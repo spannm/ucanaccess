@@ -30,7 +30,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -428,6 +430,10 @@ public class LoadJet {
 				BigDecimal bd = new BigDecimal(value.toString());
 				return bd;
 			}
+			 if(value instanceof Date &&!(value instanceof Timestamp)){
+	                Timestamp ts= new Timestamp(((Date)value).getTime());
+	                return ts;
+	         }
 			return value;
 		}
 	}
