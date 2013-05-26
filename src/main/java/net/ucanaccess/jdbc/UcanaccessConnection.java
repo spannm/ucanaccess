@@ -437,7 +437,7 @@ public class UcanaccessConnection implements Connection {
 	private String prepare(String sql) throws SQLException {
 		if (getAutoCommit())
 			checkLastModified();
-		return SQLConverter.convertSQL(sql);
+		return SQLConverter.convertSQL(sql,this);
 	}
 
 	public PreparedStatement prepareStatement(String sql) throws SQLException {

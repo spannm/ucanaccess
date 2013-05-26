@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -238,10 +239,14 @@ public class LoadJet {
 				if (defaulT != null) {
 					String cdefaulT = SQLConverter.convertSQL(" "
 							+ defaulT.toString());
+					if(cl.getType().equals(DataType.BOOLEAN)&&("=yes".equalsIgnoreCase(cdefaulT)||"yes".equalsIgnoreCase(cdefaulT)))
+						cdefaulT="true";
+					if(cl.getType().equals(DataType.BOOLEAN)&&("=no".equalsIgnoreCase(cdefaulT)||"no".equalsIgnoreCase(cdefaulT)))
+						cdefaulT="false";
 					String guidExp = "GenGUID()";
 					if (!guidExp.equals(defaulT)) {
 						if (!tryDefault(cdefaulT)) {
-							Logger.logWarning("Unknown expression:" + defaulT);
+							Logger.logWarning("Unknown expression:" + defaulT+ " default value of  column "+cl.getName()+" table "+cl.getTable().getName());
 						} else {
 							if (cdefaulT.endsWith(")")) {
 								arTrigger
@@ -482,13 +487,27 @@ public class LoadJet {
 			if (qnn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpaceTables(q.getName());
 			}
-			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(qnn)
-					.append(" AS ").append(q.toSQLString());
+			String escqn=qnn.indexOf(' ')>0?"["+qnn+"]":qnn;
+			String querySQL=q.toSQLString();
+			Pivot pivot=null;
+			if(q.getType().equals(Query.Type.CROSS_TAB)){		
+				pivot=new Pivot(conn);
+				if(!pivot.parsePivot(querySQL)||(querySQL=pivot.toSQL())==null){
+					this.notLoaded.add(q.getName());
+					return false;
+				}
+							
+			}
+			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn)
+					.append(" AS ").append(querySQL);
 			String v = null;
 			try {
 				v = SQLConverter.convertSQL(sb.toString(), true);
 				execCreate(v);
-				loadedQueries.add(qnn);
+     			loadedQueries.add(qnn);
+				if(pivot!=null){
+					pivot.registerPivot(qnn);
+				}
 				return true;
 			} catch (Exception e) {
 				this.notLoaded.add(q.getName());
@@ -505,14 +524,16 @@ public class LoadJet {
 			List<Query> lq = null;
 			try {
 				lq = dbIO.getQueries();
-				ArrayList<Query> toRemove = new ArrayList<Query>();
-				for (Query q : lq) {
+				Iterator<Query> it=lq.iterator();
+				while(it.hasNext()) {
+					Query q=it.next();
 					if (!q.getType().equals(Query.Type.SELECT)
-							&& !q.getType().equals(Query.Type.UNION)) {
-						toRemove.add(q);
+							&& !q.getType().equals(Query.Type.UNION)
+								&& !q.getType().equals(Query.Type.CROSS_TAB)
+							) {
+						it.remove();
 					}
 				}
-				lq.removeAll(toRemove);
 				queryPorting(lq);
 			} catch (Exception e) {
 				this.notLoaded.add("");
