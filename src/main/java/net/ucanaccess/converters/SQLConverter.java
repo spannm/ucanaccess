@@ -66,7 +66,7 @@ public class SQLConverter {
 	private static final  List<String>  DFUNCTIONLIST=Arrays.asList("COUNT","MAX","MIN","SUM","AVG","LAST","FIRST");
 	public  static final String BIG_BANG = "1899-12-30";
 	private static  ArrayList<String> whiteSpaceTables=new ArrayList<String>();
-	private static  final  List<String>  XESCAPED_IDENTIFIERS=Arrays.asList( "APPLICATION", "ASSISTANT", "CONTAINER", "DESCRIPTION",  "DOCUMENT", "ECHO", "FIELD", "FIELDS", "FILLCACHE", "FORM", "FORMS", "IDLE", "IMP", "LASTMODIFIED", "LEVEL",  "MACRO", "MATCH", "NAME", "NEWPASSWORD", "NO", "OFF", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", "PERCENT", "PROPERTY",  "QUIT", "REFRESH", "REFRESHLINK", "REPAINT", "REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION", "TABLEDEF", "TABLEDEFS",  "VAR", "VARP", "WORKSPACE");
+	private static  final  List<String>  XESCAPED_IDENTIFIERS=Arrays.asList( "APPLICATION", "ASSISTANT", "CONTAINER", "DESCRIPTION",  "DOCUMENT", "ECHO", "FIELD", "FIELDS", "FILLCACHE", "FORM", "FORMS", "IDLE", "IMP", "LASTMODIFIED", "LEVEL",  "MACRO", "MATCH", "NAME", "NEWPASSWORD",  "OFF", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", "PERCENT", "PROPERTY",  "QUIT", "REFRESH", "REFRESHLINK", "REPAINT", "REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION", "TABLEDEF", "TABLEDEFS",  "VAR", "VARP", "WORKSPACE");
 	private static final  List<String>  KEYWORDLIST=Arrays.asList("AT", "BOTH", "CORRESPONDING", "LEADING");
 	
 	private static boolean supportsAccessLike=true;
