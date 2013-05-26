@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
 import com.healthmarketscience.jackcess.Database;
 
 public class SQLConverter {
@@ -54,7 +56,7 @@ public class SQLConverter {
 	private static List<String> waFunctions=new ArrayList<String>();
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
-	private static final String XDESCRIPTION = "(\\W)((?i)DESCRIPTION)(\\W)";
+	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
@@ -64,7 +66,8 @@ public class SQLConverter {
 	private static final  List<String>  DFUNCTIONLIST=Arrays.asList("COUNT","MAX","MIN","SUM","AVG","LAST","FIRST");
 	public  static final String BIG_BANG = "1899-12-30";
 	private static  ArrayList<String> whiteSpaceTables=new ArrayList<String>();
-	private static final  List<String>  KEYWORDLIST=Arrays.asList("AT");
+	private static  final  List<String>  XESCAPED_IDENTIFIERS=Arrays.asList( "APPLICATION", "ASSISTANT", "CONTAINER", "DESCRIPTION",  "DOCUMENT", "ECHO", "FIELD", "FIELDS", "FILLCACHE", "FORM", "FORMS", "IDLE", "IMP", "LASTMODIFIED", "LEVEL",  "MACRO", "MATCH", "NAME", "NEWPASSWORD", "NO", "OFF", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", "PERCENT", "PROPERTY",  "QUIT", "REFRESH", "REFRESHLINK", "REPAINT", "REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION", "TABLEDEF", "TABLEDEFS",  "VAR", "VARP", "WORKSPACE");
+	private static final  List<String>  KEYWORDLIST=Arrays.asList("AT", "BOTH", "CORRESPONDING", "LEADING");
 	
 	private static boolean supportsAccessLike=true;
 	
@@ -124,11 +127,22 @@ public class SQLConverter {
 		for (String waFun:waFunctions){
 			sql=sql.replaceAll("(\\W)(?i)"+waFun+"\\s*\\(", "$1"+waFun+"WA(");
 		}
+		sql=sql.replaceAll("(\\W)(?i)STDEV\\s*\\(", "$1STDDEV_SAMP(");
+		sql=sql.replaceAll("(\\W)(?i)STDEVP\\s*\\(", "$1STDDEV_POP(");
+		sql=sql.replaceAll("(\\W)(?i)VAR\\s*\\(", "$1VAR_SAMP(");
+		sql=sql.replaceAll("(\\W)(?i)VARP\\s*\\(", "$1VAR_POP(");
+		//StDevP
+		
 		return sql.replaceAll(WA_CURRENT_USER,"$1user(");
 
 	}
+	
+	public static String convertSQL(String sql, boolean creatingQuery) {
+		return convertSQL( sql, null, creatingQuery);
+	}
 
-	public static String convertSQL(String sql, boolean accessInnerQuery) {
+	public static String convertSQL(String sql,UcanaccessConnection conn, boolean creatingQuery) {
+		sql=sql+" ";
 		sql = convertAccessDate(sql);
 		sql = replaceWorkAroundFunctions(sql);
 		sql = convertDFunctions(sql);
@@ -136,7 +150,9 @@ public class SQLConverter {
 		sql = convertLike(sql);
 		sql=replaceWhiteSpaceTables(sql);
 		sql=replaceDistinctRow(sql);
-		
+		if(!creatingQuery){
+			Pivot.checkAndRefreshPivot(sql,conn);
+		}
 		sql = sql.trim();
 		return sql;
 	}
@@ -163,7 +179,10 @@ public class SQLConverter {
 	}
 
 	public static String convertSQL(String sql) {
-		return convertSQL(sql, false);
+		return convertSQL(sql,null, false);
+	}
+     public static String convertSQL(String sql, UcanaccessConnection conn) {
+    	 return convertSQL(sql,conn, false);
 	}
 
 	public static String convertAccessDate(String sql) {
@@ -223,27 +242,24 @@ public class SQLConverter {
 		if(whiteSpaceTables.size()==0){
 			return sql;
 		}
-		StringBuffer sb=new StringBuffer("(");
+		StringBuffer sb=new StringBuffer(" (");
 		String or="";
 		for(String bst:whiteSpaceTables){
-			sb.append(or).append(" (?i)"+bst);
+			sb.append(or).append("(?i)"+bst);
 			or="|";
 		}
 		//workaround o.o. and  l.o.
 		for(String bst:whiteSpaceTables){
 			String dw=bst.replaceAll(" ", "  ");
-			sb.append(or).append(" (?i)"+dw);
+			sb.append(or).append("(?i)"+dw);
 		}
 		sb.append(")");
 		sql=sql.replaceAll(sb.toString()," \"$1\"");
 		return sql;
 	}
 	public static String escapeKeywords(String sql){
-		
 		for(String bst:KEYWORDLIST){
-			
 		    sql=sql.replaceAll("(\\W)(?i)"+bst+"(\\W)"," $1\""+bst+"\"$2");
-		
 		}
 		return sql;
 	}
@@ -265,18 +281,22 @@ public class SQLConverter {
 		}
 		return sql;
 	}
+	
+	
 
 	private static String convertIdentifiersSWDigit(String sql) {
-		return  convertIdentifiers(sql)
+		String sqlc=  convertIdentifiers(sql)
 				.replaceAll(DIGIT_STARTING_IDENTIFIERS,
 				"$1Z_" + "$2$5")
 				.replaceAll(UNDERSCORE_IDENTIFIERS,
-				"$1Z" + "$2$5")
-				.replaceAll(XDESCRIPTION, "$1X" + "$2$3");
+				"$1Z" + "$2$5");
+		
+		for (String xidt:XESCAPED_IDENTIFIERS){
+				sqlc=sqlc.replaceAll(XESCAPED.replaceAll("_",xidt), "$1X" + "$2$3");
+		}
+		return sqlc;
 	}
-   public static void main(String[] s){
-	   System.out.println(convertSQL("update region set XDESCRIPTION=\"\""));
-   }
+   
 	
    private static String escape(String sql) {
 		Pattern pd = DOUBLE_QUOTE_G_PATTERN;
@@ -311,9 +331,12 @@ public class SQLConverter {
 	public static String basicEscapingIdentifier(String name) {
 		if (name.startsWith("~"))
 			return null;
-		String escaped = Database.escapeIdentifier(name//.replaceAll(" ", "_")
-				.replaceAll("[/\\\\$%^]", "_").replaceAll("~", "M_").replaceAll("\\.",
+		
+		String escaped = Database
+				.escapeIdentifier(name//.replaceAll(" ", "_")
+				.replaceAll("[/\\\\$%^:]", "_").replaceAll("~", "M_").replaceAll("\\.",
 						"_"));
+		
 		if (Character.isDigit(escaped.charAt(0))) {
 			escaped = "Z_" + escaped;
 		}
@@ -449,5 +472,9 @@ public class SQLConverter {
 	public static void setSupportsAccessLike(boolean supportsAccessLike) {
 		SQLConverter.supportsAccessLike = supportsAccessLike;
 	}
+
+
+
+	
 
 }
