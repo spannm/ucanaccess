@@ -163,7 +163,9 @@ public class Pivot {
 			Statement st = conn.createStatement();
 			ResultSet rs = st.executeQuery(verifySQL());
 			while (rs.next()) {
-				this.pivotIn.add(format(rs.getObject("PIVOT")));
+				String frm=format(rs.getObject("PIVOT"));
+				if(frm!=null)
+				this.pivotIn.add(frm);
 			}
 			return true;
 		} catch (Exception e) {
@@ -172,6 +174,7 @@ public class Pivot {
 	}
 
 	private String format(Object cln) {
+		if (cln==null) return null;
 		if (cln instanceof Date) {
 			SimpleDateFormat sdf = new SimpleDateFormat("#MM/dd/yyyy HH:mm:ss#");
 			String clns = sdf.format((Date) cln);
@@ -181,16 +184,21 @@ public class Pivot {
 			return clns;
 		}
 		if (cln instanceof String) {
-			return "'" + cln + "'";
+			return "'" + cln.toString().replaceAll("\'","''") + "'";
 		}
 		return cln.toString();
 	}
 
 	private String replaceComma(String cn) {
+		cn=cn.replaceAll("\n", " ").replaceAll("\r", " ");
 		Matcher dcm = PIVOT_CN.matcher(cn);
+		
 		if (dcm.matches()) {
 			cn = dcm.group(1);
 		}
+		
+		cn=cn.replaceAll("\'","").replaceAll("\"", "");
+		
 		return "[" + cn + "]";
 	}
 
