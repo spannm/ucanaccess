@@ -182,6 +182,7 @@ public class LoadJet {
 	}
 
 	private final class TablesLoader {
+		private static final int HSQL_FK_ALREADY_EXISTS = -5528;
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
 
 		private String commaSeparated(List<ColumnDescriptor> columns) {
@@ -292,7 +293,14 @@ public class LoadJet {
 			if (idx.getReference().isCascadeUpdates()) {
 				ci.append(" ON UPDATE CASCADE ");
 			}
-			execCreate(ci.toString());
+			try{
+				execCreate(ci.toString());
+			}catch(SQLException e){
+				if(e.getErrorCode()==HSQL_FK_ALREADY_EXISTS){
+					Logger.log(e.getMessage());
+				}
+				else throw e;
+			}
 			loadedIndexes.add("FK on " + ntn + " Columns:" + colsIdx
 					+ " References " + nrt + " Columns:" + colsIdxRef);
 		}
@@ -339,7 +347,7 @@ public class LoadJet {
 		private void loadTable(Table t) throws SQLException, IOException {
 			String tn = t.getName();
 			if (tn.indexOf(" ") > 0) {
-				SQLConverter.addWhiteSpaceTables(tn);
+				SQLConverter.addWhiteSpacedTableNames(tn);
 			}
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
@@ -485,7 +493,7 @@ public class LoadJet {
 		private boolean loadView(Query q) throws SQLException {
 			String qnn = SQLConverter.basicEscapingIdentifier(q.getName());
 			if (qnn.indexOf(" ") > 0) {
-				SQLConverter.addWhiteSpaceTables(q.getName());
+				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
 			String escqn=qnn.indexOf(' ')>0?"["+qnn+"]":qnn;
 			String querySQL=q.toSQLString();
@@ -514,6 +522,7 @@ public class LoadJet {
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
+					Logger.log("Error message was :"+e.getMessage());
 					err = true;
 				}
 				return false;
@@ -591,6 +600,7 @@ public class LoadJet {
 		super();
 		this.conn = conn;
 		this.dbIO = dbIO;
+		
 	}
 
 	private static boolean hasAutoNumberColumn(Table t) {
@@ -615,7 +625,7 @@ public class LoadJet {
 		Statement st = null;
 		try {
 			st = conn.createStatement();
-			st.executeUpdate(SQLConverter.escapeKeywords(expression));
+			st.executeUpdate(expression);
 		} finally {
 			if (st != null)
 				st.close();
