@@ -41,9 +41,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Column;
@@ -53,6 +55,7 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
+import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.query.Query;
 
 public class LoadJet {
@@ -184,6 +187,7 @@ public class LoadJet {
 	private final class TablesLoader {
 		private static final int HSQL_FK_ALREADY_EXISTS = -5528;
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
+		private HashSet<String> readonlyTables = new HashSet<String>();
 
 		private String commaSeparated(List<ColumnDescriptor> columns) {
 			String comma = "";
@@ -233,21 +237,29 @@ public class LoadJet {
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
 				PropertyMap pm = cl.getProperties();
-				String ncn=SQLConverter
-						.escapeIdentifier(cl
-								.getName());
+				String ncn = SQLConverter.escapeIdentifier(cl.getName());
 				Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
 				if (defaulT != null) {
 					String cdefaulT = SQLConverter.convertSQL(" "
 							+ defaulT.toString());
-					if(cl.getType().equals(DataType.BOOLEAN)&&("=yes".equalsIgnoreCase(cdefaulT)||"yes".equalsIgnoreCase(cdefaulT)))
-						cdefaulT="true";
-					if(cl.getType().equals(DataType.BOOLEAN)&&("=no".equalsIgnoreCase(cdefaulT)||"no".equalsIgnoreCase(cdefaulT)))
-						cdefaulT="false";
+					if (cdefaulT.trim().startsWith("=")) {
+						cdefaulT = cdefaulT.trim().substring(1);
+					}
+					if (cl.getType().equals(DataType.BOOLEAN)
+							&& ("=yes".equalsIgnoreCase(cdefaulT) || "yes"
+									.equalsIgnoreCase(cdefaulT)))
+						cdefaulT = "true";
+					if (cl.getType().equals(DataType.BOOLEAN)
+							&& ("=no".equalsIgnoreCase(cdefaulT) || "no"
+									.equalsIgnoreCase(cdefaulT)))
+						cdefaulT = "false";
 					String guidExp = "GenGUID()";
 					if (!guidExp.equals(defaulT)) {
 						if (!tryDefault(cdefaulT)) {
-							Logger.logWarning("Unknown expression:" + defaulT+ " default value of  column "+cl.getName()+" table "+cl.getTable().getName());
+							Logger.logWarning("Unknown expression:" + defaulT
+									+ " default value of  column "
+									+ cl.getName() + " table "
+									+ cl.getTable().getName());
 						} else {
 							if (cdefaulT.endsWith(")")) {
 								arTrigger
@@ -256,14 +268,13 @@ public class LoadJet {
 												+ " BEFORE INSERT ON "
 												+ ntn
 												+ "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW."
-												+ ncn
-												+ " IS NULL THEN "
-												+ "SET NEW."
-												+ ncn
-												+ "= " + cdefaulT + " ; END IF");
+												+ ncn + " IS NULL THEN "
+												+ "SET NEW." + ncn + "= "
+												+ cdefaulT + " ; END IF");
 							} else
-								arTrigger
-								.add("alter table "+ntn+" alter column "+ncn+" set default "+cdefaulT);
+								arTrigger.add("alter table " + ntn
+										+ " alter column " + ncn
+										+ " set default " + cdefaulT);
 						}
 					}
 				}
@@ -293,13 +304,13 @@ public class LoadJet {
 			if (idx.getReference().isCascadeUpdates()) {
 				ci.append(" ON UPDATE CASCADE ");
 			}
-			try{
+			try {
 				execCreate(ci.toString());
-			}catch(SQLException e){
-				if(e.getErrorCode()==HSQL_FK_ALREADY_EXISTS){
+			} catch (SQLException e) {
+				if (e.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
 					Logger.log(e.getMessage());
-				}
-				else throw e;
+				} else
+					throw e;
 			}
 			loadedIndexes.add("FK on " + ntn + " Columns:" + colsIdx
 					+ " References " + nrt + " Columns:" + colsIdxRef);
@@ -326,11 +337,20 @@ public class LoadJet {
 			try {
 				execCreate(ci.toString());
 			} catch (Exception e) {
+				if (idx.isUnique()) {
+					for (ColumnDescriptor cd : idx.getColumns()) {
+						if (cd.getColumn().getType()
+								.equals(DataType.COMPLEX_TYPE)) {
+							return;
+						}
+					}
+				}
 				Logger.logWarning(e.getMessage());
 				return;
 			}
 			String pre = pk ? "Primary Key " : uk ? "Index Unique " : "Index";
 			loadedIndexes.add(pre + " on " + ntn + " Columns:" + colsIdx);
+			
 		}
 
 		private void loadIndexes() throws SQLException, IOException {
@@ -357,7 +377,41 @@ public class LoadJet {
 			defaultValues(t);
 			triggersGenerator.synchronisationTriggers(ntn,
 					hasAutoNumberColumn(t));
+			
 			loadedTables.add(ntn);
+			if(checkComplex(t)&&!readonlyTables.contains(ntn)){
+				//makeReadOnly(ntn);
+				readonlyTables.add(ntn);
+			}
+		}
+		private void makeComplexReadOnly() throws SQLException {
+			for(String ntn:readonlyTables){
+				 makeReadOnly(ntn);
+			}
+		}
+		
+
+		private void makeReadOnly(String ntn) throws SQLException {
+			Statement st=null;
+			try{
+				st=conn.createStatement();
+				st.execute("SET TABLE "+ntn+" READONLY TRUE");
+				Logger.log(ntn+ " table is readonly because it has complex type columns (not yet supported in write mode) ");
+			}finally{
+				if(st!=null){
+					st.close();
+				}
+			}
+			
+		}
+
+		private boolean checkComplex(Table t) {
+			for (Column c:t.getColumns()){
+				if(c.getType().equals(DataType.COMPLEX_TYPE)){
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private void loadTableData(Table t) throws IOException, SQLException {
@@ -436,17 +490,24 @@ public class LoadJet {
 			return conn.prepareStatement(sbI.toString());
 		}
 
-		private Object value(Object value) {
+		private Object value(Object value) throws SQLException {
 			if (value == null)
 				return null;
 			if (value instanceof Float) {
 				BigDecimal bd = new BigDecimal(value.toString());
 				return bd;
 			}
-			 if(value instanceof Date &&!(value instanceof Timestamp)){
-	                Timestamp ts= new Timestamp(((Date)value).getTime());
-	                return ts;
-	         }
+			if (value instanceof Date && !(value instanceof Timestamp)) {
+				Timestamp ts = new Timestamp(((Date) value).getTime());
+				return ts;
+			}
+			if (value instanceof ComplexValueForeignKey) {
+				try {
+					return ComplexBase.convert((ComplexValueForeignKey) value);
+				} catch (IOException e) {
+					throw new UcanaccessSQLException(e);
+				}
+			}
 			return value;
 		}
 	}
@@ -495,16 +556,16 @@ public class LoadJet {
 			if (qnn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
-			String escqn=qnn.indexOf(' ')>0?"["+qnn+"]":qnn;
-			String querySQL=q.toSQLString();
-			Pivot pivot=null;
-			if(q.getType().equals(Query.Type.CROSS_TAB)){		
-				pivot=new Pivot(conn);
-				if(!pivot.parsePivot(querySQL)||(querySQL=pivot.toSQL())==null){
+			String escqn = qnn.indexOf(' ') > 0 ? "[" + qnn + "]" : qnn;
+			String querySQL = q.toSQLString();
+			Pivot pivot = null;
+			if (q.getType().equals(Query.Type.CROSS_TAB)) {
+				pivot = new Pivot(conn);
+				if (!pivot.parsePivot(querySQL)
+						|| (querySQL = pivot.toSQL()) == null) {
 					this.notLoaded.add(q.getName());
 					return false;
 				}
-							
 			}
 			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn)
 					.append(" AS ").append(querySQL);
@@ -512,8 +573,8 @@ public class LoadJet {
 			try {
 				v = SQLConverter.convertSQL(sb.toString(), true);
 				execCreate(v);
-     			loadedQueries.add(qnn);
-				if(pivot!=null){
+				loadedQueries.add(qnn);
+				if (pivot != null) {
 					pivot.registerPivot(qnn);
 				}
 				return true;
@@ -522,7 +583,7 @@ public class LoadJet {
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
-					Logger.log("Error message was :"+e.getMessage());
+					Logger.log("Error message was :" + e.getMessage());
 					err = true;
 				}
 				return false;
@@ -533,13 +594,12 @@ public class LoadJet {
 			List<Query> lq = null;
 			try {
 				lq = dbIO.getQueries();
-				Iterator<Query> it=lq.iterator();
-				while(it.hasNext()) {
-					Query q=it.next();
+				Iterator<Query> it = lq.iterator();
+				while (it.hasNext()) {
+					Query q = it.next();
 					if (!q.getType().equals(Query.Type.SELECT)
 							&& !q.getType().equals(Query.Type.UNION)
-								&& !q.getType().equals(Query.Type.CROSS_TAB)
-							) {
+							&& !q.getType().equals(Query.Type.CROSS_TAB)) {
 						it.remove();
 					}
 				}
@@ -600,7 +660,6 @@ public class LoadJet {
 		super();
 		this.conn = conn;
 		this.dbIO = dbIO;
-		
 	}
 
 	private static boolean hasAutoNumberColumn(Table t) {
@@ -672,6 +731,7 @@ public class LoadJet {
 			this.functionsLoader.loadMappedFunctions();
 			this.tablesLoader.loadTables();
 			this.tablesLoader.loadIndexes();
+			this.tablesLoader.makeComplexReadOnly();
 			this.viewsLoader.loadViews();
 		} finally {
 			Logger.log("Loaded Tables:");
