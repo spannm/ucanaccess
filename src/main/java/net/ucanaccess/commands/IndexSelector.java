@@ -26,10 +26,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+
+
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.SimpleColumnMatcher;
 import com.healthmarketscience.jackcess.Table;
+
 
 public class IndexSelector {
 	private class ColumnMatcher extends SimpleColumnMatcher {
@@ -85,6 +88,18 @@ public class IndexSelector {
 
 				return true;
 			}
+			
+			
+//			if(currVal instanceof ComplexBase[]&& dbVal instanceof ComplexValueForeignKey){
+//				try {
+//					boolean eq=Arrays.equals((ComplexBase[])currVal, ComplexBase.convert((ComplexValueForeignKey)dbVal));
+//					if(!eq)throw new RuntimeException("Update of Complex values is not yet supported");
+//					return eq;
+//				} catch (Exception e) {
+//					throw new RuntimeException(e);
+//				}
+//			}
+		
 			return super.matches(table, columnName, currVal, dbVal);
 		}
 	}
