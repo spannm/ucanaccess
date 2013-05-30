@@ -71,7 +71,7 @@ public class SQLConverter {
 	private static  final  List<String>  NO_SQL_RESERVED_WORDS=Arrays.asList( "APPLICATION", "ASSISTANT", "CONTAINER", "DESCRIPTION", 	"DOCUMENT", "ECHO", "FIELD", "FIELDS", "FILLCACHE", "FORM", "FORMS", "IDLE", "IMP", "LASTMODIFIED", "LEVEL",  "MACRO", "MATCH", "NAME", "NEWPASSWORD",  "OFF", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", "PERCENT", "PROPERTY",  "QUIT", "REFRESH", "REFRESHLINK", "REPAINT", "REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION", "TABLEDEF", "TABLEDEFS",  "VAR", "VARP", "WORKSPACE");
 	private static final  List<String>  KEYWORDLIST=Arrays.asList("ALL","AND ","ANY ","AS","AT","AVG",
 										"BETWEEN","BOTH","BY", "CALL","CASE","CAST","COALESCE","CORRESPONDING","CONVERT","COUNT","CREATE","CROSS",
-										"DEFAULT ","DISTINCT","DROP","ELSE","EVERY","EXISTS",
+										"DEFAULT","DISTINCT","DROP","ELSE","EVERY","EXISTS",
 										"EXCEPT","FOR","FROM","FULL","GRANT"," GROUP","HAVING",
 										"IN","INNER ","INTERSECT","INTO","IS","JOIN","LEFT","LEADING","LIKE",
 										"MAX ","MIN","NATURAL","NOT","NULLIF","ON","ORDER","OR","OUTER","PRIMARY","REFERENCES","RIGHT","SELECT",
@@ -350,7 +350,7 @@ public class SQLConverter {
 		}
 		String escaped = Database
 				.escapeIdentifier(name//.replaceAll(" ", "_")
-				.replaceAll("[/\\\\$%^:]", "_").replaceAll("~", "M_").replaceAll("\\.",
+				.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\.",
 						"_")).replaceAll("\'","");
 		
 		if (Character.isDigit(escaped.charAt(0))) {
