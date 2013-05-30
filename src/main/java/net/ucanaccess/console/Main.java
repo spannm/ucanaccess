@@ -39,6 +39,7 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
 
@@ -145,6 +146,9 @@ public class Main {
 			System.out.print("| ");
 			for (int i = 1; i <= cols; ++i) {
 				Object o = rs.getObject(i);
+				if(o!=null&&o.getClass().isArray()){
+					o=Arrays.toString((Object[])o);
+				}
 				out.print(o + " | ");
 			}
 			out.println();
@@ -167,6 +171,9 @@ public class Main {
 			for (int i = 1; i <= cols; ++i) {
 				Object o = rs.getObject(i);
 				if(o==null)o="";
+				if(o!=null&&o.getClass().isArray()){
+					o=Arrays.toString((Object[])o);
+				}
 				if(o instanceof Date){
 					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 					o=df.format((Date)o);
