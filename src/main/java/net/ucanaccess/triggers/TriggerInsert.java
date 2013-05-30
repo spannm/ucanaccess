@@ -33,7 +33,7 @@ public class TriggerInsert extends TriggerBase {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		String execId = UcanaccessConnection.getCtxExcId();
 		try {
-			Table t = conn.getDbIO().getTable(tableName);
+			Table t = getTable(tableName,conn);
 			super.convertRowTypes(newR, t);
 			InsertCommand c4j = (t == null) ? new InsertCommand(tableName, conn
 					.getDbIO(), newR, execId) : new InsertCommand(t, newR,

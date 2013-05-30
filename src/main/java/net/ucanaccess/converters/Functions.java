@@ -420,7 +420,7 @@ public class Functions {
 
 	@FunctionType(functionName = "FORMAT", argumentTypes = {
 			AccessType.DATETIME, AccessType.TEXT }, returnType = AccessType.TEXT)
-	public static String format(Timestamp t, String par) {
+	public static String format(Timestamp t, String par) throws UcanaccessSQLException {
 		if ("long date".equalsIgnoreCase(par)) {
 			return new SimpleDateFormat("EEEE d MMMM yyyy").format(t);
 		}
@@ -441,6 +441,9 @@ public class Functions {
 		}
 		if ("short time".equalsIgnoreCase(par)) {
 			return new SimpleDateFormat("HH:mm").format(t);
+		}
+		if("q".equalsIgnoreCase(par)){
+			return String.valueOf(datePart(par, t));
 		}
 		return new SimpleDateFormat(par.replaceAll("m", "M").replaceAll("n",
 				"m")).format(t);

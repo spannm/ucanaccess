@@ -33,7 +33,7 @@ public class TriggerDelete extends TriggerBase {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		String execId = UcanaccessConnection.getCtxExcId();
 		try {
-			Table t = conn.getDbIO().getTable(tableName);
+			Table t = getTable(tableName,conn);
 			super.convertRowTypes(oldR, t);
 			DeleteCommand c4j = new DeleteCommand(t, getRowPattern(oldR, t),
 					execId);

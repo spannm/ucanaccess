@@ -154,7 +154,7 @@ public class Pivot {
 		sb.append("SELECT DISTINCT ").append(this.pivot).append(" AS PIVOT ");
 		sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ")
 				.append(this.pivot).append(",").append(fromS[1]);
-		return sb.toString();
+		return SQLConverter.convertSQL(sb.toString());
 	}
 
 	public boolean prepare() {
@@ -162,13 +162,19 @@ public class Pivot {
 			this.pivotIn = new ArrayList<String>();
 			Statement st = conn.createStatement();
 			ResultSet rs = st.executeQuery(verifySQL());
+			int i=0;
 			while (rs.next()) {
 				String frm=format(rs.getObject("PIVOT"));
 				if(frm!=null)
 				this.pivotIn.add(frm);
+				i++;
+				if(i>1000){
+					return false;
+				}
 			}
 			return true;
 		} catch (Exception e) {
+			
 			return false;
 		}
 	}

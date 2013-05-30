@@ -21,11 +21,15 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 */
 package net.ucanaccess.triggers;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
 import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessConnection;
 
+import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 
 public abstract class TriggerBase implements org.hsqldb.Trigger {
@@ -40,4 +44,22 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 			throws SQLException {
 		return p2a.getRowPattern(values, t);
 	}
+	protected Table getTable(String tableName,UcanaccessConnection conn ) throws IOException{
+		Table t=conn.getDbIO().getTable(tableName);
+		if(t==null&&tableName.startsWith("X")&&
+				SQLConverter.contains(tableName.substring(1))){
+			t=conn.getDbIO().getTable(tableName.substring(1));
+		}
+		if(t==null){
+			Database db=conn.getDbIO();
+			for (String cand:db.getTableNames()){
+				if(SQLConverter.escapeIdentifier(cand).equals(tableName)){
+					return db .getTable(cand);
+				}
+				
+			}
+		}
+		return t;
+	}
+	
 }

@@ -47,6 +47,7 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
+import net.ucanaccess.util.Logger.Messages;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
@@ -396,7 +397,7 @@ public class LoadJet {
 			try{
 				st=conn.createStatement();
 				st.execute("SET TABLE "+ntn+" READONLY TRUE");
-				Logger.log(ntn+ " table is readonly because it has complex type columns (not yet supported in write mode) ");
+				Logger.log(ntn+ Logger.getLogMessage(Messages.COMPLEX_TYPE_UNSUPPORTED));
 			}finally{
 				if(st!=null){
 					st.close();
@@ -602,6 +603,8 @@ public class LoadJet {
 							&& !q.getType().equals(Query.Type.CROSS_TAB)) {
 						it.remove();
 					}
+						
+					
 				}
 				queryPorting(lq);
 			} catch (Exception e) {

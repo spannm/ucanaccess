@@ -37,7 +37,7 @@ public class TriggerUpdate extends TriggerBase {
 			return;
 		String execId = UcanaccessConnection.getCtxExcId();
 		try {
-			Table t = conn.getDbIO().getTable(tableName);
+			Table t = getTable(tableName,conn);
 			super.convertRowTypes(oldR, t);
 			super.convertRowTypes(newR, t);
 			if (valuesChanged(oldR, newR)) {

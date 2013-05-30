@@ -27,7 +27,8 @@ import java.util.ResourceBundle;
 
 public class Logger {
 	public enum Messages{
-		HSQLDB_DRIVER_NOT_FOUND
+		HSQLDB_DRIVER_NOT_FOUND,
+		COMPLEX_TYPE_UNSUPPORTED
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
@@ -57,6 +58,10 @@ public class Logger {
 	
 	public static void  logMessage(Messages cod){
 		log( messageBundle.getString(cod.name()));
+	}
+	
+	public static String  getLogMessage(Messages cod){
+		return messageBundle.getString(cod.name());
 	}
 	
 	public static void  logWarning(String warning){

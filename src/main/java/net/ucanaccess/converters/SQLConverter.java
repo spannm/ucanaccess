@@ -68,7 +68,15 @@ public class SQLConverter {
 	private static final  String DFUNCTIONS_NO_WHERE="(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
 	private static final  List<String>  DFUNCTIONLIST=Arrays.asList("COUNT","MAX","MIN","SUM","AVG","LAST","FIRST");
 	public  static final String BIG_BANG = "1899-12-30";
-	private static  final  List<String>  NO_SQL_RESERVED_WORDS=Arrays.asList( "APPLICATION", "ASSISTANT", "CONTAINER", "DESCRIPTION", 	"DOCUMENT", "ECHO", "FIELD", "FIELDS", "FILLCACHE", "FORM", "FORMS", "IDLE", "IMP", "LASTMODIFIED", "LEVEL",  "MACRO", "MATCH", "NAME", "NEWPASSWORD",  "OFF", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", "PERCENT", "PROPERTY",  "QUIT", "REFRESH", "REFRESHLINK", "REPAINT", "REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION", "TABLEDEF", "TABLEDEFS",  "VAR", "VARP", "WORKSPACE");
+	private static  final  List<String>  NO_SQL_RESERVED_WORDS=Arrays.asList( "APPLICATION", "ASSISTANT",   "COLUMN", "COMPACTDATABASE",  "CONTAINER", 
+			"CREATEDATABASE", "CREATEFIELD", "CREATEGROUP", "CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION", "CREATETABLEDEF", "CREATEUSER",
+			"CREATEWORKSPACE","DESCRIPTION", "DISALLOW",  "DOCUMENT",  "ECHO",   "ERROR", "EXIT",  "FIELD", "FIELDS", "FILLCACHE",  "FORM", "FORMS", 
+			"GENERAL", "GETOBJECT", "GETOPTION", "GOTOPAGE",  "IDLE",  "IMP",  "INDEXES", "INSERTTEXT",  "LASTMODIFIED", "LEVEL", "LOGICAL", "LOGICAL1", 
+			"MACRO", "MODULE", "MOVE", "NAME", "NEWPASSWORD",  "OFF", "OPENRECORDSET", "OPTION", "OWNERACCESS", "PARAMETER", "PARAMETERS", "PARTIAL", 
+			"PROPERTY", "QUERIES",  "QUIT", "RECALC", "RECORDSET", "REFRESH", "REFRESHLINK", "REGISTERDATABASE", "REPAINT", "REPAIRDATABASE",
+			"REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",  "TABLEDEF", "TABLEDEFS", "TABLEID",    "USER", "VALUE",
+			"WORKSPACE",  "YEAR");
+			
 	private static final  List<String>  KEYWORDLIST=Arrays.asList("ALL","AND ","ANY ","AS","AT","AVG",
 										"BETWEEN","BOTH","BY", "CALL","CASE","CAST","COALESCE","CORRESPONDING","CONVERT","COUNT","CREATE","CROSS",
 										"DEFAULT","DISTINCT","DROP","ELSE","EVERY","EXISTS",
@@ -487,6 +495,12 @@ public class SQLConverter {
 
 	public static void setSupportsAccessLike(boolean supportsAccessLike) {
 		SQLConverter.supportsAccessLike = supportsAccessLike;
+	}
+
+
+
+	public static boolean contains(String identifier) {
+		return xescapedIdentifiers.contains(identifier);
 	}
 
 
