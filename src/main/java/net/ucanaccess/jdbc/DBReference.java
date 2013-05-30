@@ -66,7 +66,7 @@ public class DBReference {
 	    	private int activeConnection;
 	    	private int inactivityTimeout=INACTIVITY_TIMEOUT_DEFAULT;
 			private long lastConnectionTime;
-			private Timer timer=new  Timer() ;
+			private Timer timer =new Timer(true);
 			
 			private synchronized void decrementActiveConnection(final Session session){
 				activeConnection--;
@@ -74,12 +74,13 @@ public class DBReference {
 					 try {
 						shutdown(session);
 					} catch (Exception e) {
-					
+						e.printStackTrace();
 					}
 					 return;
 				}
 				
 				if(DBReference.this.inMemory&&inactivityTimeout>0){
+				
 				
 				if(activeConnection==0){
 				
