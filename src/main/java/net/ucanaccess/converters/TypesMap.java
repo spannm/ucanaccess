@@ -94,6 +94,7 @@ public class TypesMap {
 		jackcess2HsqldbTypesMap.put(DataType.SHORT_DATE_TIME,"TIMESTAMP");
 		jackcess2HsqldbTypesMap.put( DataType.FLOAT,"FLOAT");
 		jackcess2HsqldbTypesMap.put( DataType.DOUBLE,"DOUBLE");
+		jackcess2HsqldbTypesMap.put( DataType.COMPLEX_TYPE,"OBJECT");
 		
 	}
 	
