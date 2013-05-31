@@ -473,6 +473,7 @@ public class UcanaccessConnection implements Connection {
 			throw new UcanaccessSQLException(e);
 		}
 	}
+	
 
 	public PreparedStatement prepareStatement(String sql, int resultSetType,
 			int resultSetConcurrency, int resultSetHoldability)

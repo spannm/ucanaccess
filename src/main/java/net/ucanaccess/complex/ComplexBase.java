@@ -134,6 +134,15 @@ public abstract  class ComplexBase implements Serializable {
 			}
 			return lat;
 		}
+		if (fk.getComplexType().equals(ComplexDataType.UNSUPPORTED)) {
+			List<com.healthmarketscience.jackcess.complex.UnsupportedValue> lst = fk
+					.getUnsupportedValues();
+			UnsupportedValue[] lat = new UnsupportedValue[lst.size()];
+			for (int i = 0; i < lat.length; i++) {
+				lat[i] = new UnsupportedValue(lst.get(i));
+			}
+			return lat;
+		}
 		throw new UcanaccessSQLException(ExceptionMessages.COMPLEX_TYPE_UNSUPPORTED);
 	}
 	

@@ -31,7 +31,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
+
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -47,8 +47,7 @@ public final class UcanaccessDriver implements Driver {
 		try {
 			DriverManager.registerDriver(new UcanaccessDriver());
 			Class.forName("org.hsqldb.jdbc.JDBCDriver");
-			java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.healthmarketscience.jackcess");
-			logger.setLevel(Level.OFF);
+			
 
 		} catch (ClassNotFoundException e) {
 			Logger.logMessage(Messages.HSQLDB_DRIVER_NOT_FOUND);

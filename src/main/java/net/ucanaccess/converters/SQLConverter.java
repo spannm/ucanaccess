@@ -253,7 +253,8 @@ public class SQLConverter {
 		}
 		return sb.toString();
 	}
-
+	
+	
 	private static String replaceWhiteSpacedTableNames0(String sql){
 		if(whiteSpacedTableNames.size()==0){
 			return sql;
@@ -267,7 +268,7 @@ public class SQLConverter {
 		//workaround o.o. and  l.o.
 		for(String bst:whiteSpacedTableNames){
 			String dw=bst.replaceAll(" ", "  ");
-			sb.append(or).append("(?i)"+dw);
+			sql=sql.replaceAll(dw, bst);
 		}
 		sb.append(")");
 		sql=sql.replaceAll(sb.toString()," \"$1\"");
@@ -359,10 +360,10 @@ public class SQLConverter {
 		String escaped = Database
 				.escapeIdentifier(name//.replaceAll(" ", "_")
 				.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\.",
-						"_")).replaceAll("\'","");
+						"_")).replaceAll("\'","").replaceAll("\\+", "");
 		
-		if (Character.isDigit(escaped.charAt(0))) {
-			escaped = "Z_" + escaped;
+		if (Character.isDigit(escaped.trim().charAt(0))) {
+			escaped = "Z_" + escaped.trim();
 		}
 		if (escaped.charAt(0)=='_') {
 			escaped = "Z" + escaped;

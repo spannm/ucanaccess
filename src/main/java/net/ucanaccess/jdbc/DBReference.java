@@ -35,10 +35,9 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import net.ucanaccess.converters.LoadJet;
-import net.ucanaccess.util.Logger;
-
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.LinkResolver;
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -145,6 +144,8 @@ public class DBReference {
 
 		this.dbFile = fl;
 		this.updateLastModified();
+		java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.healthmarketscience.jackcess");
+		logger.setLevel(Level.OFF);
 		if (!fl.exists() && ff != null) {
 			dbIO = Database.create(ff, fl);
 		} else {
@@ -153,8 +154,7 @@ public class DBReference {
 			this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(FileFormat.V1997);
 			}
 			catch(Exception e){
-				
-				Logger.logWarning(e.getMessage());
+			//	Logger.logWarning(e.getMessage());
 			}
 			this.dbIO.setLinkResolver(new LinkResolver() {
 				

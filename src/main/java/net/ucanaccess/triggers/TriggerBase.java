@@ -34,7 +34,7 @@ import com.healthmarketscience.jackcess.Table;
 
 public abstract class TriggerBase implements org.hsqldb.Trigger {
 	public static final Persist2Jet p2a = new Persist2Jet();
-	
+	public static final String ESCAPE_PREFIX = "X";
 	public void convertRowTypes(Object[] values, Table table)
 			throws SQLException {
 		p2a.convertRowTypes(values, table);
@@ -46,7 +46,7 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 	}
 	protected Table getTable(String tableName,UcanaccessConnection conn ) throws IOException{
 		Table t=conn.getDbIO().getTable(tableName);
-		if(t==null&&tableName.startsWith("X")&&
+		if(t==null&&tableName.startsWith(ESCAPE_PREFIX )&&
 				SQLConverter.contains(tableName.substring(1))){
 			t=conn.getDbIO().getTable(tableName.substring(1));
 		}
