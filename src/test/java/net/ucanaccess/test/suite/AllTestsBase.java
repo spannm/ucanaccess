@@ -34,6 +34,7 @@ import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.PasswordTest;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
+import net.ucanaccess.test.PivotTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -53,6 +54,7 @@ public class AllTestsBase {
 		suite.addTestSuite(PasswordTest.class);
 		suite.addTestSuite(TransactionTest.class);
 		suite.addTestSuite(WorkloadTest.class);
+		suite.addTestSuite(PivotTest.class);
 		return suite;
 	}
 }
