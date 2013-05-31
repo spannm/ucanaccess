@@ -250,7 +250,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 			log.append("}");
 		}
 		log.append("}");
-		System.out.println(log);
+		
 	}
 	
 	private String print(Object ob2) {
