@@ -573,6 +573,8 @@ public class LoadJet {
 			String v = null;
 			try {
 				v = SQLConverter.convertSQL(sb.toString(), true);
+				if(v.trim().endsWith(";"))
+					v=v.trim().substring(0, v.length()-1);
 				execCreate(v);
 				loadedQueries.add(qnn);
 				if (pivot != null) {
