@@ -297,7 +297,7 @@ public class Functions {
 			throws UcanaccessSQLException {
 		if (dt == null || intv == null)
 			return null;
-		Calendar cl = Calendar.getInstance();
+		Calendar cl = Calendar.getInstance(Locale.US);
 		cl.setTime(dt);
 		if (intv.equalsIgnoreCase("yyyy")) {
 			return cl.get(Calendar.YEAR);
@@ -550,6 +550,13 @@ public class Functions {
 			return null;
 		return new Integer(o.length());
 	}
+	
+	
+	@FunctionType(functionName = "MID", argumentTypes = { AccessType.MEMO,
+			AccessType.LONG}, returnType = AccessType.MEMO)
+	public static String mid(String value, int start) {
+		return mid( value,  start,value.length());
+	}
 
 	@FunctionType(functionName = "MID", argumentTypes = { AccessType.MEMO,
 			AccessType.LONG, AccessType.LONG }, returnType = AccessType.MEMO)
@@ -633,7 +640,7 @@ public class Functions {
 		return Math.round(d) == d ? pre + Math.round(d) : pre + d;
 	}
 
-	@Deprecated
+	
 	@FunctionType(functionName = "TIME", argumentTypes = {}, returnType = AccessType.DATETIME)
 	public static Timestamp time() {
 		Calendar cl = Calendar.getInstance();
@@ -702,4 +709,38 @@ public class Functions {
 		String pattern = abbr ? "%ta" : "%tA";
 		return String.format(pattern, cal, cal);
 	}
+	
+	
+
+
+	@FunctionType(functionName = "WEEKDAY", argumentTypes = { AccessType.DATETIME }, returnType = AccessType.LONG)
+	public static Integer weekDay(Timestamp dt ) throws UcanaccessSQLException {
+		return datePart("w",  dt);
+	}
+
+	
+	@FunctionType(functionName = "WEEKDAY", argumentTypes = { AccessType.DATETIME,AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer weekDay(Timestamp dt,Integer firstDayOfWeek ) throws UcanaccessSQLException {
+		return datePart("w",  dt,firstDayOfWeek);
+	}
+	
+	@FunctionType(functionName = "STRING", argumentTypes = { AccessType.LONG,AccessType.MEMO }, returnType = AccessType.MEMO)
+	public static String string(Integer nr, String str ) throws UcanaccessSQLException {
+		if(str==null)return null;
+		String ret="";
+		for(int i=0;i<nr;++i){
+			ret+=str.charAt(0);
+		}
+		return ret;
+	}
+	
+	@FunctionType(functionName = "TIMESERIAL", argumentTypes = {AccessType.LONG,AccessType.LONG,AccessType.LONG}, returnType = AccessType.DATETIME)
+	public static Timestamp timeserial(Integer h,Integer m,Integer s) {
+		Calendar cl = Calendar.getInstance();
+		cl.setTime(now());
+		cl.set(1899, 11, 30,h,m,s);
+		return new java.sql.Timestamp(cl.getTimeInMillis());
+	}
+
+	
 }
