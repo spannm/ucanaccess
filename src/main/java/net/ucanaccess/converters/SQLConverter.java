@@ -54,12 +54,13 @@ public class SQLConverter {
 	private static final Pattern FROM_PATTERN = Pattern
 	.compile("\\w*(?i)from\\w*");
 	
-	
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	private static List<String> waFunctions=new ArrayList<String>();
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
+	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
+	private static final String KEYWORD_ALIAS ="(\\s*AS\\s*)((?i)_)(\\W)";
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
@@ -77,14 +78,14 @@ public class SQLConverter {
 			"REPORT", "REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",  "TABLEDEF", "TABLEDEFS", "TABLEID",    "USER", "VALUE",
 			"WORKSPACE",  "YEAR");
 			
-	private static final  List<String>  KEYWORDLIST=Arrays.asList("ALL","AND ","ANY ","AS","AT","AVG",
+	private static final  List<String>  KEYWORDLIST=Arrays.asList("ALL","AND","ANY","AS","AT","AVG",
 										"BETWEEN","BOTH","BY", "CALL","CASE","CAST","COALESCE","CORRESPONDING","CONVERT","COUNT","CREATE","CROSS",
 										"DEFAULT","DISTINCT","DROP","ELSE","EVERY","EXISTS",
-										"EXCEPT","FOR","FROM","FULL","GRANT"," GROUP","HAVING",
+										"EXCEPT","FOR","FROM","FULL","GRANT","GROUP","HAVING",
 										"IN","INNER ","INTERSECT","INTO","IS","JOIN","LEFT","LEADING","LIKE",
 										"MAX ","MIN","NATURAL","NOT","NULLIF","ON","ORDER","OR","OUTER","PRIMARY","REFERENCES","RIGHT","SELECT",
 										"SET","SOME","STDDEV_POP","STDDEV_SAMP","SUM","TABLE","THEN","TO",
-										"TRAILING","TRIGGER","UNION ","UNIQUE","USING","VALUES","VAR_POP","VAR_SAMP","WHEN","WHERE","WITH");
+										"TRAILING","TRIGGER","UNION","UNIQUE","USING","VALUES","VAR_POP","VAR_SAMP","WHEN","WHERE","WITH");
 	private static  ArrayList<String> whiteSpacedTableNames=new ArrayList<String>();
 	private static final  HashSet<String>  xescapedIdentifiers=new HashSet<String>();
 	
@@ -310,7 +311,12 @@ public class SQLConverter {
 				"$1Z" + "$2$5");
 		
 		for (String xidt:xescapedIdentifiers){
-				sqlc=sqlc.replaceAll(XESCAPED.replaceAll("_",xidt), "$1X" + "$2$3");
+				sqlc=sqlc.replaceAll(XESCAPED.replaceAll("_",xidt), "$1X$2$3");
+				sqlc=sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_",xidt), "$1$2(");
+		}
+		for (String xidt:KEYWORDLIST){
+			if(!xidt.equals("SELECT"))
+			sqlc=sqlc.replaceAll(KEYWORD_ALIAS.replaceAll("_",xidt), "$1\"$2\"$3");
 		}
 		return sqlc;
 	}
@@ -360,7 +366,7 @@ public class SQLConverter {
 		String escaped = Database
 				.escapeIdentifier(name//.replaceAll(" ", "_")
 				.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\.",
-						"_")).replaceAll("\'","").replaceAll("\\+", "");
+						"_")).replaceAll("\'","").replaceAll("\"","").replaceAll("\\+", "");
 		
 		if (Character.isDigit(escaped.trim().charAt(0))) {
 			escaped = "Z_" + escaped.trim();
@@ -484,7 +490,7 @@ public class SQLConverter {
 					+ convert2RegexMatches( likeContent)
 					+ closePar + " ";
 		}
-		return " " + conditionField + " like '"
+		return " " + conditionField+ closePar + " like '"
 				+ convert2LikeCondition(likeContent)
 
 				+ "'";
