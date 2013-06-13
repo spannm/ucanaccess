@@ -23,7 +23,7 @@ public class DFunction {
 	private static final String DFUNCTIONS_WHERE = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
 	private static final String DFUNCTIONS_WHERE_DYNAMIC = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\,(.*)\\)";
 	private static final String DFUNCTIONS_NO_WHERE = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
-	private static final String OPERATORS = "([\\+\\*-=<>/\\(\\s]*)(?i)(\\[*_)";
+	private static final String IDENTIFIER = "(\\W)((?i)_)(\\W)";
 	private static final List<String> DFUNCTIONLIST = Arrays.asList("COUNT",
 			"MAX", "MIN", "SUM", "AVG", "LAST", "FIRST");
 
@@ -67,18 +67,20 @@ public class DFunction {
 								tkn = tkn.trim();
 								sb.append(unpad(tkn));
 							} else {
+								tkn+=" ";
 								for (String cln : getColumnNames(tn
 										.toUpperCase())) {
-									String oppn = OPERATORS.replaceFirst("_",
+									String oppn = IDENTIFIER.replaceFirst("_",
 											cln);
 									Pattern op = Pattern.compile(oppn);
 									Matcher mtcop=op.matcher(tkn);
 									if (!mtcop.find())
 										continue;
-									if(mtcop.group(1).trim().endsWith("."))continue;
-									tkn = tkn.replaceAll(oppn, "$1"
+									String pref=mtcop.group(1);
+									if(pref.equals("."))continue;
+									tkn = tkn.replaceAll(oppn,pref.equals("[")?resolveAmbiguosTableName(cln)+".$1$2$3": "$1"
 											+ resolveAmbiguosTableName(cln)
-											+ ".$2");
+											+ ".$2$3");
 								}
 								sb.append(tkn);
 							}
