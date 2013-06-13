@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.converters;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,8 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
-
 import com.healthmarketscience.jackcess.Database;
+
 
 public class SQLConverter {
 	private static final Pattern	 QUOTE_G_PATTERN = Pattern
@@ -51,23 +52,21 @@ public class SQLConverter {
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 	.compile("\\[[\\*|_|#]\\]");
 	
-	private static final Pattern FROM_PATTERN = Pattern
-	.compile("\\w*(?i)from\\w*");
+	
 	
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
-	private static List<String> waFunctions=new ArrayList<String>();
+	
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
-	private static final String KEYWORD_ALIAS ="(\\s*AS\\s*)((?i)_)(\\W)";
+	private static final String KEYWORD_ALIAS ="(\\s+(?i)AS\\s*)((?i)_)(\\W)";
+	//private static final String QUOTED_ALIAS ="(\\s+(?i)AS\\s*)(\\[(?i)_\\])(\\W)";
+	private static final Pattern QUOTED_ALIAS =Pattern.compile("(\\s+(?i)AS\\s*)(\\[([^\\]])*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "(0[0-9]|1[0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])";
-	private static final String DFUNCTIONS_WHERE="(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
-	private static final  String DFUNCTIONS_NO_WHERE="(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
-	private static final  List<String>  DFUNCTIONLIST=Arrays.asList("COUNT","MAX","MIN","SUM","AVG","LAST","FIRST");
 	public  static final String BIG_BANG = "1899-12-30";
 	private static  final  List<String>  NO_SQL_RESERVED_WORDS=Arrays.asList( "APPLICATION", "ASSISTANT",   "COLUMN", "COMPACTDATABASE",  "CONTAINER", 
 			"CREATEDATABASE", "CREATEFIELD", "CREATEGROUP", "CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION", "CREATETABLEDEF", "CREATEUSER",
@@ -88,8 +87,8 @@ public class SQLConverter {
 										"TRAILING","TRIGGER","UNION","UNIQUE","USING","VALUES","VAR_POP","VAR_SAMP","WHEN","WHERE","WITH");
 	private static  ArrayList<String> whiteSpacedTableNames=new ArrayList<String>();
 	private static final  HashSet<String>  xescapedIdentifiers=new HashSet<String>();
-	
-	
+	private static final  HashSet<String>  quotedAliases=new HashSet<String>();
+	private static final  HashSet<String> waFunctions=new HashSet<String>();
 	private static boolean supportsAccessLike=true;
 	
 	
@@ -163,21 +162,35 @@ public class SQLConverter {
 	public static String convertSQL(String sql,UcanaccessConnection conn, boolean creatingQuery) {
 		sql=sql+" ";
 		sql = convertAccessDate(sql);
+		sql=convertQuotedAliases(sql);
 		sql = replaceWorkAroundFunctions(sql);
-		sql = convertDFunctions(sql);
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql=replaceWhiteSpacedTables(sql);
 		sql=replaceDistinctRow(sql);
 		if(!creatingQuery){
 			Pivot.checkAndRefreshPivot(sql,conn);
+			sql = DFunction.convertDFunctions(sql,conn);
 		}
 		sql = sql.trim();
 		return sql;
 	}
 	
 	
-	 private static String replaceDistinctRow(String sql) {
+	public static String convertQuotedAliases(String sql) {
+		for(Matcher mtc=QUOTED_ALIAS.matcher(sql);mtc.find();QUOTED_ALIAS.matcher(sql)){
+				sql=sql.substring(0, mtc.start())
+					  +mtc.group(1)
+					  +(mtc.group(2).replaceAll("[\'\"]", " "))
+					  +mtc.group(4)
+					  +sql.substring(mtc.end() );
+			}
+		return sql;
+	}
+
+
+
+	private static String replaceDistinctRow(String sql) {
 			return sql.replaceAll("\\s+(?i)distinctrow\\s+", " DISTINCT ");
 	}
 
@@ -291,9 +304,7 @@ public class SQLConverter {
 			int end = sql.indexOf("]");
 			if(end<init)return sql;
 			String content=basicEscapingIdentifier(sql.substring(init + 1, end)).toUpperCase();
-			
 			String subs=content.indexOf(" ")>0?"\"":" ";
-			
 			sql = sql.substring(0, init) + subs
 					+content + subs
 					+ sql.substring(end + 1);
@@ -360,13 +371,16 @@ public class SQLConverter {
 		if(Database.isReservedWord(nl)&&NO_SQL_RESERVED_WORDS.contains(nl)){
 			xescapedIdentifiers.add(nl);
 		}
-		if(KEYWORDLIST.contains(nl)){
-			name= "\""+name+"\"";
-		}
+		
 		String escaped = Database
 				.escapeIdentifier(name//.replaceAll(" ", "_")
 				.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\.",
 						"_")).replaceAll("\'","").replaceAll("\"","").replaceAll("\\+", "");
+		if(KEYWORDLIST.contains(escaped)){
+			escaped= "\""+escaped+"\"";
+		}
+		
+		
 		
 		if (Character.isDigit(escaped.trim().charAt(0))) {
 			escaped = "Z_" + escaped.trim();
@@ -404,24 +418,6 @@ public class SQLConverter {
 		return sql;
 	}
 	
-	private  static String convertDFunctions(String sql) {
-		boolean hasFrom=FROM_PATTERN.matcher(sql).find();
-		String init=hasFrom?" (SELECT ":"";
-		String end=hasFrom?" ) ":"";
-		
-		for(String s:DFUNCTIONLIST){
-			sql=sql.replaceAll(
-					DFUNCTIONS_WHERE.replaceFirst("_", "D"+s), 
-					init+s+"($1) FROM $2 WHERE $3     "+end);
-			sql=sql.replaceAll(
-					DFUNCTIONS_NO_WHERE.replaceFirst("_", "D"+s), 
-					init+s+"($1) FROM $2    "+end);
-		
-		}
-		return sql;
-	}
-
-
 	public static String convertCreateTable(String sql) {
 		return convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());
 	}
@@ -506,11 +502,13 @@ public class SQLConverter {
 
 
 
-	public static boolean contains(String identifier) {
+	public static boolean isXescaped(String identifier) {
 		return xescapedIdentifiers.contains(identifier);
 	}
 
-
+	static void registerQuotedAlias(String ql){
+		quotedAliases.add(ql);
+	}
 
 	
 

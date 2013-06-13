@@ -38,8 +38,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
@@ -53,14 +53,15 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.query.Query;
+import com.healthmarketscience.jackcess.query.Query.Row;
 
 public class LoadJet {
-	private static int y = 0;
+	private static int namingCounter = 0;
 
 	private final class FunctionsLoader {
 		private HashSet<String> functionsDefinition = new HashSet<String>();
@@ -265,7 +266,7 @@ public class LoadJet {
 							if (cdefaulT.endsWith(")")) {
 								arTrigger
 										.add("CREATE TRIGGER DEFAULT_TRIGGER"
-												+ (y++)
+												+ (namingCounter++)
 												+ " BEFORE INSERT ON "
 												+ ntn
 												+ "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW."
@@ -558,6 +559,13 @@ public class LoadJet {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
 			String escqn = qnn.indexOf(' ') > 0 ? "[" + qnn + "]" : qnn;
+			for(Row row:q.getRows()){
+				if(row.name1!=null&&
+						(row.name1.contains("'")||row.name1.contains("\""))){
+					SQLConverter.registerQuotedAlias(row.name1);
+				}
+			}
+			
 			String querySQL = q.toSQLString();
 			Pivot pivot = null;
 			if (q.getType().equals(Query.Type.CROSS_TAB)) {
@@ -568,6 +576,7 @@ public class LoadJet {
 					return false;
 				}
 			}
+			querySQL =new DFunction(conn, querySQL ).toSQL();
 			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn)
 					.append(" AS ").append(querySQL);
 			String v = null;
@@ -577,6 +586,7 @@ public class LoadJet {
 					v=v.trim().substring(0, v.length()-1);
 				execCreate(v);
 				loadedQueries.add(qnn);
+				this.notLoaded.remove(qnn);
 				if (pivot != null) {
 					pivot.registerPivot(qnn);
 				}
@@ -593,6 +603,7 @@ public class LoadJet {
 			}
 		}
 
+	
 		private void loadViews() throws SQLException, IOException {
 			List<Query> lq = null;
 			try {
@@ -690,7 +701,11 @@ public class LoadJet {
 		try {
 			st = conn.createStatement();
 			st.executeUpdate(expression);
-		} finally {
+		} catch(SQLException e){
+			throw new SQLException("Cannot execute:"+expression, e);
+		}
+		
+		finally {
 			if (st != null)
 				st.close();
 		}

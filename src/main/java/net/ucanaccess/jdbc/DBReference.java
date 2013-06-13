@@ -267,6 +267,7 @@ public class DBReference {
 			try {
 				st = conn.createStatement();
 				st.execute("set ignorecase true");
+				
 			} catch (Exception w) {
 			} finally {
 				if (st != null)

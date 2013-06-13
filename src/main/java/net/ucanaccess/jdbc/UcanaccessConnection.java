@@ -83,6 +83,7 @@ public class UcanaccessConnection implements Connection {
 	}
 
 	public synchronized static UcanaccessConnection getCtxConnection() {
+		if(ctx==null)return null;
 		return ctx.get().getCurrentConnection();
 	}
 
