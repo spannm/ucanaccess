@@ -52,7 +52,8 @@ public class SQLConverter {
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 	.compile("\\[[\\*|_|#]\\]");
 	
-	
+	private static final String YES = "(\\W)((?i)YES)(\\W)";
+	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	
@@ -161,6 +162,7 @@ public class SQLConverter {
 
 	public static String convertSQL(String sql,UcanaccessConnection conn, boolean creatingQuery) {
 		sql=sql+" ";
+		sql=convertYesNo(sql);
 		sql = convertAccessDate(sql);
 		sql=convertQuotedAliases(sql);
 		sql = replaceWorkAroundFunctions(sql);
@@ -177,6 +179,14 @@ public class SQLConverter {
 	}
 	
 	
+	private static String convertYesNo(String sql) {
+		// TODO Auto-generated method stub
+		return sql.replaceAll(YES, "$1true$3")
+				.replaceAll(NO, "$1false$3");
+	}
+
+
+
 	public static String convertQuotedAliases(String sql) {
 		for(Matcher mtc=QUOTED_ALIAS.matcher(sql);mtc.find();QUOTED_ALIAS.matcher(sql)){
 				sql=sql.substring(0, mtc.start())
