@@ -52,6 +52,9 @@ public class SQLConverter {
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 	.compile("\\[[\\*|_|#]\\]");
 	
+	
+	private static final Pattern NO_ALFANUMERIC= Pattern.compile("\\W");
+	
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	
@@ -62,7 +65,7 @@ public class SQLConverter {
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
 	private static final String KEYWORD_ALIAS ="(\\s+(?i)AS\\s*)((?i)_)(\\W)";
-	//private static final String QUOTED_ALIAS ="(\\s+(?i)AS\\s*)(\\[(?i)_\\])(\\W)";
+	private static final String KIND_OF_SUBQUERY = "(\\[)(([^\\]])*)(\\]\\.)";
 	private static final Pattern QUOTED_ALIAS =Pattern.compile("(\\s+(?i)AS\\s*)(\\[([^\\]])*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
@@ -88,7 +91,6 @@ public class SQLConverter {
 										"TRAILING","TRIGGER","UNION","UNIQUE","USING","VALUES","VAR_POP","VAR_SAMP","WHEN","WHERE","WITH");
 	private static  ArrayList<String> whiteSpacedTableNames=new ArrayList<String>();
 	private static final  HashSet<String>  xescapedIdentifiers=new HashSet<String>();
-	private static final  HashSet<String>  quotedAliases=new HashSet<String>();
 	private static final  HashSet<String> waFunctions=new HashSet<String>();
 	private static boolean supportsAccessLike=true;
 	
@@ -162,7 +164,6 @@ public class SQLConverter {
 
 	public static String convertSQL(String sql,UcanaccessConnection conn, boolean creatingQuery) {
 		sql=sql+" ";
-		sql=convertYesNo(sql);
 		sql = convertAccessDate(sql);
 		sql=convertQuotedAliases(sql);
 		sql = replaceWorkAroundFunctions(sql);
@@ -187,11 +188,12 @@ public class SQLConverter {
 
 
 
-	public static String convertQuotedAliases(String sql) {
+	private static String convertQuotedAliases(String sql) {
+		sql=sql.replaceAll(KIND_OF_SUBQUERY,"($2)");
 		for(Matcher mtc=QUOTED_ALIAS.matcher(sql);mtc.find();QUOTED_ALIAS.matcher(sql)){
 				sql=sql.substring(0, mtc.start())
 					  +mtc.group(1)
-					  +(mtc.group(2).replaceAll("[\'\"]", " "))
+					  +mtc.group(2).replaceAll("[\'\"]", " ")
 					  +mtc.group(4)
 					  +sql.substring(mtc.end() );
 			}
@@ -312,12 +314,13 @@ public class SQLConverter {
 		while ((init = sql.indexOf("[")) != -1) {
 			
 			int end = sql.indexOf("]");
-			if(end<init)return sql;
+			if(end<init)return sql.replaceAll("&", "||");
 			String content=basicEscapingIdentifier(sql.substring(init + 1, end)).toUpperCase();
-			String subs=content.indexOf(" ")>0?"\"":" ";
-			sql = sql.substring(0, init) + subs
+			
+			String subs=content.indexOf(" ")>0||NO_ALFANUMERIC.matcher(content).find()?"\"":" ";
+			sql = sql.substring(0, init).replaceAll("&", "||") + subs
 					+content + subs
-					+ sql.substring(end + 1);
+					+ sql.substring(end + 1).replaceAll("&", "||");
 		}
 		return sql;
 	}
@@ -339,6 +342,7 @@ public class SQLConverter {
 			if(!xidt.equals("SELECT"))
 			sqlc=sqlc.replaceAll(KEYWORD_ALIAS.replaceAll("_",xidt), "$1\"$2\"$3");
 		}
+		sqlc=convertYesNo(sqlc);
 		return sqlc;
 	}
    
@@ -349,7 +353,6 @@ public class SQLConverter {
 		int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
 		boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
 		String suff = enddq ? "" : sql.substring(li + 1);
-		suff = suff.replaceAll("&", "||");
 		suff = convertIdentifiersSWDigit(suff);
 		String tsql = enddq ? sql : sql.substring(0, li + 1);
 		Matcher md = pd.matcher(tsql);
@@ -516,9 +519,7 @@ public class SQLConverter {
 		return xescapedIdentifiers.contains(identifier);
 	}
 
-	static void registerQuotedAlias(String ql){
-		quotedAliases.add(ql);
-	}
+	
 
 	
 

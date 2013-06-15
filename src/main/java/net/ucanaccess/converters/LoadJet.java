@@ -58,7 +58,6 @@ import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.query.Query;
-import com.healthmarketscience.jackcess.query.Query.Row;
 
 public class LoadJet {
 	private static int namingCounter = 0;
@@ -559,13 +558,6 @@ public class LoadJet {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
 			String escqn = qnn.indexOf(' ') > 0 ? "[" + qnn + "]" : qnn;
-			for(Row row:q.getRows()){
-				if(row.name1!=null&&
-						(row.name1.contains("'")||row.name1.contains("\""))){
-					SQLConverter.registerQuotedAlias(row.name1);
-				}
-			}
-			
 			String querySQL = q.toSQLString();
 			Pivot pivot = null;
 			if (q.getType().equals(Query.Type.CROSS_TAB)) {
@@ -592,7 +584,8 @@ public class LoadJet {
 				}
 				return true;
 			} catch (Exception e) {
-				this.notLoaded.add(q.getName());
+				String cause=e.getCause()!=null?e.getCause().getMessage():"";
+				this.notLoaded.add(q.getName()+": "+cause);
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
