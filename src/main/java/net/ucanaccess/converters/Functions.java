@@ -40,6 +40,8 @@ import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class Functions {
+	private static Double rnd;
+	private static Double lastRnd;
 	public final static SimpleDateFormat[] SDFA = new SimpleDateFormat[] {
 			new SimpleDateFormat("MMM dd,yyyy"),
 			new SimpleDateFormat("MM dd,yyyy"),
@@ -740,6 +742,21 @@ public class Functions {
 		cl.setTime(now());
 		cl.set(1899, 11, 30,h,m,s);
 		return new java.sql.Timestamp(cl.getTimeInMillis());
+	}
+	
+	@FunctionType(functionName = "RND", argumentTypes = {}, returnType = AccessType.DOUBLE)
+	public static Double  rnd() {
+		return rnd(null);
+	}
+	
+	
+	@FunctionType(functionName = "RND", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static Double  rnd(Double d) {
+		if(d==null)return lastRnd=Math.random();
+		if(d>0)return lastRnd=Math.random();
+		if(d<0)return rnd==null?rnd=d:rnd;
+		if(d==0)return lastRnd==null?lastRnd=Math.random():lastRnd;
+		return null;
 	}
 
 	
