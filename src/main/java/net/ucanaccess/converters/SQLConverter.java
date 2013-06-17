@@ -24,6 +24,7 @@ package net.ucanaccess.converters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 
@@ -65,7 +66,7 @@ public class SQLConverter {
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
 	private static final String KEYWORD_ALIAS ="(\\s+(?i)AS\\s*)((?i)_)(\\W)";
-	private static final String KIND_OF_SUBQUERY = "(\\[)(([^\\]])*)(\\]\\.)";
+	private static final String KIND_OF_SUBQUERY = "(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.\\s)";
 	private static final Pattern QUOTED_ALIAS =Pattern.compile("(\\s+(?i)AS\\s*)(\\[([^\\]])*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
@@ -91,6 +92,7 @@ public class SQLConverter {
 										"TRAILING","TRIGGER","UNION","UNIQUE","USING","VALUES","VAR_POP","VAR_SAMP","WHEN","WHERE","WITH");
 	private static  ArrayList<String> whiteSpacedTableNames=new ArrayList<String>();
 	private static final  HashSet<String>  xescapedIdentifiers=new HashSet<String>();
+	private static final  HashMap<String,String>  identifiersContainingKeyword=new HashMap<String,String>();
 	private static final  HashSet<String> waFunctions=new HashSet<String>();
 	private static boolean supportsAccessLike=true;
 	
@@ -176,6 +178,7 @@ public class SQLConverter {
 			sql = DFunction.convertDFunctions(sql,conn);
 		}
 		sql = sql.trim();
+		
 		return sql;
 	}
 	
@@ -196,7 +199,7 @@ public class SQLConverter {
 					  +mtc.group(2).replaceAll("[\'\"]", " ")
 					  +mtc.group(4)
 					  +sql.substring(mtc.end() );
-			}
+		}
 		return sql;
 	}
 
@@ -310,12 +313,21 @@ public class SQLConverter {
 	
 	
 	private static String convertIdentifiers(String sql) {
+		
 		int init;
 		while ((init = sql.indexOf("[")) != -1) {
 			
 			int end = sql.indexOf("]");
 			if(end<init)return sql.replaceAll("&", "||");
-			String content=basicEscapingIdentifier(sql.substring(init + 1, end)).toUpperCase();
+			String content=sql.substring(init + 1, end);
+			if(content.indexOf(" ")>0){
+				String tryContent=" "+content+" ";
+				String tryConversion =convertXescaped(tryContent);
+				if(!tryConversion.equalsIgnoreCase(tryContent)){
+					identifiersContainingKeyword.put(tryConversion.trim(), content.toUpperCase());
+				}
+			}
+			content=basicEscapingIdentifier(content).toUpperCase();
 			
 			String subs=content.indexOf(" ")>0||NO_ALFANUMERIC.matcher(content).find()?"\"":" ";
 			sql = sql.substring(0, init).replaceAll("&", "||") + subs
@@ -325,18 +337,24 @@ public class SQLConverter {
 		return sql;
 	}
 	
-	
+	private static String convertXescaped(String sqlc) {
+		for (String xidt:xescapedIdentifiers){
+			sqlc=sqlc.replaceAll(XESCAPED.replaceAll("_",xidt), "$1X$2$3");
+			sqlc=sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_",xidt), "$1$2(");
+		}
+		
+		return sqlc;
+	}
 
-	private static String convertIdentifiersSWDigit(String sql) {
+	private static String convertPartIdentifiers(String sql) {
 		String sqlc=  convertIdentifiers(sql)
 				.replaceAll(DIGIT_STARTING_IDENTIFIERS,
 				"$1Z_" + "$2$5")
 				.replaceAll(UNDERSCORE_IDENTIFIERS,
 				"$1Z" + "$2$5");
-		
-		for (String xidt:xescapedIdentifiers){
-				sqlc=sqlc.replaceAll(XESCAPED.replaceAll("_",xidt), "$1X$2$3");
-				sqlc=sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_",xidt), "$1$2(");
+		sqlc=convertXescaped(sqlc);
+		for(Map.Entry<String,String> entry:identifiersContainingKeyword.entrySet()){
+			sqlc=sqlc.replaceAll("(?i)\""+entry.getKey()+"\"","\""+entry.getValue()+"\"");
 		}
 		for (String xidt:KEYWORDLIST){
 			if(!xidt.equals("SELECT"))
@@ -353,7 +371,7 @@ public class SQLConverter {
 		int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
 		boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
 		String suff = enddq ? "" : sql.substring(li + 1);
-		suff = convertIdentifiersSWDigit(suff);
+		suff = convertPartIdentifiers(suff);
 		String tsql = enddq ? sql : sql.substring(0, li + 1);
 		Matcher md = pd.matcher(tsql);
 		Matcher ms = ps.matcher(tsql);
@@ -368,10 +386,10 @@ public class SQLConverter {
 				group = group.replaceAll("'", "''").replaceAll("\"\"", "\"");
 			str = tsql.substring(0, mcr.start(0));
 			str = str.replaceAll("&", "||");
-			str = convertIdentifiersSWDigit(str);
+			str = convertPartIdentifiers(str);
 			tsql = str + "'" + group + "'" + escape(tsql.substring(mcr.end(0)));
 		} else {
-			tsql = convertIdentifiersSWDigit(tsql);
+			tsql = convertPartIdentifiers(tsql);
 		}
 		return tsql + suff;
 	}
