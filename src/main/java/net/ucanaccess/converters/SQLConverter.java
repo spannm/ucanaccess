@@ -72,6 +72,8 @@ public class SQLConverter {
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "(0[0-9]|1[0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])";
+	private static final String UNION = "(;)(\\s*)((?i)UNION)(\\s*)";
+	private static final String DISTINCT_ROW = "\\s+(?i)DISTINCTROW\\s+";
 	public  static final String BIG_BANG = "1899-12-30";
 	private static  final  List<String>  NO_SQL_RESERVED_WORDS=Arrays.asList( "APPLICATION", "ASSISTANT",   "COLUMN", "COMPACTDATABASE",  "CONTAINER", 
 			"CREATEDATABASE", "CREATEFIELD", "CREATEGROUP", "CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION", "CREATETABLEDEF", "CREATEUSER",
@@ -165,7 +167,8 @@ public class SQLConverter {
 	}
 
 	public static String convertSQL(String sql,UcanaccessConnection conn, boolean creatingQuery) {
-		sql=sql+" ";
+		sql=sql.replaceAll("\n", " ").replaceAll("\r", " ")+" ";
+		sql=  convertUnion(sql);
 		sql = convertAccessDate(sql);
 		sql=convertQuotedAliases(sql);
 		sql = replaceWorkAroundFunctions(sql);
@@ -183,6 +186,12 @@ public class SQLConverter {
 	}
 	
 	
+	private static String convertUnion(String sql) {
+		return sql.replaceAll(UNION,"$2$3$4");
+	}
+
+
+
 	private static String convertYesNo(String sql) {
 		// TODO Auto-generated method stub
 		return sql.replaceAll(YES, "$1true$3")
@@ -193,12 +202,20 @@ public class SQLConverter {
 
 	private static String convertQuotedAliases(String sql) {
 		sql=sql.replaceAll(KIND_OF_SUBQUERY,"($2)");
+		HashSet<String> hs=new HashSet<String>();
 		for(Matcher mtc=QUOTED_ALIAS.matcher(sql);mtc.find();QUOTED_ALIAS.matcher(sql)){
-				sql=sql.substring(0, mtc.start())
+			String g2=mtc.group(2);
+			if(g2.indexOf('\'')>=0||g2.indexOf('"')>=0){
+				hs.add(g2);
+			}
+			sql=sql.substring(0, mtc.start())
 					  +mtc.group(1)
-					  +mtc.group(2).replaceAll("[\'\"]", " ")
+					  +g2.replaceAll("[\'\"]", "")
 					  +mtc.group(4)
 					  +sql.substring(mtc.end() );
+		}
+		for(String escaped:hs){
+			sql=sql.replaceAll("\\["+escaped.substring(1, escaped.length()-1)+"\\]", escaped.replaceAll("[\'\"]", ""));
 		}
 		return sql;
 	}
@@ -206,7 +223,7 @@ public class SQLConverter {
 
 
 	private static String replaceDistinctRow(String sql) {
-			return sql.replaceAll("\\s+(?i)distinctrow\\s+", " DISTINCT ");
+			return sql.replaceAll(DISTINCT_ROW, " DISTINCT ");
 	}
 
 	
@@ -315,7 +332,7 @@ public class SQLConverter {
 	private static String convertIdentifiers(String sql) {
 		
 		int init;
-		while ((init = sql.indexOf("[")) != -1) {
+		if ((init = sql.indexOf("[")) != -1) {
 			
 			int end = sql.indexOf("]");
 			if(end<init)return sql.replaceAll("&", "||");
@@ -332,7 +349,9 @@ public class SQLConverter {
 			String subs=content.indexOf(" ")>0||NO_ALFANUMERIC.matcher(content).find()?"\"":" ";
 			sql = sql.substring(0, init).replaceAll("&", "||") + subs
 					+content + subs
-					+ sql.substring(end + 1).replaceAll("&", "||");
+					+ convertIdentifiers(sql.substring(end + 1));
+		}else{
+			sql=sql.replaceAll("&", "||");
 		}
 		return sql;
 	}
@@ -385,7 +404,6 @@ public class SQLConverter {
 			if (inid)
 				group = group.replaceAll("'", "''").replaceAll("\"\"", "\"");
 			str = tsql.substring(0, mcr.start(0));
-			str = str.replaceAll("&", "||");
 			str = convertPartIdentifiers(str);
 			tsql = str + "'" + group + "'" + escape(tsql.substring(mcr.end(0)));
 		} else {
@@ -407,12 +425,9 @@ public class SQLConverter {
 				.escapeIdentifier(name//.replaceAll(" ", "_")
 				.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\.",
 						"_")).replaceAll("\'","").replaceAll("\"","").replaceAll("\\+", "");
-		if(KEYWORDLIST.contains(escaped)){
+		if(KEYWORDLIST.contains(escaped.toUpperCase())){
 			escaped= "\""+escaped+"\"";
 		}
-		
-		
-		
 		if (Character.isDigit(escaped.trim().charAt(0))) {
 			escaped = "Z_" + escaped.trim();
 		}
@@ -507,9 +522,6 @@ public class SQLConverter {
 	private static String convertLike(String conditionField, String closePar,
 			String likeContent) {
 		Pattern inter = ACCESS_LIKE_CHARINTERVAL_PATTERN;
-		
-		
-		
 		if (likeContent.indexOf("#") >= 0 || inter.matcher(likeContent).find()) {
 				return "REGEXP_MATCHES("
 					+ conditionField
