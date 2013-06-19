@@ -50,7 +50,7 @@ public class Pivot {
 	private final Pattern PIVOT_EXPR = Pattern
 			.compile("(.*)(?i)IN\\s*\\((.*)\\)");
 	private final Pattern PIVOT_AGGR = Pattern
-			.compile("((?i)SUM|(?i)MAX|(?)MIN|(?)FIRST|(?)LAST|(?i)AVG|(?)STDEV|(?)VAR)\\s*\\((.*)\\)");
+			.compile("((?i)SUM|(?i)MAX|(?)MIN|(?)FIRST|(?)LAST|(?i)AVG|(?)COUNT|(?)STDEV|(?)VAR)\\s*\\((.*)\\)");
 	private final Pattern PIVOT_CN = Pattern.compile("[\"'#](.*)[\"'#]");
 	private final String PIVOT_GROUP_BY = "(?i)GROUP\\s*(?i)BY";
 	private String aggregateFun;
