@@ -377,14 +377,23 @@ public class LoadJet {
 			loadTableData(t);
 			defaultValues(t);
 			triggersGenerator.synchronisationTriggers(ntn,
-					hasAutoNumberColumn(t));
+					hasAutoNumberColumn(t),hasAppendOnly(t));
 			
 			loadedTables.add(ntn);
 			if(checkComplex(t)&&!readonlyTables.contains(ntn)){
-				//makeReadOnly(ntn);
-				readonlyTables.add(ntn);
+				//dec
+				//readonlyTables.add(ntn);
 			}
 		}
+		private boolean hasAppendOnly(Table t) {
+			for (Column c:t.getColumns()){
+				if(c.isAppendOnly()){
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private void makeComplexReadOnly() throws SQLException {
 			for(String ntn:readonlyTables){
 				 makeReadOnly(ntn);
@@ -533,13 +542,19 @@ public class LoadJet {
 		}
 
 		private void synchronisationTriggers(String tableName,
-				boolean hasAutoNumberColumn) throws SQLException {
+				boolean hasAutoNumberColumn, boolean hasAutoAppendOnly) throws SQLException {
 			loadTriggerNP(tableName, "genericInsert", "AFTER INSERT",
 					"TriggerInsert");
 			loadTriggerNP(tableName, "genericUpdate", "AFTER UPDATE",
 					"TriggerUpdate");
 			loadTriggerNP(tableName, "genericDelete", "AFTER DELETE",
 					"TriggerDelete");
+			if (hasAutoAppendOnly) {
+				loadTriggerNP(tableName, "appendOnly", "BEFORE INSERT",
+						"TriggerAppendOnly");
+				loadTriggerNP(tableName, "appendOnly_upd", "BEFORE UPDATE",
+						"TriggerAppendOnly");
+			}
 			if (hasAutoNumberColumn) {
 				loadTriggerNP(tableName, "autonumber", "BEFORE INSERT",
 						"TriggerAutoNumber");
@@ -550,7 +565,7 @@ public class LoadJet {
 	}
 
 	private final class ViewsLoader {
-		private HashSet<String> notLoaded = new HashSet<String>();
+		private HashMap<String,String> notLoaded = new HashMap<String,String>();
 
 		private boolean loadView(Query q) throws SQLException {
 			String qnn = SQLConverter.basicEscapingIdentifier(q.getName());
@@ -564,7 +579,7 @@ public class LoadJet {
 				pivot = new Pivot(conn);
 				if (!pivot.parsePivot(querySQL)
 						|| (querySQL = pivot.toSQL()) == null) {
-					this.notLoaded.add(q.getName());
+					this.notLoaded.put(q.getName(),"cannot load this query");
 					return false;
 				}
 			}
@@ -585,7 +600,7 @@ public class LoadJet {
 				return true;
 			} catch (Exception e) {
 				String cause=e.getCause()!=null?e.getCause().getMessage():"";
-				this.notLoaded.add(q.getName()+": "+cause);
+				this.notLoaded.put(q.getName(),": "+cause);
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
@@ -607,14 +622,16 @@ public class LoadJet {
 					if (!q.getType().equals(Query.Type.SELECT)
 							&& !q.getType().equals(Query.Type.UNION)
 							&& !q.getType().equals(Query.Type.CROSS_TAB)) {
-						it.remove();
+						if(!q.getName().startsWith("~"))
+						   Logger.log("Cannot load query "+q.getName()+" of type "+q.getType());
+					    	it.remove();
 					}
 						
 					
 				}
 				queryPorting(lq);
 			} catch (Exception e) {
-				this.notLoaded.add("");
+				this.notLoaded.put("","");
 			}
 		}
 
@@ -719,8 +736,8 @@ public class LoadJet {
 			return null;
 		}
 		SQLWarning sqlw = null;
-		for (String s : this.viewsLoader.notLoaded) {
-			String message = s.length() > 0 ? "Cannot load view " + s
+		for (String s : this.viewsLoader.notLoaded.keySet()) {
+			String message = s.length() > 0 ? "Cannot load view " + s+ " "+this.viewsLoader.notLoaded.get(s)
 					: "Cannot load views ";
 			if (sqlw == null) {
 				sqlw = new SQLWarning(message);
@@ -762,9 +779,9 @@ public class LoadJet {
 	}
 
 	public void synchronisationTriggers(String tableName,
-			boolean hasAutoNumberColumn) throws SQLException {
+			boolean hasAutoNumberColumn,boolean hasAppendOnly) throws SQLException {
 		this.triggersGenerator.synchronisationTriggers(tableName,
-				hasAutoNumberColumn);
+				hasAutoNumberColumn,hasAppendOnly);
 	}
 
 	private boolean tryDefault(Object defaulT) throws SQLException {

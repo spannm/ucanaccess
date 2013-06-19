@@ -44,6 +44,7 @@ import org.hsqldb.HsqlDateTime;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.types.BlobData;
+import org.hsqldb.types.JavaObjectData;
 import org.hsqldb.types.TimestampData;
 
 import com.healthmarketscience.jackcess.Column;
@@ -135,6 +136,11 @@ public class Persist2Jet {
 						long length = bd.length(si);
 						values[i] = ((BlobData) value).getBytes(si, 0,
 								(int) length);
+					}
+					if(value instanceof JavaObjectData){
+						JavaObjectData jod=(JavaObjectData)value;
+						Object obj=jod.getObject();
+						values[i] =obj;
 					}
 				}
 			}

@@ -28,7 +28,12 @@ public class SingleValue extends ComplexBase{
 	private static final long serialVersionUID = 1L;
 	private Object value;
 
-	public SingleValue(int id, String tableName, String columnName, Object value) {
+	public SingleValue( String value) {
+		this(-222, null, null,value);
+		
+	}
+	
+	public SingleValue(int id, String tableName, String columnName, String value) {
 		super(id, tableName, columnName);
 		this.value = value;
 	}
@@ -58,8 +63,8 @@ public class SingleValue extends ComplexBase{
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
+//		if (!super.equals(obj))
+//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		SingleValue other = (SingleValue) obj;
@@ -73,7 +78,7 @@ public class SingleValue extends ComplexBase{
 
 	@Override
 	public String toString() {
-		return "SingleValue [value=" + value + "]";
+		return "SingleValue [value=" + value + value.getClass()+"]";
 	}
 	
 	

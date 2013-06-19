@@ -43,7 +43,7 @@ public class DDLCommandEnlist {
 		Connection hsqlConn = ac.getHSQLDBConnection();
 		Database db = ac.getDbIO();
 		LoadJet lfa = new LoadJet(hsqlConn, db);
-		lfa.synchronisationTriggers(tn, true);
+		lfa.synchronisationTriggers(tn, true,true);
 		CreateTableCommand c4io = ddlType.equals(DDLType.CREATE_TABLE) ? new CreateTableCommand(
 				tn, execId, parseTypesFromCreateStatement(sql))
 				: new CreateTableCommand(tn, execId);

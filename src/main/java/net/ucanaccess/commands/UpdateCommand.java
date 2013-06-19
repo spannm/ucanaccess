@@ -27,13 +27,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.complex.Version;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 
 public class UpdateCommand extends AbstractCursorCommand {
 	private List<Column> blobColumns;
@@ -97,7 +102,9 @@ public class UpdateCommand extends AbstractCursorCommand {
 						modifiedRow[tableColumns.indexOf(col)] = val;
 					}
 				}
+				updateComplex(cur );
 				cur.updateCurrentRow(modifiedRow);
+				
 			}
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
@@ -110,9 +117,46 @@ public class UpdateCommand extends AbstractCursorCommand {
 			for (Column col : this.blobColumns) {
 				Object val = cur.getCurrentRowValue(col);
 				modifiedRow[tableColumns.indexOf(col)] = val;
+				
 			}
 		}
+		updateComplex(cur);
 		cur.updateCurrentRow(modifiedRow);
+	}
+	
+	private void updateComplex(Cursor cur) throws IOException{
+		int j=0;
+		for(Column cl:this.tableColumns){
+			if (cl.getType() == DataType.COMPLEX_TYPE) {
+				ComplexValueForeignKey rowFk = (ComplexValueForeignKey) cl
+							.getRowValue( cur.getCurrentRow());
+				    
+					
+				    if (modifiedRow[j] instanceof Attachment[]) {
+				    	rowFk.deleteAllValues();
+				    	Attachment[] atcs = (Attachment[]) modifiedRow[j];
+						for (Attachment atc : atcs) {
+							rowFk.addAttachment(atc.getUrl(), atc.getName(),
+									atc.getType(), atc.getData(),
+									atc.getTimeStamp(), atc.getFlags());
+							
+						}
+					} else if (modifiedRow[j] instanceof SingleValue[]) {
+						rowFk.deleteAllValues();
+						SingleValue[] vs = (SingleValue[]) modifiedRow[j];
+						for (SingleValue v : vs) {
+							rowFk.addMultiValue(v.getValue());
+						}
+						
+					} else if (modifiedRow[j] instanceof Version[]) {
+						Version[] vs = (Version[]) modifiedRow[j];
+						for (Version v : vs) {
+							rowFk.addVersion(v.getValue(),v.getModifiedDate());
+						}
+					}
+				}
+			j++;
+		}
 	}
 
 	public IFeedbackAction rollback() throws SQLException {

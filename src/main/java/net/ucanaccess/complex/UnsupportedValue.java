@@ -53,8 +53,8 @@ public class UnsupportedValue extends ComplexBase{
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
+//		if (!super.equals(obj))
+//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		UnsupportedValue other = (UnsupportedValue) obj;

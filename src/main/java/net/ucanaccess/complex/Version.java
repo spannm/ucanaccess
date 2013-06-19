@@ -36,6 +36,11 @@ public class Version extends ComplexBase{
 			this.value = value;
 			this.modifiedDate = modifiedDate;
 		}
+	 
+	  public Version( String value,
+				Date modifiedDate) {
+			this(-222, null,null,value,modifiedDate);
+		}
 	public Version(com.healthmarketscience.jackcess.complex.Version cv) {
 		super(cv);
 		this.value=cv.getValue();
@@ -67,8 +72,8 @@ public class Version extends ComplexBase{
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
+//		if (!super.equals(obj))
+//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Version other = (Version) obj;

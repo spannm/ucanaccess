@@ -43,6 +43,12 @@ public class Attachment extends ComplexBase {
 		this.timeStamp = timeStamp;
 		this.flags = flags;
 	}
+	public Attachment( String url,
+			String name, String type, byte[] data, Date timeStamp, Integer flags) {
+		this(-222, null, null, url,
+				name,  type,  data, timeStamp, flags);
+		
+	}
 
 	public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) {
 		super(atc);
@@ -120,8 +126,8 @@ public class Attachment extends ComplexBase {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
+//		if (!super.equals(obj))
+//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Attachment other = (Attachment) obj;

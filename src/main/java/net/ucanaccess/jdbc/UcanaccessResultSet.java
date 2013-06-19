@@ -67,6 +67,7 @@ public class UcanaccessResultSet implements ResultSet {
 			return label;
 		}
 		String escaped=SQLConverter.basicEscapingIdentifier(label);
+		escaped=escaped.replaceAll("[\"\']", "");
 		if(this.metadata.contains(escaped.toUpperCase())){
 			return escaped;
 		}
