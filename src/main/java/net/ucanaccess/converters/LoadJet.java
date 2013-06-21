@@ -68,8 +68,12 @@ public class LoadJet {
 		private void addAggregates() {
 			functionsDefinition.add(getAggregate("LONGVARCHAR", "last"));
 			functionsDefinition.add(getAggregate("DECIMAL(100,10)", "last"));
+			functionsDefinition.add(getAggregate("BOOLEAN", "last"));
+			functionsDefinition.add(getAggregate("TIMESTAMP", "last"));
 			functionsDefinition.add(getAggregate("LONGVARCHAR", "first"));
 			functionsDefinition.add(getAggregate("DECIMAL(100,10)", "first"));
+			functionsDefinition.add(getAggregate("BOOLEAN", "first"));
+			functionsDefinition.add(getAggregate("TIMESTAMP", "first"));
 		}
 
 		private void addFunction(String functionName, String methodName,
@@ -600,7 +604,7 @@ public class LoadJet {
 				return true;
 			} catch (Exception e) {
 				String cause=e.getCause()!=null?e.getCause().getMessage():"";
-				this.notLoaded.put(q.getName(),": "+cause);
+				this.notLoaded.put(q.getName(),": "+cause+" :"+v);
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
