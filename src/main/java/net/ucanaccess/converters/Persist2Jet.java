@@ -174,7 +174,7 @@ public class Persist2Jet {
 			short length = (short) rs.getInt("COLUMN_SIZE");
 			byte precision=(byte) rs.getInt("DECIMAL_DIGITS");
 			DataType dt = null;
-			if (length == 0) {
+			if (length == 0&&types!=null) {
 				if (types[i]
 						.equalsIgnoreCase(AccessType.MEMO.name())) {
 					dt = DataType.MEMO;
@@ -209,7 +209,8 @@ public class Persist2Jet {
 			if (dt == null) {
 				dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
 				cl.setType(dt);
-			//	cl.setLengthInUnits(length);
+				if(length>0&&dt.equals(DataType.TEXT))
+				cl.setLengthInUnits(length);
 				if(precision>0)
 				cl.setPrecision(precision);
 			}
