@@ -783,4 +783,20 @@ public class Functions {
 	public static Integer nz(Integer value, Integer outher) {
 		return (Integer) nz((Object) value, (Object) outher);
 	}
+	
+	
+	@FunctionType(functionName = "STRREVERSE", argumentTypes = { AccessType.MEMO}, returnType = AccessType.MEMO)
+	public static String strReverse(String value) {
+		if(value==null)return null;
+		return new StringBuffer(value).reverse().toString();
+	}
+	
+	@FunctionType(functionName = "STRCONV", argumentTypes = { AccessType.MEMO,AccessType.LONG}, returnType = AccessType.MEMO)
+	public static String strConv(String value,int ul) {
+		if(value==null)return null;
+		if(ul==1)value= value.toUpperCase();
+		if(ul==2)value= value.toLowerCase();
+		return value;
+	}
+	
 }
