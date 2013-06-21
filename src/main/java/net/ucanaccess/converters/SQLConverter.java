@@ -40,14 +40,21 @@ public class SQLConverter {
 	private static final Pattern DOUBLE_QUOTE_G_PATTERN = Pattern
 			.compile("\"(((([^\"])*(\"\")*))*)\"");
 	private static final Pattern FIND_LIKE_PATTERN = Pattern
-			.compile("[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(?i)like\\s*\\'(.*)'");
+			.compile("[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(?i)LIKE\\s*\'([^']*(?:'')*)\'");
 	private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN = Pattern
-			.compile("\\[[a-zA-Z]\\-[a-zA-Z]\\]|\\[\\![a-zA-Z]\\-[a-zA-Z]\\]");
+			.compile("\\[(?:\\!*[a-zA-Z]\\-[a-zA-Z])+\\]");
+	
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 			.compile("\\[[\\*|_|#]\\]");
+	
+	private static final Pattern SWITCH_PATTERN=Pattern
+			.compile("(\\W(?i)SWITCH\\s*)(\\([^\\)]*\\))"); 
+	
+	private static final Pattern NO_DATA_PATTERN = Pattern.compile(" (?i)WITH\\s+(?i)NO\\s+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
+	
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
@@ -164,6 +171,7 @@ public class SQLConverter {
 			boolean creatingQuery) {
 		sql = sql.replaceAll("\n", " ").replaceAll("\r", " ") + " ";
 		sql = convertUnion(sql);
+		sql=  convertSwitch(sql);
 		sql = convertAccessDate(sql);
 		sql = convertQuotedAliases(sql);
 		sql = replaceWorkAroundFunctions(sql);
@@ -179,13 +187,49 @@ public class SQLConverter {
 		return sql;
 	}
 
+	private static String convertSwitch(String sql) {
+		for (Matcher mtc = SWITCH_PATTERN.matcher(sql); mtc.find();mtc =  SWITCH_PATTERN
+				.matcher(sql)) {
+			
+			String g2=mtc.group(2);
+			String baseSwitch= g2.substring(1,g2.length()-1);
+			String[] elts=baseSwitch.split(",", -1);
+			StringBuffer sb=new StringBuffer("(CASE ");
+			for(int i=0;i<elts.length;++i){
+				if(i==0||i%2==0){
+					if(i==elts.length-1){
+						sb.append(" ELSE").append(elts[i]);
+					}else
+					sb.append("  WHEN ").append( elts[i]).append(" THEN ");
+				
+				}else{
+					sb.append( elts[i]);
+				}
+			}
+			sb.append(" END )");
+			sql=sql.substring(0,mtc.start())+sb.toString()+sql.substring(mtc.end());
+						
+			
+		}
+		return sql;
+	}
+
 	private static String convertUnion(String sql) {
 		return sql.replaceAll(UNION, "$2$3$4");
 	}
 
 	private static String convertYesNo(String sql) {
 		// TODO Auto-generated method stub
-		return sql.replaceAll(YES, "$1true$3").replaceAll(NO, "$1false$3");
+		  sql= sql.replaceAll(YES, "$1true$3");
+		  Matcher mtc=NO_DATA_PATTERN.matcher(sql);
+		  if(mtc.find()){
+			  sql=sql.substring(0, mtc.start()).replaceAll(NO, "$1false$3")
+					  +sql.substring(mtc.start());
+		  }else{
+			  sql= sql.replaceAll(NO, "$1false$3");
+		  }
+		  
+		  return sql;
 	}
 
 	
@@ -527,4 +571,6 @@ public class SQLConverter {
 	public static boolean isXescaped(String identifier) {
 		return xescapedIdentifiers.contains(identifier);
 	}
+	
+	
 }
