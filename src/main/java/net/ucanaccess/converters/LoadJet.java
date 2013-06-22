@@ -716,7 +716,9 @@ public class LoadJet {
 			st = conn.createStatement();
 			st.executeUpdate(expression);
 		} catch(SQLException e){
-			throw new SQLException("Cannot execute:"+expression, e);
+			if(e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
+			Logger.log("Cannot execute:"+expression+" "+e.getMessage());
+			throw e;
 		}
 		
 		finally {
