@@ -460,7 +460,7 @@ public class SQLConverter {
 				.escapeIdentifier(
 						name// .replaceAll(" ", "_")
 						.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_")
-								.replaceAll("\\.", "_")).replaceAll("\'", "")
+								.replaceAll("\\.", "_")).replaceAll("\'", "").replaceAll("#", "_")
 				.replaceAll("\"", "").replaceAll("\\+", "");
 		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
 			escaped = "\"" + escaped + "\"";
