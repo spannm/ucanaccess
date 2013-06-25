@@ -115,10 +115,21 @@ public class Functions {
 		return new BigDecimal((long) Math.floor(value + 0.499999999999999d))
 				.shortValueExact();
 	}
+	
+	@FunctionType(functionName = "CINT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
+	public static Short cint(boolean value) throws UcanaccessSQLException {
+		return (short)(value?-1:0);
+	}
 
 	@FunctionType(functionName = "CLONG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
 	public static Integer clong(Double value) throws UcanaccessSQLException {
 		return (int) Math.floor(value + 0.499999999999999d);
+	}
+	
+	
+	@FunctionType(functionName = "CLONG", argumentTypes = { AccessType.YESNO }, returnType = AccessType.LONG)
+	public static Integer clong(boolean value) throws UcanaccessSQLException {
+		return value?-1:0;
 	}
 
 	@FunctionType(functionName = "CSIGN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.SINGLE)
@@ -797,6 +808,33 @@ public class Functions {
 		if(ul==1)value= value.toUpperCase();
 		if(ul==2)value= value.toLowerCase();
 		return value;
+	}
+	
+	@FunctionType(functionName = "STRCOMP", argumentTypes = { AccessType.MEMO,AccessType.MEMO,AccessType.LONG}, returnType = AccessType.LONG)
+	public static Integer strComp(String value1,String value2, Integer type) throws UcanaccessSQLException {
+		switch(type){
+		case 0:
+		case -1: 
+		case 2: return value1.compareTo(value2);
+		case 1: return value1.toUpperCase().compareTo(value2.toUpperCase());
+		default: throw new UcanaccessSQLException(ExceptionMessages.INVALID_PARAMETER);
+		}
+	}
+	
+	@FunctionType(functionName = "STRCOMP", argumentTypes = { AccessType.MEMO,AccessType.MEMO}, returnType = AccessType.LONG)
+	public static Integer strComp(String value1,String value2) throws UcanaccessSQLException {
+		return strComp( value1,value2, 0);
+	}
+	
+	@FunctionType(functionName = "INT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.INTEGER)
+	public static Short mint(Double value) throws UcanaccessSQLException {
+		return new BigDecimal((long) Math.floor(value ))
+				.shortValueExact();
+	}
+	
+	@FunctionType(functionName = "INT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
+	public static Short mint(boolean value) throws UcanaccessSQLException {
+		return (short)(value?-1:0);
 	}
 	
 }
