@@ -143,7 +143,7 @@ public class LoadJet {
 
 		private void createFunctions() throws SQLException {
 			for (String functionDef : functionsDefinition) {
-				execCreate(functionDef);
+				execCreate(functionDef,true);
 			}
 			functionsDefinition.clear();
 		}
@@ -229,9 +229,9 @@ public class LoadJet {
 				comma = ",";
 			}
 			sbC.append(")");
-			execCreate(sbC.toString());
+			execCreate(sbC.toString(),true);
 			for (String trigger : arTrigger) {
-				execCreate(trigger);
+				execCreate(trigger,true);
 			}
 		}
 
@@ -285,7 +285,7 @@ public class LoadJet {
 				}
 			}
 			for (String trigger : arTrigger) {
-				execCreate(trigger);
+				execCreate(trigger,true);
 			}
 		}
 
@@ -310,7 +310,7 @@ public class LoadJet {
 				ci.append(" ON UPDATE CASCADE ");
 			}
 			try {
-				execCreate(ci.toString());
+				execCreate(ci.toString(),true);
 			} catch (SQLException e) {
 				if (e.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
 					Logger.log(e.getMessage());
@@ -340,7 +340,7 @@ public class LoadJet {
 						.append(" ON ").append(ntn).append(colsIdx);
 			}
 			try {
-				execCreate(ci.toString());
+				execCreate(ci.toString(),true);
 			} catch (Exception e) {
 				if (idx.isUnique()) {
 					for (ColumnDescriptor cd : idx.getColumns()) {
@@ -536,7 +536,7 @@ public class LoadJet {
 					+ (tableName.replaceAll("\"", "").replaceAll(" ", "_"));
 			execCreate("CREATE TRIGGER " + triggerName + "  " + when + " ON "
 					+ tableName + "   FOR EACH ROW	" + q0 + "   CALL \""
-					+ className + "\" ");
+					+ className + "\" ",true);
 		}
 
 		private void loadTriggerNP(String tableName, String namePrefix,
@@ -595,7 +595,7 @@ public class LoadJet {
 				v = SQLConverter.convertSQL(sb.toString(), true);
 				if(v.trim().endsWith(";"))
 					v=v.trim().substring(0, v.length()-1);
-				execCreate(v);
+				execCreate(v,false);
 				loadedQueries.add(qnn);
 				this.notLoaded.remove(qnn);
 				if (pivot != null) {
@@ -710,13 +710,13 @@ public class LoadJet {
 		tablesLoader.createSyncrTable(t);
 	}
 
-	private void execCreate(String expression) throws SQLException {
+	private void execCreate(String expression, boolean blocking) throws SQLException {
 		Statement st = null;
 		try {
 			st = conn.createStatement();
 			st.executeUpdate(expression);
 		} catch(SQLException e){
-			if(e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
+			if(blocking&&e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
 			Logger.log("Cannot execute:"+expression+" "+e.getMessage());
 			throw e;
 		}
