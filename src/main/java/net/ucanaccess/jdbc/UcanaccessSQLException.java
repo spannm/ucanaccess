@@ -35,7 +35,7 @@ public class UcanaccessSQLException extends SQLException {
 		NOT_A_VALID_PASSWORD, 
 		ONLY_IN_MEMORY_ALLOWED, 
 		UNPARSABLE_DATE,
-		COMPLEX_TYPE_UNSUPPORTED
+		COMPLEX_TYPE_UNSUPPORTED, INVALID_PARAMETER
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
 	private Throwable cause;
@@ -43,7 +43,6 @@ public class UcanaccessSQLException extends SQLException {
 	}
 	
 	public UcanaccessSQLException(ExceptionMessages reason) {
-		
 		super(Logger.getMessage(reason.name()));
 	}
 	
