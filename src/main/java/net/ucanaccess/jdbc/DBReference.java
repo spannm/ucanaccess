@@ -262,11 +262,13 @@ public class DBReference {
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
+		
 		if (session.isIgnoreCase() ) {
 			Statement st = null;
 			try {
 				st = conn.createStatement();
 				st.execute("set ignorecase true");
+				
 				
 			} catch (Exception w) {
 			} finally {
