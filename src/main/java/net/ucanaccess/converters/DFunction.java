@@ -46,7 +46,7 @@ public class DFunction {
 	private static final String DFUNCTIONS_NO_WHERE = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
 	private static final String IDENTIFIER = "(\\W)((?i)_)(\\W)";
 	private static final List<String> DFUNCTIONLIST = Arrays.asList("COUNT",
-			"MAX", "MIN", "SUM", "AVG", "LAST", "FIRST");
+			"MAX", "MIN", "SUM", "AVG", "LAST", "FIRST","LOOKUP");
 
 	public DFunction(Connection conn, String sql) {
 		this.conn = conn;
@@ -60,14 +60,17 @@ public class DFunction {
 			String init = hasFrom ? " (SELECT " : "";
 			String end = hasFrom ? " ) " : "";
 			for (String s : DFUNCTIONLIST) {
+				
+				String fun="D" + s;
+				s=s.equalsIgnoreCase("lookup")?" ":s;
 				sql0 = sql0.replaceAll(
-						DFUNCTIONS_WHERE.replaceFirst("_", "D" + s), init + s
+						DFUNCTIONS_WHERE.replaceFirst("_", fun), init + s
 								+ "($1) FROM $2 WHERE $3     " + end);
 				sql0 = sql0.replaceAll(
-						DFUNCTIONS_NO_WHERE.replaceFirst("_", "D" + s), init
+						DFUNCTIONS_NO_WHERE.replaceFirst("_", fun), init
 								+ s + "($1) FROM $2    " + end);
 				Pattern dfd = Pattern.compile(DFUNCTIONS_WHERE_DYNAMIC
-						.replaceFirst("_", "D" + s));
+						.replaceFirst("_", fun));
 				for (Matcher mtc = dfd.matcher(sql0); mtc.find(); mtc = dfd
 						.matcher(sql0)) {
 					StringBuffer sb = new StringBuffer();
@@ -98,7 +101,8 @@ public class DFunction {
 									if (!mtcop.find())
 										continue;
 									String pref=mtcop.group(1);
-									if(pref.equals("."))continue;
+									if(pref.equals(".")||
+											(pref.equals("[")&&mtcop.start(1)>0&&tkn.charAt(mtcop.start(1)-1)=='.'))continue;
 									tkn = tkn.replaceAll(oppn,pref.equals("[")?resolveAmbiguosTableName(cln)+".$1$2$3": "$1"
 											+ resolveAmbiguosTableName(cln)
 											+ ".$2$3");
@@ -110,7 +114,7 @@ public class DFunction {
 					sb.append(end);
 					sql0 = sql0
 							.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC
-									.replaceFirst("_", "D" + s), sb.toString());
+									.replaceFirst("_", fun), sb.toString());
 				}
 			}
 		} catch (SQLException e) {
