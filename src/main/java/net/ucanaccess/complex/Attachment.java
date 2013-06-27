@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 */
 package net.ucanaccess.complex;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -50,7 +51,7 @@ public class Attachment extends ComplexBase {
 		
 	}
 
-	public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) {
+	public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
 		super(atc);
 		this.url = atc.getFileUrl();
 		this.name = atc.getFileName();
