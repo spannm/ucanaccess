@@ -90,6 +90,7 @@ public class PhysicalRollbackTest extends UcanaccessTestBase {
 			if (st != null)
 				st.close();
 		}
+		this.ucanaccess=super.getUcanaccessConnection();
 		dump("select * from t4");
 		
 		assertTrue(getCount("select count(*) from T4", true) == 0);

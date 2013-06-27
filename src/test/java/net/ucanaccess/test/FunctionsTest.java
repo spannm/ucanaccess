@@ -494,6 +494,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select weekDayName(3) from t234", "Tuesday");
 		checkQuery("select weekDayName(3,true) from t234", "Tue");
 		checkQuery("select  WeekdayName (3, TRUE, 2)  from t234", "Wed");
+		dump("select  WeekdayName(Weekday(#2001-1-1#)) from t234");
 	}
 
 	public void testMonthName() throws SQLException, IOException {
@@ -526,5 +527,32 @@ public class FunctionsTest extends UcanaccessTestBase {
 				"Friday 13 May 1994");
 		checkQuery("select format('0.6','percent') from t234", "60,00%");
 	}
-
+	
+	public void testInt() throws SQLException, IOException
+	 {
+        checkQuery("select int(2.5), int(-2.5)from t234",2,-3);
+	}
+	
+	public void testRnd() throws SQLException, IOException
+	 {
+       dump("select rnd()from t234");
+	}
+	public void testStrComp() throws SQLException, IOException{
+		 checkQuery("select StrComp('Cia','Cia') from t234",0);
+	}
+	public void testStrConv() throws SQLException, IOException{
+		 checkQuery("select StrConv('Cia',1) from t234","CIA");
+	}
+	
+	public void testStrReverse() throws SQLException, IOException{
+		 checkQuery("select StrReverse('ylatI') from t234","Italy");
+	}
+	
+	public void testString() throws SQLException, IOException{
+		 checkQuery("select String(4,'c') from t234","cccc");
+	}
+	
+	public void testWeekday() throws SQLException, IOException{
+		 checkQuery("select Weekday(#06/27/2013 10:42:58 PM#,1) from t234",5);
+	}
 }

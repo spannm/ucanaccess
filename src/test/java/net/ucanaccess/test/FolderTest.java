@@ -50,7 +50,7 @@ public class FolderTest extends UcanaccessTestBase {
 	}
 	
 	
-	public void testLikeExternal() throws SQLException, IOException, ClassNotFoundException {
+	public void testFolderContent() throws SQLException, IOException, ClassNotFoundException {
 		Statement st = null;
 		String folderPath=System.getProperty("accessFolder");
 		if(folderPath==null)return;

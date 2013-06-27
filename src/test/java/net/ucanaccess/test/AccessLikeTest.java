@@ -78,14 +78,14 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			ver = new Object[][] { { "aa" }, { "aBa" }, { "aBBBa" }, { "a*a" },
 					{ "A*a" } };
 			checkQuery(
-					"select descr from T21 where descr like \"a*a\" ORDER BY ID",
+					"select descr from T21 where descr like \"a*a\"  AND '1'='1' ORDER BY ID",
 					ver);
 			ver = new Object[][]{{2,"aa"},{3,"aBa"},{4,"aBBBa"},{7,"a*a"},{8,"A*a"}};
 			checkQuery("select * from T21 where descr like 'a%a'",ver);
 			
 			checkQuery("select descr from T21 where descr like 'P[A-F]###'",
 					"PB123");
-			checkQuery("select descr from T21 where descr like 'P[!A-F]###'",
+			checkQuery("select descr from T21 where (descr) like 'P[!A-F]###' AND '1'='1'",
 					"PZ123");
 			checkQuery("select * from T21 where descr='aba'",3,"aBa");
 			

@@ -36,16 +36,19 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 
 import junit.framework.TestCase;
 
+import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+
 
 public abstract class UcanaccessTestBase extends TestCase {
 	private static FileFormat defaultFileFormat = FileFormat.V2003;
@@ -232,7 +235,13 @@ public abstract class UcanaccessTestBase extends TestCase {
 						for (int y = 0; y < btodbc.length; y++) {
 							assertEquals(btodbc[y], bt[y]);
 						}
-					} else {
+					} 
+					else if (ob1 instanceof ComplexBase[]&& ob2 instanceof ComplexBase[]) {
+						System.out.println(Arrays.toString((ComplexBase[])ob1)+" "+Arrays.toString((ComplexBase[])ob2));
+						assertTrue(Arrays.equals((ComplexBase[])ob1, (ComplexBase[])ob2));
+					}
+					
+					else {
 						if (ob1 instanceof Number && ob2 instanceof Number) {
 							BigDecimal ob1b = new BigDecimal(ob1.toString());
 							BigDecimal ob2b = new BigDecimal(ob2.toString());

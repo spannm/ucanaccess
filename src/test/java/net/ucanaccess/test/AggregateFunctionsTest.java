@@ -72,9 +72,9 @@ public class AggregateFunctionsTest extends UcanaccessTestBase {
 	public void testDCount() throws SQLException, IOException, ParseException {
 		
 
-		checkQuery("select id, DCount('*','t235','1=1') from t235",
+		checkQuery("select id  , DCount('*','t235','1=1') from [t235]",
 				new Object[][] { { 1234, 2 }, { 12344, 2 } });
-		checkQuery("select id, DCount('descr','t235','1=1')from t235",
+		checkQuery("select id as [WW \"SS], DCount('descr','t235','1=1')from t235",
 				new Object[][] { { 1234, 2 }, { 12344, 2 } });
 		checkQuery("select  DCount('*','t235','1=1') ", 2);
 
