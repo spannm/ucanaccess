@@ -21,15 +21,19 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.test.suite;
 
+import net.ucanaccess.test.ComplexTest;
 import net.ucanaccess.test.UcanaccessTestBase;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class AllTests2010 {
 	public static Test suite() throws ClassNotFoundException {
 		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2010);
-		return AllTestsBase.suite();
+		TestSuite ts= AllTestsBase.suite();
+		ts.addTestSuite(ComplexTest.class);
+		return ts;
 	}
 }

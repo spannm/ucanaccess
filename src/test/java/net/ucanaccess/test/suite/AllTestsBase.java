@@ -29,17 +29,17 @@ import net.ucanaccess.test.CreateTableTest;
 import net.ucanaccess.test.CrudTest;
 import net.ucanaccess.test.DropTableTest;
 import net.ucanaccess.test.FunctionsTest;
+import net.ucanaccess.test.InsertBigTest;
 import net.ucanaccess.test.LoadTypesAccessTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.PasswordTest;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
-import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
-	public static Test suite() throws ClassNotFoundException {
+	public static TestSuite suite() throws ClassNotFoundException {
 		TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
 		suite.addTestSuite(AccessLikeTest.class);
 		suite.addTestSuite(CounterTest.class);
@@ -55,6 +55,7 @@ public class AllTestsBase {
 		suite.addTestSuite(TransactionTest.class);
 		suite.addTestSuite(WorkloadTest.class);
 		suite.addTestSuite(PivotTest.class);
+		suite.addTestSuite(InsertBigTest.class);
 		return suite;
 	}
 }
