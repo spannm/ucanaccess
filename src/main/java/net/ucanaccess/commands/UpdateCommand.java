@@ -24,6 +24,7 @@ package net.ucanaccess.commands;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,9 @@ public class UpdateCommand extends AbstractCursorCommand {
 	private Map<String, Object> rowPattern;
 	private Table  table;
 	private List<Column> tableColumns;
+	private boolean isRollbacking;
+
+	
 	
 	public UpdateCommand(Table table, Map<String, Object> map, Object[] modifiedRow,
 			String execId) {
@@ -126,6 +130,7 @@ public class UpdateCommand extends AbstractCursorCommand {
 	
 	private void updateComplex(Cursor cur) throws IOException{
 		int j=0;
+		
 		for(Column cl:this.tableColumns){
 			if (cl.getType() == DataType.COMPLEX_TYPE) {
 				ComplexValueForeignKey rowFk = (ComplexValueForeignKey) cl
@@ -149,10 +154,21 @@ public class UpdateCommand extends AbstractCursorCommand {
 						}
 						
 					} else if (modifiedRow[j] instanceof Version[]) {
+						
 						Version[] vs = (Version[]) modifiedRow[j];
-						for (Version v : vs) {
-							rowFk.addVersion(v.getValue(),v.getModifiedDate());
-						}
+						Version v=vs[0];
+						List<com.healthmarketscience.jackcess.complex.Version> oldV=rowFk.getVersions();
+						String vn=v.getValue();
+						String vo=oldV.size()>0?oldV.get(0).getValue():null;
+						Date upTime =isRollbacking? new Date():v.getModifiedDate();
+					
+						if((vn!=null&&vo==null)||
+						    (vo!=null&&vn==null)||	
+						    (vo!=null&&vn!=null&&!vo.equals(vn))   
+						)
+						rowFk.addVersion(vn,upTime);
+						  
+						
 					}
 				}
 			j++;
@@ -161,11 +177,13 @@ public class UpdateCommand extends AbstractCursorCommand {
 
 	public IFeedbackAction rollback() throws SQLException {
 		Persist2Jet p2a=new Persist2Jet();
+		
 		UpdateCommand urev=new	UpdateCommand(
 				this.table, 
 				p2a.getRowPattern(this.modifiedRow, this.table), 
 				p2a.getValues(this.getRowPattern(), this.table),
 				this.execId) ;
+		        urev.isRollbacking=true;
 		        return urev.persist();
 	}
 

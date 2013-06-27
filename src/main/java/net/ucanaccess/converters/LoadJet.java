@@ -602,9 +602,11 @@ public class LoadJet {
 					pivot.registerPivot(qnn);
 				}
 				return true;
-			} catch (Exception e) {
-				String cause=e.getCause()!=null?e.getCause().getMessage():"";
-				this.notLoaded.put(q.getName(),": "+cause+" :"+v);
+			} 
+			
+			catch (Exception e) {
+				String cause=UcanaccessSQLException.explaneCause(e);
+				this.notLoaded.put(q.getName(),": "+cause);
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
@@ -626,9 +628,7 @@ public class LoadJet {
 					if (!q.getType().equals(Query.Type.SELECT)
 							&& !q.getType().equals(Query.Type.UNION)
 							&& !q.getType().equals(Query.Type.CROSS_TAB)) {
-						if(!q.getName().startsWith("~"))
-						   Logger.log("Cannot load query "+q.getName()+" of type "+q.getType());
-					    	it.remove();
+						  	it.remove();
 					}
 						
 					
@@ -718,6 +718,7 @@ public class LoadJet {
 		} catch(SQLException e){
 			if(blocking&&e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
 			Logger.log("Cannot execute:"+expression+" "+e.getMessage());
+			
 			throw e;
 		}
 		

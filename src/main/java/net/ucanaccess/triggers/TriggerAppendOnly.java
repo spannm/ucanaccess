@@ -21,7 +21,6 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.triggers;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import org.hsqldb.types.JavaObjectData;
@@ -64,9 +63,12 @@ public class TriggerAppendOnly extends TriggerBase {
 								|| (!oldR[i].equals(newR[i]))) {
 							Version[] oldV = (Version[]) ((JavaObjectData)oldR[verCol
 									.getColumnNumber()]).getObject();
-							Version[] newV = Arrays.copyOf(oldV,
-									oldV.length + 1);
-							newV[oldV.length] = new Version(val, upTime);
+							
+							Version[] newV =new Version[oldV.length + 1];
+							for(int j=0;j<oldV.length;j++){
+								newV[j+1]=oldV[j];
+							}
+							newV[0] = new Version(val, upTime);
 							newR[verCol.getColumnNumber()] = new JavaObjectData(
 									newV);
 						}

@@ -23,6 +23,8 @@ package net.ucanaccess.commands;
 
 import java.sql.SQLException;
 
+
+
 public interface ICommand {
 	public enum TYPES {
 		COMPOSITE, DDL, DELETE, INSERT, UPDATE

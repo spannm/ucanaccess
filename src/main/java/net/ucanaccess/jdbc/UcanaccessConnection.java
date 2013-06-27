@@ -290,6 +290,11 @@ public class UcanaccessConnection implements Connection {
 				}
 			}
 			this.ref.updateLastModified();
+			try {
+			this.ref.getDbIO().flush();
+			this.unloadDB();
+			}
+			catch (IOException e) {}
 			throw new UcanaccessSQLException(t);
 		}
 		try {

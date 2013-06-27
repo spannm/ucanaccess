@@ -23,6 +23,7 @@ package net.ucanaccess.jdbc;
 
 import java.sql.SQLException;
 
+
 import net.ucanaccess.util.Logger;
 
 public class UcanaccessSQLException extends SQLException {
@@ -35,7 +36,7 @@ public class UcanaccessSQLException extends SQLException {
 		NOT_A_VALID_PASSWORD, 
 		ONLY_IN_MEMORY_ALLOWED, 
 		UNPARSABLE_DATE,
-		COMPLEX_TYPE_UNSUPPORTED, INVALID_PARAMETER
+		COMPLEX_TYPE_UNSUPPORTED, INVALID_PARAMETER,INVALID_TYPES_IN_COMBINATION
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
 	private Throwable cause;
@@ -68,10 +69,18 @@ public class UcanaccessSQLException extends SQLException {
 	}
 	
 	public UcanaccessSQLException(Throwable cause) {
-		
-		super( cause.getMessage());
+		super( explaneCause(cause));
 		this.cause=cause;
-		
+	}
+	
+	public static String explaneCause(Throwable cause){
+		if(cause instanceof SQLException){
+			SQLException se=(SQLException)cause;
+			if(se.getErrorCode()==-5562){
+				return cause.getMessage()+" "+Logger.getMessage(ExceptionMessages.INVALID_TYPES_IN_COMBINATION.name());
+			}
+		}
+		return cause.getMessage();
 	}
 
 	public Throwable getCause() {
