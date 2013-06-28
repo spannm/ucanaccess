@@ -237,7 +237,6 @@ public abstract class UcanaccessTestBase extends TestCase {
 						}
 					} 
 					else if (ob1 instanceof ComplexBase[]&& ob2 instanceof ComplexBase[]) {
-						System.out.println(Arrays.toString((ComplexBase[])ob1)+" "+Arrays.toString((ComplexBase[])ob2));
 						assertTrue(Arrays.equals((ComplexBase[])ob1, (ComplexBase[])ob2));
 					}
 					

@@ -68,7 +68,7 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps.setString(1, "row12");
 			ps.setString(2,"ciao");
 			ps.setString(3,"to version");
-			SingleValue[] svs=new SingleValue[]{new SingleValue("16"),new SingleValue("24") };
+			SingleValue[] svs=new SingleValue[]{new SingleValue("ccc16"),new SingleValue("ccc24") };
 			ps.setObject(4,svs);
 			Attachment[] atcs=new Attachment[]{new Attachment(null,"ccc.txt","txt","ddddd ddd".getBytes(), new Date(),null),
 					new Attachment(null,"ccczz.txt","txt","ddddd zzddd".getBytes(), new Date(),null) };
@@ -87,7 +87,11 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps.setObject(1,atc);
 			ResultSet rs=ps.executeQuery();
 			dump(rs);
-			 checkQuery("select * from TABLE1 order by id");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET MULTI_VALUE_DATA=? ");
+			svs=new SingleValue[]{new SingleValue("aaaaaaa14"),new SingleValue("2eeeeeeeeeee") }; 
+			ps.setObject(1,svs);
+			ps.execute();
+			checkQuery("select * from TABLE1 order by id");
 			assertTrue(getCount("select count(*) from TABLE1", true) == 7);
 		} finally {
 			if (ps != null)
