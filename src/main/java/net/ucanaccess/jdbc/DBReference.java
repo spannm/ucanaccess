@@ -257,7 +257,7 @@ public class DBReference {
 		Connection conn;
 
 		conn = DriverManager.getConnection(this.getHsqlUrl(session), session
-				.getUser() == null ? "" : session.getUser(), session
+				.getUser() == null ? "Admin" : session.getUser(), session
 				.getPassword());
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();

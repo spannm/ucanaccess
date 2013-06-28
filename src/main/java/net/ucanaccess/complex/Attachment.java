@@ -34,6 +34,15 @@ public class Attachment extends ComplexBase {
 	private Date timeStamp;
 	private Integer flags;
 
+	public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
+		super(atc);
+		this.url = atc.getFileUrl();
+		this.name = atc.getFileName();
+		this.type = atc.getFileType();
+		this.data = atc.getFileData();
+		this.timeStamp = atc.getFileTimeStamp();
+		this.flags = atc.getFileFlags();
+	}
 	public Attachment(int id, String tableName, String columnName, String url,
 			String name, String type, byte[] data, Date timeStamp, Integer flags) {
 		super(id, tableName, columnName);
@@ -44,83 +53,12 @@ public class Attachment extends ComplexBase {
 		this.timeStamp = timeStamp;
 		this.flags = flags;
 	}
+
 	public Attachment( String url,
 			String name, String type, byte[] data, Date timeStamp, Integer flags) {
-		this(-222, null, null, url,
+		this(CREATE_ID, null, null, url,
 				name,  type,  data, timeStamp, flags);
 		
-	}
-
-	public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
-		super(atc);
-		this.url = atc.getFileUrl();
-		this.name = atc.getFileName();
-		this.type = atc.getFileType();
-		this.data = atc.getFileData();
-		this.timeStamp = atc.getFileTimeStamp();
-		this.flags = atc.getFileFlags();
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public byte[] getData() {
-		return data;
-	}
-
-	public void setData(byte[] data) {
-		this.data = data;
-	}
-
-	public Date getTimeStamp() {
-		return timeStamp;
-	}
-
-	public void setTimeStamp(Date timeStamp) {
-		this.timeStamp = timeStamp;
-	}
-
-	public Integer getFlags() {
-		return flags;
-	}
-
-	public void setFlags(Integer flags) {
-		this.flags = flags;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Arrays.hashCode(data);
-		result = prime * result + ((flags == null) ? 0 : flags.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result
-				+ ((timeStamp == null) ? 0 : timeStamp.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + ((url == null) ? 0 : url.hashCode());
-		return result;
 	}
 
 	@Override
@@ -160,6 +98,68 @@ public class Attachment extends ComplexBase {
 		} else if (!url.equals(other.url))
 			return false;
 		return true;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public Integer getFlags() {
+		return flags;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Date getTimeStamp() {
+		return timeStamp;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Arrays.hashCode(data);
+		result = prime * result + ((flags == null) ? 0 : flags.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((timeStamp == null) ? 0 : timeStamp.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((url == null) ? 0 : url.hashCode());
+		return result;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
+	}
+
+	public void setFlags(Integer flags) {
+		this.flags = flags;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setTimeStamp(Date timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	@Override

@@ -31,22 +31,14 @@ public class UnsupportedValue extends ComplexBase{
 	;
 	private Map<String, Object> values;
 
-	public UnsupportedValue(int id, String tableName, String columnName, Map<String, Object> values) {
-		super(id, tableName, columnName);
-		this.values = values;
-	}
-
 	public UnsupportedValue(com.healthmarketscience.jackcess.complex.UnsupportedValue cv) {
 		super(cv);
 		this.values=cv.getValues();
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((values == null) ? 0 : values.hashCode());
-		return result;
+	public UnsupportedValue(int id, String tableName, String columnName, Map<String, Object> values) {
+		super(id, tableName, columnName);
+		this.values = values;
 	}
 
 	@Override
@@ -68,6 +60,14 @@ public class UnsupportedValue extends ComplexBase{
 
 	public Map<String, Object> getValues() {
 		return values;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
+		return result;
 	}
 
 	public void setValues(Map<String, Object> values) {

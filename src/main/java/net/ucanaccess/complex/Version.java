@@ -30,50 +30,27 @@ public class Version extends ComplexBase{
 	private static final long serialVersionUID = 1L;
 	private String value;
 	 private Date modifiedDate;
-	 public Version(int id, String tableName, String columnName, String value,
+	 public Version(com.healthmarketscience.jackcess.complex.Version cv) {
+		super(cv);
+		this.value=cv.getValue();
+		this.modifiedDate=cv.getModifiedDate();
+	}
+	 
+	  public Version(int id, String tableName, String columnName, String value,
 				Date modifiedDate) {
 			super(id, tableName, columnName);
 			this.value = value;
 			this.modifiedDate = modifiedDate;
 		}
-	 
-	  public Version( String value,
+	  
+	public Version( String value,
 				Date modifiedDate) {
-			this(-222, null,null,value,modifiedDate);
+		this(CREATE_ID, null, null, value, modifiedDate);
 		}
-	public Version(com.healthmarketscience.jackcess.complex.Version cv) {
-		super(cv);
-		this.value=cv.getValue();
-		this.modifiedDate=cv.getModifiedDate();
-	}
-	public String getValue() {
-		return value;
-	}
-	public void setValue(String value) {
-		this.value = value;
-	}
-	
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ ((modifiedDate == null) ? 0 : modifiedDate.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
-	}
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-//		if (!super.equals(obj))
-//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Version other = (Version) obj;
@@ -88,6 +65,28 @@ public class Version extends ComplexBase{
 		} else if (!value.equals(other.value))
 			return false;
 		return true;
+	}
+	public Date getModifiedDate() {
+		return modifiedDate;
+	}
+	
+	public String getValue() {
+		return value;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((modifiedDate == null) ? 0 : modifiedDate.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+	public void setValue(String value) {
+		this.value = value;
 	}
 	@Override
 	public String toString() {

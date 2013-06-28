@@ -37,6 +37,7 @@ public abstract  class ComplexBase implements Serializable {
 	private int id;
 	private String tableName;
 	private String columnName;
+	public final static int CREATE_ID=0;
 	
 	public ComplexBase(int id, String tableName, String columnName) {
 		super();

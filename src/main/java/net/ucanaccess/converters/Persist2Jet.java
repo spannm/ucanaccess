@@ -35,11 +35,14 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import net.ucanaccess.commands.InsertCommand;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.complex.UnsupportedValue;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
-
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import org.hsqldb.HsqlDateTime;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
@@ -140,7 +143,9 @@ public class Persist2Jet {
 					if(value instanceof JavaObjectData){
 						JavaObjectData jod=(JavaObjectData)value;
 						Object obj=jod.getObject();
-						values[i] =obj;
+						if(obj instanceof ComplexBase[]&&!(obj instanceof UnsupportedValue[]))
+							values[i] =obj;
+						else throw new UcanaccessSQLException(ExceptionMessages.UNSUPPORTED_TYPE);
 					}
 				}
 			}

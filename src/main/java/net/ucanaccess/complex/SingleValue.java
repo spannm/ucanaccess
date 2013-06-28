@@ -28,9 +28,9 @@ public class SingleValue extends ComplexBase{
 	private static final long serialVersionUID = 1L;
 	private Object value;
 
-	public SingleValue( String value) {
-		this(-222, null, null,value);
-		
+	public SingleValue(com.healthmarketscience.jackcess.complex.SingleValue cv) {
+		super(cv);
+		this.value=cv.get();
 	}
 	
 	public SingleValue(int id, String tableName, String columnName, String value) {
@@ -38,33 +38,15 @@ public class SingleValue extends ComplexBase{
 		this.value = value;
 	}
 
-	public SingleValue(com.healthmarketscience.jackcess.complex.SingleValue cv) {
-		super(cv);
-		this.value=cv.get();
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public void setValue(Object value) {
-		this.value = value;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
+	public SingleValue( String value) {
+		this(CREATE_ID, null, null,value);
+		
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-//		if (!super.equals(obj))
-//			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		SingleValue other = (SingleValue) obj;
@@ -76,9 +58,25 @@ public class SingleValue extends ComplexBase{
 		return true;
 	}
 
+	public Object getValue() {
+		return value;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
 	@Override
 	public String toString() {
-		return "SingleValue [value=" + value + value.getClass()+"]";
+		return "SingleValue [value=" + value +"]";
 	}
 	
 	
