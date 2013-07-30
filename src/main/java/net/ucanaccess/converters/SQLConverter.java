@@ -50,28 +50,30 @@ public class SQLConverter {
 	
 	
 	private static final Pattern SWITCH_PATTERN=Pattern
-			.compile("(\\W(?i)SWITCH\\s*)(\\([^\\)]*\\))"); 
+			.compile("(\\W(?i)SWITCH[\\s\n\r]*)(\\([^\\)]*\\))"); 
 	
-	private static final Pattern NO_DATA_PATTERN = Pattern.compile(" (?i)WITH\\s+(?i)NO\\s+(?i)DATA");
+	private static final Pattern NO_DATA_PATTERN = Pattern.compile(" (?i)WITH[\\s\n\r]+(?i)NO[\\s\n\r]+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
-	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH\\s+(?i)OWNERACCESS\\s+(?i)OPTION(\\W)";
+	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH[\\s\n\r]+(?i)OWNERACCESS[\\s\n\r]+(?i)OPTION(\\W)";
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
-	private static final String KEYWORD_ALIAS = "(\\s+(?i)AS\\s*)((?i)_)(\\W)";
-	private static final String KIND_OF_SUBQUERY = "(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.\\s)";
+	private static final String KEYWORD_ALIAS = "(\\[\\s\n\r]+(?i)AS\\[\\s\n\r]*)((?i)_)(\\W)";
+	private static final String KIND_OF_SUBQUERY = "(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])";
 	private static final Pattern QUOTED_ALIAS = Pattern
-			.compile("(\\s+(?i)AS\\s*)(\\[[^\\]]*\\])(\\W)");
+			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "(0[0-9]|1[0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])";
-	private static final String UNION = "(;)(\\s*)((?i)UNION)(\\s*)";
-	private static final String DISTINCT_ROW = "\\s+(?i)DISTINCTROW\\s+";
+	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
+	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
+	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,)";
+	
 	public static final String BIG_BANG = "1899-12-30";
 	private static final List<String> NO_SQL_RESERVED_WORDS = Arrays.asList(
 			"APPLICATION", "ASSISTANT", "COLUMN", "COMPACTDATABASE",
@@ -88,7 +90,11 @@ public class SQLConverter {
 			"REGISTERDATABASE", "REPAINT", "REPAIRDATABASE", "REPORT",
 			"REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",
 			"TABLEDEF", "TABLEDEFS", "TABLEID", "USER", "VALUE", "WORKSPACE",
-			"YEAR");
+			"YEAR",
+			"COUNTER","CURRENCY", "DATETIME","MEMO", "OLE",	"SINGLE","TEXT","YESNO","GUID");
+	
+	
+	
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
 			"ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
 			"CAST", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
@@ -108,9 +114,9 @@ public class SQLConverter {
 
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
-				Pattern.compile("\\s*(?i)create\\s*(?i)table\\s*(([_a-zA-Z0-9])*)\\s*(?)AS\\s*\\(\\s*(?)SELECT")), CREATE_TABLE(
-				Pattern.compile("\\s*(?i)create\\s*(?i)table\\s*(([_a-zA-Z0-9])*)")), DROP_TABLE(
-				Pattern.compile("\\s*(?i)drop\\s*(?i)table\\s*(([_a-zA-Z0-9])*)"));
+				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
+				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)")), DROP_TABLE(
+				Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)"));
 		private Pattern pattern;
 
 		private DDLType(Pattern pattern) {
@@ -171,7 +177,7 @@ public class SQLConverter {
 
 	public static String convertSQL(String sql, UcanaccessConnection conn,
 			boolean creatingQuery) {
-		sql = sql.replaceAll("\n", " ").replaceAll("\r", " ") + " ";
+		sql = sql + " ";
 		sql = convertUnion(sql);
 		sql = convertOwnerAccess(sql);
 		sql=  convertSwitch(sql);
@@ -499,9 +505,10 @@ public class SQLConverter {
 			sql = sql.replaceAll(
 					TYPES_TRANSLATE.replaceAll("_", entry.getKey()), "$1"
 							+ entry.getValue() + "$2");
-			sql = sql.replaceAll("(\\W)(?i)VARCHAR\\s*w*(\\)|,)",
-					"$1VARCHAR(255)$2");
+			
 		}
+		sql = sql.replaceAll(DEFAULT_VARCHAR,
+				"$1VARCHAR(255)$2");
 		return sql;
 	}
 

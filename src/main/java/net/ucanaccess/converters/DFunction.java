@@ -41,16 +41,16 @@ public class DFunction {
 	private static final Pattern FROM_PATTERN = Pattern
 			.compile("\\w*(?i)FROM\\w*");
 	private static final String SELECT_FROM = "(?i)SELECT(.*\\W)(?i)FROM(.*)";
-	private static final String DFUNCTIONS_WHERE = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
-	private static final String DFUNCTIONS_WHERE_DYNAMIC = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\,(.*)\\)";
-	private static final String DFUNCTIONS_NO_WHERE = "(?i)_\\s*\\(\\s*[\'\"](.*)[\'\"]\\,\\s*[\'\"](.*)[\'\"]\\s*\\)";
+	private static final String DFUNCTIONS_WHERE = "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"][\\s\n\r]*\\)";
+	private static final String DFUNCTIONS_WHERE_DYNAMIC = "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"]\\,(.*)\\)";
+	private static final String DFUNCTIONS_NO_WHERE = "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"][\\s\n\r]*\\)";
 	private static final String IDENTIFIER = "(\\W)((?i)_)(\\W)";
 	private static final List<String> DFUNCTIONLIST = Arrays.asList("COUNT",
 			"MAX", "MIN", "SUM", "AVG", "LAST", "FIRST","LOOKUP");
 
 	public DFunction(Connection conn, String sql) {
 		this.conn = conn;
-		this.sql = sql.replaceAll("\n", " ").replaceAll("\r", " ");
+		this.sql = sql;
 	}
 
 	private String convertDFunctions() {
@@ -125,7 +125,7 @@ public class DFunction {
 	private String resolveAmbiguosTableName(String identifier) {
 		Statement st = null;
 		try {
-			String f4t = SQLConverter.convertSQL(this.sql.replaceFirst(
+			String f4t = SQLConverter.convertSQL(this.sql.replaceAll("[\r\\n]", " ").replaceFirst(
 					SELECT_FROM, "SELECT " + identifier + " FROM $2 "));
 			st = conn.createStatement();
 			ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
