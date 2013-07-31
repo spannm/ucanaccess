@@ -125,7 +125,7 @@ public class DFunction {
 	private String resolveAmbiguosTableName(String identifier) {
 		Statement st = null;
 		try {
-			String f4t = SQLConverter.convertSQL(this.sql.replaceAll("[\r\\n]", " ").replaceFirst(
+			String f4t = SQLConverter.convertSQL(this.sql.replaceAll("[\r\n]", " ").replaceFirst(
 					SELECT_FROM, "SELECT " + identifier + " FROM $2 "));
 			st = conn.createStatement();
 			ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
