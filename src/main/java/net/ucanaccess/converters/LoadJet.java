@@ -292,6 +292,7 @@ public class LoadJet {
 		private void loadForeignKey(Index idx) throws IOException, SQLException {
 			String ntn = SQLConverter
 					.escapeIdentifier(idx.getTable().getName());
+			if(ntn==null)return;
 			String nin = SQLConverter.escapeIdentifier(idx.getName());
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			String colsIdx = commaSeparated(idx.getColumns());
@@ -301,6 +302,7 @@ public class LoadJet {
 			ci.append(" ADD CONSTRAINT ").append(nin);
 			String nrt = SQLConverter.escapeIdentifier(idx.getReferencedIndex()
 					.getTable().getName());
+			if(nrt==null)return;
 			ci.append(" FOREIGN KEY ").append(colsIdx).append(" REFERENCES ")
 					.append(nrt).append(colsIdxRef);
 			if (idx.getReference().isCascadeDeletes()) {
@@ -324,6 +326,7 @@ public class LoadJet {
 		private void loadIndex(Index idx) throws IOException, SQLException {
 			String ntn = SQLConverter
 					.escapeIdentifier(idx.getTable().getName());
+			if(ntn==null)return;
 			String nin = SQLConverter.escapeIdentifier(idx.getName());
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			boolean uk = idx.isUnique();
@@ -501,6 +504,7 @@ public class LoadJet {
 			sbI.append(") ");
 			sbE.append(")");
 			sbI.append(sbE);
+			
 			return conn.prepareStatement(sbI.toString());
 		}
 
@@ -713,6 +717,7 @@ public class LoadJet {
 	private void execCreate(String expression, boolean blocking) throws SQLException {
 		Statement st = null;
 		try {
+			
 			st = conn.createStatement();
 			st.executeUpdate(expression);
 		} catch(SQLException e){
