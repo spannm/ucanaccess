@@ -40,13 +40,14 @@ public class SQLConverter {
 	private static final Pattern DOUBLE_QUOTE_G_PATTERN = Pattern
 			.compile("\"(((([^\"])*(\"\")*))*)\"");
 	private static final Pattern FIND_LIKE_PATTERN = Pattern
-			.compile("[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(?i)LIKE\\s*\'([^']*(?:'')*)\'");
+			.compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
 	private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN = Pattern
 			.compile("\\[(?:\\!*[a-zA-Z]\\-[a-zA-Z])+\\]");
 	
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 			.compile("\\[[\\*|_|#]\\]");
-	
+	private static final Pattern CHECK_DDL=Pattern
+			.compile("^([\n\r\\s]*(?i)(create|alter|drop))[\n\r\\s]+.*");
 	private static final Pattern KIND_OF_SUBQUERY = Pattern.compile("(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])");
 	
 	private static final Pattern SWITCH_PATTERN=Pattern
@@ -62,10 +63,11 @@ public class SQLConverter {
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
-	private static final String KEYWORD_ALIAS = "(\\[\\s\n\r]+(?i)AS\\[\\s\n\r]*)((?i)_)(\\W)";
+	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
+												 
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
@@ -192,6 +194,7 @@ public class SQLConverter {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
 		}
+		
 		sql = sql.trim();
 		return sql;
 	}
@@ -471,15 +474,22 @@ public class SQLConverter {
 		if (name.startsWith("~"))
 			return null;
 		String nl = name.toUpperCase();
-		if (Database.isReservedWord(nl) && NO_SQL_RESERVED_WORDS.contains(nl)) {
+		if (Database.isReservedWord(nl) && NO_SQL_RESERVED_WORDS.contains(nl)
+				) {
 			xescapedIdentifiers.add(nl);
 		}
+		
+		
+		
 		String escaped = Database
 				.escapeIdentifier(
 						name// .replaceAll(" ", "_")
 						.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_")
 								.replaceAll("\\.", "_")).replaceAll("\'", "").replaceAll("#", "_")
-				.replaceAll("\"", "").replaceAll("\\+", "");
+				.replaceAll("\"", "").replaceAll("\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_");
+		
+		
+		
 		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
 			escaped = "\"" + escaped + "\"";
 		}
@@ -524,11 +534,7 @@ public class SQLConverter {
 	public static boolean checkDDL(String sql) {
 		if (sql == null)
 			return false;
-		else {
-			String lcsql = sql.toLowerCase().trim();
-			return lcsql.startsWith("create ") || lcsql.startsWith("alter ")
-					|| lcsql.startsWith("drop ");
-		}
+		return CHECK_DDL.matcher(sql).matches();
 	}
 
 	private static String convertLike(String sql) {
