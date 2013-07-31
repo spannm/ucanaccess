@@ -47,7 +47,7 @@ public class SQLConverter {
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 			.compile("\\[[\\*|_|#]\\]");
 	
-	
+	private static final Pattern KIND_OF_SUBQUERY = Pattern.compile("(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])");
 	
 	private static final Pattern SWITCH_PATTERN=Pattern
 			.compile("(\\W(?i)SWITCH[\\s\n\r]*)(\\([^\\)]*\\))"); 
@@ -63,7 +63,7 @@ public class SQLConverter {
 	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
 	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
 	private static final String KEYWORD_ALIAS = "(\\[\\s\n\r]+(?i)AS\\[\\s\n\r]*)((?i)_)(\\W)";
-	private static final String KIND_OF_SUBQUERY = "(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])";
+	
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
@@ -247,7 +247,12 @@ public class SQLConverter {
 
 	
 	private static String convertQuotedAliases(String sql) {
-		sql = sql.replaceAll(KIND_OF_SUBQUERY, "($2)");
+		for (Matcher mtc = KIND_OF_SUBQUERY.matcher(sql); mtc.find();mtc =  SWITCH_PATTERN
+				.matcher(sql)) {
+			String g2=mtc.group(2).trim();
+			if(g2.endsWith(";"))g2=g2.substring(0, g2.length()-1);
+			sql=sql.substring(0,mtc.start())+"("+g2+")"+sql.substring(mtc.end());
+		}
 		HashSet<String> hs = new HashSet<String>();
 		String sqle=sql;
 		String sqlN="";
