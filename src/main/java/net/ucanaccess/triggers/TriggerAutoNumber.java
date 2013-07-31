@@ -57,7 +57,15 @@ public class TriggerAutoNumber extends TriggerBase {
 							newR[i] = 	AutoNumberManager.getNext(cl);
 							
 						}
-					} else if (cl.getAutoNumberGenerator().getType().equals(
+					} else if(type == TriggerAutoNumber.UPDATE_BEFORE_ROW&&cl.getAutoNumberGenerator().getType().equals(
+							DataType.LONG)){
+						if(!oldR[i].equals(newR[i])){
+							throw new RuntimeException("Cannot update autoincrement column");
+						}
+					}
+					
+					
+					else if (cl.getAutoNumberGenerator().getType().equals(
 							DataType.GUID)) {
 						validateGUID(newR[i]);
 					}
