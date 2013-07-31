@@ -215,7 +215,7 @@ public class Persist2Jet {
 				dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
 				cl.setType(dt);
 				if(length>0&&dt.equals(DataType.TEXT))
-				cl.setLengthInUnits(length);
+					cl.setLengthInUnits(length);
 				if(precision>0)
 				cl.setPrecision(precision);
 			}
