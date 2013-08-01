@@ -29,6 +29,7 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -199,6 +200,16 @@ public final class UcanaccessDriver implements Driver {
 
 
 	private void readProperties(Properties pr, String url) {
+		Properties nb=new Properties();
+		
+		for( Entry<Object, Object> entry:pr.entrySet()){
+			String key=(String)entry.getKey();
+			if(key!=null){
+				nb.put(key.toLowerCase(), entry.getValue());
+			}
+		}
+		pr.clear();
+		pr.putAll(nb);
 		StringTokenizer st = new StringTokenizer(url, ";");
 		while (st.hasMoreTokens()) {
 			String entry = st.nextToken();
