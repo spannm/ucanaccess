@@ -23,6 +23,7 @@ package net.ucanaccess.console;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,7 +42,9 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import net.ucanaccess.util.Logger;
 
@@ -73,7 +76,19 @@ public class Main {
 		db.close();
 		return pwd != null;
 	}
-
+	
+	private static void lcProperties(Properties pr) {
+		Properties nb=new Properties();
+		
+		for( Entry<Object, Object> entry:pr.entrySet()){
+			String key=(String)entry.getKey();
+			if(key!=null){
+				nb.put(key.toLowerCase(), entry.getValue());
+			}
+		}
+		pr.clear();
+		pr.putAll(nb);
+	}
 	/**
 	 * @param args
 	 * @throws Exception
@@ -83,6 +98,16 @@ public class Main {
 		BufferedReader input = new BufferedReader(new InputStreamReader(
 				System.in));
 		// password properties info
+		Properties info=new Properties();
+		if(args.length>0){
+			File pfl =new File(args[0]);
+			if(pfl.exists()){
+				FileInputStream fis=new FileInputStream (pfl);
+				info.load(fis);
+				lcProperties(info);
+			}
+		}
+		
 		try {
 			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
 		} catch (ClassNotFoundException e) {
@@ -111,14 +136,17 @@ public class Main {
 		}
 		try {
 			String passwordEntry = "";
-			if (hasPassword(fl)) {
+			String noMem="";
+			if (info.containsKey("jackcessopener")||hasPassword(fl)) {
 				System.out.print("Please, enter password: ");
 				passwordEntry = ";password=" + input.readLine().trim();
 			}
-			String noMem=size>30000000?";memory=false":"";
+			
+			if(!info.containsKey("jackcessopener"))
+			noMem=size>30000000?";memory=false":"";
 			
 			conn = DriverManager.getConnection("jdbc:ucanaccess://"
-					+ fl.getAbsolutePath() + passwordEntry+noMem
+					+ fl.getAbsolutePath() + passwordEntry+noMem,info
 					);
 			
 			SQLWarning sqlw= conn.getWarnings();
