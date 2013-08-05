@@ -40,7 +40,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		executeCreateTable(" CREATE TABLE AAA ( baaaa text(5) PRIMARY KEY,A long default 3, C text(255)) ");
+		executeCreateTable(" CREATE \nTABLE AAA ( baaaa text PRIMARY KEY,A long default 3, C text(255)) ");
 			
 	}
 	
