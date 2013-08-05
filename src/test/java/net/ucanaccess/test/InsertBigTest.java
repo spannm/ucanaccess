@@ -51,11 +51,11 @@ public class InsertBigTest extends UcanaccessTestBase {
 			int id = 6666554;
 			String s="t";
 			for(int i=0;i<10000;i++){
-				s+="t";
+				s+="t\n";
 			}
 			st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id
 					+ ",'"+s+"')");
-			
+			dump("select * from Tbig");
 			
 		} finally {
 			if (st != null)
