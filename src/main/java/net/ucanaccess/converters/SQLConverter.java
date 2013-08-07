@@ -393,7 +393,7 @@ public class SQLConverter {
 		if ((init = sql.indexOf("[")) != -1) {
 			int end = sql.indexOf("]");
 			if (end < init)
-				return sql.replaceAll("&", "||");
+				return convertTokens(sql);
 			String content = sql.substring(init + 1, end);
 			if (content.indexOf(" ") > 0) {
 				String tryContent = " " + content + " ";
@@ -406,13 +406,18 @@ public class SQLConverter {
 			content = basicEscapingIdentifier(content).toUpperCase();
 			String subs = content.indexOf(" ") > 0
 					|| NO_ALFANUMERIC.matcher(content).find() ? "\"" : " ";
-			sql = sql.substring(0, init).replaceAll("&", "||") + subs + content
+			sql = convertTokens(sql.substring(0, init)) + subs + content
 					+ subs + convertIdentifiers(sql.substring(end + 1));
 		} else {
-			sql = sql.replaceAll("&", "||");
+			sql = convertTokens(sql);
 		}
 		return sql;
 	}
+	
+	private static String convertTokens(String sql){
+		return convertYesNo(sql.replaceAll("&", "||"));
+	}
+	
 
 	private static String convertXescaped(String sqlc) {
 		for (String xidt : xescapedIdentifiers) {
@@ -438,7 +443,7 @@ public class SQLConverter {
 				sqlc = sqlc.replaceAll(KEYWORD_ALIAS.replaceAll("_", xidt),
 						"$1\"$2\"$3");
 		}
-		sqlc = convertYesNo(sqlc);
+		//sqlc = convertYesNo(sqlc);
 		return sqlc;
 	}
 
