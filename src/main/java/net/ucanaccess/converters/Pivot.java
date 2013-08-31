@@ -69,6 +69,7 @@ public class Pivot {
 	}
 
 	public static void checkAndRefreshPivot(String currSql,UcanaccessConnection conu) {
+	
 		for (String name : pivotMap.keySet()) {
 			Pattern ptrn = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
 			Matcher mtc = ptrn.matcher(currSql);
@@ -109,7 +110,7 @@ public class Pivot {
 
 	public boolean parsePivot(String originalQuery) {
 		this.originalQuery=originalQuery;
-		originalQuery = originalQuery.replaceAll("\n", " ").replaceAll("\r", " ").trim();
+		originalQuery = originalQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("(?i)(\\[PIVOT\\])", "XPIVOT").trim();
 		if (originalQuery.endsWith(";"))
 			originalQuery = originalQuery.substring(0, originalQuery.length() - 1);
 		Matcher mtc = PIVOT.matcher(originalQuery);
@@ -174,7 +175,6 @@ public class Pivot {
 			}
 			return true;
 		} catch (Exception e) {
-			
 			return false;
 		}
 	}

@@ -47,7 +47,6 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
-import net.ucanaccess.util.Logger.Messages;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
@@ -191,8 +190,8 @@ public class LoadJet {
 
 	private final class TablesLoader {
 		private static final int HSQL_FK_ALREADY_EXISTS = -5528;
+		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-		private HashSet<String> readonlyTables = new HashSet<String>();
 
 		private String commaSeparated(List<ColumnDescriptor> columns) {
 			String comma = "";
@@ -205,10 +204,18 @@ public class LoadJet {
 			}
 			return sb.append(") ").toString();
 		}
+		
+		private String schema(String name,boolean systemTable){
+			if(systemTable){
+				return SYSTEM_SCHEMA+"."+name;
+			}
+			return name;
+		}
 
-		private void createSyncrTable(Table t) throws SQLException, IOException {
+		
+		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException {
 			String tn = t.getName();
-			String ntn = SQLConverter.escapeIdentifier(tn);
+			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
 			StringBuffer sbC = new StringBuffer("CREATE CACHED TABLE ").append(
 					ntn).append("(");
 			List<Column> lc = t.getColumns();
@@ -372,7 +379,11 @@ public class LoadJet {
 			}
 		}
 
-		private void loadTable(Table t) throws SQLException, IOException {
+    	private void loadTable(Table t) throws SQLException, IOException {
+			loadTable(t,false) ;
+		}
+
+		private void loadTable(Table t, boolean systemTable) throws SQLException, IOException {
 			String tn = t.getName();
 			if (tn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(tn);
@@ -380,16 +391,13 @@ public class LoadJet {
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
 				return;
-			createSyncrTable(t);
-			loadTableData(t);
-			defaultValues(t);
-			triggersGenerator.synchronisationTriggers(ntn,
+			createSyncrTable(t,systemTable);
+			loadTableData(t,systemTable);
+			if(!systemTable){
+				defaultValues(t);
+				triggersGenerator.synchronisationTriggers(ntn,
 					hasAutoNumberColumn(t),hasAppendOnly(t));
-			
-			loadedTables.add(ntn);
-			if(checkComplex(t)&&!readonlyTables.contains(ntn)){
-				//dec
-				//readonlyTables.add(ntn);
+				loadedTables.add(ntn);
 			}
 		}
 		private boolean hasAppendOnly(Table t) {
@@ -401,37 +409,7 @@ public class LoadJet {
 			return false;
 		}
 
-		private void makeComplexReadOnly() throws SQLException {
-			for(String ntn:readonlyTables){
-				 makeReadOnly(ntn);
-			}
-		}
-		
-
-		private void makeReadOnly(String ntn) throws SQLException {
-			Statement st=null;
-			try{
-				st=conn.createStatement();
-				st.execute("SET TABLE "+ntn+" READONLY TRUE");
-				Logger.log(ntn+ Logger.getLogMessage(Messages.COMPLEX_TYPE_UNSUPPORTED));
-			}finally{
-				if(st!=null){
-					st.close();
-				}
-			}
-			
-		}
-
-		private boolean checkComplex(Table t) {
-			for (Column c:t.getColumns()){
-				if(c.getType().equals(DataType.COMPLEX_TYPE)){
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private void loadTableData(Table t) throws IOException, SQLException {
+	   private void loadTableData(Table t,boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
 				for (int i = 0; i < t.getRowCount(); i++) {
@@ -440,7 +418,7 @@ public class LoadJet {
 					if (row == null)
 						continue;
 					if (ps == null)
-						ps = sqlInsert(t, row);
+						ps = sqlInsert(t, row,systemTable);
 					Set<Entry<String, Object>> se = row.entrySet();
 					for (Entry<String, Object> en : se) {
 						values.add(value(en.getValue()));
@@ -483,12 +461,35 @@ public class LoadJet {
 				if (t != null)
 					loadTable(t);
 			}
+			if(sysSchema){
+			createSystemSchema();
+			for (String tn : dbIO.getSystemTableNames()) {
+				Table t = null;
+				try {
+					t = dbIO.getSystemTable(tn);
+				} catch (Exception e) {
+					
+				}
+				if (t != null){
+					
+					loadTable(t,true);
+					execCreate("GRANT SELECT  ON "+schema(t.getName().toUpperCase()+" TO PUBLIC ",true),false);
+				}
+		    	}
+			}
+			
 		}
 
-		private PreparedStatement sqlInsert(Table t, Map<String, Object> row)
+		private void createSystemSchema() throws SQLException {
+			execCreate("CREATE SCHEMA "+SYSTEM_SCHEMA+" AUTHORIZATION DBA",false);
+			
+			
+		}
+
+		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,boolean systemTable)
 				throws IOException, SQLException {
 			String tn = t.getName();
-			String ntn = SQLConverter.escapeIdentifier(tn);
+			String ntn = schema(SQLConverter.escapeIdentifier(tn),systemTable);
 			String comma = "";
 			StringBuffer sbI = new StringBuffer(" INSERT INTO ").append(ntn)
 					.append(" (");
@@ -577,6 +578,9 @@ public class LoadJet {
 
 		private boolean loadView(Query q) throws SQLException {
 			String qnn = SQLConverter.basicEscapingIdentifier(q.getName());
+			if(qnn==null){
+				return false;
+			}
 			if (qnn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
@@ -689,6 +693,7 @@ public class LoadJet {
 	private TablesLoader tablesLoader = new TablesLoader();
 	private TriggersLoader triggersGenerator = new TriggersLoader();
 	private ViewsLoader viewsLoader = new ViewsLoader();
+	private boolean sysSchema;
 
 	public LoadJet(Connection conn, Database dbIO) {
 		super();
@@ -708,10 +713,6 @@ public class LoadJet {
 
 	public void addFunctions(Class<?> clazz) throws SQLException {
 		this.functionsLoader.addFunctions(clazz);
-	}
-
-	public void createSyncrTable(Table t) throws SQLException, IOException {
-		tablesLoader.createSyncrTable(t);
 	}
 
 	private void execCreate(String expression, boolean blocking) throws SQLException {
@@ -773,8 +774,8 @@ public class LoadJet {
 			this.functionsLoader.loadMappedFunctions();
 			this.tablesLoader.loadTables();
 			this.tablesLoader.loadIndexes();
-			this.tablesLoader.makeComplexReadOnly();
 			this.viewsLoader.loadViews();
+			SQLConverter.cleanEscaped();
 		} finally {
 			Logger.log("Loaded Tables:");
 			logsFlusher.dumpList(this.loadedTables);
@@ -784,10 +785,6 @@ public class LoadJet {
 			logsFlusher.dumpList(this.loadedIndexes, true);
 			conn.close();
 		}
-	}
-
-	public void loadTableData(Table t) throws IOException, SQLException {
-		tablesLoader.loadTableData(t);
 	}
 
 	public void synchronisationTriggers(String tableName,
@@ -809,5 +806,10 @@ public class LoadJet {
 			if (st != null)
 				st.close();
 		}
+	}
+
+	public void setSysSchema(boolean sysSchema) {
+		this.sysSchema=sysSchema;
+		
 	}
 }

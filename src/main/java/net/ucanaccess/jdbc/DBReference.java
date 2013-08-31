@@ -29,6 +29,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import com.healthmarketscience.jackcess.LinkResolver;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class DBReference {
-	
+	private final static  String CIPHER_SPEC="AES";
 	private static ArrayList<OnReloadReferenceListener> onReloadListeners = new ArrayList<OnReloadReferenceListener>();
 	private static String version;
 	private File dbFile;
@@ -59,6 +60,8 @@ public class DBReference {
 	private boolean showSchema;
 	private File tempHsql;
 	private boolean singleConnection;
+	private boolean encryptHSQLDB;
+	private String encryptionKey;
 	
 	private class MemoryTimer{
 	    	private final static int INACTIVITY_TIMEOUT_DEFAULT=120000;
@@ -153,7 +156,7 @@ public class DBReference {
 			try{
 			this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(FileFormat.V1997);
 			}
-			catch(Exception e){
+			catch(Exception ignore){
 			//	Logger.logWarning(e.getMessage());
 			}
 			this.dbIO.setLinkResolver(new LinkResolver() {
@@ -161,18 +164,26 @@ public class DBReference {
 				public Database resolveLinkedDatabase(Database linkerDb, 
                         String linkeeFileName)
 						throws IOException {
-					try {
-						return Database.open(new File(linkeeFileName), false, false);
-					} catch (IOException e) {
-							return Database.open(new File(linkeeFileName), true, false);
-
-					}
+					Database ldb =open(new File(linkeeFileName));
+					return ldb;
 				    
 				}
 			});
 		}
 		
 	}
+    
+    public static Database open(File dbfl) throws IOException{
+    	try {
+			return  Database.open(dbfl, false, false);
+		} catch (IOException e) {
+			return Database.open(dbfl, true, false);
+
+		}
+	
+    }
+    
+    
 	public static boolean addOnReloadRefListener(
 			OnReloadReferenceListener action) {
 		return onReloadListeners.add(action);
@@ -281,10 +292,28 @@ public class DBReference {
 		return conn;
 	}
 	
+	private  String key(String pwd) throws SQLException{
+		if(this.encryptionKey==null){
+		String url=	"jdbc:hsqldb:mem:"+id+"_tmp";
+		Connection conn =DriverManager.getConnection(url);
+		Statement stmt = conn.createStatement();  
+		ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('"+CIPHER_SPEC+"', null) ");  
+		rs.next();  
+		this.encryptionKey = rs.getString(1);  
+	}
+		return this.encryptionKey;
+	}
+	
+	
 	private String getHsqlUrl(final Session session) throws SQLException {
 		try {
 			if (this.lockMdb && this.fileLock == null) {
 				lockMdbFile();
+			}
+			String enc="";
+			if(this.encryptHSQLDB){
+				System.out.println(key("AES")+" "+this.dbFile);
+				enc=";crypt_key="+key("AES")+";crypt_type=aes;crypt_lobs=true";
 			}
 			if (!this.inMemory && tempHsql == null) {
 				File folder = dbFile.getParentFile();
@@ -304,7 +333,7 @@ public class DBReference {
 
 			}
 			return "jdbc:hsqldb:"
-					+ (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath());
+					+ (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath())+enc;
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -371,7 +400,7 @@ public class DBReference {
 		for (OnReloadReferenceListener listener : onReloadListeners) {
 			listener.onReload();
 		}
-		this.dbIO = Database.open(dbFile, false, false);
+		this.dbIO =open(dbFile);
 	}
 
 	void setDbAccess(Database dbAccess) {
@@ -417,6 +446,10 @@ public class DBReference {
 	}
 	public void setSingleConnection(boolean singleConnection) {
 		this.singleConnection=singleConnection;
+		
+	}
+	public void setEncryptHSQLDB(boolean encryptHSQLDB) {
+		this.encryptHSQLDB=encryptHSQLDB;
 		
 	}
 

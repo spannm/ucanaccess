@@ -42,7 +42,7 @@ public class IndexSelector {
 	private class ColumnMatcher extends SimpleColumnMatcher {
 		@Override
 		public boolean matches(Table table, String columnName, Object currVal,
-				Object dbVal) {
+				 Object dbVal) {
 			if (currVal == null && dbVal == null)
 				return true;
 			if (currVal == null || dbVal == null)

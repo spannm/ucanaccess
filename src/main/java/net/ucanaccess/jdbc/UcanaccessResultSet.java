@@ -68,9 +68,13 @@ public class UcanaccessResultSet implements ResultSet {
 		}
 		String escaped=SQLConverter.basicEscapingIdentifier(label);
 		escaped=escaped.replaceAll("[\"\']", "");
+		if(SQLConverter.isXescaped(label)&&this.metadata.contains(label.substring(1))){
+			return label.substring(1);
+		}
 		if(this.metadata.contains(escaped.toUpperCase())){
 			return escaped;
-		}
+		} 
+		
 		return label;
 	}
 	

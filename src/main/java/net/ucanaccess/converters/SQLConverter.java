@@ -61,8 +61,8 @@ public class SQLConverter {
 	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
-	private static final String XESCAPED = "(\\W)((?i)_)(\\W)";
-	private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
+	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
+	//private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	
 	private static final Pattern QUOTED_ALIAS = Pattern
@@ -77,23 +77,23 @@ public class SQLConverter {
 	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,)";
 	
 	public static final String BIG_BANG = "1899-12-30";
-	private static final List<String> NO_SQL_RESERVED_WORDS = Arrays.asList(
-			"APPLICATION", "ASSISTANT", "COLUMN", "COMPACTDATABASE",
-			"CONTAINER", "CREATEDATABASE", "CREATEFIELD", "CREATEGROUP",
-			"CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION",
-			"CREATETABLEDEF", "CREATEUSER", "CREATEWORKSPACE", "DESCRIPTION",
-			"DISALLOW", "DOCUMENT", "ECHO", "ERROR", "EXIT", "FIELD", "FIELDS",
-			"FILLCACHE", "FORM", "FORMS", "GENERAL", "GETOBJECT", "GETOPTION",
-			"GOTOPAGE", "IDLE", "IMP", "INDEXES", "INSERTTEXT", "LASTMODIFIED",
-			"LEVEL", "LOGICAL", "LOGICAL1", "MACRO", "MODULE", "MOVE", "NAME",
-			"NEWPASSWORD", "OFF", "OPENRECORDSET", "OPTION", "OWNERACCESS",
-			"PARAMETER", "PARAMETERS", "PARTIAL", "PROPERTY", "QUERIES",
-			"QUIT", "RECALC", "RECORDSET", "REFRESH", "REFRESHLINK",
-			"REGISTERDATABASE", "REPAINT", "REPAIRDATABASE", "REPORT",
-			"REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",
-			"TABLEDEF", "TABLEDEFS", "TABLEID", "USER", "VALUE", "WORKSPACE",
-			"YEAR",
-			"COUNTER","CURRENCY", "DATETIME","MEMO", "OLE",	"SINGLE","TEXT","YESNO","GUID");
+//	private static final List<String> NO_SQL_RESERVED_WORDS = Arrays.asList(
+//			"APPLICATION", "ASSISTANT", "COLUMN", "COMPACTDATABASE",
+//			"CONTAINER", "CREATEDATABASE", "CREATEFIELD", "CREATEGROUP",
+//			"CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION",
+//			"CREATETABLEDEF", "CREATEUSER", "CREATEWORKSPACE", "DESCRIPTION",
+//			"DISALLOW", "DOCUMENT", "ECHO", "ERROR", "EXIT", "FIELD", "FIELDS",
+//			"FILLCACHE", "FORM", "FORMS", "GENERAL", "GETOBJECT", "GETOPTION",
+//			"GOTOPAGE", "IDLE", "IMP", "INDEXES", "INSERTTEXT", "LASTMODIFIED",
+//			"LEVEL", "LOGICAL", "LOGICAL1", "MACRO", "MODULE", "MOVE", "NAME",
+//			"NEWPASSWORD", "OFF", "OPENRECORDSET", "OPTION", "OWNERACCESS",
+//			"PARAMETER", "PARAMETERS", "PARTIAL", "PROPERTY", "QUERIES",
+//			"QUIT", "RECALC", "RECORDSET", "REFRESH", "REFRESHLINK",
+//			"REGISTERDATABASE", "REPAINT", "REPAIRDATABASE", "REPORT",
+//			"REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",
+//			"TABLEDEF", "TABLEDEFS", "TABLEID", "USER", "VALUE", "WORKSPACE",
+//			"YEAR",
+//			"COUNTER","CURRENCY", "DATETIME","MEMO", "OLE",	"SINGLE","TEXT","YESNO","GUID");
 	
 	
 	
@@ -110,6 +110,7 @@ public class SQLConverter {
 			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH");
 	private static ArrayList<String> whiteSpacedTableNames = new ArrayList<String>();
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
+	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	private static boolean supportsAccessLike = true;
@@ -181,7 +182,7 @@ public class SQLConverter {
 			boolean creatingQuery) {
 		sql = sql + " ";
 		sql = convertUnion(sql);
-		sql = convertOwnerAccess(sql);
+		//sql = convertOwnerAccess(sql);
 		sql=  convertSwitch(sql);
 		sql = convertAccessDate(sql);
 		sql = convertQuotedAliases(sql);
@@ -189,7 +190,7 @@ public class SQLConverter {
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
-		sql = replaceDistinctRow(sql);
+		//sql = replaceDistinctRow(sql);
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -393,7 +394,7 @@ public class SQLConverter {
 		if ((init = sql.indexOf("[")) != -1) {
 			int end = sql.indexOf("]");
 			if (end < init)
-				return convertTokens(sql);
+				return convertSQLTokens(sql);
 			String content = sql.substring(init + 1, end);
 			if (content.indexOf(" ") > 0) {
 				String tryContent = " " + content + " ";
@@ -406,24 +407,25 @@ public class SQLConverter {
 			content = basicEscapingIdentifier(content).toUpperCase();
 			String subs = content.indexOf(" ") > 0
 					|| NO_ALFANUMERIC.matcher(content).find() ? "\"" : " ";
-			sql = convertTokens(sql.substring(0, init)) + subs + content
+			sql = convertSQLTokens(sql.substring(0, init)) + subs + content
 					+ subs + convertIdentifiers(sql.substring(end + 1));
 		} else {
-			sql = convertTokens(sql);
+			sql = convertSQLTokens(sql);
 		}
 		return sql;
 	}
 	
-	private static String convertTokens(String sql){
-		return convertYesNo(sql.replaceAll("&", "||"));
+	private static String convertSQLTokens(String sql){
+		return  convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||"))));
 	}
 	
 
 	private static String convertXescaped(String sqlc) {
 		for (String xidt : xescapedIdentifiers) {
-			sqlc = sqlc.replaceAll(XESCAPED.replaceAll("_", xidt), "$1X$2$3");
-			sqlc = sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_", xidt),
-					"$1$2(");
+			
+			sqlc = sqlc.replaceAll(XESCAPED.replaceAll("_", xidt), "$1$3$4");
+//			sqlc = sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_", xidt),
+//					"$1$2(");
 		}
 		return sqlc;
 	}
@@ -474,23 +476,24 @@ public class SQLConverter {
 		}
 		return tsql + suff;
 	}
+	public static void cleanEscaped() {
+		xescapedIdentifiers.removeAll(alreadyEscapedIdentifiers);
+	}
 
 	public static String basicEscapingIdentifier(String name) {
 		if (name.startsWith("~"))
 			return null;
 		String nl = name.toUpperCase();
-		if (Database.isReservedWord(nl) && NO_SQL_RESERVED_WORDS.contains(nl)
+		if (Database.isReservedWord(nl) 
 				) {
 			xescapedIdentifiers.add(nl);
 		}
-		
-		
-		
-		String escaped = Database
-				.escapeIdentifier(
-						name// .replaceAll(" ", "_")
+		if(nl.startsWith("X")&&Database.isReservedWord(nl.substring(1))){
+			alreadyEscapedIdentifiers.add(nl.substring(1));
+		}
+	    String escaped = name
 						.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_")
-								.replaceAll("\\.", "_")).replaceAll("\'", "").replaceAll("#", "_")
+								.replaceAll("\\.", "_").replaceAll("\'", "").replaceAll("#", "_")
 				.replaceAll("\"", "").replaceAll("\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_");
 		
 		

@@ -248,7 +248,7 @@ public class Persist2Jet {
 		return arcl;
 	}
 
-	private void checkPK(ArrayList<IndexBuilder> arcl, IndexBuilder ibpk) {
+	private void checkPK(List<IndexBuilder> arcl, IndexBuilder ibpk) {
 		if (ibpk == null)
 			return;
 		Iterator<IndexBuilder> itib = arcl.iterator();

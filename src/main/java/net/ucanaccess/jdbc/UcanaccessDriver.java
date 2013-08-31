@@ -90,10 +90,6 @@ public final class UcanaccessDriver implements Driver {
 
 				}
 				boolean useCustomOpener=pr.containsKey("jackcessopener");
-				if(useCustomOpener&&pr.containsKey("memory")&&!"true".equalsIgnoreCase(pr
-						.getProperty("memory")))
-					
-					throw new UcanaccessSQLException(ExceptionMessages.ONLY_IN_MEMORY_ALLOWED);	
 				JackcessOpenerInterface jko=useCustomOpener?
 						newJackcessOpenerInstance(pr.getProperty("jackcessopener")):
 						new DefaultJackcessOpener();
@@ -101,7 +97,15 @@ public final class UcanaccessDriver implements Driver {
 						.loadReference(mdb, ff, jko,pr.getProperty("password"));
 
 				if (!alreadyLoaded) {
-
+					if((useCustomOpener||(pr.containsKey("encrypt")
+							&& 
+							"true".equalsIgnoreCase(pr.getProperty("encrypt"))))
+							&&pr.containsKey("memory")
+							&&!"true".equalsIgnoreCase(pr
+							.getProperty("memory"))){
+						ref.setEncryptHSQLDB(true);
+					}
+					
 					if (pr.containsKey("memory")) {
 						ref.setInMemory("true".equalsIgnoreCase(pr
 								.getProperty("memory")));
@@ -153,6 +157,12 @@ public final class UcanaccessDriver implements Driver {
 				if (!alreadyLoaded) {
 					LoadJet la=		new LoadJet(ref.getHSQLDBConnection(session), ref
 							.getDbIO());
+					if (pr.containsKey("sysschema")) {
+						la.setSysSchema("true".equalsIgnoreCase(pr
+								.getProperty("sysschema")));
+					}
+					
+					
 					la.loadDB();
 					as.put(mdb.getAbsolutePath(), ref);
 					sqlw=la.getLoadingWarnings();
