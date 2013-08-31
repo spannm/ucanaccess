@@ -312,7 +312,6 @@ public class DBReference {
 			}
 			String enc="";
 			if(this.encryptHSQLDB){
-				System.out.println(key("AES")+" "+this.dbFile);
 				enc=";crypt_key="+key("AES")+";crypt_type=aes;crypt_lobs=true";
 			}
 			if (!this.inMemory && tempHsql == null) {
