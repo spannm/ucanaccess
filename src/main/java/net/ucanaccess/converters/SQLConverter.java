@@ -404,9 +404,10 @@ public class SQLConverter {
 							content.toUpperCase());
 				}
 			}
+			boolean isKeyword=KEYWORDLIST.contains(content.toUpperCase());
 			content = basicEscapingIdentifier(content).toUpperCase();
-			String subs = content.indexOf(" ") > 0
-					|| NO_ALFANUMERIC.matcher(content).find() ? "\"" : " ";
+			String subs =!isKeyword&&( content.indexOf(" ") > 0
+					|| NO_ALFANUMERIC.matcher(content).find()) ? "\"" : " ";
 			sql = convertSQLTokens(sql.substring(0, init)) + subs + content
 					+ subs + convertIdentifiers(sql.substring(end + 1));
 		} else {
@@ -605,5 +606,6 @@ public class SQLConverter {
 		return xescapedIdentifiers.contains(identifier);
 	}
 	
+
 	
 }
