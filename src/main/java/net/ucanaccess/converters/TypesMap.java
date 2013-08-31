@@ -95,6 +95,10 @@ public class TypesMap {
 		jackcess2HsqldbTypesMap.put( DataType.FLOAT,"FLOAT");
 		jackcess2HsqldbTypesMap.put( DataType.DOUBLE,"DOUBLE");
 		jackcess2HsqldbTypesMap.put( DataType.COMPLEX_TYPE,"OBJECT");
+		jackcess2HsqldbTypesMap.put( DataType.UNKNOWN_11,"BLOB");
+		jackcess2HsqldbTypesMap.put( DataType.UNKNOWN_0D,"BLOB");
+		jackcess2HsqldbTypesMap.put( DataType.UNSUPPORTED_FIXEDLEN,"BLOB");
+		jackcess2HsqldbTypesMap.put( DataType.UNSUPPORTED_VARLEN,"BLOB");
 		
 	}
 	
