@@ -68,8 +68,9 @@ public class UcanaccessResultSet implements ResultSet {
 		}
 		String escaped=SQLConverter.basicEscapingIdentifier(label);
 		escaped=escaped.replaceAll("[\"\']", "");
-		if(SQLConverter.isXescaped(label)&&this.metadata.contains(label.substring(1))){
-			return label.substring(1);
+		String slabel=label.substring(1).toUpperCase();
+		if(SQLConverter.isXescaped(slabel)&&this.metadata.contains(slabel)){
+			return slabel;
 		}
 		if(this.metadata.contains(escaped.toUpperCase())){
 			return escaped;
@@ -244,7 +245,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Blob getBlob(int idx) throws SQLException {
 		try {
-			return wrapped.getBlob(idx);
+			return new UcanaccessBlob(wrapped.getBlob(idx));
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -252,7 +253,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Blob getBlob(String columnLabel) throws SQLException {
 		try {
-			return wrapped.getBlob(checkEscaped(columnLabel));
+			return new UcanaccessBlob( wrapped.getBlob(checkEscaped(columnLabel)));
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -532,7 +533,11 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Object getObject(int idx) throws SQLException {
 		try {
-			return wrapped.getObject(idx);
+			Object obj=wrapped.getObject(idx);
+			if(obj instanceof Blob){
+				return new UcanaccessBlob((Blob)obj);
+			}
+			return obj;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -549,7 +554,11 @@ public class UcanaccessResultSet implements ResultSet {
 	public Object getObject(int idx, Map<String, Class<?>> arg1)
 			throws SQLException {
 		try {
-			return wrapped.getObject(idx, arg1);
+			Object obj=  wrapped.getObject(idx, arg1);
+			if(obj instanceof Blob){
+				return new UcanaccessBlob((Blob)obj);
+			}
+			return obj;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -557,7 +566,11 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Object getObject(String columnLabel) throws SQLException {
 		try {
-			return wrapped.getObject(checkEscaped(columnLabel));
+			Object obj= wrapped.getObject(checkEscaped(columnLabel));
+			if(obj instanceof Blob){
+				return new UcanaccessBlob((Blob)obj);
+			}
+			return obj;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
