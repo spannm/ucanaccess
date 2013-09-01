@@ -318,6 +318,7 @@ public class LoadJet {
 			if (idx.getReference().isCascadeUpdates()) {
 				ci.append(" ON UPDATE CASCADE ");
 			}
+			
 			try {
 				execCreate(ci.toString(),true);
 			} catch (SQLException e) {
@@ -397,8 +398,9 @@ public class LoadJet {
 				defaultValues(t);
 				triggersGenerator.synchronisationTriggers(ntn,
 					hasAutoNumberColumn(t),hasAppendOnly(t));
-				loadedTables.add(ntn);
+				
 			}
+			loadedTables.add(schema(ntn,systemTable));
 		}
 		private boolean hasAppendOnly(Table t) {
 			for (Column c:t.getColumns()){
@@ -467,14 +469,13 @@ public class LoadJet {
 				Table t = null;
 				try {
 					t = dbIO.getSystemTable(tn);
-				} catch (Exception e) {
-					
-				}
+				
 				if (t != null){
-					
 					loadTable(t,true);
-					execCreate("GRANT SELECT  ON "+schema(t.getName().toUpperCase()+" TO PUBLIC ",true),false);
+					execCreate("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
+					execCreate("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
 				}
+		    	} catch (Exception ignore) {}
 		    	}
 			}
 			
