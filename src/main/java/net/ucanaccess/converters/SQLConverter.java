@@ -77,26 +77,6 @@ public class SQLConverter {
 	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,)";
 	
 	public static final String BIG_BANG = "1899-12-30";
-//	private static final List<String> NO_SQL_RESERVED_WORDS = Arrays.asList(
-//			"APPLICATION", "ASSISTANT", "COLUMN", "COMPACTDATABASE",
-//			"CONTAINER", "CREATEDATABASE", "CREATEFIELD", "CREATEGROUP",
-//			"CREATEINDEX", "CREATEOBJECT", "CREATEPROPERTY", "CREATERELATION",
-//			"CREATETABLEDEF", "CREATEUSER", "CREATEWORKSPACE", "DESCRIPTION",
-//			"DISALLOW", "DOCUMENT", "ECHO", "ERROR", "EXIT", "FIELD", "FIELDS",
-//			"FILLCACHE", "FORM", "FORMS", "GENERAL", "GETOBJECT", "GETOPTION",
-//			"GOTOPAGE", "IDLE", "IMP", "INDEXES", "INSERTTEXT", "LASTMODIFIED",
-//			"LEVEL", "LOGICAL", "LOGICAL1", "MACRO", "MODULE", "MOVE", "NAME",
-//			"NEWPASSWORD", "OFF", "OPENRECORDSET", "OPTION", "OWNERACCESS",
-//			"PARAMETER", "PARAMETERS", "PARTIAL", "PROPERTY", "QUERIES",
-//			"QUIT", "RECALC", "RECORDSET", "REFRESH", "REFRESHLINK",
-//			"REGISTERDATABASE", "REPAINT", "REPAIRDATABASE", "REPORT",
-//			"REPORTS", "REQUERY", "SCREEN", "SECTION", "SETFOCUS", "SETOPTION",
-//			"TABLEDEF", "TABLEDEFS", "TABLEID", "USER", "VALUE", "WORKSPACE",
-//			"YEAR",
-//			"COUNTER","CURRENCY", "DATETIME","MEMO", "OLE",	"SINGLE","TEXT","YESNO","GUID");
-	
-	
-	
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
 			"ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
 			"CAST", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
@@ -182,15 +162,12 @@ public class SQLConverter {
 			boolean creatingQuery) {
 		sql = sql + " ";
 		sql = convertUnion(sql);
-		//sql = convertOwnerAccess(sql);
 		sql=  convertSwitch(sql);
 		sql = convertAccessDate(sql);
 		sql = convertQuotedAliases(sql);
-		sql = replaceWorkAroundFunctions(sql);
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
-		//sql = replaceDistinctRow(sql);
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -417,16 +394,13 @@ public class SQLConverter {
 	}
 	
 	private static String convertSQLTokens(String sql){
-		return  convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||"))));
+		return  replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||")))));
 	}
 	
 
 	private static String convertXescaped(String sqlc) {
 		for (String xidt : xescapedIdentifiers) {
-			
 			sqlc = sqlc.replaceAll(XESCAPED.replaceAll("_", xidt), "$1$3$4");
-//			sqlc = sqlc.replaceAll(XESCAPED_FUNCTIONS.replaceAll("_", xidt),
-//					"$1$2(");
 		}
 		return sqlc;
 	}
@@ -446,7 +420,6 @@ public class SQLConverter {
 				sqlc = sqlc.replaceAll(KEYWORD_ALIAS.replaceAll("_", xidt),
 						"$1\"$2\"$3");
 		}
-		//sqlc = convertYesNo(sqlc);
 		return sqlc;
 	}
 
