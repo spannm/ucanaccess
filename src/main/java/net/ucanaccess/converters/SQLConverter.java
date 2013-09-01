@@ -358,13 +358,7 @@ public class SQLConverter {
 		return sql;
 	}
 
-	public static String escapeKeyword(String identifier) {
-		for (String bst : KEYWORDLIST) {
-			identifier = identifier.replaceAll("(\\W)(?i)" + bst + "(\\W)",
-					" $1\"" + bst + "\"$2");
-		}
-		return identifier;
-	}
+
 
 	private static String convertIdentifiers(String sql) {
 		int init;
