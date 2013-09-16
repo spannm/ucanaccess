@@ -371,12 +371,16 @@ public class LoadJet {
 
 		private void loadIndexes() throws SQLException, IOException {
 			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn))
+				if (!this.unresolvedTables.contains(tn)){
 					this.loadTableIndexes(tn);
+					conn.commit();
+				}
 			}
 			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn))
+				if (!this.unresolvedTables.contains(tn)){
 					this.loadTableFKs(tn);
+					conn.commit();
+				}
 			}
 		}
 
@@ -426,6 +430,9 @@ public class LoadJet {
 						values.add(value(en.getValue()));
 					}
 					execInsert(ps, values);
+					if(i>0&&i%1000==0){
+						conn.commit();
+					}
 				}
 			} finally {
 				if (ps != null)
@@ -776,7 +783,9 @@ public class LoadJet {
 			this.tablesLoader.loadTables();
 			this.tablesLoader.loadIndexes();
 			this.viewsLoader.loadViews();
+			conn.commit();
 			SQLConverter.cleanEscaped();
+			
 		} finally {
 			Logger.log("Loaded Tables:");
 			logsFlusher.dumpList(this.loadedTables);
