@@ -21,6 +21,8 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 */
 package net.ucanaccess.complex;
 
+import com.healthmarketscience.jackcess.complex.ComplexValue;
+
 
 
 public class SingleValue extends ComplexBase{
@@ -33,7 +35,7 @@ public class SingleValue extends ComplexBase{
 		this.value=cv.get();
 	}
 	
-	public SingleValue(int id, String tableName, String columnName, String value) {
+	public SingleValue(ComplexValue.Id id, String tableName, String columnName, String value) {
 		super(id, tableName, columnName);
 		this.value = value;
 	}

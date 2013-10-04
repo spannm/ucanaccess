@@ -26,6 +26,7 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 
 import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class AutoNumberManager {
 	private static Hashtable<Column,Integer> register=new Hashtable<Column,Integer>();
@@ -38,7 +39,8 @@ public class AutoNumberManager {
 	}
 	
 	
-	static synchronized int  getNext(Column cl){
+	static synchronized int  getNext(Column cli){
+		ColumnImpl cl=(ColumnImpl) cli;
 		if(!register.containsKey(cl)){
 			register.put(cl, ((Integer) cl.getAutoNumberGenerator()
 										.getLast()));

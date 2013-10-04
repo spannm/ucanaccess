@@ -25,14 +25,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import com.healthmarketscience.jackcess.Database;
+
+import com.healthmarketscience.jackcess.TableBuilder;
 
 public class SQLConverter {
 	private static final Pattern QUOTE_G_PATTERN = Pattern
@@ -75,8 +75,11 @@ public class SQLConverter {
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,)";
+	private static final String BACKTRIK="(`)([^`]*)(`)";
+	
 	
 	public static final String BIG_BANG = "1899-12-30";
+
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
 			"ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
 			"CAST", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
@@ -153,6 +156,10 @@ public class SQLConverter {
 		sql = sql.replaceAll("(\\W)(?i)VARP\\s*\\(", "$1VAR_POP(");
 		return sql.replaceAll(WA_CURRENT_USER, "$1user(");
 	}
+	
+	private static String replaceBacktrik(String sql){
+		return sql.replaceAll(BACKTRIK, "[$2]");
+	}
 
 	public static String convertSQL(String sql, boolean creatingQuery) {
 		return convertSQL(sql, null, creatingQuery);
@@ -161,6 +168,7 @@ public class SQLConverter {
 	public static String convertSQL(String sql, UcanaccessConnection conn,
 			boolean creatingQuery) {
 		sql = sql + " ";
+		sql =replaceBacktrik(sql);
 		sql = convertUnion(sql);
 		sql=  convertSwitch(sql);
 		sql = convertAccessDate(sql);
@@ -168,6 +176,7 @@ public class SQLConverter {
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
+	
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -213,7 +222,6 @@ public class SQLConverter {
 	}
 
 	private static String convertYesNo(String sql) {
-		// TODO Auto-generated method stub
 		  sql= sql.replaceAll(YES, "$1true$3");
 		  Matcher mtc=NO_DATA_PATTERN.matcher(sql);
 		  if(mtc.find()){
@@ -358,8 +366,6 @@ public class SQLConverter {
 		return sql;
 	}
 
-
-
 	private static String convertIdentifiers(String sql) {
 		int init;
 		if ((init = sql.indexOf("[")) != -1) {
@@ -394,6 +400,7 @@ public class SQLConverter {
 
 	private static String convertXescaped(String sqlc) {
 		for (String xidt : xescapedIdentifiers) {
+			
 			sqlc = sqlc.replaceAll(XESCAPED.replaceAll("_", xidt), "$1$3$4");
 		}
 		return sqlc;
@@ -452,11 +459,11 @@ public class SQLConverter {
 		if (name.startsWith("~"))
 			return null;
 		String nl = name.toUpperCase();
-		if (Database.isReservedWord(nl) 
+		if (TableBuilder.isReservedWord(nl) 
 				) {
 			xescapedIdentifiers.add(nl);
 		}
-		if(nl.startsWith("X")&&Database.isReservedWord(nl.substring(1))){
+		if(nl.startsWith("X")&&TableBuilder.isReservedWord(nl.substring(1))){
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
 	    String escaped = name
@@ -573,6 +580,5 @@ public class SQLConverter {
 		return xescapedIdentifiers.contains(identifier);
 	}
 	
-
 	
 }

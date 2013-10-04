@@ -32,17 +32,19 @@ import net.ucanaccess.complex.ComplexBase;
 
 
 import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.CursorBuilder;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.SimpleColumnMatcher;
+
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.util.SimpleColumnMatcher;
 
 
 public class IndexSelector {
 	private class ColumnMatcher extends SimpleColumnMatcher {
 		@Override
 		public boolean matches(Table table, String columnName, Object currVal,
-				 Object dbVal) {
+				Object dbVal) {
 			if (currVal == null && dbVal == null)
 				return true;
 			if (currVal == null || dbVal == null)
@@ -117,7 +119,7 @@ public class IndexSelector {
 	
 	public Index getBestIndex() {
 		if (this.bestIndex == null) {
-			List<Index> li = table.getIndexes();
+			List<? extends Index> li = table.getIndexes();
 			for (Index idx : li) {
 				if (idx.isPrimaryKey()) {
 					this.bestIndex = idx;
@@ -141,10 +143,11 @@ public class IndexSelector {
 	public Cursor getCursor() throws IOException {
 		Index idx = getBestIndex();
 		Cursor cursor;
+		CursorBuilder cb=table.newCursor();
 		if (idx == null)
-			cursor = Cursor.createCursor(table);
+			cursor = cb.toCursor();
 		else
-			cursor = Cursor.createIndexCursor(table, idx);
+			cursor = cb.setIndex(idx).toCursor();
 		cursor.setColumnMatcher(new ColumnMatcher());
 		return cursor;
 	}

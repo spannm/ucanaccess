@@ -51,11 +51,14 @@ import org.hsqldb.types.JavaObjectData;
 import org.hsqldb.types.TimestampData;
 
 import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.ColumnBuilder;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.IndexBuilder;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.TableBuilder;
+import com.healthmarketscience.jackcess.impl.DatabaseImpl;
 
 public class Persist2Jet {
 	private static HashMap<String, List<String>> columnNamesCache = new HashMap<String, List<String>>();
@@ -112,8 +115,8 @@ public class Persist2Jet {
 	public void convertRowTypes(Object[] values, Table t)
 			throws SQLException {
 		try {
-			List<Column> columns=t.getColumns();
-			Iterator<Column> it = columns.iterator();
+			List<? extends Column> columns=t.getColumns();
+			Iterator<? extends Column> it = columns.iterator();
 			for (int i = 0; i < values.length; ++i) {
 				Object value = values[i];
 				Column column = it.next();
@@ -156,7 +159,7 @@ public class Persist2Jet {
 
 	private LinkedHashMap<String, Object> escapeIdentifiers(
 			LinkedHashMap<String, Object> map, Table t) {
-		List<Column> colums = t.getColumns();
+		List<? extends Column> colums = t.getColumns();
 		LinkedHashMap<String, Object> vl = new LinkedHashMap<String, Object>();
 		for (Column cl : colums) {
 			String key = cl.getName();
@@ -166,16 +169,16 @@ public class Persist2Jet {
 		return vl;
 	}
 
-	private List<Column> getColumns(String tableName, String[] types)
+	private List<ColumnBuilder> getColumns(String tableName, String[] types)
 			throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		ArrayList<Column> arcl = new ArrayList<Column>();
+		ArrayList<ColumnBuilder> arcl = new ArrayList<ColumnBuilder>();
 		ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC",
 				tableName.toUpperCase(), null);
 		int i = 0;
 		while (rs.next()) {
-			Column cl = new Column();
-			cl.setName(rs.getString("COLUMN_NAME"));
+			
+			ColumnBuilder cb=new ColumnBuilder(rs.getString("COLUMN_NAME"));
 			short length = (short) rs.getInt("COLUMN_SIZE");
 			byte precision=(byte) rs.getInt("DECIMAL_DIGITS");
 			DataType dt = null;
@@ -183,12 +186,12 @@ public class Persist2Jet {
 				if (types[i]
 						.equalsIgnoreCase(AccessType.MEMO.name())) {
 					dt = DataType.MEMO;
-					cl.setType(dt);
+					cb.setType(dt);
 				}
 				if (types[i]
 						.equalsIgnoreCase(AccessType.TEXT.name())) {
 					dt = DataType.TEXT;
-					cl.setType(dt);
+					cb.setType(dt);
 				}
 			}
 			
@@ -205,33 +208,33 @@ public class Persist2Jet {
 			)
 			){
 			dt = TypesMap.map2Jackcess(AccessType.valueOf(types[i].toUpperCase()));
-			cl.setType(dt);
-			cl.setLengthInUnits((short)dt.getFixedSize());
+			cb.setType(dt);
+			cb.setLengthInUnits((short)dt.getFixedSize());
 			}
 			
 		
 			
 			if (dt == null) {
 				dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
-				cl.setType(dt);
+				cb.setType(dt);
 				if(length>0&&dt.equals(DataType.TEXT))
-					cl.setLengthInUnits(length);
+					cb.setLengthInUnits(length);
 				if(precision>0)
-				cl.setPrecision(precision);
+				cb.setPrecision(precision);
 			}
 
-			arcl.add(cl);
+			
 			if (types != null) {
 				if (types[i]
 						.equalsIgnoreCase(AccessType.COUNTER.name()))
-					cl.setAutoNumber(true);
+					cb.setAutoNumber(true);
 				if (types[i]
 						.equalsIgnoreCase(AccessType.GUID.name())) {
-					cl.setType(DataType.GUID);
-					cl.setAutoNumber(true);
+					cb.setType(DataType.GUID);
+					cb.setAutoNumber(true);
 				}
 			}
-			
+			arcl.add(cb);
 			++i;
 		}
 		return arcl;
@@ -240,11 +243,7 @@ public class Persist2Jet {
 	private List<IndexBuilder> getIndexBuilders(String tableName)
 			throws SQLException {
 		ArrayList<IndexBuilder> arcl = new ArrayList<IndexBuilder>();
-		IndexBuilder ibpk = getIndexBuilderPK(tableName);
 		addIndexBuildersSimple(tableName, arcl);
-		checkPK(arcl, ibpk);
-		if (ibpk != null)
-			arcl.add(ibpk);
 		return arcl;
 	}
 
@@ -324,10 +323,19 @@ public class Persist2Jet {
 			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
-		db.doUseBigIndex();
-		db.createTable(tableName, getColumns(tableName, types),
-				getIndexBuilders(tableName));
-		Table table = db.getTable(tableName);
+		TableBuilder tb=new TableBuilder(tableName);
+		tb.addColumns(getColumns(tableName, types));
+		List<IndexBuilder> arcl=getIndexBuilders(tableName);
+		for(IndexBuilder ixb:arcl){
+			tb.addIndex(ixb);
+		}
+		IndexBuilder ibpk = getIndexBuilderPK(tableName);
+		
+		checkPK(arcl, ibpk);
+		if (ibpk != null)
+			arcl.add(ibpk);
+		
+		Table table = tb.toTable(db);
 		Statement st = null;
 		try {
 			st = conn.createStatement();
@@ -354,25 +362,29 @@ public class Persist2Jet {
 		Table t = db.getTable(tableName);
 		if (t == null)
 			return;
-		while (t.getNextRow() != null) {
-			t.deleteCurrentRow();
+		Cursor c=t.getDefaultCursor();
+		while (c.getNextRow() != null) {
+			c.deleteCurrentRow();
 		}
-		Table cat = db.getSystemCatalog();
+		DatabaseImpl dbi=(DatabaseImpl) db;
+		Table cat =dbi.getSystemCatalog();
 		Map<String, Object> row;
-		while ((row = cat.getNextRow()) != null) {
+		Cursor catc=cat.getDefaultCursor();
+		while ((row = catc.getNextRow()) != null) {
 			String name = (String) row.get("Name");
 			if (name != null && name.equalsIgnoreCase(tableName)) {
 				Integer id = (Integer) row.get("Id");
 				Table tsa = db.getSystemTable("MSysACEs");
 				HashMap<String, Object> rowtsa = new HashMap<String, Object>();
 				rowtsa.put("ObjectId", id);
-				Cursor cur = Cursor.createCursor(tsa);
+				Cursor cur = tsa.getDefaultCursor();
 				if (cur.findNextRow(rowtsa)) {
 					cur.deleteCurrentRow();
 				}
-				cat.deleteCurrentRow();
+				catc.deleteCurrentRow();
 				Table srs = db.getSystemTable("MSysRelationships");
-				while ((row = srs.getNextRow()) != null) {
+				Cursor srsc=srs.getDefaultCursor();
+				while ((row = srsc.getNextRow()) != null) {
 					String szObject = (String) row.get("szObject");
 					String szReferencedObject = (String) row
 							.get("szReferencedObject");
@@ -380,7 +392,7 @@ public class Persist2Jet {
 							.equalsIgnoreCase(tableName))
 							|| (szReferencedObject != null && szReferencedObject
 									.equalsIgnoreCase(tableName))) {
-						srs.deleteCurrentRow();
+						srsc.deleteCurrentRow();
 					}
 				}
 			}

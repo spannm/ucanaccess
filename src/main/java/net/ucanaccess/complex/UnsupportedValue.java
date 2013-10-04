@@ -23,6 +23,8 @@ package net.ucanaccess.complex;
 
 import java.util.Map;
 
+import com.healthmarketscience.jackcess.complex.ComplexValue;
+
 
 
 public class UnsupportedValue extends ComplexBase{
@@ -36,7 +38,7 @@ public class UnsupportedValue extends ComplexBase{
 		this.values=cv.getValues();
 	}
 
-	public UnsupportedValue(int id, String tableName, String columnName, Map<String, Object> values) {
+	public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> values) {
 		super(id, tableName, columnName);
 		this.values = values;
 	}

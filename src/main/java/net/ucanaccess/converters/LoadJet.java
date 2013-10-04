@@ -47,15 +47,14 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
-
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.query.Query;
 
 public class LoadJet {
@@ -192,11 +191,11 @@ public class LoadJet {
 		private static final int HSQL_FK_ALREADY_EXISTS = -5528;
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-
-		private String commaSeparated(List<ColumnDescriptor> columns) {
+		
+		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
 			StringBuffer sb = new StringBuffer(" (");
-			for (ColumnDescriptor cd : columns) {
+			for (Index.Column cd : columns) {
 				sb.append(comma)
 						.append(SQLConverter.escapeIdentifier(cd.getColumn()
 								.getName()));
@@ -216,9 +215,9 @@ public class LoadJet {
 		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException {
 			String tn = t.getName();
 			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
-			StringBuffer sbC = new StringBuffer("CREATE CACHED TABLE ").append(
+			StringBuffer sbC = new StringBuffer("CREATE  CACHED TABLE ").append(
 					ntn).append("(");
-			List<Column> lc = t.getColumns();
+			List<? extends Column> lc = t.getColumns();
 			String comma = "";
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
@@ -245,7 +244,7 @@ public class LoadJet {
 		private void defaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
 			String ntn = SQLConverter.escapeIdentifier(tn);
-			List<Column> lc = t.getColumns();
+			List<? extends Column> lc = t.getColumns();
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
 				PropertyMap pm = cl.getProperties();
@@ -296,7 +295,8 @@ public class LoadJet {
 			}
 		}
 
-		private void loadForeignKey(Index idx) throws IOException, SQLException {
+		private void loadForeignKey(Index idxi) throws IOException, SQLException {
+			IndexImpl idx=(IndexImpl)idxi;
 			String ntn = SQLConverter
 					.escapeIdentifier(idx.getTable().getName());
 			if(ntn==null)return;
@@ -312,13 +312,14 @@ public class LoadJet {
 			if(nrt==null)return;
 			ci.append(" FOREIGN KEY ").append(colsIdx).append(" REFERENCES ")
 					.append(nrt).append(colsIdxRef);
+			//riw
+			
 			if (idx.getReference().isCascadeDeletes()) {
 				ci.append(" ON DELETE CASCADE ");
 			}
 			if (idx.getReference().isCascadeUpdates()) {
 				ci.append(" ON UPDATE CASCADE ");
 			}
-			
 			try {
 				execCreate(ci.toString(),true);
 			} catch (SQLException e) {
@@ -354,7 +355,7 @@ public class LoadJet {
 				execCreate(ci.toString(),true);
 			} catch (Exception e) {
 				if (idx.isUnique()) {
-					for (ColumnDescriptor cd : idx.getColumns()) {
+					for (Index.Column cd : idx.getColumns()) {
 						if (cd.getColumn().getType()
 								.equals(DataType.COMPLEX_TYPE)) {
 							return;
@@ -375,6 +376,7 @@ public class LoadJet {
 					this.loadTableIndexes(tn);
 					conn.commit();
 				}
+					
 			}
 			for (String tn : dbIO.getTableNames()) {
 				if (!this.unresolvedTables.contains(tn)){
@@ -383,8 +385,8 @@ public class LoadJet {
 				}
 			}
 		}
-
-    	private void loadTable(Table t) throws SQLException, IOException {
+		
+		private void loadTable(Table t) throws SQLException, IOException {
 			loadTable(t,false) ;
 		}
 
@@ -396,15 +398,15 @@ public class LoadJet {
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
 				return;
+			
 			createSyncrTable(t,systemTable);
 			loadTableData(t,systemTable);
 			if(!systemTable){
 				defaultValues(t);
 				triggersGenerator.synchronisationTriggers(ntn,
 					hasAutoNumberColumn(t),hasAppendOnly(t));
-				
+				loadedTables.add(ntn);
 			}
-			loadedTables.add(schema(ntn,systemTable));
 		}
 		private boolean hasAppendOnly(Table t) {
 			for (Column c:t.getColumns()){
@@ -443,10 +445,12 @@ public class LoadJet {
 		private void loadTableFKs(String tableName) throws IOException,
 				SQLException {
 			Table table = dbIO.getTable(tableName);
-			for (Index idx : table.getIndexes()) {
+			for (Index idxi : table.getIndexes()) {
+				//riw
+				IndexImpl idx=(IndexImpl)idxi;
 				if (idx.isForeignKey() && !idx.getReference().isPrimaryTable())
 					loadForeignKey(idx);
-			}
+				}
 		}
 
 		private void loadTableIndexes(String tableName) throws IOException,
@@ -472,7 +476,7 @@ public class LoadJet {
 			}
 			if(sysSchema){
 			createSystemSchema();
-			for (String tn : dbIO.getSystemTableNames()) {
+		for (String tn : dbIO.getSystemTableNames()) {
 				Table t = null;
 				try {
 					t = dbIO.getSystemTable(tn);
@@ -710,7 +714,7 @@ public class LoadJet {
 	}
 
 	private static boolean hasAutoNumberColumn(Table t) {
-		List<Column> lc = t.getColumns();
+		List<? extends Column> lc = t.getColumns();
 		for (Column cl : lc) {
 			if (cl.isAutoNumber()) {
 				return true;
@@ -785,7 +789,6 @@ public class LoadJet {
 			this.viewsLoader.loadViews();
 			conn.commit();
 			SQLConverter.cleanEscaped();
-			
 		} finally {
 			Logger.log("Loaded Tables:");
 			logsFlusher.dumpList(this.loadedTables);
@@ -796,6 +799,8 @@ public class LoadJet {
 			conn.close();
 		}
 	}
+
+
 
 	public void synchronisationTriggers(String tableName,
 			boolean hasAutoNumberColumn,boolean hasAppendOnly) throws SQLException {

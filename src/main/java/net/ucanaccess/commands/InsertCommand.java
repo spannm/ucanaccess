@@ -38,6 +38,7 @@ import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 
 public class InsertCommand implements ICommand {
@@ -102,7 +103,8 @@ public class InsertCommand implements ICommand {
 			initComplex();
 			table.addRow(newRow);
 			int j = 0;
-			for (Column cl : table.getColumns()) {
+			for (Column cli : table.getColumns()) {
+				ColumnImpl cl=(ColumnImpl)cli;
 				if (cl.isAutoNumber()
 						&& cl.getAutoNumberGenerator().getType()
 								.equals(DataType.LONG)

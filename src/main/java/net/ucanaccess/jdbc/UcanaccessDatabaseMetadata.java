@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -240,7 +241,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getDatabaseProductVersion() throws SQLException {
-		return this.connection.getDbIO().getFormat().toString();
+		try {
+			return this.connection.getDbIO().getFileFormat().toString();
+		} catch (IOException e) {
+			return "";
+		}
 	}
 
 	public int getDefaultTransactionIsolation() throws SQLException {
@@ -264,7 +269,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getDriverVersion() throws SQLException {
-		return "1.0.4.1";
+		return "0.1";
 	}
 
 	public ResultSet getExportedKeys(String catalog, String schema, String table)
@@ -309,7 +314,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getIdentifierQuoteString() throws SQLException {
-		return " ";
+		return "`";
 	}
 
 	public ResultSet getImportedKeys(String catalog, String schema, String table)

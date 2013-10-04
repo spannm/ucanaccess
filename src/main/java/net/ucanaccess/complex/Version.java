@@ -23,6 +23,8 @@ package net.ucanaccess.complex;
 
 import java.util.Date;
 
+import com.healthmarketscience.jackcess.complex.ComplexValue;
+
 
 
 public class Version extends ComplexBase{
@@ -36,7 +38,7 @@ public class Version extends ComplexBase{
 		this.modifiedDate=cv.getModifiedDate();
 	}
 	 
-	  public Version(int id, String tableName, String columnName, String value,
+	  public Version(ComplexValue.Id id, String tableName, String columnName, String value,
 				Date modifiedDate) {
 			super(id, tableName, columnName);
 			this.value = value;

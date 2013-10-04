@@ -21,8 +21,6 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.jdbc;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -39,12 +37,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import net.ucanaccess.converters.LoadJet;
+
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.LinkResolver;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.util.LinkResolver;
 
 public class DBReference {
-	private final static  String CIPHER_SPEC="AES";
+	private final static String CIPHER_SPEC = "AES";
 	private static ArrayList<OnReloadReferenceListener> onReloadListeners = new ArrayList<OnReloadReferenceListener>();
 	private static String version;
 	private File dbFile;
@@ -54,7 +54,7 @@ public class DBReference {
 	private boolean inMemory = true;
 	private long lastModified;
 	private boolean lockMdb = false;
-	private MemoryTimer memoryTimer=new  MemoryTimer() ;
+	private MemoryTimer memoryTimer = new MemoryTimer();
 	private boolean readOnly;
 	private boolean readOnlyFileFormat;
 	private boolean showSchema;
@@ -62,137 +62,122 @@ public class DBReference {
 	private boolean singleConnection;
 	private boolean encryptHSQLDB;
 	private String encryptionKey;
-	
-	private class MemoryTimer{
-	    	private final static int INACTIVITY_TIMEOUT_DEFAULT=120000;
-	    	private int activeConnection;
-	    	private int inactivityTimeout=INACTIVITY_TIMEOUT_DEFAULT;
-			private long lastConnectionTime;
-			private Timer timer =new Timer(true);
-			
-			private synchronized void decrementActiveConnection(final Session session){
-				activeConnection--;
-				if(DBReference.this.singleConnection&&activeConnection==0){
-					 try {
-						shutdown(session);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					 return;
+
+	private class MemoryTimer {
+		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
+		private int activeConnection;
+		private int inactivityTimeout = INACTIVITY_TIMEOUT_DEFAULT;
+		private long lastConnectionTime;
+		private Timer timer = new Timer(true);
+
+		private synchronized void decrementActiveConnection(
+				final Session session) {
+			activeConnection--;
+			if (DBReference.this.singleConnection && activeConnection == 0) {
+				try {
+					shutdown(session);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				
-				if(DBReference.this.inMemory&&inactivityTimeout>0){
-				
-				
-				if(activeConnection==0){
-				
-					timer.schedule(new TimerTask(){
-	
+				return;
+			}
+			if (DBReference.this.inMemory && inactivityTimeout > 0) {
+				if (activeConnection == 0) {
+					timer.schedule(new TimerTask() {
 						@Override
 						public void run() {
-						try {
-								
-							synchronized (UcanaccessDriver.class){
-							   if( System.currentTimeMillis() - getLastConnectionTime()>=  inactivityTimeout&&
-									   getActiveConnection()==0){
-								 
-								    shutdown(session);
-									System.gc();
+							try {
+								synchronized (UcanaccessDriver.class) {
+									if (System.currentTimeMillis()
+											- getLastConnectionTime() >= inactivityTimeout
+											&& getActiveConnection() == 0) {
+										shutdown(session);
+										System.gc();
+									}
 								}
-							}
-								
 							} catch (Exception e) {
-								
 							}
-							
-						}}, inactivityTimeout);
+						}
+					}, inactivityTimeout);
 				}
 			}
-			}
-			
-			
-			
-			private synchronized int getActiveConnection() {
-				return activeConnection;
-			}
-	
-	
-	
-			private int getInactivityTimeout() {
-				return inactivityTimeout;
-			}
-	
-	
-	
-			private synchronized long  getLastConnectionTime() {
-				return lastConnectionTime;
-			}
-	
-	
-	
-			private synchronized void  incrementActiveConnection(){
-				activeConnection++;
-				if(DBReference.this.inMemory&&inactivityTimeout>0){
-					lastConnectionTime=System.currentTimeMillis();
-				}
-			}
-	
-	
-	
-			private void setInactivityTimeout(int inactivityTimeout) {
-				this.inactivityTimeout = inactivityTimeout;
-			}
-	    }
-    public DBReference(File fl, FileFormat ff,JackcessOpenerInterface jko,String pwd) throws IOException, SQLException {
+		}
 
+		private synchronized int getActiveConnection() {
+			return activeConnection;
+		}
+
+		private int getInactivityTimeout() {
+			return inactivityTimeout;
+		}
+
+		private synchronized long getLastConnectionTime() {
+			return lastConnectionTime;
+		}
+
+		private synchronized void incrementActiveConnection() {
+			activeConnection++;
+			if (DBReference.this.inMemory && inactivityTimeout > 0) {
+				lastConnectionTime = System.currentTimeMillis();
+			}
+		}
+
+		private void setInactivityTimeout(int inactivityTimeout) {
+			this.inactivityTimeout = inactivityTimeout;
+		}
+	}
+
+	public DBReference(File fl, FileFormat ff, JackcessOpenerInterface jko,
+			String pwd) throws IOException, SQLException {
 		this.dbFile = fl;
 		this.updateLastModified();
-		java.util.logging.Logger logger = java.util.logging.Logger.getLogger("com.healthmarketscience.jackcess");
+		java.util.logging.Logger logger = java.util.logging.Logger
+				.getLogger("com.healthmarketscience.jackcess");
 		logger.setLevel(Level.OFF);
 		if (!fl.exists() && ff != null) {
-			dbIO = Database.create(ff, fl);
+			dbIO = DatabaseBuilder.create(ff, fl);
 		} else {
-			dbIO =jko.open(fl,pwd);
-			try{
-			this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(FileFormat.V1997);
-			}
-			catch(Exception ignore){
-			//	Logger.logWarning(e.getMessage());
+			dbIO = jko.open(fl, pwd);
+			try {
+				this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(
+						FileFormat.V1997);
+			} catch (Exception ignore) {
+				// Logger.logWarning(e.getMessage());
 			}
 			this.dbIO.setLinkResolver(new LinkResolver() {
-				
-				public Database resolveLinkedDatabase(Database linkerDb, 
-                        String linkeeFileName)
-						throws IOException {
-					Database ldb =open(new File(linkeeFileName));
+				public Database resolveLinkedDatabase(Database linkerDb,
+						String linkeeFileName) throws IOException {
+					Database ldb = open(new File(linkeeFileName));
 					return ldb;
-				    
 				}
 			});
+			dbIO.setEnforceForeignKeys(false);
 		}
-		
 	}
-    
-    public static Database open(File dbfl) throws IOException{
-    	try {
-			return  Database.open(dbfl, false, false);
-		} catch (IOException e) {
-			return Database.open(dbfl, true, false);
 
+	public static Database open(File dbfl) throws IOException {
+		DatabaseBuilder dbb = new DatabaseBuilder(dbfl);
+		dbb.setAutoSync(false);
+		Database db;
+		try {
+			dbb.setReadOnly(false);
+			db = dbb.open();
+		} catch (IOException e) {
+			dbb.setReadOnly(true);
+			db = dbb.open();
 		}
-	
-    }
-    
-    
+		db.setEnforceForeignKeys(false);
+		return db;
+	}
+
 	public static boolean addOnReloadRefListener(
 			OnReloadReferenceListener action) {
 		return onReloadListeners.add(action);
 	}
+
 	public static String getVersion() {
 		return version;
 	}
-
-
 
 	public static boolean is2xx() {
 		return version.startsWith("2.");
@@ -200,7 +185,6 @@ public class DBReference {
 
 	Connection checkLastModified(Connection conn, Session session)
 			throws Exception {
-
 		// I'm detecting if another process(and not another thread) is writing
 		for (int i = 0; i < Thread.activeCount(); i++) {
 			if (lastModified >= this.dbFile.lastModified()) {
@@ -209,11 +193,13 @@ public class DBReference {
 				Thread.sleep(10);
 			}
 		}
-
 		this.updateLastModified();
 		this.dbIO.flush();
 		this.dbIO.close();
-		this.dbIO = Database.open(this.dbFile, false, false);
+		DatabaseBuilder dbb = new DatabaseBuilder(this.dbFile);
+		dbb.setAutoSync(false);
+		dbb.setReadOnly(false);
+		this.dbIO = dbb.open();
 		this.closeHSQLDB(session);
 		this.id = id();
 		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
@@ -237,7 +223,6 @@ public class DBReference {
 	}
 
 	private void finalizeHSQLDB(Session session) throws Exception {
-
 		this.releaseLock();
 		Connection conn = null;
 		Statement st = null;
@@ -253,66 +238,60 @@ public class DBReference {
 				conn.close();
 		}
 	}
-	
-	
 
 	File getDbFile() {
 		return dbFile;
 	}
 
-	public  Database getDbIO() {
+	public Database getDbIO() {
 		return dbIO;
 	}
 
 	public Connection getHSQLDBConnection(Session session) throws SQLException {
 		Connection conn;
-
-		conn = DriverManager.getConnection(this.getHsqlUrl(session), session
-				.getUser() == null ? "Admin" : session.getUser(), session
-				.getPassword());
+		conn = DriverManager.getConnection(this.getHsqlUrl(session),
+				session.getUser() == null ? "Admin" : session.getUser(),
+				session.getPassword());
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
-		
-		if (session.isIgnoreCase() ) {
+		if (session.isIgnoreCase()) {
 			Statement st = null;
 			try {
 				st = conn.createStatement();
 				st.execute("set ignorecase true");
-				
-				
 			} catch (Exception w) {
 			} finally {
 				if (st != null)
 					st.close();
-			
 			}
 		}
 		conn.setAutoCommit(false);
 		return conn;
 	}
-	
-	private  String key(String pwd) throws SQLException{
-		if(this.encryptionKey==null){
-		String url=	"jdbc:hsqldb:mem:"+id+"_tmp";
-		Connection conn =DriverManager.getConnection(url);
-		Statement stmt = conn.createStatement();  
-		ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('"+CIPHER_SPEC+"', null) ");  
-		rs.next();  
-		this.encryptionKey = rs.getString(1);  
-	}
+
+	private String key(String pwd) throws SQLException {
+		if (this.encryptionKey == null) {
+			String url = "jdbc:hsqldb:mem:" + id + "_tmp";
+			Connection conn = DriverManager.getConnection(url);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('" + CIPHER_SPEC
+					+ "', null) ");
+			rs.next();
+			this.encryptionKey = rs.getString(1);
+		}
 		return this.encryptionKey;
 	}
-	
-	
+
 	private String getHsqlUrl(final Session session) throws SQLException {
 		try {
 			if (this.lockMdb && this.fileLock == null) {
 				lockMdbFile();
 			}
-			String enc="";
-			if(this.encryptHSQLDB){
-				enc=";crypt_key="+key("AES")+";crypt_type=aes;crypt_lobs=true";
+			String enc = "";
+			if (this.encryptHSQLDB) {
+				enc = ";crypt_key=" + key("AES")
+						+ ";crypt_type=aes;crypt_lobs=true";
 			}
 			if (!this.inMemory && tempHsql == null) {
 				File folder = dbFile.getParentFile();
@@ -329,14 +308,13 @@ public class DBReference {
 						}
 					}
 				}));
-
 			}
 			return "jdbc:hsqldb:"
-					+ (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath())+enc;
+					+ (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath())
+					+ enc;
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
-
 	}
 
 	public int getInactivityTimeout() {
@@ -374,16 +352,13 @@ public class DBReference {
 			flLock.createNewFile();
 			final RandomAccessFile raf = new RandomAccessFile(flLock, "rw");
 			FileLock tryLock = raf.getChannel().tryLock();
-
 			if (tryLock == null) {
 				this.readOnly = true;
 			} else {
 				this.fileLock = tryLock;
 				this.readOnly = false;
 			}
-		}
-
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
@@ -399,7 +374,7 @@ public class DBReference {
 		for (OnReloadReferenceListener listener : onReloadListeners) {
 			listener.onReload();
 		}
-		this.dbIO =open(dbFile);
+		this.dbIO = open(dbFile);
 	}
 
 	void setDbAccess(Database dbAccess) {
@@ -411,7 +386,7 @@ public class DBReference {
 	}
 
 	public void setInactivityTimeout(int inactivityTimeout) {
-		memoryTimer.setInactivityTimeout( inactivityTimeout);
+		memoryTimer.setInactivityTimeout(inactivityTimeout);
 	}
 
 	public void setInMemory(boolean inMemory) {
@@ -423,34 +398,30 @@ public class DBReference {
 	}
 
 	public void setShowSchema(boolean showSchema) {
-		this.showSchema=showSchema;
-		
+		this.showSchema = showSchema;
 	}
 
 	void setTempHsql(File tempHsql) {
 		this.tempHsql = tempHsql;
 	}
 
-	void shutdown(Session session) throws Exception{
-	
-		DBReferenceSingleton.getInstance().remove(this.dbFile.getAbsolutePath());
+	void shutdown(Session session) throws Exception {
+		DBReferenceSingleton.getInstance()
+				.remove(this.dbFile.getAbsolutePath());
 		this.dbIO.flush();
 		this.dbIO.close();
 		this.closeHSQLDB(session);
-		
 	}
 
 	public void updateLastModified() {
 		this.lastModified = this.dbFile.lastModified();
 	}
+
 	public void setSingleConnection(boolean singleConnection) {
-		this.singleConnection=singleConnection;
-		
-	}
-	public void setEncryptHSQLDB(boolean encryptHSQLDB) {
-		this.encryptHSQLDB=encryptHSQLDB;
-		
+		this.singleConnection = singleConnection;
 	}
 
-	
+	public void setEncryptHSQLDB(boolean encryptHSQLDB) {
+		this.encryptHSQLDB = encryptHSQLDB;
+	}
 }

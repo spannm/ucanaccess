@@ -25,15 +25,21 @@ import java.io.File;
 import java.io.IOException;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 
 public class DefaultJackcessOpener implements JackcessOpenerInterface{
 
 	public Database open(File fl,String pwd) throws IOException {
+		DatabaseBuilder dbd =new DatabaseBuilder(fl);
+		dbd.setAutoSync(false);
 		try {
-			return  Database.open(fl, false, false);
+			dbd.setReadOnly(false);
+			
+			return  dbd.open();
 		} catch (IOException e) {
-			return Database.open(fl, true, false);
+			dbd.setReadOnly(true);
+			return dbd.open();
 
 		}
 	}

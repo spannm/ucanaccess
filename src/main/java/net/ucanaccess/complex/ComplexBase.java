@@ -31,17 +31,18 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.complex.ComplexValue;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.complex.ComplexColumnInfoImpl;
 
 public abstract  class ComplexBase implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private int id;
+	private int  id;
 	private String tableName;
 	private String columnName;
-	public final static int CREATE_ID=0;
+	public final static ComplexValue.Id CREATE_ID=ComplexColumnInfoImpl.INVALID_ID;
 	
-	public ComplexBase(int id, String tableName, String columnName) {
+	public ComplexBase(ComplexValue.Id id, String tableName, String columnName) {
 		super();
-		this.id = id;
+		this.id = id.get();
 		this.tableName = tableName;
 		this.columnName = columnName;
 	}
@@ -52,12 +53,7 @@ public abstract  class ComplexBase implements Serializable {
 				);
 	}
 	
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
+
 	public String getTableName() {
 		return tableName;
 	}

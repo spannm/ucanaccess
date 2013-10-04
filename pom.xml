@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.ucanaccess</groupId>
 	<artifactId>ucanaccess</artifactId>
-	<version>1.0.4.1</version>
+	<version>2.0.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>com.healthmarketscience.jackcess</groupId>
 			<artifactId>jackcess</artifactId>
-			<version>1.2.14.2</version>
+			<version>2.0.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>

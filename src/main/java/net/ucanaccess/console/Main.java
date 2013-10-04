@@ -49,6 +49,7 @@ import java.util.Map.Entry;
 import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 public class Main {
 	private static boolean batchMode=false;
@@ -66,10 +67,11 @@ public class Main {
 	private static boolean hasPassword(File fl) throws IOException {
 		Database db;
 		try{
-		db = Database.open(fl);
+		db = DatabaseBuilder.open(fl);
 	      }catch(IOException e){
-		
-		db= Database.open(fl, true, false);
+	    	  DatabaseBuilder dbb=new  DatabaseBuilder();
+	    	  dbb.setReadOnly(true);
+		      db= dbb.open();
 		
 	    }
 		String pwd = db.getDatabasePassword();
@@ -177,6 +179,7 @@ public class Main {
 				if(o!=null&&o.getClass().isArray()){
 					o=Arrays.toString((Object[])o);
 				}
+				
 				out.print(o + " | ");
 			}
 			out.println();

@@ -30,6 +30,7 @@ import net.ucanaccess.util.Logger;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class TriggerAutoNumber extends TriggerBase {
 	 public static int autorandom=-1;
@@ -44,7 +45,8 @@ public class TriggerAutoNumber extends TriggerBase {
 			Table t = conn.getDbIO().getTable(tableName);
 			if(t==null)throw new RuntimeException(Logger.getMessage("TABLE_DOESNT_EXIST")+" :"+tableName);
 			int i = 0;
-			for (Column cl : t.getColumns()) {
+			for (Column cli : t.getColumns()) {
+				ColumnImpl cl=(ColumnImpl)cli;
 				if (cl.isAutoNumber()) {
 					if (type == TriggerAutoNumber.INSERT_BEFORE_ROW) {
 						if (cl.getAutoNumberGenerator().getType().equals(

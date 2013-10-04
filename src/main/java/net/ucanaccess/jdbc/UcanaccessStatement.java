@@ -26,8 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-
-import org.hsqldb.jdbc.JDBCPreparedStatement;
 import  org.hsqldb.jdbc.JDBCStatement;
 
 import net.ucanaccess.converters.SQLConverter;
@@ -81,25 +79,14 @@ public class UcanaccessStatement implements Statement {
 		}
 	}
 	
-	
-		public void closeOnCompletion() throws SQLException {
-			
-			         try {
-			             if (wrapped instanceof JDBCStatement) {
-			                 ((JDBCStatement) wrapped).closeOnCompletion();
-			             } else {
-			                 if (wrapped instanceof JDBCPreparedStatement) {
-			                     ((JDBCPreparedStatement) wrapped).closeOnCompletion();
-			                 } else {
-			                     throw new SQLException("Internal error. Object 'wrapped' is neither a JDBCStatement nor a JDBCPreparedStatement");
-			                 }
-			             }
-			         } catch (SQLException e) {
-			             throw new UcanaccessSQLException(e);
-			         }
-			     }
-
-	
+	public void closeOnCompletion() throws SQLException {
+		
+		try {
+			 ((JDBCStatement)wrapped).closeOnCompletion();
+		} catch (SQLException e) {
+			throw new UcanaccessSQLException(e);
+		}
+	}
 	
 	public boolean execute(String sql) throws SQLException {
 		try {

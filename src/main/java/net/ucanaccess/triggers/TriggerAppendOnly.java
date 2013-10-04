@@ -32,6 +32,7 @@ import net.ucanaccess.util.Logger;
 import com.healthmarketscience.jackcess.Column;
 
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class TriggerAppendOnly extends TriggerBase {
 	public static int autorandom = -1;
@@ -50,7 +51,7 @@ public class TriggerAppendOnly extends TriggerBase {
 			int i = 0;
 			for (Column cl : t.getColumns()) {
 				if (cl.isAppendOnly()) {
-					Column verCol = cl.getVersionHistoryColumn();
+					ColumnImpl verCol = (ColumnImpl)cl.getVersionHistoryColumn();
 					Date upTime = new Date();
 					String val = newR[i] == null ? null : newR[i].toString();
 					if (type == TriggerBase.INSERT_BEFORE_ROW)

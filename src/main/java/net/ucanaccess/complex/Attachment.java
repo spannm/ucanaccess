@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.healthmarketscience.jackcess.complex.ComplexValue;
+
 public class Attachment extends ComplexBase {
 	private static final long serialVersionUID = 1L;
 	private String url;
@@ -43,7 +45,7 @@ public class Attachment extends ComplexBase {
 		this.timeStamp = atc.getFileTimeStamp();
 		this.flags = atc.getFileFlags();
 	}
-	public Attachment(int id, String tableName, String columnName, String url,
+	public Attachment(ComplexValue.Id id, String tableName, String columnName, String url,
 			String name, String type, byte[] data, Date timeStamp, Integer flags) {
 		super(id, tableName, columnName);
 		this.url = url;

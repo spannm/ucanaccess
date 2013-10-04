@@ -48,7 +48,7 @@ public class UpdateCommand extends AbstractCursorCommand {
 	private Object[] modifiedRow;
 	private Map<String, Object> rowPattern;
 	private Table  table;
-	private List<Column> tableColumns;
+	private List<? extends Column> tableColumns;
 	private boolean isRollbacking;
 
 	
