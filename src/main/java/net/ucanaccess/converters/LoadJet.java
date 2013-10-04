@@ -318,6 +318,7 @@ public class LoadJet {
 			if (idx.getReference().isCascadeUpdates()) {
 				ci.append(" ON UPDATE CASCADE ");
 			}
+			
 			try {
 				execCreate(ci.toString(),true);
 			} catch (SQLException e) {
@@ -370,12 +371,16 @@ public class LoadJet {
 
 		private void loadIndexes() throws SQLException, IOException {
 			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn))
+				if (!this.unresolvedTables.contains(tn)){
 					this.loadTableIndexes(tn);
+					conn.commit();
+				}
 			}
 			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn))
+				if (!this.unresolvedTables.contains(tn)){
 					this.loadTableFKs(tn);
+					conn.commit();
+				}
 			}
 		}
 
@@ -397,8 +402,9 @@ public class LoadJet {
 				defaultValues(t);
 				triggersGenerator.synchronisationTriggers(ntn,
 					hasAutoNumberColumn(t),hasAppendOnly(t));
-				loadedTables.add(ntn);
+				
 			}
+			loadedTables.add(schema(ntn,systemTable));
 		}
 		private boolean hasAppendOnly(Table t) {
 			for (Column c:t.getColumns()){
@@ -424,6 +430,9 @@ public class LoadJet {
 						values.add(value(en.getValue()));
 					}
 					execInsert(ps, values);
+					if(i>0&&i%1000==0){
+						conn.commit();
+					}
 				}
 			} finally {
 				if (ps != null)
@@ -467,14 +476,13 @@ public class LoadJet {
 				Table t = null;
 				try {
 					t = dbIO.getSystemTable(tn);
-				} catch (Exception e) {
-					
-				}
+				
 				if (t != null){
-					
 					loadTable(t,true);
-					execCreate("GRANT SELECT  ON "+schema(t.getName().toUpperCase()+" TO PUBLIC ",true),false);
+					execCreate("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
+					execCreate("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
 				}
+		    	} catch (Exception ignore) {}
 		    	}
 			}
 			
@@ -775,7 +783,9 @@ public class LoadJet {
 			this.tablesLoader.loadTables();
 			this.tablesLoader.loadIndexes();
 			this.viewsLoader.loadViews();
+			conn.commit();
 			SQLConverter.cleanEscaped();
+			
 		} finally {
 			Logger.log("Loaded Tables:");
 			logsFlusher.dumpList(this.loadedTables);

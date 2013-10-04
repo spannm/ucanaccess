@@ -264,7 +264,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getDriverVersion() throws SQLException {
-		return "0.1";
+		return "1.0.4.1";
 	}
 
 	public ResultSet getExportedKeys(String catalog, String schema, String table)
