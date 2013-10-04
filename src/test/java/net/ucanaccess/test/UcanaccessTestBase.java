@@ -48,6 +48,7 @@ import net.ucanaccess.jdbc.UcanaccessDriver;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 
 public abstract class UcanaccessTestBase extends TestCase {
@@ -319,7 +320,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 			testingClass=this.getClass();
 			if (this.getAccessPath() == null) {
 				fileMdb = File.createTempFile("test", ".mdb");
-				Database db = Database.create(this.fileFormat, fileMdb);
+				Database db = DatabaseBuilder.create(this.fileFormat, fileMdb);
 				db.flush();
 				db.close();
 				System.out.println("Access file version " + this.fileFormat
