@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -470,12 +471,18 @@ public class UcanaccessConnection implements Connection {
 
 	public PreparedStatement prepareStatement(String sql, int resultSetType,
 			int resultSetConcurrency) throws SQLException {
+		String nsql=sql;
 		try {
 			sql = prepare(sql);
 			return new UcanaccessPreparedStatement(
 					hsqlDBConnection.prepareStatement(sql, resultSetType,
 							resultSetConcurrency), this);
-		} catch (SQLException e) {
+		}
+		
+		catch (SQLException e) {
+		    if(resultSetType==ResultSet.TYPE_SCROLL_SENSITIVE&&resultSetConcurrency==ResultSet.CONCUR_UPDATABLE){
+		    	return  prepareStatement(nsql, ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY); 
+		    }
 			throw new UcanaccessSQLException(e);
 		}
 	}
