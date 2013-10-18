@@ -163,8 +163,13 @@ public class Persist2Jet {
 		LinkedHashMap<String, Object> vl = new LinkedHashMap<String, Object>();
 		for (Column cl : colums) {
 			String key = cl.getName();
-			vl.put(key, map.get(SQLConverter.escapeIdentifier(key)
-					.toUpperCase()));
+			String ekey=SQLConverter.escapeIdentifier(key)
+					.toUpperCase();
+			if(key.indexOf(" ")>0&& !map.containsKey(ekey)&&
+				map.containsKey(ekey.substring(1, ekey.length()-1))){
+				ekey=ekey.substring(1, ekey.length()-1);
+			}
+			vl.put(key, map.get(ekey));
 		}
 		return vl;
 	}
