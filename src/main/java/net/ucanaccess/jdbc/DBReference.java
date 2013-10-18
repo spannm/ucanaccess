@@ -126,14 +126,14 @@ public class DBReference {
 			this.inactivityTimeout = inactivityTimeout;
 		}
 	}
+	
+	
 
 	public DBReference(File fl, FileFormat ff, JackcessOpenerInterface jko,
 			String pwd) throws IOException, SQLException {
 		this.dbFile = fl;
 		this.updateLastModified();
-		java.util.logging.Logger logger = java.util.logging.Logger
-				.getLogger("com.healthmarketscience.jackcess");
-		logger.setLevel(Level.OFF);
+		 silentLog();
 		if (!fl.exists() && ff != null) {
 			dbIO = DatabaseBuilder.create(ff, fl);
 		} else {
@@ -194,13 +194,10 @@ public class DBReference {
 			}
 		}
 		this.updateLastModified();
+		this.closeHSQLDB(session);
 		this.dbIO.flush();
 		this.dbIO.close();
-		DatabaseBuilder dbb = new DatabaseBuilder(this.dbFile);
-		dbb.setAutoSync(false);
-		dbb.setReadOnly(false);
-		this.dbIO = dbb.open();
-		this.closeHSQLDB(session);
+		this.dbIO =open(this.dbFile);
 		this.id = id();
 		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
 		return getHSQLDBConnection(session);
@@ -220,6 +217,12 @@ public class DBReference {
 
 	public void decrementActiveConnection(Session session) {
 		memoryTimer.decrementActiveConnection(session);
+	}
+	
+	private void silentLog(){
+		java.util.logging.Logger logger = java.util.logging.Logger
+		.getLogger("com.healthmarketscience.jackcess");
+         logger.setLevel(Level.OFF);
 	}
 
 	private void finalizeHSQLDB(Session session) throws Exception {
