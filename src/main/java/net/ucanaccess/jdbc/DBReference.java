@@ -156,6 +156,7 @@ public class DBReference {
 	}
 
 	public static Database open(File dbfl) throws IOException {
+		silentLog();
 		DatabaseBuilder dbb = new DatabaseBuilder(dbfl);
 		dbb.setAutoSync(false);
 		Database db;
@@ -219,7 +220,7 @@ public class DBReference {
 		memoryTimer.decrementActiveConnection(session);
 	}
 	
-	private void silentLog(){
+	private static void silentLog(){
 		java.util.logging.Logger logger = java.util.logging.Logger
 		.getLogger("com.healthmarketscience.jackcess");
          logger.setLevel(Level.OFF);
