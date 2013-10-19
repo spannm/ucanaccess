@@ -24,6 +24,7 @@ package net.ucanaccess.util;
 
 import java.io.PrintWriter;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 public class Logger {
 	public enum Messages{
@@ -39,6 +40,12 @@ public class Logger {
 			logPrintWriter.println(el.toString());
 			logPrintWriter.flush();
 		}
+	}
+	
+	public static void turnOffJackcessLog(){
+		java.util.logging.Logger logger = java.util.logging.Logger
+		.getLogger("com.healthmarketscience.jackcess");
+         logger.setLevel(Level.OFF);
 	}
 	
 	public static PrintWriter getLogPrintWriter() {
