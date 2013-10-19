@@ -37,6 +37,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -62,6 +63,8 @@ public class DBReference {
 	private boolean singleConnection;
 	private boolean encryptHSQLDB;
 	private String encryptionKey;
+	private String pwd;
+	private JackcessOpenerInterface jko;
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -130,10 +133,12 @@ public class DBReference {
 	
 
 	public DBReference(File fl, FileFormat ff, JackcessOpenerInterface jko,
-			String pwd) throws IOException, SQLException {
+			final String pwd) throws IOException, SQLException {
 		this.dbFile = fl;
+		this.pwd=pwd;
+		this.jko=jko;
 		this.updateLastModified();
-		 silentLog();
+		Logger.turnOffJackcessLog();
 		if (!fl.exists() && ff != null) {
 			dbIO = DatabaseBuilder.create(ff, fl);
 		} else {
@@ -147,7 +152,7 @@ public class DBReference {
 			this.dbIO.setLinkResolver(new LinkResolver() {
 				public Database resolveLinkedDatabase(Database linkerDb,
 						String linkeeFileName) throws IOException {
-					Database ldb = open(new File(linkeeFileName));
+					Database ldb = open(new File(linkeeFileName),pwd);
 					return ldb;
 				}
 			});
@@ -155,20 +160,10 @@ public class DBReference {
 		}
 	}
 
-	public static Database open(File dbfl) throws IOException {
-		silentLog();
-		DatabaseBuilder dbb = new DatabaseBuilder(dbfl);
-		dbb.setAutoSync(false);
-		Database db;
-		try {
-			dbb.setReadOnly(false);
-			db = dbb.open();
-		} catch (IOException e) {
-			dbb.setReadOnly(true);
-			db = dbb.open();
-		}
-		db.setEnforceForeignKeys(false);
-		return db;
+	public Database open(File dbfl,String pwd) throws IOException {
+		Logger.turnOffJackcessLog();
+		return jko.open( dbfl,pwd);
+		
 	}
 
 	public static boolean addOnReloadRefListener(
@@ -198,7 +193,7 @@ public class DBReference {
 		this.closeHSQLDB(session);
 		this.dbIO.flush();
 		this.dbIO.close();
-		this.dbIO =open(this.dbFile);
+		this.dbIO =open(this.dbFile,this.pwd);
 		this.id = id();
 		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
 		return getHSQLDBConnection(session);
@@ -220,11 +215,7 @@ public class DBReference {
 		memoryTimer.decrementActiveConnection(session);
 	}
 	
-	private static void silentLog(){
-		java.util.logging.Logger logger = java.util.logging.Logger
-		.getLogger("com.healthmarketscience.jackcess");
-         logger.setLevel(Level.OFF);
-	}
+	
 
 	private void finalizeHSQLDB(Session session) throws Exception {
 		this.releaseLock();
@@ -271,6 +262,7 @@ public class DBReference {
 			}
 		}
 		conn.setAutoCommit(false);
+		
 		return conn;
 	}
 
@@ -378,7 +370,7 @@ public class DBReference {
 		for (OnReloadReferenceListener listener : onReloadListeners) {
 			listener.onReload();
 		}
-		this.dbIO = open(dbFile);
+		this.dbIO = open(dbFile,this.pwd);
 	}
 
 	void setDbAccess(Database dbAccess) {
