@@ -165,7 +165,7 @@ public class Persist2Jet {
 			String key = cl.getName();
 			String ekey=SQLConverter.escapeIdentifier(key)
 					.toUpperCase();
-			if(key.indexOf(" ")>0&& !map.containsKey(ekey)&&
+			if( !map.containsKey(ekey)&&
 				map.containsKey(ekey.substring(1, ekey.length()-1))){
 				ekey=ekey.substring(1, ekey.length()-1);
 			}
