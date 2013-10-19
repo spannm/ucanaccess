@@ -161,6 +161,7 @@ public final class UcanaccessDriver implements Driver {
 				if (!alreadyLoaded) {
 					LoadJet la=		new LoadJet(ref.getHSQLDBConnection(session), ref
 							.getDbIO());
+					Logger.turnOffJackcessLog();
 					if (pr.containsKey("sysschema")) {
 						la.setSysSchema("true".equalsIgnoreCase(pr
 								.getProperty("sysschema")));
