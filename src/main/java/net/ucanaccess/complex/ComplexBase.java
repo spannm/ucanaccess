@@ -38,7 +38,7 @@ public abstract  class ComplexBase implements Serializable {
 	private int  id;
 	private String tableName;
 	private String columnName;
-	public final static ComplexValue.Id CREATE_ID=ComplexColumnInfoImpl.INVALID_ID;
+	 public final static ComplexValue.Id CREATE_ID=ComplexColumnInfoImpl.INVALID_ID;
 	
 	public ComplexBase(ComplexValue.Id id, String tableName, String columnName) {
 		super();
