@@ -38,11 +38,12 @@ import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.UnsupportedValue;
 import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
+import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+
 import org.hsqldb.HsqlDateTime;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
@@ -56,6 +57,7 @@ import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.IndexBuilder;
+import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.TableBuilder;
 import com.healthmarketscience.jackcess.impl.DatabaseImpl;
@@ -239,6 +241,7 @@ public class Persist2Jet {
 					cb.setAutoNumber(true);
 				}
 			}
+			
 			arcl.add(cb);
 			++i;
 		}
@@ -324,7 +327,27 @@ public class Persist2Jet {
 		}
 	}
 
-	public void createTable(String tableName, String[] types)
+	private void saveColumnsDefaults(String[] defaults,Boolean[] required,Table table) throws IOException{
+		List<? extends Column> cols=table.getColumns();
+		int j=0;
+		if(defaults!=null||required!=null)
+		for(Column cl:cols){
+			PropertyMap map=cl.getProperties();
+			if(defaults!=null&&defaults[j]!=null){
+				map.put(PropertyMap.DEFAULT_VALUE_PROP,DataType.TEXT,defaults[j]);
+			}
+			if(required!=null&&required[j]!=null &&required[j]){
+					map.put(PropertyMap.REQUIRED_PROP,DataType.BOOLEAN,required[j]);
+			}
+			map.save();
+			
+			j++;
+		}
+		
+	}
+	
+	
+	public void createTable(String tableName, String[] types, String[] defaults, Boolean[] notNulls)
 			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
@@ -341,6 +364,9 @@ public class Persist2Jet {
 			arcl.add(ibpk);
 		
 		Table table = tb.toTable(db);
+		saveColumnsDefaults(defaults,notNulls, table);
+	    LoadJet lj=new LoadJet(conn.getHSQLDBConnection(),db);
+		lj.loadDefaultValues(table);
 		Statement st = null;
 		try {
 			st = conn.createStatement();

@@ -31,6 +31,8 @@ public class CreateTableCommand implements ICommand {
 	private String execId;
 	private String tableName;
 	private String[] types;
+	private String[] defaults;
+	private Boolean[] notNulls;
 	
 	public CreateTableCommand(String tableName, String execId) {
 		super();
@@ -41,9 +43,11 @@ public class CreateTableCommand implements ICommand {
 	
 	
 	public CreateTableCommand(String tn, String execId2,
-			String[] types) {
+			String[] types, String[] defaults, Boolean[] notNulls) {
 		this(tn, execId2);
 		this.types =types;
+		this.defaults=defaults;
+		this.notNulls=notNulls;
 	}
 
 
@@ -89,7 +93,7 @@ public class CreateTableCommand implements ICommand {
 	public IFeedbackAction persist() throws SQLException {
 		try {
 			Persist2Jet p2a = new Persist2Jet();
-			p2a.createTable(tableName, types);
+			p2a.createTable(tableName, types,defaults,notNulls);
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}

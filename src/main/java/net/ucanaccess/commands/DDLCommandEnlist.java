@@ -35,6 +35,10 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import com.healthmarketscience.jackcess.Database;
 
 public class DDLCommandEnlist {
+	private String[] types;
+	private String[] defaults;
+	private Boolean[] notNulls;
+	
 	private void enlistCreateTable(String sql, DDLType ddlType)
 			throws SQLException {
 		String tn = ddlType.getDBObjectName(sql);
@@ -44,10 +48,17 @@ public class DDLCommandEnlist {
 		Database db = ac.getDbIO();
 		LoadJet lfa = new LoadJet(hsqlConn, db);
 		lfa.synchronisationTriggers(tn, true,true);
-		CreateTableCommand c4io = ddlType.equals(DDLType.CREATE_TABLE) ? new CreateTableCommand(
-				tn, execId, parseTypesFromCreateStatement(sql))
-				: new CreateTableCommand(tn, execId);
-		ac.add(c4io);
+		CreateTableCommand c4io;
+       if(ddlType.equals(DDLType.CREATE_TABLE)){
+    	   parseTypesFromCreateStatement(sql);
+    	   c4io=new CreateTableCommand(
+				tn, execId, this.types,this.defaults,this.notNulls);
+    	   }
+       else  {
+    	   c4io=new CreateTableCommand(tn, execId);
+       }
+      
+		ac.add(c4io); 
 	}
 	
 	public void enlistDDLCommand(String sql, DDLType ddlType)
@@ -71,7 +82,7 @@ public class DDLCommandEnlist {
 		ac.add(c4io);
 	}
 	//getting AUTOINCREMENT and GUID
-	private String[] parseTypesFromCreateStatement(String sql) throws SQLException {
+	private void parseTypesFromCreateStatement(String sql) throws SQLException {
 		int startDecl = sql.indexOf('(');
 		int endDecl = sql.lastIndexOf(')');
 		
@@ -81,19 +92,47 @@ public class DDLCommandEnlist {
 		String decl = sql.substring(startDecl + 1, endDecl);
 		String[] tokens = decl.split(",");
 		ArrayList<String> typeList = new ArrayList<String>() ;
+		ArrayList<String> defaultList = new ArrayList<String>() ;
+		ArrayList<Boolean> notNullList = new ArrayList<Boolean>() ;
 		for (int j = 0; j < tokens.length; ++j) {
 			String tknt=tokens[j].trim();
-			if(tknt.matches("\\s*\\d+\\s*\\)")){
-				
+			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\)")){
 				continue;
 			}
-			String[] colDecls = tknt.split("\\s+");
-		
+			String[] colDecls = tknt.split("[\\s\n\r]+");
 			if (colDecls.length < 2) {
 				throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
 			}
 			typeList.add(colDecls[1]);
+			
+			
+			if(colDecls.length>2
+					&&"not".equalsIgnoreCase(colDecls[colDecls.length-2])
+					&&"null".equalsIgnoreCase(colDecls[colDecls.length-1])
+					){
+				notNullList.add(true);
+			}else{
+				notNullList.add(false); 
+			}
+			
+			if(colDecls.length>=4
+					&&"default".equalsIgnoreCase(colDecls[2])
+					){
+				defaultList.add(colDecls[3]);
+				tokens[j]=
+						colDecls[0]+" "+colDecls[1];
+				for(int k=2;k<colDecls.length;k++){
+					tokens[j]+=" "+colDecls[k];
+				}
+			}else{
+				defaultList.add(null); 
+			}
 		}
-		return (String[])typeList.toArray(new String[typeList.size()]);
+		
+		this.types= (String[])typeList.toArray(new String[typeList.size()]);
+		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
+		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
 	}
+	
+	
 }

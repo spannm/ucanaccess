@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.converters;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,6 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 import com.healthmarketscience.jackcess.TableBuilder;
 
@@ -58,11 +61,9 @@ public class SQLConverter {
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH[\\s\n\r]+(?i)OWNERACCESS[\\s\n\r]+(?i)OPTION(\\W)";
-	private static final String WA_CURRENT_USER = "(\\W)(?i)currentUser\\s*\\(";
 	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
-	//private static final String XESCAPED_FUNCTIONS = "(\\W)(?i)X(_)\\s*\\(";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	
 	private static final Pattern QUOTED_ALIAS = Pattern
@@ -154,7 +155,19 @@ public class SQLConverter {
 		sql = sql.replaceAll("(\\W)(?i)STDEVP\\s*\\(", "$1STDDEV_POP(");
 		sql = sql.replaceAll("(\\W)(?i)VAR\\s*\\(", "$1VAR_SAMP(");
 		sql = sql.replaceAll("(\\W)(?i)VARP\\s*\\(", "$1VAR_POP(");
-		return sql.replaceAll(WA_CURRENT_USER, "$1user(");
+		return sql.replaceAll( "(\\W)(?i)currentUser\\s*\\(", "$1user(");
+	}
+	
+	public static String restoreWorkAroundFunctions(String sql) {
+		for (String waFun : waFunctions) {
+			sql = sql.replaceAll("(\\W)(?i)" + waFun + "WA\\s*\\(", "$1" + waFun
+					+ "(");
+		}
+		sql = sql.replaceAll("(\\W)(?i)STDDEV_SAMP\\s*\\(", "$1STDEV(");
+		sql = sql.replaceAll("(\\W)(?i)STDDEV_POP\\s*\\(", "$1STDEVP(");
+		sql = sql.replaceAll("(\\W)(?i)VAR_SAMP\\s*\\(", "$1VAR(");
+		sql = sql.replaceAll("(\\W)(?i)VAR_POP\\s*\\(", "$1VARP(");
+		return sql.replaceAll( "(\\W)(?i)user\\s*\\(", "$1currentUser(");
 	}
 	
 	private static String replaceBacktrik(String sql){
@@ -496,7 +509,7 @@ public class SQLConverter {
 	}
 
 	private static String convertCreateTable(String sql,
-			Map<String, String> types2Convert) {
+			Map<String, String> types2Convert) throws SQLException {
 		// padding for detecting the right exception
 		sql += " ";
 		for (Map.Entry<String, String> entry : types2Convert.entrySet()) {
@@ -507,17 +520,55 @@ public class SQLConverter {
 		}
 		sql = sql.replaceAll(DEFAULT_VARCHAR,
 				"$1VARCHAR(255)$2");
-		return sql;
+		return clearDefaultsCreateStatement(sql);
 	}
+	
+	private static String clearDefaultsCreateStatement(String sql) throws SQLException {
+		if(sql.toUpperCase().indexOf("DEFAULT")<0)return sql;
+		int startDecl = sql.indexOf('(');
+		int endDecl = sql.lastIndexOf(')');
+		
+		if (startDecl >= endDecl) {
+			throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
+		}
+		String decl = sql.substring(startDecl + 1, endDecl);
+		String[] tokens = decl.split(",");
+		StringBuffer hsqlCreate=new StringBuffer(sql.substring(0, startDecl+1));
+		String comma="";
+		for (int j = 0; j < tokens.length; ++j) {
+			hsqlCreate.append(comma);
+			String tknt=tokens[j].trim();
+			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\)")){
+				continue;
+			}
+			String[] colDecls = tknt.split("[\\s\n\r]+");
+					
+			if(colDecls.length>=4
+					&&"default".equalsIgnoreCase(colDecls[2])
+					){
+				tokens[j]=
+						colDecls[0]+" "+colDecls[1];
+				for(int k=4;k<colDecls.length;k++){
+					
+					tokens[j]+=" "+colDecls[k];
+				}
+			}
+			hsqlCreate.append(tokens[j]);
+			comma=",";
+		}
+		hsqlCreate.append(sql.substring(endDecl));
+		return hsqlCreate.toString();
+	}
+	
 
-	public static String convertCreateTable(String sql) {
+	public static String convertCreateTable(String sql) throws SQLException {
 		return convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());
 	}
 
 	public static boolean checkDDL(String sql) {
 		if (sql == null)
 			return false;
-		return CHECK_DDL.matcher(sql).matches();
+		return CHECK_DDL.matcher(sql.replaceAll("[\n\r]", " ")).matches();
 	}
 
 	private static String convertLike(String sql) {

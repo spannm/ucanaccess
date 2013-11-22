@@ -92,13 +92,13 @@ public abstract class AbstractExecute {
 			if (ddlType == null)
 				throw new FeatureNotSupportedException(
 						NotSupportedMessage.NOT_SUPPORTED_YET);
+			
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql) : sql;
-					ddlExpr=	ddlExpr.replaceAll("(?i)NOWWA\\(\\)", "'NOWWA'");
-			statement.getWrapped().executeUpdate(ddlExpr);
+					statement.getWrapped().executeUpdate(ddlExpr);
 			DDLCommandEnlist ddle = new DDLCommandEnlist();
-			ddle.enlistDDLCommand(sql, ddlType);
+			ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage());
 		}

@@ -241,9 +241,9 @@ public class LoadJet {
 			}
 		}
 
-		private void defaultValues(Table t) throws SQLException, IOException {
+		private  void defaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
-			String ntn = SQLConverter.escapeIdentifier(tn);
+			 String ntn = SQLConverter.escapeIdentifier(tn);
 			List<? extends Column> lc = t.getColumns();
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
@@ -712,6 +712,10 @@ public class LoadJet {
 		this.conn = conn;
 		this.dbIO = dbIO;
 	}
+	
+	public void loadDefaultValues(Table t) throws SQLException, IOException{
+		this.tablesLoader.defaultValues(t);
+	}
 
 	private static boolean hasAutoNumberColumn(Table t) {
 		List<? extends Column> lc = t.getColumns();
@@ -827,4 +831,6 @@ public class LoadJet {
 		this.sysSchema=sysSchema;
 		
 	}
+	
+
 }
