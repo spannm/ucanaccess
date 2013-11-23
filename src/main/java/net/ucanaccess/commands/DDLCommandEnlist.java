@@ -118,12 +118,9 @@ public class DDLCommandEnlist {
 			if(colDecls.length>=4
 					&&"default".equalsIgnoreCase(colDecls[2])
 					){
-				defaultList.add(colDecls[3]);
-				tokens[j]=
-						colDecls[0]+" "+colDecls[1];
-				for(int k=2;k<colDecls.length;k++){
-					tokens[j]+=" "+colDecls[k];
-				}
+				
+				defaultList.add(value(colDecls[3]));
+				
 			}else{
 				defaultList.add(null); 
 			}
@@ -132,6 +129,16 @@ public class DDLCommandEnlist {
 		this.types= (String[])typeList.toArray(new String[typeList.size()]);
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
+	}
+
+	private String value(String value) {
+		if(value.startsWith("\"")&&value.endsWith("\"")){
+			return value.substring(1, value.length()-1).replaceAll("\"\"", "\"");
+		}
+		if(value.startsWith("'")&&value.endsWith("'")){
+			return value.substring(1, value.length()-1).replaceAll("''", "'");
+		}
+		return value;
 	}
 	
 	
