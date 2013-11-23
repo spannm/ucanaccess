@@ -75,7 +75,7 @@ public class SQLConverter {
 	private static final String HHMMSS_ACCESS_FORMAT = "(0[0-9]|1[0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])";
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
-	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,)";
+	private static final String DEFAULT_VARCHAR="(\\W)(?i)VARCHAR[\\s\\w]*(\\)|,|(?)NOT|(?)DEFAULT)";
 	private static final String BACKTRIK="(`)([^`]*)(`)";
 	
 	
