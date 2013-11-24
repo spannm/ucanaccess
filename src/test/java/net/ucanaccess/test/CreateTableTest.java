@@ -22,10 +22,16 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
+import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.Table;
 
 public class CreateTableTest extends UcanaccessTestBase {
 	
@@ -40,9 +46,12 @@ public class CreateTableTest extends UcanaccessTestBase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		executeCreateTable(" CREATE \nTABLE AAA ( baaaa text PRIMARY KEY,A long default 3, C text(255)) ");
+		executeCreateTable(" CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, " +
+				"d DATETIME default now(), e text default 'l''aria')");
 			
 	}
+	
+	
 	
 
 	
@@ -51,9 +60,9 @@ public class CreateTableTest extends UcanaccessTestBase {
 		try {
 			st = super.ucanaccess.createStatement();
 			st.execute("INSERT INTO AAA(baaaa,c) VALUES ('33A','G'   )");
-			st.execute("INSERT INTO AAA VALUES ('33B',111,'G'   )");
+			st.execute("INSERT INTO AAA(baaaa,a,c) VALUES ('33B',111,'G'   )");
 			Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
-			checkQuery("select * from AAA order by baaaa", ver);
+			checkQuery("select baaaa,a,c from AAA order by baaaa", ver);
 		} finally {
 			if (st != null)
 				st.close();
@@ -65,7 +74,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 		try {
 			st = super.ucanaccess.createStatement();
 			st
-					.executeUpdate("CREATE TABLE AAA_BIS as (select * from AAA) 	WITH DATA");
+					.executeUpdate("CREATE TABLE AAA_BIS as (select baaaa,a,c from AAA) 	WITH DATA");
 			Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
 			checkQuery("select * from AAA_bis order by baaaa", ver);
 		} finally {
@@ -74,15 +83,38 @@ public class CreateTableTest extends UcanaccessTestBase {
 		}
 	}
 	
+	
+	
 	public void testCreateAsSelect2() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
 			st
-					.executeUpdate("CREATE TABLE AAA_TRIS as (select * from AAA) WITH no DATA ");
+					.executeUpdate("CREATE TABLE AAA_TRIS as (select baaaa,a,c from AAA) WITH no DATA ");
 			st.execute("INSERT INTO AAA_TRIS SELECT * from AAA_bis");
 			Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
 			checkQuery("select * from AAA_tris order by baaaa", ver);
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	public void testDefaults()  throws Exception{
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			ResultSet rs= st.executeQuery("SELECT D, E FROM AAA");
+			while(rs.next()){
+				assertNotNull(rs.getObject(1));
+				assertNotNull(rs.getObject(2));
+			}
+			Database db=((UcanaccessConnection)super.ucanaccess).getDbIO();
+			Table tb=db.getTable("AAA");
+			PropertyMap pm=tb.getColumn("d").getProperties();
+			assertEquals("NOW()", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
+			PropertyMap pm1=tb.getColumn("a").getProperties();
+			assertEquals(true, pm1.getValue(PropertyMap.REQUIRED_PROP));
 		} finally {
 			if (st != null)
 				st.close();
