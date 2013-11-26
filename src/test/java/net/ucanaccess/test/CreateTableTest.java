@@ -50,11 +50,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 				"d DATETIME default now(), e text default 'l''aria')");
 			
 	}
-	
-	
-	
-
-	
+		
 	public void testCreateSimple() throws SQLException, IOException {
 		Statement st = null;
 		try {
@@ -115,7 +111,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 			assertEquals("NOW()", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
 			PropertyMap pm1=tb.getColumn("a").getProperties();
 			assertEquals(true, pm1.getValue(PropertyMap.REQUIRED_PROP));
-		} finally {
+			} finally {
 			if (st != null)
 				st.close();
 		}
