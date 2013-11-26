@@ -265,8 +265,12 @@ public class LoadJet {
 									.equalsIgnoreCase(cdefaulT)))
 						cdefaulT = "false";
 					if(
-							cl.getType().equals(DataType.MEMO)||
-							cl.getType().equals(DataType.TEXT)
+							(cl.getType().equals(DataType.MEMO)||
+							cl.getType().equals(DataType.TEXT))&&
+							(!defaulT.toString().startsWith("\"")||
+							 !defaulT.toString().endsWith("\"")		
+							)
+							
 					){
 						cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
 					}
