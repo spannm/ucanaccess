@@ -264,6 +264,12 @@ public class LoadJet {
 							&& ("=no".equalsIgnoreCase(cdefaulT) || "no"
 									.equalsIgnoreCase(cdefaulT)))
 						cdefaulT = "false";
+					if(
+							cl.getType().equals(DataType.MEMO)||
+							cl.getType().equals(DataType.TEXT)
+					){
+						cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
+					}
 					String guidExp = "GenGUID()";
 					if (!guidExp.equals(defaulT)) {
 						if (!tryDefault(cdefaulT)) {
