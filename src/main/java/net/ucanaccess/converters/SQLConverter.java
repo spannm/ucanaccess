@@ -91,7 +91,7 @@ public class SQLConverter {
 			"OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET",
 			"SOME", "STDDEV_POP", "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO",
 			"TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
-			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH");
+			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH","END");
 	private static ArrayList<String> whiteSpacedTableNames = new ArrayList<String>();
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
 	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
