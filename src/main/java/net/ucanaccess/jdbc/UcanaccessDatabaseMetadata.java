@@ -46,7 +46,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		}
 
 		public String getString(int idx) throws SQLException {
-			return (String) this.getObject(idx);
+			Object obj= this.getObject(idx);
+			if (obj==null)return null;
+			else if(obj instanceof String)return (String)obj;
+			return obj.toString();
+			
 		}
 	}
 

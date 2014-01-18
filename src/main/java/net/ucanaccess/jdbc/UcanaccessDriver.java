@@ -29,6 +29,8 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -90,10 +92,7 @@ public final class UcanaccessDriver implements Driver {
 
 				}
 				boolean useCustomOpener=pr.containsKey("jackcessopener");
-//				if(useCustomOpener&&pr.containsKey("memory")&&!"true".equalsIgnoreCase(pr
-//						.getProperty("memory")))
-//					
-//					throw new UcanaccessSQLException(ExceptionMessages.ONLY_IN_MEMORY_ALLOWED);	
+
 				JackcessOpenerInterface jko=useCustomOpener?
 						newJackcessOpenerInstance(pr.getProperty("jackcessopener")):
 						new DefaultJackcessOpener();
@@ -135,11 +134,15 @@ public final class UcanaccessDriver implements Driver {
 						ref.setLockMdb("true".equalsIgnoreCase(pr
 								.getProperty("lockmdb")));
 					}
+					if(pr.containsKey("remap")){
+						ref.setExternalResourcesMapping(toMap(pr.getProperty("remap")));
+					}
 
 					if (pr.containsKey("supportsaccesslike")) {
 						SQLConverter.setSupportsAccessLike("true"
 								.equalsIgnoreCase(pr.getProperty("supportsaccesslike")));
 					}
+					
 
 				}
 				String pwd = ref.getDbIO().getDatabasePassword();
@@ -157,6 +160,7 @@ public final class UcanaccessDriver implements Driver {
 					session.setIgnoreCase("true".equalsIgnoreCase(pr
 							.getProperty("ignorecase")));
 				}
+				
 				SQLWarning sqlw=null;
 				if (!alreadyLoaded) {
 					LoadJet la=		new LoadJet(ref.getHSQLDBConnection(session), ref
@@ -184,6 +188,17 @@ public final class UcanaccessDriver implements Driver {
 		}
 	}
 	
+	private Map<String,String> toMap(String property) {
+		HashMap<String,String> hm=new HashMap<String,String> ();
+		StringTokenizer st=new StringTokenizer(property,"&");
+		while(st.hasMoreTokens()){
+			String entry=st.nextToken();
+			if(entry.indexOf("|")<0)continue;
+			hm.put(entry.substring(0,entry.indexOf('|')).toLowerCase(), entry.substring(entry.indexOf('|')+1));
+		}
+		return hm;
+	}
+
 	public int getMajorVersion() {
 		return 0;
 	}

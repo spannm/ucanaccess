@@ -31,10 +31,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.logging.Level;
+
 
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.util.Logger;
@@ -65,6 +66,7 @@ public class DBReference {
 	private String encryptionKey;
 	private String pwd;
 	private JackcessOpenerInterface jko;
+	private Map<String,String> externalResourcesMapping;
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -152,7 +154,18 @@ public class DBReference {
 			this.dbIO.setLinkResolver(new LinkResolver() {
 				public Database resolveLinkedDatabase(Database linkerDb,
 						String linkeeFileName) throws IOException {
-					Database ldb = open(new File(linkeeFileName),pwd);
+					File linkeeFile=new File(linkeeFileName);
+					Map<String,String> emr=DBReference.this.externalResourcesMapping;
+					if(!linkeeFile.exists()&&
+						emr!=null&&
+						emr.containsKey(linkeeFile.getAbsolutePath().toLowerCase())
+							){
+						linkeeFile=new File(emr.get(linkeeFile.getAbsolutePath().toLowerCase()));
+					}
+					if(!linkeeFile.exists()){
+						Logger.logWarning("External file "+linkeeFile.getAbsolutePath()+" does not exist");
+					}
+					Database ldb = open(linkeeFile,pwd);
 					return ldb;
 				}
 			});
@@ -419,5 +432,10 @@ public class DBReference {
 
 	public void setEncryptHSQLDB(boolean encryptHSQLDB) {
 		this.encryptHSQLDB = encryptHSQLDB;
+	}
+
+	public void setExternalResourcesMapping(Map<String, String> externalResourcesMapping) {
+		this.externalResourcesMapping=externalResourcesMapping;
+		
 	}
 }
