@@ -80,6 +80,7 @@ public class SQLConverter {
 	
 	
 	public static final String BIG_BANG = "1899-12-30";
+	public static final HashMap<String,String> noRomanCharacters=new HashMap<String,String>();
 
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
 			"ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
@@ -98,7 +99,23 @@ public class SQLConverter {
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	private static boolean supportsAccessLike = true;
-
+	static{
+		noRomanCharacters.put("€", "EUR");
+		noRomanCharacters.put("¹", "1");
+		noRomanCharacters.put("²", "2");
+		noRomanCharacters.put("³", "3");
+		noRomanCharacters.put("¼", "1_4");
+		noRomanCharacters.put("½", "1_2");
+		noRomanCharacters.put("¾", "¾");
+		noRomanCharacters.put("Ð", "D");
+		noRomanCharacters.put("×", "X");
+		noRomanCharacters.put("Þ", "P");
+		noRomanCharacters.put("ð", "O");
+		noRomanCharacters.put("ý", "Y");
+		noRomanCharacters.put("þ", "P");
+	
+		
+	}
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
 				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
@@ -484,7 +501,7 @@ public class SQLConverter {
 								.replaceAll("\\.", "_").replaceAll("\'", "").replaceAll("#", "_")
 				.replaceAll("\"", "").replaceAll("\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_");
 		
-		
+		escaped=replaceNoRomanCharacters(escaped);
 		
 		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
 			escaped = "\"" + escaped + "\"";
@@ -496,6 +513,15 @@ public class SQLConverter {
 			escaped = "Z" + escaped;
 		}
 		return escaped.toUpperCase();
+	}
+
+	private static String replaceNoRomanCharacters(String escaped) {
+		for(Map.Entry<String, String>me :noRomanCharacters.entrySet()){
+			if(escaped.indexOf(me.getKey())>0){
+				escaped=escaped.replaceAll(me.getKey(), me.getValue());
+			}
+		}
+		return escaped;
 	}
 
 	public static String escapeIdentifier(String name) {
