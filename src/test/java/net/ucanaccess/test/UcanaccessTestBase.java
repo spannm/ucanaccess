@@ -326,23 +326,28 @@ public abstract class UcanaccessTestBase extends TestCase {
 				System.out.println("Access file version " + this.fileFormat
 						+ " created: " + fileMdb.getAbsolutePath());
 			} else {
-				InputStream is = this.getClass().getClassLoader()
-						.getResourceAsStream(this.getAccessPath());
-				byte[] buffer = new byte[4096];
-				File temp = File.createTempFile("tempJunit", "mdb");
-				System.out.println("Resource file: "+this.getAccessPath()+" copied in "+temp.getAbsolutePath());
-				FileOutputStream fos = new FileOutputStream(temp);
-				int bread;
-				while ((bread = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, bread);
-				}
-				fos.flush();
-				fos.close();
-				is.close();
-				fileMdb = temp;
+				fileMdb = copyResourceInTemp(this.getAccessPath());;
 			}
 		}
 		return fileMdb.getAbsolutePath();
+	}
+	
+	
+	protected File copyResourceInTemp(String resourcePath) throws IOException{
+		InputStream is = this.getClass().getClassLoader()
+				.getResourceAsStream(resourcePath);
+		byte[] buffer = new byte[4096];
+		File temp = File.createTempFile("tempJunit", "mdb");
+		System.out.println("Resource file: "+resourcePath+" copied in "+temp.getAbsolutePath());
+		FileOutputStream fos = new FileOutputStream(temp);
+		int bread;
+		while ((bread = is.read(buffer)) != -1) {
+			fos.write(buffer, 0, bread);
+		}
+		fos.flush();
+		fos.close();
+		is.close();
+		return temp;
 	}
 	
 	public int getCount(String sql) throws SQLException, IOException {
