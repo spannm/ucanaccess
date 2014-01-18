@@ -442,7 +442,8 @@ public class LoadJet {
 						values.add(value(en.getValue()));
 					}
 					execInsert(ps, values);
-					if(i>0&&i%1000==0){
+					if((i>0&&i%1000==0)||
+							i==t.getRowCount()-1		){
 						conn.commit();
 					}
 				}
