@@ -28,11 +28,13 @@ import net.ucanaccess.test.CounterTest;
 import net.ucanaccess.test.CreateTableTest;
 import net.ucanaccess.test.CrudTest;
 import net.ucanaccess.test.DropTableTest;
+import net.ucanaccess.test.ExternalResourcesTest;
 import net.ucanaccess.test.FunctionsTest;
 import net.ucanaccess.test.InsertBigTest;
 import net.ucanaccess.test.LoadTypesAccessTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.PasswordTest;
+import net.ucanaccess.test.RomanCharacterTest;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
@@ -56,6 +58,10 @@ public class AllTestsBase {
 		suite.addTestSuite(WorkloadTest.class);
 		suite.addTestSuite(PivotTest.class);
 		suite.addTestSuite(InsertBigTest.class);
+		suite.addTestSuite(RomanCharacterTest.class);
+	
+		suite.addTestSuite(ExternalResourcesTest.class);
+		
 		return suite;
 	}
 }
