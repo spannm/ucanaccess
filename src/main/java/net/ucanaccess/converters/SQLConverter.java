@@ -99,20 +99,21 @@ public class SQLConverter {
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	private static boolean supportsAccessLike = true;
+	
 	static{
-		noRomanCharacters.put("€", "EUR");
-		noRomanCharacters.put("¹", "1");
-		noRomanCharacters.put("²", "2");
-		noRomanCharacters.put("³", "3");
-		noRomanCharacters.put("¼", "1_4");
-		noRomanCharacters.put("½", "1_2");
-		noRomanCharacters.put("¾", "¾");
-		noRomanCharacters.put("Ð", "D");
-		noRomanCharacters.put("×", "X");
-		noRomanCharacters.put("Þ", "P");
-		noRomanCharacters.put("ð", "O");
-		noRomanCharacters.put("ý", "Y");
-		noRomanCharacters.put("þ", "P");
+		noRomanCharacters.put("\u20ac", "EUR");
+		noRomanCharacters.put("\u00B9", "1");
+		noRomanCharacters.put("\u00B2", "2");
+		noRomanCharacters.put("\u00B3", "3");
+		noRomanCharacters.put("\u00BC", "1_4");
+		noRomanCharacters.put("\u00BD", "1_2");
+		noRomanCharacters.put("\u00BE", "3_4");
+		noRomanCharacters.put("\u00D0", "D");
+		noRomanCharacters.put("\u00D7", "X");
+		noRomanCharacters.put("\u00DE", "P");
+		noRomanCharacters.put("\\00F0", "O");
+		noRomanCharacters.put("\\00FD", "Y");
+		noRomanCharacters.put("\\00FE", "P");
 	
 		
 	}
