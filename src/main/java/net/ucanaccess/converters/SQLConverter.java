@@ -111,9 +111,9 @@ public class SQLConverter {
 		noRomanCharacters.put("\u00D0", "D");
 		noRomanCharacters.put("\u00D7", "X");
 		noRomanCharacters.put("\u00DE", "P");
-		noRomanCharacters.put("\\00F0", "O");
-		noRomanCharacters.put("\\00FD", "Y");
-		noRomanCharacters.put("\\00FE", "P");
+		noRomanCharacters.put("\u00F0", "O");
+		noRomanCharacters.put("\u00FD", "Y");
+		noRomanCharacters.put("\u00FE", "P");
 	
 		
 	}
