@@ -29,7 +29,8 @@ import java.util.logging.Level;
 public class Logger {
 	public enum Messages{
 		HSQLDB_DRIVER_NOT_FOUND,
-		COMPLEX_TYPE_UNSUPPORTED
+		COMPLEX_TYPE_UNSUPPORTED,
+		KEEP_MIRROR_AND_OTHERS
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
@@ -73,6 +74,9 @@ public class Logger {
 	
 	public static void  logWarning(String warning){
 		System.err.println("WARNING:"+ warning);
+	}
+	public static void  logWarning(Messages cod){
+		logWarning( messageBundle.getString(cod.name()));
 	}
 	
 	public static void setLogPrintWriter(PrintWriter logPrintWriter) {
