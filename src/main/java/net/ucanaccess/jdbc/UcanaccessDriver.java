@@ -100,18 +100,31 @@ public final class UcanaccessDriver implements Driver {
 						.loadReference(mdb, ff, jko,pr.getProperty("password"));
 
 				if (!alreadyLoaded) {
-					if((useCustomOpener||(pr.containsKey("encrypt")
-							&& 
-							"true".equalsIgnoreCase(pr.getProperty("encript"))))
-							&&pr.containsKey("memory")
-							&&!"true".equalsIgnoreCase(pr
-							.getProperty("memory"))){
+					if(		(useCustomOpener||
+							(pr.containsKey("encrypt")&&"true".equalsIgnoreCase(pr.getProperty("encrypt")))
+							)
+							&&
+							(	(pr.containsKey("memory")&&!"true".equalsIgnoreCase(pr.getProperty("memory")))||
+									pr.containsKey("keepmirror")
+							)
+									){
 						ref.setEncryptHSQLDB(true);
 					}
+					
 					
 					if (pr.containsKey("memory")) {
 						ref.setInMemory("true".equalsIgnoreCase(pr
 								.getProperty("memory")));
+					}
+					if(pr.containsKey("keepmirror")){
+						ref.setInMemory(false);
+						if(ref.isEncryptHSQLDB()){
+							Logger.logWarning(Messages.KEEP_MIRROR_AND_OTHERS);
+						}else{
+							File dbMirror=new File(pr.getProperty("keepmirror"));
+							ref.setToKeepHsql(dbMirror);
+							
+						}
 					}
 					
 					if (pr.containsKey("showschema")) {
@@ -163,6 +176,7 @@ public final class UcanaccessDriver implements Driver {
 				
 				SQLWarning sqlw=null;
 				if (!alreadyLoaded) {
+					boolean toBeLoaded=!ref.loadedFromKeptMirror(session);
 					LoadJet la=		new LoadJet(ref.getHSQLDBConnection(session), ref
 							.getDbIO());
 					Logger.turnOffJackcessLog();
@@ -171,7 +185,7 @@ public final class UcanaccessDriver implements Driver {
 								.getProperty("sysschema")));
 					}
 					
-					
+					if(toBeLoaded)
 					la.loadDB();
 					as.put(mdb.getAbsolutePath(), ref);
 					sqlw=la.getLoadingWarnings();
