@@ -121,7 +121,7 @@ public final class UcanaccessDriver implements Driver {
 						if(ref.isEncryptHSQLDB()){
 							Logger.logWarning(Messages.KEEP_MIRROR_AND_OTHERS);
 						}else{
-							File dbMirror=new File(pr.getProperty("keepmirror"));
+							File dbMirror=new File(pr.getProperty("keepmirror")+mdb.getName().hashCode());
 							ref.setToKeepHsql(dbMirror);
 							
 						}
