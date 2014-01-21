@@ -614,7 +614,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getSchemaTerm() throws SQLException {
-		throw new FeatureNotSupportedException();
+		return null;
 	}
 
 	public String getSearchStringEscape() throws SQLException {
