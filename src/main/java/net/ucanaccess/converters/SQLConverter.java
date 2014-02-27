@@ -61,8 +61,8 @@ public class SQLConverter {
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH[\\s\n\r]+(?i)OWNERACCESS[\\s\n\r]+(?i)OPTION(\\W)";
-	private static final String DIGIT_STARTING_IDENTIFIERS = "(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
-	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z])+)(\\W)";
+	private static final String DIGIT_STARTING_IDENTIFIERS = "^(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
+	private static final String UNDERSCORE_IDENTIFIERS = "^(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	
