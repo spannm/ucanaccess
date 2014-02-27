@@ -48,11 +48,12 @@ public class TransactionTest extends UcanaccessTestBase {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
+			int i=getCount("select count(*) from T4", true);
 			st
 					.execute("INSERT INTO T4 (id,descr)  VALUES( 6666554,'nel mezzo del cammin di nostra vita')");
-			assertTrue(getCount("select count(*) from T4", false) == 0);
+			assertTrue(getCount("select count(*) from T4", false) == i);
 			super.ucanaccess.commit();
-			assertTrue(getCount("select count(*) from T4", true) == 1);
+			assertTrue(getCount("select count(*) from T4", true) == i+1);
 			
 		} finally {
 			if (st != null)
