@@ -272,6 +272,10 @@ public class LoadJet {
 							)
 							
 					){
+//						if(cdefaulT.startsWith("'")&&cdefaulT.endsWith("'")){
+//							cdefaulT="'"+cdefaulT.substring(1, cdefaulT.length()-1).replaceAll("'","''")+"'";
+//						}else
+						
 						cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
 					}
 					String guidExp = "GenGUID()";
@@ -282,7 +286,7 @@ public class LoadJet {
 									+ cl.getName() + " table "
 									+ cl.getTable().getName());
 						} else {
-							if (cdefaulT.endsWith(")")) {
+							//if (cdefaulT.endsWith(")")) {
 								arTrigger
 										.add("CREATE TRIGGER DEFAULT_TRIGGER"
 												+ (namingCounter++)
@@ -292,10 +296,11 @@ public class LoadJet {
 												+ ncn + " IS NULL THEN "
 												+ "SET NEW." + ncn + "= "
 												+ cdefaulT + " ; END IF");
-							} else
-								arTrigger.add("alter table " + ntn
-										+ " alter column " + ncn
-										+ " set default " + cdefaulT);
+//							} 
+//						else
+//								arTrigger.add("alter table " + ntn
+//										+ " alter column " + ncn
+//										+ " set default " + cdefaulT);
 						}
 					}
 				}
