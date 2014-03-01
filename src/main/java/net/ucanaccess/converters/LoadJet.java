@@ -289,8 +289,9 @@ public class LoadJet {
 								defaulT.toString().length()>cl.getLengthInUnits()
 							){
 								Logger.logWarning("Default values should start and end with a double quote,"+
-								" setting  single quote as part of the default value "+defaulT+
-								" could cause a data truncation error at runtime, because the column maxsize is "+cl.getLengthInUnits());
+								" the single quote is considered as part of the default value "+defaulT+" " +
+										"(column "+cl.getName()+",table "+cl.getTable().getName()+")."+
+								"\nIt could result in a data truncation error at runtime, because the column maxsize is "+cl.getLengthInUnits());
 							}
 								arTrigger
 										.add("CREATE TRIGGER DEFAULT_TRIGGER"
