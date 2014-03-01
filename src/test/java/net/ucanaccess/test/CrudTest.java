@@ -158,6 +158,7 @@ public class CrudTest extends UcanaccessTestBase {
 		rs.updateRow();
 		Object[][] ver = { { 6666554, "show must go off" } };
 		super.checkQuery("SELECT *  FROM T1", ver);
+		st.execute("delete from t1");
 		} 
 		finally {
 			if (rs != null)
