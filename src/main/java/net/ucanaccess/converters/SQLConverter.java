@@ -38,10 +38,17 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import com.healthmarketscience.jackcess.TableBuilder;
 
 public class SQLConverter {
-	private static final Pattern QUOTE_G_PATTERN = Pattern
-			.compile("\'(((([^'])*('')*))*)\'");
-	private static final Pattern DOUBLE_QUOTE_G_PATTERN = Pattern
-			.compile("\"(((([^\"])*(\"\")*))*)\"");
+	private static final Pattern QUOTE_S_PATTERN = Pattern
+			.compile("(')+");
+	private static final Pattern DOUBLE_QUOTE_S_PATTERN = Pattern
+			.compile("(\")+");	
+	private static final Pattern QUOTE_M_PATTERN = Pattern
+			.compile("'(([^'])*)'");
+	private static final Pattern DOUBLE_QUOTE_M_PATTERN = Pattern
+			.compile("\"(([^\"])*)\"");	
+	
+			
+	
 	private static final Pattern FIND_LIKE_PATTERN = Pattern
 			.compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
 	private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN = Pattern
@@ -65,7 +72,6 @@ public class SQLConverter {
 	private static final String UNDERSCORE_IDENTIFIERS = "^(\\W)((_)+([_a-zA-Z])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
-	
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 												 
@@ -117,6 +123,77 @@ public class SQLConverter {
 	
 		
 	}
+	
+	private static int[] getQuoteGroup(String s){
+			
+		if(s.indexOf("''")<0){
+			Matcher mtc= QUOTE_M_PATTERN.matcher(s);
+			return mtc.find()?new int[]{mtc.start(),mtc.end()}:null;
+			 
+		}
+		
+		else{
+			int[] ret=new int[]{-1,-1};
+			Pattern pt=QUOTE_S_PATTERN;
+			Matcher mc=pt.matcher(s);
+			while(mc.find()){
+				int start=mc.start();
+				int end=mc.end();
+				if((end-start)%2==0){
+					if(ret[0]==-1){
+						return new int[]{mc.start(),mc.end()};
+					}
+					
+					continue;
+				}else{
+					if(ret[0]==-1)ret[0]=mc.start();
+					else {
+						ret[1]=mc.end();
+						return ret;
+					}
+				}
+			}
+			return null;
+			
+		}
+
+	}
+	private static int[] getDoubleQuoteGroup(String s){
+		
+		if(s.indexOf("\"\"")<0){
+			Matcher mtc= DOUBLE_QUOTE_M_PATTERN.matcher(s);
+			return mtc.find()?new int[]{mtc.start(),mtc.end()}:null;
+		}
+		
+		else{
+			int[] ret=new int[]{-1,-1};
+			Pattern pt=DOUBLE_QUOTE_S_PATTERN;
+			Matcher mc=pt.matcher(s);
+			while(mc.find()){
+				int start=mc.start();
+				int end=mc.end();
+				if((end-start)%2==0){
+					if(ret[0]==-1){
+						return new int[]{mc.start(),mc.end()};
+					}
+
+					
+					continue;
+				}else{
+					if(ret[0]==-1)ret[0]=mc.start();
+					else {
+						ret[1]=mc.end();
+						return ret;
+					}
+				}
+			}
+			return null;
+			
+		}
+
+	}
+	
+	
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
 				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
@@ -359,7 +436,6 @@ public class SQLConverter {
 						"Timestamp'" + BIG_BANG + " $1'")
 				.replaceAll("#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
 						"Timestamp'" + BIG_BANG + " $1'+ 12 Hour");
-		;
 		return sql;
 	}
 
@@ -456,30 +532,29 @@ public class SQLConverter {
 	}
 
 	private static String escape(String sql) {
-		Pattern pd = DOUBLE_QUOTE_G_PATTERN;
-		Pattern ps = QUOTE_G_PATTERN;
+
 		int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
 		boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
 		String suff = enddq ? "" : sql.substring(li + 1);
 		suff = convertPartIdentifiers(suff);
 		String tsql = enddq ? sql : sql.substring(0, li + 1);
-		Matcher md = pd.matcher(tsql);
-		Matcher ms = ps.matcher(tsql);
-		boolean fd = md.find();
-		boolean fs = ms.find();
-		if (fd || fs) {
-			boolean inid = !fs || (fd && md.start(0) < ms.start(0));
+		int[] fd= getDoubleQuoteGroup(tsql);
+		int[] fs = getQuoteGroup(tsql);
+		if (fd !=null|| fs!=null) {
+			boolean inid = fs==null || (fd!=null && fd[0] < fs[0]);
 			String group, str;
-			Matcher mcr = inid ? md : ms;
-			group = mcr.group(1);
-			if (inid)
+			int[] mcr = inid ? fd : fs;
+			group = tsql.substring(mcr[0]+1, mcr[1]-1);
+			if (inid){
 				group = group.replaceAll("'", "''").replaceAll("\"\"", "\"");
-			str = tsql.substring(0, mcr.start(0));
+			}
+			str = tsql.substring(0, mcr[0]);
 			str = convertPartIdentifiers(str);
-			tsql = str + "'" + group + "'" + escape(tsql.substring(mcr.end(0)));
+			tsql = str + "'" + group + "'" + escape(tsql.substring(mcr[1]));
 		} else {
 			tsql = convertPartIdentifiers(tsql);
 		}
+
 		return tsql + suff;
 	}
 	public static void cleanEscaped() {
