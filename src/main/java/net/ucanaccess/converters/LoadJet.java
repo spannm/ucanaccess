@@ -47,6 +47,8 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
+import net.ucanaccess.util.Logger.Messages;
+
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
@@ -277,10 +279,9 @@ public class LoadJet {
 					String guidExp = "GenGUID()";
 					if (!guidExp.equals(defaulT)) {
 						if (!tryDefault(cdefaulT)) {
-							Logger.logWarning("Unknown expression:" + defaulT
-									+ " default value of  column "
-									+ cl.getName() + " table "
-									+ cl.getTable().getName());
+							
+							Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
+							""+ defaulT, cl.getName(), cl.getTable().getName());
 						} else {
 							
 							if(cl.getType()==DataType.TEXT
@@ -288,10 +289,8 @@ public class LoadJet {
 								defaulT.toString().startsWith("'")&&defaulT.toString().endsWith("'")&&
 								defaulT.toString().length()>cl.getLengthInUnits()
 							){
-								Logger.logWarning("Default values should start and end with a double quote,"+
-								" the single quote is considered as part of the default value "+defaulT+" " +
-										"(column "+cl.getName()+",table "+cl.getTable().getName()+")."+
-								"\nIt could result in a data truncation error at runtime, because the column maxsize is "+cl.getLengthInUnits());
+								Logger.logParametricWarning(Messages.DEFAULT_VALUES_DELIMETERS,
+										""+defaulT,cl.getName(),cl.getTable().getName(),""+cl.getLengthInUnits());
 							}
 								arTrigger
 										.add("CREATE TRIGGER DEFAULT_TRIGGER"
