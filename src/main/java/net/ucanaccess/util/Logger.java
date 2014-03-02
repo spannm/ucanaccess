@@ -30,7 +30,9 @@ public class Logger {
 	public enum Messages{
 		HSQLDB_DRIVER_NOT_FOUND,
 		COMPLEX_TYPE_UNSUPPORTED,
-		KEEP_MIRROR_AND_OTHERS
+		KEEP_MIRROR_AND_OTHERS,
+		UNKNOWN_EXPRESSION,
+		DEFAULT_VALUES_DELIMETERS
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
@@ -79,6 +81,9 @@ public class Logger {
 		logWarning( messageBundle.getString(cod.name()));
 	}
 	
+	public static void  logParametricWarning(Messages cod,String... par){
+		logWarning(String.format(messageBundle.getString(cod.name()),(Object[])par));
+	}	
 	public static void setLogPrintWriter(PrintWriter logPrintWriter) {
 		Logger.logPrintWriter = logPrintWriter;
 	}
