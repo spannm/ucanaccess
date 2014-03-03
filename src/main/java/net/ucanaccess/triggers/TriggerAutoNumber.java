@@ -42,7 +42,7 @@ public class TriggerAutoNumber extends TriggerBase {
 		if (conn.isFeedbackState())
 			return;
 		try {
-			Table t = conn.getDbIO().getTable(tableName);
+			Table t = getTable(tableName,conn);
 			if(t==null)throw new RuntimeException(Logger.getMessage("TABLE_DOESNT_EXIST")+" :"+tableName);
 			int i = 0;
 			for (Column cli : t.getColumns()) {
