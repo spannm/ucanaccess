@@ -35,6 +35,7 @@ import net.ucanaccess.test.LoadTypesAccessTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.PasswordTest;
 import net.ucanaccess.test.NoRomanCharacterTest;
+import net.ucanaccess.test.RegexTest;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
@@ -60,6 +61,7 @@ public class AllTestsBase {
 		suite.addTestSuite(InsertBigTest.class);
 		suite.addTestSuite(NoRomanCharacterTest.class);
 		suite.addTestSuite(ExternalResourcesTest.class);
+		suite.addTestSuite(RegexTest.class);
 		
 		return suite;
 	}

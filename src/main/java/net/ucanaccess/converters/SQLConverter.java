@@ -68,8 +68,8 @@ public class SQLConverter {
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH[\\s\n\r]+(?i)OWNERACCESS[\\s\n\r]+(?i)OPTION(\\W)";
-	private static final String DIGIT_STARTING_IDENTIFIERS = "^(\\W)(([0-9])+([_a-zA-Z])+)(\\W)";
-	private static final String UNDERSCORE_IDENTIFIERS = "^(\\W)((_)+([_a-zA-Z])+)(\\W)";
+	private static final Pattern DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)(([0-9])+(([_a-zA-Z])+([0-9])*)+)(\\W)");
+	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	private static final Pattern QUOTED_ALIAS = Pattern
@@ -478,7 +478,7 @@ public class SQLConverter {
 		if ((init = sql.indexOf("[")) != -1) {
 			int end = sql.indexOf("]");
 			if (end < init)
-				return convertSQLTokens(sql);
+				return convertResidualSQL(sql);
 			String content = sql.substring(init + 1, end);
 			if (content.indexOf(" ") > 0) {
 				String tryContent = " " + content + " ";
@@ -492,16 +492,37 @@ public class SQLConverter {
 			content = basicEscapingIdentifier(content).toUpperCase();
 			String subs =!isKeyword&&( content.indexOf(" ") > 0
 					|| NO_ALFANUMERIC.matcher(content).find()) ? "\"" : " ";
-			sql = convertSQLTokens(sql.substring(0, init)) + subs + content
+			sql = convertResidualSQL(sql.substring(0, init)) + subs + content
 					+ subs + convertIdentifiers(sql.substring(end + 1));
 		} else {
-			sql = convertSQLTokens(sql);
+			sql = convertResidualSQL(sql);
 		}
 		return sql;
 	}
 	
+	private static String convertResidualSQL(String sql){
+		sql=convertSQLTokens( sql);
+		return  replaceDigitStartingIdentifiers(sql.replaceAll(
+						UNDERSCORE_IDENTIFIERS, "$1Z$2$5"));
+	}
+	
+		
 	private static String convertSQLTokens(String sql){
-		return  replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||")))));
+		return replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||")))));
+	}
+	
+	private static String replaceDigitStartingIdentifiers(String sql){
+		Matcher mtc = DIGIT_STARTING_IDENTIFIERS.matcher(sql);
+		if( mtc.find()){
+			String prefix=(mtc.group(0).matches("\\.([0-9])+[Ee]([0-9])+\\s")||
+			   mtc.group(0).matches("\\.([0-9])+[Ee][-+]")	
+			)?"":"Z_";
+			String build=mtc.group(1)+prefix+mtc.group(2)+mtc.group(7);
+			sql=sql.substring(0, mtc.start())+
+			build+
+			replaceDigitStartingIdentifiers(sql.substring(mtc.end()));
+		}
+		return sql;
 	}
 	
 
@@ -514,9 +535,7 @@ public class SQLConverter {
 	}
 
 	private static String convertPartIdentifiers(String sql) {
-		String sqlc = convertIdentifiers(sql).replaceAll(
-				DIGIT_STARTING_IDENTIFIERS, "$1Z_" + "$2$5").replaceAll(
-				UNDERSCORE_IDENTIFIERS, "$1Z" + "$2$5");
+		String sqlc = convertIdentifiers(sql);
 		sqlc = convertXescaped(sqlc);
 		for (Map.Entry<String, String> entry : identifiersContainingKeyword
 				.entrySet()) {
