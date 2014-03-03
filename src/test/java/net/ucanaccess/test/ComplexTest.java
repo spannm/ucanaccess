@@ -101,8 +101,11 @@ public class ComplexTest extends UcanaccessTestBase {
 	
 	public void testComplexRoolback() throws SQLException, IOException, ParseException, SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		PreparedStatement ps = null;
+		int i=getCount("select count(*) from TABLE1", true);
 		try {
+			
 			super.ucanaccess.setAutoCommit(false);
+			
 			Method mth=UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[]{boolean.class});
 			mth.setAccessible(true);
 			mth.invoke(super.ucanaccess, new Object[]{Boolean.TRUE});
@@ -135,6 +138,6 @@ public class ComplexTest extends UcanaccessTestBase {
 		this.ucanaccess=super.getUcanaccessConnection();
 		dump("select * from TABLE1");
 		 checkQuery("select * from TABLE1  WHERE ID='row12' order by id");
-		 assertTrue(getCount("select count(*) from TABLE1", true) == 7);
+		 assertTrue(getCount("select count(*) from TABLE1", true) == i);
 	}
 }
