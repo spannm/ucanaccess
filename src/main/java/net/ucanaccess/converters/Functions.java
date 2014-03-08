@@ -120,10 +120,25 @@ public class Functions {
 	public static Short cint(boolean value) throws UcanaccessSQLException {
 		return (short)(value?-1:0);
 	}
-
+	
 	@FunctionType(functionName = "CLONG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
 	public static Integer clong(Double value) throws UcanaccessSQLException {
+		return clng(value);
+	}
+	
+	@FunctionType(functionName = "CLONG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer clong(Integer value) throws UcanaccessSQLException {
+		return value;
+	}
+
+	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
+	public static Integer clng(Double value) throws UcanaccessSQLException {
 		return (int) Math.floor(value + 0.499999999999999d);
+	}
+	
+	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer clng(Integer value) throws UcanaccessSQLException {
+		return value;
 	}
 	
 	
@@ -141,6 +156,11 @@ public class Functions {
 	@FunctionType(functionName = "CSTR", argumentTypes = { AccessType.YESNO }, returnType = AccessType.MEMO)
 	public static String cstr(Boolean value) throws UcanaccessSQLException {
 		return cstr((Object) value);
+	}
+	
+	@FunctionType(functionName = "CSTR", argumentTypes = { AccessType.TEXT }, returnType = AccessType.MEMO)
+	public static String cstr(String value) throws UcanaccessSQLException {
+		return value;
 	}
 
 	@FunctionType(functionName = "CSTR", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.MEMO)
@@ -469,6 +489,18 @@ public class Functions {
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.MEMO)
 	public static String iif(boolean b, String o, String o1) {
+		return b ? o : o1;
+	}
+	
+	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
+			AccessType.LONG, AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer iif(boolean b, Integer o, Integer o1) {
+		return b ? o : o1;
+	}
+	
+	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
+			AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static Double iif(boolean b, Double o, Double o1) {
 		return b ? o : o1;
 	}
 
