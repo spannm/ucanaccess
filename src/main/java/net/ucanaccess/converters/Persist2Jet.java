@@ -333,12 +333,16 @@ public class Persist2Jet {
 		if(defaults!=null||required!=null)
 		for(Column cl:cols){
 			PropertyMap map=cl.getProperties();
+			boolean changed=false;
 			if(defaults!=null&&defaults[j]!=null){
+				changed=true;
 				map.put(PropertyMap.DEFAULT_VALUE_PROP,DataType.TEXT,defaults[j]);
 			}
 			if(required!=null&&required[j]!=null &&required[j]){
+				changed=true;
 					map.put(PropertyMap.REQUIRED_PROP,DataType.BOOLEAN,required[j]);
 			}
+			if(changed)
 			map.save();
 			
 			j++;
