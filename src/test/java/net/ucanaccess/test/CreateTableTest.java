@@ -22,6 +22,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -64,6 +65,24 @@ public class CreateTableTest extends UcanaccessTestBase {
 				st.close();
 		}
 	}
+	
+	public void testCreatePs() throws SQLException, IOException {
+		PreparedStatement ps = null;
+		try {
+			ps = super.ucanaccess.prepareStatement(" CREATE \nTABLE BBB ( baaaa \nvarchar(2) PRIMARY KEY)");
+			ps.execute(" CREATE TABLE BBB ( baaaa text PRIMARY KEY,b text)");
+			
+			throw new RuntimeException("To block DDL with PreparedStatement");
+		}catch(SQLException ex){
+			System.out.println("ok");
+		}
+		
+		 finally {
+			if (ps != null)
+				ps.close();
+		}
+	}
+	
 	
 	public void testCreateAsSelect() throws SQLException, IOException {
 		Statement st = null;
