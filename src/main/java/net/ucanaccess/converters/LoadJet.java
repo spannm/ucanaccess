@@ -231,7 +231,9 @@ public class LoadJet {
 						.append(" ").append(htype);
 				PropertyMap pm = cl.getProperties();
 				Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-				if (required != null && ((Boolean) required)) {
+				if (required != null&&
+						required instanceof Boolean && ((Boolean) required)		
+						) {
 					sbC.append(" NOT NULL ");
 				}
 				comma = ",";
