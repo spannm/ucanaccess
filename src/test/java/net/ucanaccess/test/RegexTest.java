@@ -75,9 +75,9 @@ public class RegexTest extends UcanaccessTestBase {
 		try {
 			st = super.ucanaccess.createStatement();
 			st.execute(getStatement(s.replaceAll("'", "''"),"'"));
-			System.out.println("ok1");
+			
 			st.execute(getStatement(s.replaceAll("\"", "\"\""),"\""));
-			System.out.println("ok2");
+			
 		} 
 		catch(SQLException sqle ){
 			System.err.println(getStatement(s,"\""));
@@ -92,7 +92,7 @@ public class RegexTest extends UcanaccessTestBase {
 	
 	
 	private String getStatement(String s,String dlm){
-		System.out.println("delimiter:"+dlm+ " string:"+s);
+		
 		return "INSERT INTO reg (descr)  VALUES(  "+dlm+s+dlm+")";
 	}
 	
