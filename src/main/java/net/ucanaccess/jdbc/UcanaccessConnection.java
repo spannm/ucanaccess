@@ -444,6 +444,11 @@ public class UcanaccessConnection implements Connection {
 	private String prepare(String sql) throws SQLException {
 		if (getAutoCommit())
 			checkLastModified();
+		
+		if(SQLConverter.checkDDL(sql)){
+			throw new UcanaccessSQLException(UcanaccessSQLException.ExceptionMessages.STATEMENT_DDL);
+		}
+		
 		return SQLConverter.convertSQL(sql,this);
 	}
 
