@@ -115,6 +115,11 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select  Clong(8.52), Clong(8.49 ),Clong(5.5)  from t234  ",
 				9, 8, 5);
 	}
+	
+	public void testCLng() throws SQLException, IOException, ParseException {
+		checkQuery("select  Clng(8.52), Clng(8.49 ),Clng(5.5)  from t234  ",
+				9, 8, 5);
+	}
 
 	public void testCDec() throws SQLException, IOException, ParseException {
 		checkQuery("select cdec(8.45 * 0.005 * 0.01) from t234  ", 0.0004225);
@@ -209,6 +214,11 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery(
 				"select  IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') from t234 ",
 				"pl'uto\" \" cccc", "pl'uto\" \" cccc");
+	
+		checkQuery(
+				"select  IIf(true,false,true) from t234 ",
+				false);
+	
 	}
 
 	public void testInstr() throws SQLException, IOException {
