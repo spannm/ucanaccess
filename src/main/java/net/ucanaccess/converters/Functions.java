@@ -489,20 +489,44 @@ public class Functions {
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.MEMO)
 	public static String iif(boolean b, String o, String o1) {
-		return b ? o : o1;
+		return (String)iif(b,(Object)o,(Object) o1);
 	}
 	
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.LONG, AccessType.LONG }, returnType = AccessType.LONG)
 	public static Integer iif(boolean b, Integer o, Integer o1) {
-		return b ? o : o1;
+		return (Integer)iif(b,(Object)o,(Object) o1);
 	}
 	
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static Double iif(boolean b, Double o, Double o1) {
-		return b ? o : o1;
+		return (Double)iif(b,(Object)o,(Object) o1);
 	}
+	
+	
+	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
+			AccessType.YESNO, AccessType.YESNO }, returnType = AccessType.YESNO)
+	public static Boolean iif(Boolean b, Boolean o, Boolean o1) {
+			
+		return (Boolean)iif(b,(Object)o,(Object) o1);
+	}
+	
+	
+	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
+			AccessType.DATETIME, AccessType.DATETIME }, returnType = AccessType.DATETIME)
+	public static Timestamp iif(Boolean b, Timestamp o, Timestamp o1) {
+		return (Timestamp)iif(b,(Object)o,(Object) o1);
+	}
+	
+	
+	private static Object iif(Boolean b, Object o, Object o1) {
+		if(b==null)	b=Boolean.FALSE;
+			return b ? o : o1;
+    }
+	
+	
+	
 
 	@FunctionType(functionName = "INSTR", argumentTypes = { AccessType.LONG,
 			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.LONG)
