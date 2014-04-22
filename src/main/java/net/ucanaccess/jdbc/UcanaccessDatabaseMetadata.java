@@ -799,8 +799,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	private String normalizeName(String table) {
-		
-		if(table == null) return null; 
+		if(table==null||table.trim().length()==0)return table;
 		if(table.indexOf("%")>=0) return table;
 		else return SQLConverter.basicEscapingIdentifier(
 				table).toUpperCase();
