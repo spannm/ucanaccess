@@ -168,4 +168,40 @@ public class CrudTest extends UcanaccessTestBase {
 			
 		}
 	}
+	
+	
+	public void testInsertRS() throws SQLException, IOException {
+		Statement st = null;
+		ResultSet rs =null;
+		try {
+			 super.ucanaccess.setAutoCommit(false);
+	    st = super.ucanaccess.createStatement();
+		int id = 6666554;
+		st.execute("delete from t1");
+		st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id
+				+ ",'tre canarini volano su e cadono')");
+		PreparedStatement ps = super.ucanaccess.prepareStatement(
+				"SELECT *  FROM T1", ResultSet.TYPE_FORWARD_ONLY,
+				ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		rs = ps.executeQuery();
+		 rs.moveToInsertRow();
+		 rs.updateInt(1,4);
+		  rs.updateString(2, "Growing old in rural pleaces");
+		
+		  rs.insertRow();
+		    ps.getConnection().commit();
+		Object[][] ver = {{ 4, "Growing old in rural pleaces" } ,{ 6666554, "tre canarini volano su e cadono" } };
+		super.checkQuery("SELECT *  FROM T1 order by id", ver);
+		st.execute("delete from t1");
+		} 
+		finally {
+			if (rs != null)
+				rs.close();
+			if (st != null)
+				st.close();
+			
+		}
+	}
+	
+	
 }
