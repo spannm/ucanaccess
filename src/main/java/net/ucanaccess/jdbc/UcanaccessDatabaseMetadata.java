@@ -280,6 +280,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			throws SQLException {
 		try {
 			table = normalizeName(table);
+			if(this.connection.isShowSchema())
+				return wrapped.getExportedKeys("PUBLIC",
+						"PUBLIC", table);
+			
 			return new MetadataResultSet(wrapped.getExportedKeys("PUBLIC",
 					"PUBLIC", table));
 		} catch (SQLException e) {
@@ -325,6 +329,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			throws SQLException {
 		try {
 			table = normalizeName(table);
+			if(this.connection.isShowSchema())
+				return wrapped.getImportedKeys("PUBLIC",
+						"PUBLIC", table);
 			return new MetadataResultSet(wrapped.getImportedKeys("PUBLIC",
 					"PUBLIC", table));
 		} catch (SQLException e) {
@@ -531,6 +538,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			throws SQLException {
 		try {
 			table = normalizeName(table);
+			if(this.connection.isShowSchema())
+				return wrapped.getPrimaryKeys("PUBLIC",
+						"PUBLIC", table);
 			return new MetadataResultSet(wrapped.getPrimaryKeys("PUBLIC",
 					"PUBLIC", table));
 		} catch (SQLException e) {
