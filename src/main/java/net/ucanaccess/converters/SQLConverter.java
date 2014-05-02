@@ -592,7 +592,7 @@ public class SQLConverter {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
 	    String escaped = name
-						.replaceAll("[/\\\\$%^:-\\?]", "_").replaceAll("~", "M_")
+						.replaceAll("[/\\\\$%^:-]", "_").replaceAll("~", "M_").replaceAll("\\?", "_")
 								.replaceAll("\\.", "_").replaceAll("\'", "").replaceAll("#", "_")
 				.replaceAll("\"", "").replaceAll("\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_");
 		
