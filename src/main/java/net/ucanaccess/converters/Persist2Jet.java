@@ -187,7 +187,7 @@ public class Persist2Jet {
 			
 			ColumnBuilder cb=new ColumnBuilder(rs.getString("COLUMN_NAME"));
 			short length = (short) rs.getInt("COLUMN_SIZE");
-			byte precision=(byte) rs.getInt("DECIMAL_DIGITS");
+			byte scale=(byte) rs.getInt("DECIMAL_DIGITS");
 			DataType dt = null;
 			if (length == 0&&types!=null) {
 				if (types[i]
@@ -219,15 +219,18 @@ public class Persist2Jet {
 			cb.setLengthInUnits((short)dt.getFixedSize());
 			}
 			
-		
-			
 			if (dt == null) {
-				dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
+				if(types[i].equalsIgnoreCase(AccessType.NUMERIC.name())){
+					dt=DataType.NUMERIC;
+				}
+				else{
+					dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
+				}
 				cb.setType(dt);
 				if(length>0&&dt.equals(DataType.TEXT))
 					cb.setLengthInUnits(length);
-				if(precision>0)
-				cb.setPrecision(precision);
+				if(scale>0)
+				cb.setScale(scale);
 			}
 
 			
