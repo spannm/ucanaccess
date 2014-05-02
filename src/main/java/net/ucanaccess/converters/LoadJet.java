@@ -223,12 +223,24 @@ public class LoadJet {
 			String comma = "";
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
-				String htype = cl.getType().equals(DataType.TEXT) ? "VARCHAR("
-						+ cl.getLengthInUnits() + ")" : TypesMap.map2hsqldb(cl
+				String htype ;
+				if( cl.getType().equals(DataType.TEXT)){
+					htype="VARCHAR("
+						+ cl.getLengthInUnits() + ")" ;}
+				else if(cl.getType().equals(DataType.NUMERIC)&&cl.getScale()>0){
+					htype="NUMERIC("+
+							(cl.getPrecision()>0?cl.getPrecision():100)+","+
+							cl.getScale()+")";
+				}
+				else{
+					htype=TypesMap.map2hsqldb(cl
 						.getType());
+				}
 				sbC.append(comma)
 						.append(SQLConverter.escapeIdentifier(cl.getName()))
 						.append(" ").append(htype);
+				
+				
 				PropertyMap pm = cl.getProperties();
 				Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
 				if (required != null&&
