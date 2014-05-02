@@ -220,7 +220,7 @@ public class Persist2Jet {
 			}
 			
 			if (dt == null) {
-				if(types[i].equalsIgnoreCase(AccessType.NUMERIC.name())){
+				if( types!=null&&types[i]!=null&&types[i].equalsIgnoreCase(AccessType.NUMERIC.name())){
 					dt=DataType.NUMERIC;
 				}
 				else{
