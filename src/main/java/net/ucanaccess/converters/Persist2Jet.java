@@ -229,8 +229,12 @@ public class Persist2Jet {
 				cb.setType(dt);
 				if(length>0&&dt.equals(DataType.TEXT))
 					cb.setLengthInUnits(length);
-				if(scale>0)
-				cb.setScale(scale);
+				if(scale>0){
+					cb.setScale(scale);
+					if(length>0){
+						cb.setPrecision(length);
+					}
+				}
 			}
 
 			
