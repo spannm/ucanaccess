@@ -74,6 +74,8 @@ public class DDLCommandEnlist {
 		}
 	}
 	
+	
+	
 	private void enlistDropTable(String sql, DDLType ddlType) {
 		String tn = ddlType.getDBObjectName(sql);
 		String execId = UcanaccessConnection.getCtxExcId();
@@ -102,6 +104,9 @@ public class DDLCommandEnlist {
 			String[] colDecls = tknt.split("[\\s\n\r]+");
 			if (colDecls.length < 2) {
 				throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
+			}
+			if(colDecls[1]!=null&&colDecls[1].toUpperCase().startsWith("NUMERIC(")){
+				colDecls[1]="NUMERIC";
 			}
 			typeList.add(colDecls[1]);
 			
