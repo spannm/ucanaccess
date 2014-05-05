@@ -163,8 +163,12 @@ public final class UcanaccessDriver implements Driver {
 					if (!pwd.equals(pr.get("password")))
 						throw new UcanaccessSQLException(
 								ExceptionMessages.NOT_A_VALID_PASSWORD);
-					session.setPassword(pwd);
+					
+				}else if(pr.containsKey("jackcessopener")){
+					String mpwd=pr.getProperty("password");
+					session.setPassword(mpwd);
 				}
+				
 				String user = pr.getProperty("user");
 				if (user != null) {
 					session.setUser(user);
