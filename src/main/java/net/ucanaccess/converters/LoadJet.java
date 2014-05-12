@@ -55,6 +55,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.query.Query;
@@ -225,8 +226,10 @@ public class LoadJet {
 			for (Column cl : lc) {
 				String htype ;
 				if( cl.getType().equals(DataType.TEXT)){
+					int ln=ff1997?cl.getLength():cl.getLengthInUnits();
 					htype="VARCHAR("
-						+ cl.getLengthInUnits() + ")" ;}
+						+ ln + ")" ;
+					}
 				else if(cl.getType().equals(DataType.NUMERIC)&&cl.getScale()>0){
 					htype="NUMERIC("+
 							(cl.getPrecision()>0?cl.getPrecision():100)+","+
@@ -699,16 +702,22 @@ public class LoadJet {
 			while (lq.size() > 0) {
 				ArrayList<Query> arq = new ArrayList<Query>();
 				for (Query q : lq) {
-					String qtxt = q.toSQLString().toLowerCase();
+					String qtxt =null;
+					boolean qryGot=true;
+					try{
+					 qtxt = q.toSQLString().toLowerCase();
+					}catch(Exception ignore){
+						qryGot=false;
+					}
 					boolean foundDep = false;
-					if (!heavy)
+					if (qryGot&&!heavy)
 						for (String name : arn) {
 							if (qtxt.indexOf(name) != -1) {
 								foundDep = true;
 								break;
 							}
 						}
-					if (!foundDep && loadView(q)) {
+					if (qryGot&&!foundDep && loadView(q)) {
 						arq.add(q);
 						arn.remove(q.getName());
 					}
@@ -735,13 +744,19 @@ public class LoadJet {
 	private LogsFlusher logsFlusher = new LogsFlusher();
 	private TablesLoader tablesLoader = new TablesLoader();
 	private TriggersLoader triggersGenerator = new TriggersLoader();
-	private ViewsLoader viewsLoader = new ViewsLoader();
+	 private ViewsLoader viewsLoader = new ViewsLoader();
 	private boolean sysSchema;
+	private boolean ff1997;
 
 	public LoadJet(Connection conn, Database dbIO) {
 		super();
 		this.conn = conn;
 		this.dbIO = dbIO;
+		try {
+			this.ff1997= FileFormat.V1997.equals(this.dbIO.getFileFormat());
+		} catch (Exception ignore) {
+			// Logger.logWarning(e.getMessage());
+		}
 	}
 	
 	public void loadDefaultValues(Table t) throws SQLException, IOException{
