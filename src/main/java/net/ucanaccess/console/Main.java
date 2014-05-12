@@ -71,6 +71,7 @@ public class Main {
 	      }catch(IOException e){
 	    	  DatabaseBuilder dbb=new  DatabaseBuilder();
 	    	  dbb.setReadOnly(true);
+	    	  dbb.setFile(fl);
 		      db= dbb.open();
 		
 	    }
