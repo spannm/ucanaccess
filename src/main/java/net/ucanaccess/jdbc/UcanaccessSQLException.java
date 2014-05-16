@@ -23,6 +23,8 @@ package net.ucanaccess.jdbc;
 
 import java.sql.SQLException;
 
+import org.hsqldb.error.ErrorCode;
+
 
 import net.ucanaccess.util.Logger;
 
@@ -80,7 +82,7 @@ public class UcanaccessSQLException extends SQLException {
 	public static String explaneCause(Throwable cause){
 		if(cause instanceof SQLException){
 			SQLException se=(SQLException)cause;
-			if(se.getErrorCode()==-5562){
+			if(se.getErrorCode()==-ErrorCode.X_42562){
 				return cause.getMessage()+" "+Logger.getMessage(ExceptionMessages.INVALID_TYPES_IN_COMBINATION.name());
 			}
 		}
