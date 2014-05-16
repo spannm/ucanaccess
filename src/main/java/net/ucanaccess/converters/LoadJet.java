@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -36,10 +37,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.hsqldb.error.ErrorCode;
+
 
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
@@ -189,9 +196,10 @@ public class LoadJet {
 			logs.clear();
 		}
 	}
-
+	
+	
 	private final class TablesLoader {
-		private static final int HSQL_FK_ALREADY_EXISTS = -5528;
+		private static final int HSQL_FK_ALREADY_EXISTS = -ErrorCode.X_42528;   // -5528;
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
 		
@@ -621,8 +629,14 @@ public class LoadJet {
 
 	private final class ViewsLoader {
 		private HashMap<String,String> notLoaded = new HashMap<String,String>();
-
+		private static final int OBJECT_ALREADY_EXISTS=-ErrorCode.X_42504;
+		
+		
 		private boolean loadView(Query q) throws SQLException {
+			return loadView(q,null);
+		}
+		
+		private boolean loadView(Query q, String queryWKT) throws SQLException {
 			String qnn = SQLConverter.basicEscapingIdentifier(q.getName());
 			if(qnn==null){
 				return false;
@@ -631,7 +645,7 @@ public class LoadJet {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
 			String escqn = qnn.indexOf(' ') > 0 ? "[" + qnn + "]" : qnn;
-			String querySQL = q.toSQLString();
+			String querySQL =queryWKT==null? q.toSQLString():queryWKT;
 			Pivot pivot = null;
 			if (q.getType().equals(Query.Type.CROSS_TAB)) {
 				pivot = new Pivot(conn);
@@ -659,8 +673,14 @@ public class LoadJet {
 			} 
 			
 			catch (Exception e) {
+				if(e instanceof SQLSyntaxErrorException&&queryWKT==null&&((SQLSyntaxErrorException)e).getErrorCode()==OBJECT_ALREADY_EXISTS){
+					return loadView( q, solveAmbiguous(querySQL));
+				}
 				String cause=UcanaccessSQLException.explaneCause(e);
+				
 				this.notLoaded.put(q.getName(),": "+cause);
+				
+				
 				if (!err) {
 					Logger.log("Error occured while loading:" + q.getName());
 					Logger.log("Converted view was :" + v);
@@ -672,6 +692,53 @@ public class LoadJet {
 		}
 
 	
+		
+		
+		private  String solveAmbiguous(String sql) {
+			sql=sql.replaceAll("[\n\r]", " ");
+			Pattern pt=Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
+			Matcher mtc =pt.matcher(sql);
+			if(mtc.find()){
+				String select =mtc.group(2);
+				String pre=mtc.group(1)==null?"":mtc.group(1);
+				String[] splitted=select.split(",",-1);
+				StringBuffer sb=new StringBuffer (pre+" select ");
+				LinkedList<String> lkl=new LinkedList<String>();
+				
+				for(String s:splitted){
+					int j=s.lastIndexOf(".");
+					
+					Pattern aliasPt=Pattern
+					.compile("[\\s\n\r]+(?i)AS[\\s\n\r]+");
+					boolean alias=aliasPt.matcher(s).find();
+					if(j<0||alias){
+						lkl.add(s);
+					}else{
+						String k=s.substring(j+1);
+						if(lkl.contains(k)){
+							int idx=lkl.indexOf(k);
+							String old=lkl.get(lkl.indexOf(k));
+							lkl.remove(old);
+							lkl.add(idx,splitted[idx]+ " AS ["+splitted[idx] +"]");
+							lkl.add(s + " AS ["+s+"]");
+						}else{
+							lkl.add(k);
+						}
+						
+					}
+				}
+				String comma="";
+				for(String s:lkl){
+					sb.append(comma).append(s);
+					
+					comma=",";
+				}
+				sb.append(" FROM ").append(mtc.group(4)); 
+			
+				return sb.toString();
+			}
+			else return sql;
+		}
 		private void loadViews() throws SQLException, IOException {
 			List<Query> lq = null;
 			try {
