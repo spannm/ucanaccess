@@ -67,6 +67,7 @@ public class DBReference {
 	private String pwd;
 	private JackcessOpenerInterface jko;
 	private Map<String, String> externalResourcesMapping;
+	private boolean firstConnection=true;
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -300,26 +301,48 @@ public class DBReference {
 	public Database getDbIO() {
 		return dbIO;
 	}
-
+   private void setIgnoreCase(Connection conn) throws SQLException{
+	   Statement st = null;
+		try {
+			st = conn.createStatement();
+			st.execute("set ignorecase true");
+			
+		} catch (Exception w) {
+		} finally {
+			if (st != null)
+				st.close();
+		}
+   }
+	
+	
+   private void setSintax(Connection conn) throws SQLException{
+	   Statement st = null;
+		try {
+			st = conn.createStatement();
+			st.execute("SET DATABASE SQL SYNTAX ora TRUE");
+			
+		} catch (Exception w) {
+		} finally {
+			if (st != null)
+				st.close();
+		}
+   }
+	
 	public Connection getHSQLDBConnection(Session session) throws SQLException {
-		Connection conn;
-		conn = DriverManager.getConnection(this.getHsqlUrl(session),
+		Connection conn= DriverManager.getConnection(this.getHsqlUrl(session),
 				session.getUser() == null ? "Admin" : session.getUser(),
 				session.getPassword());
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
 		if (session.isIgnoreCase()) {
-			Statement st = null;
-			try {
-				st = conn.createStatement();
-				st.execute("set ignorecase true");
-			} catch (Exception w) {
-			} finally {
-				if (st != null)
-					st.close();
-			}
+			setIgnoreCase( conn);
 		}
+		if(this.firstConnection){
+			setSintax(conn);
+			this.firstConnection=false;
+		}
+		
 		conn.setAutoCommit(false);
 		return conn;
 	}
