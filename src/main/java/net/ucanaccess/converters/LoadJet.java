@@ -690,20 +690,18 @@ public class LoadJet {
 				return false;
 			}
 		}
-
 	
-		
-		
 		private  String solveAmbiguous(String sql) {
-			sql=sql.replaceAll("[\n\r]", " ");
-			Pattern pt=Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
-			Matcher mtc =pt.matcher(sql);
-			if(mtc.find()){
-				String select =mtc.group(2);
-				String pre=mtc.group(1)==null?"":mtc.group(1);
-				String[] splitted=select.split(",",-1);
-				StringBuffer sb=new StringBuffer (pre+" select ");
-				LinkedList<String> lkl=new LinkedList<String>();
+			try{
+				sql=sql.replaceAll("[\n\r]", " ");
+				Pattern pt=Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
+				Matcher mtc =pt.matcher(sql);
+				if(mtc.find()){
+					String select =mtc.group(2);
+					String pre=mtc.group(1)==null?"":mtc.group(1);
+					String[] splitted=select.split(",",-1);
+					StringBuffer sb=new StringBuffer (pre+" select ");
+					LinkedList<String> lkl=new LinkedList<String>();
 				
 				for(String s:splitted){
 					int j=s.lastIndexOf(".");
@@ -719,12 +717,11 @@ public class LoadJet {
 							int idx=lkl.indexOf(k);
 							String old=lkl.get(lkl.indexOf(k));
 							lkl.remove(old);
-							lkl.add(idx,splitted[idx]+ " AS ["+splitted[idx] +"]");
-							lkl.add(s + " AS ["+s+"]");
+							lkl.add(idx,splitted[idx]+ " AS ["+splitted[idx].trim() +"]");
+							lkl.add(s + " AS ["+s.trim()+"]");
 						}else{
 							lkl.add(k);
 						}
-						
 					}
 				}
 				String comma="";
@@ -738,7 +735,11 @@ public class LoadJet {
 				return sb.toString();
 			}
 			else return sql;
+				}catch(Exception e){
+					return sql;
+			}
 		}
+		
 		private void loadViews() throws SQLException, IOException {
 			List<Query> lq = null;
 			try {
