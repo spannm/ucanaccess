@@ -23,6 +23,7 @@ package net.ucanaccess.test;
 
 import java.io.IOException;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -65,7 +66,24 @@ public class BatchTest extends UcanaccessTestBase {
 		}
 	}
 	
-	
+	public void testBatchPS() throws SQLException, IOException {
+		PreparedStatement st = null;
+		try {
+			st = super.ucanaccess.prepareStatement("UPDATE T1 SET [name]=?,age=? ");
+			
+			st.setString(1, "ciao");
+			st.setInt(2, 23);
+			st.addBatch();
+			st.setString(1, "ciao1");
+			st.setInt(2, 43);
+			st.addBatch();
+			st.executeBatch();
+			checkQuery("select * from t1");
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
 	
 	
 }
