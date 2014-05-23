@@ -72,6 +72,7 @@ public class UcanaccessConnection implements Connection {
 	private Session session;
 	private SQLWarning warnings;
 	private String url;
+	final static String BATCH_ID="BATCH_ID";
 
 	public boolean isTestRollback() {
 		return testRollback;
@@ -130,7 +131,7 @@ public class UcanaccessConnection implements Connection {
 				|| c4io.getType().equals(TYPES.DELETE)) {
 			ICommand last = commands.size() > 0 ? commands.getLast() : null;
 			ICursorCommand c4ioc = (ICursorCommand) c4io;
-			if (last != null && last.getExecId().equals(c4io.getExecId())
+			if (last != null&&! last.getExecId().equals(BATCH_ID) && last.getExecId().equals(c4io.getExecId())
 					&& last.getTableName().equals(c4io.getTableName())) {
 				return ((CompositeCommand) last).add(c4ioc);
 			} else {

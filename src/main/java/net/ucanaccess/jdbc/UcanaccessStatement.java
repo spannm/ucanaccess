@@ -35,6 +35,7 @@ import net.ucanaccess.converters.SQLConverter;
 public class UcanaccessStatement implements Statement {
 	private UcanaccessConnection connection;
 	private Statement wrapped;
+	 
 
 	public UcanaccessStatement(Statement wrapped, UcanaccessConnection conn)
 			throws SQLException {
@@ -44,7 +45,8 @@ public class UcanaccessStatement implements Statement {
 
 	public void addBatch(String batch) throws SQLException {
 		try {
-			wrapped.addBatch(batch);
+			wrapped.addBatch(SQLConverter.convertSQL(batch));
+			
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
