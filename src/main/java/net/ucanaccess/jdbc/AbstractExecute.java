@@ -113,7 +113,13 @@ public abstract class AbstractExecute {
 		UcanaccessConnection conn = (UcanaccessConnection) statement
 				.getConnection();
 		UcanaccessConnection.setCtxConnection(conn);
-		UcanaccessConnection.setCtxExecId(Math.random() + "");
+		
+		if(this.commandType.equals(CommandType.BATCH)){
+			UcanaccessConnection.setCtxExecId(UcanaccessConnection. BATCH_ID);
+		}
+		else{
+			UcanaccessConnection.setCtxExecId(Math.random() + "");
+		}
 		Object retv;
 		if (checkDDL()) {
 			retv = addDDLCommand();
