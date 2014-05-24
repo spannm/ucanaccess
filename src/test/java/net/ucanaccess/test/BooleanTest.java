@@ -57,6 +57,8 @@ public class BooleanTest extends UcanaccessTestBase {
 			st = super.ucanaccess.createStatement();
 			st
 					.executeUpdate("insert into tblMain (company)values('pippo')");
+			st
+			.executeUpdate("update tblMain set closed=yes");
 			
 			init = true;
 		}
@@ -64,14 +66,10 @@ public class BooleanTest extends UcanaccessTestBase {
 	}
 	
 	public void testCreate() throws SQLException, IOException, ParseException {
+		dump("select * from  tblMain");
 		checkQuery("select * from  tblMain");
 	}
 
-	@Override
-	public String getAccessPath() {
-		// TODO Auto-generated method stub
-		return "net/ucanaccess/test/resources/2007.accdb";
-	}
-
+	
 	
 }
