@@ -71,6 +71,10 @@ public class TriggerAutoNumber extends TriggerBase {
 							DataType.GUID)) {
 						validateGUID(newR[i]);
 					}
+				}else if(DataType.BOOLEAN.equals(cl.getType())){
+					if(newR[i]==null){
+						newR[i]=false;
+					}
 				}
 				++i;
 			}
