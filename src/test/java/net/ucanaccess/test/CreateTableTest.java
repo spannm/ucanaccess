@@ -51,8 +51,15 @@ public class CreateTableTest extends UcanaccessTestBase {
 				"d DATETIME default now(), e text default 'l''aria')");
 			
 	}
+	
+	public void testCreate() throws SQLException, IOException{
+		createSimple();
+		 createPs();
+		 createAsSelect() ;
+		 createAsSelect2();
+	}
 		
-	public void testCreateSimple() throws SQLException, IOException {
+	private void createSimple() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
@@ -66,7 +73,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 		}
 	}
 	
-	public void testCreatePs() throws SQLException, IOException {
+	private void createPs() throws SQLException, IOException {
 		PreparedStatement ps = null;
 		try {
 			ps = super.ucanaccess.prepareStatement(" CREATE \nTABLE BBB ( baaaa \nvarchar(2) PRIMARY KEY)");
@@ -84,7 +91,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 	}
 	
 	
-	public void testCreateAsSelect() throws SQLException, IOException {
+	private void createAsSelect() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
@@ -100,7 +107,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 	
 	
 	
-	public void testCreateAsSelect2() throws SQLException, IOException {
+	private void createAsSelect2() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
