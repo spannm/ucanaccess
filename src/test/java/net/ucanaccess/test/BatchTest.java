@@ -42,11 +42,11 @@ public class BatchTest extends UcanaccessTestBase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		 executeCreateTable("CREATE TABLE T1 (id LONG,name TEXT, age LONG) ");
+		 executeCreateTable("CREATE TABLE Tb (id LONG,name TEXT, age LONG) ");
 		 
 		Statement	st = super.ucanaccess.createStatement();
 			st
-					.execute("INSERT INTO T1 VALUES(1,'Sophia', 33)");
+					.execute("INSERT INTO Tb VALUES(1,'Sophia', 33)");
 
 			st.close();
 		
@@ -56,10 +56,10 @@ public class BatchTest extends UcanaccessTestBase {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
-			st.addBatch("UPDATE T1 SET [name]='ccc'");
-			st.addBatch("UPDATE T1 SET age=95");
+			st.addBatch("UPDATE Tb SET [name]='ccc'");
+			st.addBatch("UPDATE Tb SET age=95");
 			st.executeBatch();
-			checkQuery("select * from t1");
+			checkQuery("select * from tb");
 		} finally {
 			if (st != null)
 				st.close();
@@ -69,7 +69,7 @@ public class BatchTest extends UcanaccessTestBase {
 	public void testBatchPS() throws SQLException, IOException {
 		PreparedStatement st = null;
 		try {
-			st = super.ucanaccess.prepareStatement("UPDATE T1 SET [name]=?,age=? ");
+			st = super.ucanaccess.prepareStatement("UPDATE Tb SET [name]=?,age=? ");
 			
 			st.setString(1, "ciao");
 			st.setInt(2, 23);
@@ -78,7 +78,7 @@ public class BatchTest extends UcanaccessTestBase {
 			st.setInt(2, 43);
 			st.addBatch();
 			st.executeBatch();
-			checkQuery("select * from t1");
+			checkQuery("select * from tb");
 		} finally {
 			if (st != null)
 				st.close();
