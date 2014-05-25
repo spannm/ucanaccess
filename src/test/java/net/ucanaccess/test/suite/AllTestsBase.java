@@ -23,7 +23,9 @@ package net.ucanaccess.test.suite;
 
 import net.ucanaccess.test.AccessLikeTest;
 import net.ucanaccess.test.AggregateFunctionsTest;
+import net.ucanaccess.test.BatchTest;
 import net.ucanaccess.test.BlobOleTest;
+import net.ucanaccess.test.BooleanTest;
 import net.ucanaccess.test.CounterTest;
 import net.ucanaccess.test.CreateTableTest;
 import net.ucanaccess.test.CrudTest;
@@ -36,6 +38,7 @@ import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.PasswordTest;
 import net.ucanaccess.test.NoRomanCharacterTest;
 import net.ucanaccess.test.RegexTest;
+import net.ucanaccess.test.Size97Test;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
@@ -62,7 +65,9 @@ public class AllTestsBase {
 		suite.addTestSuite(NoRomanCharacterTest.class);
 		suite.addTestSuite(ExternalResourcesTest.class);
 		suite.addTestSuite(RegexTest.class);
-		
+		suite.addTestSuite(Size97Test.class);
+		suite.addTestSuite(BatchTest.class);
+		suite.addTestSuite(BooleanTest.class);
 		return suite;
 	}
 }
