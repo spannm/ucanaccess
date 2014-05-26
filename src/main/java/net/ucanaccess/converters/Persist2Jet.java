@@ -366,15 +366,16 @@ public class Persist2Jet {
 		TableBuilder tb=new TableBuilder(tableName);
 		tb.addColumns(getColumns(tableName, types));
 		List<IndexBuilder> arcl=getIndexBuilders(tableName);
-		for(IndexBuilder ixb:arcl){
-			tb.addIndex(ixb);
-		}
+		
 		IndexBuilder ibpk = getIndexBuilderPK(tableName);
 		
 		checkPK(arcl, ibpk);
-		if (ibpk != null)
+		if (ibpk != null){
 			arcl.add(ibpk);
-		
+		}
+		for(IndexBuilder ixb:arcl){
+			tb.addIndex(ixb);
+		}
 		Table table = tb.toTable(db);
 		saveColumnsDefaults(defaults,notNulls, table);
 	    LoadJet lj=new LoadJet(conn.getHSQLDBConnection(),db);
