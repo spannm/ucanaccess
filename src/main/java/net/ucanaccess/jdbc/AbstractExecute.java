@@ -96,8 +96,10 @@ public abstract class AbstractExecute {
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql) : sql;
+				
 					statement.getWrapped().executeUpdate(ddlExpr);
-			DDLCommandEnlist ddle = new DDLCommandEnlist();
+		
+					DDLCommandEnlist ddle = new DDLCommandEnlist();
 			ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage());
