@@ -25,7 +25,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+
 import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
@@ -85,6 +87,7 @@ public class DDLCommandEnlist {
 	}
 	//getting AUTOINCREMENT and GUID
 	private void parseTypesFromCreateStatement(String sql) throws SQLException {
+	
 		int startDecl = sql.indexOf('(');
 		int endDecl = sql.lastIndexOf(')');
 		
@@ -98,50 +101,55 @@ public class DDLCommandEnlist {
 		ArrayList<Boolean> notNullList = new ArrayList<Boolean>() ;
 		for (int j = 0; j < tokens.length; ++j) {
 			String tknt=tokens[j].trim();
-			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\)")){
-				continue;
-			}
+			
 			String[] colDecls = tknt.split("[\\s\n\r]+");
-			if (colDecls.length < 2) {
+			int restart=0;
+			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")){
+				restart=2;
+				tknt=tknt.substring(tknt.indexOf(")")+1).trim();
+				 colDecls = tknt.split("[\\s\n\r]+");
+			}
+			//int lenght=colDecls.length +restart;
+			if (restart==0&&colDecls.length< 2) {
 				throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
 			}
-			if(colDecls[1]!=null&&colDecls[1].toUpperCase().startsWith("NUMERIC(")){
-				colDecls[1]="NUMERIC";
+			boolean decDef=false;
+			if(restart==0){
+				if(colDecls[1]!=null&&colDecls[1].toUpperCase().startsWith("NUMERIC(")){
+					colDecls[1]="NUMERIC";
+					decDef=true;
+				}
+				typeList.add(colDecls[1]);
+				
 			}
-			typeList.add(colDecls[1]);
-			
 			
 			if(colDecls.length>2
 					&&"not".equalsIgnoreCase(colDecls[colDecls.length-2])
 					&&"null".equalsIgnoreCase(colDecls[colDecls.length-1])
 					){
 				notNullList.add(true);
-			}else{
+			}else if(!decDef){
 				notNullList.add(false); 
 			}
 			
-			if(colDecls.length>=4
-					&&"default".equalsIgnoreCase(colDecls[2])
-					){
-				
-				defaultList.add(value(colDecls[3]));
-				
-			}else{
-				defaultList.add(null); 
+			if(!decDef){
+				defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
 			}
-		}
-		
+
 		this.types= (String[])typeList.toArray(new String[typeList.size()]);
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
+		
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
+	}
 	}
 
 	private String value(String value) {
+		if(value==null)return null;
 		if(value.startsWith("\"")&&value.endsWith("\"")){
-			return value.substring(1, value.length()-1).replaceAll("\"\"", "\"");
+			return  value.substring(1, value.length()-1).replaceAll("\"\"", "\"");
 		}
 		if(value.startsWith("'")&&value.endsWith("'")){
-			return value.substring(1, value.length()-1).replaceAll("''", "'");
+			return (value.substring(1, value.length()-1).replaceAll("''", "'"));
 		}
 		return value;
 	}
