@@ -27,6 +27,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
+
+
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 
 import net.ucanaccess.converters.SQLConverter;
@@ -273,7 +275,12 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	public String getDriverVersion() throws SQLException {
-		return "2.0.4.1";
+		 try {
+		    String version= this.getClass().getPackage().getImplementationVersion();
+			return version==null?"2.x.x":version;	
+			} catch (Exception e){
+				return "2.x.x";
+			}
 	}
 
 	public ResultSet getExportedKeys(String catalog, String schema, String table)
