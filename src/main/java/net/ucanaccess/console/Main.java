@@ -163,7 +163,7 @@ public class Main {
 			System.exit(1);
 		}
 		Main main = new Main(conn, input);
-		main.sayHello();
+		main.sayHello(conn.getMetaData().getDriverVersion());
 		main.start();
 	}
 	
@@ -300,9 +300,10 @@ public class Main {
 		}
 	}
 	
-	private void sayHello() {
+	private void sayHello(String version) {
 		prompt("");
 		System.out.println("Copyright (c) 2012 Marco Amadei");
+		System.out.println("UCanAccess version "+version);
 		System.out.println("You are connected!! ");
 		
 		System.out.println("Type quit to exit ");
