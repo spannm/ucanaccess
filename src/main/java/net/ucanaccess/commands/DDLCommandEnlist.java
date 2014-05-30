@@ -111,7 +111,7 @@ public class DDLCommandEnlist {
 			}
 			//int lenght=colDecls.length +restart;
 			if (restart==0&&colDecls.length< 2) {
-				throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
+				continue;
 			}
 			boolean decDef=false;
 			if(restart==0){
