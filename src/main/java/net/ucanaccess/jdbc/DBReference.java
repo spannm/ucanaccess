@@ -68,6 +68,7 @@ public class DBReference {
 	private JackcessOpenerInterface jko;
 	private Map<String, String> externalResourcesMapping;
 	private boolean firstConnection=true;
+	private FileFormat dbFormat;
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -147,6 +148,7 @@ public class DBReference {
 			try {
 				this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(
 						FileFormat.V1997);
+				this.dbFormat=dbIO.getFileFormat();
 			} catch (Exception ignore) {
 				// Logger.logWarning(e.getMessage());
 			}
@@ -444,8 +446,12 @@ public class DBReference {
 			int suffixStart = fileName.lastIndexOf('.');
 			if (suffixStart < 0)
 				suffixStart = fileName.length();
+			String suffix=this.dbFormat!=null&&
+					(FileFormat.V2010.equals(this.dbFormat)||FileFormat.V2007.equals(this.dbFormat))?
+							".laccdb":".ldb";
 			File flLock = new File(folder, fileName.substring(0, suffixStart)
-					+ ".ldb");
+					+ suffix);
+			
 			flLock.createNewFile();
 			final RandomAccessFile raf = new RandomAccessFile(flLock, "rw");
 			FileLock tryLock = raf.getChannel().tryLock();
