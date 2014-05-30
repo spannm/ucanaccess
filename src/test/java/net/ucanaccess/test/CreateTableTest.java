@@ -52,11 +52,13 @@ public class CreateTableTest extends UcanaccessTestBase {
 			
 	}
 	
-	public void testCreate() throws SQLException, IOException{
+	public void testCreate() throws Exception{
 		createSimple();
 		 createPs();
 		 createAsSelect() ;
 		 createAsSelect2();
+		 setProperties();
+		 defaults();
 	}
 		
 	private void createSimple() throws SQLException, IOException {
@@ -122,7 +124,23 @@ public class CreateTableTest extends UcanaccessTestBase {
 		}
 	}
 	
-	public void testDefaults()  throws Exception{
+	public void setProperties() throws SQLException{
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			
+			st.execute("create table tbl(c counter  primary key , " +
+					"number numeric(23,5) default -4.6 not null , " +
+					"txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33)," +
+					"txt3 text)");
+		}finally{
+			st.close();
+		}
+	}
+	
+	
+	
+	public void defaults()  throws Exception{
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
@@ -137,6 +155,12 @@ public class CreateTableTest extends UcanaccessTestBase {
 			assertEquals("NOW()", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
 			PropertyMap pm1=tb.getColumn("a").getProperties();
 			assertEquals(true, pm1.getValue(PropertyMap.REQUIRED_PROP));
+			tb=db.getTable("TBL");
+			pm=tb.getColumn("NUMBER").getProperties();
+			assertEquals("-4.6", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
+			assertEquals(true, pm.getValue(PropertyMap.REQUIRED_PROP));
+			pm=tb.getColumn("BLANK").getProperties();
+			assertEquals(" ", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
 			} finally {
 			if (st != null)
 				st.close();
