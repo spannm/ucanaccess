@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 
+
+
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
@@ -61,6 +63,9 @@ public class DDLCommandEnlist {
        }
       
 		ac.add(c4io); 
+		if(!ac.getAutoCommit()){
+			ac.commit();
+		}
 	}
 	
 	public void enlistDDLCommand(String sql, DDLType ddlType)
@@ -109,8 +114,9 @@ public class DDLCommandEnlist {
 				tknt=tknt.substring(tknt.indexOf(")")+1).trim();
 				 colDecls = tknt.split("[\\s\n\r]+");
 			}
-			//int lenght=colDecls.length +restart;
+			
 			if (restart==0&&colDecls.length< 2) {
+				
 				continue;
 			}
 			boolean decDef=false;
@@ -140,6 +146,7 @@ public class DDLCommandEnlist {
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
 		
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
+		System.out.println(defaultList);
 	}
 	}
 
