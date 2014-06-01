@@ -139,7 +139,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 			this.ucanaccess.setAutoCommit(false);
 			try {
 				st = super.ucanaccess.createStatement();
-				st.execute("insert into  dunique values('ddl force commit',2.3)");
+				st.execute("insert into  dunique values('ddl forces commit',2.3)");
 				st = super.ucanaccess.createStatement();
 				st.execute("create table dtrx(c text  , "
 						+ "number numeric(23,5) , " + "  unique (C,NUMBER))");
