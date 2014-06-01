@@ -144,9 +144,8 @@ public class DDLCommandEnlist {
 
 		this.types= (String[])typeList.toArray(new String[typeList.size()]);
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
-		
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
-		System.out.println(defaultList);
+		
 	}
 	}
 
