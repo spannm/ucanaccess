@@ -138,7 +138,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void deleteRow() throws SQLException {
 		try {
-			wrapped.deleteRow();
+			new DeleteResultSet(this).execute();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
