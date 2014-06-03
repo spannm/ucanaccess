@@ -882,10 +882,10 @@ public class Functions {
 		return strComp( value1,value2, 0);
 	}
 	
-	@FunctionType(functionName = "INT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.INTEGER)
-	public static Short mint(Double value) throws UcanaccessSQLException {
-		return new BigDecimal((long) Math.floor(value ))
-				.shortValueExact();
+	@FunctionType(functionName = "INT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
+	public static Integer mint(Double value) throws UcanaccessSQLException {
+		return new BigDecimal((long) Math.floor(value )).intValueExact()
+				;
 	}
 	
 	@FunctionType(functionName = "INT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
