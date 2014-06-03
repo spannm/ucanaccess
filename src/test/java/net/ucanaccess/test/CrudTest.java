@@ -52,6 +52,7 @@ public class CrudTest extends UcanaccessTestBase {
 			st = super.ucanaccess.createStatement();
 			int id = 6666554;
 			int id1 = 5556664;
+			st.execute("delete from t1");
 			st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id
 					+ ",'nel mezzo del cammin di nostra vita')");
 			boolean ret = getCount("select count(*) from T1") == 1;
@@ -70,7 +71,11 @@ public class CrudTest extends UcanaccessTestBase {
 	
 	public void testCrudPS() throws SQLException, IOException {
 		PreparedStatement ps = null;
+		Statement st=null;
 		try {
+			 st = super.ucanaccess.createStatement();
+				
+				st.execute("delete from t1");
 			ps = super.ucanaccess
 					.prepareStatement("INSERT INTO T1 (id,descr)  VALUES( ?,?)");
 			int id = 6666554;
@@ -99,6 +104,9 @@ public class CrudTest extends UcanaccessTestBase {
 		} finally {
 			if (ps != null)
 				ps.close();
+			
+			if (st != null)
+				st.close();
 		}
 	}
 	
@@ -169,6 +177,34 @@ public class CrudTest extends UcanaccessTestBase {
 		}
 	}
 	
+	public void testDeleteRS() throws SQLException, IOException {
+		Statement st = null;
+		ResultSet rs =null;
+		try {
+			 super.ucanaccess.setAutoCommit(false);
+	    st = super.ucanaccess.createStatement();
+		int id = 6666554;
+		st.execute("delete from t1");
+		st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id
+				+ ",'tre canarini volano su e cadono')");
+		PreparedStatement ps = super.ucanaccess.prepareStatement(
+				"SELECT *  FROM T1", ResultSet.TYPE_FORWARD_ONLY,
+				ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		rs = ps.executeQuery();
+		 rs.next();
+		
+		  rs.deleteRow();
+		    ps.getConnection().commit();
+		
+		super.checkQuery("SELECT count(*)  FROM T1 ", 0);
+		
+		} 
+		finally {
+			if (rs != null)
+				rs.close();
+		}	
+			
+		}
 	
 	public void testInsertRS() throws SQLException, IOException {
 		Statement st = null;
