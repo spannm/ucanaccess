@@ -73,6 +73,10 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select  ASC('1') FROM t234", 49);
 		checkQuery("select  ASC('u') FROM t234", 117);
 	}
+	
+	
+	
+	
 
 	public void testATN() throws SQLException, IOException {
 		checkQuery("select atn(3) FROM t234", 1.2490457723982544);
@@ -540,7 +544,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 	
 	public void testInt() throws SQLException, IOException
 	 {
-        checkQuery("select int(2.5), int(-2.5)from t234",2,-3);
+        checkQuery("select int(1111112.5), int(-2.5)from t234",1111112,-3);
 	}
 	
 	public void testRnd() throws SQLException, IOException
