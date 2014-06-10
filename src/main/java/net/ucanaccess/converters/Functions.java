@@ -175,7 +175,7 @@ public class Functions {
 	}
 
 	public static String cstr(Object value) throws UcanaccessSQLException {
-		return value == null ? null : format(value.toString(), "");
+		return value == null ? null : format(value.toString(), "",true);
 	}
 
 	@FunctionType(functionName = "CSTR", argumentTypes = { AccessType.DATETIME }, returnType = AccessType.MEMO)
@@ -442,18 +442,29 @@ public class Functions {
 			throw new UcanaccessSQLException(e);
 		}
 	}
-
+	
+	
 	@FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.TEXT,
 			AccessType.TEXT }, returnType = AccessType.TEXT)
 	public static String format(String s, String par)
 			throws UcanaccessSQLException {
+		return format( s,  par,  false);
+	}
+
+	
+	public static String format(String s, String par, boolean incl)
+			throws UcanaccessSQLException {
 		if (isNumeric(s)) {
+			if(incl){
+				return format(Double.parseDouble(s), par);
+			}
 			DecimalFormatSymbols dfs=new DecimalFormatSymbols (Locale.US);
 			DecimalFormat df=new DecimalFormat();
 			dfs.setGroupingSeparator('.');
 			dfs.setDecimalSeparator(',');
 			df.setDecimalFormatSymbols(dfs);
 			try {
+				
 				return format(df.parse(s).doubleValue(), par);
 			} catch (ParseException e) {
 				throw new UcanaccessSQLException(e);
