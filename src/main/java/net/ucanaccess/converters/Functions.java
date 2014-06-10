@@ -23,6 +23,7 @@ package net.ucanaccess.converters;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
@@ -435,6 +436,7 @@ public class Functions {
 		}
 		try {
 			DecimalFormat formatter = new DecimalFormat(par);
+			formatter.setRoundingMode(RoundingMode.HALF_UP);
 			return formatter.format(d);
 		} catch (Exception e) {
 			throw new UcanaccessSQLException(e);
@@ -446,7 +448,16 @@ public class Functions {
 	public static String format(String s, String par)
 			throws UcanaccessSQLException {
 		if (isNumeric(s)) {
-			return format(Double.parseDouble(s), par);
+			DecimalFormatSymbols dfs=new DecimalFormatSymbols (Locale.US);
+			DecimalFormat df=new DecimalFormat();
+			dfs.setGroupingSeparator('.');
+			dfs.setDecimalSeparator(',');
+			df.setDecimalFormatSymbols(dfs);
+			try {
+				return format(df.parse(s).doubleValue(), par);
+			} catch (ParseException e) {
+				throw new UcanaccessSQLException(e);
+			}
 		}
 		if (isDate(s)) {
 			return format(dateValue(s), par);
@@ -610,7 +621,8 @@ public class Functions {
 	@FunctionType(functionName = "ISNUMERIC", argumentTypes = { AccessType.MEMO }, returnType = AccessType.YESNO)
 	public static boolean isNumeric(String s) {
 		try {
-			new BigDecimal(s);
+			if(s.startsWith(".")||s.startsWith("+.")||s.startsWith("-."))return false;
+			new BigDecimal(s.replaceAll("\\.", "").replaceAll(",","."));
 			return true;
 		} catch (Exception e) {
 		}
@@ -884,8 +896,7 @@ public class Functions {
 	
 	@FunctionType(functionName = "INT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
 	public static Integer mint(Double value) throws UcanaccessSQLException {
-		return new BigDecimal((long) Math.floor(value )).intValueExact()
-				;
+		return new BigDecimal((long) Math.floor(value )).intValueExact();
 	}
 	
 	@FunctionType(functionName = "INT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
