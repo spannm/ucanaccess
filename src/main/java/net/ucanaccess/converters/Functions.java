@@ -24,11 +24,10 @@ package net.ucanaccess.converters;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -134,7 +133,7 @@ public class Functions {
 
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
 	public static Integer clng(Double value) throws UcanaccessSQLException {
-		return (int) Math.floor(value + 0.499999999999999d);
+		return (int) Math.floor(value + 0.5d);
 	}
 	
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
@@ -403,12 +402,14 @@ public class Functions {
 	public static String format(double d, String par)
 			throws UcanaccessSQLException {
 		if ("percent".equalsIgnoreCase(par)) {
-			return (new BigDecimal(d * 100).setScale(2,
-					BigDecimal.ROUND_HALF_UP) + "%").replace(".", ",");
+			DecimalFormat formatter = new DecimalFormat("0.00");
+			formatter.setRoundingMode(RoundingMode.HALF_UP);
+			return (formatter.format(d * 100) + "%");
 		}
 		if ("fixed".equalsIgnoreCase(par)) {
-			return new BigDecimal(d).setScale(2, BigDecimal.ROUND_HALF_UP)
-					.toString().replace(".", ",");
+			DecimalFormat formatter = new DecimalFormat("0.00");
+			formatter.setRoundingMode(RoundingMode.HALF_UP);
+			return formatter.format(d);
 		}
 		if ("standard".equalsIgnoreCase(par)) {
 			DecimalFormat formatter = new DecimalFormat("###,###.##");
@@ -416,10 +417,10 @@ public class Functions {
 		}
 		if ("general number".equalsIgnoreCase(par)) {
 			DecimalFormat formatter = new DecimalFormat();
-			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-			dfs.setDecimalSeparator(',');
+//			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+//			dfs.setDecimalSeparator(',');
 			formatter.setGroupingUsed(false);
-			formatter.setDecimalFormatSymbols(dfs);
+			
 			return formatter.format(d);
 		}
 		if ("yes/no".equalsIgnoreCase(par)) {
@@ -432,7 +433,7 @@ public class Functions {
 			return d == 0 ? "Off" : "On";
 		}
 		if ("Scientific".equalsIgnoreCase(par)) {
-			return String.format(Locale.US, "%6.2E", d).replace(".", ",");
+			return String.format( "%6.2E", d);
 		}
 		try {
 			DecimalFormat formatter = new DecimalFormat(par);
@@ -458,11 +459,8 @@ public class Functions {
 			if(incl){
 				return format(Double.parseDouble(s), par);
 			}
-			DecimalFormatSymbols dfs=new DecimalFormatSymbols (Locale.US);
 			DecimalFormat df=new DecimalFormat();
-			dfs.setGroupingSeparator('.');
-			dfs.setDecimalSeparator(',');
-			df.setDecimalFormatSymbols(dfs);
+		
 			try {
 				
 				return format(df.parse(s).doubleValue(), par);
@@ -481,6 +479,7 @@ public class Functions {
 	public static String format(Timestamp t, String par)
 			throws UcanaccessSQLException {
 		if ("long date".equalsIgnoreCase(par)) {
+			
 			return new SimpleDateFormat("EEEE d MMMM yyyy").format(t);
 		}
 		if ("medium date".equalsIgnoreCase(par)) {
