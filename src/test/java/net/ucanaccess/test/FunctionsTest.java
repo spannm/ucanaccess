@@ -95,11 +95,11 @@ public class FunctionsTest extends UcanaccessTestBase {
 	}
 
 	public void testCVar() throws SQLException, IOException {
-		checkQuery("select cvar(8),cvar(8.44) from t234 ", "8", "8,44");
+		checkQuery("select cvar(8),cvar(8.44) from t234 ", "8", "8.44");
 	}
 
 	public void testCstr() throws SQLException, IOException, ParseException {
-		checkQuery("select cstr(date0) from t234 ", "22/11/2003 22:42:58");
+		checkQuery("select cstr(date0) from t234 ", "11/22/2003 10:42:58 PM");
 		checkQuery("select cstr(false) from t234 ", "false");
 		checkQuery("select cstr(8) from t234 ", "8");
 		checkQuery("select cstr(8.78787878) from t234 ", "8.78787878");
@@ -117,12 +117,12 @@ public class FunctionsTest extends UcanaccessTestBase {
 
 	public void testCLong() throws SQLException, IOException, ParseException {
 		checkQuery("select  Clong(8.52), Clong(8.49 ),Clong(5.5)  from t234  ",
-				9, 8, 5);
+				9, 8, 6);
 	}
 	
 	public void testCLng() throws SQLException, IOException, ParseException {
 		checkQuery("select  Clng(8.52), Clng(8.49 ),Clng(5.5)  from t234  ",
-				9, 8, 5);
+				9, 8, 6);
 	}
 
 	public void testCDec() throws SQLException, IOException, ParseException {
@@ -267,6 +267,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select isNumeric('a')  from t234 ", false);
 		checkQuery("select isNumeric('33d')from t234 ", false);
 		checkQuery("select isNumeric(id)   from t234 ", true);
+		checkQuery("select isNumeric('4,5')   from t234 ", true);
 	}
 
 	public void testLcase() throws SQLException, IOException {
@@ -457,45 +458,45 @@ public class FunctionsTest extends UcanaccessTestBase {
 	}
 
 	public void testFormatNumber() throws SQLException, IOException {
-		checkQuery("select format(num,'percent') from t234", "-111055,40%");
-		checkQuery("select format(num,'fixed')   from t234", "-1110,55");
+		checkQuery("select format(0.981,'percent') from t234", "98.10%");
+		checkQuery("select format(num,'fixed')   from t234", "-1110.55");
 		checkQuery("select format(num,'standard')   from t234", "-1,110.55");
 		checkQuery("select format(num,'general number')   from t234",
-				"-1110,554");
+				"-1110.554");
 		checkQuery("select format(num,'on/off')  from t234", "On");
 		checkQuery("select format(num,'true/false') from t234", "True");
 		checkQuery("select format(num,'yes/no')  from t234", "Yes");
 		checkQuery("select Format (11111210.6, '#,##0.00') from t234",
 				"11,111,210.60");
 		checkQuery("select Format (1111111210.6, 'Scientific') from t234",
-				"1,11E+09");
+				"1.11E+09");
 		checkQuery(
 				"select Format (0.00000000000000015661112106, 'Scientific') from t234",
-				"1,57E-16");
+				"1.57E-16");
 	}
 
 	public void testFormatDate() throws SQLException, IOException {
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Long date') from t234",
-				"Friday 13 May 1994");
+				"Friday, May 13, 1994");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Medium date') from t234",
 				"13-May-94");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Short date') from t234",
-				"13/05/1994");
+				"5/13/1994");
 		checkQuery(
-				"select format(#05/13/1994 10:42:58 PM#,'Long time') from t234",
-				"22:42:58");
+				"select format(#05/13/1994 10:42:58 AM#,'Long time') from t234",
+				"10:42:58 AM");
 		checkQuery(
 				"select format(#05/13/1994 10:42:18 PM#,'Medium time') from t234",
-				"10:42");
+				"10:42 PM");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Short time') from t234",
 				"22:42");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'General date') from t234",
-				"13/05/1994 22:42:58");
+				"5/13/1994 10:42:58 PM");
 	}
 
 	public void testSign() throws SQLException, IOException {
@@ -538,8 +539,11 @@ public class FunctionsTest extends UcanaccessTestBase {
 	public void testFormatString() throws SQLException, IOException,
 			ParseException {
 		checkQuery("select format('05/13/1994','Long date') from t234",
-				"Friday 13 May 1994");
-		checkQuery("select format('0.6','percent') from t234", "60,00%");
+				"Friday, May 13, 1994");
+		checkQuery("select format(0.6,'percent') from t234", "60.00%");
+		checkQuery("select format('0,6','percent') from t234", "600.00%");
+		checkQuery("select format(48.1425,'.###') from t234","48.143");
+		
 	}
 	
 	public void testInt() throws SQLException, IOException
