@@ -30,6 +30,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 
@@ -416,8 +417,6 @@ public class Functions {
 		}
 		if ("general number".equalsIgnoreCase(par)) {
 			DecimalFormat formatter = new DecimalFormat();
-//			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-//			dfs.setDecimalSeparator(',');
 			formatter.setGroupingUsed(false);
 			
 			return formatter.format(d);
@@ -479,22 +478,22 @@ public class Functions {
 			throws UcanaccessSQLException {
 		if ("long date".equalsIgnoreCase(par)) {
 			
-			return new SimpleDateFormat("EEEE d MMMM yyyy").format(t);
+			return new SimpleDateFormat("EEEE, MMMM dd, yyyy").format(t);
 		}
 		if ("medium date".equalsIgnoreCase(par)) {
 			return new SimpleDateFormat("d-MMM-yy").format(t);
 		}
 		if ("short date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("dd/MM/yyyy").format(t);
+			return new SimpleDateFormat("M/dd/yyyy").format(t);
 		}
 		if ("general date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(t);
+			return new SimpleDateFormat("M/dd/yyyy hh:mm:ss a").format(t);
 		}
 		if ("long time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("HH:mm:ss").format(t);
+			return new SimpleDateFormat("hh:mm:ss a").format(t);
 		}
 		if ("medium time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("hh:mm").format(t);
+			return new SimpleDateFormat("hh:mm a").format(t);
 		}
 		if ("short time".equalsIgnoreCase(par)) {
 			return new SimpleDateFormat("HH:mm").format(t);
@@ -630,7 +629,9 @@ public class Functions {
 	@FunctionType(functionName = "ISNUMERIC", argumentTypes = { AccessType.MEMO }, returnType = AccessType.YESNO)
 	public static boolean isNumeric(String s) {
 		try {
-			if(s.startsWith(".")||s.startsWith("+.")||s.startsWith("-."))return false;
+			Currency cr=Currency.getInstance(Locale.getDefault());
+			if(s.startsWith(cr.getSymbol()))return isNumeric( s.substring(cr.getSymbol().length())); 
+			if(s.startsWith("+")||s.startsWith("-"))return isNumeric( s.substring(1));
 			new BigDecimal(s.replaceAll("\\.", "").replaceAll(",","."));
 			return true;
 		} catch (Exception e) {
