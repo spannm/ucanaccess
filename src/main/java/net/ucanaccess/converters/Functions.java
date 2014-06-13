@@ -27,12 +27,14 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
+
 
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
@@ -632,7 +634,19 @@ public class Functions {
 			Currency cr=Currency.getInstance(Locale.getDefault());
 			if(s.startsWith(cr.getSymbol()))return isNumeric( s.substring(cr.getSymbol().length())); 
 			if(s.startsWith("+")||s.startsWith("-"))return isNumeric( s.substring(1));
-			new BigDecimal(s.replaceAll("\\.", "").replaceAll(",","."));
+			DecimalFormatSymbols dfs=DecimalFormatSymbols.getInstance();
+			String sep=dfs.getDecimalSeparator()+"";
+			String gs=dfs.getGroupingSeparator()+"";
+			if(s.startsWith(gs))return false;
+			if(s.startsWith(sep))return isNumeric( s.substring(1));
+			
+			if(sep.equals("."))
+				s=s.replaceAll(gs,"");
+			
+			else
+				s=s.replaceAll("\\.", "").replaceAll(sep,".");
+			
+			new BigDecimal(s);
 			return true;
 		} catch (Exception e) {
 		}
