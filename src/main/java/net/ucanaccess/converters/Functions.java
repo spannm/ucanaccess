@@ -478,25 +478,25 @@ public class Functions {
 			throws UcanaccessSQLException {
 		if ("long date".equalsIgnoreCase(par)) {
 			
-			return new SimpleDateFormat("EEEE, MMMM dd, yyyy").format(t);
+			return new SimpleDateFormat(RegionalSettings.getLongDatePattern()).format(t);
 		}
 		if ("medium date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("d-MMM-yy").format(t);
+			return new SimpleDateFormat(RegionalSettings.getMediumDatePattern()).format(t);
 		}
 		if ("short date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("M/dd/yyyy").format(t);
+			return new SimpleDateFormat(RegionalSettings.getShortDatePattern()).format(t);
 		}
 		if ("general date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("M/dd/yyyy hh:mm:ss a").format(t);
+			return new SimpleDateFormat(RegionalSettings.getGeneralPattern()).format(t);
 		}
 		if ("long time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("hh:mm:ss a").format(t);
+			return new SimpleDateFormat(RegionalSettings.getLongTimePattern()).format(t);
 		}
 		if ("medium time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("hh:mm a").format(t);
+			return new SimpleDateFormat(RegionalSettings.getMediumTimePattern()).format(t);
 		}
 		if ("short time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat("HH:mm").format(t);
+			return new SimpleDateFormat(RegionalSettings.getShortTimePattern()).format(t);
 		}
 		if ("q".equalsIgnoreCase(par)) {
 			return String.valueOf(datePart(par, t));
