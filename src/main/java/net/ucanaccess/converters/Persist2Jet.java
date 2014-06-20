@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -214,7 +215,7 @@ public class Persist2Jet {
 					types[i].equalsIgnoreCase(AccessType.COUNTER.name())
 			)
 			){
-			dt = TypesMap.map2Jackcess(AccessType.valueOf(types[i].toUpperCase()));
+			dt = TypesMap.map2Jackcess(AccessType.valueOf(types[i].toUpperCase(Locale.US)));
 			cb.setType(dt);
 			cb.setLengthInUnits((short)dt.getFixedSize());
 			}

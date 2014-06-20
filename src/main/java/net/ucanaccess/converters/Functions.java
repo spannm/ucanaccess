@@ -473,6 +473,23 @@ public class Functions {
 		}
 		return s;
 	}
+	
+	
+	private static String formatDate(Timestamp t,String pattern){
+		
+		String ret= new SimpleDateFormat(pattern).format(t);
+		if(!RegionalSettings.getRS().equalsIgnoreCase("true")){
+			if(!RegionalSettings.getAM().equals("AM"))
+				ret=ret.replaceAll("AM", RegionalSettings.getAM());
+			if(!RegionalSettings.getPM().equals("PM"))
+				ret=ret.replaceAll("PM", RegionalSettings.getPM());
+		}else{
+			ret=ret.replaceAll( RegionalSettings.getPM(),"PM");
+			ret=ret.replaceAll( RegionalSettings.getAM(),"AM");
+		}
+		return ret;
+		
+	}
 
 	@FunctionType(functionName = "FORMAT", argumentTypes = {
 			AccessType.DATETIME, AccessType.TEXT }, returnType = AccessType.TEXT)
@@ -480,25 +497,26 @@ public class Functions {
 			throws UcanaccessSQLException {
 		if ("long date".equalsIgnoreCase(par)) {
 			
-			return new SimpleDateFormat(RegionalSettings.getLongDatePattern()).format(t);
+			return  formatDate(t,RegionalSettings.getLongDatePattern());
 		}
 		if ("medium date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getMediumDatePattern()).format(t);
+			
+			return formatDate(t,RegionalSettings.getMediumDatePattern());
 		}
 		if ("short date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getShortDatePattern()).format(t);
+			return formatDate(t,RegionalSettings.getShortDatePattern());
 		}
 		if ("general date".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getGeneralPattern()).format(t);
+			 return  formatDate(t,RegionalSettings.getGeneralPattern());
 		}
 		if ("long time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getLongTimePattern()).format(t);
+			return formatDate(t,RegionalSettings.getLongTimePattern());
 		}
 		if ("medium time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getMediumTimePattern()).format(t);
+			return formatDate(t,RegionalSettings.getMediumTimePattern());
 		}
 		if ("short time".equalsIgnoreCase(par)) {
-			return new SimpleDateFormat(RegionalSettings.getShortTimePattern()).format(t);
+			return formatDate(t,RegionalSettings.getShortTimePattern());
 		}
 		if ("q".equalsIgnoreCase(par)) {
 			return String.valueOf(datePart(par, t));

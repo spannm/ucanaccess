@@ -834,7 +834,7 @@ public class LoadJet {
 	private static boolean hasAutoNumberColumn(Table t) {
 		List<? extends Column> lc = t.getColumns();
 		for (Column cl : lc) {
-			if (cl.isAutoNumber()) {
+			if (cl.isAutoNumber()||DataType.BOOLEAN.equals(cl.getType())) {
 				return true;
 			}
 		}
