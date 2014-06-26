@@ -62,7 +62,8 @@ public class Functions {
 			return null;
 		return (int) s.charAt(0);
 	}
-
+	
+	
 	@FunctionType(functionName = "ATN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static double atn(double v) {
 		return Math.atan(v);
@@ -522,7 +523,7 @@ public class Functions {
 			return String.valueOf(datePart(par, t));
 		}
 		return new SimpleDateFormat(par.replaceAll("m", "M").replaceAll("n",
-				"m")).format(t);
+				"m").replaceAll("(?i)AM/PM|A/P|AMPM", "a").replaceAll("dddd", "EEEE")).format(t);
 	}
 
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,

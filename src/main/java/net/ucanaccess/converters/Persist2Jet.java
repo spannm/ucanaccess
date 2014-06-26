@@ -123,6 +123,7 @@ public class Persist2Jet {
 			for (int i = 0; i < values.length; ++i) {
 				Object value = values[i];
 				Column column = it.next();
+			  
 				if (value != null) {
 					if (value instanceof TimestampData) {
 						if (column.getType().equals(DataType.SHORT_DATE_TIME)) {

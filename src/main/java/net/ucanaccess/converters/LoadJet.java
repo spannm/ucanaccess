@@ -63,6 +63,7 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.PropertyMap.Property;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.query.Query;
@@ -202,7 +203,7 @@ public class LoadJet {
 		private static final int HSQL_FK_ALREADY_EXISTS = -ErrorCode.X_42528;   // -5528;
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-		
+		private static final String  EXPRESSION="Expression";
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
 			StringBuffer sb = new StringBuffer(" (");
@@ -221,6 +222,40 @@ public class LoadJet {
 			}
 			return name;
 		}
+		
+		
+		private String getHsqldbColumnType(Column cl){
+			String htype ;
+			if( cl.getType().equals(DataType.TEXT)){
+				int ln=ff1997?cl.getLength():cl.getLengthInUnits();
+				htype="VARCHAR("
+					+ ln + ")" ;
+				}
+			else if(cl.getType().equals(DataType.NUMERIC)&&cl.getScale()>0){
+				htype="NUMERIC("+
+						(cl.getPrecision()>0?cl.getPrecision():100)+","+
+						cl.getScale()+")";
+			}
+			else{
+				htype=TypesMap.map2hsqldb(cl
+					.getType());
+			}
+			return htype;
+		}
+		
+		
+		private String getCalculatedFieldTrigger(String ntn,Column cl){
+			
+			String trg="CREATE TRIGGER expr%d %s ON "+ntn+
+			   " REFERENCING NEW as newrow FOR EACH ROW "+
+			   " BEGIN  ATOMIC "+
+			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" =%s  "+
+			    	
+			    "; END ";
+			return trg;
+		}
+		
+		
 
 		
 		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException {
@@ -232,21 +267,16 @@ public class LoadJet {
 			String comma = "";
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
-				String htype ;
-				if( cl.getType().equals(DataType.TEXT)){
-					int ln=ff1997?cl.getLength():cl.getLengthInUnits();
-					htype="VARCHAR("
-						+ ln + ")" ;
-					}
-				else if(cl.getType().equals(DataType.NUMERIC)&&cl.getScale()>0){
-					htype="NUMERIC("+
-							(cl.getPrecision()>0?cl.getPrecision():100)+","+
-							cl.getScale()+")";
+				String expr=getExpression(cl);
+				if(expr!=null){
+					String tgr=getCalculatedFieldTrigger(ntn,cl);
+					arTrigger.add(String.format(tgr,namingCounter++,"before insert",SQLConverter.convertSQL(expr)));
+					arTrigger.add(String.format(tgr,namingCounter++,"before update",SQLConverter.convertSQL(expr)));
+
 				}
-				else{
-					htype=TypesMap.map2hsqldb(cl
-						.getType());
-				}
+				
+				String htype= getHsqldbColumnType(cl) ;
+				
 				sbC.append(comma)
 						.append(SQLConverter.escapeIdentifier(cl.getName()))
 						.append(" ").append(htype);
@@ -264,8 +294,22 @@ public class LoadJet {
 			sbC.append(")");
 			execCreate(sbC.toString(),true);
 			for (String trigger : arTrigger) {
-				execCreate(trigger,true);
+				execCreate(trigger,false);
 			}
+		}
+
+		private String getExpression(Column cl) throws IOException {
+			PropertyMap map=cl.getProperties();
+             Property exprp=map.get( EXPRESSION);
+			if(exprp!=null){
+				Table tl=cl.getTable();
+				String expr=(String)exprp.getValue();
+				for(Column cl1:tl.getColumns()){
+					expr=expr.replaceAll("\\[(?i)("+Pattern.quote(cl1.getName())+")\\]","newrow.$0");
+				}
+			    return expr;
+			}
+			return null;
 		}
 
 		private  void defaultValues(Table t) throws SQLException, IOException {
@@ -388,6 +432,7 @@ public class LoadJet {
 			} else if (uk) {
 				ci.append(" ADD CONSTRAINT ").append(nin);
 				ci.append(" UNIQUE ").append(colsIdx);
+				
 			} else {
 				ci = new StringBuffer("CREATE INDEX ").append(nin)
 						.append(" ON ").append(ntn).append(colsIdx);
@@ -463,6 +508,7 @@ public class LoadJet {
 			try {
 				for (int i = 0; i < t.getRowCount(); i++) {
 					ArrayList<Object> values = new ArrayList<Object>();
+					
 					Map<String, Object> row = t.getNextRow();
 					if (row == null)
 						continue;
@@ -499,11 +545,24 @@ public class LoadJet {
 				SQLException {
 			Table table = dbIO.getTable(tableName);
 			for (Index idx : table.getIndexes()) {
-				if (!idx.isForeignKey())
+				if (!idx.isForeignKey()&&idx.isPrimaryKey()){
 					loadIndex(idx);
+				}
+			}
+			//PK before avoid issues on reload with keepMirror parameter
+			for (Index idx : table.getIndexes()) {
+				if (!idx.isForeignKey()&&!idx.isPrimaryKey()){
+					loadIndex(idx);
+				}
 			}
 		}
-
+		private boolean hasCalculatedFields(Table t) throws IOException{
+			for(Column cl:t.getColumns()){
+				if(cl.getProperties().get(EXPRESSION)!=null)return true;
+			}
+			return false;
+		}
+		
 		private void loadTables() throws SQLException, IOException {
 			for (String tn : dbIO.getTableNames()) {
 				Table t = null;
@@ -515,6 +574,10 @@ public class LoadJet {
 				}
 				if (t != null)
 					loadTable(t);
+				//to be removed in the 2.0.7.1
+				if(hasCalculatedFields( t) ){
+					execCreate("SET TABLE "+SQLConverter.escapeIdentifier(t.getName())+" READONLY TRUE ",false);
+				}
 			}
 			if(sysSchema){
 			createSystemSchema();
