@@ -379,7 +379,7 @@ public class DBReference {
 				enc = ";crypt_key=" + key("AES")
 						+ ";crypt_type=aes;crypt_lobs=true";
 			}
-			if (!this.inMemory) {
+			if (!this.inMemory&&this.toKeepHsql ==null) {
 				log = ";hsqldb.log_data=FALSE";
 			}
 			if (!this.inMemory && tempHsql == null) {
