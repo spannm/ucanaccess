@@ -52,23 +52,35 @@ public class BooleanTest extends UcanaccessTestBase {
 		
 			st = super.ucanaccess.createStatement();
 			st
-					.executeUpdate("CREATE TABLE tblMain (ID COUNTER NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed YESNO); ");
+					.executeUpdate("CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed YESNO); ");
 			st.close();
 			st = super.ucanaccess.createStatement();
 			st
-					.executeUpdate("insert into tblMain (company)values('pippo')");
+					.executeUpdate("insert into tblMain (id,company)values(1,'pippo')");
 			st
 			.executeUpdate("update tblMain set closed=yes");
 			
+			st
+			.executeUpdate("insert into t (pk)values('pippo')");
 			init = true;
 		}
 
 	}
 	
+	
+	
+	
 	public void testCreate() throws SQLException, IOException, ParseException {
 		dump("select * from  tblMain");
+		dump("select * from  t");
 		checkQuery("select * from  tblMain");
+		checkQuery("select * from  t");
 	}
+	
+	public String getAccessPath() {
+		return  "net/ucanaccess/test/resources/bool.accdb";
+	}
+	
 
 	
 	

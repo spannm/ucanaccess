@@ -155,6 +155,8 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select CurrentUser() from t234", "ucanaccess");
 	}
 
+	
+	
 	public void testDateAdd() throws SQLException, IOException, ParseException {
 
 		checkQuery(
@@ -479,24 +481,30 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Long date') from t234",
 				"Friday, May 13, 1994");
-		checkQuery(
-				"select format(#05/13/1994 10:42:58 PM#,'Medium date') from t234",
-				"13-May-94");
+		
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Short date') from t234",
 				"5/13/1994");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 AM#,'Long time') from t234",
 				"10:42:58 AM");
-		checkQuery(
-				"select format(#05/13/1994 10:42:18 PM#,'Medium time') from t234",
-				"10:42 PM");
+		
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Short time') from t234",
 				"22:42");
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'General date') from t234",
 				"5/13/1994 10:42:58 PM");
+		
+		checkQuery(
+				"select format(#05/13/1994 10:42:58 PM#,'Medium date') from t234",
+				"13-May-94");
+		
+		checkQuery(
+				"select format(#05/13/1994 10:42:18 PM#,'Medium time') from t234",
+				"10:42 PM");
+		
+		
 	}
 
 	public void testSign() throws SQLException, IOException {
@@ -530,6 +538,8 @@ public class FunctionsTest extends UcanaccessTestBase {
 			ParseException {
 
 		checkQuery("select dateValue(#11/22/2003 10:42:58 PM#) from t234", SDF
+				.parse("2003-11-22 00:00:00.0"));
+		checkQuery("select dateValue(#11/22/2003 21:42:58 AM#) from t234", SDF
 				.parse("2003-11-22 00:00:00.0"));
 		checkQuery("select dateValue('6/30/2004') from t234", SDF
 				.parse("2004-06-30 00:00:00.0"));
