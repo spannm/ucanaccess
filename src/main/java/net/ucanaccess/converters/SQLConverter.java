@@ -41,6 +41,7 @@ public class SQLConverter {
 	private static final Pattern QUOTE_S_PATTERN = Pattern.compile("(')+");
 	private static final Pattern DOUBLE_QUOTE_S_PATTERN = Pattern
 			.compile("(\")+");
+
 	private static final Pattern QUOTE_M_PATTERN = Pattern
 			.compile("'(([^'])*)'");
 	private static final Pattern DOUBLE_QUOTE_M_PATTERN = Pattern
@@ -83,6 +84,8 @@ public class SQLConverter {
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
+	private static final Pattern ESPRESSION_DIGIT = Pattern
+			.compile("([\\d]+)(?![\\.\\d])");
 	public static final String BIG_BANG = "1899-12-30";
 	public static final HashMap<String, String> noRomanCharacters = new HashMap<String, String>();
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
@@ -179,9 +182,12 @@ public class SQLConverter {
 
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
-				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
-				Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)")), DROP_TABLE(
-				Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)"));
+				Pattern
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
+				Pattern
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)")), DROP_TABLE(
+				Pattern
+						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)"));
 		private Pattern pattern;
 
 		private DDLType(Pattern pattern) {
@@ -225,6 +231,7 @@ public class SQLConverter {
 	}
 
 	private static String replaceWorkAroundFunctions(String sql) {
+		
 		for (String waFun : waFunctions) {
 			sql = sql.replaceAll("(\\W)(?i)" + waFun + "\\s*\\(", "$1" + waFun
 					+ "WA(");
@@ -255,7 +262,8 @@ public class SQLConverter {
 	public static String convertSQL(String sql, boolean creatingQuery) {
 		return convertSQL(sql, null, creatingQuery);
 	}
-
+	
+		
 	public static String convertSQL(String sql, UcanaccessConnection conn,
 			boolean creatingQuery) {
 		sql = sql + " ";
@@ -267,6 +275,7 @@ public class SQLConverter {
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
+		
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -343,8 +352,8 @@ public class SQLConverter {
 		}
 		sql = sqlN + sqle;
 		for (String escaped : hs) {
-			sql = sql.replaceAll(
-					"\\[" + escaped.substring(1, escaped.length() - 1) + "\\]",
+			sql = sql.replaceAll("\\["
+					+ escaped.substring(1, escaped.length() - 1) + "\\]",
 					escaped.replaceAll("[\'\"]", ""));
 		}
 		return sql;
@@ -377,40 +386,35 @@ public class SQLConverter {
 	}
 
 	public static String convertAccessDate(String sql) {
-		sql = sql
-				.replaceAll("#" + DATE_ACCESS_FORMAT + "#",
-						"Timestamp'$3-$1-$2 00:00:00'")
+		sql = sql.replaceAll("#" + DATE_ACCESS_FORMAT + "#",
+				"Timestamp'$3-$1-$2 00:00:00'")
 				// FORMAT MM/dd/yyyy
 				.replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")#",
-						"Timestamp'$3-$1-$2 $4'")
-				.replaceAll(
+						"Timestamp'$3-$1-$2 $4'").replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")\\s*(?i)AM#",
-						"Timestamp'$3-$1-$2 $4'")
-				.replaceAll(
+						"Timestamp'$3-$1-$2 $4'").replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
 						"Timestamp'$3-$1-$2 $4'+ 12 Hour ")
 				// FORMAT yyyy-MM-dd
 				.replaceAll("#" + DATE_FORMAT + "#",
-						"Timestamp'$1-$2-$3 00:00:00'")
-				.replaceAll(
+						"Timestamp'$1-$2-$3 00:00:00'").replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
-								+ ")#", "Timestamp'$1-$2-$3 $4'")
-				.replaceAll(
+								+ ")#", "Timestamp'$1-$2-$3 $4'").replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
 								+ ")\\s*(?i)AM#", "Timestamp'$1-$2-$3 $4'")
 				.replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
 								+ ")\\s*(?i)PM#",
-						"Timestamp'$1-$2-$3 $4'+ 12 Hour ")
-				.replaceAll("#(" + HHMMSS_ACCESS_FORMAT + ")#",
-						"Timestamp'" + BIG_BANG + " $1'")
-				.replaceAll("#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)AM#",
-						"Timestamp'" + BIG_BANG + " $1'")
-				.replaceAll("#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
+						"Timestamp'$1-$2-$3 $4'+ 12 Hour ").replaceAll(
+						"#(" + HHMMSS_ACCESS_FORMAT + ")#",
+						"Timestamp'" + BIG_BANG + " $1'").replaceAll(
+						"#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)AM#",
+						"Timestamp'" + BIG_BANG + " $1'").replaceAll(
+						"#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
 						"Timestamp'" + BIG_BANG + " $1'+ 12 Hour");
 		return sql;
 	}
@@ -562,12 +566,23 @@ public class SQLConverter {
 		if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
-		String escaped = name.replaceAll("[/\\\\$%^:-]", "_")
-				.replaceAll("~", "M_").replaceAll("\\?", "_")
-				.replaceAll("\\.", "_").replaceAll("\'", "")
-				.replaceAll("#", "_").replaceAll("\"", "")
-				.replaceAll("\\+", "").replaceAll("\\(", "_")
-				.replaceAll("\\)", "_");
+		String escaped = name.replaceAll("[§/\\\\$%^:-]", "_").replaceAll("~",
+				"M_").replaceAll("\\?", "_").replaceAll("\\.", "_").replaceAll(
+				"\'", "").replaceAll("#", "_").replaceAll("\"", "").replaceAll(
+				"\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_")
+				.replaceAll("°", "0")
+				.replaceAll(Pattern.quote("<"), "lt")
+				.replaceAll(Pattern.quote(">"), "gt")
+				.replaceAll(Pattern.quote(";"),"_")
+				.replaceAll(Pattern.quote("@"),"_")
+				.replaceAll(Pattern.quote(","),"_")
+				.replaceAll(Pattern.quote("|"),"_")
+				.replaceAll(Pattern.quote("£"),"_")
+				.replaceAll(Pattern.quote("*"),"_")
+				.replaceAll(Pattern.quote("&"),"_")
+				.replaceAll(Pattern.quote("="),"_")
+				
+				;
 		escaped = replaceNoRomanCharacters(escaped);
 		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
 			escaped = "\"" + escaped + "\"";
@@ -605,22 +620,22 @@ public class SQLConverter {
 		// padding for detecting the right exception
 		sql += " ";
 		for (Map.Entry<String, String> entry : types2Convert.entrySet()) {
-			sql = sql.replaceAll(
-					TYPES_TRANSLATE.replaceAll("_", entry.getKey()), "$1"
-							+ entry.getValue() + "$2");
+			sql = sql.replaceAll(TYPES_TRANSLATE
+					.replaceAll("_", entry.getKey()), "$1" + entry.getValue()
+					+ "$2");
 		}
 		sql = sql.replaceAll(DEFAULT_VARCHAR, "$1VARCHAR(255)$2");
 		return clearDefaultsCreateStatement(sql);
 	}
 
-	public static String  getDDLDefault(String ddlf){
-		for(String pattern :DEFAULT_CATCH){
-			Pattern pt=Pattern.compile(pattern);
-			Matcher mtch=pt.matcher(ddlf+" ");
-			if(mtch.find()){
+	public static String getDDLDefault(String ddlf) {
+		for (String pattern : DEFAULT_CATCH) {
+			Pattern pt = Pattern.compile(pattern);
+			Matcher mtch = pt.matcher(ddlf + " ");
+			if (mtch.find()) {
 				return mtch.group(2);
 			}
-		
+
 		}
 		return null;
 	}
@@ -637,7 +652,7 @@ public class SQLConverter {
 		}
 		for (String pattern : DEFAULT_CATCH)
 			sql = sql.replaceAll(pattern, "$3");
-		
+
 		return sql;
 	}
 
@@ -656,8 +671,8 @@ public class SQLConverter {
 		Matcher matcher = ptfl.matcher(sql);
 		if (matcher.find()) {
 			return sql.substring(0, matcher.start(1))
-					+ convertLike(matcher.group(1), matcher.group(2),
-							matcher.group(3))
+					+ convertLike(matcher.group(1), matcher.group(2), matcher
+							.group(3))
 					+ convertLike(sql.substring(matcher.end(0)));
 		} else
 			return sql;
@@ -672,8 +687,8 @@ public class SQLConverter {
 					+ convert2RegexMatches(likeContent.substring(mtc.end(0)));
 		}
 		return likeContent.replaceAll("#", "\\\\d").replaceAll("\\*", ".*")
-				.replaceAll("_", ".")
-				.replaceAll("(\\[)\\!(\\w\\-\\w\\])", "$1^$2")
+				.replaceAll("_", ".").replaceAll("(\\[)\\!(\\w\\-\\w\\])",
+						"$1^$2")
 				+ "')";
 	}
 
@@ -710,4 +725,188 @@ public class SQLConverter {
 	public static boolean isXescaped(String identifier) {
 		return xescapedIdentifiers.contains(identifier);
 	}
+
+	public static String convertFormula(String sql) {
+		//white space to allow replaceWorkAroundFunction pattern to work fine
+		sql = convertFormula0(convertSQL(" "+sql));
+		return sql;
+	}
+
+	private static String convertDigit(String sql) {
+		Matcher mtc = ESPRESSION_DIGIT.matcher(sql);
+		char[] cq = sql.toCharArray();
+		if (mtc.find()) {
+			int idx = mtc.start();
+			int idxe = mtc.end();
+			boolean replace = true;
+			for (int j = idx; j >= 0; j--) {
+				if (Character.isDigit(cq[j])) {
+					continue;
+				} else {
+					if (Character.isLetter(cq[j])) {
+						replace = false;
+					}
+					break;
+				}
+			}
+			if(replace){
+				return sql.substring(0, idx)+mtc.group(1)+"E0"+ convertDigit( sql.substring(idxe));
+			}else 
+				return sql.substring(0, idxe)+convertDigit( sql.substring(idxe));
+		}else return sql;
+		
+	}
+
+	private static String convertFormula0(String sql) {
+		int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
+		boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
+		String suff = enddq ? "" : sql.substring(li + 1);
+		suff = convertDigit(suff);
+		String tsql = enddq ? sql : sql.substring(0, li + 1);
+		int[] fd = getDoubleQuoteGroup(tsql);
+		int[] fs = getQuoteGroup(tsql);
+		if (fd != null || fs != null) {
+			boolean inid = fs == null || (fd != null && fd[0] < fs[0]);
+			String group, str;
+			int[] mcr = inid ? fd : fs;
+			group = tsql.substring(mcr[0], mcr[1]);
+			str = tsql.substring(0, mcr[0]);
+			str = convertDigit(str);
+			tsql = str + group + convertFormula0(tsql.substring(mcr[1]));
+		} else {
+			tsql = convertDigit(tsql);
+		}
+		return tsql + suff;
+	}
+
+	public static String convertPowOperator(String sql) {
+		int i = sql.indexOf("^");
+		if (i < 0) {
+			return sql;
+		}
+		while ((i = sql.indexOf("^")) >= 0) {
+			int foi = firstOperandIndex(sql, i);
+			int loi = i + secondOperandIndex(sql, i) + 1;
+			sql = sql.substring(0, foi) + " (power(" + sql.substring(foi, i)
+					+ "," + sql.substring(i + 1, loi + 1) + "))"
+					+ sql.substring(loi + 1);
+		}
+
+		return sql;
+	}
+
+	private static int secondOperandIndex(String sql, int i) {
+		sql = sql.substring(i + 1);
+		char[] ca = sql.toCharArray();
+		boolean foundType = false;
+		boolean field = false;
+		boolean group = false;
+		boolean digit = false;
+		int countPar = 0;
+		int j;
+
+		for (j = 0; j < ca.length; j++) {
+			char c = ca[j];
+			if (c == ' ')
+				continue;
+
+			if (foundType) {
+				if (field && c == ']') {
+					return j;
+				} else if (digit && !Character.isDigit(c) && c != '.') {
+					return j - 1;
+				} else if (group) {
+					if (c == '(')
+						countPar++;
+					if (c == ')') {
+						countPar--;
+						if (countPar == 0)
+							return j;
+					}
+				}
+			} else {
+				if (c == '[') {
+					foundType = true;
+					field = true;
+				} else if (c == '(') {
+					foundType = true;
+					group = true;
+					countPar++;
+				} else if (Character.isDigit(c)) {
+					foundType = true;
+					digit = true;
+				} else if (c == '+' || c == '-') {
+					if (j + 1 < ca.length && ca[j + 1] != '('
+							&& ca[j + 1] != '[') {
+						foundType = true;
+						digit = true;
+					}
+				}
+
+			}
+
+		}
+		return j - 1;
+	}
+
+	private static int firstOperandIndex(String sql, int i) {
+		sql = sql.substring(0, i);
+
+		char[] ca = sql.toCharArray();
+		boolean foundType = false;
+		boolean field = false;
+		boolean group = false;
+		boolean digit = false;
+		int countPar = 0;
+		int j;
+		for (j = ca.length - 1; j >= 0; j--) {
+			char c = ca[j];
+
+			if (c == ' ')
+				continue;
+			if (foundType) {
+				if (field && c == '[') {
+					return j;
+				} else if (digit && !Character.isDigit(c) && c != '.') {
+					if ((c == '+' || c == '-') && j > 0
+							&& (ca[j - 1] == '+' || ca[j - 1] == '-')) {
+						return j;
+					}
+
+					return j + 1;
+				} else if (group) {
+					if (c == ')')
+						countPar++;
+
+					if (c == '(') {
+						countPar--;
+						if (countPar == 0)
+							return j;
+					}
+				}
+			} else {
+				if (c == ']') {
+					foundType = true;
+					field = true;
+				} else if (c == ')') {
+					foundType = true;
+					group = true;
+					countPar++;
+				} else if (Character.isDigit(c)) {
+					foundType = true;
+					digit = true;
+				}
+
+			}
+
+		}
+		return j + 1;
+	}
+
+	public static int asUnsigned(byte a) {
+		int b = ((a & 0xFF));
+		return ((b));
+	}
+
+	
 }

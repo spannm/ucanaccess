@@ -201,9 +201,11 @@ public class LoadJet {
 	
 	private final class TablesLoader {
 		private static final int HSQL_FK_ALREADY_EXISTS = -ErrorCode.X_42528;   // -5528;
+		private static final int HSQL_UK_ALREADY_EXISTS= -ErrorCode.X_42522;//-5522
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
 		private static final String  EXPRESSION="Expression";
+		private static final String RESULT_TYPE = "ResultType";
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
 			StringBuffer sb = new StringBuffer(" (");
@@ -224,38 +226,98 @@ public class LoadJet {
 		}
 		
 		
-		private String getHsqldbColumnType(Column cl){
+		private DataType getReturnType(Column cl) throws IOException{
+			if(cl.getProperties().get(EXPRESSION)==null||cl.getProperties().get(RESULT_TYPE)==null)
+				return null;
+			byte pos=(Byte)	cl.getProperties().get(RESULT_TYPE).getValue();
+			return DataType.fromByte(pos);
+		
+		}
+		
+		
+		private String getHsqldbColumnType(Column cl) throws IOException{
 			String htype ;
-			if( cl.getType().equals(DataType.TEXT)){
+			DataType dtyp=cl.getType();
+			DataType rtyp= getReturnType( cl);
+			boolean calcType=false;
+			if( rtyp!=null){
+				dtyp=rtyp;
+				calcType=true;
+			}
+						
+			if( dtyp.equals(DataType.TEXT)){
 				int ln=ff1997?cl.getLength():cl.getLengthInUnits();
 				htype="VARCHAR("
 					+ ln + ")" ;
 				}
-			else if(cl.getType().equals(DataType.NUMERIC)&&cl.getScale()>0){
-				htype="NUMERIC("+
+			else if(dtyp.equals(DataType.NUMERIC)&&(cl.getScale()>0||calcType)){
+				if(calcType){
+					htype="NUMERIC(100 ,4)";
+				}
+				else{
+					htype="NUMERIC("+
 						(cl.getPrecision()>0?cl.getPrecision():100)+","+
 						cl.getScale()+")";
+				}
+			}
+			else if(dtyp.equals(DataType.FLOAT)&&calcType){
+				htype="NUMERIC("+
+				(cl.getPrecision()>0?cl.getPrecision():100)+","+
+				4+")";
 			}
 			else{
-				htype=TypesMap.map2hsqldb(cl
-					.getType());
+				htype=TypesMap.map2hsqldb(dtyp);
 			}
 			return htype;
 		}
 		
 		
-		private String getCalculatedFieldTrigger(String ntn,Column cl){
+		private String getCalculatedFieldTrigger(String ntn,Column cl) throws IOException{
+			DataType dt=getReturnType( cl);
+			String fun=null;
+			if(isNumeric(dt)){
+				fun="formulaToNumeric";
+			}else if(isBoolean(dt)){
+				fun="formulaToBoolean";
+			}else if(isDate(dt)){
+				fun="formulaToDate";
+			}else if(isTextual(dt)){
+				fun="formulaToText";
+			}
+			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
 			
 			String trg="CREATE TRIGGER expr%d %s ON "+ntn+
 			   " REFERENCING NEW as newrow FOR EACH ROW "+
 			   " BEGIN  ATOMIC "+
-			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" =%s  "+
+			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
 			    	
 			    "; END ";
+			
 			return trg;
 		}
 		
+		private boolean isNumeric(DataType dt){
+			return typeGroup(dt,DataType.NUMERIC,DataType.MONEY,DataType.DOUBLE,DataType.FLOAT,DataType.LONG,DataType.INT,DataType.BYTE);
+		}
 		
+		private boolean isDate(DataType dt){
+			return typeGroup(dt,DataType.SHORT_DATE_TIME);
+		}
+		
+		private boolean isBoolean(DataType dt){
+			return typeGroup(dt,DataType.BOOLEAN);
+		}
+		
+		private boolean isTextual(DataType dt){
+			return typeGroup(dt,DataType.MEMO,DataType.TEXT);
+		}
+		
+		private boolean typeGroup(DataType dt,DataType...gr){
+			for(DataType el:gr){
+				if(el.equals(dt))return true;
+			}
+			return false;
+		}
 
 		
 		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException {
@@ -270,13 +332,10 @@ public class LoadJet {
 				String expr=getExpression(cl);
 				if(expr!=null){
 					String tgr=getCalculatedFieldTrigger(ntn,cl);
-					arTrigger.add(String.format(tgr,namingCounter++,"before insert",SQLConverter.convertSQL(expr)));
-					arTrigger.add(String.format(tgr,namingCounter++,"before update",SQLConverter.convertSQL(expr)));
-
+					arTrigger.add(String.format(tgr,namingCounter++,"before insert",SQLConverter.convertFormula(expr)));
 				}
 				
 				String htype= getHsqldbColumnType(cl) ;
-				
 				sbC.append(comma)
 						.append(SQLConverter.escapeIdentifier(cl.getName()))
 						.append(" ").append(htype);
@@ -294,16 +353,22 @@ public class LoadJet {
 			sbC.append(")");
 			execCreate(sbC.toString(),true);
 			for (String trigger : arTrigger) {
-				execCreate(trigger,false);
+				try{
+					execCreate(trigger,false);
+				}catch(SQLException e){
+					System.err.println(trigger);
+					Logger.logWarning(e.getMessage());
+					break;
+				}
 			}
 		}
 
 		private String getExpression(Column cl) throws IOException {
 			PropertyMap map=cl.getProperties();
              Property exprp=map.get( EXPRESSION);
-			if(exprp!=null){
+             if(exprp!=null){
 				Table tl=cl.getTable();
-				String expr=(String)exprp.getValue();
+				String expr= SQLConverter.convertPowOperator((String)exprp.getValue());
 				for(Column cl1:tl.getColumns()){
 					expr=expr.replaceAll("\\[(?i)("+Pattern.quote(cl1.getName())+")\\]","newrow.$0");
 				}
@@ -439,7 +504,9 @@ public class LoadJet {
 			}
 			try {
 				execCreate(ci.toString(),true);
-			} catch (Exception e) {
+			} 
+			catch (SQLException e) {
+				if( HSQL_UK_ALREADY_EXISTS== e.getErrorCode())return ;
 				if (idx.isUnique()) {
 					for (Index.Column cd : idx.getColumns()) {
 						if (cd.getColumn().getType()
@@ -448,6 +515,11 @@ public class LoadJet {
 						}
 					}
 				}
+				Logger.logWarning(e.getMessage());
+				return;
+			}
+			catch (Exception e) {
+				
 				Logger.logWarning(e.getMessage());
 				return;
 			}
@@ -484,9 +556,9 @@ public class LoadJet {
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
 				return;
-			
+			List<Integer> cfil=calculatedFieldIndexList( t) ;
 			createSyncrTable(t,systemTable);
-			loadTableData(t,systemTable);
+			loadTableData(t,cfil,systemTable);
 			if(!systemTable){
 				defaultValues(t);
 				triggersGenerator.synchronisationTriggers(ntn,
@@ -503,7 +575,7 @@ public class LoadJet {
 			return false;
 		}
 
-	   private void loadTableData(Table t,boolean systemTable) throws IOException, SQLException {
+	   private void loadTableData(Table t,List<Integer> cfil, boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
 				for (int i = 0; i < t.getRowCount(); i++) {
@@ -513,9 +585,12 @@ public class LoadJet {
 					if (row == null)
 						continue;
 					if (ps == null)
-						ps = sqlInsert(t, row,systemTable);
+						ps = sqlInsert(t, row,cfil,systemTable);
 					Set<Entry<String, Object>> se = row.entrySet();
+					
 					for (Entry<String, Object> en : se) {
+						Column cl=t.getColumn(en.getKey());
+						if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
 						values.add(value(en.getValue()));
 					}
 					execInsert(ps, values);
@@ -555,12 +630,23 @@ public class LoadJet {
 					loadIndex(idx);
 				}
 			}
+			
+			//to be removed in the 2.0.7.2
+			if(hasCalculatedFields( table) ){
+				execCreate("SET TABLE "+SQLConverter.escapeIdentifier(table.getName())+" READONLY TRUE ",false);
+			}
 		}
 		private boolean hasCalculatedFields(Table t) throws IOException{
+			return calculatedFieldIndexList(t).size()>0; 
+		}
+		
+		
+		private List<Integer> calculatedFieldIndexList(Table t) throws IOException{
+			ArrayList<Integer> ari=new ArrayList<Integer>(); 
 			for(Column cl:t.getColumns()){
-				if(cl.getProperties().get(EXPRESSION)!=null)return true;
+				if(cl.getProperties().get(EXPRESSION)!=null)ari.add(cl.getColumnIndex());
 			}
-			return false;
+			return ari;
 		}
 		
 		private void loadTables() throws SQLException, IOException {
@@ -574,14 +660,11 @@ public class LoadJet {
 				}
 				if (t != null)
 					loadTable(t);
-				//to be removed in the 2.0.7.1
-				if(hasCalculatedFields( t) ){
-					execCreate("SET TABLE "+SQLConverter.escapeIdentifier(t.getName())+" READONLY TRUE ",false);
-				}
+				
 			}
 			if(sysSchema){
 			createSystemSchema();
-		for (String tn : dbIO.getSystemTableNames()) {
+			for (String tn : dbIO.getSystemTableNames()) {
 				Table t = null;
 				try {
 					t = dbIO.getSystemTable(tn);
@@ -603,7 +686,7 @@ public class LoadJet {
 			
 		}
 
-		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,boolean systemTable)
+		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,List<Integer> cfil, boolean systemTable)
 				throws IOException, SQLException {
 			String tn = t.getName();
 			String ntn = schema(SQLConverter.escapeIdentifier(tn),systemTable);
@@ -614,8 +697,11 @@ public class LoadJet {
 			Set<Entry<String, Object>> se = row.entrySet();
 			comma = "";
 			for (Entry<String, Object> en : se) {
+				String cn=en.getKey();
+				Column cl=t.getColumn(cn);
+				if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
 				sbI.append(comma).append(
-						SQLConverter.escapeIdentifier(en.getKey()));
+						SQLConverter.escapeIdentifier(cn));
 				sbE.append(comma).append(" ? ");
 				comma = ",";
 			}
@@ -643,6 +729,9 @@ public class LoadJet {
 				} catch (IOException e) {
 					throw new UcanaccessSQLException(e);
 				}
+			}
+			if(value instanceof Byte){
+				return SQLConverter.asUnsigned((Byte)value);
 			}
 			return value;
 		}
@@ -908,14 +997,14 @@ public class LoadJet {
 		this.functionsLoader.addFunctions(clazz);
 	}
 
-	private void execCreate(String expression, boolean blocking) throws SQLException {
+	private void execCreate(String expression, boolean logging) throws SQLException {
 		Statement st = null;
 		try {
 			
 			st = conn.createStatement();
 			st.executeUpdate(expression);
 		} catch(SQLException e){
-			if(blocking&&e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
+			if(logging&&e.getErrorCode()!=TablesLoader.HSQL_FK_ALREADY_EXISTS)
 			Logger.log("Cannot execute:"+expression+" "+e.getMessage());
 			
 			throw e;

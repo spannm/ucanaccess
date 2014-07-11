@@ -34,12 +34,14 @@ import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
-
+import java.util.regex.Pattern;
 
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+
+import com.healthmarketscience.jackcess.DataType;
 
 public class Functions {
 	private static Double rnd;
@@ -67,6 +69,12 @@ public class Functions {
 	@FunctionType(functionName = "ATN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static double atn(double v) {
 		return Math.atan(v);
+	}
+	
+	
+	@FunctionType(functionName = "SQR", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double sqr(double v) {
+		return Math.sqrt(v);
 	}
 
 	@FunctionType(functionName = "CBOOL", argumentTypes = { AccessType.NUMERIC }, returnType = AccessType.YESNO)
@@ -774,6 +782,9 @@ public class Functions {
 		cl.set(1899, 11, 30);
 		return new java.sql.Timestamp(cl.getTimeInMillis());
 	}
+	
+	
+	
 
 	@FunctionType(functionName = "VAL", argumentTypes = { AccessType.NUMERIC }, returnType = AccessType.DOUBLE)
 	public static Double val(BigDecimal val1) {
@@ -888,6 +899,9 @@ public class Functions {
 		return null;
 	}
 
+	
+	
+	
 	@FunctionType(functionName = "NZ", argumentTypes = { AccessType.NUMERIC,
 			AccessType.NUMERIC }, returnType = AccessType.NUMERIC)
 	public static BigDecimal nz(BigDecimal value, BigDecimal outher) {
@@ -947,4 +961,327 @@ public class Functions {
 		return (short)(value?-1:0);
 	}
 	
+	@FunctionType(functionName = "DDB", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double ddb(double cost, double salvage, double life,double  period ){
+		return  ddb( cost, salvage,life,  period ,2d);
+	}
+	
+	@FunctionType(functionName = "DDB", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double ddb(double cost, double salvage, double life,double  period ,double factor){
+		double depr=0d;
+		double val=0d;
+		for(double p=1d; p<=period;p++){
+			val+=depr;
+			depr 
+			=Math.min((cost-val)*factor/life, cost-salvage-val);
+			
+		}
+		return depr;
+	}
+	
+	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double fv(double rate,int periods,double payment){
+		return fv(rate, periods, payment,0,0);
+	}
+	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG ,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static double fv(double rate,int periods,double payment,double pv){
+		return fv(rate, periods, payment,pv,0);
+	}
+	
+	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+	public static double fv(double rate,int periods,double payment,double pv,int type){
+		if(type>0)type=1;
+		double fv=pv*Math.pow(1+rate, periods);
+		for(int i=0;i<periods;i++){
+				fv+=(payment)*Math.pow(1+rate, i+type);
+		}
+		return -fv;
+	}
+	
+	
+	@FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static double pmt(double rate, double periods, double pv) {
+           return pmt( rate, periods, pv,0,0);
+    }
+	
+	@FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static double pmt(double rate, double periods, double pv, double fv) {
+           return pmt( rate, periods, pv,0,0);
+    }
+		
+	@FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+	public static double pmt(double rate, double periods, double pv, double fv, int type) {
+		if(type>0)type=1;
+		
+        if (rate == 0) {
+            return -1*(fv+pv)/periods;
+        }
+        else {
+          	return ( fv + pv * Math.pow(1+rate , periods) ) * rate
+                  /
+               ((type==1? 1+rate  : 1) * (1 - Math.pow(1+rate, periods)));
+        }
+      
+    }
+	
+	
+
+	@FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static double nper(double rate, double pmt, double pv) {
+		return nper( rate,  pmt, pv, 0, 0);
+	}
+	
+	@FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	public static double nper(double rate, double pmt, double pv, double fv) {
+		
+		return nper( rate,  pmt, pv, fv, 0);
+	}
+	
+	@FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+	public static double nper(double rate, double pmt, double pv, double fv,int type) {
+        if(type>0)type=1;
+		double nper = 0;
+        if (rate == 0) {
+            nper = -1 * (fv + pv) / pmt;
+        } else {
+          
+            double cr = (type==1 ? 1+rate : 1) * pmt / rate;
+            double val1 = ((cr - fv) < 0)
+                    ? Math.log(fv - cr)
+                    : Math.log(cr - fv);
+            double val2 = ((cr - fv) < 0)
+                    ? Math.log(-pv - cr)
+                    : Math.log(pv + cr);
+            double val3 = Math.log(1+ rate);
+            nper = (val1 - val2) / val3;
+        }
+        return nper;
+    }
+	
+	@FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double ipmt(double rate, double per, double nper, double pv) {
+		return ipmt(rate, per,  nper,  pv, 0,0);
+	}
+	
+	@FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double ipmt(double rate, double per, double nper, double pv, double fv) {
+		return ipmt(rate, per,  nper,  pv, fv,0);
+	}
+	
+	@FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+	public static double ipmt(double rate, double per, double nper, double pv, double fv, int type) {
+			if(type>0)type=1;
+			double ipmt = fv(rate, new Double(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
+			if (type==1) ipmt =ipmt/ (1 + rate);
+			return ipmt;
+	 }
+	
+	
+	@FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt) {
+    	return pv( rate, nper,  pmt,0,0);
+       
+    }
+	
+	@FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt, double fv) {
+    	return pv( rate, nper,  pmt,fv,0);
+       
+    }
+
+	
+	
+	@FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt, double fv, int type) {
+    	if(type>0)type=1;
+    	
+        if (rate == 0) {
+            return -1*((nper*pmt)+fv);
+        }
+        else {
+           
+            return (( ( 1 - Math.pow(1+rate, nper) ) / rate ) * (type==1 ? 1+rate : 1)  * pmt - fv)
+                     /
+                    Math.pow(1+rate, nper);
+        }
+       
+    }
+	
+	@FunctionType(functionName = "PPMT", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.LONG,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	 public static double ppmt(double rate, int per, int nper, double pv) {
+	    return ppmt(rate,per, nper, pv, 0, 0) ;
+	}
+	
+	@FunctionType(functionName = "PPMT", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	 public static double ppmt(double rate, int per, int nper, double pv, double fv) {
+	    return ppmt(rate,per, nper, pv, fv, 0) ;
+	}
+
+	@FunctionType(functionName = "PPMT", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
+	 public static double ppmt(double rate, int per, int nper, double pv, double fv, int type) {
+	    return pmt(rate, nper, pv, fv, type) - ipmt(rate, per, nper, pv, fv, type);
+	}
+	
+	
+	@FunctionType(functionName = "SLN", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	 public static double sln(double cost,  double salvage, double life) {
+	    return (cost-salvage)/life;
+	}
+	
+	@FunctionType(functionName = "SYD", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	 public static double syd(double cost,  double salvage, double life,double per) {
+	    return (cost-salvage)*(life-per+1)*2/(life*(life+1));
+	}
+		  
+	   @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.DOUBLE)
+	   public static Double formulaToNumeric(Double res, String datatype){
+		    return res;
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.YESNO,AccessType.MEMO}, returnType = AccessType.DOUBLE)
+	   public static  Double  formulaToNumeric(Boolean res, String datatype){
+		    if(res==null)return null;
+		   return res.booleanValue()?-1d:0d;
+	   }
+	   
+	   
+	   @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.MEMO,AccessType.MEMO}, returnType = AccessType.DOUBLE)
+	   public static  Double  formulaToNumeric(String res, String datatype){
+		    if(res==null)return null;
+		    try{
+		    	DecimalFormatSymbols dfs=DecimalFormatSymbols.getInstance();
+		    	String sep=dfs.getDecimalSeparator()+"";
+		    	String gs=dfs.getGroupingSeparator()+"";
+		    	res=res.replaceAll(Pattern.quote(gs), "");
+		    	if(!sep.equalsIgnoreCase("."))
+		    		res=res.replaceAll(Pattern.quote(sep),".");
+		    	double d= val(res);
+		    	DataType dt= DataType.valueOf(datatype);
+		    	if(dt.equals( DataType.BYTE)||dt.equals( DataType.INT)||dt.equals( DataType.LONG)){
+		    		d=Math.rint(d+0.00000001);
+		    	}
+		    	return d;
+		    }catch(Exception e){
+		    	return null;
+		    }
+		  
+	   } 
+	      
+	   @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.DATETIME,AccessType.MEMO}, returnType = AccessType.DOUBLE)
+	   public static  Double  formulaToNumeric(Timestamp res, String datatype) throws UcanaccessSQLException{
+		    if(res==null)return null;
+		    Calendar clbb = Calendar.getInstance();
+		    clbb.set(1899, 11, 30,0,0,0);
+		     return (double)dateDiff("y",new Timestamp(clbb.getTimeInMillis()),res );
+	   }
+	   
+	   @FunctionType(functionName = "formulaToBoolean", argumentTypes = { AccessType.YESNO,AccessType.MEMO}, returnType = AccessType.YESNO)
+	   public static  Boolean  formulaToBoolean(Boolean res, String datatype){
+		    return res;
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToBoolean", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.YESNO)
+	   public static  Boolean  formulaToBoolean(Double res, String datatype){
+		   if(res==null)return null; 
+		   return res!=0d;
+	   } 
+	   
+	   
+	   @FunctionType(functionName = "formulaToBoolean", argumentTypes = { AccessType.DATETIME,AccessType.MEMO}, returnType = AccessType.YESNO)
+	   public static  Boolean  formulaToBoolean(Timestamp res, String datatype){
+		   return null; 
+		   
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToBoolean", argumentTypes = { AccessType.MEMO,AccessType.MEMO}, returnType = AccessType.YESNO)
+	   public static  Boolean  formulaToBoolean(String res, String datatype){
+		   if(res==null)return null; 
+		   if(res.equals("-1"))return true;
+		  if(res.equals("0"))return false;
+		  return null;
+		   
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.MEMO,AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static  String formulaToText(String res, String datatype){
+		   return res;
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static  String formulaToText(Double res, String datatype) throws UcanaccessSQLException{
+		   if(res==null)return null; 
+		   DecimalFormatSymbols dfs=DecimalFormatSymbols.getInstance();
+		   DecimalFormat df = new DecimalFormat("#",dfs);
+		   df.setGroupingUsed(false);
+		   df.setMaximumFractionDigits(100);
+	       return df.format(res);
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.YESNO,AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static  String formulaToText(Boolean res, String datatype) throws UcanaccessSQLException{
+		   if(res==null)return null; 
+		   return res?"-1":"0";
+	   } 
+	   
+	   
+	   @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.DATETIME,AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static  String formulaToText(Timestamp res, String datatype) throws UcanaccessSQLException{
+		   Calendar cl = Calendar.getInstance();
+		   cl.setTimeInMillis(res.getTime());
+		   if(cl.get(Calendar.HOUR)==0&&cl.get(Calendar.MINUTE)==0&&cl.get(Calendar.SECOND)==0)
+		   return format(res,"short date" );
+		   else return format(res,"general date" );
+	   } 
+	
+	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DATETIME,AccessType.MEMO}, returnType = AccessType.DATETIME)
+	   public static  Timestamp formulaToDate(Timestamp res, String datatype){
+		   return res;
+	   } 
+	   
+	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.MEMO,AccessType.MEMO}, returnType = AccessType.DATETIME)
+	   public static  Timestamp formulaToDate(String res, String datatype){
+		   if(res==null)return null; 
+		  try{
+		   return dateValue(res);
+		  }catch(Exception e){
+			  return null;
+		  }
+	   } 
+	  	   
+	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.YESNO,AccessType.MEMO}, returnType = AccessType.DATETIME)
+	   public static  Timestamp formulaToDate(Boolean res, String datatype) throws UcanaccessSQLException{
+		   if(res==null)return null;
+		   Calendar clbb = Calendar.getInstance();
+		    clbb.set(1899, 11, 30,0,0,0);
+		    clbb.set(Calendar.MILLISECOND, 0);
+		  return    dateAdd("y", res?-1:0, new Timestamp(clbb.getTimeInMillis()));
+	   } 
+	
+	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.DATETIME)
+	   public static  Timestamp formulaToDate(Double res, String datatype) throws UcanaccessSQLException{
+		   if(res==null)return null;
+		   	Calendar clbb = Calendar.getInstance();
+		    clbb.set(1899, 11, 30,0,0,0);
+		    clbb.set(Calendar.MILLISECOND, 0);
+		     Double d=Math.floor(res);
+		     Timestamp tr=    dateAdd("y", d.intValue(), new Timestamp(clbb.getTimeInMillis()));
+		     d=(res-res.intValue())*24;
+		     tr=    dateAdd("H",d.intValue(), tr);
+		     d=(d-d.intValue())*60;
+		     tr=    dateAdd("N",d.intValue(), tr);
+		     d=(d-d.intValue())*60;
+		     tr=    dateAdd("S",new Double(Math.rint(d+0.0000001)).intValue(), tr);
+		     return tr;
+	   } 
+	   
+	   @FunctionType(namingConflict = true,functionName = "ROUND", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	   public static double round(double d, double p) {
+	        double f = Math.pow(10d, p);
+	        return Math.round(d * f) / f;
+	    }
+	   
+	   @FunctionType(namingConflict = true,functionName = "FIX", argumentTypes = { AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	   public static double fix(double d) throws UcanaccessSQLException {
+		   return  sign(d) * mint(Math.abs(d));
+	    }
 }
