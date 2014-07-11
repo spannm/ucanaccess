@@ -154,6 +154,13 @@ public class Persist2Jet {
 							values[i] =obj;
 						else throw new UcanaccessSQLException(ExceptionMessages.UNSUPPORTED_TYPE);
 					}
+					
+					if (column.getType().equals(DataType.BYTE)) {
+						int vl=(Integer)value;
+						if (vl<0||vl>256){
+							throw new  SQLException("Data out of range");
+						}
+					}
 				}
 			}
 		} catch (Exception e) {

@@ -50,7 +50,7 @@ public class TypesMap {
 	
 	static {
 		
-		access2HsqlTypesMap.put(AccessType.BYTE.name(), "TINYINT");
+		access2HsqlTypesMap.put(AccessType.BYTE.name(), "SMALLINT");
 		access2HsqlTypesMap.put(AccessType.INTEGER.name(), "SMALLINT");
 		access2HsqlTypesMap.put(AccessType.LONG.name(), "INTEGER");
 		access2HsqlTypesMap.put(AccessType.TEXT.name(), "VARCHAR");
@@ -63,7 +63,7 @@ public class TypesMap {
 		access2HsqlTypesMap.put(AccessType.YESNO.name(), "BOOLEAN");
 		access2HsqlTypesMap.put(AccessType.DATETIME.name(), "TIMESTAMP");
 		access2HsqlTypesMap.put(AccessType.SINGLE.name(), "FLOAT");
-		
+				
 		access2JackcessTypesMap.put(AccessType.BYTE, DataType.BYTE);
 		access2JackcessTypesMap.put(AccessType.INTEGER, DataType.INT);
 		access2JackcessTypesMap.put(AccessType.LONG, DataType.LONG); 
@@ -80,7 +80,7 @@ public class TypesMap {
 		access2JackcessTypesMap.put(AccessType.DOUBLE, DataType.DOUBLE);
 		
 		
-		jackcess2HsqldbTypesMap.put( DataType.BYTE,"TINYINT");
+		jackcess2HsqldbTypesMap.put( DataType.BYTE,"SMALLINT");
 		jackcess2HsqldbTypesMap.put( DataType.INT,"SMALLINT");
 		jackcess2HsqldbTypesMap.put( DataType.LONG,"INTEGER"); 
 		jackcess2HsqldbTypesMap.put( DataType.TEXT,"VARCHAR");
