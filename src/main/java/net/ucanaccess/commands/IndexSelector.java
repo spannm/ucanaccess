@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.converters.SQLConverter;
 
 
 
@@ -72,12 +73,11 @@ public class IndexSelector {
 						.intValue();
 			}
 			if (currVal instanceof Integer && dbVal instanceof Byte) {
-				return ((Integer) currVal).intValue() == ((Byte) dbVal)
-						.intValue();
+				return ((Integer) currVal).intValue() == SQLConverter.asUnsigned( (Byte) dbVal);
 			}
 			if (dbVal instanceof Integer && currVal instanceof Byte) {
-				return ((Integer) dbVal).intValue() == ((Byte) currVal)
-						.intValue();
+				return ((Integer) dbVal).intValue() ==SQLConverter.asUnsigned( (Byte) currVal);
+					
 			}
 			
 			if ((dbVal instanceof Float && currVal instanceof Double)||(dbVal instanceof Double && currVal instanceof Float)) {
