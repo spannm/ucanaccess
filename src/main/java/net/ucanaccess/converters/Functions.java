@@ -18,6 +18,11 @@ USA
 
 You can contact Marco Amadei at amadei.mar@gmail.com.
 
+NOTICE:
+Most of the financial functions (PMT, NPER, PV, IPMT, PPMT,RATE Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
+They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
+The  Apache POI project is licensed under Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.
+
  */
 package net.ucanaccess.converters;
 
@@ -969,13 +974,16 @@ public class Functions {
 	@FunctionType(functionName = "DDB", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static double ddb(double cost, double salvage, double life,double  period ,double factor){
 		double depr=0d;
-		double val=0d;
-		for(double p=1d; p<=period;p++){
-			val+=depr;
+		double sumdpr=0d;
+		double p;
+		for( p=0; p<Math.ceil(period);p++){
+			//double corr=1d;
+			sumdpr+=depr;
 			depr 
-			=Math.min((cost-val)*factor/life, cost-salvage-val);
+			=Math.min((cost-sumdpr)*factor/life, cost-salvage-sumdpr);
 			
 		}
+		
 		return depr;
 	}
 	
@@ -1132,6 +1140,66 @@ public class Functions {
 	 public static double syd(double cost,  double salvage, double life,double per) {
 	    return (cost-salvage)*(life-per+1)*2/(life*(life+1));
 	}
+	
+	
+	@FunctionType(functionName = "RATE", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	 public static double rate(double nper, double pmt, double pv) {
+		return rate(nper,  pmt,  pv, 0, 0, 0.1);
+	}
+	
+	@FunctionType(functionName = "RATE", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE, AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	 public static double rate(double nper, double pmt, double pv, double fv) {
+		return rate(nper,  pmt,  pv, fv, 0, 0.1);
+	}
+	
+	
+	@FunctionType(functionName = "RATE", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE, AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	 public static double rate(double nper, double pmt, double pv, double fv, double type) {
+		return rate(nper,  pmt,  pv, fv, type, 0.1);
+	}
+	
+
+	@FunctionType(functionName = "RATE", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE, AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+	 public static double rate(double nper, double pmt, double pv, double fv, double type, double guess) {
+	      //FROM MS http://office.microsoft.com/en-us/excel-help/rate-HP005209232.aspx
+	     
+		  type=(Math.abs(type)>=1)?1:0; 	//the only change to the implementation Apache POI
+		  int FINANCIAL_MAX_ITERATIONS = 20;//Bet accuracy with 128
+	      double FINANCIAL_PRECISION = 0.0000001;//1.0e-8
+
+	      double y, y0, y1, x0, x1 = 0, f = 0, i = 0;
+	      double rate = guess;
+	      if (Math.abs(rate) < FINANCIAL_PRECISION) {
+	         y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
+	      } else {
+	         f = Math.exp(nper * Math.log(1 + rate));
+	         y = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
+	      }
+	      y0 = pv + pmt * nper + fv;
+	      y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
+
+	      // find root by Newton secant method
+	      i = x0 = 0.0;
+	      x1 = rate;
+	      while ((Math.abs(y0 - y1) > FINANCIAL_PRECISION) && (i < FINANCIAL_MAX_ITERATIONS)) {
+	         rate = (y1 * x0 - y0 * x1) / (y1 - y0);
+	         x0 = x1;
+	         x1 = rate;
+
+	         if (Math.abs(rate) < FINANCIAL_PRECISION) {
+	            y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
+	         } else {
+	            f = Math.exp(nper * Math.log(1 + rate));
+	            y = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
+	         }
+
+	         y0 = y1;
+	         y1 = y;
+	         ++i;
+	      }
+	     
+	      return rate;
+	   }
 		  
 	   @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.DOUBLE)
 	   public static Double formulaToNumeric(Double res, String datatype){
