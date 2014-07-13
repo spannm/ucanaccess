@@ -972,21 +972,17 @@ public class Functions {
 	}
 	
 	@FunctionType(functionName = "DDB", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
-	public static double ddb(double cost, double salvage, double life,double  period ,double factor){
-		double depr=0d;
-		double sumdpr=0d;
-		double p;
-		for( p=0; p<Math.ceil(period);p++){
-			//double corr=1d;
-			sumdpr+=depr;
-			depr 
-			=Math.min((cost-sumdpr)*factor/life, cost-salvage-sumdpr);
-			
-		}
+	 public static double ddb(double cost, double salvage, double life, double period, double factor) {
+         if (cost<0||((life == 2d) && (period > 1d)))return 0;
+         if (life < 2d||((life == 2d) && (period <= 1d)))
+             return (cost - salvage);
+          if (period <= 1d)
+               return    	 Math.min(cost*factor/life, cost-salvage);
+          double retk =Math.max(  salvage -cost * Math.pow((life - factor) / life, period),0);
+       
+          return  Math.max( ((factor * cost) / life) * Math.pow((life - factor) / life,  period - 1d)-retk,0);
+    }
 		
-		return depr;
-	}
-	
 	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static double fv(double rate,int periods,double payment){
 		return fv(rate, periods, payment,0,0);
