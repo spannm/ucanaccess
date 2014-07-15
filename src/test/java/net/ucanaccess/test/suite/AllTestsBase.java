@@ -42,6 +42,7 @@ import net.ucanaccess.test.Size97Test;
 import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
+import net.ucanaccess.test.ByteTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -68,6 +69,7 @@ public class AllTestsBase {
 		suite.addTestSuite(Size97Test.class);
 		suite.addTestSuite(BatchTest.class);
 		suite.addTestSuite(BooleanTest.class);
+		suite.addTestSuite(ByteTest.class);
 		return suite;
 	}
 }
