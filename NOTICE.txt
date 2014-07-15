@@ -1,3 +1,3 @@
-Most of the financial functions (PMT, NPER, PV, IPMT, PPMT,RATE PMT, NPER, PV, IPMT, PPMT,RATE Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
+Most of the financial functions (PMT, NPER, IPMT, PPMT, RATE, PV) Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
 They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
 The  Apache POI project is licensed under Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.
