@@ -384,7 +384,7 @@ public class SQLConverter {
 	public static String convertSQL(String sql, UcanaccessConnection conn) {
 		return convertSQL(sql, conn, false);
 	}
-
+	
 	public static String convertAccessDate(String sql) {
 		sql = sql.replaceAll("#" + DATE_ACCESS_FORMAT + "#",
 				"Timestamp'$3-$1-$2 00:00:00'")
@@ -416,7 +416,8 @@ public class SQLConverter {
 						"Timestamp'" + BIG_BANG + " $1'").replaceAll(
 						"#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
 						"Timestamp'" + BIG_BANG + " $1'+ 12 Hour");
-		return sql;
+		
+			return sql;
 	}
 
 	private static String replaceWhiteSpacedTables(String sql) {

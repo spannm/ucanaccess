@@ -356,7 +356,6 @@ public class LoadJet {
 				try{
 					execCreate(trigger,false);
 				}catch(SQLException e){
-					System.err.println(trigger);
 					Logger.logWarning(e.getMessage());
 					break;
 				}
@@ -366,8 +365,9 @@ public class LoadJet {
 		private String getExpression(Column cl) throws IOException {
 			PropertyMap map=cl.getProperties();
              Property exprp=map.get( EXPRESSION);
+             
              if(exprp!=null){
-				Table tl=cl.getTable();
+            	Table tl=cl.getTable();
 				String expr= SQLConverter.convertPowOperator((String)exprp.getValue());
 				for(Column cl1:tl.getColumns()){
 					expr=expr.replaceAll("\\[(?i)("+Pattern.quote(cl1.getName())+")\\]","newrow.$0");

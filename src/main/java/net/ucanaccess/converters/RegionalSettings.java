@@ -21,48 +21,57 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 */
 package net.ucanaccess.converters;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class RegionalSettings {
 	
 	
-	private static  final ResourceBundle dateBundle=ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat");
+	private   final ResourceBundle dateBundle;
 	
+	
+	public RegionalSettings(){
+		this.dateBundle=ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat");
+	}
+	
+	public RegionalSettings(Locale l){
+		this.dateBundle=ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat",l);
+	}
+
 
 	
-	public static  String getAM() {
+	public   String getAM() {
 		return dateBundle.getString("AM");
 	}
 	
-	public static  String getPM() {
+	public   String getPM() {
 		return dateBundle.getString("PM");
 	}
 	
-	public static  String getRS() {
+	public   String getRS() {
 		return dateBundle.getString("RS");
 	}
 	
-	public static  String getLongDatePattern() {
+	public   String getLongDatePattern() {
 		return dateBundle.getString("longDate");
 	}
-	public  static   String getMediumDatePattern() {
+	public     String getMediumDatePattern() {
 		return dateBundle.getString("mediumDate");
 	}
-	public  static  String getShortDatePattern() {
+	public    String getShortDatePattern() {
 		return dateBundle.getString("shortDate");
 	}
-	public  static  String getLongTimePattern() {
+	public    String getLongTimePattern() {
 	 return dateBundle.getString("longTime");
 	}
-	public  static  String getMediumTimePattern() {
+	public    String getMediumTimePattern() {
 		 return  dateBundle.getString("mediumTime");
 	}
-	public  static String getShortTimePattern() {
+	public  String getShortTimePattern() {
 		return dateBundle.getString("shortTime");
 	}
-	
-	
-	public  static String getGeneralPattern() {
+		
+	public String getGeneralPattern() {
 		return dateBundle.getString("generalDate");
 	}
 	

@@ -19,7 +19,7 @@ USA
 You can contact Marco Amadei at amadei.mar@gmail.com.
 
 NOTICE:
-Most of the financial functions (PMT, NPER, PV, IPMT, PPMT,RATE Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
+Most of the financial functions (PMT, NPER, IPMT, PPMT, RATE, PV Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
 They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
 The  Apache POI project is licensed under Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -35,6 +35,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
@@ -51,15 +52,49 @@ import com.healthmarketscience.jackcess.DataType;
 public class Functions {
 	private static Double rnd;
 	private static Double lastRnd;
-	public final static SimpleDateFormat[] SDFA = new SimpleDateFormat[] {
-			new SimpleDateFormat("MMM dd,yyyy"),
-			new SimpleDateFormat("MM dd,yyyy"),
-			new SimpleDateFormat("MM/dd/yyyy"),
-			new SimpleDateFormat("MMM dd hh:mm:ss"),
-			new SimpleDateFormat("MM dd hh:mm:ss"),
-			new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"),
-			new SimpleDateFormat("yyyy-MM-dd"),
-			new SimpleDateFormat("MM/dd/yyyy hh:mm:ss") };
+	public final static ArrayList<SimpleDateFormat> LDF = new ArrayList<SimpleDateFormat>();
+	public final static ArrayList<Boolean> LDFY = new ArrayList<Boolean>();
+	
+	static {
+		
+		addDateP(new SimpleDateFormat("yyyy-MM-dd h:m:s a"));
+		addDateP(new SimpleDateFormat("yyyy-MM-dd H:m:s"));
+		addDateP(new SimpleDateFormat("yyyy-MM-dd"));
+		
+		
+		RegionalSettings s=new RegionalSettings();
+		addDateP(new SimpleDateFormat(s.getGeneralPattern()));
+		addDateP(new SimpleDateFormat(s.getLongDatePattern()));
+		addDateP(new SimpleDateFormat(s.getMediumDatePattern()));
+		addDateP(new SimpleDateFormat(s.getShortDatePattern()));
+		if(!Locale.getDefault().equals(Locale.US)){
+			
+			s=new RegionalSettings(Locale.US);
+			addDateP(new SimpleDateFormat(s.getGeneralPattern()));
+			addDateP(new SimpleDateFormat(s.getLongDatePattern()));
+			addDateP(new SimpleDateFormat(s.getMediumDatePattern()));
+			addDateP(new SimpleDateFormat(s.getShortDatePattern()));
+			
+		}
+		addDateP(new SimpleDateFormat("MMM dd,yyyy"));
+		addDateP(new SimpleDateFormat("MM dd,yyyy"));
+		addDateP(new SimpleDateFormat("MMM dd hh:mm:ss"),true);
+		addDateP(new SimpleDateFormat("MM dd hh:mm:ss"),true);
+		addDateP(new SimpleDateFormat("MMM yy hh:mm:ss"));
+		addDateP(new SimpleDateFormat("MM yy hh:mm:ss"));
+	}
+	
+	public static void addDateP( SimpleDateFormat sdf){
+		 addDateP(sdf,false);
+	}
+	
+	public static void addDateP( SimpleDateFormat sdf,boolean yearOverride){
+		sdf.setLenient(false);
+		LDF.add(sdf);
+		LDFY.add(yearOverride);
+	}
+	
+	
 	public static final SimpleDateFormat SDFBB = new SimpleDateFormat(
 			"yyyy-MM-dd");
 
@@ -113,7 +148,7 @@ public class Functions {
 
 	@FunctionType(functionName = "CDATE", argumentTypes = { AccessType.MEMO }, returnType = AccessType.DATETIME)
 	public static Timestamp cdate(String dt) {
-		return dateValue(dt);
+		return dateValue(dt,false);
 	}
 
 	@FunctionType(functionName = "CDBL", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
@@ -242,7 +277,36 @@ public class Functions {
 			throws UcanaccessSQLException {
 		return (Timestamp) dateAdd(intv, vl, (Date) dt);
 	}
-
+	
+	
+	@FunctionType(namingConflict = true, functionName = "DATEADD", argumentTypes = {
+			AccessType.MEMO, AccessType.LONG, AccessType.MEMO }, returnType = AccessType.DATETIME)
+	public static Timestamp dateAdd(String intv, int vl, String dt)
+			throws UcanaccessSQLException {
+		return (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt,false));
+	}
+	
+	
+	
+	@FunctionType(namingConflict = true, functionName = "DATEDIFF", argumentTypes = {
+			AccessType.MEMO, AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.LONG)
+	public static Integer dateDiff(String intv, String dt1, String dt2) throws UcanaccessSQLException{
+		return dateDiff(intv,dateValue(dt1,false),dateValue(dt2,false));
+	}
+	
+	
+	@FunctionType(namingConflict = true, functionName = "DATEDIFF", argumentTypes = {
+			AccessType.MEMO, AccessType.MEMO, AccessType.DATETIME }, returnType = AccessType.LONG)
+	public static Integer dateDiff(String intv, String dt1,  Timestamp dt2) throws UcanaccessSQLException{
+		return dateDiff(intv,dateValue(dt1,false),dt2);
+	}
+	
+	@FunctionType(namingConflict = true, functionName = "DATEDIFF", argumentTypes = {
+			AccessType.MEMO, AccessType.DATETIME, AccessType.MEMO }, returnType = AccessType.LONG)
+	public static Integer dateDiff(String intv, Timestamp dt1, String dt2) throws UcanaccessSQLException{
+		return dateDiff(intv,dt1,dateValue(dt2,false));
+	}
+	
 	@FunctionType(namingConflict = true, functionName = "DATEDIFF", argumentTypes = {
 			AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME }, returnType = AccessType.LONG)
 	public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2)
@@ -293,6 +357,15 @@ public class Functions {
 					ExceptionMessages.INVALID_INTERVAL_VALUE);
 		return result * sign;
 	}
+	
+	
+	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
+			AccessType.MEMO, AccessType.MEMO, AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer datePart(String intv, String dt,
+			Integer firstDayOfWeek) throws UcanaccessSQLException {
+		return datePart( intv, dateValue( dt,false),
+				 firstDayOfWeek);
+	}
 
 	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
 			AccessType.MEMO, AccessType.DATETIME, AccessType.LONG }, returnType = AccessType.LONG)
@@ -308,6 +381,14 @@ public class Functions {
 				ret = 7 + ret;
 		}
 		return ret;
+	}
+	
+	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
+			AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG},returnType =  AccessType.LONG)
+	public static Integer datePart(String intv, String dt,
+			Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+		return datePart( intv, dateValue( dt,false),
+				 firstDayOfWeek, firstWeekOfYear);
 	}
 
 	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
@@ -342,6 +423,13 @@ public class Functions {
 		}
 		return ret;
 	}
+	
+	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
+			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.LONG)
+	public static Integer datePart(String intv, String dt) throws UcanaccessSQLException{
+		 return datePart( intv, dateValue( dt,false));
+	}
+	
 
 	@FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = {
 			AccessType.MEMO, AccessType.DATETIME }, returnType = AccessType.LONG)
@@ -391,12 +479,29 @@ public class Functions {
 		return new Timestamp(cl.getTime().getTime());
 	}
 
+	
+	
+	
+	
 	@FunctionType(functionName = "DATEVALUE", argumentTypes = { AccessType.MEMO }, returnType = AccessType.DATETIME)
 	public static Timestamp dateValue(String dt) {
-		for (SimpleDateFormat sdf : SDFA)
+		return dateValue( dt,true);
+	}
+	
+	private static Timestamp dateValue(String dt, boolean onlyDate) {
+		for (SimpleDateFormat sdf :  LDF)
 			try {
-				sdf.setLenient(true);
-				return new Timestamp(sdf.parse(dt).getTime());
+				
+				Timestamp t= new Timestamp(sdf.parse(dt).getTime());
+				if(onlyDate)t=dateValue(t);
+				if(LDFY.get(LDF.indexOf(sdf))){
+					Calendar cl = Calendar.getInstance();
+				   int y=cl.get(Calendar.YEAR);
+					cl.setTime(t);
+				    cl.set(Calendar.YEAR, y);
+				    t=new Timestamp(cl.getTime().getTime());
+				}
+				return t;
 			} catch (ParseException e) {
 			}
 		return null;
@@ -483,23 +588,23 @@ public class Functions {
 			}
 		}
 		if (isDate(s)) {
-			return format(dateValue(s), par);
+			return format(dateValue(s,false), par);
 		}
 		return s;
 	}
 	
 	
 	private static String formatDate(Timestamp t,String pattern){
-		
+		RegionalSettings s=new RegionalSettings();
 		String ret= new SimpleDateFormat(pattern).format(t);
-		if(!RegionalSettings.getRS().equalsIgnoreCase("true")){
-			if(!RegionalSettings.getAM().equals("AM"))
-				ret=ret.replaceAll("AM", RegionalSettings.getAM());
-			if(!RegionalSettings.getPM().equals("PM"))
-				ret=ret.replaceAll("PM", RegionalSettings.getPM());
+		if(!s.getRS().equalsIgnoreCase("true")){
+			if(!s.getAM().equals("AM"))
+				ret=ret.replaceAll("AM", s.getAM());
+			if(!s.getPM().equals("PM"))
+				ret=ret.replaceAll("PM",s.getPM());
 		}else{
-			ret=ret.replaceAll( RegionalSettings.getPM(),"PM");
-			ret=ret.replaceAll( RegionalSettings.getAM(),"AM");
+			ret=ret.replaceAll( s.getPM(),"PM");
+			ret=ret.replaceAll(s.getAM(),"AM");
 		}
 		return ret;
 		
@@ -509,28 +614,29 @@ public class Functions {
 			AccessType.DATETIME, AccessType.TEXT }, returnType = AccessType.TEXT)
 	public static String format(Timestamp t, String par)
 			throws UcanaccessSQLException {
+		RegionalSettings st=new RegionalSettings();
 		if ("long date".equalsIgnoreCase(par)) {
 			
-			return  formatDate(t,RegionalSettings.getLongDatePattern());
+			return  formatDate(t,st.getLongDatePattern());
 		}
 		if ("medium date".equalsIgnoreCase(par)) {
 			
-			return formatDate(t,RegionalSettings.getMediumDatePattern());
+			return formatDate(t,st.getMediumDatePattern());
 		}
 		if ("short date".equalsIgnoreCase(par)) {
-			return formatDate(t,RegionalSettings.getShortDatePattern());
+			return formatDate(t,st.getShortDatePattern());
 		}
 		if ("general date".equalsIgnoreCase(par)) {
-			 return  formatDate(t,RegionalSettings.getGeneralPattern());
+			 return  formatDate(t,st.getGeneralPattern());
 		}
 		if ("long time".equalsIgnoreCase(par)) {
-			return formatDate(t,RegionalSettings.getLongTimePattern());
+			return formatDate(t,st.getLongTimePattern());
 		}
 		if ("medium time".equalsIgnoreCase(par)) {
-			return formatDate(t,RegionalSettings.getMediumTimePattern());
+			return formatDate(t,st.getMediumTimePattern());
 		}
 		if ("short time".equalsIgnoreCase(par)) {
-			return formatDate(t,RegionalSettings.getShortTimePattern());
+			return formatDate(t,st.getShortTimePattern());
 		}
 		if ("q".equalsIgnoreCase(par)) {
 			return String.valueOf(datePart(par, t));
@@ -992,9 +1098,9 @@ public class Functions {
 		return fv(rate, periods, payment,pv,0);
 	}
 	
-	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-	public static double fv(double rate,int periods,double payment,double pv,int type){
-		if(type>0)type=1;
+	@FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double fv(double rate,int periods,double payment,double pv,double type){
+		  type=(Math.abs(type)>=1)?1:0;
 		double fv=pv*Math.pow(1+rate, periods);
 		for(int i=0;i<periods;i++){
 				fv+=(payment)*Math.pow(1+rate, i+type);
@@ -1013,9 +1119,9 @@ public class Functions {
            return pmt( rate, periods, pv,0,0);
     }
 		
-	@FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-	public static double pmt(double rate, double periods, double pv, double fv, int type) {
-		if(type>0)type=1;
+	@FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double pmt(double rate, double periods, double pv, double fv, double type) {
+		 type=(Math.abs(type)>=1)?1:0;
 		
         if (rate == 0) {
             return -1*(fv+pv)/periods;
@@ -1041,9 +1147,9 @@ public class Functions {
 		return nper( rate,  pmt, pv, fv, 0);
 	}
 	
-	@FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-	public static double nper(double rate, double pmt, double pv, double fv,int type) {
-        if(type>0)type=1;
+	@FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double nper(double rate, double pmt, double pv, double fv,double type) {
+		 type=(Math.abs(type)>=1)?1:0;
 		double nper = 0;
         if (rate == 0) {
             nper = -1 * (fv + pv) / pmt;
@@ -1072,9 +1178,9 @@ public class Functions {
 		return ipmt(rate, per,  nper,  pv, fv,0);
 	}
 	
-	@FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-	public static double ipmt(double rate, double per, double nper, double pv, double fv, int type) {
-			if(type>0)type=1;
+	@FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static double ipmt(double rate, double per, double nper, double pv, double fv, double type) {
+		     type=(Math.abs(type)>=1)?1:0;
 			double ipmt = fv(rate, new Double(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
 			if (type==1) ipmt =ipmt/ (1 + rate);
 			return ipmt;
@@ -1095,9 +1201,9 @@ public class Functions {
 
 	
 	
-	@FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-    public static double pv(double rate, double nper, double pmt, double fv, int type) {
-    	if(type>0)type=1;
+	@FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt, double fv, double type) {
+		type=(Math.abs(type)>=1)?1:0; 	
     	
         if (rate == 0) {
             return -1*((nper*pmt)+fv);
@@ -1306,7 +1412,7 @@ public class Functions {
 	   public static  Timestamp formulaToDate(String res, String datatype){
 		   if(res==null)return null; 
 		  try{
-		   return dateValue(res);
+		   return dateValue(res,false);
 		  }catch(Exception e){
 			  return null;
 		  }
@@ -1348,4 +1454,5 @@ public class Functions {
 	   public static double fix(double d) throws UcanaccessSQLException {
 		   return  sign(d) * mint(Math.abs(d));
 	    }
+
 }
