@@ -154,7 +154,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 	public void testCurrentUser() throws SQLException, IOException {
 		checkQuery("select CurrentUser() from t234", "ucanaccess");
 	}
-
+	
 	
 	
 	public void testDateAdd() throws SQLException, IOException, ParseException {
@@ -259,7 +259,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery("select isDate('Feb 10 00:25:09') from t234 ", true);
 		checkQuery("select isDate('02 10 00:25:09') from t234 ", true);
 		checkQuery("select isDate('Feb 35 00:25:09') from t234 ", true);
-		checkQuery("select isDate('jan 35,2015') from t234 ", true);
+		checkQuery("select isDate('jan 35,2015') from t234 ", false);
 		checkQuery("select isDate('Feb 20 01:25:09 PM') from t234 ", true);
 	}
 
@@ -582,5 +582,10 @@ public class FunctionsTest extends UcanaccessTestBase {
 	
 	public void testWeekday() throws SQLException, IOException{
 		 checkQuery("select Weekday(#06/27/2013 10:42:58 PM#,1) from t234",5);
+	}
+	
+	public void testFinancial() throws SQLException, IOException {
+		checkQuery("select FV(0,100,-100,-10000,-1) ,DDB(1001100,10020,111,62,5.5),NPer(0.0525,200,1500,233,0.1),IPmt(0.5,4,8,10*1,10000,0.5),PV(0,4,-10000,1000,-1.55),PPmt(0.5,3,7,100000,15000.1),SLN(10000,110000,9),SYD(10000,200,12,4),Pmt(0.08,30,5000,-15000,0.1) from t234",20000.0,2234.68083152805,-7.721791247488574,477.63917525773195,39000.0,-8042.7461874696455,-11111.111111111111,1130.7692307692307,-311.72566612727735);
+		checkQuery("select Rate(3,200,-610,0,-20,0.1) from t234",-0.01630483472667564);
 	}
 }
