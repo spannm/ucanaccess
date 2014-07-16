@@ -1300,8 +1300,8 @@ public class Functions {
 	    return ppmt(rate,per, nper, pv, fv, 0) ;
 	}
 
-	@FunctionType(functionName = "PPMT", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.LONG }, returnType = AccessType.DOUBLE)
-	 public static double ppmt(double rate, int per, int nper, double pv, double fv, int type) {
+	@FunctionType(functionName = "PPMT", argumentTypes = { AccessType.DOUBLE,AccessType.LONG,AccessType.LONG,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	 public static double ppmt(double rate, int per, int nper, double pv, double fv, double type) {
 	    return pmt(rate, nper, pv, fv, type) - ipmt(rate, per, nper, pv, fv, type);
 	}
 	
