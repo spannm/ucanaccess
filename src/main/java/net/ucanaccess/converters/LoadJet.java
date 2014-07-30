@@ -329,6 +329,9 @@ public class LoadJet {
 			String comma = "";
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
+				if("USER".equalsIgnoreCase(cl.getName())){
+					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
+				}
 				String expr=getExpression(cl);
 				if(expr!=null){
 					String tgr=getCalculatedFieldTrigger(ntn,cl);
