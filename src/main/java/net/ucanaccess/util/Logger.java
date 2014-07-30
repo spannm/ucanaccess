@@ -32,7 +32,8 @@ public class Logger {
 		COMPLEX_TYPE_UNSUPPORTED,
 		KEEP_MIRROR_AND_OTHERS,
 		UNKNOWN_EXPRESSION,
-		DEFAULT_VALUES_DELIMETERS
+		DEFAULT_VALUES_DELIMETERS,
+		USER_AS_COLUMNNAME
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
