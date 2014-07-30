@@ -818,8 +818,18 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	private String normalizeName(String table) {
 		if(table==null||table.trim().length()==0)return table;
 		if(table.indexOf("%")>=0) return table;
-		else return SQLConverter.basicEscapingIdentifier(
+		else{ 
+				if(table.startsWith("\"")&&
+						table.endsWith("\"")){
+					String stb=table.substring(1,table.length()-1).toUpperCase();
+					if(SQLConverter.isListedAsKeyword(stb))return stb;
+				}
+				if(SQLConverter.isListedAsKeyword(table)){
+					return table;
+				}
+			return SQLConverter.basicEscapingIdentifier(
 				table).toUpperCase();
+			}
 	}
 
 	public boolean nullPlusNonNullIsNull() throws SQLException {
