@@ -84,6 +84,8 @@ public class SQLConverter {
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
+	private static final String DELETE_ALL ="((?i)DELETE[\\s\n\r]+)(\\*)([\\s\n\r]+(?i)FROM[\\s\n\r]+)";
+	
 	private static final Pattern ESPRESSION_DIGIT = Pattern
 			.compile("([\\d]+)(?![\\.\\d])");
 	public static final String BIG_BANG = "1899-12-30";
@@ -99,12 +101,15 @@ public class SQLConverter {
 			"SOME", "STDDEV_POP", "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO",
 			"TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
 			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO",
-			"CONSTRAINT");
+			"CONSTRAINT"
+			,"USER"
+			);
 	private static ArrayList<String> whiteSpacedTableNames = new ArrayList<String>();
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
 	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
 	private static final HashSet<String> waFunctions = new HashSet<String>();
+	
 	private static boolean supportsAccessLike = true;
 	static {
 		noRomanCharacters.put("\u20ac", "EUR");
@@ -120,6 +125,11 @@ public class SQLConverter {
 		noRomanCharacters.put("\u00F0", "O");
 		noRomanCharacters.put("\u00FD", "Y");
 		noRomanCharacters.put("\u00FE", "P");
+	}
+	
+	
+	public static boolean isListedAsKeyword(String s){
+		return KEYWORDLIST.contains(s.toUpperCase()) ;
 	}
 
 	private static int[] getQuoteGroup(String s) {
@@ -268,6 +278,7 @@ public class SQLConverter {
 			boolean creatingQuery) {
 		sql = sql + " ";
 		sql = replaceBacktrik(sql);
+		sql = convertDeleteAll(sql);
 		sql = convertUnion(sql);
 		sql = convertSwitch(sql);
 		sql = convertAccessDate(sql);
@@ -286,6 +297,10 @@ public class SQLConverter {
 
 	private static String convertOwnerAccess(String sql) {
 		return sql.replaceAll(WITH_OWNERACCESS_OPTION, "");
+	}
+	
+	private static String convertDeleteAll(String sql) {
+		return sql.replaceAll(DELETE_ALL, "$1$3");
 	}
 
 	private static String convertSwitch(String sql) {
@@ -567,18 +582,18 @@ public class SQLConverter {
 		if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
-		String escaped = name.replaceAll("[§/\\\\$%^:-]", "_").replaceAll("~",
+		String escaped = name.replaceAll("[Â§/\\\\$%^:-]", "_").replaceAll("~",
 				"M_").replaceAll("\\?", "_").replaceAll("\\.", "_").replaceAll(
 				"\'", "").replaceAll("#", "_").replaceAll("\"", "").replaceAll(
 				"\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_")
-				.replaceAll("°", "0")
+				.replaceAll("Â°", "0")
 				.replaceAll(Pattern.quote("<"), "lt")
 				.replaceAll(Pattern.quote(">"), "gt")
 				.replaceAll(Pattern.quote(";"),"_")
 				.replaceAll(Pattern.quote("@"),"_")
 				.replaceAll(Pattern.quote(","),"_")
 				.replaceAll(Pattern.quote("|"),"_")
-				.replaceAll(Pattern.quote("£"),"_")
+				.replaceAll(Pattern.quote("Â£"),"_")
 				.replaceAll(Pattern.quote("*"),"_")
 				.replaceAll(Pattern.quote("&"),"_")
 				.replaceAll(Pattern.quote("="),"_")
