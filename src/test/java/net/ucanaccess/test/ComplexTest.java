@@ -121,6 +121,7 @@ public class ComplexTest extends UcanaccessTestBase {
 					new Attachment(null,"ccczz.txt","txt","ddddd zzddd".getBytes(), new Date(),null) };
 			ps.setObject(5,atcs);
 			ps.execute();
+			ps.close();
 			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET APPEND_MEMO_DATA='THE BIG BIG CAT' WHERE ID='row12' ");
 			ps.execute();
 			ps.close();

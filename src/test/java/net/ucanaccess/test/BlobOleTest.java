@@ -91,6 +91,7 @@ public class BlobOleTest extends UcanaccessTestBase {
 			outByte.close();
 			checkQuery("select * from T2", new Object[][] { { 1, "TestOle",
 					outByte.toByteArray() } });
+			ps.close();
 			ps = super.ucanaccess
 					.prepareStatement("UPDATE T2 SET descr=? WHERE  descr=?");
 			ps.setString(1, "TestOleOk");

@@ -140,10 +140,12 @@ public class CreateTableTest extends UcanaccessTestBase {
 			try {
 				st = super.ucanaccess.createStatement();
 				st.execute("insert into  dunique values('ddl forces commit',2.3)");
+				st.close();
 				st = super.ucanaccess.createStatement();
 				st.execute("create table dtrx(c text  , "
 						+ "number numeric(23,5) , " + "  unique (C,NUMBER))");
 				st.execute("insert into  dtrx values('I''ll be forgotten sob sob ',55555.3)");
+				st.close();
 				st = super.ucanaccess.createStatement();
 				st.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number))");
 			} catch (Exception e) {

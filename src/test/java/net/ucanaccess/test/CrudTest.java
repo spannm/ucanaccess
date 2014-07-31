@@ -132,6 +132,7 @@ public class CrudTest extends UcanaccessTestBase {
 			boolean	ret = getCount("select count(*) from T1 where id in (1234,12345)") == 2;
 			ps.clearBatch();
 			assertTrue("Failed Insert", ret);
+			ps.close();
 			ps = super.ucanaccess
 					.prepareStatement("DELETE FROM  t1 ");
 			ps.addBatch();
