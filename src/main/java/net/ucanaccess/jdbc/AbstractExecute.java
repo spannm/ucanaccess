@@ -31,6 +31,7 @@ import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.FeatureNotSupportedException.NotSupportedMessage;
 
 
+
 public abstract class AbstractExecute {
 	protected enum CommandType {
 		BATCH, NO_ARGUMENTS, PREPARED_STATEMENT, UPDATABLE_RESULTSET, WITH_AUTO_GENERATED_KEYS, WITH_COLUMNS_NAME, WITH_INDEXES
@@ -123,14 +124,23 @@ public abstract class AbstractExecute {
 			UcanaccessConnection.setCtxExecId(Math.random() + "");
 		}
 		Object retv;
-		if (checkDDL()) {
-			retv = addDDLCommand();
-		} else {
-			retv = executeWrapped();
-		}
-		if (conn.getAutoCommit()) {
-			conn.commit();
-		}
+		
+			if (checkDDL()) {
+				retv = addDDLCommand();
+			} else {
+				try{
+					retv = executeWrapped();
+				}catch(SQLException e){
+					if (conn.getAutoCommit()) {
+						conn.rollback();
+					}
+					throw e;
+				}
+			}
+			if (conn.getAutoCommit()) {
+				conn.commit();
+			}
+		
 		
 		return retv;
 	}
