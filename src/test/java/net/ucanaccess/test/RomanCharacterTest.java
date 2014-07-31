@@ -43,8 +43,8 @@ public class RomanCharacterTest extends UcanaccessTestBase {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO NOROMAN ([end],[q3²ß€Ğ×İŞğış])  VALUES( 'the end','yeeep')");
-			st.execute("UPDATE NOROMAN SET [q3²ß€Ğ×İŞğış]='NOOOp' WHERE [end]='the end' ");
+			st.execute("INSERT INTO NOROMAN ([end],[q3Â²ÃŸâ‚¬ÃÃ—ÃÃÃ°Ã½Ã¾])  VALUES( 'the end','yeeep')");
+			st.execute("UPDATE NOROMAN SET [q3Â²ÃŸâ‚¬ÃÃ—ÃÃÃ°Ã½Ã¾]='NOOOp' WHERE [end]='the end' ");
 			checkQuery("SELECT * FROM NOROMAN");
 		} finally {
 			if (st != null)
