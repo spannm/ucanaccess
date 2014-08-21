@@ -40,7 +40,8 @@ public class TypesMap {
 			OLE,
 			SINGLE,
 			TEXT,
-			YESNO
+			YESNO,
+			AUTOINCREMENT
 	}
 	private static final HashMap<String, String> access2HsqlTypesMap = new HashMap<String, String>();
 	private static final HashMap<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
@@ -59,6 +60,7 @@ public class TypesMap {
 		access2HsqlTypesMap.put(AccessType.CURRENCY.name(), "DECIMAL("+DataType.MONEY.getFixedSize()+",4)");
 		access2HsqlTypesMap.put(AccessType.GUID.name(), "CHAR(38)");
 		access2HsqlTypesMap.put(AccessType.COUNTER.name(), "INTEGER");
+		access2HsqlTypesMap.put(AccessType.AUTOINCREMENT.name(), "INTEGER");
 		access2HsqlTypesMap.put(AccessType.NUMERIC.name(), "DECIMAL");
 		access2HsqlTypesMap.put(AccessType.YESNO.name(), "BOOLEAN");
 		access2HsqlTypesMap.put(AccessType.DATETIME.name(), "TIMESTAMP");
@@ -73,6 +75,7 @@ public class TypesMap {
 		access2JackcessTypesMap.put(AccessType.CURRENCY, DataType.MONEY);
 		access2JackcessTypesMap.put(AccessType.GUID, DataType.GUID);
 		access2JackcessTypesMap.put(AccessType.COUNTER, DataType.LONG);
+		access2JackcessTypesMap.put(AccessType.AUTOINCREMENT, DataType.LONG);
 		access2JackcessTypesMap.put(AccessType.NUMERIC, DataType.NUMERIC);
 		access2JackcessTypesMap.put(AccessType.YESNO, DataType.BOOLEAN);
 		access2JackcessTypesMap.put(AccessType.DATETIME, DataType.SHORT_DATE_TIME);

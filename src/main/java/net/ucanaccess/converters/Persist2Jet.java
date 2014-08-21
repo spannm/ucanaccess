@@ -220,7 +220,8 @@ public class Persist2Jet {
 					types[i].equalsIgnoreCase(AccessType.DOUBLE.name())||
 					types[i].equalsIgnoreCase(AccessType.YESNO.name())||
 					types[i].equalsIgnoreCase(AccessType.DATETIME.name())||
-					types[i].equalsIgnoreCase(AccessType.COUNTER.name())
+					types[i].equalsIgnoreCase(AccessType.COUNTER.name())||
+					types[i].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())
 			)
 			){
 			dt = TypesMap.map2Jackcess(AccessType.valueOf(types[i].toUpperCase(Locale.US)));
@@ -249,7 +250,10 @@ public class Persist2Jet {
 			
 			if (types != null) {
 				if (types[i]
-						.equalsIgnoreCase(AccessType.COUNTER.name()))
+						.equalsIgnoreCase(AccessType.COUNTER.name())||
+						types[i]
+								.equalsIgnoreCase(AccessType.AUTOINCREMENT.name())
+						)
 					cb.setAutoNumber(true);
 				if (types[i]
 						.equalsIgnoreCase(AccessType.GUID.name())) {
