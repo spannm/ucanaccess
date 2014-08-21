@@ -23,7 +23,8 @@ package net.ucanaccess.commands;
 
 import java.io.IOException;
 import java.sql.SQLException;
-
+import java.util.Arrays;
+import java.util.List;
 
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.ComplexBase;
@@ -37,6 +38,7 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
@@ -97,20 +99,38 @@ public class InsertCommand implements ICommand {
 
 	public IFeedbackAction persist() throws SQLException {
 		try {
+			AutoNumberAction ana=null;
 			if (table == null)
 				table = this.dbIO.getTable(this.tableName);
 			Object[] memento = mementoRow();
 			initComplex();
-			table.addRow(newRow);
 			int j = 0;
-			for (Column cli : table.getColumns()) {
+			List<? extends Column> lc= table.getColumns();
+			if (table.getDatabase().getColumnOrder()
+					.equals(ColumnOrder.DISPLAY)) {
+				Object[] newRowReorded=new Object[newRow.length];
+				Column[] cllReorded=new Column[newRow.length];
+				for (Column cli : table.getColumns()){
+					newRowReorded[cli.getColumnIndex()]=newRow[j];
+					memento[cli.getColumnIndex()]=newRow[j];
+					 cllReorded[cli.getColumnIndex()]=cli;
+					j++;
+				}
+				newRow=newRowReorded; 
+				lc=Arrays.asList(cllReorded);
+			}
+			
+			
+			table.addRow(newRow);
+			j = 0;
+			for (Column cli : lc) {
 				ColumnImpl cl=(ColumnImpl)cli;
 				if (cl.isAutoNumber()
 						&& cl.getAutoNumberGenerator().getType()
 								.equals(DataType.LONG)
 						&& !memento[j].equals(newRow[j])) {
 					AutoNumberManager.reset(cl, (Integer) newRow[j]);
-					return new AutoNumberAction(table, memento, newRow);
+					ana= new AutoNumberAction(table, memento, newRow);
 				} 
 
 			if (cl.getType() == DataType.COMPLEX_TYPE) {
@@ -139,7 +159,7 @@ public class InsertCommand implements ICommand {
 				}
 				++j;
 			}
-			return null;
+			return ana;
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}

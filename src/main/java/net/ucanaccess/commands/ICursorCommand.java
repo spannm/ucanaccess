@@ -22,8 +22,8 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.commands;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
-
 
 import com.healthmarketscience.jackcess.Cursor;
 
@@ -35,5 +35,5 @@ public interface ICursorCommand extends ICommand {
 	
 	public Map<String, Object> getRowPattern();
 	
-	public void persistCurrentRow(Cursor cur) throws IOException;
+	public void persistCurrentRow(Cursor cur) throws IOException, SQLException;
 }
