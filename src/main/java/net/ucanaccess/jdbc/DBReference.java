@@ -42,6 +42,7 @@ import net.ucanaccess.util.Logger;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import com.healthmarketscience.jackcess.util.LinkResolver;
 
 public class DBReference {
@@ -69,6 +70,7 @@ public class DBReference {
 	private Map<String, String> externalResourcesMapping;
 	private boolean firstConnection=true;
 	private FileFormat dbFormat;
+	private boolean columnOrderDisplay;
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -179,7 +181,10 @@ public class DBReference {
 
 	public Database open(File dbfl, String pwd) throws IOException {
 		Logger.turnOffJackcessLog();
-		return jko.open(dbfl, pwd);
+		Database ret= jko.open(dbfl, pwd);
+		if(this.columnOrderDisplay)
+			ret.setColumnOrder(ColumnOrder.DISPLAY);
+		return ret;
 	}
 
 	boolean loadedFromKeptMirror(Session session) throws UcanaccessSQLException {
@@ -543,5 +548,10 @@ public class DBReference {
 
 	public boolean isEncryptHSQLDB() {
 		return encryptHSQLDB;
+	}
+
+	public void setColumnOrderDisplay() {
+		this. columnOrderDisplay=true;
+		if(this.dbIO!=null)dbIO.setColumnOrder(ColumnOrder.DISPLAY);
 	}
 }

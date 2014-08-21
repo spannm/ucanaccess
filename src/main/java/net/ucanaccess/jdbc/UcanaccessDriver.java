@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 import net.ucanaccess.converters.LoadJet;
@@ -156,6 +155,11 @@ public final class UcanaccessDriver implements Driver {
 								.equalsIgnoreCase(pr.getProperty("supportsaccesslike")));
 					}
 					
+					if (pr.containsKey("columnorder")&&"display".equalsIgnoreCase(pr.getProperty("columnorder"))) {
+						ref
+						.setColumnOrderDisplay();
+					}
+					
 
 				}
 				String pwd = ref.getDbIO().getDatabasePassword();
@@ -177,6 +181,8 @@ public final class UcanaccessDriver implements Driver {
 					session.setIgnoreCase("true".equalsIgnoreCase(pr
 							.getProperty("ignorecase")));
 				}
+				
+				
 				
 				SQLWarning sqlw=null;
 				if (!alreadyLoaded) {
