@@ -493,6 +493,12 @@ public class LoadJet {
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			boolean uk = idx.isUnique();
 			boolean pk = idx.isPrimaryKey();
+			if(uk&&idx.getColumns().size()==1){
+				Column cl=idx.getColumns().get(0).getColumn();
+				DataType dt=cl.getType();
+				if(dt.equals(DataType.COMPLEX_TYPE))return;
+			}
+			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
 			String colsIdx = commaSeparated(idx.getColumns());
 			if (pk) {
