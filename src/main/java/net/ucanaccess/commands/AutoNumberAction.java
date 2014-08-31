@@ -63,7 +63,8 @@ public class AutoNumberAction implements IFeedbackAction {
 					ps.setObject(1, cnNew);
 					ps.setObject(2, cnOld);
 					ps.executeUpdate();
-					UcanaccessConnection.getCtxConnection()
+					conn.setGeneratedKey((Integer)cnNew);
+					conn
 							.setFeedbackState(false);
 				} finally {
 					if (ps != null)
