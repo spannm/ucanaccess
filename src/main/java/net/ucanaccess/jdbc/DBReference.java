@@ -233,6 +233,7 @@ public class DBReference {
 		this.dbIO = open(this.dbFile, this.pwd);
 		this.id = id();
 		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
+		this.firstConnection=true;
 		return getHSQLDBConnection(session);
 	}
 
