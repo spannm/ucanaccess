@@ -41,7 +41,8 @@ public class TypesMap {
 			SINGLE,
 			TEXT,
 			YESNO,
-			AUTOINCREMENT
+			AUTOINCREMENT,
+			COMPLEX
 	}
 	private static final HashMap<String, String> access2HsqlTypesMap = new HashMap<String, String>();
 	private static final HashMap<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
@@ -65,6 +66,7 @@ public class TypesMap {
 		access2HsqlTypesMap.put(AccessType.YESNO.name(), "BOOLEAN");
 		access2HsqlTypesMap.put(AccessType.DATETIME.name(), "TIMESTAMP");
 		access2HsqlTypesMap.put(AccessType.SINGLE.name(), "FLOAT");
+		access2HsqlTypesMap.put(AccessType.COMPLEX.name(), "OBJECT");
 				
 		access2JackcessTypesMap.put(AccessType.BYTE, DataType.BYTE);
 		access2JackcessTypesMap.put(AccessType.INTEGER, DataType.INT);
