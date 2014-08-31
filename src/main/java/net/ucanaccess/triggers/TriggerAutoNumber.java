@@ -55,9 +55,9 @@ public class TriggerAutoNumber extends TriggerBase {
 									cl.getAutoNumberGenerator().getLast());
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {
-							
-							newR[i] = 	AutoNumberManager.getNext(cl);
-							
+							int keyg=AutoNumberManager.getNext(cl);
+							newR[i] = 	keyg;
+							conn.setGeneratedKey(keyg);
 						}
 					} else if(type == TriggerAutoNumber.UPDATE_BEFORE_ROW&&cl.getAutoNumberGenerator().getType().equals(
 							DataType.LONG)){
