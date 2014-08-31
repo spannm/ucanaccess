@@ -21,8 +21,14 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 */
 package net.ucanaccess.jdbc;
 
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -40,18 +46,60 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
+
+import net.ucanaccess.converters.SQLConverter;
+
 
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		PreparedStatement {
-	private Map<Integer, Blob> blobMap = new HashMap<Integer, Blob>();
-	private PreparedStatement wrapped;
 	
-	public UcanaccessPreparedStatement(PreparedStatement hidden,
+	private PreparedStatement wrapped;
+	private String sql;
+	private HashMap<Integer,ParameterReset> memento=new  HashMap<Integer,ParameterReset>();
+	
+	private class ParameterReset{
+		private String methodName;
+		private Object[] args;
+		private Class<?>[] argClasses;
+
+		private  ParameterReset(String methodName,Class<?>[] argClasses, Object... args){
+			this.methodName=methodName;
+			this.args=args;
+			this.argClasses=argClasses;
+		}
+		
+		private void execute(){
+			try {
+				Method mth=PreparedStatement.class.getDeclaredMethod(this.methodName,this.argClasses);
+				mth.invoke(wrapped, args);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+	}
+	
+	private void addMementoEntry(String methodName,Class<?>[] argClasses, Object... args){
+		Class<?>[] ac=new Class[args.length];
+		ac[0]=Integer.TYPE;
+		for(int y=1; y<ac.length;y++){
+			ac[y]=argClasses[y-1];
+		}
+		this.memento.put((Integer)args[0],new  ParameterReset(  methodName,ac,args ));
+	}
+	
+	
+	
+	
+	
+	
+	public UcanaccessPreparedStatement(String sql,PreparedStatement hidden,
 			UcanaccessConnection connection) throws SQLException {
 		super(hidden, connection);
+		this.sql=sql;
 		this.wrapped = hidden;
 	}
 	
@@ -73,6 +121,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public boolean execute() throws SQLException {
 		try {
+			 preprocess();
+			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			checkLastModified();
 			return new Execute(this).execute();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -81,6 +132,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public ResultSet executeQuery() throws SQLException {
 		try {
+			 preprocess();
+			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			checkLastModified();
 				return new UcanaccessResultSet(wrapped.executeQuery(), this);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -89,6 +143,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public int executeUpdate() throws SQLException {
 		try {
+			 preprocess();
+			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			checkLastModified();
 			int y = new ExecuteUpdate(this).execute();
 			return y;
 		} catch (SQLException e) {
@@ -96,10 +153,10 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 	}
 	
-	public Map<Integer, Blob> getBlobMap() {
-		return blobMap;
-	}
 	
+	
+	
+		
 	public ResultSetMetaData getMetaData() throws SQLException {
 		try {
 			return wrapped.getMetaData();
@@ -116,78 +173,92 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 	}
 	
-	public void setArray(int arg0, Array arg1) throws SQLException {
+	public void setArray(int idx, Array array) throws SQLException {
 		try {
-			wrapped.setArray(arg0, arg1);
+			addMementoEntry("setArray",new Class[]{Array.class},idx,array);
+			wrapped.setArray(idx, array);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setAsciiStream(int arg0, InputStream arg1) throws SQLException {
+	public void setAsciiStream(int idx, InputStream is) throws SQLException {
 		try {
-			wrapped.setAsciiStream(arg0, arg1);
+			is=markableInputStream(is);
+			addMementoEntry("setAsciiStream",new Class[]{InputStream.class},idx,is);
+			wrapped.setAsciiStream(idx, is);
+			resetInputStream(is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setAsciiStream(int arg0, InputStream arg1, int arg2)
+	public void setAsciiStream(int idx, InputStream is, int length)
 			throws SQLException {
 		try {
-			wrapped.setAsciiStream(arg0, arg1, arg2);
+			is=markableInputStream(is);
+			addMementoEntry("setAsciiStream",new Class[]{InputStream.class,Integer.TYPE},idx,is,length);
+			wrapped.setAsciiStream(idx, is, length);
+			resetInputStream(is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setAsciiStream(int arg0, InputStream arg1, long arg2)
+	public void setAsciiStream(int idx, InputStream is, long length)
 			throws SQLException {
 		try {
-			wrapped.setAsciiStream(arg0, arg1, arg2);
+			is=markableInputStream(is);
+			addMementoEntry("setAsciiStream",new Class[]{InputStream.class,Long.TYPE},idx,is,length);
+			wrapped.setAsciiStream(idx, is, length);
+			resetInputStream(is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBigDecimal(int arg0, BigDecimal arg1) throws SQLException {
+	public void setBigDecimal(int idx, BigDecimal dec) throws SQLException {
 		try {
-			wrapped.setBigDecimal(arg0, arg1);
+			addMementoEntry("setBigDecimal",new Class[]{BigDecimal.class},idx,dec);
+			wrapped.setBigDecimal(idx, dec);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBinaryStream(int arg0, InputStream arg1) throws SQLException {
+	public void setBinaryStream(int idx, InputStream is) throws SQLException {
 		try {
-			wrapped.setBinaryStream(arg0, arg1);
+			addMementoEntry("setBinaryStream",new Class[]{InputStream.class},idx,is);
+			wrapped.setBinaryStream(idx, is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBinaryStream(int arg0, InputStream arg1, int arg2)
+	public void setBinaryStream(int idx, InputStream is, int length)
 			throws SQLException {
 		try {
-			wrapped.setBinaryStream(arg0, arg1, arg2);
+			addMementoEntry("setBinaryStream",new Class[]{InputStream.class,Integer.TYPE},idx,is,length);
+			wrapped.setBinaryStream(idx, is, length);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBinaryStream(int arg0, InputStream arg1, long arg2)
+	public void setBinaryStream(int idx, InputStream is, long length)
 			throws SQLException {
 		try {
-			wrapped.setBinaryStream(arg0, arg1, arg2);
+			addMementoEntry("setBinaryStream",new Class[]{InputStream.class,Long.TYPE},idx,is,length);
+			wrapped.setBinaryStream(idx, is, length);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBlob(int idx, Blob value) throws SQLException {
+	public void setBlob(int idx, Blob blob) throws SQLException {
 		try {
-			this.blobMap.put(idx - 1, value);
-			wrapped.setBlob(idx, value);
+			addMementoEntry("setBlob",new Class[]{Blob.class},idx,blob);
+			wrapped.setBlob(idx, blob);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -195,90 +266,112 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setBlob(int idx, InputStream is) throws SQLException {
 		try {
+			addMementoEntry("setBlob",new Class[]{InputStream.class},idx,is);
 			wrapped.setBlob(idx, is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBlob(int arg0, InputStream arg1, long arg2)
+	public void setBlob(int idx, InputStream is, long length)
 			throws SQLException {
 		try {
-			wrapped.setBlob(arg0, arg1, arg2);
+			addMementoEntry("setBlob",new Class[]{InputStream.class,Long.TYPE},idx,is,length);
+			wrapped.setBlob(idx, is, length);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBoolean(int arg0, boolean arg1) throws SQLException {
+	public void setBoolean(int idx, boolean bool) throws SQLException {
 		try {
-			wrapped.setBoolean(arg0, arg1);
+			addMementoEntry("setBoolean",new Class[]{Boolean.TYPE},idx,bool);
+			wrapped.setBoolean(idx, bool);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setByte(int arg0, byte arg1) throws SQLException {
+	public void setByte(int idx, byte b) throws SQLException {
 		try {
-			wrapped.setByte(arg0, arg1);
+			addMementoEntry("setByte",new Class[]{Byte.TYPE},idx,b);
+			wrapped.setByte(idx, b);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setBytes(int arg0, byte[] arg1) throws SQLException {
+	public void setBytes(int idx, byte[] bytes) throws SQLException {
 		try {
-			wrapped.setBytes(arg0, arg1);
+			addMementoEntry("setBytes",new Class[]{byte[].class},idx,bytes);
+			wrapped.setBytes(idx, bytes);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setCharacterStream(int arg0, Reader arg1) throws SQLException {
+	public void setCharacterStream(int idx, Reader reader) throws SQLException {
 		try {
-			wrapped.setCharacterStream(arg0, arg1);
+			reader=markableReader(reader);
+			addMementoEntry("setCharacterStream",new Class[]{Reader.class},idx,reader);
+			
+			wrapped.setCharacterStream(idx, reader);
+            resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setCharacterStream(int arg0, Reader arg1, int arg2)
+	public void setCharacterStream(int idx, Reader reader, int length)
 			throws SQLException {
 		try {
-			wrapped.setCharacterStream(arg0, arg1, arg2);
+			reader=markableReader(reader);
+			addMementoEntry("setCharacterStream",new Class[]{Reader.class,Integer.TYPE},idx,reader,length);
+			wrapped.setCharacterStream(idx, reader, length);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setCharacterStream(int arg0, Reader arg1, long arg2)
+	public void setCharacterStream(int idx, Reader reader, long length)
 			throws SQLException {
 		try {
-			wrapped.setCharacterStream(arg0, arg1, arg2);
+			reader=markableReader(reader);
+			addMementoEntry("setCharacterStream",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
+			wrapped.setCharacterStream(idx, reader, length);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setClob(int arg0, Clob arg1) throws SQLException {
+	public void setClob(int idx, Clob clob) throws SQLException {
 		try {
-			wrapped.setClob(arg0, arg1);
+			addMementoEntry("setClob",new Class[]{Clob.class},idx,clob);
+			wrapped.setClob(idx,  clob);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setClob(int arg0, Reader arg1) throws SQLException {
+	public void setClob(int idx, Reader reader) throws SQLException {
 		try {
-			wrapped.setClob(arg0, arg1);
+			reader=markableReader(reader);
+			addMementoEntry("setClob",new Class[]{Reader.class},idx,reader);
+			wrapped.setClob(idx, reader);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setClob(int arg0, Reader arg1, long arg2) throws SQLException {
+	public void setClob(int idx, Reader reader, long length) throws SQLException {
 		try {
-			wrapped.setClob(arg0, arg1, arg2);
+			reader=markableReader(reader);
+			addMementoEntry("setClob",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
+			wrapped.setClob(idx, reader, length);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -292,262 +385,262 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 	}
 	
-	public void setDate(int arg0, Date arg1) throws SQLException {
+	public void setDate(int idx, Date date) throws SQLException {
 		try {
-			wrapped.setDate(arg0, arg1);
+			addMementoEntry("setDate",new Class[]{Date.class},idx,date);
+			wrapped.setDate(idx, date);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setDate(int arg0, Date arg1, Calendar arg2) throws SQLException {
+	public void setDate(int idx, Date date, Calendar cal) throws SQLException {
 		try {
-			wrapped.setDate(arg0, arg1, arg2);
+			addMementoEntry("setDate",new Class[]{Date.class,Calendar.class},idx,date,cal);
+			wrapped.setDate(idx, date, cal);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setDouble(int arg0, double arg1) throws SQLException {
+	public void setDouble(int idx, double d) throws SQLException {
 		try {
-			wrapped.setDouble(arg0, arg1);
+			addMementoEntry("setDouble",new Class[]{Double.TYPE},idx,d);
+			wrapped.setDouble(idx, d);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setEscapeProcessing(boolean enable) throws SQLException {
+	
+	
+	
+	public void setFloat(int idx, float f) throws SQLException {
 		try {
-			wrapped.setEscapeProcessing(enable);
+			addMementoEntry("setFloat",new Class[]{Float.TYPE},idx,f);
+			wrapped.setFloat(idx, f);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setFetchDirection(int direction) throws SQLException {
+	public void setInt(int idx, int i) throws SQLException {
 		try {
-			wrapped.setFetchDirection(direction);
+			addMementoEntry("setInt",new Class[]{Integer.TYPE},idx,i);
+			wrapped.setInt(idx, i);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setFetchSize(int rows) throws SQLException {
+	public void setLong(int idx, long l) throws SQLException {
 		try {
-			wrapped.setFetchSize(rows);
+			addMementoEntry("setLong",new Class[]{Long.TYPE},idx,l);
+			wrapped.setLong(idx, l);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setFloat(int arg0, float arg1) throws SQLException {
+  	
+	public void setNCharacterStream(int idx, Reader reader) throws SQLException {
 		try {
-			wrapped.setFloat(arg0, arg1);
+			reader=markableReader(reader);
+			addMementoEntry("setNCharacterStream",new Class[]{Reader.class},idx,reader);
+			wrapped.setNCharacterStream(idx, reader);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setInt(int arg0, int arg1) throws SQLException {
-		try {
-			wrapped.setInt(arg0, arg1);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public void setLong(int arg0, long arg1) throws SQLException {
-		try {
-			wrapped.setLong(arg0, arg1);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public void setMaxFieldSize(int max) throws SQLException {
-		try {
-			wrapped.setMaxFieldSize(max);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public void setMaxRows(int max) throws SQLException {
-		try {
-			wrapped.setMaxRows(max);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public void setNCharacterStream(int arg0, Reader arg1) throws SQLException {
-		try {
-			wrapped.setNCharacterStream(arg0, arg1);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public void setNCharacterStream(int arg0, Reader arg1, long arg2)
+	public void setNCharacterStream(int idx, Reader reader, long l)
 			throws SQLException {
 		try {
-			wrapped.setNCharacterStream(arg0, arg1, arg2);
+			reader=markableReader(reader);
+			addMementoEntry("setNCharacterStream",new Class[]{Reader.class,Long.TYPE},idx,reader,l);
+			wrapped.setNCharacterStream(idx, reader, l);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNClob(int arg0, NClob arg1) throws SQLException {
+	public void setNClob(int idx, NClob nclob) throws SQLException {
 		try {
-			wrapped.setNClob(arg0, arg1);
+			addMementoEntry("setNClob",new Class[]{NClob.class},idx,nclob);
+			wrapped.setNClob(idx, nclob);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNClob(int arg0, Reader arg1) throws SQLException {
+	public void setNClob(int idx, Reader reader) throws SQLException {
 		try {
-			wrapped.setNClob(arg0, arg1);
+			reader=markableReader(reader);
+			addMementoEntry("setNClob",new Class[]{Reader.class},idx,reader);
+			wrapped.setNClob(idx, reader);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNClob(int arg0, Reader arg1, long arg2) throws SQLException {
+	public void setNClob(int idx, Reader reader, long length) throws SQLException {
 		try {
-			wrapped.setNClob(arg0, arg1, arg2);
+			reader=markableReader(reader);
+			addMementoEntry("setNClob",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
+			wrapped.setNClob(idx, reader, length);
+			resetReader(reader);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNString(int arg0, String arg1) throws SQLException {
+	public void setNString(int idx, String string) throws SQLException {
 		try {
-			wrapped.setNString(arg0, arg1);
+			addMementoEntry("setNString",new Class[]{String.class},idx,string);
+			wrapped.setNString(idx, string);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNull(int arg0, int arg1) throws SQLException {
+	public void setNull(int idx, int sqlt) throws SQLException {
 		try {
-			wrapped.setNull(arg0, arg1);
+			addMementoEntry("setNull",new Class[]{Integer.TYPE},idx,sqlt);
+			wrapped.setNull(idx, sqlt);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setNull(int arg0, int arg1, String arg2) throws SQLException {
+	public void setNull(int idx, int sqlt, String tn) throws SQLException {
 		try {
-			wrapped.setNull(arg0, arg1, arg2);
+			addMementoEntry("setNull",new Class[]{Integer.TYPE,String.class},idx,sqlt,tn);
+			wrapped.setNull(idx, sqlt, tn);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setObject(int arg0, Object arg1) throws SQLException {
+	public void setObject(int idx, Object x) throws SQLException {
 		try {
-			wrapped.setObject(arg0, arg1);
+			addMementoEntry("setObject",new Class[]{Object.class},idx,x);
+			wrapped.setObject(idx, x);
+			
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setObject(int arg0, Object arg1, int arg2) throws SQLException {
+	public void setObject(int idx, Object x, int tsqlt) throws SQLException {
 		try {
-			wrapped.setObject(arg0, arg1, arg2);
+			addMementoEntry("setObject",new Class[]{Object.class,Integer.TYPE},idx,x,tsqlt);
+			wrapped.setObject(idx, x, tsqlt);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setObject(int arg0, Object arg1, int arg2, int arg3)
+	public void setObject(int idx, Object x, int tsqlt, int sol)
 			throws SQLException {
 		try {
-			wrapped.setObject(arg0, arg1, arg2, arg3);
+			addMementoEntry("setObject",new Class[]{Object.class,Integer.TYPE,Integer.TYPE},idx,x,tsqlt,tsqlt);
+			wrapped.setObject(idx, x, tsqlt, sol);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setRef(int arg0, Ref arg1) throws SQLException {
+	public void setRef(int idx, Ref ref) throws SQLException {
 		try {
-			wrapped.setRef(arg0, arg1);
+			addMementoEntry("setRef",new Class[]{Ref.class},idx,ref);
+			wrapped.setRef(idx, ref);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setRowId(int arg0, RowId arg1) throws SQLException {
+	public void setRowId(int idx, RowId rowId) throws SQLException {
 		try {
-			wrapped.setRowId(arg0, arg1);
+			addMementoEntry("setRowId",new Class[]{RowId.class},idx,rowId);
+			wrapped.setRowId(idx, rowId);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setShort(int arg0, short arg1) throws SQLException {
+	public void setShort(int idx, short sht) throws SQLException {
 		try {
-			wrapped.setShort(arg0, arg1);
+			addMementoEntry("setShort",new Class[]{Short.TYPE},idx,sht);
+			wrapped.setShort(idx, sht);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setSQLXML(int arg0, SQLXML arg1) throws SQLException {
+	public void setSQLXML(int idx, SQLXML sx) throws SQLException {
 		try {
-			wrapped.setSQLXML(arg0, arg1);
+			addMementoEntry("setSQLXML",new Class[]{SQLXML.class},idx,sx);
+			wrapped.setSQLXML(idx, sx);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setString(int arg0, String arg1) throws SQLException {
+	public void setString(int idx, String string) throws SQLException {
 		try {
-			wrapped.setString(arg0, arg1);
+			addMementoEntry("setString",new Class[]{String.class},idx,string);
+			wrapped.setString(idx, string);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setTime(int arg0, Time arg1) throws SQLException {
+	public void setTime(int idx, Time time) throws SQLException {
 		try {
-			wrapped.setTime(arg0, arg1);
+			addMementoEntry("setTime",new Class[]{Time.class},idx,time);
+			wrapped.setTime(idx, time);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setTime(int arg0, Time arg1, Calendar arg2) throws SQLException {
+	public void setTime(int idx, Time time, Calendar cal) throws SQLException {
 		try {
-			wrapped.setTime(arg0, arg1, arg2);
+			addMementoEntry("setTime",new Class[]{Time.class},idx,time,cal);
+			wrapped.setTime(idx, time, cal);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setTimestamp(int arg0, Timestamp arg1) throws SQLException {
+	public void setTimestamp(int idx, Timestamp ts) throws SQLException {
 		try {
-			wrapped.setTimestamp(arg0, arg1);
+			addMementoEntry("setTimestamp",new Class[]{Timestamp.class},idx,ts);
+			wrapped.setTimestamp(idx, ts);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
-	public void setTimestamp(int idx, Timestamp arg1, Calendar arg2)
+	public void setTimestamp(int idx, Timestamp ts, Calendar cal)
 			throws SQLException {
 		try {
-			wrapped.setTimestamp(idx, arg1, arg2);
+			addMementoEntry("setTimestamp",new Class[]{Timestamp.class,Calendar.class},idx,ts,cal);
+			wrapped.setTimestamp(idx, ts, cal);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 	
 	@Deprecated
-	public void setUnicodeStream(int arg0, InputStream arg1, int arg2)
+	public void setUnicodeStream(int idx, InputStream is, int length)
 			throws SQLException {
 		try {
-			wrapped.setUnicodeStream(arg0, arg1, arg2);
+			addMementoEntry("setUnicodeStream",new Class[]{InputStream.class,Integer.TYPE},idx,is,length);
+			wrapped.setUnicodeStream(idx, is, length);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -555,7 +648,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setURL(int idx, URL url) throws SQLException {
 		try {
-			wrapped.setString(idx, "#" + url.toString() + "#");
+			String arg= "#" + url.toString() + "#";
+			addMementoEntry("setString",new Class[]{String.class},idx,arg);
+			wrapped.setString(idx, arg);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -567,5 +662,95 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
+	}
+	
+	protected void reset() throws SQLException{
+		PreparedStatement old=this.wrapped;
+		this.wrapped=((UcanaccessConnection)this.getConnection()).getHSQLDBConnection().prepareStatement(sql, wrapped.getResultSetType(),  wrapped.getResultSetConcurrency(),  wrapped.getResultSetHoldability());
+		reset(this.wrapped);
+		parametersReset();
+		old.close();
+	}
+	
+	private void parametersReset(){
+		for(ParameterReset pr:this.memento.values()){
+			pr.execute();
+		}
+	}
+	
+	private Reader markableReader(Reader r) throws SQLException{
+		if(r.markSupported()){
+			boolean marked=true;
+			try {
+				r.mark(1000000);
+			} catch (IOException e) {
+				marked=false;
+			}
+			if(marked)
+			return r;
+		}
+		
+		StringBuffer sb=new StringBuffer();
+		
+		char[] cb=new char[4096];
+		int rd;
+		try {
+		while((rd=r.read(cb))>=0){
+			sb.append(Arrays.copyOf(cb, rd));
+		}
+		StringReader sr=new StringReader(sb.toString());
+		sr.mark(1000000);
+		return sr;
+		} catch (IOException e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	
+	private InputStream  markableInputStream (InputStream is) throws SQLException{
+		if(is.markSupported()){
+			is.mark(1000000);
+			return is;
+		}
+		
+		ByteArrayOutputStream bos=new ByteArrayOutputStream();
+		
+		byte[] buffer=new byte[4096];
+		int rd;
+		try {
+		while((rd=is.read(buffer))>=0){
+			bos.write(buffer, 0, rd);
+		}
+		bos.flush();
+		ByteArrayInputStream ir=new ByteArrayInputStream(bos.toByteArray());
+		ir.mark(1000000);
+		return ir;
+		} catch (IOException e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	private void resetReader(Reader r) throws SQLException{
+		 try {
+				r.reset();
+			} catch (IOException e) {
+				throw new SQLException(e);
+			}
+	}
+	
+	private void resetInputStream(InputStream is) throws SQLException{
+		 try {
+				is.reset();
+			} catch (IOException e) {
+				throw new SQLException(e);
+			}
+	}
+	
+	private void preprocess() throws SQLException{
+		if (SQLConverter.hasMacro(sql)){
+			this.sql=SQLConverter.preprocess(sql, ((UcanaccessConnection)this.getConnection()).getLastGeneratedKey());
+			reset();
+		}
+		
 	}
 }

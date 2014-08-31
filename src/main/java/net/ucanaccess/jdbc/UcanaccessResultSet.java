@@ -831,6 +831,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void insertRow() throws SQLException {
 		try {
+			((UcanaccessConnection)this.wrappedStatement.getConnection()).setCurrentStatment(this.wrappedStatement);
 			new InsertResultSet(this).execute();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
