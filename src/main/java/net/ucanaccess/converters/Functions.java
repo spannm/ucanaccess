@@ -36,9 +36,11 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -172,6 +174,28 @@ public class Functions {
 		return (int) s.charAt(0);
 	}
 	
+	@FunctionType(functionName = "EQUALS", argumentTypes = { AccessType.COMPLEX,AccessType.COMPLEX }, returnType = AccessType.YESNO)
+	public static Boolean equals(Object obj1,Object obj2) {
+		if(obj1==null||obj2==null)return false;
+		if(!obj1.getClass().equals(obj2.getClass()))
+		return false;
+		if(obj1.getClass().isArray()){
+			return Arrays.equals((Object[])obj1,(Object[])obj2);
+		}
+		return obj1.equals(obj2);
+	}
+	
+	
+	@FunctionType(functionName = "CONTAINS", argumentTypes = { AccessType.COMPLEX,AccessType.COMPLEX }, returnType = AccessType.YESNO)
+	public static Boolean contains(Object obj1,Object obj2) {
+		if(obj1==null||obj2==null)return false;
+		if(!obj1.getClass().isArray())
+		return false;
+		List<Object> lo= Arrays.asList((Object[])obj1);
+		List<Object> arg=obj2.getClass().isArray()? Arrays.asList((Object[])obj2):
+		Arrays.asList(new Object[]{obj2});
+		return lo.containsAll(arg);
+	}
 	
 	@FunctionType(functionName = "ATN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
 	public static double atn(double v) {
