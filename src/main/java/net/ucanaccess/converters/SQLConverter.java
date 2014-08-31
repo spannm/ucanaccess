@@ -61,6 +61,10 @@ public class SQLConverter {
 	private static final Pattern NO_DATA_PATTERN = Pattern
 			.compile(" (?i)WITH[\\s\n\r]+(?i)NO[\\s\n\r]+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
+	private static final String IDENTITY ="(\\W+)((?i)@@identity)(\\W*)";
+	private static final Pattern SELECT_IDENTITY = Pattern.compile("(?)select[\\s\n\r]+(?i)@@identity.*");
+	private static final Pattern HAS_FROM = Pattern.compile("[\\s\n\r]+(?i)from[\\s\n\r]+");
+	
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
 	private static final String WITH_OWNERACCESS_OPTION = "(\\W)(?i)WITH[\\s\n\r]+(?i)OWNERACCESS[\\s\n\r]+(?i)OPTION(\\W)";
@@ -108,6 +112,8 @@ public class SQLConverter {
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
 	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
+	
+	
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	
 	private static boolean supportsAccessLike = true;
@@ -127,6 +133,19 @@ public class SQLConverter {
 		noRomanCharacters.put("\u00FE", "P");
 	}
 	
+	
+	public static boolean hasMacro(String sql ){
+		return sql.indexOf("@@")>0&& sql.toUpperCase().indexOf("@@IDENTITY")>0;
+	}
+	
+	
+	public static String preprocess(String sql ,int key){
+		
+		Matcher mtc=SELECT_IDENTITY.matcher(sql);
+		Matcher mtc1=HAS_FROM.matcher(sql);
+		String end=mtc.matches()&&!mtc1.find()?" FROM DUAL":"";
+		return sql.replaceAll(IDENTITY, "$1"+key+"$3")+end;
+	}
 	
 	public static boolean isListedAsKeyword(String s){
 		return KEYWORDLIST.contains(s.toUpperCase()) ;
