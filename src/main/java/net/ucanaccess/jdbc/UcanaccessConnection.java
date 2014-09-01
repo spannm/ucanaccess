@@ -758,7 +758,7 @@ public class UcanaccessConnection implements Connection {
 	
 	
 	String preprocess(String sql){
-		if (SQLConverter.hasMacro(sql)){
+		if (SQLConverter.hasIdentity(sql)){
 			return SQLConverter.preprocess(sql, lastGeneratedKey);
 		}
 		return sql;

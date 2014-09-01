@@ -747,7 +747,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	}
 	
 	private void preprocess() throws SQLException{
-		if (SQLConverter.hasMacro(sql)){
+		if (SQLConverter.hasIdentity(sql)){
 			this.sql=SQLConverter.preprocess(sql, ((UcanaccessConnection)this.getConnection()).getLastGeneratedKey());
 			reset();
 		}
