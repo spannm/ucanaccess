@@ -60,6 +60,13 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	private String sql;
 	private HashMap<Integer,ParameterReset> memento=new  HashMap<Integer,ParameterReset>();
 	
+	public UcanaccessPreparedStatement(String sql,PreparedStatement hidden,
+			UcanaccessConnection connection) throws SQLException {
+		super(hidden, connection);
+		this.sql=sql;
+		this.wrapped = hidden;
+	}
+	
 	private class ParameterReset{
 		private String methodName;
 		private Object[] args;
@@ -71,7 +78,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 			this.argClasses=argClasses;
 		}
 		
-		private void execute(){
+	private void execute(){
 			try {
 				Method mth=PreparedStatement.class.getDeclaredMethod(this.methodName,this.argClasses);
 				mth.invoke(wrapped, args);
@@ -92,17 +99,89 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	}
 	
 	
-	
-	
-	
-	
-	public UcanaccessPreparedStatement(String sql,PreparedStatement hidden,
-			UcanaccessConnection connection) throws SQLException {
-		super(hidden, connection);
-		this.sql=sql;
-		this.wrapped = hidden;
+	private void parametersReset(){
+		for(ParameterReset pr:this.memento.values()){
+			pr.execute();
+		}
 	}
 	
+	private Reader markableReader(Reader r) throws SQLException{
+		if(r.markSupported()){
+			boolean marked=true;
+			try {
+				r.mark(1000000);
+			} catch (IOException e) {
+				marked=false;
+			}
+			if(marked)
+			return r;
+		}
+		
+		StringBuffer sb=new StringBuffer();
+		
+		char[] cb=new char[4096];
+		int rd;
+		try {
+		while((rd=r.read(cb))>=0){
+			sb.append(Arrays.copyOf(cb, rd));
+		}
+		StringReader sr=new StringReader(sb.toString());
+		sr.mark(1000000);
+		return sr;
+		} catch (IOException e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	
+	private InputStream  markableInputStream (InputStream is) throws SQLException{
+		if(is.markSupported()){
+			is.mark(1000000);
+			return is;
+		}
+		
+		ByteArrayOutputStream bos=new ByteArrayOutputStream();
+		
+		byte[] buffer=new byte[4096];
+		int rd;
+		try {
+		while((rd=is.read(buffer))>=0){
+			bos.write(buffer, 0, rd);
+		}
+		bos.flush();
+		ByteArrayInputStream ir=new ByteArrayInputStream(bos.toByteArray());
+		ir.mark(1000000);
+		return ir;
+		} catch (IOException e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	private void resetReader(Reader r) throws SQLException{
+		 try {
+				r.reset();
+			} catch (IOException e) {
+				throw new SQLException(e);
+			}
+	}
+	
+	private void resetInputStream(InputStream is) throws SQLException{
+		 try {
+				is.reset();
+			} catch (IOException e) {
+				throw new SQLException(e);
+			}
+	}
+	
+	private void preprocess() throws SQLException{
+		if (SQLConverter.hasIdentity(sql)){
+			this.sql=SQLConverter.preprocess(sql, ((UcanaccessConnection)this.getConnection()).getLastGeneratedKey());
+			reset();
+		}
+		
+	}
+	
+		
 	public void addBatch() throws SQLException {
 		try {
 			wrapped.addBatch();
@@ -546,7 +625,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setObject(int idx, Object x, int tsqlt, int sol)
 			throws SQLException {
 		try {
-			addMementoEntry("setObject",new Class[]{Object.class,Integer.TYPE,Integer.TYPE},idx,x,tsqlt,tsqlt);
+			addMementoEntry("setObject",new Class[]{Object.class,Integer.TYPE,Integer.TYPE},idx,x,tsqlt,sol);
 			wrapped.setObject(idx, x, tsqlt, sol);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -609,7 +688,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setTime(int idx, Time time, Calendar cal) throws SQLException {
 		try {
-			addMementoEntry("setTime",new Class[]{Time.class},idx,time,cal);
+			addMementoEntry("setTime",new Class[]{Time.class, Calendar.class},idx,time,cal);
 			wrapped.setTime(idx, time, cal);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -672,85 +751,5 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		old.close();
 	}
 	
-	private void parametersReset(){
-		for(ParameterReset pr:this.memento.values()){
-			pr.execute();
-		}
-	}
 	
-	private Reader markableReader(Reader r) throws SQLException{
-		if(r.markSupported()){
-			boolean marked=true;
-			try {
-				r.mark(1000000);
-			} catch (IOException e) {
-				marked=false;
-			}
-			if(marked)
-			return r;
-		}
-		
-		StringBuffer sb=new StringBuffer();
-		
-		char[] cb=new char[4096];
-		int rd;
-		try {
-		while((rd=r.read(cb))>=0){
-			sb.append(Arrays.copyOf(cb, rd));
-		}
-		StringReader sr=new StringReader(sb.toString());
-		sr.mark(1000000);
-		return sr;
-		} catch (IOException e) {
-			throw new SQLException(e);
-		}
-	}
-	
-	
-	private InputStream  markableInputStream (InputStream is) throws SQLException{
-		if(is.markSupported()){
-			is.mark(1000000);
-			return is;
-		}
-		
-		ByteArrayOutputStream bos=new ByteArrayOutputStream();
-		
-		byte[] buffer=new byte[4096];
-		int rd;
-		try {
-		while((rd=is.read(buffer))>=0){
-			bos.write(buffer, 0, rd);
-		}
-		bos.flush();
-		ByteArrayInputStream ir=new ByteArrayInputStream(bos.toByteArray());
-		ir.mark(1000000);
-		return ir;
-		} catch (IOException e) {
-			throw new SQLException(e);
-		}
-	}
-	
-	private void resetReader(Reader r) throws SQLException{
-		 try {
-				r.reset();
-			} catch (IOException e) {
-				throw new SQLException(e);
-			}
-	}
-	
-	private void resetInputStream(InputStream is) throws SQLException{
-		 try {
-				is.reset();
-			} catch (IOException e) {
-				throw new SQLException(e);
-			}
-	}
-	
-	private void preprocess() throws SQLException{
-		if (SQLConverter.hasIdentity(sql)){
-			this.sql=SQLConverter.preprocess(sql, ((UcanaccessConnection)this.getConnection()).getLastGeneratedKey());
-			reset();
-		}
-		
-	}
 }

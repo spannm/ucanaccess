@@ -78,15 +78,27 @@ public class UcanaccessConnection implements Connection {
 	private int lastGeneratedKey;
 	final static String BATCH_ID="BATCH_ID";
 
-	public boolean isTestRollback() {
-		return testRollback;
+	int getLastGeneratedKey() {
+		return lastGeneratedKey;
 	}
 	
+	
+	String preprocess(String sql){
+		if (SQLConverter.hasIdentity(sql)){
+			return SQLConverter.preprocess(sql, lastGeneratedKey);
+		}
+		return sql;
+	}
 	
 	void setCurrentStatment(UcanaccessStatement currentStatment){
 		this.currentStatement=currentStatment;
 	}
 	
+	public boolean isTestRollback() {
+		return testRollback;
+	}
+	
+		
 	public void setGeneratedKey(int key){
 		this.lastGeneratedKey=key;
 		if(currentStatement!=null)
@@ -752,17 +764,7 @@ public class UcanaccessConnection implements Connection {
 	}
 
 
-	int getLastGeneratedKey() {
-		return lastGeneratedKey;
-	}
 	
-	
-	String preprocess(String sql){
-		if (SQLConverter.hasIdentity(sql)){
-			return SQLConverter.preprocess(sql, lastGeneratedKey);
-		}
-		return sql;
-	}
 	
 
 }

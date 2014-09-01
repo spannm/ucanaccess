@@ -43,6 +43,18 @@ public class UcanaccessStatement implements Statement {
 		this.wrapped = wrapped;
 		this.connection = conn;
 	}
+	
+	private String convertSQL(String sql,UcanaccessConnection conn){
+		return preprocess(SQLConverter.convertSQL(sql, conn));
+	}
+	
+	private String convertSQL(String sql){
+		return preprocess(SQLConverter.convertSQL(sql));
+	}
+	
+	private String preprocess(String sql){
+		return this.connection.preprocess(sql);
+	}
 
 	public void addBatch(String batch) throws SQLException {
 		try {
@@ -494,16 +506,6 @@ public class UcanaccessStatement implements Statement {
 	}
 	
 	
-	private String convertSQL(String sql,UcanaccessConnection conn){
-		return preprocess(SQLConverter.convertSQL(sql, conn));
-	}
 	
-	private String convertSQL(String sql){
-		return preprocess(SQLConverter.convertSQL(sql));
-	}
-	
-	private String preprocess(String sql){
-		return this.connection.preprocess(sql);
-	}
 	 
 }
