@@ -134,7 +134,7 @@ public class SQLConverter {
 	}
 	
 	
-	public static boolean hasMacro(String sql ){
+	public static boolean hasIdentity(String sql ){
 		return sql.indexOf("@@")>0&& sql.toUpperCase().indexOf("@@IDENTITY")>0;
 	}
 	
