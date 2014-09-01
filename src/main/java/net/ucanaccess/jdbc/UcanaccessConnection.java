@@ -90,8 +90,8 @@ public class UcanaccessConnection implements Connection {
 		return sql;
 	}
 	
-	void setCurrentStatment(UcanaccessStatement currentStatment){
-		this.currentStatement=currentStatment;
+	void setCurrentStatement(UcanaccessStatement currentStatement){
+		this.currentStatement=currentStatement;
 	}
 	
 	public boolean isTestRollback() {
@@ -566,11 +566,12 @@ public class UcanaccessConnection implements Connection {
 		try {
 			
 			hsqlDBConnection.rollback();
-			this.checkModified=true;
+			
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		} finally {
 			finalizeEnlistedResources();
+			this.checkModified=true;
 		}
 	}
 
@@ -692,7 +693,7 @@ public class UcanaccessConnection implements Connection {
 		return w + "[" + this.ref.getDbFile() + "]";
 	}
 
-	void checkLastModified() throws UcanaccessSQLException {
+	void  checkLastModified() throws UcanaccessSQLException {
 		try {
 			this.checkModified=false;
 			this.hsqlDBConnection = this.ref.checkLastModified(

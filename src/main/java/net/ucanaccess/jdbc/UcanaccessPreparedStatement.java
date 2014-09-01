@@ -201,7 +201,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public boolean execute() throws SQLException {
 		try {
 			 preprocess();
-			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			((UcanaccessConnection)this.getConnection()).setCurrentStatement(this);
 			checkLastModified();
 			return new Execute(this).execute();
 		} catch (SQLException e) {
@@ -212,7 +212,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public ResultSet executeQuery() throws SQLException {
 		try {
 			 preprocess();
-			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			((UcanaccessConnection)this.getConnection()).setCurrentStatement(this);
 			checkLastModified();
 				return new UcanaccessResultSet(wrapped.executeQuery(), this);
 		} catch (SQLException e) {
@@ -223,7 +223,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public int executeUpdate() throws SQLException {
 		try {
 			 preprocess();
-			((UcanaccessConnection)this.getConnection()).setCurrentStatment(this);
+			((UcanaccessConnection)this.getConnection()).setCurrentStatement(this);
 			checkLastModified();
 			int y = new ExecuteUpdate(this).execute();
 			return y;
