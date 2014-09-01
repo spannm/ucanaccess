@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 
 
+
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
@@ -35,13 +36,13 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
-
 import com.healthmarketscience.jackcess.Database;
 
 public class DDLCommandEnlist {
 	private String[] types;
 	private String[] defaults;
 	private Boolean[] notNulls;
+	
 	
 	private void enlistCreateTable(String sql, DDLType ddlType)
 			throws SQLException {
@@ -101,6 +102,7 @@ public class DDLCommandEnlist {
 		}
 		String decl = sql.substring(startDecl + 1, endDecl);
 		String[] tokens = decl.split(",");
+		
 		ArrayList<String> typeList = new ArrayList<String>() ;
 		ArrayList<String> defaultList = new ArrayList<String>() ;
 		ArrayList<Boolean> notNullList = new ArrayList<Boolean>() ;
@@ -108,19 +110,19 @@ public class DDLCommandEnlist {
 			String tknt=tokens[j].trim();
 			
 			String[] colDecls = tknt.split("[\\s\n\r]+");
-			int restart=0;
+
+			boolean reset=false;
 			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")){
-				restart=2;
+				reset=true;
 				tknt=tknt.substring(tknt.indexOf(")")+1).trim();
-				 colDecls = tknt.split("[\\s\n\r]+");
+				colDecls = tknt.split("[\\s\n\r]+");
 			}
 			
-			if (restart==0&&colDecls.length< 2) {
-				
+			if (!reset&&colDecls.length< 2) {
 				continue;
 			}
 			boolean decDef=false;
-			if(restart==0){
+			if(!reset){
 				if(colDecls[1]!=null&&colDecls[1].toUpperCase().startsWith("NUMERIC(")){
 					colDecls[1]="NUMERIC";
 					decDef=true;
@@ -141,7 +143,7 @@ public class DDLCommandEnlist {
 			if(!decDef){
 				defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
 			}
-
+	
 		this.types= (String[])typeList.toArray(new String[typeList.size()]);
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
