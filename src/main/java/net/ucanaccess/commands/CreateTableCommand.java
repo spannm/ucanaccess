@@ -23,6 +23,7 @@ package net.ucanaccess.commands;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Map;
 
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
@@ -33,6 +34,7 @@ public class CreateTableCommand implements ICommand {
 	private String[] types;
 	private String[] defaults;
 	private Boolean[] notNulls;
+	private Map<String,String> columnMap;
 	
 	public CreateTableCommand(String tableName, String execId) {
 		super();
@@ -42,12 +44,13 @@ public class CreateTableCommand implements ICommand {
 	
 	
 	
-	public CreateTableCommand(String tn, String execId2,
+	public CreateTableCommand(String tn, String execId2,Map<String,String> columnMap,
 			String[] types, String[] defaults, Boolean[] notNulls) {
 		this(tn, execId2);
 		this.types =types;
 		this.defaults=defaults;
 		this.notNulls=notNulls;
+		this.columnMap=columnMap;
 	}
 
 
@@ -93,7 +96,7 @@ public class CreateTableCommand implements ICommand {
 	public IFeedbackAction persist() throws SQLException {
 		try {
 			Persist2Jet p2a = new Persist2Jet();
-			p2a.createTable(tableName, types,defaults,notNulls);
+			p2a.createTable(tableName,columnMap, types,defaults,notNulls);
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}

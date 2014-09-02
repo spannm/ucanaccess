@@ -29,6 +29,9 @@ import java.util.ArrayList;
 
 
 
+
+import java.util.HashMap;
+
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
@@ -42,6 +45,7 @@ public class DDLCommandEnlist {
 	private String[] types;
 	private String[] defaults;
 	private Boolean[] notNulls;
+	private  HashMap<String,String> columnMap= new HashMap<String,String>();
 	
 	
 	private void enlistCreateTable(String sql, DDLType ddlType)
@@ -57,7 +61,7 @@ public class DDLCommandEnlist {
        if(ddlType.equals(DDLType.CREATE_TABLE)){
     	   parseTypesFromCreateStatement(sql);
     	   c4io=new CreateTableCommand(
-				tn, execId, this.types,this.defaults,this.notNulls);
+				tn, execId,this.columnMap, this.types,this.defaults,this.notNulls);
     	   }
        else  {
     	   c4io=new CreateTableCommand(tn, execId);
@@ -105,12 +109,31 @@ public class DDLCommandEnlist {
 		
 		ArrayList<String> typeList = new ArrayList<String>() ;
 		ArrayList<String> defaultList = new ArrayList<String>() ;
+		this.columnMap = new HashMap<String,String>() ;
 		ArrayList<Boolean> notNullList = new ArrayList<Boolean>() ;
 		for (int j = 0; j < tokens.length; ++j) {
 			String tknt=tokens[j].trim();
 			
 			String[] colDecls = tknt.split("[\\s\n\r]+");
-
+			
+			if(colDecls[0].startsWith("[")&&tknt.substring(1).indexOf("]")>0){
+				for(int k=0;k<colDecls.length;k++){
+					if(colDecls[k].endsWith("]")){
+						String[] colDecls0=new String[colDecls.length-k];
+						colDecls0[0]=tknt.substring(1,tknt.indexOf("]"));
+						for(int y=1;y<colDecls0.length;y++){
+							colDecls0[y]=colDecls[y+k];
+						}
+						colDecls=colDecls0;
+						break;
+					}
+				}
+			}
+			String escaped=(SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()))?
+					colDecls[0].toUpperCase():SQLConverter.basicEscapingIdentifier(colDecls[0]);
+			columnMap.put(escaped,colDecls[0]);
+		 
+			
 			boolean reset=false;
 			if(tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")){
 				reset=true;
@@ -145,6 +168,7 @@ public class DDLCommandEnlist {
 			}
 	
 		this.types= (String[])typeList.toArray(new String[typeList.size()]);
+		
 		this.defaults=(String[])defaultList.toArray(new String[defaultList.size()]);
 		this.notNulls=(Boolean[])notNullList.toArray(new Boolean[notNullList.size()]);
 		
