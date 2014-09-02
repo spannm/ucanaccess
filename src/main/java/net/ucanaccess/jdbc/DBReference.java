@@ -354,6 +354,13 @@ public class DBReference {
 		conn.setAutoCommit(false);
 		return conn;
 	}
+	
+	
+	
+
+	String getId() {
+		return id;
+	}
 
 	private String key(String pwd) throws SQLException {
 		Connection conn =null;
@@ -525,7 +532,8 @@ public class DBReference {
 	public void updateLastModified() {
 		this.lastModified = this.dbFile.lastModified();
 	}
-
+	
+	
 	public void setSingleConnection(boolean singleConnection) {
 		this.singleConnection = singleConnection;
 	}

@@ -45,10 +45,16 @@ public class UcanaccessStatement implements Statement {
 	}
 	
 	private String convertSQL(String sql,UcanaccessConnection conn){
+		if(SQLConverter.checkDDL(sql)){
+			return sql;
+		}
 		return preprocess(SQLConverter.convertSQL(sql, conn));
 	}
 	
 	private String convertSQL(String sql){
+		if(SQLConverter.checkDDL(sql)){
+			return sql;
+		}
 		return preprocess(SQLConverter.convertSQL(sql));
 	}
 	

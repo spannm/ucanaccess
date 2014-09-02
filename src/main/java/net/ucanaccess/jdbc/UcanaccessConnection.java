@@ -76,41 +76,10 @@ public class UcanaccessConnection implements Connection {
 	private String url;
 	private  UcanaccessStatement currentStatement;
 	private int lastGeneratedKey;
+	private String refId;
+	
 	final static String BATCH_ID="BATCH_ID";
 
-	int getLastGeneratedKey() {
-		return lastGeneratedKey;
-	}
-	
-	
-	String preprocess(String sql){
-		if (SQLConverter.hasIdentity(sql)){
-			return SQLConverter.preprocess(sql, lastGeneratedKey);
-		}
-		return sql;
-	}
-	
-	void setCurrentStatement(UcanaccessStatement currentStatement){
-		this.currentStatement=currentStatement;
-	}
-	
-	public boolean isTestRollback() {
-		return testRollback;
-	}
-	
-		
-	public void setGeneratedKey(int key){
-		this.lastGeneratedKey=key;
-		if(currentStatement!=null)
-		currentStatement.setGeneratedKey( key);
-	}
-	
-
-	// test only!!!!
-	@SuppressWarnings("unused")
-	private void setTestRollback(boolean testRollback) {
-		this.testRollback = testRollback;
-	}
 
 	public synchronized static UcanaccessConnection getCtxConnection() {
 		if(ctx==null)return null;
@@ -133,6 +102,7 @@ public class UcanaccessConnection implements Connection {
 			Session session) throws UcanaccessSQLException {
 		try {
 			this.ref = ref;
+			this.refId=ref.getId();
 			ref.incrementActiveConnection();
 			this.session = session;
 			this.hsqlDBConnection = ref.getHSQLDBConnection(session);
@@ -140,6 +110,40 @@ public class UcanaccessConnection implements Connection {
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
+	}
+	
+	
+
+	int getLastGeneratedKey() {
+		return lastGeneratedKey;
+	}
+	
+	
+	String preprocess(String sql){
+		if (SQLConverter.hasIdentity(sql)){
+			return SQLConverter.preprocess(sql, lastGeneratedKey);
+		}
+		return sql;
+	}
+	
+	void setCurrentStatement(UcanaccessStatement currentStatement){
+		this.currentStatement=currentStatement;
+	}
+	
+	public void setGeneratedKey(int key){
+		this.lastGeneratedKey=key;
+		if(currentStatement!=null)
+		currentStatement.setGeneratedKey( key);
+	}
+	
+	public boolean isTestRollback() {
+		return testRollback;
+	}
+	
+	// test only!!!!
+	@SuppressWarnings("unused")
+	private void setTestRollback(boolean testRollback) {
+		this.testRollback = testRollback;
 	}
 
 	public void addFunctions(Class<?> clazz) throws SQLException {
@@ -320,8 +324,8 @@ public class UcanaccessConnection implements Connection {
 			}
 			this.ref.updateLastModified();
 			try {
-			this.ref.getDbIO().flush();
-			this.unloadDB();
+				this.ref.getDbIO().flush();
+				this.unloadDB();
 			}
 			catch (IOException e) {}
 			throw new UcanaccessSQLException(t);
@@ -698,6 +702,10 @@ public class UcanaccessConnection implements Connection {
 			this.checkModified=false;
 			this.hsqlDBConnection = this.ref.checkLastModified(
 					this.hsqlDBConnection, session);
+			if(!this.refId.equals(ref.getId())){
+				this.refId=ref.getId();
+				this.hsqlDBConnection=ref.getHSQLDBConnection(session);
+			}
 		} catch (Exception e) {
 			throw new UcanaccessSQLException(e);
 		}
