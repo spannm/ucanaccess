@@ -185,7 +185,13 @@ public class Persist2Jet {
 		return vl;
 	}
 
-	private List<ColumnBuilder> getColumns(String tableName, String[] types)
+	private String getNormalizedName(String name,Map<String,String> columnMap ){
+		if( columnMap==null)return name;
+		return columnMap.containsKey(name)?columnMap.get(name):name;
+	}
+	
+	
+	private List<ColumnBuilder> getColumns(String tableName,Map<String,String> columnMap, String[] types)
 			throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ArrayList<ColumnBuilder> arcl = new ArrayList<ColumnBuilder>();
@@ -193,8 +199,9 @@ public class Persist2Jet {
 				tableName.toUpperCase(), null);
 		int i = 0;
 		while (rs.next()) {
-			
-			ColumnBuilder cb=new ColumnBuilder(rs.getString("COLUMN_NAME"));
+			String name=rs.getString("COLUMN_NAME");
+			String nname=getNormalizedName( name,columnMap );
+			ColumnBuilder cb=new ColumnBuilder(nname);
 			short length = (short) rs.getInt("COLUMN_SIZE");
 			byte scale=(byte) rs.getInt("DECIMAL_DIGITS");
 			DataType dt = null;
@@ -268,10 +275,10 @@ public class Persist2Jet {
 		return arcl;
 	}
 
-	private List<IndexBuilder> getIndexBuilders(String tableName)
+	private List<IndexBuilder> getIndexBuilders(String tableName,Map<String,String> columnMap)
 			throws SQLException {
 		ArrayList<IndexBuilder> arcl = new ArrayList<IndexBuilder>();
-		addIndexBuildersSimple(tableName, arcl);
+		addIndexBuildersSimple(tableName,columnMap, arcl);
 		return arcl;
 	}
 
@@ -302,7 +309,7 @@ public class Persist2Jet {
 		}
 	}
 
-	private IndexBuilder getIndexBuilderPK(String tableName)
+	private IndexBuilder getIndexBuilderPK(String tableName,Map<String,String> columnMap)
 			throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, "PUBLIC",
@@ -315,12 +322,12 @@ public class Persist2Jet {
 				indpk.setPrimaryKey();
 				
 			}
-			indpk.addColumns(pkrs.getString("COLUMN_NAME"));
+			indpk.addColumns(getNormalizedName(pkrs.getString("COLUMN_NAME"),columnMap));
 		}
 		return indpk;
 	}
 
-	private void addIndexBuildersSimple(String tableName,
+	private void addIndexBuildersSimple(String tableName,Map<String,String> columnMap,
 			ArrayList<IndexBuilder> arcl) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ResultSet idxrs = conn.getMetaData().getIndexInfo(null, "PUBLIC",
@@ -330,7 +337,7 @@ public class Persist2Jet {
 			hi.put(ib.getName(), ib);
 		}
 		while (idxrs.next()) {
-			String colName = idxrs.getString("COLUMN_NAME");
+			String colName =getNormalizedName( idxrs.getString("COLUMN_NAME"),columnMap);
 			String indexName = idxrs.getString("INDEX_NAME");
 			boolean unique = !idxrs.getBoolean("NON_UNIQUE");
 			String ad = idxrs.getString("ASC_OR_DESC");
@@ -372,15 +379,15 @@ public class Persist2Jet {
 	}
 	
 	
-	public void createTable(String tableName, String[] types, String[] defaults, Boolean[] notNulls)
+	public void createTable(String tableName,Map<String,String> columnMap, String[] types, String[] defaults, Boolean[] notNulls)
 			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		TableBuilder tb=new TableBuilder(tableName);
-		tb.addColumns(getColumns(tableName, types));
-		List<IndexBuilder> arcl=getIndexBuilders(tableName);
+		tb.addColumns(getColumns(tableName,columnMap, types));
+		List<IndexBuilder> arcl=getIndexBuilders(tableName,columnMap);
 		
-		IndexBuilder ibpk = getIndexBuilderPK(tableName);
+		IndexBuilder ibpk = getIndexBuilderPK(tableName,columnMap);
 		
 		checkPK(arcl, ibpk);
 		if (ibpk != null){
