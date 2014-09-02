@@ -815,20 +815,20 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		}
 	}
 
-	private String normalizeName(String table) {
-		if(table==null||table.trim().length()==0)return table;
-		if(table.indexOf("%")>=0) return table;
+	private String normalizeName(String name) {
+		if(name==null||name.trim().length()==0)return name;
+		if(name.indexOf("%")>=0) return name;
 		else{ 
-				if(table.startsWith("\"")&&
-						table.endsWith("\"")){
-					String stb=table.substring(1,table.length()-1).toUpperCase();
+				if(name.startsWith("\"")&&
+						name.endsWith("\"")){
+					String stb=name.substring(1,name.length()-1).toUpperCase();
 					if(SQLConverter.isListedAsKeyword(stb))return stb;
 				}
-				if(SQLConverter.isListedAsKeyword(table)){
-					return table;
+				if(SQLConverter.isListedAsKeyword(name)){
+					return name;
 				}
 			return SQLConverter.basicEscapingIdentifier(
-				table).toUpperCase();
+				name).toUpperCase();
 			}
 	}
 
