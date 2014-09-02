@@ -94,9 +94,11 @@ public abstract class AbstractExecute {
 				throw new FeatureNotSupportedException(
 						NotSupportedMessage.NOT_SUPPORTED_YET);
 			
+			
+			String sql0=SQLConverter.convertSQL(sql);
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
-					.convertCreateTable(sql) : sql;
+					.convertCreateTable(sql0) : sql0;
 				
 					statement.getWrapped().executeUpdate(ddlExpr);
 		
