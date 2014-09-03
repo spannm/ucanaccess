@@ -493,14 +493,7 @@ public class DBReference {
 		this.dbIO = open(dbFile, this.pwd);
 	}
 
-	void setDbAccess(Database dbAccess) {
-		this.dbIO = dbAccess;
-	}
-
-	void setDbFile(File dbFile) {
-		this.dbFile = dbFile;
-	}
-
+	
 	public void setInactivityTimeout(int inactivityTimeout) {
 		memoryTimer.setInactivityTimeout(inactivityTimeout);
 	}
