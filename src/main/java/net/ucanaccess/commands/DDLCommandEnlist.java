@@ -56,7 +56,12 @@ public class DDLCommandEnlist {
 		Connection hsqlConn = ac.getHSQLDBConnection();
 		Database db = ac.getDbIO();
 		LoadJet lfa = new LoadJet(hsqlConn, db);
-		lfa.synchronisationTriggers(tn, true,true);
+		String ntn=tn;
+		if(tn.startsWith("[")&&tn.endsWith("]")){
+			ntn=SQLConverter.escapeIdentifier(tn.substring(1, tn.length()-1));
+		}
+		
+		lfa.synchronisationTriggers(ntn, true,true);
 		CreateTableCommand c4io;
        if(ddlType.equals(DDLType.CREATE_TABLE)){
     	   parseTypesFromCreateStatement(sql);
