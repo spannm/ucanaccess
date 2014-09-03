@@ -39,9 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-
 import junit.framework.TestCase;
-
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessDriver;
@@ -73,6 +71,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 	protected Connection verifyConnection;
 	private Boolean ignoreCase;
 	private int inactivityTimeout=-1;
+	private String columnOrder;
 	private static  ArrayList<Class<? extends UcanaccessTestBase>> tableCreated=new   ArrayList<Class<? extends UcanaccessTestBase>>();
 	
 	public UcanaccessTestBase() {
@@ -388,6 +387,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 		+ getAccessTempPath();
 		if(this.ignoreCase!=null)url+=";ignoreCase="+this.ignoreCase;
 		if(this.inactivityTimeout!=-1)url+=";inactivityTimeout="+this.inactivityTimeout;
+		if(this.columnOrder!=null)url+=";columnOrder="+this.columnOrder;
 		return DriverManager.getConnection(url, this.user, this.password);
 	}
 	
@@ -423,6 +423,10 @@ public abstract class UcanaccessTestBase extends TestCase {
 
 	void setPassword(String password) {
 		this.password = password;
+	}
+	
+	void setColumnOrder(String columnOrder) {
+		this.columnOrder = columnOrder;
 	}
 	
 	@Override
