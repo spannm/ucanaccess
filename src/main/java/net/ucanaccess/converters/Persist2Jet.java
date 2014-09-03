@@ -383,11 +383,17 @@ public class Persist2Jet {
 			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
-		TableBuilder tb=new TableBuilder(tableName);
-		tb.addColumns(getColumns(tableName,columnMap, types));
-		List<IndexBuilder> arcl=getIndexBuilders(tableName,columnMap);
+		String tn=tableName;
+		String ntn=tableName;
+		if(tn.startsWith("[")&&tn.endsWith("]")){
+			tn=tn.substring(1, tn.length()-1);
+			ntn=SQLConverter.escapeIdentifier(tn);
+		}
+		TableBuilder tb=new TableBuilder(tn);
+		tb.addColumns(getColumns(ntn,columnMap, types));
+		List<IndexBuilder> arcl=getIndexBuilders(ntn,columnMap);
 		
-		IndexBuilder ibpk = getIndexBuilderPK(tableName,columnMap);
+		IndexBuilder ibpk = getIndexBuilderPK(ntn,columnMap);
 		
 		checkPK(arcl, ibpk);
 		if (ibpk != null){
@@ -423,6 +429,9 @@ public class Persist2Jet {
 	public void dropTable(String tableName) throws IOException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
+		if(tableName.startsWith("[")&&tableName.endsWith("]")){
+			tableName=tableName.substring(1, tableName.length()-1);
+		}
 		Table t = db.getTable(tableName);
 		if (t == null)
 			return;

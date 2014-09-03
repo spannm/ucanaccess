@@ -62,7 +62,7 @@ public class SQLConverter {
 			.compile(" (?i)WITH[\\s\n\r]+(?i)NO[\\s\n\r]+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
 	private static final String IDENTITY ="(\\W+)((?i)@@identity)(\\W*)";
-	private static final Pattern SELECT_IDENTITY = Pattern.compile("(?)select[\\s\n\r]+(?i)@@identity.*");
+	private static final Pattern SELECT_IDENTITY = Pattern.compile("(?i)select[\\s\n\r]+(?i)@@identity.*");
 	private static final Pattern HAS_FROM = Pattern.compile("[\\s\n\r]+(?i)from[\\s\n\r]+");
 	
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
@@ -212,11 +212,11 @@ public class SQLConverter {
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
 				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
 				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)")), DROP_TABLE(
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\])")), DROP_TABLE(
 				Pattern
-						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]*(?i)table[\\s\n\r]*(([_a-zA-Z0-9])*)"));
+						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\])"));
 		private Pattern pattern;
 
 		private DDLType(Pattern pattern) {
