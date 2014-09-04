@@ -57,7 +57,8 @@ public class DDLCommandEnlist {
 		Database db = ac.getDbIO();
 		LoadJet lfa = new LoadJet(hsqlConn, db);
 		String ntn=tn;
-		if(tn.startsWith("[")&&tn.endsWith("]")){
+		if((tn.startsWith("[")&&tn.endsWith("]"))||
+				(tn.startsWith("`")&&tn.endsWith("`"))){
 			ntn=SQLConverter.escapeIdentifier(tn.substring(1, tn.length()-1));
 		}
 		
@@ -100,6 +101,24 @@ public class DDLCommandEnlist {
 		DropTableCommand c4io = new DropTableCommand(tn, execId);
 		ac.add(c4io);
 	}
+	private String[]  checkEscaped(String ll,String rl,String[] colDecls,String tknt){
+		if(colDecls[0].startsWith(ll)&&tknt.substring(1).indexOf(rl)>0){
+			for(int k=0;k<colDecls.length;k++){
+				if(colDecls[k].endsWith(rl)){
+					String[] colDecls0=new String[colDecls.length-k];
+					colDecls0[0]=tknt.substring(1,tknt.substring(1).indexOf(rl)+1);
+					for(int y=1;y<colDecls0.length;y++){
+						colDecls0[y]=colDecls[y+k];
+					}
+					colDecls=colDecls0;
+					break;
+				}
+			}
+		}
+		return colDecls;
+	}
+	
+	
 	//getting AUTOINCREMENT and GUID
 	private void parseTypesFromCreateStatement(String sql) throws SQLException {
 	
@@ -120,20 +139,8 @@ public class DDLCommandEnlist {
 			String tknt=tokens[j].trim();
 			
 			String[] colDecls = tknt.split("[\\s\n\r]+");
-			
-			if(colDecls[0].startsWith("[")&&tknt.substring(1).indexOf("]")>0){
-				for(int k=0;k<colDecls.length;k++){
-					if(colDecls[k].endsWith("]")){
-						String[] colDecls0=new String[colDecls.length-k];
-						colDecls0[0]=tknt.substring(1,tknt.indexOf("]"));
-						for(int y=1;y<colDecls0.length;y++){
-							colDecls0[y]=colDecls[y+k];
-						}
-						colDecls=colDecls0;
-						break;
-					}
-				}
-			}
+			colDecls =checkEscaped("[","]", colDecls, tknt);
+			colDecls =checkEscaped("`","`", colDecls, tknt);
 			String escaped=(SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()))?
 					colDecls[0].toUpperCase():SQLConverter.basicEscapingIdentifier(colDecls[0]);
 			columnMap.put(escaped,colDecls[0]);
