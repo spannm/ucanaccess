@@ -385,7 +385,9 @@ public class Persist2Jet {
 		Database db = conn.getDbIO();
 		String tn=tableName;
 		String ntn=tableName;
-		if(tn.startsWith("[")&&tn.endsWith("]")){
+		if( 	(tn.startsWith("[")&&tn.endsWith("]"))||
+				(tn.startsWith("`")&&tn.endsWith("`"))
+		){
 			tn=tn.substring(1, tn.length()-1);
 			ntn=SQLConverter.escapeIdentifier(tn);
 		}
@@ -429,7 +431,9 @@ public class Persist2Jet {
 	public void dropTable(String tableName) throws IOException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
-		if(tableName.startsWith("[")&&tableName.endsWith("]")){
+		if( 	(tableName.startsWith("[")&&tableName.endsWith("]"))||
+				(tableName.startsWith("`")&&tableName.endsWith("`"))
+		){
 			tableName=tableName.substring(1, tableName.length()-1);
 		}
 		Table t = db.getTable(tableName);

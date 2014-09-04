@@ -214,9 +214,9 @@ public class SQLConverter {
 				Pattern
 						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
 				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\])")), DROP_TABLE(
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))")), DROP_TABLE(
 				Pattern
-						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\])"));
+						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)"));
 		private Pattern pattern;
 
 		private DDLType(Pattern pattern) {
