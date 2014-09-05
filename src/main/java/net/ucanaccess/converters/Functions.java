@@ -186,6 +186,19 @@ public class Functions {
 	}
 	
 	
+	@FunctionType(functionName = "EQUALSIGNOREORDER", argumentTypes = { AccessType.COMPLEX,AccessType.COMPLEX }, returnType = AccessType.YESNO)
+	public static Boolean equalsIgnoreOrder(Object obj1,Object obj2) {
+		if(obj1==null||obj2==null)return false;
+		if(!obj1.getClass().equals(obj2.getClass()))
+		return false;
+		if(obj1.getClass().isArray()){
+			List<Object> lo1= Arrays.asList((Object[])obj1);
+			List<Object> lo2= Arrays.asList((Object[])obj2);
+			return lo1.containsAll(lo2) && lo2.containsAll(lo1);
+		}
+		return obj1.equals(obj2);
+	}
+	
 	@FunctionType(functionName = "CONTAINS", argumentTypes = { AccessType.COMPLEX,AccessType.COMPLEX }, returnType = AccessType.YESNO)
 	public static Boolean contains(Object obj1,Object obj2) {
 		if(obj1==null||obj2==null)return false;
