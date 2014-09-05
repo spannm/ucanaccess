@@ -217,7 +217,7 @@ public class UcanaccessConnection implements Connection {
 	public Array createArrayOf(String typeName, Object[] elements)
 			throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return hsqlDBConnection.createArrayOf(typeName, elements);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -226,11 +226,19 @@ public class UcanaccessConnection implements Connection {
 
 	public Blob createBlob() throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return new UcanaccessBlob(hsqlDBConnection.createBlob());
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
+	}
+
+	private void checkConnection() throws UcanaccessSQLException {
+		if(this.autoCommit||this.isCheckModified()){
+			
+			this.checkLastModified();
+		}
+		
 	}
 
 	public Clob createClob() throws SQLException {
@@ -247,7 +255,7 @@ public class UcanaccessConnection implements Connection {
 
 	public Statement createStatement() throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return new UcanaccessStatement(hsqlDBConnection.createStatement(),
 					this);
 		} catch (SQLException e) {
@@ -258,7 +266,7 @@ public class UcanaccessConnection implements Connection {
 	public Statement createStatement(int resultSetType, int resultSetConcurrency)
 			throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return new UcanaccessStatement(hsqlDBConnection.createStatement(
 					resultSetType, resultSetConcurrency), this);
 		} catch (SQLException e) {
@@ -270,7 +278,7 @@ public class UcanaccessConnection implements Connection {
 			int resultSetConcurrency, int resultSetHoldability)
 			throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return new UcanaccessStatement(hsqlDBConnection.createStatement(
 					resultSetType, resultSetConcurrency, resultSetHoldability),
 					this);
@@ -285,7 +293,7 @@ public class UcanaccessConnection implements Connection {
 	public Struct createStruct(String typeName, Object[] attributes)
 			throws SQLException {
 		try {
-			checkDBreference();
+			checkConnection();
 			return hsqlDBConnection.createStruct(typeName, attributes);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -479,10 +487,10 @@ public class UcanaccessConnection implements Connection {
 	}
 
 	private String prepare(String sql) throws SQLException {
-		checkDBreference();
+		checkConnection();
 		if(SQLConverter.checkDDL(sql)){
 			throw new UcanaccessSQLException(UcanaccessSQLException.ExceptionMessages.STATEMENT_DDL);
-		}
+		 }
 		
 		return SQLConverter.convertSQL(sql,this);
 	}
@@ -705,26 +713,21 @@ public class UcanaccessConnection implements Connection {
 
 	void  checkLastModified() throws UcanaccessSQLException {
 		try {synchronized (UcanaccessDriver.class) {
-			
-			this.checkModified=false;
-			this.hsqlDBConnection = this.ref.checkLastModified(
+				this.checkModified=false;
+				if(!this.refId.equals(ref.getId())){
+					this.hsqlDBConnection=ref.getHSQLDBConnection(session);
+				}
+				this.hsqlDBConnection = this.ref.checkLastModified(
 					this.hsqlDBConnection, session);
-			
-			checkDBreference();
-			
-		}
+				this.refId=ref.getId();
+			}
 		} catch (Exception e) {
 			throw new UcanaccessSQLException(e);
 		}
 
 	}
 	
-	private void checkDBreference() throws SQLException{
-		if(!this.refId.equals(ref.getId())){
-		this.refId=ref.getId();
-		this.hsqlDBConnection=ref.getHSQLDBConnection(session);}
-	}
-
+	
 	public String getUrl() {
 		return url;
 	}
@@ -783,12 +786,6 @@ public class UcanaccessConnection implements Connection {
 	}
 
 
-	public void setCheckModified(boolean checkModified) {
-		this.checkModified = checkModified;
-	}
-
-
-	
 	
 
 }

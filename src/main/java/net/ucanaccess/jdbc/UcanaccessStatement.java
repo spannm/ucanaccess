@@ -123,11 +123,13 @@ public class UcanaccessStatement implements Statement {
 	
 	
 	protected void checkLastModified() throws  SQLException{
+		
 		if( connection.getAutoCommit()||connection.isCheckModified()){
-			Connection hsqldb=this.wrapped.getConnection();
+			 Connection hsqldb=this.wrapped.getConnection();
 			 connection.checkLastModified();
 			 if(hsqldb!=connection.getHSQLDBConnection()){
 				 reset();
+				 
 			 }
 		}
 	}

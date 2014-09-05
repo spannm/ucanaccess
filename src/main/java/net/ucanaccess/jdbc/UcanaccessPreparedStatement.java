@@ -100,6 +100,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	
 	private void parametersReset(){
+		System.out.println("in");
 		for(ParameterReset pr:this.memento.values()){
 			pr.execute();
 		}
@@ -240,6 +241,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 			int y = new ExecuteUpdate(this).execute();
 			return y;
 		} catch (SQLException e) {
+			e.printStackTrace();
 			throw new UcanaccessSQLException(e);
 		}
 	}
