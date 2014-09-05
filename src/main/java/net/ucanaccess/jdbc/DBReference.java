@@ -71,6 +71,7 @@ public class DBReference {
 	private boolean firstConnection=true;
 	private FileFormat dbFormat;
 	private boolean columnOrderDisplay;
+	
 
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -513,13 +514,14 @@ public class DBReference {
 	void setTempHsql(File tempHsql) {
 		this.tempHsql = tempHsql;
 	}
-
+		
 	void shutdown(Session session) throws Exception {
 		DBReferenceSingleton.getInstance()
 				.remove(this.dbFile.getAbsolutePath());
 		this.dbIO.flush();
 		this.dbIO.close();
 		this.closeHSQLDB(session);
+		
 	}
 
 	public void updateLastModified() {
@@ -556,4 +558,7 @@ public class DBReference {
 		this. columnOrderDisplay=true;
 		if(this.dbIO!=null)dbIO.setColumnOrder(ColumnOrder.DISPLAY);
 	}
+
+	
+	
 }
