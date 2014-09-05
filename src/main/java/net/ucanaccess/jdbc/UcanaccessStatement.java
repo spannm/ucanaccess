@@ -266,7 +266,7 @@ public class UcanaccessStatement implements Statement {
 
 	public ResultSet getGeneratedKeys() throws SQLException {
 		try {
-			
+			checkLastModified();
 			Connection conn=this.connection.getHSQLDBConnection();
 			Statement st=conn.createStatement();
 			StringBuffer sql=new StringBuffer();
