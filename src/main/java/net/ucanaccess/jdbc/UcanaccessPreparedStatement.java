@@ -105,8 +105,13 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 	}
 	
+	
 	private Reader markableReader(Reader r) throws SQLException{
-		if(r.markSupported()){
+		return markableReader( r,-1);
+	}
+	
+	private Reader markableReader(Reader r,long l) throws SQLException{
+		if(r.markSupported()&&l<0){
 			boolean marked=true;
 			try {
 				r.mark(1000000);
@@ -118,13 +123,15 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 		
 		StringBuffer sb=new StringBuffer();
-		
-		char[] cb=new char[4096];
+		int dim=l>=0?(int)l:4096;
+		char[] cb=new char[dim];
 		int rd;
 		try {
-		while((rd=r.read(cb))>=0){
-			sb.append(Arrays.copyOf(cb, rd));
-		}
+			
+			while((rd=r.read(cb))>=0){
+				sb.append(Arrays.copyOf(cb, rd));
+				if(l>=0)break;
+			}
 		StringReader sr=new StringReader(sb.toString());
 		sr.mark(1000000);
 		return sr;
@@ -135,18 +142,23 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	
 	private InputStream  markableInputStream (InputStream is) throws SQLException{
-		if(is.markSupported()){
+		return markableInputStream ( is,  -1);
+	}
+	
+	private InputStream  markableInputStream (InputStream is, long l) throws SQLException{
+		if(is.markSupported()&&l<0){
 			is.mark(1000000);
 			return is;
 		}
 		
 		ByteArrayOutputStream bos=new ByteArrayOutputStream();
-		
-		byte[] buffer=new byte[4096];
+		int dim=l>=0?(int)l:4096;
+		byte[] buffer=new byte[dim];
 		int rd;
 		try {
 		while((rd=is.read(buffer))>=0){
 			bos.write(buffer, 0, rd);
+			if(l>=0)break;
 		}
 		bos.flush();
 		ByteArrayInputStream ir=new ByteArrayInputStream(bos.toByteArray());
@@ -275,7 +287,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setAsciiStream(int idx, InputStream is, int length)
 			throws SQLException {
 		try {
-			is=markableInputStream(is);
+			is=markableInputStream(is,length);
 			addMementoEntry("setAsciiStream",new Class[]{InputStream.class,Integer.TYPE},idx,is,length);
 			wrapped.setAsciiStream(idx, is, length);
 			resetInputStream(is);
@@ -287,7 +299,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setAsciiStream(int idx, InputStream is, long length)
 			throws SQLException {
 		try {
-			is=markableInputStream(is);
+			is=markableInputStream(is,length);
 			addMementoEntry("setAsciiStream",new Class[]{InputStream.class,Long.TYPE},idx,is,length);
 			wrapped.setAsciiStream(idx, is, length);
 			resetInputStream(is);
@@ -404,7 +416,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setCharacterStream(int idx, Reader reader, int length)
 			throws SQLException {
 		try {
-			reader=markableReader(reader);
+			 reader=markableReader(reader,length);
 			addMementoEntry("setCharacterStream",new Class[]{Reader.class,Integer.TYPE},idx,reader,length);
 			wrapped.setCharacterStream(idx, reader, length);
 			resetReader(reader);
@@ -416,7 +428,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setCharacterStream(int idx, Reader reader, long length)
 			throws SQLException {
 		try {
-			reader=markableReader(reader);
+			reader=markableReader(reader,length);
 			addMementoEntry("setCharacterStream",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
 			wrapped.setCharacterStream(idx, reader, length);
 			resetReader(reader);
@@ -447,7 +459,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setClob(int idx, Reader reader, long length) throws SQLException {
 		try {
-			reader=markableReader(reader);
+			reader=markableReader(reader,length);
 			addMementoEntry("setClob",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
 			wrapped.setClob(idx, reader, length);
 			resetReader(reader);
@@ -536,7 +548,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setNCharacterStream(int idx, Reader reader, long l)
 			throws SQLException {
 		try {
-			reader=markableReader(reader);
+			reader=markableReader(reader,l);
 			addMementoEntry("setNCharacterStream",new Class[]{Reader.class,Long.TYPE},idx,reader,l);
 			wrapped.setNCharacterStream(idx, reader, l);
 			resetReader(reader);
@@ -567,7 +579,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setNClob(int idx, Reader reader, long length) throws SQLException {
 		try {
-			reader=markableReader(reader);
+			reader=markableReader(reader,length);
 			addMementoEntry("setNClob",new Class[]{Reader.class,Long.TYPE},idx,reader,length);
 			wrapped.setNClob(idx, reader, length);
 			resetReader(reader);
@@ -718,8 +730,10 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setUnicodeStream(int idx, InputStream is, int length)
 			throws SQLException {
 		try {
+			is=markableInputStream(is,length);
 			addMementoEntry("setUnicodeStream",new Class[]{InputStream.class,Integer.TYPE},idx,is,length);
 			wrapped.setUnicodeStream(idx, is, length);
+			resetInputStream(is);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
