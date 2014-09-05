@@ -43,6 +43,8 @@ import net.ucanaccess.test.TransactionTest;
 import net.ucanaccess.test.WorkloadTest;
 import net.ucanaccess.test.PivotTest;
 import net.ucanaccess.test.ByteTest;
+import net.ucanaccess.test.GeneratedKeysTest;
+import net.ucanaccess.test.ColumnOrderTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -70,6 +72,8 @@ public class AllTestsBase {
 		suite.addTestSuite(BatchTest.class);
 		suite.addTestSuite(BooleanTest.class);
 		suite.addTestSuite(ByteTest.class);
+		suite.addTestSuite(GeneratedKeysTest.class);
+		suite.addTestSuite(ColumnOrderTest.class);
 		return suite;
 	}
 }
