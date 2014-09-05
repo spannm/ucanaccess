@@ -61,6 +61,55 @@ public class ComplexTest extends UcanaccessTestBase {
 	public void testComplex() throws SQLException, IOException, ParseException {
 		PreparedStatement ps = null;
 		try {
+			complex0();
+			complex1() ;
+		} finally {
+			if (ps != null)
+				ps.close();
+		}
+	}
+		
+		private void complex0() throws SQLException, IOException, ParseException {
+			PreparedStatement ps = null;
+			try {
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  contains(MULTI_VALUE_DATA,?)");
+				ps.setObject(1, SingleValue.multipleValue("value1","value2"));
+				ResultSet rs=ps.executeQuery();
+				rs.next();
+				assertEquals(2, rs.getInt(1));
+				ps.setObject(1, new SingleValue("value1"));
+				rs=ps.executeQuery();
+				rs.next();
+				assertEquals(3, rs.getInt(1));
+				ps.close();
+				
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALS(MULTI_VALUE_DATA,?)");
+				ps.setObject(1, SingleValue.multipleValue("value4","value1"));
+				rs=ps.executeQuery();
+				rs.next();
+				assertEquals(0, rs.getInt(1));
+				ps.setObject(1, SingleValue.multipleValue("value1","value4"));
+				rs=ps.executeQuery();
+				rs.next();
+				assertEquals(1, rs.getInt(1));
+				ps.close();
+				
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALSIGNOREORDER(MULTI_VALUE_DATA,?)");
+				ps.setObject(1, SingleValue.multipleValue("value4","value1"));
+				rs=ps.executeQuery();
+				rs.next();
+				assertEquals(1, rs.getInt(1));
+				ps.close();
+			} finally {
+				if (ps != null)
+					ps.close();
+			}
+		}
+	
+	
+	private void complex1() throws SQLException, IOException, ParseException {
+		PreparedStatement ps = null;
+		try {
 			
 			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , MEMO_DATA , APPEND_MEMO_DATA , MULTI_VALUE_DATA , ATTACH_DATA) " +
 					"VALUES (?,?,?,?,?)");
