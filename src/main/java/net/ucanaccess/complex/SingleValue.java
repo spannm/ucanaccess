@@ -81,5 +81,12 @@ public class SingleValue extends ComplexBase{
 		return "SingleValue [value=" + value +"]";
 	}
 	
+	public static SingleValue[] multipleValue(String...rv){
+		SingleValue[] sv=new SingleValue[rv.length];
+		for(int j=0;j<rv.length;j++)
+			sv[j]=new SingleValue(rv[j]);
+		return sv;
+	}
+	
 	
 }
