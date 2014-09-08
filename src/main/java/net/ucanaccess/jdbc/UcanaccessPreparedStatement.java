@@ -100,7 +100,6 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	
 	private void parametersReset(){
-		System.out.println("in");
 		for(ParameterReset pr:this.memento.values()){
 			pr.execute();
 		}
