@@ -1573,22 +1573,21 @@ public class Functions {
 		   interval=Math.rint(interval);
 		  
 		   String ul=String.valueOf(lrint(stop)+1);
-		   String ll=String.valueOf(lrint(start)-1);
 		   stop=lrint(stop);
 		   start=lrint(start);
 		   int h=ul.length();
 		   if(number<start){
-		   		return padLeft(-1, h)+":"+ll;
+		   		return padLeft(-1, h)+":"+padLeft(lrint(start)-1,h);
 		   	}
 		   if(number>stop){
-			   return  ul+":";
+			   return  ul+":"+padLeft(-1, h);
 		   }
 		   
-		  
+		   
 		   for(double d=start;d<=stop;d+=interval){
 			   if((number>=d&&number<(d+interval)))
 			   {
-				   return padLeft(lceil(d),h)+":"+  padLeft(((d+interval)<stop?lfloor(d+interval):  lrint(stop)),h);
+				   return padLeft(lceil(d),h)+":"+  padLeft(((d+interval)<=stop?lfloor(d+interval):  lrint(stop)),h);
 				  
 			   }
 		   }
