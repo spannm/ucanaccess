@@ -57,6 +57,7 @@ public class Functions {
 	public final static ArrayList<SimpleDateFormat> LDF = new ArrayList<SimpleDateFormat>();
 	public final static ArrayList<Boolean> LDFY = new ArrayList<Boolean>();
 	public final static  RegionalSettings reg=new RegionalSettings();
+	private final static double APPROX=0.00000001;
 	private static boolean pointDateSeparator;
 	static {
 		pointDateSeparator=getPointDateSeparator();
@@ -1438,7 +1439,7 @@ public class Functions {
 		    	double d= val(res);
 		    	DataType dt= DataType.valueOf(datatype);
 		    	if(dt.equals( DataType.BYTE)||dt.equals( DataType.INT)||dt.equals( DataType.LONG)){
-		    		d=Math.rint(d+0.00000001);
+		    		d=Math.rint(d+APPROX);
 		    	}
 		    	return d;
 		    }catch(Exception e){
@@ -1550,7 +1551,7 @@ public class Functions {
 		     d=(d-d.intValue())*60;
 		     tr=    dateAdd("N",d.intValue(), tr);
 		     d=(d-d.intValue())*60;
-		     tr=    dateAdd("S",new Double(Math.rint(d+0.0000001)).intValue(), tr);
+		     tr=    dateAdd("S",new Double(Math.rint(d+APPROX)).intValue(), tr);
 		     return tr;
 	   } 
 	   
@@ -1564,5 +1565,53 @@ public class Functions {
 	   public static double fix(double d) throws UcanaccessSQLException {
 		   return  sign(d) * mint(Math.abs(d));
 	    }
+	   
+	   @FunctionType(functionName = "PARTITION", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.MEMO)
+	   public static String partition(Double number,double start,double stop,double interval) throws UcanaccessSQLException {
+		   if(number==null)return null;
+		   number=Math.rint(number);
+		   interval=Math.rint(interval);
+		  
+		   String ul=String.valueOf(lrint(stop)+1);
+		   String ll=String.valueOf(lrint(start)-1);
+		   stop=lrint(stop);
+		   start=lrint(start);
+		   int h=ul.length();
+		   if(number<start){
+		   		return padLeft(-1, h)+":"+ll;
+		   	}
+		   if(number>stop){
+			   return  ul+":";
+		   }
+		   
+		  
+		   for(double d=start;d<=stop;d+=interval){
+			   if((number>=d&&number<(d+interval)))
+			   {
+				   return padLeft(lceil(d),h)+":"+  padLeft(((d+interval)<stop?lfloor(d+interval):  lrint(stop)),h);
+				  
+			   }
+		   }
+		   return "";
+	    }
+	   
+	   
+	   private static int lfloor(double d){
+		   return new Double(Math.floor(d-APPROX)).intValue();
+	   }
+	   
+	   private static int lceil(double d){
+		   return  new Double(Math.ceil(d-APPROX)).intValue();
+	   }
+	   
+	   private static int lrint(double d){
+		   return  new Double(Math.rint(d-APPROX)).intValue();
+	   }
 
+	   private static String padLeft(int ext, int n) {
+		  String tp=ext>0?String.valueOf(ext):"";
+		    return String.format("%1$" + n + "s", tp);  
+	   }
+
+		
 }
