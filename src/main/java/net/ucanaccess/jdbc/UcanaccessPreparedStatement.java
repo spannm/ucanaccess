@@ -240,7 +240,6 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 			int y = new ExecuteUpdate(this).execute();
 			return y;
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new UcanaccessSQLException(e);
 		}
 	}

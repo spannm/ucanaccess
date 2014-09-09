@@ -229,6 +229,7 @@ public class DBReference {
 		}
 		this.updateLastModified();
 		this.closeHSQLDB(session);
+		System.gc();
 		this.dbIO.flush();
 		this.dbIO.close();
 		this.dbIO = open(this.dbFile, this.pwd);

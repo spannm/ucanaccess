@@ -235,7 +235,6 @@ public class UcanaccessConnection implements Connection {
 
 	private void checkConnection() throws UcanaccessSQLException {
 		if(this.autoCommit||this.isCheckModified()){
-			
 			this.checkLastModified();
 		}
 		
@@ -710,17 +709,22 @@ public class UcanaccessConnection implements Connection {
 		String w = super.toString();
 		return w + "[" + this.ref.getDbFile() + "]";
 	}
+	
+	
 
 	void  checkLastModified() throws UcanaccessSQLException {
-		try {synchronized (UcanaccessDriver.class) {
+		try {
+				
 				this.checkModified=false;
 				if(!this.refId.equals(ref.getId())){
 					this.hsqlDBConnection=ref.getHSQLDBConnection(session);
 				}
-				this.hsqlDBConnection = this.ref.checkLastModified(
+			    synchronized (UcanaccessDriver.class) {
+				    this.hsqlDBConnection = this.ref.checkLastModified(
 					this.hsqlDBConnection, session);
+			    }
 				this.refId=ref.getId();
-			}
+			
 		} catch (Exception e) {
 			throw new UcanaccessSQLException(e);
 		}
