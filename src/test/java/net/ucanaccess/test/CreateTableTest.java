@@ -196,7 +196,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 	public void testNaming() throws SQLException{
 		Statement st = super.ucanaccess.createStatement();
 		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-		st.execute(" CREATE TABLE [ggg() kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+		st.execute(" CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
 		st.execute(" CREATE TABLE [wHere]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
 		st.execute(" drop table  [ggg kk]");
 		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
