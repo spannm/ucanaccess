@@ -587,12 +587,9 @@ public class LoadJet {
 	   private void loadTableData(Table t,List<Integer> cfil, boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
-				Iterator<Row> it=t.iterator();
 				int i=0;
-				while (it.hasNext()) {
+				for (Row row:t) {
 					ArrayList<Object> values = new ArrayList<Object>();
-					
-					Row row = it.next();
 					if (row == null)
 						continue;
 					if (ps == null)
