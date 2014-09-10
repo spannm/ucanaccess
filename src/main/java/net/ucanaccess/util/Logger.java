@@ -33,7 +33,8 @@ public class Logger {
 		KEEP_MIRROR_AND_OTHERS,
 		UNKNOWN_EXPRESSION,
 		DEFAULT_VALUES_DELIMETERS,
-		USER_AS_COLUMNNAME
+		USER_AS_COLUMNNAME,
+		ROW_COUNT
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
