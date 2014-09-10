@@ -49,7 +49,7 @@ import junit.framework.TestSuite;
 
 public class AllTestsBase {
 	public static TestSuite suite() throws ClassNotFoundException {
-		TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
+		 TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
 		suite.addTestSuite(AccessLikeTest.class);
 		suite.addTestSuite(CounterTest.class);
 		suite.addTestSuite(BlobOleTest.class);
