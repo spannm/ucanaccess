@@ -211,6 +211,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void clearParameters() throws SQLException {
 		try {
+			this.memento.clear();
 			wrapped.clearParameters();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
