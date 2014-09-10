@@ -42,7 +42,9 @@ public class UcanaccessSQLException extends SQLException {
 		INVALID_PARAMETER,
 		INVALID_TYPES_IN_COMBINATION,
 		UNSUPPORTED_TYPE,
-		STATEMENT_DDL
+		STATEMENT_DDL,
+		CLOSE_ON_COMPLETION_STATEMENT
+		
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
 	private Throwable cause;

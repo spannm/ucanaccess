@@ -31,6 +31,7 @@ import org.hsqldb.jdbc.JDBCPreparedStatement;
 import org.hsqldb.jdbc.JDBCStatement;
 
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class UcanaccessStatement implements Statement {
 	private UcanaccessConnection connection;
@@ -111,8 +112,7 @@ public class UcanaccessStatement implements Statement {
 				if (wrapped instanceof JDBCPreparedStatement) {
 					((JDBCPreparedStatement) wrapped).closeOnCompletion();
 				} else {
-					throw new SQLException(
-							"Internal error. Object 'wrapped' is neither a JDBCStatement nor a JDBCPreparedStatement");
+					throw new UcanaccessSQLException(ExceptionMessages.CLOSE_ON_COMPLETION_STATEMENT);
 				}
 			}
 		} catch (SQLException e) {
