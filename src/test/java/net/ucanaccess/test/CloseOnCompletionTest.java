@@ -47,8 +47,7 @@ public class CloseOnCompletionTest extends UcanaccessTestBase {
 			st = super.ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23)) ");
 			((UcanaccessStatement) st).closeOnCompletion();
 
-			st
-					.execute();
+			st.execute();
 
 		} finally {
 			if (st != null)

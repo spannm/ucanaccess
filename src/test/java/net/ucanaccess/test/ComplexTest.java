@@ -128,14 +128,17 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET APPEND_MEMO_DATA='THE CAT' ");
 			ps.execute();
 			ps.close();
-			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=? ");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=? WHERE ID=?");
 			Attachment[] atc;
 			ps.setObject(1,atc=new Attachment[]{new Attachment(null,"cccsss.cvs","cvs","ddddd ;sssssssssssssssssssddd".getBytes(), new Date(),null) });
+			ps.setString(2, "row12");
 			ps.execute();
-			ps=super.ucanaccess.prepareStatement("select * from Table1 where ATTACH_DATA=? ");
+			
+			ps=super.ucanaccess.prepareStatement("select COUNT(*) from Table1 where EQUALS(ATTACH_DATA,?) ");
 			ps.setObject(1,atc);
 			ResultSet rs=ps.executeQuery();
-			dump(rs);
+			rs.next();
+			assertEquals( rs.getInt(1), 1);
 			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET MULTI_VALUE_DATA=? ");
 			svs=new SingleValue[]{new SingleValue("aaaaaaa14"),new SingleValue("2eeeeeeeeeee") }; 
 			ps.setObject(1,svs);
