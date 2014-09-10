@@ -82,6 +82,13 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 			try {
 				Method mth=PreparedStatement.class.getDeclaredMethod(this.methodName,this.argClasses);
 				mth.invoke(wrapped, args);
+				if(args[1] instanceof StringReader){
+					 StringReader sr=(StringReader)args[1];
+					 sr.reset();
+				}
+				if(args[1] instanceof InputStream && ( "setAsciiStream".equals(methodName)||"setUnicodeStream".equals(methodName))){
+					((InputStream)args[1]).reset();
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -416,7 +423,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	public void setCharacterStream(int idx, Reader reader, int length)
 			throws SQLException {
 		try {
-			 reader=markableReader(reader,length);
+			reader=markableReader(reader,length);
 			addMementoEntry("setCharacterStream",new Class[]{Reader.class,Integer.TYPE},idx,reader,length);
 			wrapped.setCharacterStream(idx, reader, length);
 			resetReader(reader);
