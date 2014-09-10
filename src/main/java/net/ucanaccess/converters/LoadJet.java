@@ -47,7 +47,6 @@ import java.util.regex.Pattern;
 
 import org.hsqldb.error.ErrorCode;
 
-
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
@@ -61,6 +60,7 @@ import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
@@ -587,10 +587,12 @@ public class LoadJet {
 	   private void loadTableData(Table t,List<Integer> cfil, boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
-				for (int i = 0; i < t.getRowCount(); i++) {
+				Iterator<Row> it=t.iterator();
+				int i=0;
+				while (it.hasNext()) {
 					ArrayList<Object> values = new ArrayList<Object>();
 					
-					Map<String, Object> row = t.getNextRow();
+					Row row = it.next();
 					if (row == null)
 						continue;
 					if (ps == null)
@@ -607,6 +609,10 @@ public class LoadJet {
 							i==t.getRowCount()-1		){
 						conn.commit();
 					}
+					i++;
+				}
+				if(i!=t.getRowCount()){
+					Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(),String.valueOf(t.getRowCount()),String.valueOf(i));
 				}
 			} finally {
 				if (ps != null)
