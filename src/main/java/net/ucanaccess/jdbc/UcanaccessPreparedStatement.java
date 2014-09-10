@@ -699,20 +699,30 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public void setTime(int idx, Time time) throws SQLException {
 		try {
-			addMementoEntry("setTime",new Class[]{Time.class},idx,time);
-			wrapped.setTime(idx, time);
+			Calendar cl = Calendar.getInstance();
+			cl.setTime(time);
+			cl.set(1899, 11, 30);
+			cl.set(Calendar.MILLISECOND, 0);
+			Timestamp ts=new Timestamp(cl.getTimeInMillis());
+			addMementoEntry("setTimestamp",new Class[]{Timestamp.class},idx,ts);
+			wrapped.setTimestamp(idx, ts);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
-	
+
 	public void setTime(int idx, Time time, Calendar cal) throws SQLException {
 		try {
-			addMementoEntry("setTime",new Class[]{Time.class, Calendar.class},idx,time,cal);
-			wrapped.setTime(idx, time, cal);
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
+			Calendar cl = Calendar.getInstance();
+			cal.setTime(time);
+			cl.set(1899, 11, 30,cal.get(Calendar.HOUR_OF_DAY),cal.get(Calendar.MINUTE),cal.get(Calendar.SECOND));
+			cl.set(Calendar.MILLISECOND, 0);
+			Timestamp ts=new Timestamp(cl.getTimeInMillis());
+			addMementoEntry("setTimestamp",new Class[]{Timestamp.class},idx,ts);
+			wrapped.setTimestamp(idx, ts);
+			} catch (SQLException e) {
+				throw new UcanaccessSQLException(e);
+		 }
 	}
 	
 	public void setTimestamp(int idx, Timestamp ts) throws SQLException {

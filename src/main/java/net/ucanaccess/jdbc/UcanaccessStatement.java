@@ -183,7 +183,6 @@ public class UcanaccessStatement implements Statement {
 	public int[] executeBatch() throws SQLException {
 		try {
 			this.connection.setCurrentStatement(this);
-			checkLastModified();
 			return new ExecuteUpdate(this).executeBatch();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
