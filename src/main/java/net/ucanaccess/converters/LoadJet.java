@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 
 import org.hsqldb.error.ErrorCode;
 
+
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
@@ -60,7 +61,6 @@ import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
@@ -329,9 +329,6 @@ public class LoadJet {
 			String comma = "";
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
-				if("USER".equalsIgnoreCase(cl.getName())){
-					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
-				}
 				String expr=getExpression(cl);
 				if(expr!=null){
 					String tgr=getCalculatedFieldTrigger(ntn,cl);
@@ -493,12 +490,6 @@ public class LoadJet {
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			boolean uk = idx.isUnique();
 			boolean pk = idx.isPrimaryKey();
-			if(uk&&idx.getColumns().size()==1){
-				Column cl=idx.getColumns().get(0).getColumn();
-				DataType dt=cl.getType();
-				if(dt.equals(DataType.COMPLEX_TYPE))return;
-			}
-			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
 			String colsIdx = commaSeparated(idx.getColumns());
 			if (pk) {
@@ -587,9 +578,10 @@ public class LoadJet {
 	   private void loadTableData(Table t,List<Integer> cfil, boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
-				int i=0;
-				for (Row row:t) {
+				for (int i = 0; i < t.getRowCount(); i++) {
 					ArrayList<Object> values = new ArrayList<Object>();
+					
+					Map<String, Object> row = t.getNextRow();
 					if (row == null)
 						continue;
 					if (ps == null)
@@ -606,10 +598,6 @@ public class LoadJet {
 							i==t.getRowCount()-1		){
 						conn.commit();
 					}
-					i++;
-				}
-				if(i!=t.getRowCount()){
-					Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(),String.valueOf(t.getRowCount()),String.valueOf(i));
 				}
 			} finally {
 				if (ps != null)
