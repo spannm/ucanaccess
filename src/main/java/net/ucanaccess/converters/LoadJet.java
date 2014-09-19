@@ -33,6 +33,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,13 +41,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hsqldb.error.ErrorCode;
-
 
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
@@ -61,6 +60,7 @@ import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
@@ -204,8 +204,8 @@ public class LoadJet {
 		private static final int HSQL_UK_ALREADY_EXISTS= -ErrorCode.X_42522;//-5522
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-		private static final String  EXPRESSION="Expression";
-		private static final String RESULT_TYPE = "ResultType";
+		private ArrayList<String> arTrigger;
+
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
 			StringBuffer sb = new StringBuffer(" (");
@@ -227,9 +227,9 @@ public class LoadJet {
 		
 		
 		private DataType getReturnType(Column cl) throws IOException{
-			if(cl.getProperties().get(EXPRESSION)==null||cl.getProperties().get(RESULT_TYPE)==null)
+			if(cl.getProperties().get( PropertyMap.EXPRESSION_PROP)==null||cl.getProperties().get(PropertyMap.RESULT_TYPE_PROP)==null)
 				return null;
-			byte pos=(Byte)	cl.getProperties().get(RESULT_TYPE).getValue();
+			byte pos=(Byte)	cl.getProperties().get(PropertyMap.RESULT_TYPE_PROP).getValue();
 			return DataType.fromByte(pos);
 		
 		}
@@ -287,11 +287,11 @@ public class LoadJet {
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
 			
 			String trg="CREATE TRIGGER expr%d %s ON "+ntn+
-			   " REFERENCING NEW as newrow FOR EACH ROW "+
-			   " BEGIN  ATOMIC "+
+			   " REFERENCING NEW  AS newrow %s FOR EACH ROW "+
+			   " BEGIN  ATOMIC %s"+
 			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
 			    	
-			    "; END ";
+			    " %s; END ";
 			
 			return trg;
 		}
@@ -327,12 +327,20 @@ public class LoadJet {
 					ntn).append("(");
 			List<? extends Column> lc = t.getColumns();
 			String comma = "";
-			ArrayList<String> arTrigger = new ArrayList<String>();
+			this.arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
+				if("USER".equalsIgnoreCase(cl.getName())){
+					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
+				}
 				String expr=getExpression(cl);
+				
 				if(expr!=null){
 					String tgr=getCalculatedFieldTrigger(ntn,cl);
-					arTrigger.add(String.format(tgr,namingCounter++,"before insert",SQLConverter.convertFormula(expr)));
+					arTrigger.add(String.format(tgr,namingCounter++,"after insert","","",SQLConverter.convertFormula(expr),""));
+					String uc=getUpdateConditions(cl);
+					if(uc.length()>0){
+						arTrigger.add(String.format(tgr,namingCounter++,"before update"," OLD AS OLDROW ",uc,SQLConverter.convertFormula(expr),"; END CASE "));
+					}
 				}
 				
 				String htype= getHsqldbColumnType(cl) ;
@@ -352,19 +360,12 @@ public class LoadJet {
 			}
 			sbC.append(")");
 			execCreate(sbC.toString(),true);
-			for (String trigger : arTrigger) {
-				try{
-					execCreate(trigger,false);
-				}catch(SQLException e){
-					Logger.logWarning(e.getMessage());
-					break;
-				}
-			}
+			
 		}
 
 		private String getExpression(Column cl) throws IOException {
 			PropertyMap map=cl.getProperties();
-             Property exprp=map.get( EXPRESSION);
+            Property exprp=map.get(  PropertyMap.EXPRESSION_PROP);
              
              if(exprp!=null){
             	Table tl=cl.getTable();
@@ -376,6 +377,31 @@ public class LoadJet {
 			}
 			return null;
 		}
+		
+		
+		private String getUpdateConditions(Column cl) throws IOException {
+			PropertyMap map=cl.getProperties();
+            Property exprp=map.get(  PropertyMap.EXPRESSION_PROP);
+             
+            if(exprp!=null){
+            	Set<String> setu=SQLConverter.getFormulaDependencies(exprp.getValue().toString());
+            	
+            	if(setu.size()>0){
+            		String or="";
+            		StringBuffer cw=new StringBuffer(" CASE WHEN ");
+            		for(String dep:setu){
+            			cw.append(or).
+            			append("oldrow.").append(dep).append("<>").append("newrow.").append(dep);
+            			or=" OR ";
+            		}
+            		cw.append(" THEN ");
+            		return cw.toString();
+            	}
+            
+            }
+			return "";
+		}
+
 
 		private  void defaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
@@ -490,6 +516,12 @@ public class LoadJet {
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			boolean uk = idx.isUnique();
 			boolean pk = idx.isPrimaryKey();
+			if(uk&&idx.getColumns().size()==1){
+				Column cl=idx.getColumns().get(0).getColumn();
+				DataType dt=cl.getType();
+				if(dt.equals(DataType.COMPLEX_TYPE))return;
+			}
+			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
 			String colsIdx = commaSeparated(idx.getColumns());
 			if (pk) {
@@ -556,9 +588,10 @@ public class LoadJet {
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
 				return;
-			List<Integer> cfil=calculatedFieldIndexList( t) ;
+	//		List<Integer> cfil=calculatedFieldIndexList( t) ;
 			createSyncrTable(t,systemTable);
-			loadTableData(t,cfil,systemTable);
+			loadTableData(t,systemTable);
+			createCalculatedFieldsTriggers();
 			if(!systemTable){
 				defaultValues(t);
 				triggersGenerator.synchronisationTriggers(ntn,
@@ -575,29 +608,32 @@ public class LoadJet {
 			return false;
 		}
 
-	   private void loadTableData(Table t,List<Integer> cfil, boolean systemTable) throws IOException, SQLException {
+	   private void loadTableData(Table t, boolean systemTable) throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
-				for (int i = 0; i < t.getRowCount(); i++) {
+				int i=0;
+				for (Row row:t) {
 					ArrayList<Object> values = new ArrayList<Object>();
-					
-					Map<String, Object> row = t.getNextRow();
 					if (row == null)
 						continue;
 					if (ps == null)
-						ps = sqlInsert(t, row,cfil,systemTable);
-					Set<Entry<String, Object>> se = row.entrySet();
+						ps = sqlInsert(t, row,systemTable);
+					Collection< Object> ce = row.values();
 					
-					for (Entry<String, Object> en : se) {
-						Column cl=t.getColumn(en.getKey());
-						if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
-						values.add(value(en.getValue()));
+					for (Object obj : ce) {
+					//	Column cl=t.getColumn(en.getKey());
+					//	if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
+						values.add(value(obj));
 					}
 					execInsert(ps, values);
 					if((i>0&&i%1000==0)||
 							i==t.getRowCount()-1		){
 						conn.commit();
 					}
+					i++;
+				}
+				if(i!=t.getRowCount()){
+					Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(),String.valueOf(t.getRowCount()),String.valueOf(i));
 				}
 			} finally {
 				if (ps != null)
@@ -615,6 +651,17 @@ public class LoadJet {
 					loadForeignKey(idx);
 				}
 		}
+		
+		private void createCalculatedFieldsTriggers(){
+			for (String trigger : arTrigger) {
+				try{
+					execCreate(trigger,false);
+				}catch(SQLException e){
+					Logger.logWarning(e.getMessage());
+					break;
+				}
+			}
+		}
 
 		private void loadTableIndexes(String tableName) throws IOException,
 				SQLException {
@@ -630,23 +677,7 @@ public class LoadJet {
 					loadIndex(idx);
 				}
 			}
-			
-			//to be removed in the 2.0.7.2
-			if(hasCalculatedFields( table) ){
-				execCreate("SET TABLE "+SQLConverter.escapeIdentifier(table.getName())+" READONLY TRUE ",false);
-			}
-		}
-		private boolean hasCalculatedFields(Table t) throws IOException{
-			return calculatedFieldIndexList(t).size()>0; 
-		}
-		
-		
-		private List<Integer> calculatedFieldIndexList(Table t) throws IOException{
-			ArrayList<Integer> ari=new ArrayList<Integer>(); 
-			for(Column cl:t.getColumns()){
-				if(cl.getProperties().get(EXPRESSION)!=null)ari.add(cl.getColumnIndex());
-			}
-			return ari;
+	
 		}
 		
 		private void loadTables() throws SQLException, IOException {
@@ -686,7 +717,7 @@ public class LoadJet {
 			
 		}
 
-		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,List<Integer> cfil, boolean systemTable)
+		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,boolean systemTable)
 				throws IOException, SQLException {
 			String tn = t.getName();
 			String ntn = schema(SQLConverter.escapeIdentifier(tn),systemTable);
@@ -694,12 +725,9 @@ public class LoadJet {
 			StringBuffer sbI = new StringBuffer(" INSERT INTO ").append(ntn)
 					.append(" (");
 			StringBuffer sbE = new StringBuffer(" VALUES( ");
-			Set<Entry<String, Object>> se = row.entrySet();
+			Set<String> se = row.keySet();
 			comma = "";
-			for (Entry<String, Object> en : se) {
-				String cn=en.getKey();
-				Column cl=t.getColumn(cn);
-				if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
+			for (String cn : se) {
 				sbI.append(comma).append(
 						SQLConverter.escapeIdentifier(cn));
 				sbE.append(comma).append(" ? ");
