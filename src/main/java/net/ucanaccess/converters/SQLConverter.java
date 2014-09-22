@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +65,8 @@ public class SQLConverter {
 	private static final String IDENTITY ="(\\W+)((?i)@@identity)(\\W*)";
 	private static final Pattern SELECT_IDENTITY = Pattern.compile("(?i)select[\\s\n\r]+(?i)@@identity.*");
 	private static final Pattern HAS_FROM = Pattern.compile("[\\s\n\r]+(?i)from[\\s\n\r]+");
+	private static final Pattern FORMULA_DEPENDENCIES=Pattern.compile("\\[([^\\]]*)\\]");
+	
 	
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
@@ -941,6 +944,16 @@ public class SQLConverter {
 	public static int asUnsigned(byte a) {
 		int b = ((a & 0xFF));
 		return ((b));
+	}
+	
+	
+	public static Set<String> getFormulaDependencies(String formula){
+		Matcher mtc=FORMULA_DEPENDENCIES.matcher(formula);
+		HashSet<String> fd=new HashSet<String> ();
+		while(mtc.find()){
+		  fd.add(escapeIdentifier(mtc.group(1)));
+		}
+		return fd;
 	}
 
 	
