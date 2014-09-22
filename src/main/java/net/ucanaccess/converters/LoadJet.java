@@ -204,7 +204,7 @@ public class LoadJet {
 		private static final int HSQL_UK_ALREADY_EXISTS= -ErrorCode.X_42522;//-5522
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-		private ArrayList<String> arTrigger;
+		private ArrayList<String> calculatedFieldsTriggers;
 
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
@@ -272,8 +272,8 @@ public class LoadJet {
 		}
 		
 		
-		private String getCalculatedFieldTrigger(String ntn,Column cl) throws IOException{
-			DataType dt=getReturnType( cl);
+		private String getCalculatedFieldTrigger(String ntn,Column cl,boolean isCreate) throws IOException{
+			DataType dt=getReturnType(cl);
 			String fun=null;
 			if(isNumeric(dt)){
 				fun="formulaToNumeric";
@@ -285,13 +285,19 @@ public class LoadJet {
 				fun="formulaToText";
 			}
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
-			
-			String trg="CREATE TRIGGER expr%d %s ON "+ntn+
-			   " REFERENCING NEW  AS newrow %s FOR EACH ROW "+
-			   " BEGIN  ATOMIC %s"+
+			String trg=isCreate? "CREATE TRIGGER expr%d after insert ON "+ntn+
+			   " REFERENCING NEW  AS newrow  FOR EACH ROW "+
+			   " BEGIN  ATOMIC "+
 			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
-			    	
-			    " %s; END ";
+			   "; END "
+			   :
+			    "CREATE TRIGGER expr%d after update ON "+ntn+
+			   " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW "+
+			   " BEGIN  ATOMIC IF %s THEN "+
+			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
+			   "; ELSEIF newrow."+SQLConverter.escapeIdentifier(cl.getName())+" <> oldrow."+SQLConverter.escapeIdentifier(cl.getName())
+			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName()+"'"
+			   +";  END IF ; END ";
 			
 			return trg;
 		}
@@ -327,19 +333,19 @@ public class LoadJet {
 					ntn).append("(");
 			List<? extends Column> lc = t.getColumns();
 			String comma = "";
-			this.arTrigger = new ArrayList<String>();
+			this.calculatedFieldsTriggers = new ArrayList<String>();
 			for (Column cl : lc) {
 				if("USER".equalsIgnoreCase(cl.getName())){
 					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
 				}
 				String expr=getExpression(cl);
-				
 				if(expr!=null){
-					String tgr=getCalculatedFieldTrigger(ntn,cl);
-					arTrigger.add(String.format(tgr,namingCounter++,"after insert","","",SQLConverter.convertFormula(expr),""));
+					String tgrI=getCalculatedFieldTrigger(ntn,cl,true);
+					String tgrU=getCalculatedFieldTrigger(ntn,cl,false);
+					calculatedFieldsTriggers.add(String.format(tgrI,namingCounter++,SQLConverter.convertFormula(expr)));
 					String uc=getUpdateConditions(cl);
 					if(uc.length()>0){
-						arTrigger.add(String.format(tgr,namingCounter++,"before update"," OLD AS OLDROW ",uc,SQLConverter.convertFormula(expr),"; END CASE "));
+						calculatedFieldsTriggers.add(String.format(tgrU,namingCounter++,uc,SQLConverter.convertFormula(expr)));
 					}
 				}
 				
@@ -388,18 +394,18 @@ public class LoadJet {
             	
             	if(setu.size()>0){
             		String or="";
-            		StringBuffer cw=new StringBuffer(" CASE WHEN ");
+            		StringBuffer cw=new StringBuffer();
             		for(String dep:setu){
             			cw.append(or).
             			append("oldrow.").append(dep).append("<>").append("newrow.").append(dep);
             			or=" OR ";
             		}
-            		cw.append(" THEN ");
+            		
             		return cw.toString();
             	}
             
             }
-			return "";
+			return " FALSE ";
 		}
 
 
@@ -653,8 +659,9 @@ public class LoadJet {
 		}
 		
 		private void createCalculatedFieldsTriggers(){
-			for (String trigger : arTrigger) {
+			for (String trigger : calculatedFieldsTriggers) {
 				try{
+				
 					execCreate(trigger,false);
 				}catch(SQLException e){
 					Logger.logWarning(e.getMessage());
