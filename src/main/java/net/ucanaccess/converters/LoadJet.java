@@ -65,6 +65,7 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.IndexData;
 import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.query.Query;
 
@@ -204,7 +205,9 @@ public class LoadJet {
 		private static final int HSQL_UK_ALREADY_EXISTS= -ErrorCode.X_42522;//-5522
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
-		private ArrayList<String> calculatedFieldsTriggers;
+		private ArrayList<String> calculatedFieldsTriggers=new ArrayList<String>();
+		private LinkedList<String> loadingOrder=new LinkedList<String>();
+		private HashSet<Column> alreadyIndexed=new HashSet<Column>();
 
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
@@ -333,7 +336,6 @@ public class LoadJet {
 					ntn).append("(");
 			List<? extends Column> lc = t.getColumns();
 			String comma = "";
-			this.calculatedFieldsTriggers = new ArrayList<String>();
 			for (Column cl : lc) {
 				if("USER".equalsIgnoreCase(cl.getName())){
 					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
@@ -476,26 +478,89 @@ public class LoadJet {
 				execCreate(trigger,true);
 			}
 		}
-
+		private int countFKs() throws IOException{
+			int i=0;
+			for (String tn : this.loadingOrder) {
+				Table table = dbIO.getTable(tn);
+				if (!this.unresolvedTables.contains(tn)) {
+					for (Index idxi : table.getIndexes()) {
+						// riw
+						IndexImpl idx = (IndexImpl) idxi;
+						if (idx.isForeignKey()
+								&& !idx.getReference().isPrimaryTable())
+								i++;
+					}
+				}
+			}
+			return i;
+		}
+		
+		private boolean reorder() throws IOException, SQLException {
+			int maxIteration=countFKs();
+			 
+			 for (int i = 0; i < maxIteration; i++) {
+				boolean change = false;
+				ArrayList<String> loadingOrder0=new ArrayList<String>();
+				loadingOrder0.addAll(this.loadingOrder);
+				for (String tn : loadingOrder0) {
+					Table table = dbIO.getTable(tn);
+					if (!this.unresolvedTables.contains(tn)) {
+						for (Index idxi : table.getIndexes()) {
+							// riw
+							IndexImpl idx = (IndexImpl) idxi;
+							if (idx.isForeignKey()
+									&& !idx.getReference().isPrimaryTable()&&!tryReorder(idx))
+									change = true;
+						}
+					}
+				}
+				
+				if(!change )return true;
+			}
+			 
+			return false;
+		}
+		
+		private boolean tryReorder(Index idxi) throws IOException{
+			IndexImpl idx=(IndexImpl)idxi;
+			String ctn=idx.getTable().getName();
+			String rtn=idx.getReferencedIndex().getTable().getName();
+			int ict=this.loadingOrder.indexOf(ctn);
+			int irt=this.loadingOrder.indexOf(rtn);
+			if(ict<irt){
+				this.loadingOrder.remove(ctn);
+				this.loadingOrder.add(irt, ctn);
+				return false;
+			}
+			return true;
+		}
+		
+		
 		private void loadForeignKey(Index idxi) throws IOException, SQLException {
 			IndexImpl idx=(IndexImpl)idxi;
+			String ctn=idx.getTable().getName();
+			String rtn=idx.getReferencedIndex().getTable().getName();
+			List<IndexData.ColumnDescriptor> cls=idx.getColumns();
+			if(cls.size()==1){
+				this.alreadyIndexed.add(cls.get(0).getColumn());
+			}
 			String ntn = SQLConverter
-					.escapeIdentifier(idx.getTable().getName());
+					.escapeIdentifier(ctn);
 			if(ntn==null)return;
 			String nin = SQLConverter.escapeIdentifier(idx.getName());
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
-			String colsIdx = commaSeparated(idx.getColumns());
+			String colsIdx = commaSeparated(cls);
 			String colsIdxRef = commaSeparated(idx.getReferencedIndex()
 					.getColumns());
+			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
 			ci.append(" ADD CONSTRAINT ").append(nin);
-			String nrt = SQLConverter.escapeIdentifier(idx.getReferencedIndex()
-					.getTable().getName());
+			String nrt = SQLConverter.escapeIdentifier(rtn);
+			
 			if(nrt==null)return;
 			ci.append(" FOREIGN KEY ").append(colsIdx).append(" REFERENCES ")
 					.append(nrt).append(colsIdxRef);
-			//riw
-			
+						
 			if (idx.getReference().isCascadeDeletes()) {
 				ci.append(" ON DELETE CASCADE ");
 			}
@@ -514,6 +579,8 @@ public class LoadJet {
 					+ " References " + nrt + " Columns:" + colsIdxRef);
 		}
 
+		
+
 		private void loadIndex(Index idx) throws IOException, SQLException {
 			String ntn = SQLConverter
 					.escapeIdentifier(idx.getTable().getName());
@@ -522,6 +589,11 @@ public class LoadJet {
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
 			boolean uk = idx.isUnique();
 			boolean pk = idx.isPrimaryKey();
+			if(!uk&&!pk&&idx.getColumns().size()==1){
+				Column cl=idx.getColumns().get(0).getColumn();
+				if(this.alreadyIndexed.contains(cl))
+					return;
+			}
 			if(uk&&idx.getColumns().size()==1){
 				Column cl=idx.getColumns().get(0).getColumn();
 				DataType dt=cl.getType();
@@ -566,27 +638,12 @@ public class LoadJet {
 			
 		}
 
-		private void loadIndexes() throws SQLException, IOException {
-			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn)){
-					this.loadTableIndexes(tn);
-					conn.commit();
-				}
-					
-			}
-			for (String tn : dbIO.getTableNames()) {
-				if (!this.unresolvedTables.contains(tn)){
-					this.loadTableFKs(tn);
-					conn.commit();
-				}
-			}
-		}
-		
-		private void loadTable(Table t) throws SQLException, IOException {
-			loadTable(t,false) ;
+				
+		private void createTable(Table t) throws SQLException, IOException {
+			createTable(t,false) ;
 		}
 
-		private void loadTable(Table t, boolean systemTable) throws SQLException, IOException {
+		private void createTable(Table t, boolean systemTable) throws SQLException, IOException {
 			String tn = t.getName();
 			if (tn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(tn);
@@ -594,17 +651,9 @@ public class LoadJet {
 			String ntn = SQLConverter.escapeIdentifier(tn);
 			if (ntn == null)
 				return;
-	//		List<Integer> cfil=calculatedFieldIndexList( t) ;
 			createSyncrTable(t,systemTable);
-			loadTableData(t,systemTable);
-			createCalculatedFieldsTriggers();
-			if(!systemTable){
-				defaultValues(t);
-				triggersGenerator.synchronisationTriggers(ntn,
-					hasAutoNumberColumn(t),hasAppendOnly(t));
-				loadedTables.add(ntn);
-			}
 		}
+		
 		private boolean hasAppendOnly(Table t) {
 			for (Column c:t.getColumns()){
 				if(c.isAppendOnly()){
@@ -627,8 +676,7 @@ public class LoadJet {
 					Collection< Object> ce = row.values();
 					
 					for (Object obj : ce) {
-					//	Column cl=t.getColumn(en.getKey());
-					//	if(cl!=null&&cfil.contains(cl.getColumnIndex()))continue;
+					
 						values.add(value(obj));
 					}
 					execInsert(ps, values);
@@ -669,25 +717,36 @@ public class LoadJet {
 				}
 			}
 		}
-
-		private void loadTableIndexes(String tableName) throws IOException,
+		
+		
+		
+		
+		
+		private void loadTableIndexesUK(String tableName) throws IOException,
 				SQLException {
 			Table table = dbIO.getTable(tableName);
 			for (Index idx : table.getIndexes()) {
-				if (!idx.isForeignKey()&&idx.isPrimaryKey()){
+				if (!idx.isForeignKey() && (idx.isPrimaryKey()||idx.isUnique())) {
 					loadIndex(idx);
 				}
 			}
-			//PK before avoid issues on reload with keepMirror parameter
-			for (Index idx : table.getIndexes()) {
-				if (!idx.isForeignKey()&&!idx.isPrimaryKey()){
-					loadIndex(idx);
-				}
-			}
-	
+
 		}
 		
-		private void loadTables() throws SQLException, IOException {
+		private void loadTableIndexesNotUK(String tableName)
+				throws IOException, SQLException {
+			Table table = dbIO.getTable(tableName);
+			for (Index idx : table.getIndexes()) {
+				if (!idx.isForeignKey() && !idx.isPrimaryKey()
+						&& !idx.isUnique()) {
+					loadIndex(idx);
+				}
+			}
+
+		}
+
+		
+		private void createTables() throws SQLException, IOException{
 			for (String tn : dbIO.getTableNames()) {
 				Table t = null;
 				try {
@@ -696,32 +755,106 @@ public class LoadJet {
 					Logger.logWarning(e.getMessage());
 					this.unresolvedTables.add(tn);
 				}
-				if (t != null)
-					loadTable(t);
-				
-			}
-			if(sysSchema){
-			createSystemSchema();
-			for (String tn : dbIO.getSystemTableNames()) {
-				Table t = null;
-				try {
-					t = dbIO.getSystemTable(tn);
-				
 				if (t != null){
-					loadTable(t,true);
-					execCreate("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
-					execCreate("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
+					createTable(t);
+					this.loadingOrder.add(t.getName());
 				}
-		    	} catch (Exception ignore) {}
-		    	}
 			}
-			
+		}
+	
+		private void createIndexesUK() throws SQLException, IOException{
+			for (String tn : dbIO.getTableNames()) {
+				if (!this.unresolvedTables.contains(tn)){
+					this.loadTableIndexesUK(tn);
+					conn.commit();
+				}
+			}
+		}
+		
+		
+		private void createIndexesNotUK() throws SQLException, IOException{
+			for (String tn : dbIO.getTableNames()) {
+				if (!this.unresolvedTables.contains(tn)){
+					this.loadTableIndexesNotUK(tn);
+					conn.commit();
+				}
+			}
+		}
+		
+		private void createFKs() throws SQLException, IOException{
+			for (String tn : dbIO.getTableNames()) {
+				if (!this.unresolvedTables.contains(tn)){
+					this.loadTableFKs(tn);
+					conn.commit();
+				}
+			}
+
+		}
+		
+		
+		private void loadTablesData() throws SQLException, IOException{
+			for (String tn : this.loadingOrder) {
+				if (!this.unresolvedTables.contains(tn)){
+					Table t = dbIO.getTable(tn);
+					this.loadTableData(t,false);
+					conn.commit();
+					
+				}
+			}
+		}
+		
+		private void createTriggers() throws IOException, SQLException{
+			createCalculatedFieldsTriggers();
+			for (String tn : this.loadingOrder) {
+				if (!this.unresolvedTables.contains(tn)){
+					Table t = dbIO.getTable(tn);
+					createSyncrTriggers(t);
+				}
+			}
+		}
+		
+		
+		private void createSystemTables() throws SQLException, IOException{
+			if(sysSchema){
+				createSystemSchema();
+				for (String tn : dbIO.getSystemTableNames()) {
+					Table t = null;
+					try {
+						t = dbIO.getSystemTable(tn);
+					
+					if (t != null){
+						createTable(t,true);
+						loadTableData(t,true);
+						execCreate("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
+						execCreate("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
+					}
+			    	} catch (Exception ignore) {}
+			    	}
+				}
+		}
+		
+		private void loadTables() throws SQLException, IOException {
+			createTables();
+			createIndexesUK();
+			boolean reorder=reorder();
+			if(reorder)createFKs();
+			createIndexesNotUK();
+			loadTablesData();
+			createTriggers();
+			if(!reorder)createFKs();
+			createSystemTables();
 		}
 
 		private void createSystemSchema() throws SQLException {
 			execCreate("CREATE SCHEMA "+SYSTEM_SCHEMA+" AUTHORIZATION DBA",false);
-			
-			
+		}
+		
+		private void createSyncrTriggers(Table t) throws SQLException, IOException{
+			defaultValues(t);
+			String ntn = SQLConverter.escapeIdentifier(t.getName());
+			triggersGenerator.synchronisationTriggers(ntn,
+				hasAutoNumberColumn(t),hasAppendOnly(t));
+			loadedTables.add(ntn);
 		}
 
 		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,boolean systemTable)
@@ -1090,7 +1223,6 @@ public class LoadJet {
 		try {
 			this.functionsLoader.loadMappedFunctions();
 			this.tablesLoader.loadTables();
-			this.tablesLoader.loadIndexes();
 			this.viewsLoader.loadViews();
 			conn.commit();
 			SQLConverter.cleanEscaped();
