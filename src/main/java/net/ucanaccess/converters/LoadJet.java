@@ -496,7 +496,7 @@ public class LoadJet {
 		}
 		
 		private boolean reorder() throws IOException, SQLException {
-			int maxIteration=countFKs();
+			int maxIteration=countFKs()+1;
 			 
 			 for (int i = 0; i < maxIteration; i++) {
 				boolean change = false;
