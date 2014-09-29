@@ -674,10 +674,21 @@ public class LoadJet {
 					if (ps == null)
 						ps = sqlInsert(t, row,systemTable);
 					Collection< Object> ce = row.values();
-					
+					int j=0;
 					for (Object obj : ce) {
-					
+						//workaround waiting for a jackcess fix
+						if(obj==null){
+							Column memo=t.getColumns().get(j);
+							if(DataType.MEMO.equals(memo.getType())
+							&&memo.getProperties().getValue(PropertyMap.REQUIRED_PROP)!=null
+							&&(Boolean)memo.getProperties().getValue(PropertyMap.REQUIRED_PROP)
+									){
+								obj="";
+							}
+						}
+						//workaround end
 						values.add(value(obj));
+						j++;
 					}
 					execInsert(ps, values);
 					if((i>0&&i%1000==0)||
