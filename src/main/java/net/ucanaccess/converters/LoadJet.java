@@ -208,6 +208,7 @@ public class LoadJet {
 		private ArrayList<String> calculatedFieldsTriggers=new ArrayList<String>();
 		private LinkedList<String> loadingOrder=new LinkedList<String>();
 		private HashSet<Column> alreadyIndexed=new HashSet<Column>();
+		private HashSet<String> errorCache=new HashSet<String>();
 
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
@@ -663,42 +664,55 @@ public class LoadJet {
 			return false;
 		}
 
-	   private void loadTableData(Table t, boolean systemTable) throws IOException, SQLException {
+		private void loadTableData(Table t, boolean systemTable)
+				throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
-				int i=0;
-				for (Row row:t) {
+				int i = 0;
+				for (Row row : t) {
 					ArrayList<Object> values = new ArrayList<Object>();
 					if (row == null)
 						continue;
 					if (ps == null)
-						ps = sqlInsert(t, row,systemTable);
-					Collection< Object> ce = row.values();
-					int j=0;
+						ps = sqlInsert(t, row, systemTable);
+					Collection<Object> ce = row.values();
+					int j = 0;
 					for (Object obj : ce) {
-						//workaround waiting for a jackcess fix
-						if(obj==null){
-							Column memo=t.getColumns().get(j);
-							if(DataType.MEMO.equals(memo.getType())
-							&&memo.getProperties().getValue(PropertyMap.REQUIRED_PROP)!=null
-							&&(Boolean)memo.getProperties().getValue(PropertyMap.REQUIRED_PROP)
-									){
-								obj="";
+						// workaround waiting for a jackcess fix
+						
+						
+						if (obj == null) {
+							Column memo = t.getColumns().get(j);
+							if (DataType.MEMO.equals(memo.getType())) {
+
+								if (memo.getProperties().getValue(
+										PropertyMap.REQUIRED_PROP) != null
+										&& (Boolean) memo
+												.getProperties()
+												.getValue(
+														PropertyMap.REQUIRED_PROP)) {
+									obj = "";
+								}
+								else if(!this.errorCache.contains( memo.getName()+t.getName())){
+									Logger.logParametricWarning(Messages.MEMO_205_ERR, memo.getName(),t.getName());
+									this.errorCache.add(memo.getName()+t.getName());
+								}
 							}
 						}
-						//workaround end
+						// workaround end
 						values.add(value(obj));
 						j++;
 					}
 					execInsert(ps, values);
-					if((i>0&&i%1000==0)||
-							i==t.getRowCount()-1		){
+					if ((i > 0 && i % 1000 == 0) || i == t.getRowCount() - 1) {
 						conn.commit();
 					}
 					i++;
 				}
-				if(i!=t.getRowCount()){
-					Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(),String.valueOf(t.getRowCount()),String.valueOf(i));
+				if (i != t.getRowCount()) {
+					Logger.logParametricWarning(Messages.ROW_COUNT,
+							t.getName(), String.valueOf(t.getRowCount()),
+							String.valueOf(i));
 				}
 			} finally {
 				if (ps != null)
