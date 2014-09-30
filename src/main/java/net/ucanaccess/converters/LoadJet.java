@@ -208,7 +208,7 @@ public class LoadJet {
 		private ArrayList<String> calculatedFieldsTriggers=new ArrayList<String>();
 		private LinkedList<String> loadingOrder=new LinkedList<String>();
 		private HashSet<Column> alreadyIndexed=new HashSet<Column>();
-		private HashSet<String> errorCache=new HashSet<String>();
+
 
 		private String commaSeparated(List<? extends Index.Column> columns) {
 			String comma = "";
@@ -684,19 +684,26 @@ public class LoadJet {
 						if (obj == null) {
 							Column memo = t.getColumns().get(j);
 							if (DataType.MEMO.equals(memo.getType())) {
-								boolean alwzl=  memo.getProperties().getValue(
+								PropertyMap map=memo.getProperties();
+								
+								boolean alwzl= map.getValue(
 										PropertyMap.ALLOW_ZERO_LEN_PROP) != null
 										&& (Boolean) memo
 												.getProperties()
 												.getValue(
 														PropertyMap.ALLOW_ZERO_LEN_PROP);
-								boolean req=  memo.getProperties().getValue(
+								boolean req=  map.getValue(
 										PropertyMap.REQUIRED_PROP) != null
 										&& (Boolean) memo
 												.getProperties()
 												.getValue(
 														PropertyMap.REQUIRED_PROP);
-								if (alwzl&&req) {
+								
+								boolean defEmpty=
+										map.getValue(PropertyMap.DEFAULT_VALUE_PROP)!=null
+												&& 
+											"\"\"".equals(	map.getValue(PropertyMap.DEFAULT_VALUE_PROP))		;
+								if (alwzl&&(req||defEmpty)) {
 									obj = "";
 								}
 								
