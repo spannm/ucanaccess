@@ -684,19 +684,22 @@ public class LoadJet {
 						if (obj == null) {
 							Column memo = t.getColumns().get(j);
 							if (DataType.MEMO.equals(memo.getType())) {
-
-								if (memo.getProperties().getValue(
+								boolean alwzl=  memo.getProperties().getValue(
+										PropertyMap.ALLOW_ZERO_LEN_PROP) != null
+										&& (Boolean) memo
+												.getProperties()
+												.getValue(
+														PropertyMap.ALLOW_ZERO_LEN_PROP);
+								boolean req=  memo.getProperties().getValue(
 										PropertyMap.REQUIRED_PROP) != null
 										&& (Boolean) memo
 												.getProperties()
 												.getValue(
-														PropertyMap.REQUIRED_PROP)) {
+														PropertyMap.REQUIRED_PROP);
+								if (alwzl&&req) {
 									obj = "";
 								}
-								else if(!this.errorCache.contains( memo.getName()+t.getName())){
-									Logger.logParametricWarning(Messages.MEMO_205_ERR, memo.getName(),t.getName());
-									this.errorCache.add(memo.getName()+t.getName());
-								}
+								
 							}
 						}
 						// workaround end
