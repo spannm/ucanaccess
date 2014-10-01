@@ -678,9 +678,7 @@ public class LoadJet {
 					Collection<Object> ce = row.values();
 					int j = 0;
 					for (Object obj : ce) {
-						// workaround waiting for a jackcess fix
-						
-						
+						//workaround for maven built projects, waiting for a jackcess fix
 						if (obj == null) {
 							Column memo = t.getColumns().get(j);
 							if (DataType.MEMO.equals(memo.getType())) {
@@ -699,17 +697,14 @@ public class LoadJet {
 												.getValue(
 														PropertyMap.REQUIRED_PROP);
 								
-								boolean defEmpty=
-										map.getValue(PropertyMap.DEFAULT_VALUE_PROP)!=null
-												&& 
-											"\"\"".equals(	map.getValue(PropertyMap.DEFAULT_VALUE_PROP))		;
-								if (alwzl&&(req||defEmpty)) {
+								
+								if (alwzl&&(req)) {
 									obj = "";
 								}
 								
 							}
 						}
-						// workaround end
+						// end workaround for maven built projects
 						values.add(value(obj));
 						j++;
 					}
