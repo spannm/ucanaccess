@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.test.suite;
 
+
 import net.ucanaccess.test.AccessLikeTest;
 import net.ucanaccess.test.AggregateFunctionsTest;
 import net.ucanaccess.test.BatchTest;
@@ -30,6 +31,7 @@ import net.ucanaccess.test.CounterTest;
 import net.ucanaccess.test.CreateTableTest;
 import net.ucanaccess.test.CrudTest;
 import net.ucanaccess.test.DropTableTest;
+import net.ucanaccess.test.ExceptionCodeTest;
 import net.ucanaccess.test.ExternalResourcesTest;
 import net.ucanaccess.test.FunctionsTest;
 import net.ucanaccess.test.InsertBigTest;
@@ -74,6 +76,7 @@ public class AllTestsBase {
 		suite.addTestSuite(ByteTest.class);
 		suite.addTestSuite(GeneratedKeysTest.class);
 		suite.addTestSuite(ColumnOrderTest.class);
+		suite.addTestSuite(ExceptionCodeTest.class);
 		return suite;
 	}
 }

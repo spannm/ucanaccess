@@ -30,13 +30,8 @@ import java.util.List;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.SQLConverter;
 
-
-
-
-import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
@@ -51,13 +46,6 @@ public class IndexSelector {
 			if (currVal == null && dbVal == null)
 				return true;
 			if (currVal == null || dbVal == null){
-				//workaround waiting for a jackcess fix
-				if("".equals(currVal)){
-					Column cl=table.getColumn(columnName);
-					if((DataType.MEMO.equals(cl.getType()))){
-						return true;
-					}
-				}
 				return false;
 			}	
 			if (currVal instanceof Date && dbVal instanceof Date) {

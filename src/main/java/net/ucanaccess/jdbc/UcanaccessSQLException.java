@@ -48,6 +48,10 @@ public class UcanaccessSQLException extends SQLException {
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
 	private Throwable cause;
+	private int errorCode;
+	private String sqlState;
+	
+	
 	public UcanaccessSQLException() {
 	}
 	
@@ -79,6 +83,14 @@ public class UcanaccessSQLException extends SQLException {
 	public UcanaccessSQLException(Throwable cause) {
 		super( explaneCause(cause));
 		this.cause=cause;
+		if(cause instanceof SQLException){
+			SQLException se=(SQLException)cause;
+			this.errorCode=se.getErrorCode();
+			this.sqlState=se.getSQLState();
+		}else{
+			this.sqlState="System Exception";
+			this.errorCode=UcanaccessErrorCodes.SYSTEM_ERROR;
+		}
 	}
 	
 	public static String explaneCause(Throwable cause){
@@ -94,4 +106,16 @@ public class UcanaccessSQLException extends SQLException {
 	public Throwable getCause() {
 		return this.cause;
 	}
+
+	@Override
+	public int getErrorCode() {
+		return this.errorCode;
+	}
+
+	@Override
+	public String getSQLState() {
+		return this.sqlState;
+	}
+	
+	
 }
