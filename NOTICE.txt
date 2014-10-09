@@ -1,7 +1,3 @@
 Most of the financial functions (PMT, NPER, IPMT, PPMT, RATE, PV) Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
 They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
 The  Apache POI project is licensed under Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.
-
-A later fix from the jackcess trunk to the 2.0.5 release  has been included in this distribution. 
-It's limited to the class LongValueColumnImpl and it's about empty memo values. 
-Source file version: http://svn.code.sf.net/p/jackcess/code/jackcess/trunk/src/main/java/com/healthmarketscience/jackcess/impl/LongValueColumnImpl.java?p=884. 
