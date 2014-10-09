@@ -45,6 +45,7 @@ public class UcanaccessSQLException extends SQLException {
 		STATEMENT_DDL,
 		CLOSE_ON_COMPLETION_STATEMENT
 		
+		
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
 	private Throwable cause;
@@ -57,6 +58,8 @@ public class UcanaccessSQLException extends SQLException {
 	
 	public UcanaccessSQLException(ExceptionMessages reason) {
 		super(Logger.getMessage(reason.name()));
+		this.sqlState=String.valueOf(UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+		this.errorCode=UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR;
 	}
 	
 	public UcanaccessSQLException(String reason, String SQLState) {
@@ -88,8 +91,8 @@ public class UcanaccessSQLException extends SQLException {
 			this.errorCode=se.getErrorCode();
 			this.sqlState=se.getSQLState();
 		}else{
-			this.sqlState="System Exception";
-			this.errorCode=UcanaccessErrorCodes.SYSTEM_ERROR;
+			this.sqlState=String.valueOf(UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+			this.errorCode=UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR;
 		}
 	}
 	
@@ -109,12 +112,12 @@ public class UcanaccessSQLException extends SQLException {
 
 	@Override
 	public int getErrorCode() {
-		return this.errorCode;
+		return this.errorCode==0?super.getErrorCode():this.errorCode;
 	}
 
 	@Override
 	public String getSQLState() {
-		return this.sqlState;
+		return this.sqlState==null?super.getSQLState():this.sqlState;
 	}
 	
 	

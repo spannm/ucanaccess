@@ -22,13 +22,18 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 
 import java.util.Locale;
 
+import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessErrorCodes;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -54,7 +59,7 @@ public class ExceptionCodeTest extends UcanaccessTestBase {
 	
 	
 	
-	public void testCreate() throws SQLException, IOException, ParseException {
+	public void testVUKException() throws SQLException, IOException, ParseException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
@@ -68,6 +73,43 @@ public class ExceptionCodeTest extends UcanaccessTestBase {
 			
 			assertEquals(e.getErrorCode(), -UcanaccessErrorCodes.X_23505);
 			assertEquals(e.getSQLState(), "23505");
+		}
+		
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	public void testGenException() throws SQLException, IOException, ParseException {
+		Statement st = null;
+		try {
+			throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko",11111);
+					
+			
+			
+		}catch(SQLException e){
+			assertEquals(e.getErrorCode(),11111);
+			assertEquals(e.getSQLState(),"ko");
+		}
+		
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	public void testGException() throws SQLException, IOException, ParseException {
+		Statement st = null;
+		try {
+			Connection conn=DriverManager.getConnection(UcanaccessDriver.URL_PREFIX +"ciao ciao");
+				
+			
+			
+		}catch(SQLException e){
+		
+			assertEquals(e.getErrorCode(),UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+			assertEquals(e.getSQLState(),UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR+"");
 		}
 		
 		finally {
