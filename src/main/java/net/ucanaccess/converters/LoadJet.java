@@ -289,17 +289,18 @@ public class LoadJet {
 				fun="formulaToText";
 			}
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
+			String ecl=procedureEscapingIdentifier(cl.getName());
 			String trg=isCreate? "CREATE TRIGGER expr%d after insert ON "+ntn+
 			   " REFERENCING NEW  AS newrow  FOR EACH ROW "+
 			   " BEGIN  ATOMIC "+
-			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
+			   " SET newrow."+ecl+" = "+call+
 			   "; END "
 			   :
 			    "CREATE TRIGGER expr%d after update ON "+ntn+
 			   " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW "+
 			   " BEGIN  ATOMIC IF %s THEN "+
-			   " SET newrow."+SQLConverter.escapeIdentifier(cl.getName())+" = "+call+
-			   "; ELSEIF newrow."+SQLConverter.escapeIdentifier(cl.getName())+" <> oldrow."+SQLConverter.escapeIdentifier(cl.getName())
+			   " SET newrow."+ecl+" = "+call+
+			   "; ELSEIF newrow."+ecl+" <> oldrow."+ecl
 			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName()+"'"
 			   +";  END IF ; END ";
 			
@@ -410,6 +411,11 @@ public class LoadJet {
             }
 			return " FALSE ";
 		}
+		
+		
+		private String procedureEscapingIdentifier(String name){
+			return SQLConverter.procedureEscapingIdentifier( SQLConverter.escapeIdentifier(name));
+		}
 
 
 		private  void defaultValues(Table t) throws SQLException, IOException {
@@ -419,7 +425,7 @@ public class LoadJet {
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
 				PropertyMap pm = cl.getProperties();
-				String ncn = SQLConverter.escapeIdentifier(cl.getName());
+				String ncn =procedureEscapingIdentifier(cl.getName());
 				Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
 				if (defaulT != null) {
 					String cdefaulT = SQLConverter.convertSQL(" "

@@ -111,6 +111,8 @@ public class SQLConverter {
 			"CONSTRAINT"
 			,"USER"
 			);
+	
+	private static final List<String> PROCEDURE_KEYWORDLIST = Arrays.asList("NEW","ROW");
 	private static ArrayList<String> whiteSpacedTableNames = new ArrayList<String>();
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
 	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
@@ -592,6 +594,16 @@ public class SQLConverter {
 
 	public static void cleanEscaped() {
 		xescapedIdentifiers.removeAll(alreadyEscapedIdentifiers);
+	}
+	
+	
+	
+	public static String procedureEscapingIdentifier(String name) {
+		if (PROCEDURE_KEYWORDLIST.contains(name.toUpperCase())) {
+			name = "\"" + name.toUpperCase() + "\"";
+			
+		}
+		return name;
 	}
 
 	public static String basicEscapingIdentifier(String name) {
