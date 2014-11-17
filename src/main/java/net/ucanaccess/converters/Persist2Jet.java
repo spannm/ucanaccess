@@ -218,7 +218,7 @@ public class Persist2Jet {
 				}
 			}
 			
-			if (    types!=null&&types[i]!=null&&(
+			if (    types!=null&&i<types.length&&types[i]!=null&&(
 					types[i].equalsIgnoreCase(AccessType.LONG.name())||
 					types[i].equalsIgnoreCase(AccessType.BYTE.name())||
 					types[i].equalsIgnoreCase(AccessType.CURRENCY.name())||
@@ -237,7 +237,7 @@ public class Persist2Jet {
 			}
 			
 			if (dt == null) {
-				if( types!=null&&types[i]!=null&&types[i].equalsIgnoreCase(AccessType.NUMERIC.name())){
+				if( types!=null&&i<types.length&&types[i]!=null&&types[i].equalsIgnoreCase(AccessType.NUMERIC.name())){
 					dt=DataType.NUMERIC;
 				}
 				else{
@@ -255,7 +255,7 @@ public class Persist2Jet {
 			}
 
 			
-			if (types != null) {
+			if (types != null&&i<types.length) {
 				if (types[i]
 						.equalsIgnoreCase(AccessType.COUNTER.name())||
 						types[i]
@@ -361,12 +361,12 @@ public class Persist2Jet {
 		for(Column cl:cols){
 			PropertyMap map=cl.getProperties();
 			boolean changed=false;
-			if(defaults!=null&&defaults[j]!=null){
+			if(defaults!=null&&j<defaults.length&&defaults[j]!=null){
 				changed=true;
 				map.put(PropertyMap.DEFAULT_VALUE_PROP,DataType.TEXT,defaults[j]);
 			}
 			
-			if(required!=null&&required[j]!=null &&required[j]&&!cl.isAutoNumber()){
+			if(required!=null&&j<required.length &&required[j]!=null&&required[j]&&!cl.isAutoNumber()){
 				changed=true;
 					map.put(PropertyMap.REQUIRED_PROP,DataType.BOOLEAN,required[j]);
 			}
