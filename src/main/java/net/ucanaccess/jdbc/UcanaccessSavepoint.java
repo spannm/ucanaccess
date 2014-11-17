@@ -47,4 +47,11 @@ public class UcanaccessSavepoint implements Savepoint {
 			throw new UcanaccessSQLException(e);
 		}
 	}
+
+	Savepoint getWrapped() {
+		return wrapped;
+	}
+
+	
+	
 }
