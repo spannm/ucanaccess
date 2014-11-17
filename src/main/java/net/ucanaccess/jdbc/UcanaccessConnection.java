@@ -572,7 +572,7 @@ public class UcanaccessConnection implements Connection {
 
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
 		try {
-			hsqlDBConnection.releaseSavepoint(savepoint);
+			hsqlDBConnection.releaseSavepoint(((UcanaccessSavepoint)savepoint).getWrapped());
 			this.savepointsMap.remove(savepoint);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -656,7 +656,7 @@ public class UcanaccessConnection implements Connection {
 
 	public Savepoint setSavepoint() throws SQLException {
 		try {
-			Savepoint sp = hsqlDBConnection.setSavepoint();
+			Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint());
 			if (this.commands.size() > 0) {
 				// last to commit
 				this.savepointsMap.put(sp, this.commands.getLast().getExecId());
