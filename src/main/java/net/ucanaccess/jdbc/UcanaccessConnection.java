@@ -594,7 +594,8 @@ public class UcanaccessConnection implements Connection {
 
 	public void rollback(Savepoint savepoint) throws SQLException {
 		try {
-			hsqlDBConnection.rollback(savepoint);
+			
+			hsqlDBConnection.rollback(((UcanaccessSavepoint)savepoint).getWrapped());
 			String lastId = this.savepointsMap.get(savepoint);
 			boolean remove = false;
 			Iterator<ICommand> it = commands.iterator();
@@ -670,6 +671,7 @@ public class UcanaccessConnection implements Connection {
 		try {
 			Savepoint sp = new UcanaccessSavepoint(
 					hsqlDBConnection.setSavepoint(name));
+			
 			if (this.commands.size() > 0) {
 				// last to commit
 				this.savepointsMap.put(sp, this.commands.getLast().getExecId());
