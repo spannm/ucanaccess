@@ -22,6 +22,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.jdbc;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -35,7 +36,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.util.ErrorHandler;
+
 
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
@@ -159,8 +163,15 @@ public final class UcanaccessDriver implements Driver {
 						ref
 						.setColumnOrderDisplay();
 					}
-					
-
+					ref.getDbIO().setErrorHandler(new ErrorHandler() {
+					    @Override
+					        public Object handleRowError(Column cl, byte[] bt, Location location, Exception ex) throws IOException {
+					        if(cl.getType().isTextual()){
+					        	Logger.logParametricWarning(Messages.INVALID_CHARACTER_SEQUENCE,cl.getTable().getName(), cl.getName(),new String(bt));
+					        }
+					    	throw new IOException(ex.getMessage());
+					    }
+					});
 				}
 				String pwd = ref.getDbIO().getDatabasePassword();
 				if (pwd != null&&!pr.containsKey("jackcessopener")) {
