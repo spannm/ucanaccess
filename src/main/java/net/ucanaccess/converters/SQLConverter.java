@@ -98,10 +98,10 @@ public class SQLConverter {
 	public static final String BIG_BANG = "1899-12-30";
 	public static final HashMap<String, String> noRomanCharacters = new HashMap<String, String>();
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
-			"ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
-			"CAST", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
+			"ANY","ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
+			"CAST","CHECK", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
 			"CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY", "EXISTS",
-			"EXCEPT", "FOR", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN",
+			"EXCEPT", "FOR","FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN",
 			"INNER", "INTERSECT", "INTO", "IS", "JOIN", "LEFT", "LEADING",
 			"LIKE", "MAX", "MIN", "NATURAL", "NOT", "NULLIF", "ON", "ORDER",
 			"OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET",
@@ -300,6 +300,7 @@ public class SQLConverter {
 		
 	public static String convertSQL(String sql, UcanaccessConnection conn,
 			boolean creatingQuery) {
+		
 		sql = sql + " ";
 		sql = replaceBacktrik(sql);
 		sql = convertDeleteAll(sql);
@@ -316,6 +317,7 @@ public class SQLConverter {
 			sql = DFunction.convertDFunctions(sql, conn);
 		}
 		sql = sql.trim();
+		
 		return sql;
 	}
 
