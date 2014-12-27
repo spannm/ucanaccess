@@ -292,6 +292,12 @@ public class Functions {
 		return (int) Math.floor(value + 0.5d);
 	}
 	
+	
+	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
+	public static Integer clng( String value) throws UcanaccessSQLException {
+		return clng(Double.parseDouble(value));
+	}
+	
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
 	public static Integer clng(Integer value) throws UcanaccessSQLException {
 		return value;
