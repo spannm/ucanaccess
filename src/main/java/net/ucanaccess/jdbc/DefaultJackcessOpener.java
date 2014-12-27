@@ -35,7 +35,6 @@ public class DefaultJackcessOpener implements JackcessOpenerInterface{
 		dbd.setAutoSync(false);
 		try {
 			dbd.setReadOnly(false);
-			
 			return  dbd.open();
 		} catch (IOException e) {
 			dbd.setReadOnly(true);
