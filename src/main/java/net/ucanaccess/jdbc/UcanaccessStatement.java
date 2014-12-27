@@ -194,6 +194,7 @@ public class UcanaccessStatement implements Statement {
 			this.connection.setCurrentStatement(this);
 			checkLastModified();
 			sql = convertSQL(sql, this.connection);
+	
 			return new UcanaccessResultSet(wrapped.executeQuery(sql), this);
 		} catch (SQLException e) {
 			
