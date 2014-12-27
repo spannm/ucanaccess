@@ -35,7 +35,8 @@ public class Logger {
 		DEFAULT_VALUES_DELIMETERS,
 		USER_AS_COLUMNNAME,
 		ROW_COUNT,
-		TRIGGER_UPDATE_CF_ERR
+		TRIGGER_UPDATE_CF_ERR,
+		INVALID_CHARACTER_SEQUENCE
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
