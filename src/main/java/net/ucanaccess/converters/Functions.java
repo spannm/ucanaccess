@@ -1543,6 +1543,12 @@ public class Functions {
 		    clbb.set(Calendar.MILLISECOND, 0);
 		  return    dateAdd("y", res?-1:0, new Timestamp(clbb.getTimeInMillis()));
 	   } 
+	   
+	   @FunctionType(functionName = "orderNM", argumentTypes = { AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static String orderNM(String s) {
+			 return  s.replaceAll("(\\w)\\-(\\w)", "$1$2");
+		}
+	   
 	
 	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.DATETIME)
 	   public static  Timestamp formulaToDate(Double res, String datatype) throws UcanaccessSQLException{
@@ -1618,5 +1624,5 @@ public class Functions {
 		    return String.format("%1$" + n + "s", tp);  
 	   }
 
-		
+	  
 }
