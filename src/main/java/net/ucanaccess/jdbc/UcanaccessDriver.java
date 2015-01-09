@@ -172,6 +172,11 @@ public final class UcanaccessDriver implements Driver {
 					    	throw new IOException(ex.getMessage());
 					    }
 					});
+					if(!ref.isInMemory()&&pr.containsKey("mirrorfolder")&&ref.getToKeepHsql()==null){
+						String fd=pr.getProperty("mirrorfolder");
+						ref.setMirrorFolder(new File("java.io.tmpdir".equals(fd)?System.getProperty("java.io.tmpdir"):fd));
+					}
+					
 				}
 				String pwd = ref.getDbIO().getDatabasePassword();
 				if (pwd != null&&!pr.containsKey("jackcessopener")) {

@@ -71,6 +71,8 @@ public class DBReference {
 	private boolean firstConnection=true;
 	private FileFormat dbFormat;
 	private boolean columnOrderDisplay;
+	private boolean hsqldbShutdown;
+	private File mirrorFolder;
 	
 
 	private class MemoryTimer {
@@ -85,6 +87,7 @@ public class DBReference {
 			activeConnection--;
 			if (DBReference.this.singleConnection && activeConnection == 0) {
 				try {
+					
 					shutdown(session);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -266,8 +269,9 @@ public class DBReference {
 		finalizeHSQLDB(session);
 		if (!this.inMemory) {
 			if (this.toKeepHsql == null) {
-				File folder = dbFile.getParentFile();
+				File folder = this.mirrorFolder==null?dbFile.getParentFile():this.mirrorFolder;
 				File hbase = new File(folder, "Ucanaccess_" + this);
+				if(hbase.exists())
 				for (File hsqlF : hbase.listFiles()) {
 					hsqlF.delete();
 				}
@@ -281,6 +285,7 @@ public class DBReference {
 				}
 			}
 		}
+		
 	}
 
 	public void decrementActiveConnection(Session session) {
@@ -288,6 +293,7 @@ public class DBReference {
 	}
 
 	private void finalizeHSQLDB(Session session) throws Exception {
+	 if(!this.hsqldbShutdown){
 		this.releaseLock();
 		Connection conn = null;
 		Statement st = null;
@@ -295,6 +301,7 @@ public class DBReference {
 			conn = this.getHSQLDBConnection(session);
 			st = conn.createStatement();
 			st.execute("SHUTDOWN");
+			this.hsqldbShutdown=true;
 		} catch (Exception w) {
 		} finally {
 			if (st != null)
@@ -302,6 +309,7 @@ public class DBReference {
 			if (conn != null)
 				conn.close();
 		}
+	   }
 	}
 
 	File getDbFile() {
@@ -352,7 +360,7 @@ public class DBReference {
 			setSintax(conn);
 			this.firstConnection=false;
 		}
-		
+		this.hsqldbShutdown=false;
 		conn.setAutoCommit(false);
 		return conn;
 	}
@@ -404,7 +412,7 @@ public class DBReference {
 					}
 					this.tempHsql = this.toKeepHsql;
 				} else {
-					File folder = dbFile.getParentFile();
+					File folder = this.mirrorFolder==null?dbFile.getParentFile(): this.mirrorFolder;
 					File hbase = new File(folder, "Ucanaccess_" + toString());
 					hbase.mkdir();
 					this.tempHsql = new File(hbase, this.id);
@@ -512,13 +520,12 @@ public class DBReference {
 		this.showSchema = showSchema;
 	}
 
-	void setTempHsql(File tempHsql) {
-		this.tempHsql = tempHsql;
-	}
+	
 		
 	void shutdown(Session session) throws Exception {
 		DBReferenceSingleton.getInstance()
 				.remove(this.dbFile.getAbsolutePath());
+		
 		this.dbIO.flush();
 		this.dbIO.close();
 		this.closeHSQLDB(session);
@@ -558,6 +565,16 @@ public class DBReference {
 	public void setColumnOrderDisplay() {
 		this. columnOrderDisplay=true;
 		if(this.dbIO!=null)dbIO.setColumnOrder(ColumnOrder.DISPLAY);
+	}
+
+	public boolean isInMemory() {
+		return inMemory;
+	}
+
+	
+	public void setMirrorFolder(File mirrorFolder) {
+		this.mirrorFolder=mirrorFolder;
+		
 	}
 
 	
