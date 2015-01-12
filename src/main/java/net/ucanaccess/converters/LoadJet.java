@@ -994,7 +994,7 @@ public class LoadJet {
 					v=v.trim().substring(0, v.length()-1);
 				execCreate(v,false);
 				loadedQueries.add(qnn);
-				this.notLoaded.remove(qnn);
+				this.notLoaded.remove(q.getName());
 				if (pivot != null) {
 					pivot.registerPivot(qnn);
 				}
