@@ -676,6 +676,10 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public String getString(int idx) throws SQLException {
 		try {
+			Object obj=getObject(idx);
+			if(obj instanceof Number){
+				return obj.toString();
+			}
 			return wrapped.getString(idx);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -684,6 +688,10 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public String getString(String columnLabel) throws SQLException {
 		try {
+			Object obj=getObject(columnLabel);
+			if(obj instanceof Number){
+				return obj.toString();
+			}
 			return wrapped.getString(checkEscaped(columnLabel));
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);

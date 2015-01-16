@@ -56,6 +56,7 @@ import net.ucanaccess.commands.ICommand.TYPES;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 
@@ -487,15 +488,17 @@ public class UcanaccessConnection implements Connection {
 
 	private String prepare(String sql) throws SQLException {
 		checkConnection();
-		if(SQLConverter.checkDDL(sql)){
-			throw new UcanaccessSQLException(UcanaccessSQLException.ExceptionMessages.STATEMENT_DDL);
-		 }
-		
 		return SQLConverter.convertSQL(sql,this);
 	}
 
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		try {
+			if(SQLConverter.checkDDL(sql)){
+			    Logger.log(Logger.Messages.STATEMENT_DDL);
+			    return new UcanaccessPreparedStatement(sql,
+						null, this);
+		     }
+		
 			sql = prepare(sql);
 			return new UcanaccessPreparedStatement(sql,
 					hsqlDBConnection.prepareStatement(preprocess(sql)), this);

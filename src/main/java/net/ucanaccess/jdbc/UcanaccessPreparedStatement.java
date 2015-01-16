@@ -65,6 +65,10 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		super(hidden, connection);
 		this.sql=sql;
 		this.wrapped = hidden;
+		if(hidden==null){
+			super.wrapped=connection.createStatement();
+			
+		}
 	}
 	
 	private class ParameterReset{
@@ -220,6 +224,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public boolean execute() throws SQLException {
 		try {
+			 if(this.wrapped==null){
+				return super.wrapped.execute(sql);
+			 }
 			 preprocess();
 			((UcanaccessConnection)this.getConnection()).setCurrentStatement(this);
 			checkLastModified();
@@ -242,6 +249,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	
 	public int executeUpdate() throws SQLException {
 		try {
+			if(this.wrapped==null){
+				return super.wrapped.executeUpdate(sql);
+			 }
 			 preprocess();
 			((UcanaccessConnection)this.getConnection()).setCurrentStatement(this);
 			checkLastModified();
@@ -776,6 +786,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	}
 	
 	protected void reset() throws SQLException{
+		if(this.wrapped==null)return;
 		PreparedStatement old=this.wrapped;
 		this.wrapped=((UcanaccessConnection)this.getConnection()).getHSQLDBConnection().prepareStatement(sql, wrapped.getResultSetType(),  wrapped.getResultSetConcurrency(),  wrapped.getResultSetHoldability());
 		reset(this.wrapped);

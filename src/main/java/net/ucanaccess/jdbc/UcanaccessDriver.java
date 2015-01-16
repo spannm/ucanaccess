@@ -163,6 +163,16 @@ public final class UcanaccessDriver implements Driver {
 						ref
 						.setColumnOrderDisplay();
 					}
+					
+					if(pr.containsKey("mirrorfolder")&&ref.getToKeepHsql()==null){
+						ref.setInMemory(false);
+						String fd=pr.getProperty("mirrorfolder");
+						ref.setMirrorFolder(new File("java.io.tmpdir".equals(fd)?System.getProperty("java.io.tmpdir"):fd));
+					}
+					if (pr.containsKey("ignorecase")) {
+						ref.setIgnoreCase("true".equalsIgnoreCase(pr
+								.getProperty("ignorecase")));
+					}
 					ref.getDbIO().setErrorHandler(new ErrorHandler() {
 					    @Override
 					        public Object handleRowError(Column cl, byte[] bt, Location location, Exception ex) throws IOException {
@@ -172,11 +182,6 @@ public final class UcanaccessDriver implements Driver {
 					    	throw new IOException(ex.getMessage());
 					    }
 					});
-					if(!ref.isInMemory()&&pr.containsKey("mirrorfolder")&&ref.getToKeepHsql()==null){
-						String fd=pr.getProperty("mirrorfolder");
-						ref.setMirrorFolder(new File("java.io.tmpdir".equals(fd)?System.getProperty("java.io.tmpdir"):fd));
-					}
-					
 				}
 				String pwd = ref.getDbIO().getDatabasePassword();
 				if (pwd != null&&!pr.containsKey("jackcessopener")) {
@@ -193,10 +198,7 @@ public final class UcanaccessDriver implements Driver {
 				if (user != null) {
 					session.setUser(user);
 				}
-				if (pr.containsKey("ignorecase")) {
-					session.setIgnoreCase("true".equalsIgnoreCase(pr
-							.getProperty("ignorecase")));
-				}
+				
 				
 				
 				

@@ -35,8 +35,9 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class UcanaccessStatement implements Statement {
 	private UcanaccessConnection connection;
-	private Statement wrapped;
+	protected Statement wrapped;
 	private int generatedKey=-10000;
+	
 	 
 
 	public UcanaccessStatement(Statement wrapped, UcanaccessConnection conn)
