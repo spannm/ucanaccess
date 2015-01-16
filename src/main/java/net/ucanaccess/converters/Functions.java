@@ -804,13 +804,13 @@ public class Functions {
 	
 	
 
-	@FunctionType(functionName = "INSTR", argumentTypes = { AccessType.LONG,
+	@FunctionType(namingConflict=true ,functionName = "INSTR", argumentTypes = { AccessType.LONG,
 			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.LONG)
 	public static Integer instr(Integer start, String text, String search) {
 		return instr(start, text, search, -1);
 	}
 
-	@FunctionType(functionName = "INSTR", argumentTypes = { AccessType.LONG,
+	@FunctionType(namingConflict=true ,functionName = "INSTR", argumentTypes = { AccessType.LONG,
 			AccessType.MEMO, AccessType.MEMO, AccessType.LONG }, returnType = AccessType.LONG)
 	public static Integer instr(Integer start, String text, String search,
 			Integer compare) {
@@ -824,13 +824,13 @@ public class Functions {
 		return text.indexOf(search) + start + 1;
 	}
 
-	@FunctionType(functionName = "INSTR", argumentTypes = { AccessType.MEMO,
+	@FunctionType(namingConflict=true ,functionName = "INSTR", argumentTypes = { AccessType.MEMO,
 			AccessType.MEMO }, returnType = AccessType.LONG)
 	public static Integer instr(String text, String search) {
 		return instr(1, text, search, -1);
 	}
 
-	@FunctionType(functionName = "INSTR", argumentTypes = { AccessType.MEMO,
+	@FunctionType(namingConflict=true ,functionName = "INSTR", argumentTypes = { AccessType.MEMO,
 			AccessType.MEMO, AccessType.LONG }, returnType = AccessType.LONG)
 	public static Integer instr(String text, String search, Integer compare) {
 		return instr(1, text, search, compare);
@@ -1544,11 +1544,11 @@ public class Functions {
 		  return    dateAdd("y", res?-1:0, new Timestamp(clbb.getTimeInMillis()));
 	   } 
 	   
-	   @FunctionType(functionName = "orderNM", argumentTypes = { AccessType.MEMO}, returnType = AccessType.MEMO)
-	   public static String orderNM(String s) {
-			 return  s.replaceAll("(\\w)\\-(\\w)", "$1$2");
+	   @FunctionType(functionName = "orderJet", argumentTypes = { AccessType.MEMO}, returnType = AccessType.MEMO)
+	   public static String orderJet(String s) {
+			 return  s.replaceAll("([a-zA-Z0-9])[\\-–—]([a-zA-Z0-9])", "$1$2");
 		}
-	   
+	  
 	
 	   @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DOUBLE,AccessType.MEMO}, returnType = AccessType.DATETIME)
 	   public static  Timestamp formulaToDate(Double res, String datatype) throws UcanaccessSQLException{

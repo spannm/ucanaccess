@@ -357,20 +357,18 @@ public class Persist2Jet {
 	private void saveColumnsDefaults(String[] defaults,Boolean[] required,Table table) throws IOException{
 		List<? extends Column> cols=table.getColumns();
 		int j=0;
+		
 		if(defaults!=null||required!=null)
 		for(Column cl:cols){
 			PropertyMap map=cl.getProperties();
-			boolean changed=false;
 			if(defaults!=null&&j<defaults.length&&defaults[j]!=null){
-				changed=true;
 				map.put(PropertyMap.DEFAULT_VALUE_PROP,DataType.TEXT,defaults[j]);
 			}
 			
-			if(required!=null&&j<required.length &&required[j]!=null&&required[j]&&!cl.isAutoNumber()){
-				changed=true;
-					map.put(PropertyMap.REQUIRED_PROP,DataType.BOOLEAN,required[j]);
+			if(required!=null&&j<required.length &&required[j]!=null&&!cl.isAutoNumber()){
+				map.put(PropertyMap.REQUIRED_PROP,DataType.BOOLEAN,required[j]);
 			}
-			if(changed)
+			
 			map.save();
 			
 			j++;

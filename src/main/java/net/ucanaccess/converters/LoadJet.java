@@ -1011,7 +1011,7 @@ public class LoadJet {
 				
 				
 				if (!err) {
-					Logger.log("Error occured while loading:" + q.getName());
+					Logger.log("Error occured at the first loading attempt of " + q.getName());
 					Logger.log("Converted view was :" + v);
 					Logger.log("Error message was :" + e.getMessage());
 					err = true;
