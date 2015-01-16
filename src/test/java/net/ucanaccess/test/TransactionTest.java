@@ -82,4 +82,26 @@ public class TransactionTest extends UcanaccessTestBase {
 				st.close();
 		}
 	}
+	
+	public void testSavepoint2() throws SQLException, IOException {
+		int count = getCount("select count(*) from T4");
+		super.ucanaccess.setAutoCommit(false);
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st
+					.execute("INSERT INTO T4 (id,descr)  VALUES( 1,'nel mezzo del cammin di nostra vita')");
+			Savepoint sp = super.ucanaccess.setSavepoint("Gord svp");
+			assertTrue(getCount("select count(*) from T4", false) == count);
+			st
+					.execute("INSERT INTO T4 (id,descr)  VALUES( 2,'nel mezzo del cammin di nostra vita')");
+			super.ucanaccess.rollback(sp);
+			super.ucanaccess.commit();
+			assertTrue(getCount("select count(*) from T4") == (count + 1));
+			super.ucanaccess.setAutoCommit(false);
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
 }

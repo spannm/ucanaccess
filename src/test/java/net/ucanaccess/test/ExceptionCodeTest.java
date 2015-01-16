@@ -22,7 +22,6 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.test;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -102,7 +101,7 @@ public class ExceptionCodeTest extends UcanaccessTestBase {
 	public void testGException() throws SQLException, IOException, ParseException {
 		Statement st = null;
 		try {
-			Connection conn=DriverManager.getConnection(UcanaccessDriver.URL_PREFIX +"ciao ciao");
+			DriverManager.getConnection(UcanaccessDriver.URL_PREFIX +"ciao ciao");
 				
 			
 			

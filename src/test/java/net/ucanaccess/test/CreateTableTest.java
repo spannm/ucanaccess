@@ -204,4 +204,9 @@ public class CreateTableTest extends UcanaccessTestBase {
 		st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
 		
 	}
+	
+	public void testPs() throws SQLException{
+		PreparedStatement ps = super.ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
+		ps.execute();
+	}
 }

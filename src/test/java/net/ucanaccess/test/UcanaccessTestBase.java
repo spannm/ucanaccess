@@ -72,6 +72,15 @@ public abstract class UcanaccessTestBase extends TestCase {
 	private Boolean ignoreCase;
 	private int inactivityTimeout=-1;
 	private String columnOrder;
+	private Boolean showSchema;
+	Boolean getShowSchema() {
+		return showSchema;
+	}
+
+	void setShowSchema(Boolean showSchema) {
+		this.showSchema = showSchema;
+	}
+
 	private static  ArrayList<Class<? extends UcanaccessTestBase>> tableCreated=new   ArrayList<Class<? extends UcanaccessTestBase>>();
 	
 	public UcanaccessTestBase() {
@@ -388,6 +397,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 		if(this.ignoreCase!=null)url+=";ignoreCase="+this.ignoreCase;
 		if(this.inactivityTimeout!=-1)url+=";inactivityTimeout="+this.inactivityTimeout;
 		if(this.columnOrder!=null)url+=";columnOrder="+this.columnOrder;
+		if(this.showSchema!=null)url+=";showSchema="+this.showSchema;
 		return DriverManager.getConnection(url, this.user, this.password);
 	}
 	
