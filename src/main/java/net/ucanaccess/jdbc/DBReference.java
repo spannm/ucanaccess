@@ -73,8 +73,9 @@ public class DBReference {
 	private boolean columnOrderDisplay;
 	private boolean hsqldbShutdown;
 	private File mirrorFolder;
-	
+	private boolean ignoreCase=true;
 
+	
 	private class MemoryTimer {
 		private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
 		private int activeConnection;
@@ -323,9 +324,10 @@ public class DBReference {
 	   Statement st = null;
 		try {
 			st = conn.createStatement();
-			st.execute("set ignorecase true");
+			st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 			
 		} catch (Exception w) {
+			
 		} finally {
 			if (st != null)
 				st.close();
@@ -347,16 +349,23 @@ public class DBReference {
    }
 	
 	public Connection getHSQLDBConnection(Session session) throws SQLException {
+		boolean keptMirror=false;
+		if(this.firstConnection&&this.toKeepHsql!=null&&this.toKeepHsql.exists()){
+			 keptMirror=true;
+		}
+		
 		Connection conn= DriverManager.getConnection(this.getHsqlUrl(session),
 				session.getUser() == null ? "Admin" : session.getUser(),
 				session.getPassword());
+		
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
-		if (session.isIgnoreCase()) {
-			setIgnoreCase( conn);
-		}
+		
 		if(this.firstConnection){
+			if (this.ignoreCase&&!keptMirror) {
+				setIgnoreCase( conn);
+			}
 			setSintax(conn);
 			this.firstConnection=false;
 		}
@@ -416,6 +425,7 @@ public class DBReference {
 					File hbase = new File(folder, "Ucanaccess_" + toString());
 					hbase.mkdir();
 					this.tempHsql = new File(hbase, this.id);
+					
 					this.tempHsql.createNewFile();
 				}
 				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -460,6 +470,18 @@ public class DBReference {
 
 	boolean isShowSchema() {
 		return showSchema;
+	}
+	
+	
+
+	boolean isIgnoreCase() {
+		return ignoreCase;
+	}
+	
+	
+
+	void setIgnoreCase(boolean ignoreCase) {
+		this.ignoreCase = ignoreCase;
 	}
 
 	private void lockMdbFile() throws UcanaccessSQLException {

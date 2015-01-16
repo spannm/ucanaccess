@@ -87,6 +87,10 @@ public abstract class AbstractExecute {
 		this.commandType = CommandType.WITH_COLUMNS_NAME;
 	}
 
+	
+	
+	
+	
 	private Object addDDLCommand() throws SQLException {
 		try {
 			DDLType ddlType = SQLConverter.getDDLType(sql);
