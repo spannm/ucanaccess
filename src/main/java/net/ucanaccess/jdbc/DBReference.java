@@ -73,7 +73,7 @@ public class DBReference {
 	private boolean columnOrderDisplay;
 	private boolean hsqldbShutdown;
 	private File mirrorFolder;
-	private boolean ignoreCase=true;
+
 
 	
 	private class MemoryTimer {
@@ -320,19 +320,19 @@ public class DBReference {
 	public Database getDbIO() {
 		return dbIO;
 	}
-   private void setIgnoreCase(Connection conn) throws SQLException{
-	   Statement st = null;
-		try {
-			st = conn.createStatement();
-			st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
-			
-		} catch (Exception w) {
-			
-		} finally {
-			if (st != null)
-				st.close();
-		}
-   }
+	
+	private void setIgnoreCase(Connection conn) throws SQLException{
+		   Statement st = null;
+			try {
+				st = conn.createStatement();
+				st.execute("set ignorecase true");
+				
+			} catch (Exception w) {
+			} finally {
+				if (st != null)
+					st.close();
+			}
+	   }
 	
 	
    private void setSintax(Connection conn) throws SQLException{
@@ -348,24 +348,19 @@ public class DBReference {
 		}
    }
 	
+	
+	
 	public Connection getHSQLDBConnection(Session session) throws SQLException {
-		boolean keptMirror=false;
-		if(this.firstConnection&&this.toKeepHsql!=null&&this.toKeepHsql.exists()){
-			 keptMirror=true;
-		}
-		
 		Connection conn= DriverManager.getConnection(this.getHsqlUrl(session),
 				session.getUser() == null ? "Admin" : session.getUser(),
 				session.getPassword());
-		
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
-		
+		if (session.isIgnoreCase()) {
+			setIgnoreCase( conn);
+		}
 		if(this.firstConnection){
-			if (this.ignoreCase&&!keptMirror) {
-				setIgnoreCase( conn);
-			}
 			setSintax(conn);
 			this.firstConnection=false;
 		}
@@ -373,7 +368,6 @@ public class DBReference {
 		conn.setAutoCommit(false);
 		return conn;
 	}
-	
 	
 	
 
@@ -473,16 +467,6 @@ public class DBReference {
 	}
 	
 	
-
-	boolean isIgnoreCase() {
-		return ignoreCase;
-	}
-	
-	
-
-	void setIgnoreCase(boolean ignoreCase) {
-		this.ignoreCase = ignoreCase;
-	}
 
 	private void lockMdbFile() throws UcanaccessSQLException {
 		try {

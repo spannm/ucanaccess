@@ -169,10 +169,7 @@ public final class UcanaccessDriver implements Driver {
 						String fd=pr.getProperty("mirrorfolder");
 						ref.setMirrorFolder(new File("java.io.tmpdir".equals(fd)?System.getProperty("java.io.tmpdir"):fd));
 					}
-					if (pr.containsKey("ignorecase")) {
-						ref.setIgnoreCase("true".equalsIgnoreCase(pr
-								.getProperty("ignorecase")));
-					}
+					
 					ref.getDbIO().setErrorHandler(new ErrorHandler() {
 					    @Override
 					        public Object handleRowError(Column cl, byte[] bt, Location location, Exception ex) throws IOException {
@@ -198,10 +195,11 @@ public final class UcanaccessDriver implements Driver {
 				if (user != null) {
 					session.setUser(user);
 				}
-				
-				
-				
-				
+				if (pr.containsKey("ignorecase")) {
+					session.setIgnoreCase("true".equalsIgnoreCase(pr
+							.getProperty("ignorecase")));
+				}
+						
 				SQLWarning sqlw=null;
 				if (!alreadyLoaded) {
 					boolean toBeLoaded=!ref.loadedFromKeptMirror(session);
