@@ -682,10 +682,9 @@ public class LoadJet {
 					if (ps == null)
 						ps = sqlInsert(t, row, systemTable);
 					Collection<Object> ce = row.values();
-					int j = 0;
+				
 					for (Object obj : ce) {
 						values.add(value(obj));
-						j++;
 					}
 					execInsert(ps, values);
 					if ((i > 0 && i % 1000 == 0) || i == t.getRowCount() - 1) {
