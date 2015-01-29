@@ -877,7 +877,19 @@ public class Functions {
 	public static boolean isNull(String o) {
 		return o == null;
 	}
-
+	
+	
+	@FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = { AccessType.DATETIME }, returnType = AccessType.YESNO)
+	public static boolean isNull(Timestamp o) {
+		return o == null;
+	}
+	
+	
+	@FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.YESNO)
+	public static boolean isNull(Double o) {
+		return o == null;
+	}
+	
 	@FunctionType(functionName = "ISNUMERIC", argumentTypes = { AccessType.NUMERIC }, returnType = AccessType.YESNO)
 	public static boolean isNumeric(BigDecimal b) {
 		return true;
