@@ -75,7 +75,10 @@ public class FunctionsTest extends UcanaccessTestBase {
 	}
 	
 	
-	
+	public void testSwitch() throws SQLException, IOException {
+		checkQuery("select  switch('1'='1',1,false,2,true, 1 )FROM t234");
+		
+	}
 	
 
 	public void testATN() throws SQLException, IOException {

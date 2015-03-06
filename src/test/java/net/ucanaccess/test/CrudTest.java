@@ -44,6 +44,7 @@ public class CrudTest extends UcanaccessTestBase {
 		super.setUp();
 		 executeCreateTable("CREATE TABLE T1 (id LONG,descr TEXT) ");
 		
+		
 	}
 	
 	public void testCrud() throws SQLException, IOException {
@@ -96,7 +97,7 @@ public class CrudTest extends UcanaccessTestBase {
 			assertTrue("Failed Update", ret);
 			ps.close();
 			ps = super.ucanaccess
-					.prepareStatement("DELETE FROM  t1  WHERE  id=?");
+					.prepareStatement("DELETE * FROM  t1  WHERE  id=?");
 			ps.setInt(1, id1);
 			ps.executeUpdate();
 			ret = getCount("select count(*) from T1 where id=" + id1) == 0;
@@ -229,6 +230,42 @@ public class CrudTest extends UcanaccessTestBase {
 		    ps.getConnection().commit();
 		Object[][] ver = {{ 4, "Growing old in rural pleaces" } ,{ 6666554, "tre canarini volano su e cadono" } };
 		super.checkQuery("SELECT *  FROM T1 order by id", ver);
+		st.execute("delete from t1");
+		} 
+		finally {
+			if (rs != null)
+				rs.close();
+			if (st != null)
+				st.close();
+			
+		}
+	}
+	
+	public void testInsertRSaui() throws SQLException, IOException {
+		Statement st = null;
+		ResultSet rs =null;
+		try {
+			 super.ucanaccess.setAutoCommit(false);
+	    st = super.ucanaccess.createStatement();
+		st.execute(" CREATE TABLE T2 (id AUTOINCREMENT,descr TEXT) ");
+		st.execute("delete from t2");
+		
+		PreparedStatement ps = super.ucanaccess.prepareStatement(
+				"SELECT *  FROM T2", ResultSet.TYPE_FORWARD_ONLY,
+				ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		 rs = ps.executeQuery();
+		 rs.moveToInsertRow();
+		 rs.updateInt(1,0);
+		  rs.updateString(2, "Growing old in rural pleaces");
+		
+		  rs.insertRow();
+		  rs =ps.getGeneratedKeys();rs.next();
+		   System.out.println( rs.getInt(1));
+		    ps.getConnection().commit();
+		   
+		 
+	
+		super.checkQuery("SELECT *  FROM T2 order by id",1, "Growing old in rural pleaces" );
 		st.execute("delete from t1");
 		} 
 		finally {

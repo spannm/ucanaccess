@@ -22,6 +22,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.test.suite;
 
 import net.ucanaccess.test.ComplexTest;
+import net.ucanaccess.test.CorruptedTest;
 import net.ucanaccess.test.UcanaccessTestBase;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -34,6 +35,7 @@ public class AllTests2010 {
 		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2010);
 		TestSuite ts= AllTestsBase.suite();
 		ts.addTestSuite(ComplexTest.class);
+		ts.addTestSuite(CorruptedTest.class);
 		return ts;
 	}
 }
