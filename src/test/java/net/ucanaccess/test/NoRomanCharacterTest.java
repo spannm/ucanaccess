@@ -21,6 +21,7 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.test;
 
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -45,6 +46,11 @@ public class NoRomanCharacterTest extends UcanaccessTestBase {
 			st = super.ucanaccess.createStatement();
 			 st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþ])  VALUES( 'the end','yeeep')");
 			st.execute("UPDATE NOROMAN SET [q3¹²³¼½¾ß€Ð×ÝÞðýþ]='NOOOp' WHERE [end]='the end' ");
+			ResultSet rs=st.executeQuery("SELECT * FROM NOROMAN");
+			while(rs.next()){
+				System.out.println(rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþ"));
+			}
+			
 			checkQuery("SELECT * FROM NOROMAN");
 		} finally {
 			if (st != null)
