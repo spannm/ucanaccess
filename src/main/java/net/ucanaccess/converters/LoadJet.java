@@ -69,7 +69,7 @@ import com.healthmarketscience.jackcess.impl.IndexData;
 import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.query.Query;
 
-public class LoadJet {
+public class LoadJet { 
 	private static int namingCounter = 0;
 
 	private final class FunctionsLoader {
@@ -153,7 +153,7 @@ public class LoadJet {
 
 		private void createFunctions() throws SQLException {
 			for (String functionDef : functionsDefinition) {
-				execCreate(functionDef,true);
+				exec(functionDef,true);
 			}
 			functionsDefinition.clear();
 		}
@@ -203,6 +203,9 @@ public class LoadJet {
 	private final class TablesLoader {
 		private static final int HSQL_FK_ALREADY_EXISTS = -ErrorCode.X_42528;   // -5528;
 		private static final int HSQL_UK_ALREADY_EXISTS= -ErrorCode.X_42522;//-5522
+		private static final int HSQL_NOT_NULL= -ErrorCode.X_23502;
+		private static final int HSQL_FK_VIOLATION= -ErrorCode.X_23503;
+		private static final int HSQL_UK_VIOLATION=-ErrorCode.X_23505;
 		private static final String SYSTEM_SCHEMA = "SYS";
 		private ArrayList<String> unresolvedTables = new ArrayList<String>();
 		private ArrayList<String> calculatedFieldsTriggers=new ArrayList<String>();
@@ -329,9 +332,13 @@ public class LoadJet {
 			}
 			return false;
 		}
+		
+		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException{
+			createSyncrTable(t,systemTable, true) ;
+		}
 
 		
-		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException {
+		private void createSyncrTable(Table t,boolean systemTable, boolean constraints) throws SQLException, IOException {
 			String tn = t.getName();
 			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
 			StringBuffer sbC = new StringBuffer("CREATE  CACHED TABLE ").append(
@@ -343,7 +350,7 @@ public class LoadJet {
 					Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME,t.getName());
 				}
 				String expr=getExpression(cl);
-				if(expr!=null){
+				if(expr!=null&&constraints){
 					String tgrI=getCalculatedFieldTrigger(ntn,cl,true);
 					String tgrU=getCalculatedFieldTrigger(ntn,cl,false);
 					calculatedFieldsTriggers.add(String.format(tgrI,namingCounter++,SQLConverter.convertFormula(expr)));
@@ -361,7 +368,7 @@ public class LoadJet {
 				
 				PropertyMap pm = cl.getProperties();
 				Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-				if (required != null&&
+				if (constraints&&required != null&&
 						required instanceof Boolean && ((Boolean) required)		
 						) {
 					sbC.append(" NOT NULL ");
@@ -369,7 +376,7 @@ public class LoadJet {
 				comma = ",";
 			}
 			sbC.append(")");
-			execCreate(sbC.toString(),true);
+			exec(sbC.toString(),true);
 			
 		}
 
@@ -391,7 +398,7 @@ public class LoadJet {
 		
 		private String getUpdateConditions(Column cl) throws IOException {
 			PropertyMap map=cl.getProperties();
-            Property exprp=map.get(  PropertyMap.EXPRESSION_PROP);
+            Property exprp=map.get(PropertyMap.EXPRESSION_PROP);
              
             if(exprp!=null){
             	Set<String> setu=SQLConverter.getFormulaDependencies(exprp.getValue().toString());
@@ -482,13 +489,13 @@ public class LoadJet {
 				}
 			}
 			for (String trigger : arTrigger) {
-				execCreate(trigger,true);
+				exec(trigger,true);
 			}
 		}
 		private int countFKs() throws IOException{
 			int i=0;
 			for (String tn : this.loadingOrder) {
-				Table table = dbIO.getTable(tn);
+				UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn),tn);
 				if (!this.unresolvedTables.contains(tn)) {
 					for (Index idxi : table.getIndexes()) {
 						// riw
@@ -510,7 +517,7 @@ public class LoadJet {
 				ArrayList<String> loadingOrder0=new ArrayList<String>();
 				loadingOrder0.addAll(this.loadingOrder);
 				for (String tn : loadingOrder0) {
-					Table table = dbIO.getTable(tn);
+					UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn),tn);
 					if (!this.unresolvedTables.contains(tn)) {
 						for (Index idxi : table.getIndexes()) {
 							// riw
@@ -543,9 +550,8 @@ public class LoadJet {
 		}
 		
 		
-		private void loadForeignKey(Index idxi) throws IOException, SQLException {
+		private void loadForeignKey(Index idxi,String ctn) throws IOException, SQLException {
 			IndexImpl idx=(IndexImpl)idxi;
-			String ctn=idx.getTable().getName();
 			String rtn=idx.getReferencedIndex().getTable().getName();
 			List<IndexData.ColumnDescriptor> cls=idx.getColumns();
 			if(cls.size()==1){
@@ -575,7 +581,7 @@ public class LoadJet {
 				ci.append(" ON UPDATE CASCADE ");
 			}
 			try {
-				execCreate(ci.toString(),true);
+				exec(ci.toString(),true);
 			} catch (SQLException e) {
 				if (e.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
 					Logger.log(e.getMessage());
@@ -588,9 +594,9 @@ public class LoadJet {
 
 		
 
-		private void loadIndex(Index idx) throws IOException, SQLException {
+		private void loadIndex(Index idx,String tn) throws IOException, SQLException {
 			String ntn = SQLConverter
-					.escapeIdentifier(idx.getTable().getName());
+					.escapeIdentifier(tn);
 			if(ntn==null)return;
 			String nin = SQLConverter.escapeIdentifier(idx.getName());
 			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
@@ -620,7 +626,7 @@ public class LoadJet {
 						.append(" ON ").append(ntn).append(colsIdx);
 			}
 			try {
-				execCreate(ci.toString(),true);
+				exec(ci.toString(),true);
 			} 
 			catch (SQLException e) {
 				if( HSQL_UK_ALREADY_EXISTS== e.getErrorCode())return ;
@@ -646,11 +652,42 @@ public class LoadJet {
 		}
 
 				
-		private void createTable(Table t) throws SQLException, IOException {
+		private void createTable(Table  t) throws SQLException, IOException {
 			createTable(t,false) ;
 		}
-
-		private void createTable(Table t, boolean systemTable) throws SQLException, IOException {
+		
+		private void dropTable(Table  t,boolean systemTable) throws SQLException{
+			String tn = t.getName();
+			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
+			exec("DROP TABLE "+ntn+" CASCADE ",false);
+		}
+		
+		private void makeTableReadOnly(Table  t,boolean systemTable) throws SQLException{
+			String tn = t.getName();
+			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
+			exec("SET TABLE "+ntn+" READONLY TRUE ",false);
+		}
+		
+		private void recreate(Table  t,boolean systemTable,Row record, int errorCode) throws SQLException, IOException{
+			String type="";
+			switch(errorCode){
+			 	case HSQL_FK_VIOLATION: type="Foreign Key";break;
+			 	case HSQL_NOT_NULL: type="Not Null";break;
+			 	case HSQL_UK_VIOLATION: type="Unique";break;
+			}
+			Logger.logParametricWarning(Messages.CONSTRAINT,type,t.getName(), record.toString(),t.getName() );
+			dropTable( t,systemTable);
+			createSyncrTable(t, systemTable,false);
+			if(errorCode!=HSQL_FK_VIOLATION)
+			loadTableFKs(t.getName());
+			loadTableData(t, systemTable);
+			makeTableReadOnly(t,systemTable);
+			
+		}
+		
+		
+		
+		private void createTable(Table  t, boolean systemTable) throws SQLException, IOException {
 			String tn = t.getName();
 			if (tn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(tn);
@@ -662,6 +699,7 @@ public class LoadJet {
 		}
 		
 		private boolean hasAppendOnly(Table t) {
+			
 			for (Column c:t.getColumns()){
 				if(c.isAppendOnly()){
 					return true;
@@ -670,7 +708,7 @@ public class LoadJet {
 			return false;
 		}
 
-		private void loadTableData(Table t, boolean systemTable)
+		private void loadTableData(Table  t, boolean systemTable)
 				throws IOException, SQLException {
 			PreparedStatement ps = null;
 			try {
@@ -688,9 +726,21 @@ public class LoadJet {
 					}
 					execInsert(ps, values);
 					if ((i > 0 && i % 1000 == 0) || i == t.getRowCount() - 1) {
+						try{
+							ps.executeBatch();
+						}catch(SQLException e){
+							if(e.getErrorCode()==HSQL_NOT_NULL||
+								e.getErrorCode()==HSQL_FK_VIOLATION	||
+								e.getErrorCode()==HSQL_UK_VIOLATION		
+							){
+								recreate( t, systemTable,row,e.getErrorCode());
+							}else
+							throw e;
+						}
 						conn.commit();
 					}
 					i++;
+					
 				}
 				if (i != t.getRowCount()) {
 					Logger.logParametricWarning(Messages.ROW_COUNT,
@@ -703,22 +753,21 @@ public class LoadJet {
 			}
 		}
 
-		private void loadTableFKs(String tableName) throws IOException,
+		private void loadTableFKs(String tn) throws IOException,
 				SQLException {
-			Table table = dbIO.getTable(tableName);
+			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
 			for (Index idxi : table.getIndexes()) {
 				//riw
 				IndexImpl idx=(IndexImpl)idxi;
 				if (idx.isForeignKey() && !idx.getReference().isPrimaryTable())
-					loadForeignKey(idx);
+					loadForeignKey(idx,tn);
 				}
 		}
 		
 		private void createCalculatedFieldsTriggers(){
 			for (String trigger : calculatedFieldsTriggers) {
 				try{
-				
-					execCreate(trigger,false);
+					exec(trigger,false);
 				}catch(SQLException e){
 					Logger.logWarning(e.getMessage());
 					break;
@@ -730,24 +779,25 @@ public class LoadJet {
 		
 		
 		
-		private void loadTableIndexesUK(String tableName) throws IOException,
+		private void loadTableIndexesUK(String tn) throws IOException,
 				SQLException {
-			Table table = dbIO.getTable(tableName);
+			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
 			for (Index idx : table.getIndexes()) {
 				if (!idx.isForeignKey() && (idx.isPrimaryKey()||idx.isUnique())) {
-					loadIndex(idx);
+					loadIndex(idx,tn);
 				}
 			}
 
 		}
 		
-		private void loadTableIndexesNotUK(String tableName)
+		private void loadTableIndexesNotUK(String tn)
 				throws IOException, SQLException {
-			Table table = dbIO.getTable(tableName);
+			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
+			if(!skipIndexes)
 			for (Index idx : table.getIndexes()) {
 				if (!idx.isForeignKey() && !idx.isPrimaryKey()
 						&& !idx.isUnique()) {
-					loadIndex(idx);
+					loadIndex(idx,tn);
 				}
 			}
 
@@ -756,9 +806,9 @@ public class LoadJet {
 		
 		private void createTables() throws SQLException, IOException{
 			for (String tn : dbIO.getTableNames()) {
-				Table t = null;
+				UcanaccessTable t = null;
 				try {
-					t = dbIO.getTable(tn);
+					t = new UcanaccessTable(dbIO.getTable(tn),tn) ;
 				} catch (Exception e) {
 					Logger.logWarning(e.getMessage());
 					this.unresolvedTables.add(tn);
@@ -803,7 +853,7 @@ public class LoadJet {
 		private void loadTablesData() throws SQLException, IOException{
 			for (String tn : this.loadingOrder) {
 				if (!this.unresolvedTables.contains(tn)){
-					Table t = dbIO.getTable(tn);
+					UcanaccessTable  t =new UcanaccessTable ( dbIO.getTable(tn),tn);
 					this.loadTableData(t,false);
 					conn.commit();
 					
@@ -815,7 +865,7 @@ public class LoadJet {
 			createCalculatedFieldsTriggers();
 			for (String tn : this.loadingOrder) {
 				if (!this.unresolvedTables.contains(tn)){
-					Table t = dbIO.getTable(tn);
+					UcanaccessTable  t =new UcanaccessTable ( dbIO.getTable(tn),tn);
 					createSyncrTriggers(t);
 				}
 			}
@@ -826,15 +876,15 @@ public class LoadJet {
 			if(sysSchema){
 				createSystemSchema();
 				for (String tn : dbIO.getSystemTableNames()) {
-					Table t = null;
+					UcanaccessTable t = null;
 					try {
-						t = dbIO.getSystemTable(tn);
+						t = new UcanaccessTable( dbIO.getSystemTable(tn),tn);
 					
 					if (t != null){
 						createTable(t,true);
 						loadTableData(t,true);
-						execCreate("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
-						execCreate("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
+						exec("SET TABLE "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" READONLY TRUE ",false);
+						exec("GRANT SELECT  ON "+schema(SQLConverter.escapeIdentifier(t.getName()),true)+" TO PUBLIC ",false);
 					}
 			    	} catch (Exception ignore) {}
 			    	}
@@ -854,7 +904,7 @@ public class LoadJet {
 		}
 
 		private void createSystemSchema() throws SQLException {
-			execCreate("CREATE SCHEMA "+SYSTEM_SCHEMA+" AUTHORIZATION DBA",false);
+			exec("CREATE SCHEMA "+SYSTEM_SCHEMA+" AUTHORIZATION DBA",false);
 		}
 		
 		private void createSyncrTriggers(Table t) throws SQLException, IOException{
@@ -865,7 +915,7 @@ public class LoadJet {
 			loadedTables.add(ntn);
 		}
 
-		private PreparedStatement sqlInsert(Table t, Map<String, Object> row,boolean systemTable)
+		private PreparedStatement sqlInsert(Table  t, Map<String, Object> row,boolean systemTable)
 				throws IOException, SQLException {
 			String tn = t.getName();
 			String ntn = schema(SQLConverter.escapeIdentifier(tn),systemTable);
@@ -921,7 +971,7 @@ public class LoadJet {
 			String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
 			String triggerName = namePrefix + "_"
 					+ (tableName.replaceAll("\"", "").replaceAll(" ", "_"));
-			execCreate("CREATE TRIGGER " + triggerName + "  " + when + " ON "
+			exec("CREATE TRIGGER " + triggerName + "  " + when + " ON "
 					+ tableName + "   FOR EACH ROW	" + q0 + "   CALL \""
 					+ className + "\" ",true);
 		}
@@ -991,7 +1041,7 @@ public class LoadJet {
 				v = SQLConverter.convertSQL(sb.toString(), true);
 				if(v.trim().endsWith(";"))
 					v=v.trim().substring(0, v.length()-1);
-				execCreate(v,false);
+				exec(v,false);
 				loadedQueries.add(qnn);
 				this.notLoaded.remove(q.getName());
 				if (pivot != null) {
@@ -1143,6 +1193,7 @@ public class LoadJet {
 	 private ViewsLoader viewsLoader = new ViewsLoader();
 	private boolean sysSchema;
 	private boolean ff1997;
+	private boolean skipIndexes;
 
 	public LoadJet(Connection conn, Database dbIO) {
 		super();
@@ -1155,7 +1206,7 @@ public class LoadJet {
 		}
 	}
 	
-	public void loadDefaultValues(Table t) throws SQLException, IOException{
+	public void loadDefaultValues(Table  t) throws SQLException, IOException{
 		this.tablesLoader.defaultValues(t);
 	}
 
@@ -1173,7 +1224,7 @@ public class LoadJet {
 		this.functionsLoader.addFunctions(clazz);
 	}
 
-	private void execCreate(String expression, boolean logging) throws SQLException {
+	private void exec(String expression, boolean logging) throws SQLException {
 		Statement st = null;
 		try {
 			
@@ -1198,7 +1249,8 @@ public class LoadJet {
 		for (Object value : values) {
 			st.setObject(i++, value);
 		}
-		st.execute();
+		//st.execute();
+		st.addBatch();
 	}
 
 	public SQLWarning getLoadingWarnings() {
@@ -1270,6 +1322,11 @@ public class LoadJet {
 
 	public void setSysSchema(boolean sysSchema) {
 		this.sysSchema=sysSchema;
+		
+	}
+
+	public void setSkipIndexes(boolean skipIndexes) {
+		this.skipIndexes=skipIndexes;
 		
 	}
 	
