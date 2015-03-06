@@ -57,8 +57,13 @@ public class SQLConverter {
 			.compile("^([\n\r\\s]*(?i)(create|alter|drop))[\n\r\\s]+.*");
 	private static final Pattern KIND_OF_SUBQUERY = Pattern
 			.compile("(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])");
+	
+	private static final String PRE_SWITCH_PATTERN ="(\\W)((?i)SWITCH)([\\s\n\r]*\\()";
+	
+	private final static String SWITCH_ENC="@@@@";
+	
 	private static final Pattern SWITCH_PATTERN = Pattern
-			.compile("(\\W(?i)SWITCH[\\s\n\r]*)(\\([^\\)]*\\))");
+			.compile("(\\W(?i)"+SWITCH_ENC+"SWITCH"+SWITCH_ENC+"[\\s\n\r]*)(\\([^\\)]*\\))");
 	private static final Pattern NO_DATA_PATTERN = Pattern
 			.compile(" (?i)WITH[\\s\n\r]+(?i)NO[\\s\n\r]+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
@@ -66,7 +71,7 @@ public class SQLConverter {
 	private static final Pattern SELECT_IDENTITY = Pattern.compile("(?i)select[\\s\n\r]+(?i)@@identity.*");
 	private static final Pattern HAS_FROM = Pattern.compile("[\\s\n\r]+(?i)from[\\s\n\r]+");
 	private static final Pattern FORMULA_DEPENDENCIES=Pattern.compile("\\[([^\\]]*)\\]");
-	
+	private static final String EXCLAMATION_POINT="(\\!)([\n\r\\s]*)([^\\=])";
 	
 	private static final String YES = "(\\W)((?i)YES)(\\W)";
 	private static final String NO = "(\\W)((?i)NO)(\\W)";
@@ -117,11 +122,12 @@ public class SQLConverter {
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
 	private static final HashSet<String> alreadyEscapedIdentifiers = new HashSet<String>();
 	private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
-	
+	private static final HashSet<String> apostrophisedNames=new HashSet<String>();
 	
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	
 	private static boolean supportsAccessLike = true;
+	
 	static {
 		noRomanCharacters.put("\u20ac", "EUR");
 		noRomanCharacters.put("\u00B9", "1");
@@ -292,6 +298,12 @@ public class SQLConverter {
 	private static String replaceBacktrik(String sql) {
 		return sql.replaceAll(BACKTRIK, "[$2]");
 	}
+	
+	private static String replaceAposNames(String sql) {
+		for(String an:apostrophisedNames)
+			sql= sql.replaceAll("(?i)"+Pattern.quote("["+an+"]"), "["+an.replaceAll("'","").replaceAll("\"","")+"]");
+		return sql;
+	}
 
 	public static String convertSQL(String sql, boolean creatingQuery) {
 		return convertSQL(sql, null, creatingQuery);
@@ -303,15 +315,15 @@ public class SQLConverter {
 		
 		sql = sql + " ";
 		sql = replaceBacktrik(sql);
-		sql = convertDeleteAll(sql);
+		sql = replaceAposNames(sql);
 		sql = convertUnion(sql);
-		sql = convertSwitch(sql);
 		sql = convertAccessDate(sql);
 		sql = convertQuotedAliases(sql);
 		sql = escape(sql);
+		sql =convertSwitch(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
-		
+		sql = replaceExclamationPoints(sql);
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -321,12 +333,20 @@ public class SQLConverter {
 		return sql;
 	}
 
+	private static String replaceExclamationPoints(String sql) {
+		return sql.replaceAll(EXCLAMATION_POINT, ".$2$3");
+	}
+	
 	private static String convertOwnerAccess(String sql) {
 		return sql.replaceAll(WITH_OWNERACCESS_OPTION, "");
 	}
 	
 	private static String convertDeleteAll(String sql) {
 		return sql.replaceAll(DELETE_ALL, "$1$3");
+	}
+	
+	private static String preConvertSwitch(String sql) {
+		return sql.replaceAll(PRE_SWITCH_PATTERN, "$1"+SWITCH_ENC+"$2"+SWITCH_ENC+"$3");
 	}
 
 	private static String convertSwitch(String sql) {
@@ -530,8 +550,8 @@ public class SQLConverter {
 	}
 
 	private static String convertSQLTokens(String sql) {
-		return replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql
-				.replaceAll("&", "||")))));
+		return  convertDeleteAll(preConvertSwitch(replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql
+				.replaceAll("&", "||")))))));
 	}
 
 	private static String replaceDigitStartingIdentifiers(String sql) {
@@ -615,6 +635,11 @@ public class SQLConverter {
 		if (TableBuilder.isReservedWord(nl)) {
 			xescapedIdentifiers.add(nl);
 		}
+		if(name.indexOf("'")>=0||name.indexOf("\"")>0){
+			apostrophisedNames.add(name);
+		}
+		
+		
 		if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
