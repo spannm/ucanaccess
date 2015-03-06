@@ -751,8 +751,7 @@ public class UcanaccessConnection implements Connection {
 
 	
 	public void setSchema(String schema) throws SQLException {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 	

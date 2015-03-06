@@ -119,6 +119,12 @@ public final class UcanaccessDriver implements Driver {
 						ref.setInMemory("true".equalsIgnoreCase(pr
 								.getProperty("memory")));
 					}
+					
+					if (pr.containsKey("lobscale")) {
+						Integer vl= validateLobScale(pr.getProperty("lobscale"));
+						ref.setLobScale(vl);
+					}
+					
 					if(pr.containsKey("keepmirror")){
 						ref.setInMemory(false);
 						if(ref.isEncryptHSQLDB()){
@@ -126,7 +132,9 @@ public final class UcanaccessDriver implements Driver {
 						}else{
 							File dbMirror=new File(pr.getProperty("keepmirror")+mdb.getName().toUpperCase().hashCode());
 							ref.setToKeepHsql(dbMirror);
-							
+							if(pr.containsKey("readonlymirror")){
+								ref.setMirrorReadOnly("true".equalsIgnoreCase(pr.getProperty("readonlymirror")));
+							}
 						}
 					}
 					
@@ -147,9 +155,17 @@ public final class UcanaccessDriver implements Driver {
 					}
 
 					if (pr.containsKey("lockmdb")) {
-						ref.setLockMdb("true".equalsIgnoreCase(pr
+						ref.setOpenExclusive("true".equalsIgnoreCase(pr
 								.getProperty("lockmdb")));
 					}
+					
+					
+					if (pr.containsKey("openexclusive")) {
+						ref.setOpenExclusive("true".equalsIgnoreCase(pr
+								.getProperty("openexclusive")));
+					}
+					
+					
 					if(pr.containsKey("remap")){
 						ref.setExternalResourcesMapping(toMap(pr.getProperty("remap")));
 					}
@@ -168,6 +184,10 @@ public final class UcanaccessDriver implements Driver {
 						ref.setInMemory(false);
 						String fd=pr.getProperty("mirrorfolder");
 						ref.setMirrorFolder(new File("java.io.tmpdir".equals(fd)?System.getProperty("java.io.tmpdir"):fd));
+					}
+					if (pr.containsKey("ignorecase")) {
+						ref.setIgnoreCase("true".equalsIgnoreCase(pr
+								.getProperty("ignorecase")));
 					}
 					
 					ref.getDbIO().setErrorHandler(new ErrorHandler() {
@@ -195,10 +215,7 @@ public final class UcanaccessDriver implements Driver {
 				if (user != null) {
 					session.setUser(user);
 				}
-				if (pr.containsKey("ignorecase")) {
-					session.setIgnoreCase("true".equalsIgnoreCase(pr
-							.getProperty("ignorecase")));
-				}
+				
 						
 				SQLWarning sqlw=null;
 				if (!alreadyLoaded) {
@@ -209,6 +226,10 @@ public final class UcanaccessDriver implements Driver {
 					if (pr.containsKey("sysschema")) {
 						la.setSysSchema("true".equalsIgnoreCase(pr
 								.getProperty("sysschema")));
+					}
+					if (pr.containsKey("skipindexes")) {
+						la.setSkipIndexes("true".equalsIgnoreCase(pr
+								.getProperty("skipindexes")));
 					}
 					
 					if(toBeLoaded)
@@ -228,6 +249,21 @@ public final class UcanaccessDriver implements Driver {
 		}
 	}
 	
+	private Integer validateLobScale(String property) {
+		try{
+			Integer i= Integer.parseInt(property);
+			
+			if(i==1||i==2||i==4||i==8||i==16||i==32){
+				return i;
+			}
+			
+		}catch(Exception e){
+			
+		}
+		Logger.logWarning(Logger.Messages.LOBSCALE);
+		return null;
+	}
+
 	private Map<String,String> toMap(String property) {
 		HashMap<String,String> hm=new HashMap<String,String> ();
 		StringTokenizer st=new StringTokenizer(property,"&");
