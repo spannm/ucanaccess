@@ -989,6 +989,22 @@ public class Functions {
 	public static String nz(String value) {
 		return value == null ? "" : value;
 	}
+	
+	@FunctionType(functionName = "NZ", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
+	public static Double nz(Double value) {
+		return value == null ? 0 : value;
+	}
+	
+	@FunctionType(functionName = "NZ", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
+	public static Integer nz(Integer value) {
+		return value == null ? 0 : value;
+	}
+	
+	@FunctionType(functionName = "NZ", argumentTypes = { 
+			AccessType.NUMERIC }, returnType = AccessType.NUMERIC)
+	public static BigDecimal nz(BigDecimal value) {
+		return value == null ? new BigDecimal(0) : value;
+	}
 
 	@FunctionType(functionName = "NZ", argumentTypes = { AccessType.MEMO,
 			AccessType.MEMO }, returnType = AccessType.MEMO)
