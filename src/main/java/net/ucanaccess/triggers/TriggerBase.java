@@ -27,6 +27,7 @@ import java.util.Map;
 
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.converters.UcanaccessTable;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
 import com.healthmarketscience.jackcess.Database;
@@ -49,17 +50,20 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 		if(t==null&&tableName.startsWith(ESCAPE_PREFIX )&&
 				SQLConverter.isXescaped(tableName.substring(1))){
 			t=conn.getDbIO().getTable(tableName.substring(1));
+			if(t!=null){
+				return new  UcanaccessTable(t,tableName.substring(1));
+			}
 		}
 		if(t==null){
 			Database db=conn.getDbIO();
 			for (String cand:db.getTableNames()){
 				if(SQLConverter.escapeIdentifier(cand).equals(tableName)){
-					return db .getTable(cand);
+					return new UcanaccessTable(db .getTable(cand),cand);
 				}
 				
 			}
 		}
-		return t;
+		 return new  UcanaccessTable(t,tableName);
 	}
 	
 }
