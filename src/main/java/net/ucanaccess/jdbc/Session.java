@@ -22,7 +22,6 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.jdbc;
 
 public class Session {
-	private boolean ignoreCase=true;
 	private String password;
 	private String user;
 	
@@ -34,14 +33,6 @@ public class Session {
 		return user;
 	}
 
-	public boolean isIgnoreCase() {
-		return ignoreCase;
-	}
-	public void setIgnoreCase(boolean ignoreCase) {
-		this.ignoreCase = ignoreCase;
-	}
-	
-	
 	public void setPassword(String password) {
 		this.password = password;
 	}

@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -55,7 +56,7 @@ public class DBReference {
 	private String id = id();
 	private boolean inMemory = true;
 	private long lastModified;
-	private boolean lockMdb = false;
+	private boolean openExclusive = false;
 	private MemoryTimer memoryTimer = new MemoryTimer();
 	private boolean readOnly;
 	private boolean readOnlyFileFormat;
@@ -73,7 +74,10 @@ public class DBReference {
 	private boolean columnOrderDisplay;
 	private boolean hsqldbShutdown;
 	private File mirrorFolder;
-
+	private HashSet<File> links=new HashSet<File>();
+	private boolean ignoreCase=true;
+	private boolean mirrorReadOnly;
+	private Integer lobScale;
 
 	
 	private class MemoryTimer {
@@ -146,7 +150,7 @@ public class DBReference {
 		this.dbFile = fl;
 		this.pwd = pwd;
 		this.jko = jko;
-		this.updateLastModified();
+		this.lastModified=System.currentTimeMillis();
 		Logger.turnOffJackcessLog();
 		if (!fl.exists() && ff != null) {
 			dbIO = DatabaseBuilder.create(ff, fl);
@@ -157,11 +161,14 @@ public class DBReference {
 						FileFormat.V1997);
 				this.dbFormat=dbIO.getFileFormat();
 			} catch (Exception ignore) {
-				// Logger.logWarning(e.getMessage());
+				
 			}
 			this.dbIO.setLinkResolver(new LinkResolver() {
 				public Database resolveLinkedDatabase(Database linkerDb,
 						String linkeeFileName) throws IOException {
+					if(linkeeFileName==null){
+						throw new IOException("Cannot resolve db link");
+					}
 					File linkeeFile = new File(linkeeFileName);
 					Map<String, String> emr = DBReference.this.externalResourcesMapping;
 					if (!linkeeFile.exists()
@@ -176,6 +183,7 @@ public class DBReference {
 								+ linkeeFile.getAbsolutePath()
 								+ " does not exist");
 					}
+					links.add(linkeeFile);
 					Database ldb = open(linkeeFile, pwd);
 					return ldb;
 				}
@@ -220,12 +228,22 @@ public class DBReference {
 	public static boolean is2xx() {
 		return version.startsWith("2.");
 	}
-
+	
+	private long filesUpdateTime(){
+	    long lm= this.dbFile.lastModified();
+	    for(File fl:this.links){
+	    	lm=Math.max(lm,fl.lastModified());
+	    }
+	    return lm;
+	}
+	
+	
 	Connection checkLastModified(Connection conn, Session session)
 			throws Exception {
 		// I'm detecting if another process(and not another thread) is writing
+		
 		for (int i = 0; i < Thread.activeCount(); i++) {
-			if (lastModified >= this.dbFile.lastModified()) {
+			if (lastModified >= filesUpdateTime()) {
 				return conn;
 			} else {
 				Thread.sleep(10);
@@ -322,26 +340,33 @@ public class DBReference {
 	}
 	
 	private void setIgnoreCase(Connection conn) throws SQLException{
-		   Statement st = null;
-			try {
-				st = conn.createStatement();
-				st.execute("set ignorecase true");
-				
-			} catch (Exception w) {
-			} finally {
-				if (st != null)
-					st.close();
-			}
-	   }
+	  	   Statement st = null;
+		   	try {
+		   			st = conn.createStatement();
+		   			st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
+		   			
+		   	} catch (Exception w) {
+		   			
+		   	} finally {
+		   			if (st != null)
+		   				st.close();
+		   	}
+	}
 	
 	
-   private void setSintax(Connection conn) throws SQLException{
+   private void initHSQLDB(Connection conn) throws SQLException{
 	   Statement st = null;
 		try {
 			st = conn.createStatement();
 			st.execute("SET DATABASE SQL SYNTAX ora TRUE");
+			if(this.lobScale==null&&this.inMemory)
+			  st.execute("SET FILES LOB SCALE 2");
+			else if(this.lobScale!=null){
+				st.execute("SET FILES LOB SCALE "+this.lobScale);
+			}
 			
 		} catch (Exception w) {
+			w.printStackTrace();
 		} finally {
 			if (st != null)
 				st.close();
@@ -351,17 +376,24 @@ public class DBReference {
 	
 	
 	public Connection getHSQLDBConnection(Session session) throws SQLException {
+		
+		boolean keptMirror=false;
+		if(this.firstConnection&&this.toKeepHsql!=null&&this.toKeepHsql.exists()){
+			 keptMirror=true;
+		}
+		
 		Connection conn= DriverManager.getConnection(this.getHsqlUrl(session),
 				session.getUser() == null ? "Admin" : session.getUser(),
 				session.getPassword());
 		if (version == null) {
 			version = conn.getMetaData().getDriverVersion();
 		}
-		if (session.isIgnoreCase()) {
-			setIgnoreCase( conn);
-		}
+		
 		if(this.firstConnection){
-			setSintax(conn);
+			if (this.ignoreCase&&!keptMirror) {
+			  setIgnoreCase( conn);
+			}
+			initHSQLDB(conn);
 			this.firstConnection=false;
 		}
 		this.hsqldbShutdown=false;
@@ -396,7 +428,7 @@ public class DBReference {
 
 	private String getHsqlUrl(final Session session) throws SQLException {
 		try {
-			if (this.lockMdb && this.fileLock == null) {
+			if (this.openExclusive && this.fileLock == null) {
 				lockMdbFile();
 			}
 			String enc = "";
@@ -435,9 +467,10 @@ public class DBReference {
 					}
 				}));
 			}
+			String mro=this.mirrorReadOnly?";readonly=true":"";
 			return "jdbc:hsqldb:"
 					+ (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath())
-					+ enc + log;
+					+ enc + log+mro;
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -518,8 +551,8 @@ public class DBReference {
 		this.inMemory = inMemory;
 	}
 
-	public void setLockMdb(boolean lockMdb) {
-		this.lockMdb = lockMdb;
+	public void setOpenExclusive(boolean openExclusive) {
+		this.openExclusive = openExclusive;
 	}
 
 	public void setShowSchema(boolean showSchema) {
@@ -539,7 +572,7 @@ public class DBReference {
 	}
 
 	public void updateLastModified() {
-		this.lastModified = this.dbFile.lastModified();
+		this.lastModified = this.filesUpdateTime();
 	}
 	
 	
@@ -581,6 +614,22 @@ public class DBReference {
 	public void setMirrorFolder(File mirrorFolder) {
 		this.mirrorFolder=mirrorFolder;
 		
+	}
+
+	public boolean isIgnoreCase() {
+		return ignoreCase;
+	}
+
+	public void setIgnoreCase(boolean ignoreCase) {
+		this.ignoreCase = ignoreCase;
+	}
+
+	public void setMirrorReadOnly(boolean mirrorReadOnly) {
+		this.mirrorReadOnly = mirrorReadOnly;
+	}
+
+	public void setLobScale(Integer lobScale) {
+		this.lobScale = lobScale;
 	}
 
 	
