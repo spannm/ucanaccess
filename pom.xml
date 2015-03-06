@@ -1,16 +1,53 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.ucanaccess</groupId>
+	<groupId>net.sf.ucanaccess</groupId>
 	<artifactId>ucanaccess</artifactId>
-	<version>2.0.9.3</version>
-	<properties>
+	<version>2.0.9.4</version>
+	<packaging>jar</packaging>
+    <name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
+    <organization>
+        <name>ucanaccess</name>
+		</organization>
+    <description>an open source Java JDBC Driver implementation which allows Java developers and jdbc client programs (e.g., Open Office, Libre Office, Squirrell) to read/write Microsoft Access database.</description>
+    <url>http://ucanaccess.sourceforge.net/site.html</url>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Marco Amadei</name>
+            <id>marco-amadei</id>
+            <email>amadei.mar@gmail.com</email>
+            <roles>
+                <role>Lead developer</role>
+                <role>Committer</role>
+            </roles>
+            <timezone>0</timezone> <!-- please change -->
+        </developer>
+    </developers>
+    <inceptionYear>2012</inceptionYear> <!-- verify -->
+    <mailingLists>
+        <mailingList>
+            <name>ucanaccess-users</name>
+            <subscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</subscribe>
+            <unsubscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</unsubscribe>
+            <post>ucanaccess-users@lists.sourceforge.net</post>
+            <archive>http://sourceforge.net/p/ucanaccess/ucanaccess/ucanaccess-users/</archive>
+        </mailingList>
+    </mailingLists>
+    <scm>
+        <connection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</connection> <!-- read only svn url -->
+        <developerConnection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</developerConnection> <!-- verify this is read/write svn url-->
+        <url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
+    </scm>
+  	<properties>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
-	<organization>
-		<name>ucanaccess</name>
-	</organization>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
@@ -79,7 +116,7 @@
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.2.8</version>
+			<version>2.3.1</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -99,7 +136,86 @@
 			<optional>false</optional>
 		</dependency>
 	</dependencies>
-	<name>UCanAccess</name>
-	<url>http://ucanaccess.sourceforge.net/site.html</url>
-	<description>an open source Java JDBC Driver implementation which allows Java developers and jdbc client programs (e.g., Open Office, Libre Office, Squirrell) to read/write Microsoft Access database.</description>
+	    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.2</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.8.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Sonatype Release -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <configuration>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <useReleaseProfile>false</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
+                            <arguments>-Psonatype-oss-release -Prelease -Dgpg.passphrase=${gpg.passphrase}</arguments>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
