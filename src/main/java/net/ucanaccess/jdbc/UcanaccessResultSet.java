@@ -63,8 +63,9 @@ public class UcanaccessResultSet implements ResultSet {
 		if(this.metadata==null){
 				loadMetadata();
 		}
-		if(this.metadata.contains(label.toUpperCase())){
-			return label;
+		String lu=label.toUpperCase();
+		if(this.metadata.contains(lu)){
+			return lu;
 		}
 		String escaped=SQLConverter.basicEscapingIdentifier(label);
 		escaped=escaped.replaceAll("[\"\']", "");
@@ -72,6 +73,7 @@ public class UcanaccessResultSet implements ResultSet {
 		if(SQLConverter.isXescaped(slabel)&&this.metadata.contains(slabel)){
 			return slabel;
 		}
+		
 		if(this.metadata.contains(escaped.toUpperCase())){
 			return escaped;
 		} 
