@@ -87,8 +87,8 @@ public class FunctionsTest extends UcanaccessTestBase {
 
 	public void testNz() throws SQLException, IOException {
 		checkQuery(
-				"select nz(null,'lampredotto'),nz('turtelaz','lampredotto') FROM t234",
-				"lampredotto", "turtelaz");
+				"select nz(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5),nz(2, 2)  FROM t234",
+				"lampredotto", "turtelaz",1.5,2);
 	}
 
 	public void testCBoolean() throws SQLException, IOException {
