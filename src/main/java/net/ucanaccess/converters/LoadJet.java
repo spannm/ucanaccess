@@ -725,7 +725,7 @@ public class LoadJet {
 						values.add(value(obj));
 					}
 					execInsert(ps, values);
-					if ((i > 0 && i % 1000 == 0) || i == t.getRowCount() - 1) {
+					if ((i > 0 && i % 2000 == 0) || i == t.getRowCount() - 1) {
 						try{
 							ps.executeBatch();
 						}catch(SQLException e){
