@@ -679,7 +679,7 @@ public class LoadJet {
 			dropTable( t,systemTable);
 			createSyncrTable(t, systemTable,false);
 			if(errorCode!=HSQL_FK_VIOLATION)
-			loadTableFKs(t.getName());
+			loadTableFKs(t.getName(),false);
 			loadTableData(t, systemTable);
 			makeTableReadOnly(t,systemTable);
 			
@@ -753,15 +753,18 @@ public class LoadJet {
 			}
 		}
 
-		private void loadTableFKs(String tn) throws IOException,
+		private void loadTableFKs(String tn, boolean autoref) throws IOException,
 				SQLException {
 			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
 			for (Index idxi : table.getIndexes()) {
 				//riw
 				IndexImpl idx=(IndexImpl)idxi;
-				if (idx.isForeignKey() && !idx.getReference().isPrimaryTable())
-					loadForeignKey(idx,tn);
+				if (idx.isForeignKey() && !idx.getReference().isPrimaryTable()){
+					boolean isAuto=idx.getTable().getName().equals(idx.getReferencedIndex().getTable().getName());
+					if((autoref && isAuto)||(!autoref && !isAuto))
+					   loadForeignKey(idx,tn);
 				}
+			}
 		}
 		
 		private void createCalculatedFieldsTriggers(){
@@ -841,7 +844,22 @@ public class LoadJet {
 		private void createFKs() throws SQLException, IOException{
 			for (String tn : dbIO.getTableNames()) {
 				if (!this.unresolvedTables.contains(tn)){
-					this.loadTableFKs(tn);
+					this.loadTableFKs(tn,false);
+					conn.commit();
+				}
+			}
+
+		}
+		
+		private void createAutoFKs() throws SQLException, IOException{
+			for (String tn : dbIO.getTableNames()) {
+				if (!this.unresolvedTables.contains(tn)){
+					try{
+						this.loadTableFKs(tn,true);
+					}catch(SQLException e){
+						UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn),tn);
+						makeTableReadOnly(t,false);
+					}
 					conn.commit();
 				}
 			}
@@ -861,13 +879,14 @@ public class LoadJet {
 		}
 		
 		private void createTriggers() throws IOException, SQLException{
-			createCalculatedFieldsTriggers();
+			
 			for (String tn : this.loadingOrder) {
 				if (!this.unresolvedTables.contains(tn)){
 					UcanaccessTable  t =new UcanaccessTable ( dbIO.getTable(tn),tn);
 					createSyncrTriggers(t);
 				}
 			}
+			createCalculatedFieldsTriggers();
 		}
 		
 		
@@ -899,6 +918,7 @@ public class LoadJet {
 			loadTablesData();
 			createTriggers();
 			if(!reorder)createFKs();
+			createAutoFKs();
 			createSystemTables();
 		}
 
