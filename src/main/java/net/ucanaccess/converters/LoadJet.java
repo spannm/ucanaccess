@@ -293,13 +293,13 @@ public class LoadJet {
 			}
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
 			String ecl=procedureEscapingIdentifier(cl.getName());
-			String trg=isCreate? "CREATE TRIGGER expr%d after insert ON "+ntn+
+			String trg=isCreate? "CREATE TRIGGER expr%d before insert ON "+ntn+
 			   " REFERENCING NEW  AS newrow  FOR EACH ROW "+
 			   " BEGIN  ATOMIC "+
 			   " SET newrow."+ecl+" = "+call+
 			   "; END "
 			   :
-			    "CREATE TRIGGER expr%d after update ON "+ntn+
+			    "CREATE TRIGGER expr%d before update ON "+ntn+
 			   " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW "+
 			   " BEGIN  ATOMIC IF %s THEN "+
 			   " SET newrow."+ecl+" = "+call+
@@ -770,7 +770,6 @@ public class LoadJet {
 					exec(trigger,false);
 				}catch(SQLException e){
 					Logger.logWarning(e.getMessage());
-					break;
 				}
 			}
 		}
