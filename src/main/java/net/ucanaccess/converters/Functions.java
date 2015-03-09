@@ -295,7 +295,12 @@ public class Functions {
 	
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
 	public static Integer clng( String value) throws UcanaccessSQLException {
-		return clng(Double.parseDouble(value));
+		DecimalFormat dc=new DecimalFormat();
+		try {
+			return clng(dc.parse(value).doubleValue());
+		} catch (ParseException e) {
+			throw new UcanaccessSQLException(e);
+		}
 	}
 	
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
