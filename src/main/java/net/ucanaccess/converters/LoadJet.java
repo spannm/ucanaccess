@@ -211,6 +211,7 @@ public class LoadJet {
 		private ArrayList<String> calculatedFieldsTriggers=new ArrayList<String>();
 		private LinkedList<String> loadingOrder=new LinkedList<String>();
 		private HashSet<Column> alreadyIndexed=new HashSet<Column>();
+		private HashSet<String> readOnlyTables=new HashSet<String>();
 
 
 		private String commaSeparated(List<? extends Index.Column> columns) {
@@ -663,7 +664,8 @@ public class LoadJet {
 		}
 		
 		private void makeTableReadOnly(Table  t,boolean systemTable) throws SQLException{
-			String tn = t.getName();
+			 String tn = t.getName();
+			this.readOnlyTables.add(t.getName());
 			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
 			exec("SET TABLE "+ntn+" READONLY TRUE ",false);
 		}
@@ -676,6 +678,7 @@ public class LoadJet {
 			 	case HSQL_UK_VIOLATION: type="Unique";break;
 			}
 			Logger.logParametricWarning(Messages.CONSTRAINT,type,t.getName(), record.toString(),t.getName() );
+			
 			dropTable( t,systemTable);
 			createSyncrTable(t, systemTable,false);
 			if(errorCode!=HSQL_FK_VIOLATION)
@@ -729,10 +732,13 @@ public class LoadJet {
 						try{
 							ps.executeBatch();
 						}catch(SQLException e){
-							if(e.getErrorCode()==HSQL_NOT_NULL||
-								e.getErrorCode()==HSQL_FK_VIOLATION	||
-								e.getErrorCode()==HSQL_UK_VIOLATION		
+							int ec=e.getErrorCode();
+							if(ec==HSQL_NOT_NULL||
+								ec==HSQL_FK_VIOLATION	||
+								ec==HSQL_UK_VIOLATION		
 							){
+								if(ec==HSQL_FK_VIOLATION)
+									Logger.logWarning(e.getMessage());
 								recreate( t, systemTable,row,e.getErrorCode());
 							}else
 							throw e;
@@ -755,6 +761,7 @@ public class LoadJet {
 
 		private void loadTableFKs(String tn, boolean autoref) throws IOException,
 				SQLException {
+			if(this.readOnlyTables.contains(tn))return;
 			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
 			for (Index idxi : table.getIndexes()) {
 				//riw
@@ -881,7 +888,7 @@ public class LoadJet {
 		private void createTriggers() throws IOException, SQLException{
 			
 			for (String tn : this.loadingOrder) {
-				if (!this.unresolvedTables.contains(tn)){
+				if (!this.unresolvedTables.contains(tn)&&!this.readOnlyTables.contains(tn)){
 					UcanaccessTable  t =new UcanaccessTable ( dbIO.getTable(tn),tn);
 					createSyncrTriggers(t);
 				}
