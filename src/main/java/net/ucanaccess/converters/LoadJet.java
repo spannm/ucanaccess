@@ -968,6 +968,9 @@ public class LoadJet {
 			if (value == null)
 				return null;
 			if (value instanceof Float) {
+				if(value.equals(Float.NaN)){
+					return  value;
+				}
 				BigDecimal bd = new BigDecimal(value.toString());
 				return bd;
 			}
