@@ -716,7 +716,11 @@ public class LoadJet {
 			PreparedStatement ps = null;
 			try {
 				int i = 0;
-				for (Row row : t) {
+				int step=2000;
+				Iterator<Row> it=t.iterator();
+				
+				while (it.hasNext()) {
+					Row row=it.next();
 					ArrayList<Object> values = new ArrayList<Object>();
 					if (row == null)
 						continue;
@@ -728,7 +732,8 @@ public class LoadJet {
 						values.add(value(obj));
 					}
 					execInsert(ps, values);
-					if ((i > 0 && i % 2000 == 0) || i == t.getRowCount() - 1) {
+					
+					if ((i > 0 && i % step == 0) || !it.hasNext()) {
 						try{
 							ps.executeBatch();
 						}catch(SQLException e){
@@ -752,6 +757,7 @@ public class LoadJet {
 					Logger.logParametricWarning(Messages.ROW_COUNT,
 							t.getName(), String.valueOf(t.getRowCount()),
 							String.valueOf(i));
+					
 				}
 			} finally {
 				if (ps != null)
