@@ -86,6 +86,9 @@ public class LoadJet {
 			functionsDefinition.add(getAggregate("TIMESTAMP", "first"));
 		}
 
+		
+		
+		
 		private void addFunction(String functionName, String methodName,
 				String returnType, String... parTypes) {
 			StringBuffer funDef = new StringBuffer();
@@ -149,13 +152,51 @@ public class LoadJet {
 				}
 			}
 			createFunctions();
+			createSwitch();
 		}
 
 		private void createFunctions() throws SQLException {
 			for (String functionDef : functionsDefinition) {
 				exec(functionDef,true);
 			}
+			
 			functionsDefinition.clear();
+		}
+		
+		private void createSwitch() throws SQLException{
+			DataType[] dtypes=new DataType[]{
+					DataType.BINARY, 
+					DataType.BOOLEAN,
+					DataType.SHORT_DATE_TIME,
+					DataType.INT,
+					DataType.LONG,
+					DataType.DOUBLE,
+					DataType.MONEY,
+					DataType.NUMERIC,
+					DataType.COMPLEX_TYPE,
+					DataType.MEMO
+					};
+			for(DataType dtype:dtypes){
+				String type=" "+TypesMap.map2hsqldb(dtype)+" ";
+				
+			for(int i=1;i<10;i++){
+				
+				
+				StringBuffer header=new StringBuffer("CREATE FUNCTION SWITCH(  ");
+				StringBuffer body=new StringBuffer("(CASE ");
+				String comma="";
+				for(int j=0; j<i; j++){
+				   body.append("  WHEN B").append(j).append(" THEN V").append(j);
+				   header.append(comma).append("B").append(j).append(" BOOLEAN ,")
+				   .append("V").append(j).append(type);
+				   comma=",";
+				}
+				body.append(" END)");
+				header.append(") RETURNS").append(type).append(" RETURN").append(body);
+				exec(header.toString(),true);
+			}
+			}
+			
 		}
 
 		private String getAggregate(String type, String fun) {

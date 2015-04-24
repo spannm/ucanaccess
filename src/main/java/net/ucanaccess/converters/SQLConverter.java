@@ -58,12 +58,6 @@ public class SQLConverter {
 	private static final Pattern KIND_OF_SUBQUERY = Pattern
 			.compile("(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])");
 	
-	private static final String PRE_SWITCH_PATTERN ="(\\W)((?i)SWITCH)([\\s\n\r]*\\()";
-	
-	private final static String SWITCH_ENC="@@@@";
-	
-	private static final Pattern SWITCH_PATTERN = Pattern
-			.compile("(\\W(?i)"+SWITCH_ENC+"SWITCH"+SWITCH_ENC+"[\\s\n\r]*)(\\([^\\)]*\\))");
 	private static final Pattern NO_DATA_PATTERN = Pattern
 			.compile(" (?i)WITH[\\s\n\r]+(?i)NO[\\s\n\r]+(?i)DATA");
 	private static final Pattern NO_ALFANUMERIC = Pattern.compile("\\W");
@@ -320,7 +314,6 @@ public class SQLConverter {
 		sql = convertAccessDate(sql);
 		sql = convertQuotedAliases(sql);
 		sql = escape(sql);
-		sql =convertSwitch(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
 		sql = replaceExclamationPoints(sql);
@@ -345,33 +338,6 @@ public class SQLConverter {
 		return sql.replaceAll(DELETE_ALL, "$1$3");
 	}
 	
-	private static String preConvertSwitch(String sql) {
-		return sql.replaceAll(PRE_SWITCH_PATTERN, "$1"+SWITCH_ENC+"$2"+SWITCH_ENC+"$3");
-	}
-
-	private static String convertSwitch(String sql) {
-		for (Matcher mtc = SWITCH_PATTERN.matcher(sql); mtc.find(); mtc = SWITCH_PATTERN
-				.matcher(sql)) {
-			String g2 = mtc.group(2);
-			String baseSwitch = g2.substring(1, g2.length() - 1);
-			String[] elts = baseSwitch.split(",", -1);
-			StringBuffer sb = new StringBuffer("(CASE ");
-			for (int i = 0; i < elts.length; ++i) {
-				if (i == 0 || i % 2 == 0) {
-					if (i == elts.length - 1) {
-						sb.append(" ELSE").append(elts[i]);
-					} else
-						sb.append("  WHEN ").append(elts[i]).append(" THEN ");
-				} else {
-					sb.append(elts[i]);
-				}
-			}
-			sb.append(" END )");
-			sql = sql.substring(0, mtc.start()) + sb.toString()
-					+ sql.substring(mtc.end());
-		}
-		return sql;
-	}
 
 	private static String convertUnion(String sql) {
 		return sql.replaceAll(UNION, "$2$3$4");
@@ -388,9 +354,11 @@ public class SQLConverter {
 		}
 		return sql;
 	}
+	
+	
 
 	private static String convertQuotedAliases(String sql) {
-		for (Matcher mtc = KIND_OF_SUBQUERY.matcher(sql); mtc.find(); mtc = SWITCH_PATTERN
+		for (Matcher mtc = KIND_OF_SUBQUERY.matcher(sql); mtc.find(); mtc = KIND_OF_SUBQUERY 
 				.matcher(sql)) {
 			String g2 = mtc.group(2).trim();
 			if (g2.endsWith(";"))
@@ -550,8 +518,8 @@ public class SQLConverter {
 	}
 
 	private static String convertSQLTokens(String sql) {
-		return  convertDeleteAll(preConvertSwitch(replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql
-				.replaceAll("&", "||")))))));
+		return  convertDeleteAll(replaceWorkAroundFunctions(convertOwnerAccess(replaceDistinctRow(convertYesNo(sql
+				.replaceAll("&", "||"))))));
 	}
 
 	private static String replaceDigitStartingIdentifiers(String sql) {
