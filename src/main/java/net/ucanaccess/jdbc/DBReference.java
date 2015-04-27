@@ -393,6 +393,7 @@ public class DBReference {
 			if (this.ignoreCase&&!keptMirror) {
 			  setIgnoreCase( conn);
 			}
+			if(!this.mirrorReadOnly||!keptMirror)
 			initHSQLDB(conn);
 			this.firstConnection=false;
 		}
@@ -493,6 +494,12 @@ public class DBReference {
 			lockMdbFile();
 		}
 		return this.readOnlyFileFormat || readOnly;
+	}
+	
+	
+
+	boolean isReadOnlyFileFormat() {
+		return readOnlyFileFormat;
 	}
 
 	boolean isShowSchema() {

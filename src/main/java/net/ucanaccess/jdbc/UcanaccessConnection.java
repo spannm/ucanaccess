@@ -196,6 +196,10 @@ public class UcanaccessConnection implements Connection {
 			try {
 				if (this.isReadOnly() && this.commands.size() > 0) {
 					this.rollback();
+					if(this.ref.isReadOnlyFileFormat()){
+						throw new UcanaccessSQLException(
+								ExceptionMessages.ACCESS_97);
+					}
 					throw new UcanaccessSQLException(
 							ExceptionMessages.CONCURRENT_PROCESS_ACCESS);
 				}
