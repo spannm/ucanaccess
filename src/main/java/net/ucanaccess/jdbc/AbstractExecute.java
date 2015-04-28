@@ -92,6 +92,7 @@ public abstract class AbstractExecute {
 	
 	
 	private Object addDDLCommand() throws SQLException {
+		Object ret;
 		try {
 			DDLType ddlType = SQLConverter.getDDLType(sql);
 			if (ddlType == null)
@@ -103,15 +104,14 @@ public abstract class AbstractExecute {
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql0) : sql0;
-				
-					statement.getWrapped().executeUpdate(ddlExpr);
+				ret=	(this instanceof Execute) ?statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
 		
 					DDLCommandEnlist ddle = new DDLCommandEnlist();
 			ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage());
 		}
-		return (this instanceof Execute) ? true : 1;
+		return ret;
 	}
 
 	private boolean checkDDL() {
