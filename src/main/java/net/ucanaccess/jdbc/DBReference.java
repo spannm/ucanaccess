@@ -256,8 +256,9 @@ public class DBReference {
 		this.dbIO.close();
 		this.dbIO = open(this.dbFile, this.pwd);
 		this.id = id();
-		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
 		this.firstConnection=true;
+		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
+		
 		return getHSQLDBConnection(session);
 	}
 
@@ -359,6 +360,7 @@ public class DBReference {
 		try {
 			st = conn.createStatement();
 			st.execute("SET DATABASE SQL SYNTAX ora TRUE");
+			st.execute("SET DATABASE SQL CONCAT NULLS FALSE");
 			if(this.lobScale==null&&this.inMemory)
 			  st.execute("SET FILES LOB SCALE 2");
 			else if(this.lobScale!=null){

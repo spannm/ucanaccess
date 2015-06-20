@@ -195,7 +195,7 @@ public class Persist2Jet {
 			throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ArrayList<ColumnBuilder> arcl = new ArrayList<ColumnBuilder>();
-		ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC",
+		ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC",
 				tableName.toUpperCase(), null);
 		int i = 0;
 		while (rs.next()) {
@@ -387,10 +387,17 @@ public class Persist2Jet {
 				(tn.startsWith("`")&&tn.endsWith("`"))
 		){
 			tn=tn.substring(1, tn.length()-1);
-			ntn=SQLConverter.escapeIdentifier(tn);
+			ntn=SQLConverter.preEscapingIdentifier(tn);
 		}
+		Metadata mtd=new Metadata(conn.getHSQLDBConnection());
 		TableBuilder tb=new TableBuilder(tn);
-		tb.addColumns(getColumns(ntn,columnMap, types));
+		int idTable=mtd.newTable(tn, ntn, Metadata.Types.TABLE);
+		List<ColumnBuilder> lcb=getColumns(ntn,columnMap, types);
+		tb.addColumns(lcb);
+		for(ColumnBuilder cb:lcb){
+			mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()), cb.getType().name(), idTable);
+		}
+		
 		List<IndexBuilder> arcl=getIndexBuilders(ntn,columnMap);
 		
 		IndexBuilder ibpk = getIndexBuilderPK(ntn,columnMap);
@@ -426,7 +433,7 @@ public class Persist2Jet {
 		}
 	}
 
-	public void dropTable(String tableName) throws IOException {
+	public void dropTable(String tableName) throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		if( 	(tableName.startsWith("[")&&tableName.endsWith("]"))||
@@ -435,8 +442,11 @@ public class Persist2Jet {
 			tableName=tableName.substring(1, tableName.length()-1);
 		}
 		Table t = db.getTable(tableName);
+		
 		if (t == null)
 			return;
+		Metadata mt=new Metadata(conn.getHSQLDBConnection());
+		mt.dropTable(t.getName());
 		Cursor c=t.getDefaultCursor();
 		while (c.getNextRow() != null) {
 			c.deleteCurrentRow();

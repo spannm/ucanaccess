@@ -72,7 +72,7 @@ public class ComplexTest extends UcanaccessTestBase {
 		private void complex0() throws SQLException, IOException, ParseException {
 			PreparedStatement ps = null;
 			try {
-				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  contains(MULTI_VALUE_DATA,?)");
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  contains([MULTI-VALUE-DATA],?)");
 				ps.setObject(1, SingleValue.multipleValue("value1","value2"));
 				ResultSet rs=ps.executeQuery();
 				rs.next();
@@ -83,7 +83,7 @@ public class ComplexTest extends UcanaccessTestBase {
 				assertEquals(3, rs.getInt(1));
 				ps.close();
 				
-				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALS(MULTI_VALUE_DATA,?)");
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALS([MULTI-VALUE-DATA],?)");
 				ps.setObject(1, SingleValue.multipleValue("value4","value1"));
 				rs=ps.executeQuery();
 				rs.next();
@@ -94,7 +94,7 @@ public class ComplexTest extends UcanaccessTestBase {
 				assertEquals(1, rs.getInt(1));
 				ps.close();
 				
-				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALSIGNOREORDER(MULTI_VALUE_DATA,?)");
+				ps=super.ucanaccess.prepareStatement("select count(*) from TABLE1 WHERE  EQUALSIGNOREORDER([MULTI-VALUE-DATA],?)");
 				ps.setObject(1, SingleValue.multipleValue("value4","value1"));
 				rs=ps.executeQuery();
 				rs.next();
@@ -111,7 +111,7 @@ public class ComplexTest extends UcanaccessTestBase {
 		PreparedStatement ps = null;
 		try {
 			
-			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , MEMO_DATA , APPEND_MEMO_DATA , MULTI_VALUE_DATA , ATTACH_DATA) " +
+			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) " +
 					"VALUES (?,?,?,?,?)");
 			
 			ps.setString(1, "row12");
@@ -125,21 +125,21 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps.execute();
 			checkQuery("select * from Table1");
 			ps.close();
-			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET APPEND_MEMO_DATA='THE CAT' ");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE CAT' ");
 			ps.execute();
 			ps.close();
-			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=? WHERE ID=?");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET [ATTACH-DATA]=? WHERE ID=?");
 			Attachment[] atc;
 			ps.setObject(1,atc=new Attachment[]{new Attachment(null,"cccsss.cvs","cvs","ddddd ;sssssssssssssssssssddd".getBytes(), new Date(),null) });
 			ps.setString(2, "row12");
 			ps.execute();
 			
-			ps=super.ucanaccess.prepareStatement("select COUNT(*) from Table1 where EQUALS(ATTACH_DATA,?) ");
+			ps=super.ucanaccess.prepareStatement("select COUNT(*) from Table1 where EQUALS([ATTACH-DATA],?) ");
 			ps.setObject(1,atc);
 			ResultSet rs=ps.executeQuery();
 			rs.next();
 			assertEquals( rs.getInt(1), 1);
-			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET MULTI_VALUE_DATA=? ");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET [MULTi-VALUE-DATA]=? ");
 			svs=new SingleValue[]{new SingleValue("aaaaaaa14"),new SingleValue("2eeeeeeeeeee") }; 
 			ps.setObject(1,svs);
 			ps.execute();

@@ -43,7 +43,7 @@ public class TriggerAppendOnly extends TriggerBase {
 		if (conn.isFeedbackState())
 			return;
 		try {
-			Table t = conn.getDbIO().getTable(tableName);
+			Table t = this.getTable(tableName,conn);
 			if (t == null)
 				throw new RuntimeException(
 						Logger.getMessage("TABLE_DOESNT_EXIST") + " :"

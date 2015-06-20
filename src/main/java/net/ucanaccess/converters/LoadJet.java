@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLWarning;
@@ -65,8 +66,12 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import com.healthmarketscience.jackcess.impl.IndexData;
 import com.healthmarketscience.jackcess.impl.IndexImpl;
+import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
+import com.healthmarketscience.jackcess.impl.query.QueryFormat;
+import com.healthmarketscience.jackcess.impl.query.QueryImpl;
 import com.healthmarketscience.jackcess.query.Query;
 
 public class LoadJet { 
@@ -253,15 +258,18 @@ public class LoadJet {
 		private LinkedList<String> loadingOrder=new LinkedList<String>();
 		private HashSet<Column> alreadyIndexed=new HashSet<Column>();
 		private HashSet<String> readOnlyTables=new HashSet<String>();
+	
 
 
-		private String commaSeparated(List<? extends Index.Column> columns) {
+		private String commaSeparated(List<? extends Index.Column> columns,boolean escape) throws SQLException {
 			String comma = "";
 			StringBuffer sb = new StringBuffer(" (");
 			for (Index.Column cd : columns) {
+				String cl=escape?escapeIdentifier(cd.getColumn()
+						.getName()):cd.getColumn()
+						.getName();
 				sb.append(comma)
-						.append(SQLConverter.escapeIdentifier(cd.getColumn()
-								.getName()));
+						.append(cl);
 				comma = ",";
 			}
 			return sb.append(") ").toString();
@@ -321,7 +329,7 @@ public class LoadJet {
 		}
 		
 		
-		private String getCalculatedFieldTrigger(String ntn,Column cl,boolean isCreate) throws IOException{
+		private String getCalculatedFieldTrigger(String ntn,Column cl,boolean isCreate) throws IOException, SQLException{
 			DataType dt=getReturnType(cl);
 			String fun=null;
 			if(isNumeric(dt)){
@@ -378,11 +386,19 @@ public class LoadJet {
 		private void createSyncrTable(Table t,boolean systemTable) throws SQLException, IOException{
 			createSyncrTable(t,systemTable, true) ;
 		}
-
+		
+		
 		
 		private void createSyncrTable(Table t,boolean systemTable, boolean constraints) throws SQLException, IOException {
 			String tn = t.getName();
-			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
+			String ntn =SQLConverter.preEscapingIdentifier(tn);
+			
+			int seq=metadata.newTable(tn, ntn, Metadata.Types.TABLE);
+			ntn =SQLConverter.completeEscaping(ntn);
+			ntn =SQLConverter.checkLang(ntn,conn);
+			ntn =schema(ntn ,systemTable);
+			
+			
 			StringBuffer sbC = new StringBuffer("CREATE  CACHED TABLE ").append(
 					ntn).append("(");
 			List<? extends Column> lc = t.getColumns();
@@ -403,8 +419,20 @@ public class LoadJet {
 				}
 				
 				String htype= getHsqldbColumnType(cl) ;
+				String cn=SQLConverter.preEscapingIdentifier(cl.getName());
+				String ctype=cl.getType().name();
+				if(cl.isAutoNumber()){
+					ColumnImpl cli=(ColumnImpl)cl;
+					AutoNumberGenerator ang=cli.getAutoNumberGenerator();
+					if(ang.getType().equals(
+								DataType.LONG))ctype="COUNTER";
+						
+				}
+				metadata.newColumn(cl.getName(),cn,ctype,seq);
+				cn=SQLConverter.completeEscaping(cn);
+				cn=SQLConverter.checkLang(cn,conn);
 				sbC.append(comma)
-						.append(SQLConverter.escapeIdentifier(cl.getName()))
+						.append(cn)
 						.append(" ").append(htype);
 				
 				
@@ -438,7 +466,7 @@ public class LoadJet {
 		}
 		
 		
-		private String getUpdateConditions(Column cl) throws IOException {
+		private String getUpdateConditions(Column cl) throws IOException, SQLException {
 			PropertyMap map=cl.getProperties();
             Property exprp=map.get(PropertyMap.EXPRESSION_PROP);
              
@@ -449,6 +477,7 @@ public class LoadJet {
             		String or="";
             		StringBuffer cw=new StringBuffer();
             		for(String dep:setu){
+            			dep=escapeIdentifier(dep);
             			cw.append(or).
             			append("oldrow.").append(dep).append("<>").append("newrow.").append(dep);
             			or=" OR ";
@@ -462,14 +491,14 @@ public class LoadJet {
 		}
 		
 		
-		private String procedureEscapingIdentifier(String name){
-			return SQLConverter.procedureEscapingIdentifier( SQLConverter.escapeIdentifier(name));
+		private String procedureEscapingIdentifier(String name) throws SQLException{
+			return SQLConverter.procedureEscapingIdentifier( escapeIdentifier(name));
 		}
 
 
 		private  void defaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
-			 String ntn = SQLConverter.escapeIdentifier(tn);
+			 String ntn = escapeIdentifier(tn);
 			List<? extends Column> lc = t.getColumns();
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
@@ -478,7 +507,7 @@ public class LoadJet {
 				Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
 				if (defaulT != null) {
 					String cdefaulT = SQLConverter.convertSQL(" "
-							+ defaulT.toString());
+							+ defaulT.toString()).getSql();
 					if (cdefaulT.trim().startsWith("=")) {
 						cdefaulT = cdefaulT.trim().substring(1);
 					}
@@ -502,12 +531,16 @@ public class LoadJet {
 					}
 					String guidExp = "GenGUID()";
 					if (!guidExp.equals(defaulT)) {
-						if (!tryDefault(cdefaulT)) {
+						Object defFound=cdefaulT;
+						boolean isNull=(cdefaulT+"").equalsIgnoreCase("null");
+						if (!isNull&&(defFound=tryDefault(cdefaulT))==null) {
 							
 							Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
 							""+ defaulT, cl.getName(), cl.getTable().getName());
 						} else {
-							
+							if(defFound!=null){
+								metadata.columnDef(cl.getTable().getName(), cl.getName(), defFound.toString());
+							}
 							if(cl.getType()==DataType.TEXT
 									&&
 								defaulT.toString().startsWith("'")&&defaulT.toString().endsWith("'")&&
@@ -599,18 +632,16 @@ public class LoadJet {
 			if(cls.size()==1){
 				this.alreadyIndexed.add(cls.get(0).getColumn());
 			}
-			String ntn = SQLConverter
-					.escapeIdentifier(ctn);
+			String ntn = escapeIdentifier(ctn);
 			if(ntn==null)return;
-			String nin = SQLConverter.escapeIdentifier(idx.getName());
-			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
-			String colsIdx = commaSeparated(cls);
+			String nin = escapeIdentifier(ctn + "_" + idx.getName());
+			String colsIdx = commaSeparated(cls,true);
 			String colsIdxRef = commaSeparated(idx.getReferencedIndex()
-					.getColumns());
+					.getColumns(),true);
 			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
 			ci.append(" ADD CONSTRAINT ").append(nin);
-			String nrt = SQLConverter.escapeIdentifier(rtn);
+			String nrt = escapeIdentifier(rtn);
 			
 			if(nrt==null)return;
 			ci.append(" FOREIGN KEY ").append(colsIdx).append(" REFERENCES ")
@@ -630,18 +661,18 @@ public class LoadJet {
 				} else
 					throw e;
 			}
-			loadedIndexes.add("FK on " + ntn + " Columns:" + colsIdx
-					+ " References " + nrt + " Columns:" + colsIdxRef);
+			loadedIndexes.add("FK on " + ntn + " Columns:" +  commaSeparated(cls,false)
+					+ " References " + nrt + " Columns:" + commaSeparated(idx.getReferencedIndex()
+							.getColumns(),false));
 		}
 
 		
 
 		private void loadIndex(Index idx,String tn) throws IOException, SQLException {
-			String ntn = SQLConverter
-					.escapeIdentifier(tn);
+			String ntn = escapeIdentifier(tn);
 			if(ntn==null)return;
-			String nin = SQLConverter.escapeIdentifier(idx.getName());
-			nin = (ntn + "_" + nin).replaceAll("\"", "").replaceAll("\\W", "_");
+			String nin = idx.getName();
+			nin = escapeIdentifier(tn + "_" + nin);
 			boolean uk = idx.isUnique();
 			boolean pk = idx.isPrimaryKey();
 			if(!uk&&!pk&&idx.getColumns().size()==1){
@@ -656,7 +687,7 @@ public class LoadJet {
 			}
 			
 			StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
-			String colsIdx = commaSeparated(idx.getColumns());
+			String colsIdx = commaSeparated(idx.getColumns(),true);
 			if (pk) {
 				ci.append(" ADD PRIMARY KEY ").append(colsIdx);
 			} else if (uk) {
@@ -689,7 +720,7 @@ public class LoadJet {
 				return;
 			}
 			String pre = pk ? "Primary Key " : uk ? "Index Unique " : "Index";
-			loadedIndexes.add(pre + " on " + ntn + " Columns:" + colsIdx);
+			loadedIndexes.add(pre + " on " + tn + " Columns:" + commaSeparated(idx.getColumns(),false));
 			
 		}
 
@@ -700,14 +731,16 @@ public class LoadJet {
 		
 		private void dropTable(Table  t,boolean systemTable) throws SQLException{
 			String tn = t.getName();
-			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
+			
+			String ntn =schema( escapeIdentifier(tn),systemTable);
 			exec("DROP TABLE "+ntn+" CASCADE ",false);
+			metadata.dropTable(tn);
 		}
 		
 		private void makeTableReadOnly(Table  t,boolean systemTable) throws SQLException{
 			 String tn = t.getName();
 			this.readOnlyTables.add(t.getName());
-			String ntn =schema( SQLConverter.escapeIdentifier(tn),systemTable);
+			String ntn =schema( escapeIdentifier(tn),systemTable);
 			exec("SET TABLE "+ntn+" READONLY TRUE ",false);
 		}
 		
@@ -736,7 +769,7 @@ public class LoadJet {
 			if (tn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(tn);
 			}
-			String ntn = SQLConverter.escapeIdentifier(tn);
+			String ntn = SQLConverter.escapeIdentifier(tn);//clean
 			if (ntn == null)
 				return;
 			createSyncrTable(t,systemTable);
@@ -861,6 +894,8 @@ public class LoadJet {
 
 		
 		private void createTables() throws SQLException, IOException{
+			metadata=new Metadata(conn);
+			metadata.createMetadata();
 			for (String tn : dbIO.getTableNames()) {
 				UcanaccessTable t = null;
 				try {
@@ -982,16 +1017,19 @@ public class LoadJet {
 		
 		private void createSyncrTriggers(Table t) throws SQLException, IOException{
 			defaultValues(t);
-			String ntn = SQLConverter.escapeIdentifier(t.getName());
+			String ntn = escapeIdentifier(t.getName());
 			triggersGenerator.synchronisationTriggers(ntn,
 				hasAutoNumberColumn(t),hasAppendOnly(t));
-			loadedTables.add(ntn);
+			loadedTables.add(t.getName());
 		}
 
+		
+		
+		
 		private PreparedStatement sqlInsert(Table  t, Map<String, Object> row,boolean systemTable)
 				throws IOException, SQLException {
 			String tn = t.getName();
-			String ntn = schema(SQLConverter.escapeIdentifier(tn),systemTable);
+			String ntn = schema(escapeIdentifier(tn),systemTable);
 			String comma = "";
 			StringBuffer sbI = new StringBuffer(" INSERT INTO ").append(ntn)
 					.append(" (");
@@ -1000,7 +1038,7 @@ public class LoadJet {
 			comma = "";
 			for (String cn : se) {
 				sbI.append(comma).append(
-						SQLConverter.escapeIdentifier(cn));
+						escapeIdentifier(cn));
 				sbE.append(comma).append(" ? ");
 				comma = ",";
 			}
@@ -1047,6 +1085,7 @@ public class LoadJet {
 			String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
 			String triggerName = namePrefix + "_"
 					+ (tableName.replaceAll("\"", "").replaceAll(" ", "_"));
+			 triggerName= escapeIdentifier(triggerName);
 			exec("CREATE TRIGGER " + triggerName + "  " + when + " ON "
 					+ tableName + "   FOR EACH ROW	" + q0 + "   CALL \""
 					+ className + "\" ",true);
@@ -1090,38 +1129,69 @@ public class LoadJet {
 			return loadView(q,null);
 		}
 		
+		
+		private void registerQueryColumns(Query q,int seq) throws SQLException{
+			QueryImpl qi=(QueryImpl)q;
+			for(QueryImpl.Row row:qi.getRows()){
+				if(QueryFormat.COLUMN_ATTRIBUTE.equals(row.attribute)){
+					String name=row.name1;
+					
+					if(name==null){
+						int beginIndex=Math.max(row.expression.lastIndexOf('['), row.expression.lastIndexOf('.'));
+						
+						if(beginIndex<0||beginIndex==row.expression.length()-1||row.expression.endsWith(")")){
+							continue;
+						}
+						name=row.expression.substring(beginIndex+1);
+						if(name.endsWith("]"))
+							name=name.substring(0,name.length()-1);
+					}
+					metadata.newColumn(name, SQLConverter.preEscapingIdentifier(name), null, seq);
+					
+				}
+			}
+		}
+		
 		private boolean loadView(Query q, String queryWKT) throws SQLException {
-			String qnn = SQLConverter.basicEscapingIdentifier(q.getName());
+			String qnn = SQLConverter.preEscapingIdentifier(q.getName());
 			if(qnn==null){
 				return false;
 			}
+			int seq=metadata.newTable(q.getName(), qnn, Metadata.Types.VIEW);
+			qnn =SQLConverter.completeEscaping(qnn,false);
+			qnn =SQLConverter.checkLang(qnn,conn,false);
 			if (qnn.indexOf(" ") > 0) {
 				SQLConverter.addWhiteSpacedTableNames(q.getName());
 			}
-			String escqn = qnn.indexOf(' ') > 0 ? "[" + qnn + "]" : qnn;
+			
 			String querySQL =queryWKT==null? q.toSQLString():queryWKT;
 			Pivot pivot = null;
-			if (q.getType().equals(Query.Type.CROSS_TAB)) {
+			boolean isPivot=q.getType().equals(Query.Type.CROSS_TAB);
+			if (isPivot) {
 				pivot = new Pivot(conn);
+				
 				if (!pivot.parsePivot(querySQL)
 						|| (querySQL = pivot.toSQL()) == null) {
 					this.notLoaded.put(q.getName(),"cannot load this query");
+					
 					return false;
 				}
+				
 			}
 			querySQL =new DFunction(conn, querySQL ).toSQL();
-			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn)
+			StringBuffer sb = new StringBuffer("CREATE VIEW ").append(qnn)
 					.append(" AS ").append(querySQL);
 			String v = null;
 			try {
-				v = SQLConverter.convertSQL(sb.toString(), true);
+				v = SQLConverter.convertSQL(sb.toString(), true).getSql();
+				registerQueryColumns( q,seq);
 				if(v.trim().endsWith(";"))
 					v=v.trim().substring(0, v.length()-1);
 				exec(v,false);
-				loadedQueries.add(qnn);
+				loadedQueries.add(q.getName());
 				this.notLoaded.remove(q.getName());
 				if (pivot != null) {
-					pivot.registerPivot(qnn);
+					pivot.registerPivot(SQLConverter.preEscapingIdentifier(q.getName()));
 				}
 				return true;
 			} 
@@ -1241,7 +1311,7 @@ public class LoadJet {
 						}
 					if (qryGot&&!foundDep && loadView(q)) {
 						arq.add(q);
-						arn.remove(q.getName());
+						arn.remove(q.getName().toLowerCase());
 					}
 				}
 				if (arq.size() == 0) {
@@ -1270,6 +1340,7 @@ public class LoadJet {
 	private boolean sysSchema;
 	private boolean ff1997;
 	private boolean skipIndexes;
+	private Metadata metadata;
 
 	public LoadJet(Connection conn, Database dbIO) {
 		super();
@@ -1328,6 +1399,12 @@ public class LoadJet {
 		//st.execute();
 		st.addBatch();
 	}
+	
+	private  String escapeIdentifier(String tn) throws SQLException{
+		return SQLConverter.escapeIdentifier(tn,conn);
+	}
+	
+	
 
 	public SQLWarning getLoadingWarnings() {
 		if (this.viewsLoader.notLoaded.size() == 0
@@ -1381,15 +1458,16 @@ public class LoadJet {
 				hasAutoNumberColumn,hasAppendOnly);
 	}
 
-	private boolean tryDefault(Object defaulT) throws SQLException {
+	private Object tryDefault(Object defaulT) throws SQLException {
 		Statement st = null;
 		try {
 			st = conn.createStatement();
-			st.executeQuery("SELECT " + defaulT
-					+ " FROM   INFORMATION_SCHEMA.SYSTEM_TABLES  where 2=1");
-			return true;
+			ResultSet rs=st.executeQuery("SELECT " + defaulT
+					+ " FROM   DUAL ");
+			if(rs.next())return rs.getObject(1);
+			return null;
 		} catch (Exception e) {
-			return false;
+			return null;
 		} finally {
 			if (st != null)
 				st.close();

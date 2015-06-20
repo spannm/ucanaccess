@@ -41,6 +41,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -52,6 +53,7 @@ public class UcanaccessResultSet implements ResultSet {
 	private ResultSet wrapped;
 	private UcanaccessStatement wrappedStatement;
 	private HashSet<String> metadata;
+	private HashSet<Integer> updIndexes=new  HashSet<Integer>() ;
 	public UcanaccessResultSet(ResultSet wrapped, UcanaccessStatement statement)  {
 		super();
 		this.wrapped = wrapped;
@@ -67,8 +69,7 @@ public class UcanaccessResultSet implements ResultSet {
 		if(this.metadata.contains(lu)){
 			return lu;
 		}
-		String escaped=SQLConverter.basicEscapingIdentifier(label);
-		escaped=escaped.replaceAll("[\"\']", "");
+		String escaped=SQLConverter.preEscapingIdentifier(label);
 		String slabel=label.substring(1).toUpperCase();
 		if(SQLConverter.isXescaped(slabel)&&this.metadata.contains(slabel)){
 			return slabel;
@@ -479,7 +480,8 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public ResultSetMetaData getMetaData() throws SQLException {
 		try {
-			return wrapped.getMetaData();
+			Map<String,String> hm=this.wrappedStatement==null?new HashMap<String,String>():this.wrappedStatement.getAliases();
+			return new UcanaccessResultSetMetaData(wrapped.getMetaData(),hm,this);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -841,6 +843,13 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void insertRow() throws SQLException {
 		try {
+			for(int i=1;i<=this.getMetaData().getColumnCount();i++){
+				if(!this.updIndexes.contains(i)){
+					this.updateNull(i);
+				}
+			}
+			this.updIndexes.clear();
+			
 			((UcanaccessConnection)this.wrappedStatement.getConnection()).setCurrentStatement(this.wrappedStatement);
 			new InsertResultSet(this).execute();
 		} catch (SQLException e) {
@@ -1000,8 +1009,17 @@ public class UcanaccessResultSet implements ResultSet {
 		}
 	}
 	
+	private void addIndex(int idx){
+		this.updIndexes.add(idx);
+	}
+	private void addIndex(String columnLabel) throws SQLException{
+		addIndex(this.findColumn(columnLabel));
+	}
+	
+	
 	public void updateArray(int idx, Array arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateArray(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1010,6 +1028,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateArray(String columnLabel, Array arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateArray(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1019,6 +1038,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(int idx, InputStream arg1)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateAsciiStream(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1028,6 +1048,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(int idx, InputStream arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateAsciiStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1037,6 +1058,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(int idx, InputStream arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateAsciiStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1046,6 +1068,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(String columnLabel, InputStream arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateAsciiStream(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1055,6 +1078,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(String columnLabel, InputStream arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateAsciiStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1064,6 +1088,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateAsciiStream(String columnLabel, InputStream arg1,
 			long arg2) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateAsciiStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1072,6 +1097,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBigDecimal(int idx, BigDecimal arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBigDecimal(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1081,6 +1107,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBigDecimal(String columnLabel, BigDecimal arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBigDecimal(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1090,6 +1117,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(int idx, InputStream arg1)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBinaryStream(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1099,6 +1127,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(int idx, InputStream arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBinaryStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1108,6 +1137,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(int idx, InputStream arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBinaryStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1117,6 +1147,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(String columnLabel, InputStream arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBinaryStream(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1126,6 +1157,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(String columnLabel, InputStream arg1,
 			int arg2) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBinaryStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1135,6 +1167,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBinaryStream(String columnLabel, InputStream arg1,
 			long arg2) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBinaryStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1143,6 +1176,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBlob(int idx, Blob arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBlob(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1151,6 +1185,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBlob(int idx, InputStream arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBlob(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1160,6 +1195,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBlob(int idx, InputStream arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBlob(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1168,6 +1204,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBlob(String columnLabel, Blob arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBlob(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1177,6 +1214,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBlob(String columnLabel, InputStream arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBlob(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1186,6 +1224,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBlob(String columnLabel, InputStream arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBlob(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1194,6 +1233,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBoolean(int idx, boolean arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBoolean(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1203,6 +1243,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBoolean(String columnLabel, boolean arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBoolean(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1211,6 +1252,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateByte(int idx, byte arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateByte(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1219,6 +1261,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateByte(String columnLabel, byte arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateByte(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1227,6 +1270,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateBytes(int idx, byte[] arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateBytes(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1236,6 +1280,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateBytes(String columnLabel, byte[] arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateBytes(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1244,6 +1289,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateCharacterStream(int idx, Reader arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateCharacterStream(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1253,6 +1299,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateCharacterStream(int idx, Reader arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateCharacterStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1262,6 +1309,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateCharacterStream(int idx, Reader arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateCharacterStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1271,6 +1319,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateCharacterStream(String columnLabel, Reader arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateCharacterStream(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1280,6 +1329,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateCharacterStream(String columnLabel, Reader arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateCharacterStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1305,6 +1355,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateClob(int idx, Reader arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateClob(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1313,6 +1364,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateClob(int idx, Reader arg1, long arg2) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateClob(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1346,6 +1398,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateDate(int idx, Date arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateDate(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1354,6 +1407,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateDate(String columnLabel, Date arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateDate(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1362,6 +1416,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateDouble(int idx, double arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateDouble(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1371,6 +1426,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateDouble(String columnLabel, double arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateDouble(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1379,6 +1435,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateFloat(int idx, float arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateFloat(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1387,6 +1444,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateFloat(String columnLabel, float arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateFloat(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1395,6 +1453,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateInt(int idx, int arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateInt(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1403,6 +1462,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateInt(String columnLabel, int arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateInt(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1411,6 +1471,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateLong(int idx, long arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateLong(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1419,6 +1480,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateLong(String columnLabel, long arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateLong(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1428,6 +1490,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNCharacterStream(int idx, Reader arg1)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNCharacterStream(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1437,6 +1500,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNCharacterStream(int idx, Reader arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNCharacterStream(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1446,6 +1510,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNCharacterStream(String columnLabel, Reader arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNCharacterStream(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1455,6 +1520,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNCharacterStream(String columnLabel, Reader arg1,
 			long arg2) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNCharacterStream(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1463,6 +1529,8 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNClob(int idx, NClob arg1) throws SQLException {
 		try {
+			
+			addIndex(idx);
 			wrapped.updateNClob(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1471,6 +1539,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNClob(int idx, Reader arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNClob(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1480,6 +1549,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNClob(int idx, Reader arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNClob(idx, arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1488,6 +1558,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNClob(String columnLabel, NClob arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNClob(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1497,6 +1568,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNClob(String columnLabel, Reader arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNClob(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1506,6 +1578,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNClob(String columnLabel, Reader arg1, long arg2)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNClob(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1514,6 +1587,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNString(int idx, String arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNString(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1523,6 +1597,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateNString(String columnLabel, String arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNString(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1531,6 +1606,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNull(int idx) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateNull(idx);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1539,6 +1615,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateNull(String columnLabel) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateNull(checkEscaped(columnLabel));
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1547,6 +1624,8 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateObject(int idx, Object arg1) throws SQLException {
 		try {
+			
+			addIndex(idx);
 			wrapped.updateObject(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1565,6 +1644,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateObject(String columnLabel, Object arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateObject(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1574,6 +1654,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateObject(String columnLabel, Object arg1, int arg2)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateObject(checkEscaped(columnLabel), arg1, arg2);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1582,6 +1663,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateRef(int idx, Ref arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateRef(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1590,6 +1672,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateRef(String columnLabel, Ref arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateRef(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1598,6 +1681,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateRow() throws SQLException {
 		try {
+			this.updIndexes.clear();
 			new UpdateResultSet(this).execute();
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1614,6 +1698,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateRowId(String columnLabel, RowId arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateRowId(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1622,6 +1707,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateShort(int idx, short arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateShort(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1630,6 +1716,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateShort(String columnLabel, short arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateShort(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1638,6 +1725,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateSQLXML(int idx, SQLXML arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateSQLXML(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1647,6 +1735,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateSQLXML(String columnLabel, SQLXML arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateSQLXML(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1655,6 +1744,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateString(int idx, String arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateString(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1664,6 +1754,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateString(String columnLabel, String arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateString(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1672,6 +1763,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateTime(int idx, Time arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateTime(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1680,6 +1772,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateTime(String columnLabel, Time arg1) throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateTime(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1688,6 +1781,7 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public void updateTimestamp(int idx, Timestamp arg1) throws SQLException {
 		try {
+			addIndex(idx);
 			wrapped.updateTimestamp(idx, arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
@@ -1698,6 +1792,7 @@ public class UcanaccessResultSet implements ResultSet {
 	public void updateTimestamp(String columnLabel, Timestamp arg1)
 			throws SQLException {
 		try {
+			addIndex(columnLabel);
 			wrapped.updateTimestamp(checkEscaped(columnLabel), arg1);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);

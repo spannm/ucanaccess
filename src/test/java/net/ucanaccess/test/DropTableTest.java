@@ -63,6 +63,7 @@ public class DropTableTest extends UcanaccessTestBase {
 					{ "33B", 111, "a" } });
 			st = super.ucanaccess.createStatement();
 			st.executeUpdate("DROP TABLE AAAn");
+			//dump("select * from AAAn");
 			st
 					.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
 			createSimple("b", new Object[][] { { "33A", 11, "b" },

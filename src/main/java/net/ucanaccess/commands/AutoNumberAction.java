@@ -49,7 +49,7 @@ public class AutoNumberAction implements IFeedbackAction {
 				UcanaccessConnection conn = UcanaccessConnection
 						.getCtxConnection();
 				Connection connHsqldb = conn.getHSQLDBConnection();
-				String cn = SQLConverter.escapeIdentifier(cl.getName());
+				String cn = SQLConverter.escapeIdentifier(cl.getName(),connHsqldb);
 				Object cnOld = memento[i];
 				Object cnNew = byAccess[i];
 				oldAutoValues.put(cl.getName(), cnOld);
@@ -57,7 +57,7 @@ public class AutoNumberAction implements IFeedbackAction {
 				try {
 					conn.setFeedbackState(true);
 					String stmt = "UPDATE "
-							+ SQLConverter.escapeIdentifier(table.getName())
+							+ SQLConverter.escapeIdentifier(table.getName(),connHsqldb)
 							+ " SET " + cn + "=? WHERE " + cn + "=?";
 					ps = connHsqldb.prepareStatement(stmt);
 					ps.setObject(1, cnNew);

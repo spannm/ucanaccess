@@ -57,8 +57,9 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 		if(t==null){
 			Database db=conn.getDbIO();
 			for (String cand:db.getTableNames()){
-				if(SQLConverter.escapeIdentifier(cand).equals(tableName)){
-					return new UcanaccessTable(db .getTable(cand),cand);
+				if(	SQLConverter.preEscapingIdentifier(cand).equals(tableName)||
+						SQLConverter.escapeIdentifier(cand).equals(tableName)){
+					return new UcanaccessTable(db.getTable(cand),cand);
 				}
 				
 			}

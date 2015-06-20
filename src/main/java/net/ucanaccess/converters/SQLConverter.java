@@ -21,7 +21,9 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
  */
 package net.ucanaccess.converters;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
@@ -42,7 +45,11 @@ public class SQLConverter {
 	private static final Pattern QUOTE_S_PATTERN = Pattern.compile("(')+");
 	private static final Pattern DOUBLE_QUOTE_S_PATTERN = Pattern
 			.compile("(\")+");
-
+	
+	private static final Pattern SELECT_FROM_PATTERN_START = Pattern.compile("[\\s\n\r]*(?i)SELECT[\\s\n\r]+");
+	private static final Pattern SELECT_FROM_PATTERN_END= Pattern.compile("[\\s\n\r]*(?i)FROM[\\s\n\r\\[]+");
+	private static final Pattern UNESCAPED_ALIAS= Pattern.compile("[\\s\n\r]*(?i)AS[\\s\n\r]*");
+	
 	private static final Pattern QUOTE_M_PATTERN = Pattern
 			.compile("'(([^'])*)'");
 	private static final Pattern DOUBLE_QUOTE_M_PATTERN = Pattern
@@ -108,7 +115,7 @@ public class SQLConverter {
 			"TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
 			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO",
 			"CONSTRAINT"
-			,"USER"
+			,"USER","DUAL"
 			);
 	
 	private static final List<String> PROCEDURE_KEYWORDLIST = Arrays.asList("NEW","ROW");
@@ -141,6 +148,39 @@ public class SQLConverter {
 	
 	public static boolean hasIdentity(String sql ){
 		return sql.indexOf("@@")>0&& sql.toUpperCase().indexOf("@@IDENTITY")>0;
+	}
+	
+		
+	private static void aliases(String sql,NormalizedSQL nsql ){
+		Matcher mtc=SELECT_FROM_PATTERN_START.matcher(sql);
+		if(mtc.find()){
+			
+			int init=mtc.end();
+			sql=sql.substring(init);
+			mtc=SELECT_FROM_PATTERN_END.matcher(sql);
+			if(mtc.find()){
+				int end=mtc.start();
+				sql=sql.substring(0, end);
+				
+				for(mtc=UNESCAPED_ALIAS.matcher(sql);mtc.find(); mtc=UNESCAPED_ALIAS.matcher(sql)){
+					int e=mtc.end();
+					
+					sql=sql.substring(e)+" ";
+					char[] sqlc=sql.toCharArray();
+					if (sqlc[0]=='[')continue;
+					StringBuffer sb=new StringBuffer();
+					for(char c:sqlc){
+						if(c==' ' || c=='\n'||c=='\r'||c==','){
+							String key=SQLConverter.preEscapingIdentifier(sb.toString());
+							nsql.put(key, sb.toString());
+							break;
+						}
+						else sb.append(c);
+					}
+				}
+				
+			}
+		}
 	}
 	
 	
@@ -295,24 +335,25 @@ public class SQLConverter {
 	
 	private static String replaceAposNames(String sql) {
 		for(String an:apostrophisedNames)
-			sql= sql.replaceAll("(?i)"+Pattern.quote("["+an+"]"), "["+an.replaceAll("'","").replaceAll("\"","")+"]");
+			sql= sql.replaceAll("(?i)"+Pattern.quote("["+an+"]"), "["+SQLConverter.escapeIdentifier(an)+"]");
 		return sql;
 	}
 
-	public static String convertSQL(String sql, boolean creatingQuery) {
+	public static NormalizedSQL convertSQL(String sql, boolean creatingQuery) {
 		return convertSQL(sql, null, creatingQuery);
 	}
 	
 		
-	public static String convertSQL(String sql, UcanaccessConnection conn,
+	public static NormalizedSQL convertSQL(String sql, UcanaccessConnection conn,
 			boolean creatingQuery) {
-		
+		NormalizedSQL nsql=new NormalizedSQL();
 		sql = sql + " ";
+		aliases(sql, nsql );
 		sql = replaceBacktrik(sql);
 		sql = replaceAposNames(sql);
 		sql = convertUnion(sql);
 		sql = convertAccessDate(sql);
-		sql = convertQuotedAliases(sql);
+		sql = convertQuotedAliases(sql,nsql);
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
@@ -323,7 +364,8 @@ public class SQLConverter {
 		}
 		sql = sql.trim();
 		
-		return sql;
+		nsql.setSql(sql);
+		return nsql;
 	}
 
 	private static String replaceExclamationPoints(String sql) {
@@ -357,7 +399,7 @@ public class SQLConverter {
 	
 	
 
-	private static String convertQuotedAliases(String sql) {
+	private static String convertQuotedAliases(String sql,NormalizedSQL nsql) {
 		for (Matcher mtc = KIND_OF_SUBQUERY.matcher(sql); mtc.find(); mtc = KIND_OF_SUBQUERY 
 				.matcher(sql)) {
 			String g2 = mtc.group(2).trim();
@@ -375,6 +417,8 @@ public class SQLConverter {
 			if (g2.indexOf('\'') >= 0 || g2.indexOf('"') >= 0) {
 				hs.add(g2);
 			}
+			String value=g2.substring(1,g2.length()-1);
+			nsql.put(SQLConverter.preEscapingIdentifier(value), value);
 			sqlN += sqle.substring(0, mtc.start()) + mtc.group(1)
 					+ g2.replaceAll("[\'\"]", "") + mtc.group(3);
 			sqle = sqle.substring(mtc.end());
@@ -406,11 +450,11 @@ public class SQLConverter {
 		whiteSpacedTableNames.add(name);
 	}
 
-	public static String convertSQL(String sql) {
+	public static NormalizedSQL convertSQL(String sql) {
 		return convertSQL(sql, null, false);
 	}
 
-	public static String convertSQL(String sql, UcanaccessConnection conn) {
+	public static NormalizedSQL convertSQL(String sql, UcanaccessConnection conn) {
 		return convertSQL(sql, conn, false);
 	}
 	
@@ -499,6 +543,7 @@ public class SQLConverter {
 				}
 			}
 			boolean isKeyword = KEYWORDLIST.contains(content.toUpperCase());
+			
 			content = basicEscapingIdentifier(content).toUpperCase();
 			String subs = !isKeyword
 					&& (content.indexOf(" ") > 0 || NO_ALFANUMERIC.matcher(
@@ -595,8 +640,10 @@ public class SQLConverter {
 		}
 		return name;
 	}
-
-	public static String basicEscapingIdentifier(String name) {
+	
+	
+	public static String preEscapingIdentifier(String name) {
+		if(name.length()==0)return name;
 		if (name.startsWith("~"))
 			return null;
 		String nl = name.toUpperCase();
@@ -606,60 +653,90 @@ public class SQLConverter {
 		if(name.indexOf("'")>=0||name.indexOf("\"")>0){
 			apostrophisedNames.add(name);
 		}
-		
-		
+				
 		if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
-		String escaped = name.replaceAll("[§/\\\\$%^:-]", "_").replaceAll("~",
-				"M_").replaceAll("\\?", "_").replaceAll("\\.", "_").replaceAll(
-				"\'", "").replaceAll("#", "_").replaceAll("\"", "").replaceAll(
-				"\\+", "").replaceAll("\\(", "_").replaceAll("\\)", "_")
-				.replaceAll("°", "0")
-				.replaceAll(Pattern.quote("<"), "lt")
-				.replaceAll(Pattern.quote(">"), "gt")
-				.replaceAll(Pattern.quote(";"),"_")
-				.replaceAll(Pattern.quote("@"),"_")
-				.replaceAll(Pattern.quote(","),"_")
-				.replaceAll(Pattern.quote("|"),"_")
-				.replaceAll(Pattern.quote("£"),"_")
-				.replaceAll(Pattern.quote("*"),"_")
-				.replaceAll(Pattern.quote("&"),"_")
-				.replaceAll(Pattern.quote("="),"_")
-				
-				;
-		escaped = replaceNoRomanCharacters(escaped);
-		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
-			escaped = "\"" + escaped + "\"";
-		}
+		String escaped = name;
+		escaped = name.replaceAll(
+				"\'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
+    	
 		if (Character.isDigit(escaped.trim().charAt(0))) {
 			escaped = "Z_" + escaped.trim();
 		}
 		if (escaped.charAt(0) == '_') {
 			escaped = "Z" + escaped;
 		}
+		
 		return escaped.toUpperCase();
 	}
-
-	private static String replaceNoRomanCharacters(String escaped) {
-		for (Map.Entry<String, String> me : noRomanCharacters.entrySet()) {
-			if (escaped.indexOf(me.getKey()) > 0) {
-				escaped = escaped.replaceAll(me.getKey(), me.getValue());
-			}
+	
+	private static String escapeKeywordIdentifier(String escaped,boolean quote) {
+		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
+			escaped =quote? "\"" + escaped + "\"":"[" + escaped + "]";
 		}
 		return escaped;
 	}
+	
+	public static String basicEscapingIdentifier(String name) {
+		return escapeKeywordIdentifier(preEscapingIdentifier(name),true);
+		
+	}
+
+	public static String escapeIdentifier(String name, Connection conn) throws SQLException {
+		 return checkLang(escapeIdentifier(name),conn,true);
+	}
+	
+	public static String completeEscaping(String escaped, boolean quote){
+		return hsqlEscape(escapeKeywordIdentifier(escaped,quote),quote);
+	}
+	
+	public static String completeEscaping(String escaped){
+		return completeEscaping(escaped,true);
+	}
+	
+	
+	private static String hsqlEscape(String escaped,boolean quote){
+		if (escaped.indexOf(" ") > 0) {
+			escaped =quote? "\"" + escaped + "\"":"[" + escaped + "]";
+		}
+		return escaped;
+	} 
+
+	public static String checkLang(String name,Connection conn) throws SQLException{
+		return checkLang(name,conn,true);
+	}
+	
+	public static String checkLang(String name,Connection conn,boolean quote) throws SQLException{
+		Statement st=null;
+		try{
+			String name0=name;
+		  if(!quote){
+			  name0=name.replaceAll(Pattern.quote("["), "\"").replaceAll(Pattern.quote("]"), "\"");
+			  }
+		  st=conn.createStatement();
+		  st.execute("SELECT 1 AS "+name0+" from dual");
+		  return name;
+		}
+		catch(SQLException e){
+		    return quote?"\""+name+"\"":"["+name+"]";
+		}
+		
+		finally{
+			if(st!=null)st.close();
+			}
+	}
+
 
 	public static String escapeIdentifier(String name) {
 		String escaped = basicEscapingIdentifier(name);
+		
 		if (escaped == null)
 			return null;
-		if (escaped.indexOf(" ") > 0) {
-			escaped = "\"" + escaped + "\"";
-		}
-		return escaped;
+		return hsqlEscape(escaped,true);
 	}
-
+	
+	
 	private static String convertCreateTable(String sql,
 			Map<String, String> types2Convert) throws SQLException {
 		// padding for detecting the right exception
@@ -773,7 +850,7 @@ public class SQLConverter {
 
 	public static String convertFormula(String sql) {
 		//white space to allow replaceWorkAroundFunction pattern to work fine
-		sql = convertFormula0(convertSQL(" "+sql));
+		sql = convertFormula0(convertSQL(" "+sql).getSql());
 		return sql;
 	}
 

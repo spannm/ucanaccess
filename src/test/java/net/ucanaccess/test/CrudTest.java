@@ -45,6 +45,7 @@ public class CrudTest extends UcanaccessTestBase {
 		 executeCreateTable("CREATE TABLE T1 (id LONG,descr TEXT) ");
 		
 		
+		
 	}
 	
 	public void testCrud() throws SQLException, IOException {
@@ -256,17 +257,49 @@ public class CrudTest extends UcanaccessTestBase {
 		 rs = ps.executeQuery();
 		 rs.moveToInsertRow();
 		 rs.updateInt(1,0);
-		  rs.updateString(2, "Growing old in rural pleaces");
+		  rs.updateString(2, "Growing old in rural places");
 		
 		  rs.insertRow();
-		  rs =ps.getGeneratedKeys();rs.next();
+		  rs =ps.getGeneratedKeys();
+		  rs.next();
 		   System.out.println( rs.getInt(1));
 		    ps.getConnection().commit();
 		   
 		 
 	
-		super.checkQuery("SELECT *  FROM T2 order by id",1, "Growing old in rural pleaces" );
+		super.checkQuery("SELECT *  FROM T2 order by id",1, "Growing old in rural places" );
 		st.execute("delete from t1");
+		} 
+		finally {
+			if (rs != null)
+				rs.close();
+			if (st != null)
+				st.close();
+			
+		}
+	}
+	
+	public void testPartialInsertRS() throws SQLException, IOException {
+		Statement st = null;
+		ResultSet rs =null;
+		try {
+			 super.ucanaccess.setAutoCommit(false);
+	    st = super.ucanaccess.createStatement();
+	    st.execute ("CREATE TABLE T21 (id autoincrement,descr TEXT) ");
+	 
+		PreparedStatement ps = super.ucanaccess.prepareStatement(
+				"SELECT *  FROM T21", ResultSet.TYPE_FORWARD_ONLY,
+				ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		 rs = ps.executeQuery();
+		 rs.moveToInsertRow();
+		 
+		  rs.updateString(2, "Growing old without emotions");
+		
+		  rs.insertRow();
+		    ps.getConnection().commit();
+		Object[][] ver = {{ 1, "Growing old without emotions" }  };
+		super.checkQuery("SELECT *  FROM T21 order by id", ver);
+		st.execute("delete from t21");
 		} 
 		finally {
 			if (rs != null)

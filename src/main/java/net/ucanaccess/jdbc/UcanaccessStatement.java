@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Map;
 
 import org.hsqldb.jdbc.JDBCPreparedStatement;
 import org.hsqldb.jdbc.JDBCStatement;
@@ -37,8 +38,17 @@ public class UcanaccessStatement implements Statement {
 	private UcanaccessConnection connection;
 	protected Statement wrapped;
 	private int generatedKey=-10000;
+	private Map<String,String>  aliases;
 	
 	 
+
+	protected Map<String,String>  getAliases() {
+		return aliases;
+	}
+
+	protected void setAliases(Map<String,String> aliases) {
+		this.aliases = aliases;
+	}
 
 	public UcanaccessStatement(Statement wrapped, UcanaccessConnection conn)
 			throws SQLException {
@@ -50,14 +60,18 @@ public class UcanaccessStatement implements Statement {
 		if(SQLConverter.checkDDL(sql)){
 			return sql;
 		}
-		return preprocess(SQLConverter.convertSQL(sql, conn));
+		NormalizedSQL nsql=SQLConverter.convertSQL(sql,conn);
+		this.aliases=nsql.getAliases();
+		return preprocess(nsql.getSql());
 	}
 	
 	private String convertSQL(String sql){
 		if(SQLConverter.checkDDL(sql)){
 			return sql;
 		}
-		return preprocess(SQLConverter.convertSQL(sql));
+		NormalizedSQL nsql=SQLConverter.convertSQL(sql);
+		this.aliases=nsql.getAliases();
+		return preprocess(nsql.getSql());
 	}
 	
 	private String preprocess(String sql){
@@ -66,7 +80,8 @@ public class UcanaccessStatement implements Statement {
 
 	public void addBatch(String batch) throws SQLException {
 		try {
-			wrapped.addBatch(SQLConverter.convertSQL(batch));
+			
+			wrapped.addBatch(SQLConverter.convertSQL(batch).getSql());
 			
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);

@@ -64,6 +64,10 @@ public class Logger {
 		return messageBundle.getString(cod);
 	}
 	
+	public static String getMessage(String cod,Object... pars){
+		return String.format(messageBundle.getString(cod),pars);
+	}
+	
 	public static void log(Object obj) {
 		if (logPrintWriter != null){
 			logPrintWriter.println(obj);

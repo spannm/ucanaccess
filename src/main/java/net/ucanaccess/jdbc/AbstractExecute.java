@@ -100,7 +100,7 @@ public abstract class AbstractExecute {
 						NotSupportedMessage.NOT_SUPPORTED_YET);
 			
 			
-			String sql0=SQLConverter.convertSQL(sql);
+			String sql0=SQLConverter.convertSQL(sql).getSql();
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql0) : sql0;

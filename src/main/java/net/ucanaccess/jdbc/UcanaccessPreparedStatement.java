@@ -60,10 +60,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 	private String sql;
 	private HashMap<Integer,ParameterReset> memento=new  HashMap<Integer,ParameterReset>();
 	
-	public UcanaccessPreparedStatement(String sql,PreparedStatement hidden,
+	public UcanaccessPreparedStatement(NormalizedSQL nsql,PreparedStatement hidden,
 			UcanaccessConnection connection) throws SQLException {
 		super(hidden, connection);
-		this.sql=sql;
+		this.sql=nsql.getSql();
+		this.setAliases(nsql.getAliases());
 		this.wrapped = hidden;
 		if(hidden==null){
 			super.wrapped=connection.createStatement();

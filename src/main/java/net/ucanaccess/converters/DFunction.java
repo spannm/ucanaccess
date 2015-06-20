@@ -126,7 +126,7 @@ public class DFunction {
 		Statement st = null;
 		try {
 			String f4t = SQLConverter.convertSQL(this.sql.replaceAll("[\r\n]", " ").replaceFirst(
-					SELECT_FROM, "SELECT " + identifier + " FROM $2 "));
+					SELECT_FROM, "SELECT " + identifier + " FROM $2 ")).getSql();
 			st = conn.createStatement();
 			ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
 			String tableN = rsmd.getTableName(1);

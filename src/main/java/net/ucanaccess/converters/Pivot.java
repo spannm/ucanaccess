@@ -32,9 +32,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Logger;
 
@@ -76,9 +78,11 @@ public class Pivot {
 			if (mtc.find()) {
 				Statement st = null;
 				try {
-					if(conu==null)
+					if(conu==null&&UcanaccessConnection
+							.hasContext()){
 					conu = UcanaccessConnection
 							.getCtxConnection();
+					}
 					if (conu == null)
 						return;
 					Connection conh = conu.getHSQLDBConnection();
@@ -88,11 +92,21 @@ public class Pivot {
 					String sqlh = pivot.toSQL();
 					if(sqlh==null) return;
 					st = conh.createStatement();
-					String escqn=name.indexOf(' ')>0?"["+name+"]":name;
-					st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn,true));
+					String escqn=SQLConverter.completeEscaping(name, false);;
+					st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn,true).getSql());
 					StringBuffer sb = new StringBuffer("CREATE VIEW ")
 							.append(escqn).append(" AS ").append(sqlh);
-					String v = SQLConverter.convertSQL(sb.toString(),true);
+					NormalizedSQL nsql=SQLConverter.convertSQL(sb.toString(),true);
+					Metadata mt=new Metadata(conh);
+					String eqn=SQLConverter.preEscapingIdentifier(name);
+					Integer idTable=mt.getTableId(eqn);
+					if(idTable!=null){
+						for(Map.Entry<String, String> entry:nsql.getAliases().entrySet()){
+						    if(mt.getColumn(eqn, entry.getKey())==null) 
+						    	mt.newColumn(entry.getValue(), entry.getKey(), null, idTable);
+						}
+					}
+					String v = nsql.getSql();
 					st.executeUpdate(v);
 				} catch (Exception e) {
 					Logger. logWarning(e.getMessage());
@@ -155,7 +169,7 @@ public class Pivot {
 		sb.append("SELECT DISTINCT ").append(this.pivot).append(" AS PIVOT ");
 		sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ")
 				.append(this.pivot).append(",").append(fromS[1]);
-		return SQLConverter.convertSQL(sb.toString());
+		return SQLConverter.convertSQL(sb.toString()).getSql();
 	}
 
 	public boolean prepare() {
@@ -195,7 +209,7 @@ public class Pivot {
 		return cln.toString();
 	}
 
-	private String replaceComma(String cn) {
+	private String replaceQuotation(String cn) {
 		cn=cn.replaceAll("\n", " ").replaceAll("\r", " ");
 		Matcher dcm = PIVOT_CN.matcher(cn);
 		
@@ -219,7 +233,7 @@ public class Pivot {
 		sb.append(this.select);
 		for (String s : this.pivotIn) {
 			sb.append(",");
-			appendCaseWhen(sb, this.pivot + "=" + s, replaceComma(s));
+			appendCaseWhen(sb, this.pivot + "=" + s, replaceQuotation(s));
 		}
 		sb.append(" FROM ").append(this.from);
 		

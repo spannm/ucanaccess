@@ -43,8 +43,8 @@ public class UcanaccessSQLException extends SQLException {
 		INVALID_TYPES_IN_COMBINATION,
 		UNSUPPORTED_TYPE,
 		STATEMENT_DDL,
-		CLOSE_ON_COMPLETION_STATEMENT, ACCESS_97
-		
+		CLOSE_ON_COMPLETION_STATEMENT, ACCESS_97,
+		PARAMETER_NULL
 		
 	}
 	private static final long serialVersionUID = -1432048647665807662L;
@@ -54,10 +54,37 @@ public class UcanaccessSQLException extends SQLException {
 	
 	
 	public UcanaccessSQLException() {
+		
 	}
 	
+	private String versionMessage(String message){
+		if(message!=null&&message.startsWith("UCAExc:"))
+			return message;
+		String version= this.getClass().getPackage().getImplementationVersion();
+		version=(version==null)?"3.x.x ":version+" ";
+		version="UCAExc:::"+version;
+		return version+message;
+	}
+	
+	@Override
+	public String getLocalizedMessage() {
+		
+		return versionMessage(super.getLocalizedMessage());
+	}
+
+	@Override
+	public String getMessage() {
+		return versionMessage(super.getMessage());
+	}
+
 	public UcanaccessSQLException(ExceptionMessages reason) {
 		super(Logger.getMessage(reason.name()));
+		this.sqlState=String.valueOf(UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+		this.errorCode=UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR;
+	}
+	
+	public UcanaccessSQLException(ExceptionMessages reason,Object... pars) {
+		super(Logger.getMessage(reason.name(),pars));
 		this.sqlState=String.valueOf(UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
 		this.errorCode=UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR;
 	}
