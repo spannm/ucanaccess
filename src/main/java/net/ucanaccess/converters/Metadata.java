@@ -94,7 +94,7 @@ public class Metadata {
 			
 			return rs.getInt(1);  
 		}
-		catch(Exception e)   {
+		catch(SQLException e)   {
 			return getTableId(escaped);
 		}
 		finally{
@@ -103,15 +103,16 @@ public class Metadata {
 	}
 	
 	public void newColumn(String name,String escaped,String originalType, Integer idTable) throws SQLException{
+		if(idTable<0)return;
 		PreparedStatement ps=null;
-		try{
+		try{ 
 			ps=conn.prepareStatement(COLUMN_RECORD);
 			ps.setString(1, name);
 			ps.setString(2, escaped);
 			ps.setString(3, originalType);
 			ps.setInt(4, idTable);
 			ps.executeUpdate();
-		}catch(Exception e)   {
+		}catch(SQLException e)   {
 			
 		}
 		
@@ -182,7 +183,7 @@ public class Metadata {
 			if(rs.next()){
 				return rs.getInt("TABLE_ID");
 			}
-			else return null;
+			else return -1;
 			
 		}finally{
 			if(ps!=null)ps.close();

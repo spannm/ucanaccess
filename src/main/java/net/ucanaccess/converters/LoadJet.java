@@ -894,7 +894,7 @@ public class LoadJet {
 
 		
 		private void createTables() throws SQLException, IOException{
-			metadata=new Metadata(conn);
+			
 			metadata.createMetadata();
 			for (String tn : dbIO.getTableNames()) {
 				UcanaccessTable t = null;
@@ -1158,6 +1158,7 @@ public class LoadJet {
 				return false;
 			}
 			int seq=metadata.newTable(q.getName(), qnn, Metadata.Types.VIEW);
+			registerQueryColumns( q,seq);
 			qnn =SQLConverter.completeEscaping(qnn,false);
 			qnn =SQLConverter.checkLang(qnn,conn,false);
 			if (qnn.indexOf(" ") > 0) {
@@ -1184,7 +1185,7 @@ public class LoadJet {
 			String v = null;
 			try {
 				v = SQLConverter.convertSQL(sb.toString(), true).getSql();
-				registerQueryColumns( q,seq);
+				
 				if(v.trim().endsWith(";"))
 					v=v.trim().substring(0, v.length()-1);
 				exec(v,false);
@@ -1342,7 +1343,7 @@ public class LoadJet {
 	private boolean skipIndexes;
 	private Metadata metadata;
 
-	public LoadJet(Connection conn, Database dbIO) {
+	public LoadJet(Connection conn, Database dbIO) throws SQLException {
 		super();
 		this.conn = conn;
 		this.dbIO = dbIO;
@@ -1351,6 +1352,7 @@ public class LoadJet {
 		} catch (Exception ignore) {
 			// Logger.logWarning(e.getMessage());
 		}
+		this.metadata=new Metadata(conn);
 	}
 	
 	public void loadDefaultValues(Table  t) throws SQLException, IOException{
