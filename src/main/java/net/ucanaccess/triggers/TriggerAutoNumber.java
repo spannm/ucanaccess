@@ -22,6 +22,8 @@ You can contact Marco Amadei at amadei.mar@gmail.com.
 package net.ucanaccess.triggers;
 
 import java.sql.SQLException;
+import java.util.UUID;
+
 
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
@@ -31,6 +33,8 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
+
+
 
 public class TriggerAutoNumber extends TriggerBase {
 	 public static int autorandom=-1;
@@ -47,12 +51,15 @@ public class TriggerAutoNumber extends TriggerBase {
 			int i = 0;
 			for (Column cli : t.getColumns()) {
 				ColumnImpl cl=(ColumnImpl)cli;
-				if (cl.isAutoNumber()) {
+			
+				if (cl.isAutoNumber()&&!t.isAllowAutoNumberInsert()
+						) {
 					if (type == TriggerAutoNumber.INSERT_BEFORE_ROW) {
 						if (cl.getAutoNumberGenerator().getType().equals(
-								DataType.GUID))
-							newR[i] = cl.getAutoNumberGenerator().getNext(
-									cl.getAutoNumberGenerator().getLast());
+								DataType.GUID)){
+							
+							newR[i] = "{" + UUID.randomUUID() + "}";;
+						}
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {
 							int keyg=AutoNumberManager.getNext(cl);

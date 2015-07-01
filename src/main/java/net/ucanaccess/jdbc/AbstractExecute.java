@@ -26,9 +26,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import net.ucanaccess.commands.DDLCommandEnlist;
+import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.FeatureNotSupportedException.NotSupportedMessage;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 
 
@@ -101,6 +103,24 @@ public abstract class AbstractExecute {
 			
 			
 			String sql0=SQLConverter.convertSQL(sql).getSql();
+			boolean inDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
+					DDLType.DISABLE_AUTOINCREMENT);
+			this.statement.setEnableDisable(inDis);
+			if(inDis) {
+				String tn=ddlType.getDBObjectName(sql0);
+				if(tn==null&&sql0.indexOf('"')>0){
+					tn=sql0.substring(sql0.indexOf('"')+1,sql0.lastIndexOf('"'));
+				}
+				UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
+				Metadata mtd=new Metadata(conn.getHSQLDBConnection());
+				String rtn=mtd.getTableName(tn);
+				if(rtn==null){
+					throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tn);
+				}
+				boolean inable=ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
+				conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!inable);
+				return 	(this instanceof Execute) ?false:0;
+			}
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql0) : sql0;

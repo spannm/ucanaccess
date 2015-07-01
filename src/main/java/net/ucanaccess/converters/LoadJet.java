@@ -391,6 +391,11 @@ public class LoadJet {
 		
 		private void createSyncrTable(Table t,boolean systemTable, boolean constraints) throws SQLException, IOException {
 			String tn = t.getName();
+			if(tn.equalsIgnoreCase("DUAL")){
+				SQLConverter.setDualUsedAsTableName(true);
+			}
+			
+			
 			String ntn =SQLConverter.preEscapingIdentifier(tn);
 			
 			int seq=metadata.newTable(tn, ntn, Metadata.Types.TABLE);
@@ -1365,6 +1370,7 @@ public class LoadJet {
 			if (cl.isAutoNumber()||DataType.BOOLEAN.equals(cl.getType())) {
 				return true;
 			}
+			
 		}
 		return false;
 	}

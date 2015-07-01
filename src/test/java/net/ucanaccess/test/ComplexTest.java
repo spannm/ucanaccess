@@ -24,6 +24,7 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import java.util.Date;
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
+
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -58,12 +60,14 @@ public class ComplexTest extends UcanaccessTestBase {
 	}
 	
 	
-	public void testComplex() throws SQLException, IOException, ParseException {
+	public void testComplex() throws Exception {
 		PreparedStatement ps = null;
 		try {
 			complex0();
 			complex1() ;
-		} finally {
+		} 
+		catch(Exception e){throw e;}
+		finally {
 			if (ps != null)
 				ps.close();
 		}
@@ -107,10 +111,11 @@ public class ComplexTest extends UcanaccessTestBase {
 		}
 	
 	
-	private void complex1() throws SQLException, IOException, ParseException {
+	private void complex1() throws Exception {
 		PreparedStatement ps = null;
 		try {
-			
+			dump("select * from Table1");
+			checkQuery("select * from Table1");
 			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) " +
 					"VALUES (?,?,?,?,?)");
 			
@@ -123,6 +128,7 @@ public class ComplexTest extends UcanaccessTestBase {
 					new Attachment(null,"ccczz.txt","txt","ddddd zzddd".getBytes(), new Date(),null) };
 			ps.setObject(5,atcs);
 			ps.execute();
+			dump("select * from Table1");
 			checkQuery("select * from Table1");
 			ps.close();
 			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE CAT' ");
@@ -145,7 +151,9 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps.execute();
 			checkQuery("select * from TABLE1 order by id");
 			assertTrue(getCount("select count(*) from TABLE1", true) == 7);
-		} finally {
+		}
+		catch(Exception e){e.printStackTrace(); throw e;}
+		finally {
 			if (ps != null)
 				ps.close();
 		}
@@ -161,7 +169,7 @@ public class ComplexTest extends UcanaccessTestBase {
 			Method mth=UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[]{boolean.class});
 			mth.setAccessible(true);
 			mth.invoke(super.ucanaccess, new Object[]{Boolean.TRUE});
-			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , MEMO_DATA , APPEND_MEMO_DATA , MULTI_VALUE_DATA , ATTACH_DATA) " +
+			ps=super.ucanaccess.prepareStatement("INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) " +
 					"VALUES (?,?,?,?,?)");
 			
 			ps.setString(1, "row123");
@@ -174,7 +182,7 @@ public class ComplexTest extends UcanaccessTestBase {
 			ps.setObject(5,atcs);
 			ps.execute();
 			ps.close();
-			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET APPEND_MEMO_DATA='THE BIG BIG CAT' WHERE ID='row12' ");
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12' ");
 			ps.execute();
 			ps.close();
 			dump("select * from TABLE1");

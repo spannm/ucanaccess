@@ -13,6 +13,9 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.impl.TableImpl;
+import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
+
 import com.healthmarketscience.jackcess.util.ErrorHandler;
 
 public class UcanaccessTable implements Table{
@@ -109,5 +112,16 @@ public class UcanaccessTable implements Table{
 	public Row updateRow(Row row) throws IOException {
 		return wrapped.updateRow(row);
 	}
+	public boolean isAllowAutoNumberInsert() {
+		return wrapped.isAllowAutoNumberInsert();
+	}
+	public void setAllowAutoNumberInsert(Boolean arg0) {
+		wrapped.setAllowAutoNumberInsert(arg0);
+	}
+	public RowState createRowState() {
+		// TODO Auto-generated method stub
+		 return  ((TableImpl)wrapped).createRowState();
+	}
+	
 	
 }

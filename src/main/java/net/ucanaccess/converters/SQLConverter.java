@@ -61,7 +61,7 @@ public class SQLConverter {
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 			.compile("\\[[\\*|_|#]\\]");
 	private static final Pattern CHECK_DDL = Pattern
-			.compile("^([\n\r\\s]*(?i)(create|alter|drop))[\n\r\\s]+.*");
+			.compile("^([\n\r\\s]*(?i)(create|alter|drop|enable|disable))[\n\r\\s]+.*");
 	private static final Pattern KIND_OF_SUBQUERY = Pattern
 			.compile("(\\[)(((?i) FROM )*((?i)SELECT )*([^\\]])*)(\\]\\.[\\s\n\r])");
 	
@@ -115,7 +115,7 @@ public class SQLConverter {
 			"TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
 			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO",
 			"CONSTRAINT"
-			,"USER","DUAL"
+			,"USER"
 			);
 	
 	private static final List<String> PROCEDURE_KEYWORDLIST = Arrays.asList("NEW","ROW");
@@ -128,7 +128,7 @@ public class SQLConverter {
 	private static final HashSet<String> waFunctions = new HashSet<String>();
 	
 	private static boolean supportsAccessLike = true;
-	
+	private static boolean dualUsedAsTableName=false;
 	static {
 		noRomanCharacters.put("\u20ac", "EUR");
 		noRomanCharacters.put("\u00B9", "1");
@@ -261,7 +261,12 @@ public class SQLConverter {
 				Pattern
 						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))")), DROP_TABLE(
 				Pattern
-						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)"));
+						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)")),
+				DISABLE_AUTOINCREMENT(Pattern
+						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)")),
+				ENABLE_AUTOINCREMENT(Pattern
+								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)"))
+						;
 		private Pattern pattern;
 
 		private DDLType(Pattern pattern) {
@@ -657,6 +662,7 @@ public class SQLConverter {
 		if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
 			alreadyEscapedIdentifiers.add(nl.substring(1));
 		}
+		
 		String escaped = name;
 		escaped = name.replaceAll(
 				"\'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
@@ -666,6 +672,9 @@ public class SQLConverter {
 		}
 		if (escaped.charAt(0) == '_') {
 			escaped = "Z" + escaped;
+		}
+		if (dualUsedAsTableName&&escaped.equalsIgnoreCase("DUAL")) {
+			escaped = "DUAL_13031971";
 		}
 		
 		return escaped.toUpperCase();
@@ -1038,6 +1047,16 @@ public class SQLConverter {
 		  fd.add(escapeIdentifier(mtc.group(1)));
 		}
 		return fd;
+	}
+
+
+	static boolean isDualUsedAsTableName() {
+		return dualUsedAsTableName;
+	}
+
+
+	static void setDualUsedAsTableName(boolean dualUsedAsTableName) {
+		SQLConverter.dualUsedAsTableName = dualUsedAsTableName;
 	}
 
 	

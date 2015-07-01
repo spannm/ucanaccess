@@ -44,7 +44,8 @@ public class UcanaccessSQLException extends SQLException {
 		UNSUPPORTED_TYPE,
 		STATEMENT_DDL,
 		CLOSE_ON_COMPLETION_STATEMENT, ACCESS_97,
-		PARAMETER_NULL
+		PARAMETER_NULL,
+		TABLE_DOESNT_EXIST
 		
 	}
 	private static final long serialVersionUID = -1432048647665807662L;

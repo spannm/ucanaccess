@@ -260,7 +260,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
 	public ResultSet getClientInfoProperties() throws SQLException {
 		try {
-			return wrapped.getClientInfoProperties();
+			String sql =
+	            "SELECT * FROM UCA_METADATA.PROP";
+
+	        return executeQuery(sql);
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}

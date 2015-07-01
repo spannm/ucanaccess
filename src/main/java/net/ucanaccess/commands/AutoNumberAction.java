@@ -52,6 +52,7 @@ public class AutoNumberAction implements IFeedbackAction {
 				String cn = SQLConverter.escapeIdentifier(cl.getName(),connHsqldb);
 				Object cnOld = memento[i];
 				Object cnNew = byAccess[i];
+				if(cnNew instanceof String)cnNew=((String)cnNew).toUpperCase();
 				oldAutoValues.put(cl.getName(), cnOld);
 				newAutoValues.put(cl.getName(), cnNew);
 				try {
@@ -63,6 +64,7 @@ public class AutoNumberAction implements IFeedbackAction {
 					ps.setObject(1, cnNew);
 					ps.setObject(2, cnOld);
 					ps.executeUpdate();
+				if(cnNew instanceof Integer)
 					conn.setGeneratedKey((Integer)cnNew);
 					conn
 							.setFeedbackState(false);

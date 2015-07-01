@@ -38,6 +38,28 @@ public class Metadata {
 			"				UCA_METADATA.COLUMN(COLUMN_ID INTEGER IDENTITY, COLUMN_NAME LONGVARCHAR,ESCAPED_COLUMN_NAME LONGVARCHAR, " +
 			"				ORIGINAL_TYPE VARCHAR(20),COLUMN_DEF  LONGVARCHAR,TABLE_ID INTEGER, UNIQUE(TABLE_ID,COLUMN_NAME) )";
 	
+	private final static String PROP="CREATE MEMORY TABLE  IF NOT EXISTS UCA_METADATA.PROP(NAME LONGVARCHAR PRIMARY KEY, MAX_LEN INTEGER,DEFAULT_VALUE VARCHAR(20),DESCRIPTION LONGVARCHAR) ";
+	private final static Object[][] PROP_DATA=new Object[][]{
+		{"newdatabaseversion",8,null,"see ucanaccess website"},
+		{"jackcessopener",500,null,"see ucanaccess web site"},
+		{"password",500,null,"see ucanaccess web site"},
+		{"memory",10, "true" ,"see ucanaccess web site"},
+		{"lobscale",2,"2","see ucanaccess web site"},
+		{"keepmirror",500,"2","see ucanaccess web site"},
+		{"showschema",10,"false","see ucanaccess web site"},
+		{"inactivitytimeout",10,"2","see ucanaccess web site"},
+		{"singleconnection",10,"false","see ucanaccess web site"},
+		{"lockmdb",10,"false","see ucanaccess web site"},
+		{"openexclusive",500,"false","see ucanaccess web site"},
+		{"remap",500,null,"see ucanaccess web site"},
+		{"columnorder",10,"data","see ucanaccess web site"},
+		{"mirrorfolder",500,null,"see ucanaccess web site"},
+		{"ignorecase",10,"true","see ucanaccess web site"},
+		{"sysschema",10,"false","see ucanaccess web site"},
+		{"skipindexes",10,"false","see ucanaccess web site"},
+		
+	};
+	
 	private final static String COLUMNS_VIEW="CREATE VIEW   UCA_METADATA.COLUMNS_VIEW as " +
 			"SELECT t.TABLE_NAME, c.COLUMN_NAME,t.ESCAPED_TABLE_NAME, c.ESCAPED_COLUMN_NAME,c.COLUMN_DEF," +
 			"CASE WHEN(c.ORIGINAL_TYPE='COUNTER') THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT " +
@@ -45,6 +67,8 @@ public class Metadata {
 	
 	private final static String FK="ALTER TABLE UCA_METADATA.COLUMN   " +
 			"ADD CONSTRAINT UCA_METADATA_FK FOREIGN KEY (TABLE_ID) REFERENCES UCA_METADATA.TABLE (TABLE_ID) ON DELETE CASCADE";
+	
+	
 	
 	private final static String TABLE_RECORD="INSERT INTO UCA_METADATA.TABLE( TABLE_NAME,ESCAPED_TABLE_NAME, TYPE) VALUES(?,?,?)";
 	private final static String COLUMN_RECORD="INSERT INTO UCA_METADATA.COLUMN(COLUMN_NAME,ESCAPED_COLUMN_NAME,ORIGINAL_TYPE, TABLE_ID) " +
@@ -59,6 +83,8 @@ public class Metadata {
 	private final static String UPDATE_COLUMN_DEF="UPDATE UCA_METADATA.COLUMN c SET c.COLUMN_DEF=? WHERE COLUMN_NAME=? " +
 			" AND EXISTS(SELECT * FROM UCA_METADATA.TABLE t WHERE t.TABLE_NAME=? AND t.TABLE_ID=c.TABLE_ID) ";
 	
+	
+	
 	public static enum Types{VIEW,TABLE}
 	
 	public Metadata(Connection conn) throws SQLException {
@@ -72,15 +98,39 @@ public class Metadata {
 		try{
 			st=conn.createStatement();
 			st.execute(SCHEMA);
+			st.execute(PROP);
 			st.execute(TABLES);
 			st.execute(COLUMNS);
 			st.execute(FK);
 			st.execute(COLUMNS_VIEW);
+			loadProp();
 		}finally{
 			if(st!=null)st.close();
 		}
 	}
 	
+	public void loadProp() throws SQLException{
+		PreparedStatement ps=null;
+		try{
+			ps=conn.prepareStatement("INSERT INTO UCA_METADATA.PROP( NAME , MAX_LEN , DEFAULT_VALUE , DESCRIPTION) VALUES(?,?,?,?)");
+			for(Object[] ob:PROP_DATA){
+				ps.setObject(1, ob[0]);
+				ps.setObject(2, ob[1]);
+				ps.setObject(3, ob[2]);
+				ps.setObject(4, ob[3]);
+				ps.execute();
+			}
+		
+		}
+		
+		finally{
+			if(ps!=null)ps.close();
+		}
+		
+	}
+		
+		
+		
 	public Integer newTable(String name,String escaped,Types type) throws SQLException{
 		PreparedStatement ps=null;
 		try{
@@ -199,7 +249,7 @@ public class Metadata {
 			
 			ResultSet rs= ps.executeQuery();
 			if(rs.next()){
-				return rs.getString("NAME");
+				return rs.getString("TABLE_NAME");
 			}
 			else return null;
 			

@@ -126,10 +126,15 @@ public class InsertCommand implements ICommand {
 			for (Column cli : lc) {
 				ColumnImpl cl=(ColumnImpl)cli;
 				if (cl.isAutoNumber()
-						&& cl.getAutoNumberGenerator().getType()
-								.equals(DataType.LONG)
-						&& !memento[j].equals(newRow[j])) {
-					AutoNumberManager.reset(cl, (Integer) newRow[j]);
+						&& !memento[j].equals(newRow[j])
+						&& !cl.getAutoNumberGenerator().getType()
+						.equals(DataType.COMPLEX_TYPE)
+				) {
+					
+					if(cl.getAutoNumberGenerator().getType()
+						.equals(DataType.LONG)){
+						AutoNumberManager.reset(cl, (Integer) newRow[j]);
+					}
 					ana= new AutoNumberAction(table, memento, newRow);
 				} 
 

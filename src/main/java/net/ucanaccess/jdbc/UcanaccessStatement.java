@@ -39,7 +39,7 @@ public class UcanaccessStatement implements Statement {
 	protected Statement wrapped;
 	private int generatedKey=-10000;
 	private Map<String,String>  aliases;
-	
+	private boolean  enableDisable;
 	 
 
 	protected Map<String,String>  getAliases() {
@@ -384,7 +384,10 @@ public class UcanaccessStatement implements Statement {
 
 	public int getUpdateCount() throws SQLException {
 		try {
-			return wrapped.getUpdateCount();
+			
+			int i= wrapped.getUpdateCount();
+			if(i==-1&&this.enableDisable)return 0;
+			return i;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -528,6 +531,14 @@ public class UcanaccessStatement implements Statement {
 
 	public void setGeneratedKey(int key) {
 		this.generatedKey=key;
+	}
+
+	boolean isEnableDisable() {
+		return enableDisable;
+	}
+
+	void setEnableDisable(boolean enableDisable) {
+		this.enableDisable = enableDisable;
 	}
 	
 	

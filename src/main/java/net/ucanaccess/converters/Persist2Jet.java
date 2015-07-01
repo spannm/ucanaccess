@@ -200,6 +200,7 @@ public class Persist2Jet {
 		int i = 0;
 		while (rs.next()) {
 			String name=rs.getString("COLUMN_NAME");
+			
 			String nname=getNormalizedName( name,columnMap );
 			ColumnBuilder cb=new ColumnBuilder(nname);
 			short length = (short) rs.getInt("COLUMN_SIZE");
