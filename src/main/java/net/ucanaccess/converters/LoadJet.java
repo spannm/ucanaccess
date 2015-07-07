@@ -118,7 +118,7 @@ public class LoadJet {
 			functionsDefinition.add(funDef.toString());
 		}
 
-		private void addFunctions(Class<?> clazz) throws SQLException {
+		private void addFunctions(Class<?> clazz, boolean cswitch) throws SQLException {
 			Method[] mths = clazz.getDeclaredMethods();
 			HashMap<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
 			for (Method mth : mths) {
@@ -157,12 +157,40 @@ public class LoadJet {
 				}
 			}
 			createFunctions();
+			if(cswitch)
 			createSwitch();
 		}
+		
+		
+		private void resetDefault() throws SQLException {
+			Class<?> clazz=Functions.class;
+			Method[] mths = clazz.getDeclaredMethods();
+			for (Method mth : mths) {
+				Annotation[] ants = mth.getAnnotations();
+				for (Annotation ant : ants) {
+					if (ant.annotationType().equals(FunctionType.class)) {
+						FunctionType ft = (FunctionType) ant;
+						String functionName = ft.functionName();
+						
+						if (ft.namingConflict()) {
+							SQLConverter.addWAFunctionName(functionName);
+						}
+						
+					}
+				}
+			}
+			
+		}
+
 
 		private void createFunctions() throws SQLException {
 			for (String functionDef : functionsDefinition) {
-				exec(functionDef,true);
+				
+				try{
+					exec(functionDef,true);
+				}catch(SQLException e){
+					Logger.logParametricWarning(Messages.FUNCTION_ALREADY_ADDED,functionDef);
+				}
 			}
 			
 			functionsDefinition.clear();
@@ -185,8 +213,6 @@ public class LoadJet {
 				String type=" "+TypesMap.map2hsqldb(dtype)+" ";
 				
 			for(int i=1;i<10;i++){
-				
-				
 				StringBuffer header=new StringBuffer("CREATE FUNCTION SWITCH(  ");
 				StringBuffer body=new StringBuffer("(CASE ");
 				String comma="";
@@ -198,7 +224,11 @@ public class LoadJet {
 				}
 				body.append(" END)");
 				header.append(") RETURNS").append(type).append(" RETURN").append(body);
-				exec(header.toString(),true);
+				try{
+					exec(header.toString(),true);
+				}catch(SQLException e){
+					Logger.logParametricWarning(Messages.FUNCTION_ALREADY_ADDED,header.toString() );
+				}
 			}
 			}
 			
@@ -221,7 +251,7 @@ public class LoadJet {
 		}
 
 		private void loadMappedFunctions() throws SQLException {
-			addFunctions(Functions.class);
+			addFunctions(Functions.class,true);
 			addAggregates();
 			createFunctions();
 		}
@@ -1376,7 +1406,7 @@ public class LoadJet {
 	}
 
 	public void addFunctions(Class<?> clazz) throws SQLException {
-		this.functionsLoader.addFunctions(clazz);
+		this.functionsLoader.addFunctions(clazz,false);
 	}
 
 	private void exec(String expression, boolean logging) throws SQLException {
@@ -1438,6 +1468,10 @@ public class LoadJet {
 			}
 		}
 		return sqlw;
+	}
+	
+	public void resetFunctionsDefault() throws SQLException{
+		this.functionsLoader.resetDefault();
 	}
 
 	public void loadDB() throws SQLException, IOException {

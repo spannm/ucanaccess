@@ -232,8 +232,12 @@ public final class UcanaccessDriver implements Driver {
 								.getProperty("skipindexes")));
 					}
 					
-					if(toBeLoaded)
-					la.loadDB();
+					if(toBeLoaded){
+						la.loadDB();
+					}
+					else {
+						la.resetFunctionsDefault();
+					}
 					as.put(mdb.getAbsolutePath(), ref);
 					sqlw=la.getLoadingWarnings();
 				}
