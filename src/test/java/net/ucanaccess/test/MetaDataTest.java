@@ -122,5 +122,16 @@ public class MetaDataTest extends UcanaccessTestBase {
 				 dump(rs);
 				 rs=dbmd.getClientInfoProperties()	;
 				 dump(rs);
+				 rs=dbmd.getTablePrivileges(null, null,"??###")	;
+				 dump(rs);
+				 rs=dbmd.getTables(null, null,"??###", new String[]{"TABLE"})	;
+				 dump(rs);
+				 
+				 rs=dbmd.getTables(null, null,null, new String[]{"VIEW"})	;
+				 dump(rs);
+				 rs=dbmd.getBestRowIdentifier(null, null, "??###", 0, true)	;
+				 dump(rs);
+				 rs=dbmd.getBestRowIdentifier(null, null, "??###", 33, true)	;
+				 dump(rs);
 	}
 }
