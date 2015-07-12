@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hsqldb.jdbc.JDBCDatabaseMetaData;
+
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
@@ -41,8 +43,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private static final String SELECT_BASE = "SELECT * FROM INFORMATION_SCHEMA.";
     private static final String NATIVE_ALIAS=" l.";
     private static final String CUSTOM_ALIAS=" r.";
-	
-	
+	private static final String CAST_EXPR="CAST(null AS VARCHAR(50)) AS ";
 	private UcanaccessConnection connection;
 	private DatabaseMetaData wrapped;
 
@@ -60,6 +61,23 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		;
 		return sb.toString();
 	}
+	
+	private String in(String prefix,String field,Object[] options){
+		if(options==null || options.length==0){
+			return "";
+		}
+		StringBuffer sb=new StringBuffer(" AND ").append(prefix).append(field).append(" IN ").append("(");
+		String comma="";
+		for(int i=0;i<options.length;i++){
+			Object norm=options[i];
+			String val=norm instanceof String?"'"+norm.toString().toUpperCase()+"'":norm.toString();
+			sb.append(comma).append(val);
+			comma=",";
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+	
 	private String nAlias(String s){
 		return NATIVE_ALIAS+s;
 	}
@@ -86,6 +104,13 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 	
 	private static String and(String left, String op, String right, String and) {
+		return  and( left,op,  right, and,  true) ;
+	}
+	private static String and(String left, String op, String right,boolean apos) {
+		return  and( left,op,  right, " AND ",  apos) ;
+	}
+	
+	private static String and(String left, String op, String right, String and, boolean apos) {
 		 if (right == null) {
 	            return "";
 	    }
@@ -94,7 +119,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             return sb.append(left).append(" IS NULL ").toString();
         }
         String exp = right==null ?null
-                         : "'"+right+"'";
+                         : (apos?"'"+right+"'":right);
         sb.append(left).append(" ");
         if ("LIKE".equals(op)) {
             if (exp.indexOf('_') < 0 && exp.indexOf('%') < 0) {
@@ -122,7 +147,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 				sb.append(comma);
 				
 				if(es==null)
-				sb.append("CAST(null AS VARCHAR(50)) AS "+cn);
+				sb.append(CAST_EXPR+cn);
+				else if(es.startsWith(CAST_EXPR)){
+					sb.append(es);
+				}
 				else{
 					String suffix=es.indexOf(".")>0?"":"r.";
 					sb.append(suffix)
@@ -222,10 +250,48 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
 	public ResultSet getBestRowIdentifier(String catalog, String schema,
 			String table, int scope, boolean nullable) throws SQLException {
+		table = SQLConverter.escapeIdentifier(table).toUpperCase();
+		Integer[] scopeArr=null;
 		try {
-			table = SQLConverter.escapeIdentifier(table).toUpperCase();
-			return wrapped.getBestRowIdentifier(catalog, schema, table, scope,
-					nullable);
+			
+			
+			 switch (scope) {
+
+	            case 0 :
+	            	scopeArr = new Integer[]{0,1,2};
+
+	                break;
+	            case 1 :
+	            	scopeArr =  new Integer[]{1,2};
+
+	                break;
+	            case 2 :
+	            	scopeArr =  new Integer[]{2};
+
+	                break;
+	           
+	        }
+	       
+
+	        String nullableS = (nullable) ? null
+	                                      :String.valueOf( columnNoNulls);
+	        StringBuffer sql =
+	          
+	         new StringBuffer(  select("SYSTEM_BESTROWIDENTIFIER",
+	        		
+	       					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME","COLUMN_NAME"),
+	       					Arrays.asList(null,null,"TABLE_NAME","COLUMN_NAME")))
+	       					.append(from("SYSTEM_BESTROWIDENTIFIER", "COLUMNS_VIEW"))
+	       					
+	       					.append(on(Arrays.asList("TABLE_NAME","COLUMN_NAME"),
+	       							Arrays.asList("ESCAPED_TABLE_NAME","ESCAPED_COLUMN_NAME")))
+	       				    .append(and("TABLE_CAT","=", "PUBLIC", " WHERE "))
+	       				    .append(and("TABLE_SCHEM", "=", schema))
+	       				    .append(and("TABLE_NAME", "=", table))
+	       				    .append(and("NULLABLE", "=",nullableS ,false))
+	       				    .append(in(NATIVE_ALIAS,"SCOPE",scopeArr));
+			
+			return executeQuery(sql.toString());
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -904,13 +970,30 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			String tableNamePattern) throws SQLException {
 		try {
 			tableNamePattern = normalizeName(tableNamePattern);
-			return wrapped.getTablePrivileges(catalog, schemaPattern,
-					tableNamePattern);
+			StringBuffer select =new StringBuffer(
+					select("TABLE_PRIVILEGES",
+					Arrays.asList("TABLE_CATALOG" , "TABLE_SCHEMA","TABLE_NAME"),
+					Arrays.asList(CAST_EXPR+" TABLE_CAT ",CAST_EXPR+" TABLE_SCHEM","TABLE_NAME")))
+					.append(from("TABLE_PRIVILEGES", "TABLE"))
+					
+					.append(on(Arrays.asList("TABLE_NAME"),
+							Arrays.asList("ESCAPED_TABLE_NAME")))
+							.append(							
+		            and("TABLE_CATALOG", "=", "PUBLIC"," WHERE ")).append(
+		            and("TABLE_SCHEMA", "=", "PUBLIC")).append(
+		            and("TABLE_NAME", "LIKE", tableNamePattern));
+			
+			
+
+			return executeQuery(select.toString());
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
 	}
 
+	
+	
+	
 	public ResultSet getTables(String catalog, String schemaPattern,
 			String tableNamePattern, String[] types) throws SQLException {
 		try {
@@ -926,7 +1009,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 							.append(							
 		            and("TABLE_CAT", "=", "PUBLIC"," WHERE ")).append(
 		            and("TABLE_SCHEM", "=", "PUBLIC")).append(
-		            and("TABLE_NAME", "LIKE", tableNamePattern));
+		            and("TABLE_NAME", "LIKE", tableNamePattern)).append(
+		            in(CUSTOM_ALIAS,"TYPE",types )		);
 
 			return executeQuery(select.toString());
 		} catch (SQLException e) {
