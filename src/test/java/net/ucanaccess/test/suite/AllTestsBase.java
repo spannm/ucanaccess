@@ -23,6 +23,7 @@ package net.ucanaccess.test.suite;
 
 
 import net.ucanaccess.test.AccessLikeTest;
+import net.ucanaccess.test.AddFunctionTest;
 import net.ucanaccess.test.AggregateFunctionsTest;
 import net.ucanaccess.test.BatchTest;
 import net.ucanaccess.test.BlobOleTest;
@@ -53,6 +54,7 @@ import junit.framework.TestSuite;
 public class AllTestsBase {
 	public static TestSuite suite() throws ClassNotFoundException {
 		 TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
+		 suite.addTestSuite(AddFunctionTest.class);
 		suite.addTestSuite(AccessLikeTest.class);
 		suite.addTestSuite(CounterTest.class);
 		suite.addTestSuite(BlobOleTest.class);
