@@ -146,13 +146,17 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 				
 				if(es==null)
 				sb.append(CAST_EXPR+cn);
-				else if(es.startsWith(CAST_EXPR)){
+				else if(es.equals("PUBLIC")){
+					sb.append("'PUBLIC' AS "+cn);
+				}
+				
+				else if(es.startsWith(CAST_EXPR)||es.equals("PUBLIC")){
 					sb.append(es);
 				}
 				else{
 					String suffix=es.indexOf(".")>0?"":"r.";
 					sb.append(suffix)
-					.append(es);
+					.append(es).append(" AS ").append(cn);
 				}
 			}
 			else{
@@ -368,12 +372,17 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		try {
 			columnNamePattern = normalizeName(columnNamePattern);
 			tableNamePattern = normalizeName(tableNamePattern);
-			
+			if(invokeWrapper(catalog, schemaPattern)){
+				return this.wrapped.getColumns(catalog,  schemaPattern,
+						tableNamePattern,  columnNamePattern);
+			}
+			String cat=this.connection.isShowSchema()?"PUBLIC":null;
+			String schem=this.connection.isShowSchema()?"PUBLIC":null;
 			
 			StringBuffer select =new StringBuffer(
 					select("SYSTEM_COLUMNS",
 					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT"),
-					Arrays.asList(null,null,"TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT")))
+					Arrays.asList(cat,schem,"TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT")))
 					.append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
 					
 					.append(on(Arrays.asList("TABLE_NAME","COLUMN_NAME"),
@@ -499,6 +508,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			if(table==null)
 				throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL,"table");
 			table = normalizeName(table);
+			if(invokeWrapper(catalog, schema)){
+				return this.wrapped.getExportedKeys(catalog, schema, table);
+			}
 			String cat=this.connection.isShowSchema()?"PUBLIC":null;
 			String schem=this.connection.isShowSchema()?"PUBLIC":null;
 			StringBuffer select =new StringBuffer(
@@ -563,6 +575,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			if(table==null)
 				throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL,"table");
 			table = normalizeName(table);
+			if(invokeWrapper(catalog, schema)){
+				return this.wrapped.getImportedKeys(catalog, schema, table);
+			}
+			
+			
 			String cat=this.connection.isShowSchema()?"PUBLIC":null;
 			String schem=this.connection.isShowSchema()?"PUBLIC":null;
 			StringBuffer select =new StringBuffer(
@@ -800,12 +817,23 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		}
 	}
 
+	
+	private boolean invokeWrapper(String catalog, String schema){
+		return(this.connection.isShowSchema()
+			&& (!"PUBLIC".equals(catalog)
+			||!"PUBLIC".equals(schema))
+		);
+	}
+	
 	public ResultSet getPrimaryKeys(String catalog, String schema, String table)
 			throws SQLException {
 		try {
 			if(table==null)
 				throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL,"table");
 			table = normalizeName(table);
+			if(invokeWrapper(catalog, schema)){
+				return this.wrapped.getPrimaryKeys(catalog, schema, table);
+			}
 			String cat=this.connection.isShowSchema()?"PUBLIC":null;
 			String schem=this.connection.isShowSchema()?"PUBLIC":null;
 			 StringBuffer select =new StringBuffer(select("SYSTEM_PRIMARYKEYS",
@@ -996,10 +1024,18 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			String tableNamePattern, String[] types) throws SQLException {
 		try {
                     tableNamePattern = normalizeName(tableNamePattern);
-				StringBuffer select =new StringBuffer(
+                    
+        			if(invokeWrapper(catalog, schemaPattern)){
+        				return this.wrapped.getTables( catalog, schemaPattern,
+        						 tableNamePattern,  types);
+        			}
+        			String cat=this.connection.isShowSchema()?"PUBLIC":null;
+        			String schem=this.connection.isShowSchema()?"PUBLIC":null;
+                    
+                    StringBuffer select =new StringBuffer(
 					select("SYSTEM_TABLES",
 					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME"),
-					Arrays.asList(null,null,"TABLE_NAME")))
+					Arrays.asList(cat,schem,"TABLE_NAME")))
 					.append(from("SYSTEM_TABLES", "TABLE"))
 					
 					.append(on(Arrays.asList("TABLE_NAME"),
