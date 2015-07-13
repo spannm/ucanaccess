@@ -1,9 +1,3 @@
-package net.ucanaccess.converters;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 /*
 Copyright (c) 2012 Marco Amadei.
 
@@ -25,6 +19,13 @@ USA
 You can contact Marco Amadei at amadei.mar@gmail.com.
 
 */
+package net.ucanaccess.converters;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.CursorBuilder;
