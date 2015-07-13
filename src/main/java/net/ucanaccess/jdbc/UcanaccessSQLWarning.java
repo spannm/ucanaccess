@@ -1,25 +1,15 @@
-package net.ucanaccess.jdbc;
+/*
+Copyright (c) 2012 Marco Amadei.
 
-import java.sql.SQLWarning;
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-public class UcanaccessSQLWarning extends  SQLWarning{
-	private static final long serialVersionUID = -4626457418782839303L;
-	private SQLWarning nextWarning;
-	
+    http://www.apache.org/licenses/LICENSE-2.0
 
-	public UcanaccessSQLWarning(String message) {
-		super(message);
-	}
-
-	public SQLWarning getNextWarning() {
-		return nextWarning;
-	}
-
-	public void setNextWarning(SQLWarning warning) {
-		this.nextWarning=warning;
-	}
-
-	
-	
-
-}
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/

@@ -1,3 +1,7 @@
 Most of the financial functions (PMT, NPER, IPMT, PPMT, RATE, PV) Function class methods) have been originally copied from the Apache POI project (Apache Software Foundation) . 
 They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
 The  Apache POI project is licensed under Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.
+
+Some of the UcanaccessDatabaseMetadata methods have been originally copied from the hsqldb DatabaseMetaData implementation. 
+They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
+The  Hsqldb  project is licensed under a BSD based license.
