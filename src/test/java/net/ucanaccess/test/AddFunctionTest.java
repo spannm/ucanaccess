@@ -48,6 +48,7 @@ public class AddFunctionTest extends UcanaccessTestBase {
 			uc.addFunctions(AddFunctionClass.class);
 			super.dump("select pluto('hello',' world ',  now ()) from gooo");
 			checkQuery("select concat('Hello World, ','Ucanaccess') from gooo","Hello World, Ucanaccess");
+			//uc.addFunctions(AddFunctionClass.class);
 	}
 	
 	
