@@ -344,8 +344,15 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL,"table");
 			columnNamePattern = normalizeName(columnNamePattern);
 			table = normalizeName(table);
+			if(invokeWrapper(catalog, schema)){
+				return this.wrapped.getColumnPrivileges(catalog,  schema,
+						table,  columnNamePattern);
+			}
+			String cat=this.connection.isShowSchema()?"PUBLIC":null;
+			String schem=this.connection.isShowSchema()?"PUBLIC":null;
+			
 			StringBuffer select =
-		           new StringBuffer( "SELECT null TABLE_CAT, null TABLE_SCHEM,")
+		           new StringBuffer( "SELECT "+cat+" TABLE_CAT, "+schem+" TABLE_SCHEM,")
 					.append(cAlias("TABLE_NAME")).append(",")
 					.append(cAlias("COLUMN_NAME")).append(",")
 					.append(nAlias("GRANTOR")).append(",")
@@ -383,7 +390,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 					select("SYSTEM_COLUMNS",
 					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT"),
 					Arrays.asList(cat,schem,"TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT")))
-					.append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
+					.append(",").append(this.cAlias("ORIGINAL_TYPE"))
+			          .append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
 					
 					.append(on(Arrays.asList("TABLE_NAME","COLUMN_NAME"),
 							Arrays.asList("ESCAPED_TABLE_NAME","ESCAPED_COLUMN_NAME")))
@@ -413,7 +421,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 				throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL,"foreignTable");
 			parentTable = normalizeName(parentTable);
 			foreignTable = normalizeName(foreignTable);
-			
+			if(this.invokeWrapper(parentCatalog, parentSchema)){
+				return wrapped.getCrossReference( parentCatalog,
+						parentSchema,parentTable, foreignCatalog,
+						foreignSchema,foreignTable);
+			}
 			String cat=this.connection.isShowSchema()?"PUBLIC":null;
 			String schem=this.connection.isShowSchema()?"PUBLIC":null;
 			StringBuffer select =new StringBuffer(
@@ -819,9 +831,13 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
 	
 	private boolean invokeWrapper(String catalog, String schema){
+		
+		
 		return(this.connection.isShowSchema()
-			&& (!"PUBLIC".equals(catalog)
-			||!"PUBLIC".equals(schema))
+			&& (
+			(catalog!=null||schema!=null)
+					&&
+			(!"PUBLIC".equals(catalog)||!"PUBLIC".equals(schema)))
 		);
 	}
 	
