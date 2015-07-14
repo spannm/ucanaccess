@@ -58,8 +58,8 @@ public class AutoNumberAction implements IFeedbackAction {
 					ps.setObject(1, cnNew);
 					ps.setObject(2, cnOld);
 					ps.executeUpdate();
-				if(cnNew instanceof Integer)
-					conn.setGeneratedKey((Integer)cnNew);
+				
+					conn.setGeneratedKey(cnNew);
 					conn
 							.setFeedbackState(false);
 				} finally {

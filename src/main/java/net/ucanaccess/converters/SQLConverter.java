@@ -178,11 +178,12 @@ public class SQLConverter {
 	}
 	
 	
-	public static String preprocess(String sql ,int key){
+	public static String preprocess(String sql ,Object key){
 		
 		Matcher mtc=SELECT_IDENTITY.matcher(sql);
 		Matcher mtc1=HAS_FROM.matcher(sql);
 		String end=mtc.matches()&&!mtc1.find()?" FROM DUAL":"";
+		if(key instanceof String)key="'"+key+"'";
 		return sql.replaceAll(IDENTITY, "$1"+key+"$3")+end;
 	}
 	

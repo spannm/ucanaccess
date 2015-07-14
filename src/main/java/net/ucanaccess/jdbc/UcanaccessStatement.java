@@ -31,7 +31,7 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 public class UcanaccessStatement implements Statement {
 	private UcanaccessConnection connection;
 	protected Statement wrapped;
-	private int generatedKey=-10000;
+	private Object generatedKey;
 	private Map<String,String>  aliases;
 	private boolean  enableDisable;
 	 
@@ -283,8 +283,10 @@ public class UcanaccessStatement implements Statement {
 			Statement st=conn.createStatement();
 			StringBuffer sql=new StringBuffer();
 					
-			if(this.generatedKey!=-10000){
-				sql.append( " SELECT ").append(this.generatedKey)
+			if(this.generatedKey!=null){
+				sql.append( " SELECT ")
+				
+				.append(this.generatedKey instanceof String?"'"+this.generatedKey+"'":this.generatedKey)
 				.append(" AS GENERATED_KEY ")
 				.append(" FROM DUAL");
 				
@@ -523,7 +525,7 @@ public class UcanaccessStatement implements Statement {
 		 this.wrapped.setQueryTimeout(qt);
 	 }
 
-	public void setGeneratedKey(int key) {
+	public void setGeneratedKey(Object key) {
 		this.generatedKey=key;
 	}
 

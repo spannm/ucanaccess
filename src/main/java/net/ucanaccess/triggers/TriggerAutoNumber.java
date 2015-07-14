@@ -52,7 +52,8 @@ public class TriggerAutoNumber extends TriggerBase {
 						if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.GUID)){
 							
-							newR[i] = "{" + UUID.randomUUID() + "}";;
+							newR[i] = "{" + UUID.randomUUID() + "}";
+							conn.setGeneratedKey(newR[i]);
 						}
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {

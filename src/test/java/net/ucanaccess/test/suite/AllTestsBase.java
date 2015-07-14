@@ -29,6 +29,7 @@ import net.ucanaccess.test.DropTableTest;
 import net.ucanaccess.test.ExceptionCodeTest;
 import net.ucanaccess.test.ExternalResourcesTest;
 import net.ucanaccess.test.FunctionsTest;
+import net.ucanaccess.test.GeneratedKeysTest1;
 import net.ucanaccess.test.InsertBigTest;
 import net.ucanaccess.test.LoadTypesAccessTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
@@ -72,6 +73,7 @@ public class AllTestsBase {
 		suite.addTestSuite(BooleanTest.class);
 		suite.addTestSuite(ByteTest.class);
 		suite.addTestSuite(GeneratedKeysTest.class);
+		suite.addTestSuite(GeneratedKeysTest1.class);
 		suite.addTestSuite(ColumnOrderTest.class);
 		suite.addTestSuite(ExceptionCodeTest.class);
 		suite.addTestSuite(MultipleGroupByTest.class);

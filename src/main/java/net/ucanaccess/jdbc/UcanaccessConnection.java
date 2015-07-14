@@ -70,7 +70,7 @@ public class UcanaccessConnection implements Connection {
 	private SQLWarning warnings;
 	private String url;
 	private  UcanaccessStatement currentStatement;
-	private int lastGeneratedKey;
+	private Object lastGeneratedKey;
 	private String refId;
 	
 	final static String BATCH_ID="BATCH_ID";
@@ -113,7 +113,7 @@ public class UcanaccessConnection implements Connection {
 	
 	
 
-	int getLastGeneratedKey() {
+	Object getLastGeneratedKey() {
 		return lastGeneratedKey;
 	}
 	
@@ -129,7 +129,7 @@ public class UcanaccessConnection implements Connection {
 		this.currentStatement=currentStatement;
 	}
 	
-	public void setGeneratedKey(int key){
+	public void setGeneratedKey(Object key){
 		this.lastGeneratedKey=key;
 		if(currentStatement!=null)
 		currentStatement.setGeneratedKey( key);
@@ -505,6 +505,7 @@ public class UcanaccessConnection implements Connection {
 			return new UcanaccessPreparedStatement(nsql,
 					hsqlDBConnection.prepareStatement(preprocess(nsql.getSql())), this);
 		} catch (SQLException e) {
+			
 			throw new UcanaccessSQLException(e);
 		}
 	}
