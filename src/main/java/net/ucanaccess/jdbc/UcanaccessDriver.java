@@ -218,12 +218,17 @@ public final class UcanaccessDriver implements Driver {
 							.getDbIO());
 					Logger.turnOffJackcessLog();
 					if (pr.containsKey("sysschema")) {
-						la.setSysSchema("true".equalsIgnoreCase(pr
-								.getProperty("sysschema")));
+						boolean sysSchema="true".equalsIgnoreCase(pr
+								.getProperty("sysschema"));
+						ref.setSysSchema(sysSchema);
+						la.setSysSchema(sysSchema);
+						
 					}
 					if (pr.containsKey("skipindexes")) {
-						la.setSkipIndexes("true".equalsIgnoreCase(pr
-								.getProperty("skipindexes")));
+						boolean skipIndexes="true".equalsIgnoreCase(pr
+								.getProperty("skipindexes"));
+						ref.setSkipIndexes(skipIndexes);
+						la.setSkipIndexes(skipIndexes);
 					}
 					
 					if(toBeLoaded){

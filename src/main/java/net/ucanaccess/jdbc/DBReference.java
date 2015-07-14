@@ -25,7 +25,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,6 +37,8 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
@@ -72,6 +76,8 @@ public class DBReference {
 	private boolean ignoreCase=true;
 	private boolean mirrorReadOnly;
 	private Integer lobScale;
+	private boolean skipIndexes;
+	private boolean sysSchema;
 
 	
 	private class MemoryTimer {
@@ -176,8 +182,9 @@ public class DBReference {
 						Logger.logWarning("External file "
 								+ linkeeFile.getAbsolutePath()
 								+ " does not exist");
+					}else{
+						links.add(linkeeFile);
 					}
-					links.add(linkeeFile);
 					Database ldb = open(linkeeFile, pwd);
 					return ldb;
 				}
@@ -243,6 +250,9 @@ public class DBReference {
 				Thread.sleep(10);
 			}
 		}
+		if(!checkInside()){
+			return conn;
+		}
 		this.updateLastModified();
 		this.closeHSQLDB(session);
 		System.gc();
@@ -251,9 +261,49 @@ public class DBReference {
 		this.dbIO = open(this.dbFile, this.pwd);
 		this.id = id();
 		this.firstConnection=true;
-		new LoadJet(getHSQLDBConnection(session), dbIO).loadDB();
+		LoadJet lj=new LoadJet(getHSQLDBConnection(session), dbIO);
+		lj.setSkipIndexes(this.skipIndexes);
+		lj.setSysSchema(this.sysSchema);
+		lj.loadDB();
 		
 		return getHSQLDBConnection(session);
+	}
+	
+	
+	private boolean checkInside(Database db) throws IOException {
+		Table t= db.getSystemTable("MSysObjects");
+		Iterator<Row> it=t.iterator();
+		
+		while (it.hasNext()) {
+			Row row=it.next();
+			
+			Object dobj=row.get("DateUpdate");
+			Object tobj=row.get("Type");
+			if(dobj==null||tobj==null)continue;
+			Date dt=(Date)dobj;
+			short type=(Short)tobj;
+			if(lastModified<dt.getTime()
+					&&(type==1||type==5)
+					
+			){
+				return true;
+			}
+		
+		}
+		return false;
+	}
+
+	private boolean checkInside() throws IOException {
+		boolean reload= checkInside(this.dbIO) ;
+		if (reload) return true;
+		 for(File fl:this.links){
+		    	Database db=DatabaseBuilder.open(fl);
+		    	reload=checkInside(db) ;
+		    	db.close();
+		    	if(reload)return true;
+		 }
+		
+		return false;
 	}
 
 	private File[] getHSQLDBFiles() {
@@ -635,6 +685,13 @@ public class DBReference {
 		this.lobScale = lobScale;
 	}
 
-	
+	public void setSkipIndexes(boolean skipIndexes) {
+		this.skipIndexes = skipIndexes;
+	}
+
+	public void setSysSchema(boolean sysSchema) {
+		this.sysSchema = sysSchema;
+	}
+
 	
 }
