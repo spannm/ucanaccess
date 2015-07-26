@@ -78,6 +78,8 @@ public class DBReference {
 	private Integer lobScale;
 	private boolean skipIndexes;
 	private boolean sysSchema;
+	private boolean preventReloading;
+	private boolean concatNulls;
 
 	
 	private class MemoryTimer {
@@ -250,7 +252,7 @@ public class DBReference {
 				Thread.sleep(10);
 			}
 		}
-		if(!checkInside()){
+		if(preventReloading&&!checkInside()){
 			return conn;
 		}
 		this.updateLastModified();
@@ -279,21 +281,26 @@ public class DBReference {
 			
 			Object dobj=row.get("DateUpdate");
 			Object tobj=row.get("Type");
+			
+			
 			if(dobj==null||tobj==null)continue;
 			Date dt=(Date)dobj;
+		
 			short type=(Short)tobj;
 			if(lastModified<dt.getTime()
-					&&(type==1||type==5)
+					&&(type==1||type==5||type==8)
 					
 			){
 				return true;
 			}
+			
 		
 		}
 		return false;
 	}
 
 	private boolean checkInside() throws IOException {
+		
 		boolean reload= checkInside(this.dbIO) ;
 		if (reload) return true;
 		 for(File fl:this.links){
@@ -305,6 +312,8 @@ public class DBReference {
 		
 		return false;
 	}
+
+	
 
 	private File[] getHSQLDBFiles() {
 		if( this.toKeepHsql==null)return new File[]{};
@@ -404,7 +413,7 @@ public class DBReference {
 		try {
 			st = conn.createStatement();
 			st.execute("SET DATABASE SQL SYNTAX ora TRUE");
-			st.execute("SET DATABASE SQL CONCAT NULLS FALSE");
+			st.execute("SET DATABASE SQL CONCAT NULLS "+this.concatNulls);
 			if(this.lobScale==null&&this.inMemory)
 			  st.execute("SET FILES LOB SCALE 2");
 			else if(this.lobScale!=null){
@@ -554,19 +563,24 @@ public class DBReference {
 	
 	
 
+	
+	private File fileLock(){
+		File folder = dbFile.getParentFile();
+		String fileName = dbFile.getName();
+		int suffixStart = fileName.lastIndexOf('.');
+		if (suffixStart < 0)
+			suffixStart = fileName.length();
+		String suffix=this.dbFormat!=null&&
+				(FileFormat.V2010.equals(this.dbFormat)||FileFormat.V2007.equals(this.dbFormat))?
+						".laccdb":".ldb";
+		File flLock = new File(folder, fileName.substring(0, suffixStart)
+				+ suffix);
+		return flLock;
+	}
+	
 	private void lockMdbFile() throws UcanaccessSQLException {
 		try {
-			File folder = dbFile.getParentFile();
-			String fileName = dbFile.getName();
-			int suffixStart = fileName.lastIndexOf('.');
-			if (suffixStart < 0)
-				suffixStart = fileName.length();
-			String suffix=this.dbFormat!=null&&
-					(FileFormat.V2010.equals(this.dbFormat)||FileFormat.V2007.equals(this.dbFormat))?
-							".laccdb":".ldb";
-			File flLock = new File(folder, fileName.substring(0, suffixStart)
-					+ suffix);
-			
+			File flLock =fileLock();
 			flLock.createNewFile();
 			final RandomAccessFile raf = new RandomAccessFile(flLock, "rw");
 			FileLock tryLock = raf.getChannel().tryLock();
@@ -617,7 +631,7 @@ public class DBReference {
 	void shutdown(Session session) throws Exception {
 		DBReferenceSingleton.getInstance()
 				.remove(this.dbFile.getAbsolutePath());
-		
+		this.memoryTimer.timer.cancel();
 		this.dbIO.flush();
 		this.dbIO.close();
 		this.closeHSQLDB(session);
@@ -691,6 +705,22 @@ public class DBReference {
 
 	public void setSysSchema(boolean sysSchema) {
 		this.sysSchema = sysSchema;
+	}
+
+	public boolean isPreventReloading() {
+		return preventReloading;
+	}
+
+	public void setPreventReloading(boolean preventReloading) {
+		this.preventReloading = preventReloading;
+	}
+
+	public boolean isConcatNulls() {
+		return concatNulls;
+	}
+
+	public void setConcatNulls(boolean concatNulls) {
+		this.concatNulls = concatNulls;
 	}
 
 	

@@ -96,7 +96,7 @@ public class Pivot {
 					Integer idTable=mt.getTableId(eqn);
 					if(idTable!=null){
 						for(Map.Entry<String, String> entry:nsql.getAliases().entrySet()){
-						    if(mt.getColumn(eqn, entry.getKey())==null) 
+						    if(mt.getColumnName(eqn, entry.getKey())==null) 
 						    	mt.newColumn(entry.getValue(), entry.getKey(), null, idTable);
 						}
 					}

@@ -252,7 +252,7 @@ public class SQLConverter {
 	public static enum DDLType {
 		CREATE_TABLE_AS_SELECT(
 				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])*)[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*(?)SELECT")), CREATE_TABLE(
+						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), CREATE_TABLE(
 				Pattern
 						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))")), DROP_TABLE(
 				Pattern
@@ -291,6 +291,15 @@ public class SQLConverter {
 			Matcher m = pattern.matcher(s);
 			if (m.find()) {
 				return m.group(1);
+			}
+			return null;
+		}
+		
+		public String getSelect(String s) {
+			Matcher m = pattern.matcher(s);
+			if (m.find()) {
+				String sub= s.substring(m.start(m.groupCount()),s.lastIndexOf(")"));
+				return sub;
 			}
 			return null;
 		}
@@ -676,6 +685,7 @@ public class SQLConverter {
 	}
 	
 	private static String escapeKeywordIdentifier(String escaped,boolean quote) {
+		if(escaped==null)return null;
 		if (KEYWORDLIST.contains(escaped.toUpperCase())) {
 			escaped =quote? "\"" + escaped + "\"":"[" + escaped + "]";
 		}

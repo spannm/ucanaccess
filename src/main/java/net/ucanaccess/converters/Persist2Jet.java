@@ -16,6 +16,7 @@ limitations under the License.
 package net.ucanaccess.converters;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -97,16 +98,30 @@ public class Persist2Jet {
 
 	private List<String> getColumnNames(String ntn) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Connection conq=conn.getHSQLDBConnection();
 		if (!columnNamesCache.containsKey(ntn)) {
 			ArrayList<String> ar = new ArrayList<String>();
-			ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC", ntn,
+			ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn,
 					null);
 			while (rs.next()) {
-				ar.add(rs.getString("COLUMN_NAME").toUpperCase());
+				String cbase=rs.getString("COLUMN_NAME");
+				ar.add(cbase.toUpperCase());
 			}
 			columnNamesCache.put(ntn, ar);
 		}
 		return columnNamesCache.get(ntn);
+	}
+	
+	private List<String> getColumnNamesCreate(String ntn) throws SQLException {
+		    UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+			ArrayList<String> ar = new ArrayList<String>();
+			ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC", ntn,
+					null);
+			while (rs.next()) {
+				String cbase=rs.getString("COLUMN_NAME");
+				ar.add(cbase);
+			}
+			return ar;
 	}
 
 	public void convertRowTypes(Object[] values, Table t)
@@ -168,7 +183,8 @@ public class Persist2Jet {
 		LinkedHashMap<String, Object> vl = new LinkedHashMap<String, Object>();
 		for (Column cl : colums) {
 			String key = cl.getName();
-			String ekey=SQLConverter.escapeIdentifier(key)
+			String keyu=key.toUpperCase();
+			String ekey=map.containsKey(keyu)?keyu:SQLConverter.escapeIdentifier(key)
 					.toUpperCase();
 			if( !map.containsKey(ekey)&&
 				map.containsKey(ekey.substring(1, ekey.length()-1))){
@@ -412,7 +428,7 @@ public class Persist2Jet {
 		try {
 			st = conn.createStatement();
 			ResultSet rs = st.executeQuery("SELECT * FROM " + tableName);
-			List<String> clns = this.getColumnNames(tableName);
+			List<String> clns = this.getColumnNamesCreate(tn);
 			while (rs.next()) {
 				Object[] record = new Object[clns.size()];
 				int i = 0;

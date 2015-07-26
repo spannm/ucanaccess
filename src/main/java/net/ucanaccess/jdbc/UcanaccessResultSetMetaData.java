@@ -56,7 +56,7 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 	public String getColumnName(int column) throws SQLException {
 		String columnName= SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
 		String tableName=SQLConverter.preEscapingIdentifier( wrapped.getTableName(column));
-		String cn= this.metadata.getColumn(tableName, columnName);
+		String cn= this.metadata.getColumnName(tableName, columnName);
 		return cn==null?columnName:cn;
 		
 	}
@@ -76,7 +76,10 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 		return wrapped.getSchemaName(column);
 	}
 	public String getTableName(int column) throws SQLException {
-		return wrapped.getTableName(column);
+		
+		String tableName=SQLConverter.preEscapingIdentifier( wrapped.getTableName(column));
+		if(Metadata.SYSTEM_SUBQUERY.equals(tableName))return tableName;
+		return this.metadata.getTableName(tableName);
 	}
 	public boolean isAutoIncrement(int column) throws SQLException {
 		String columnName= SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
@@ -87,7 +90,9 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 		return wrapped.isCaseSensitive(column);
 	}
 	public boolean isCurrency(int column) throws SQLException {
-		return wrapped.isCurrency(column);
+		String columnName= SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
+		String tableName=SQLConverter.preEscapingIdentifier( wrapped.getTableName(column));
+		return this.metadata.isCurrency(tableName, columnName);
 	}
 	public boolean isDefinitelyWritable(int column) throws SQLException {
 		return wrapped.isDefinitelyWritable(column);

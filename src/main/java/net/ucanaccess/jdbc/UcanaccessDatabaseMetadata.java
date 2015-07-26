@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 NOTICE:
-Some of the UcanaccessDatabaseMetadata methods have been originally copied from the hsqldb DatabaseMetaData implementation. 
+Some of the UcanaccessDatabaseMetadata methods have been originally inspired by the hsqldb DatabaseMetaData implementation. 
 They have been then modified and adapted so that they are integrated with UCanAccess, in a consistent manner. 
 The  Hsqldb  project is licensed under a BSD based license.
 */
@@ -388,8 +388,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			
 			StringBuffer select =new StringBuffer(
 					select("SYSTEM_COLUMNS",
-					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT"),
-					Arrays.asList(cat,schem,"TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT")))
+					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT","IS_GENERATEDCOLUMN"),
+					Arrays.asList(cat,schem,"TABLE_NAME","COLUMN_NAME","COLUMN_DEF","IS_AUTOINCREMENT","IS_GENERATEDCOLUMN")))
 					.append(",").append(this.cAlias("ORIGINAL_TYPE"))
 			          .append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
 					
@@ -1016,7 +1016,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 					select("TABLE_PRIVILEGES",
 					Arrays.asList("TABLE_CATALOG" , "TABLE_SCHEMA","TABLE_NAME"),
 					Arrays.asList(CAST_EXPR+" TABLE_CAT ",CAST_EXPR+" TABLE_SCHEM","TABLE_NAME")))
-					.append(from("TABLE_PRIVILEGES", "TABLE"))
+					.append(from("TABLE_PRIVILEGES", "TABLES"))
 					
 					.append(on(Arrays.asList("TABLE_NAME"),
 							Arrays.asList("ESCAPED_TABLE_NAME")))
@@ -1052,7 +1052,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 					select("SYSTEM_TABLES",
 					Arrays.asList("TABLE_CAT" , "TABLE_SCHEM","TABLE_NAME"),
 					Arrays.asList(cat,schem,"TABLE_NAME")))
-					.append(from("SYSTEM_TABLES", "TABLE"))
+					.append(from("SYSTEM_TABLES", "TABLES"))
 					
 					.append(on(Arrays.asList("TABLE_NAME"),
 							Arrays.asList("ESCAPED_TABLE_NAME")))

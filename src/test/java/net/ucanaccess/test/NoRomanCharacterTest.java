@@ -35,11 +35,13 @@ public class NoRomanCharacterTest extends UcanaccessTestBase {
 
 	public void testNoRomanCharactersInColumnName() throws Exception {
 		dump("SELECT * FROM NOROMAN");
+		
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
+			
 			 st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
-			st.execute("UPDATE NOROMAN SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
+			st.execute("UPDATE NOROMAN SET  [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
 			ResultSet rs=st.executeQuery("SELECT * FROM NOROMAN");
 			while(rs.next()){
 				System.out.println(rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));

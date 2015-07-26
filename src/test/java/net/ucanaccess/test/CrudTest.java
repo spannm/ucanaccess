@@ -37,9 +37,6 @@ public class CrudTest extends UcanaccessTestBase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		 executeCreateTable("CREATE TABLE T1 (id LONG,descr TEXT) ");
-		
-		
-		
 	}
 	
 	public void testCrud() throws SQLException, IOException {
@@ -236,7 +233,7 @@ public class CrudTest extends UcanaccessTestBase {
 		}
 	}
 	
-	public void testInsertRSaui() throws SQLException, IOException {
+	public void testInsertRSNoAllSet() throws SQLException, IOException {
 		Statement st = null;
 		ResultSet rs =null;
 		try {

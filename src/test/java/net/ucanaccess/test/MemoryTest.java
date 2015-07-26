@@ -32,6 +32,7 @@ public class MemoryTest extends UcanaccessTestBase {
 
 	protected void setUp() throws Exception {
 	
+		System.out.println("Thread.activeCount0 "+Thread.activeCount());
 		
 		setInactivityTimeout(1);
 		super.setUp();
@@ -54,10 +55,12 @@ public class MemoryTest extends UcanaccessTestBase {
 			super.ucanaccess.close();
 			super.ucanaccess=null;
 			long occ=Runtime.getRuntime().freeMemory();
+			int ac=Thread.activeCount();
+			System.out.println("Thread.activeCount() "+Thread.activeCount());
 			System.out.println("total memory 1="+Runtime.getRuntime().totalMemory());
 			System.out.println("free memory 1="+occ);
 			Thread.sleep(61000);
-		  
+			System.out.println("Thread.activeCount() diff"+(Thread.activeCount()-ac));
 			System.out.println("total memory 2="+Runtime.getRuntime().totalMemory());
 			System.out.println("free memory 2="+Runtime.getRuntime().freeMemory());
 			System.out.println("free memory diff ="+(Runtime.getRuntime().freeMemory()-occ));
@@ -65,15 +68,8 @@ public class MemoryTest extends UcanaccessTestBase {
 			super.ucanaccess=super.getUcanaccessConnection();
 			
 			dump("select * from memm limit 10");
-			
-//			for (int i=0;i<3;i++){
-//				Thread.sleep(60000);
-//				super.ucanaccess=super.getUcanaccessConnection();
-//				
-//				dump("select * from memm");
-//				super.ucanaccess.close();
-//			}
-			
+			System.out.println("Thread.activeCount() diff"+(Thread.activeCount()-ac));
+
 			
 		} finally {
 			if (st != null)

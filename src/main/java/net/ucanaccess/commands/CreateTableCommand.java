@@ -17,6 +17,7 @@ package net.ucanaccess.commands;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 import net.ucanaccess.converters.Persist2Jet;
@@ -45,6 +46,13 @@ public class CreateTableCommand implements ICommand {
 		this.defaults=defaults;
 		this.notNulls=notNulls;
 		this.columnMap=columnMap;
+	}
+
+
+
+	public CreateTableCommand(String tn, String execId2,
+			HashMap<String, String> columnMap2) {
+		this(tn,execId2,columnMap2,null,null,null );
 	}
 
 

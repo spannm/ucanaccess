@@ -445,6 +445,7 @@ public class LoadJet {
 					if(uc.length()>0){
 						calculatedFieldsTriggers.add(String.format(tgrU,namingCounter++,uc,SQLConverter.convertFormula(expr)));
 					}
+					
 				}
 				
 				String htype= getHsqldbColumnType(cl) ;
@@ -458,6 +459,8 @@ public class LoadJet {
 						
 				}
 				metadata.newColumn(cl.getName(),cn,ctype,seq);
+				if(expr!=null&&constraints)
+				metadata.calculatedField(t.getName(), cl.getName());
 				cn=SQLConverter.completeEscaping(cn);
 				cn=SQLConverter.checkLang(cn,conn);
 				sbC.append(comma)
@@ -887,6 +890,7 @@ public class LoadJet {
 			for (String trigger : calculatedFieldsTriggers) {
 				try{
 					exec(trigger,false);
+					
 				}catch(SQLException e){
 					Logger.logWarning(e.getMessage());
 				}
@@ -927,13 +931,14 @@ public class LoadJet {
 			metadata.createMetadata();
 			for (String tn : dbIO.getTableNames()) {
 				UcanaccessTable t = null;
+				
 				try {
 					t = new UcanaccessTable(dbIO.getTable(tn),tn) ;
 				} catch (Exception e) {
 					Logger.logWarning(e.getMessage());
 					this.unresolvedTables.add(tn);
 				}
-				if (t != null){
+				if (t != null&&!tn.startsWith("~")){
 					createTable(t);
 					this.loadingOrder.add(t.getName());
 				}

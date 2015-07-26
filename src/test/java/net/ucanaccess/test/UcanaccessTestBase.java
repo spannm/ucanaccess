@@ -66,6 +66,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 	private Boolean ignoreCase;
 	private int inactivityTimeout=-1;
 	private String columnOrder;
+	private String append2JdbcURL="";
 	private Boolean showSchema;
 	Boolean getShowSchema() {
 		return showSchema;
@@ -392,9 +393,12 @@ public abstract class UcanaccessTestBase extends TestCase {
 		if(this.inactivityTimeout!=-1)url+=";inactivityTimeout="+this.inactivityTimeout;
 		if(this.columnOrder!=null)url+=";columnOrder="+this.columnOrder;
 		if(this.showSchema!=null)url+=";showSchema="+this.showSchema;
+		url+=append2JdbcURL;
 		return DriverManager.getConnection(url, this.user, this.password);
 	}
-	
+	protected void append2JdbcURL(String s){
+		append2JdbcURL+=s;
+	}
 	
 	
 	protected void initVerifyConnection() throws SQLException, IOException {

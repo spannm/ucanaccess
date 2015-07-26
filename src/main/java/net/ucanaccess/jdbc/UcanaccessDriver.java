@@ -159,6 +159,14 @@ public final class UcanaccessDriver implements Driver {
 								.getProperty("openexclusive")));
 					}
 					
+					if (pr.containsKey("concatnulls")) {
+						ref.setConcatNulls("true".equalsIgnoreCase(pr
+								.getProperty("concatnulls")));
+					}
+					if (pr.containsKey("preventreloading")) {
+						ref.setPreventReloading("true".equalsIgnoreCase(pr
+								.getProperty("preventreloading")));
+					}
 					
 					if(pr.containsKey("remap")){
 						ref.setExternalResourcesMapping(toMap(pr.getProperty("remap")));

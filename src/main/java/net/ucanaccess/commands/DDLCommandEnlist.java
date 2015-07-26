@@ -16,7 +16,10 @@ limitations under the License.
 package net.ucanaccess.commands;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.UcanaccessConnection;
@@ -64,7 +68,20 @@ public class DDLCommandEnlist {
 				tn, execId,this.columnMap, this.types,this.defaults,this.notNulls);
     	   }
        else  {
-    	   c4io=new CreateTableCommand(tn, execId);
+    	   try{
+    		   Statement st= ac.createStatement();
+    		   ResultSet rs=st.executeQuery(ddlType.getSelect(sql));
+    		   ResultSetMetaData rsmd=rs.getMetaData();
+    		   Metadata mt=new Metadata(ac.getHSQLDBConnection());
+    		   for(int i=1;i<= rsmd.getColumnCount();i++){
+    			   this.columnMap.put(mt.getEscapedColumnName(rsmd.getTableName(i), rsmd.getColumnName(i)),rsmd.getColumnLabel(i));
+    		   }
+    		   c4io=new CreateTableCommand(tn, execId, this.columnMap);
+    	   }catch(Exception ignore){
+    		   ignore.printStackTrace();
+    		   c4io=new CreateTableCommand(tn, execId);
+    	   }
+    	   
        }
       
 		ac.add(c4io); 

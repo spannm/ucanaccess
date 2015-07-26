@@ -45,7 +45,7 @@
         <url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
     </scm>
   	<properties>
-		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
 	<build>
