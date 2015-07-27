@@ -1163,7 +1163,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 		}
 	}
 
-	private String normalizeName(String name) {
+	public static String normalizeName(String name) {
 		if(name==null||name.trim().length()==0)return name;
 		if(name.indexOf("%")>=0) return name.toUpperCase();
 		else{ 
