@@ -37,6 +37,7 @@ import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
@@ -98,6 +99,7 @@ public class Persist2Jet {
 
 	private List<String> getColumnNames(String ntn) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		ntn=UcanaccessDatabaseMetadata.normalizeName(ntn);
 		Connection conq=conn.getHSQLDBConnection();
 		if (!columnNamesCache.containsKey(ntn)) {
 			ArrayList<String> ar = new ArrayList<String>();
