@@ -72,7 +72,7 @@ public class Metadata {
 	private final static String COLUMN_RECORD="INSERT INTO UCA_METADATA.COLUMNS(COLUMN_NAME,ESCAPED_COLUMN_NAME,ORIGINAL_TYPE, IS_GENERATEDCOLUMN,TABLE_ID) " +
 			"VALUES(?,?,?,'NO',?)";
 	
-	private final static String SELECT_COLUMN="SELECT c.COLUMN_NAME,c.ORIGINAL_TYPE IN('COUNTER','GUID') as IS_AUTOINCREMENT, c.ORIGINAL_TYPE='MONEY' as IS_CURRENCY  " +
+	private final static String SELECT_COLUMN="SELECT DISTINCT c.COLUMN_NAME,c.ORIGINAL_TYPE IN('COUNTER','GUID') as IS_AUTOINCREMENT, c.ORIGINAL_TYPE='MONEY' as IS_CURRENCY  " +
 			"				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t " +
 			"				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.ESCAPED_TABLE_NAME=nvl(?,t.ESCAPED_TABLE_NAME) AND c.ESCAPED_COLUMN_NAME=? ";
 	
@@ -180,15 +180,19 @@ public class Metadata {
 	public String getColumnName(String tableName,String columnName) throws SQLException {
 		PreparedStatement ps=null;
 		try{
-			tableName= SYSTEM_SUBQUERY.equals(tableName)?null:tableName;
+			boolean camb=SYSTEM_SUBQUERY.equals(tableName);
+			tableName= camb?null:tableName;
 			ps=conn.prepareStatement(SELECT_COLUMN);
 			ps.setString(1, tableName);
 			ps.setString(2, columnName);
 			ResultSet rs= ps.executeQuery();
 			if(rs.next()){
-				return rs.getString("COLUMN_NAME");
+				String res=rs.getString("COLUMN_NAME");
+				if(!camb||!rs.next())
+				return res;
+				
 			}
-			else return null;
+			 return null;
 			
 		}finally{
 			if(ps!=null)ps.close();
