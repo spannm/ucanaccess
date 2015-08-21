@@ -74,7 +74,11 @@ public class DDLCommandEnlist {
     		   ResultSetMetaData rsmd=rs.getMetaData();
     		   Metadata mt=new Metadata(ac.getHSQLDBConnection());
     		   for(int i=1;i<= rsmd.getColumnCount();i++){
-    			   this.columnMap.put(mt.getEscapedColumnName(rsmd.getColumnLabel(i), rsmd.getColumnName(i)),rsmd.getColumnLabel(i));
+    			   if(rsmd.getColumnName(i).equals(rsmd.getColumnLabel(i))){
+    				   this.columnMap.put(mt.getEscapedColumnName(rsmd.getTableName(i), rsmd.getColumnName(i)),rsmd.getColumnLabel(i));
+    			   }else{
+    				   this.columnMap.put(SQLConverter.preEscapingIdentifier(rsmd.getColumnLabel(i)),rsmd.getColumnLabel(i));
+    			   }
     		   }
     		   c4io=new CreateTableCommand(tn, execId, this.columnMap);
     	   }catch(Exception ignore){

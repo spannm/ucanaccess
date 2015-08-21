@@ -340,7 +340,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 		InputStream is = this.getClass().getClassLoader()
 				.getResourceAsStream(resourcePath);
 		byte[] buffer = new byte[4096];
-		File temp = File.createTempFile("tempJunit", "mdb");
+		File temp = File.createTempFile("tempJunit", ".accdb");
 		System.out.println("Resource file: "+resourcePath+" copied in "+temp.getAbsolutePath());
 		FileOutputStream fos = new FileOutputStream(temp);
 		int bread;

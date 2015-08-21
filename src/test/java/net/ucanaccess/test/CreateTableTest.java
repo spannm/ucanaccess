@@ -36,6 +36,11 @@ public class CreateTableTest extends UcanaccessTestBase {
 	public CreateTableTest(FileFormat accVer) {
 		super(accVer);
 	}
+	
+	public String getAccessPath() {
+		return "net/ucanaccess/test/resources/badDB.accdb";
+	}
+	
 
 	private void createAsSelect() throws SQLException, IOException {
 		Statement st = null;
@@ -44,7 +49,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 			st.executeUpdate("CREATE TABLE AAA_BIS as (select baaaa,a,c from AAA) 	WITH DATA");
 			Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
 			checkQuery("select * from AAA_bis order by baaaa", ver);
-			st.executeUpdate("CREATE TABLE AAA_quadris as (select AAA.baaaa ,AAA_BIS.baaaa as xxx  from AAA,AAA_BIS) 	WITH DATA");
+			st.executeUpdate("CREATE TABLE AAA_quadris as (select AAA.baaaa   ,AAA_BIS.baaaa as xxx  from AAA,AAA_BIS) 	WITH DATA");
 			dump("select * from AAA_quadris order by baaaa");
 			System.out.println("gooooooooooooooooo!!!!!!!");
 		} finally {
@@ -194,12 +199,14 @@ public class CreateTableTest extends UcanaccessTestBase {
 		Statement st = super.ucanaccess.createStatement();
 		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
 		st.execute(" CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
-		st.execute(" CREATE TABLE [wHere]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+		st.execute(" CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
 		st.execute(" drop table  [ggg kk]");
 		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
 		st.execute(" CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
 		st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
 		st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
+		
+		
 		dump("select * from counter");
 	}
 	

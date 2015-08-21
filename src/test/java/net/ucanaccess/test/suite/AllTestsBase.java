@@ -32,6 +32,7 @@ import net.ucanaccess.test.FunctionsTest;
 import net.ucanaccess.test.GeneratedKeysTest1;
 import net.ucanaccess.test.InsertBigTest;
 import net.ucanaccess.test.LoadTypesAccessTest;
+import net.ucanaccess.test.MetaDataTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.MultipleGroupByTest;
 import net.ucanaccess.test.PasswordTest;
@@ -77,6 +78,7 @@ public class AllTestsBase {
 		suite.addTestSuite(ColumnOrderTest.class);
 		suite.addTestSuite(ExceptionCodeTest.class);
 		suite.addTestSuite(MultipleGroupByTest.class);
+		suite.addTestSuite(MetaDataTest.class);
 		return suite;
 	}
 }
