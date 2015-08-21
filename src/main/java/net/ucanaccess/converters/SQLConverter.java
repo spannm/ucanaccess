@@ -83,7 +83,7 @@ public class SQLConverter {
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])" };
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
-	private static final String TYPES_TRANSLATE = "(\\W)(?i)_(\\W)";
+	private static final String TYPES_TRANSLATE = "(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
@@ -755,13 +755,24 @@ public class SQLConverter {
 			Map<String, String> types2Convert) throws SQLException {
 		// padding for detecting the right exception
 		sql += " ";
+		if(sql.indexOf("(")<0)return sql;
+		String pre=sql.substring(0, sql.indexOf("("));
+		sql=sql.substring(sql.indexOf("("));
 		for (Map.Entry<String, String> entry : types2Convert.entrySet()) {
-			sql = sql.replaceAll(TYPES_TRANSLATE
+			sql = sql.
+					replaceAll("([,\\(][\\s\n\r]*)"+TYPES_TRANSLATE
+							.replaceAll("_", entry.getKey()), "$1___" + entry.getKey()
+							+ "___$2")
+					.replaceAll("(\\W)"+TYPES_TRANSLATE
 					.replaceAll("_", entry.getKey()), "$1" + entry.getValue()
-					+ "$2");
+					+ "$2").
+					replaceAll("(\\W)"+TYPES_TRANSLATE
+							.replaceAll("_", "___"+entry.getKey()+"___"), "$1" + entry.getKey()
+							+ "$2")
+							;
 		}
 		sql = sql.replaceAll(DEFAULT_VARCHAR, "$1VARCHAR(255)$2");
-		return clearDefaultsCreateStatement(sql);
+		return clearDefaultsCreateStatement(pre+sql);
 	}
 
 	public static String getDDLDefault(String ddlf) {
