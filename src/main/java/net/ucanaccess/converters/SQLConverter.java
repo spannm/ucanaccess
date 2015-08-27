@@ -577,14 +577,16 @@ public class SQLConverter {
 	}
 
 	private static String replaceDigitStartingIdentifiers(String sql) {
+		
 		Matcher mtc = DIGIT_STARTING_IDENTIFIERS.matcher(sql);
 		if (mtc.find()) {
 			String prefix = (mtc.group(0).matches("\\.([0-9])+[Ee]([0-9])+\\s") || mtc
 					.group(0).matches("\\.([0-9])+[Ee][-+]")) ? "" : "Z_";
-			String build = mtc.group(1) + prefix + mtc.group(2) + mtc.group(7);
+			String build = mtc.group(1) + prefix + mtc.group(2) ;
 			sql = sql.substring(0, mtc.start()) + build
-					+ replaceDigitStartingIdentifiers(sql.substring(mtc.end()));
+					+ replaceDigitStartingIdentifiers( mtc.group(7)+sql.substring(mtc.end()));
 		}
+		
 		return sql;
 	}
 
