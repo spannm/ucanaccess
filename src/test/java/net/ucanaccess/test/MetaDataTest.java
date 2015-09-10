@@ -78,7 +78,7 @@ public class MetaDataTest extends UcanaccessTestBase {
 		dump("select * from [123456 nn%&/健康]");
 		
 		st.execute("update noroman set [किआओ]='1vv'");
-	  checkQuery("select * from noroman");
+	  checkQuery("select * from noroman order by [किआओ]");
 	}
 
 	public void testBadMetadata() throws Exception {
