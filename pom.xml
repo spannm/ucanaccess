@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.ucanaccess</groupId>
 	<artifactId>ucanaccess</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 	<packaging>jar</packaging>
     <name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
     <organization>
