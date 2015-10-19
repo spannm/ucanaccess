@@ -136,7 +136,8 @@ public class DDLCommandEnlist {
 	
 	//getting AUTOINCREMENT and GUID
 	private void parseTypesFromCreateStatement(String sql) throws SQLException {
-	
+		sql=sql.replaceAll("([\\s\n\r]+)((?i)DECIMAL)([\\s\n\r]*\\()" , "$1NUMERIC(")
+		.replaceAll("([\\s\n\r]+)((?i)NUMERIC)([\\s\n\r]*\\()" , "$1NUMERIC(");
 		int startDecl = sql.indexOf('(');
 		int endDecl = sql.lastIndexOf(')');
 		
@@ -181,7 +182,7 @@ public class DDLCommandEnlist {
 				
 			}
 			
-			if(colDecls.length>2
+			if((colDecls.length>2 ||(reset&colDecls.length==2))
 					&&"not".equalsIgnoreCase(colDecls[colDecls.length-2])
 					&&"null".equalsIgnoreCase(colDecls[colDecls.length-1])
 					){
