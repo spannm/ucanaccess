@@ -127,6 +127,9 @@ public class CreateTableTest extends UcanaccessTestBase {
 				st.close();
 		}
 	}
+	
+	
+	
 
 	public void setDPK() throws SQLException, IOException {
 		Statement st = null;
@@ -176,6 +179,33 @@ public class CreateTableTest extends UcanaccessTestBase {
 			st.close();
 		}
 	}
+	
+	private void notNullBug() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("create table nnb(c counter  primary key , "
+					+ "number decimal (23,5) default -4.6 not null , "
+					+ "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ,"
+					+ "txt3 text not null)");
+			
+			checkNotNull("nnb","number",true);
+			checkNotNull("nnb","txt1",true);
+			checkNotNull("nnb","blank",false);
+			checkNotNull("nnb","dt",true);
+			checkNotNull("nnb","txt2",false);
+			checkNotNull("nnb","txt3",true);
+		} finally {
+			st.close();
+		}
+	}
+    private void checkNotNull(String tn ,String cn,boolean notNull) throws IOException{
+    	Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+		Table tb = db.getTable(tn);
+		PropertyMap pm = tb.getColumn(cn).getProperties();
+		assertEquals(notNull, pm.getValue(PropertyMap.REQUIRED_PROP));
+		
+    }
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -192,6 +222,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 		 setTableProperties();
 		setDPK();
 		 defaults();
+		 notNullBug();
 	}
 	
 	
