@@ -51,7 +51,7 @@ public class SQLConverter {
 	private static final Pattern FIND_LIKE_PATTERN = Pattern
 			.compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
 	private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN = Pattern
-			.compile("\\[(?:\\!*[a-zA-Z]\\-[a-zA-Z])+\\]");
+			.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
 			.compile("\\[[\\*|_|#]\\]");
 	private static final Pattern CHECK_DDL = Pattern

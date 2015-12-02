@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012 Marco Amadei.
+ Copyright (c) 2012 Marco Amadei.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -170,7 +170,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	}
 	
 	 private ResultSet executeQuery(String sql) throws SQLException {
-	         Statement st = connection.getHSQLDBConnection().createStatement();
+		 	this.connection.checkLastModified();
+		    Statement st = connection.getHSQLDBConnection().createStatement();
             ResultSet rs = st.executeQuery(sql);
             return rs;	    
     }

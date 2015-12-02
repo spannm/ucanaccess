@@ -430,6 +430,7 @@ public class LoadJet {
 			
 			StringBuffer sbC = new StringBuffer("CREATE  CACHED TABLE ").append(
 					ntn).append("(");
+					
 			List<? extends Column> lc = t.getColumns();
 			String comma = "";
 			for (Column cl : lc) {
@@ -874,7 +875,9 @@ public class LoadJet {
 		private void loadTableFKs(String tn, boolean autoref) throws IOException,
 				SQLException {
 			if(this.readOnlyTables.contains(tn))return;
-			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
+			Table t=null;
+			UcanaccessTable table = new UcanaccessTable( t=dbIO.getTable(tn),tn);
+			if(t!=null)
 			for (Index idxi : table.getIndexes()) {
 				//riw
 				IndexImpl idx=(IndexImpl)idxi;
@@ -903,7 +906,9 @@ public class LoadJet {
 		
 		private void loadTableIndexesUK(String tn) throws IOException,
 				SQLException {
-			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
+			Table t=null;
+			UcanaccessTable table = new UcanaccessTable( t=dbIO.getTable(tn),tn);
+			if(t!=null)
 			for (Index idx : table.getIndexes()) {
 				if (!idx.isForeignKey() && (idx.isPrimaryKey()||idx.isUnique())) {
 					loadIndex(idx,tn);
@@ -914,8 +919,9 @@ public class LoadJet {
 		
 		private void loadTableIndexesNotUK(String tn)
 				throws IOException, SQLException {
-			UcanaccessTable table = new UcanaccessTable( dbIO.getTable(tn),tn);
-			if(!skipIndexes)
+			Table t=null;
+			UcanaccessTable table = new UcanaccessTable( t=dbIO.getTable(tn),tn);
+			if(!skipIndexes&&t!=null)
 			for (Index idx : table.getIndexes()) {
 				if (!idx.isForeignKey() && !idx.isPrimaryKey()
 						&& !idx.isUnique()) {
@@ -931,14 +937,14 @@ public class LoadJet {
 			metadata.createMetadata();
 			for (String tn : dbIO.getTableNames()) {
 				UcanaccessTable t = null;
-				
+				Table t2=null;
 				try {
-					t = new UcanaccessTable(dbIO.getTable(tn),tn) ;
+						t = new UcanaccessTable(t2=dbIO.getTable(tn),tn) ;
 				} catch (Exception e) {
 					Logger.logWarning(e.getMessage());
 					this.unresolvedTables.add(tn);
 				}
-				if (t != null&&!tn.startsWith("~")){
+				if (t2!=null&&t != null&&!tn.startsWith("~")){
 					createTable(t);
 					this.loadingOrder.add(t.getName());
 				}

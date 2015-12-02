@@ -65,6 +65,8 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			st.execute("INSERT INTO T21 (descr)  VALUES( 'A*a')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( '#')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( '*')");
+			st.execute("INSERT INTO T21 (descr)  VALUES( '132B')");
+			st.execute("INSERT INTO T21 (descr)  VALUES( '138')");
 			Object[][] ver = { { "a*a" }, { "A*a" } };
 			checkQuery(
 					"select descr from T21 where descr like 'a[*]a' order by ID",
@@ -82,6 +84,10 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			checkQuery("select descr from T21 where (T21.descr\n) \nlike 'P[!A-F]###' AND '1'='1'",
 					"PZ123");
 			checkQuery("select * from T21 where descr='aba'",3,"aBa");
+			checkQuery("select descr from T21 where descr like '13[1-4][A-F]'",
+			"132B");
+			checkQuery("select descr from T21 where descr like '13[!1-4]'",
+			"138");
 			
 		} finally {
 			if (st != null)

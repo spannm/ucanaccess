@@ -15,6 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.commands;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -25,10 +26,14 @@ import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.complex.Version;
 import net.ucanaccess.converters.Persist2Jet;
+
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.DBReferenceSingleton;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.triggers.AutoNumberManager;
 
 import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.ConstraintViolationException;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
@@ -51,6 +56,7 @@ public class InsertCommand implements ICommand {
 		this.dbIO = dbIO;
 		this.newRow = newRow;
 		this.execId = execId;
+		
 	}
 
 	public InsertCommand(Table table, Object[] newRow, String execId) {
@@ -90,6 +96,31 @@ public class InsertCommand implements ICommand {
 			}
 		}
 	}
+	public void insertRow(Table table, Object[] row) throws IOException{
+		try{
+			table.addRow(newRow);
+		}catch(ConstraintViolationException e){
+			List<? extends Column> lc= table.getColumns();
+			boolean retry=false;
+			for(Column cl:lc){
+				if (cl.isAutoNumber()){
+					retry=true; 
+					break;
+				}
+			}
+			if(!retry){
+				throw e;
+			}
+			Database db=table.getDatabase();
+			File fl=db.getFile();
+			DBReferenceSingleton dbsin=DBReferenceSingleton.getInstance();
+			DBReference ref=dbsin.getReference(fl);
+			ref.reloadDbIO();
+			this.dbIO=ref.getDbIO();
+			table = this.dbIO.getTable(this.tableName);
+			table.addRow(newRow);
+		}
+	}
 
 	public IFeedbackAction persist() throws SQLException {
 		try {
@@ -114,8 +145,7 @@ public class InsertCommand implements ICommand {
 				lc=Arrays.asList(cllReorded);
 			}
 			
-			
-			table.addRow(newRow);
+			insertRow( table, newRow);
 			j = 0;
 			for (Column cli : lc) {
 				ColumnImpl cl=(ColumnImpl)cli;

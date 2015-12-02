@@ -110,6 +110,9 @@ public class FunctionsTest extends UcanaccessTestBase {
 	public void testCDate() throws SQLException, IOException, ParseException {
 		checkQuery("select  Cdate('Apr 6, 2003')  from t234  ", SDF
 				.parse("2003-04-06 00:00:00.0"));
+		
+		checkQuery("select  Cdate('1582-10-15')  from t234  ", SDF
+				.parse("1582-10-15 00:00:00.0"));
 	}
 
 	public void testCLong() throws SQLException, IOException, ParseException {
@@ -221,6 +224,9 @@ public class FunctionsTest extends UcanaccessTestBase {
 		checkQuery(
 				"select  IIf(true,false,true) from t234 ",
 				false);
+		checkQuery(
+				"select  IIf('pippo'=null,'capra','d''una capra') from t234 ",
+				"d'una capra");
 	
 	}
 
@@ -475,6 +481,11 @@ public class FunctionsTest extends UcanaccessTestBase {
 	}
 
 	public void testFormatDate() throws SQLException, IOException {
+		
+		checkQuery(
+				"select format(#1392-01-10 10:42:58 PM#,'Long date') from t234",
+				"Wednesday, January 10, 1392");
+		
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Long date') from t234",
 				"Friday, May 13, 1994");

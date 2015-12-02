@@ -764,19 +764,19 @@ public class Functions {
 
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.MEMO, AccessType.MEMO }, returnType = AccessType.MEMO)
-	public static String iif(boolean b, String o, String o1) {
+	public static String iif(Boolean b, String o, String o1) {
 		return (String)iif(b,(Object)o,(Object) o1);
 	}
 	
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.LONG, AccessType.LONG }, returnType = AccessType.LONG)
-	public static Integer iif(boolean b, Integer o, Integer o1) {
+	public static Integer iif(Boolean b, Integer o, Integer o1) {
 		return (Integer)iif(b,(Object)o,(Object) o1);
 	}
 	
 	@FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO,
 			AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
-	public static Double iif(boolean b, Double o, Double o1) {
+	public static Double iif(Boolean b, Double o, Double o1) {
 		return (Double)iif(b,(Object)o,(Object) o1);
 	}
 	
