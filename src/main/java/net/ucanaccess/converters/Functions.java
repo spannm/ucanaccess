@@ -35,8 +35,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.ucanaccess.converters.TypesMap.AccessType;
@@ -128,7 +130,11 @@ public class Functions {
 			addDateP(pattern.replaceAll(Pattern.quote("."),"/"));
 		}
 	}
-	
+	private static SimpleDateFormat simpleDateFormat(String pt){
+		SimpleDateFormat sdf=new SimpleDateFormat(pt);
+		 ((GregorianCalendar)sdf.getCalendar()).setGregorianChange(new java.util.Date(Long.MIN_VALUE));
+		 return sdf;
+	}
 	
 	private static void addDateP( String sdfs,boolean euristic,boolean yearOverride){
 		if(euristic){
@@ -139,7 +145,7 @@ public class Functions {
 			}
 		}
 		
-		SimpleDateFormat sdf=new SimpleDateFormat(sdfs);
+		SimpleDateFormat sdf=simpleDateFormat(sdfs);
 		sdf.setLenient(false);
 		
 		if("true".equalsIgnoreCase(reg.getRS())){
@@ -599,6 +605,35 @@ public class Functions {
 		return dateValue( dt,true);
 	}
 	
+
+	@FunctionType(functionName = "TIMESTAMP0", argumentTypes = { AccessType.MEMO }, returnType = AccessType.DATETIME)
+	public static Timestamp timestamp0(String dt) {
+		GregorianCalendar gc=new GregorianCalendar();
+		gc.setGregorianChange(new java.util.Date(Long.MIN_VALUE));
+		Pattern ptdate=Pattern.compile(SQLConverter.DATE_FORMAT+"\\s");
+		Pattern pth=Pattern.compile(SQLConverter.HHMMSS_FORMAT);
+		Matcher mtc=ptdate.matcher(dt);
+		if(mtc.find()){
+			gc.set(Integer.parseInt(mtc.group(1)), 
+				   Integer.parseInt(mtc.group(2))-1,
+				   Integer.parseInt(mtc.group(3)));
+		}
+		else{
+			throw new RuntimeException("internal error in parsing timestamp");
+		}
+		mtc=pth.matcher(dt);
+		if(mtc.find()){
+			       gc.set(Calendar.HOUR_OF_DAY,Integer.parseInt(mtc.group(1)));
+			       gc.set(Calendar.MINUTE,Integer.parseInt(mtc.group(2)));
+			       gc.set(Calendar.SECOND,Integer.parseInt(mtc.group(3)));
+		}
+		else{
+			throw new RuntimeException("internal error in parsing timestamp");
+		}
+		gc.set(Calendar.MILLISECOND,0);
+		return new Timestamp(gc.getTime().getTime());
+	}
+	
 	private static Timestamp dateValue(String dt, boolean onlyDate) {
 		if(!"true".equalsIgnoreCase(reg.getRS())&&(
 				!"PM".equalsIgnoreCase(reg.getPM())||!"AM".equalsIgnoreCase(reg.getAM())
@@ -712,8 +747,8 @@ public class Functions {
 	
 	
 	private static String formatDate(Timestamp t,String pattern){
-		
-		String ret= new SimpleDateFormat(pattern).format(t);
+		SimpleDateFormat sdf=simpleDateFormat(pattern);
+		String ret= sdf.format(t);
 		if(!reg.getRS().equalsIgnoreCase("true")){
 			if(!reg.getAM().equals("AM"))
 				ret=ret.replaceAll("AM", reg.getAM());
@@ -758,7 +793,7 @@ public class Functions {
 		if ("q".equalsIgnoreCase(par)) {
 			return String.valueOf(datePart(par, t));
 		}
-		return new SimpleDateFormat(par.replaceAll("m", "M").replaceAll("n",
+		return simpleDateFormat(par.replaceAll("m", "M").replaceAll("n",
 				"m").replaceAll("(?i)AM/PM|A/P|AMPM", "a").replaceAll("dddd", "EEEE")).format(t);
 	}
 

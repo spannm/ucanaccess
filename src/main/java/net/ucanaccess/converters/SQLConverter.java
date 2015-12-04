@@ -85,8 +85,12 @@ public class SQLConverter {
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(?i)_(\\W)";
 	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
-	private static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
+	
+	public static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
+	public static final String HHMMSS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
+
+	
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
@@ -469,35 +473,46 @@ public class SQLConverter {
 	
 	public static String convertAccessDate(String sql) {
 		sql = sql.replaceAll("#" + DATE_ACCESS_FORMAT + "#",
-				"Timestamp'$3-$1-$2 00:00:00'")
+				"Timestamp('$3-$1-$2 00:00:00')")
 				// FORMAT MM/dd/yyyy
 				.replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")#",
-						"Timestamp'$3-$1-$2 $4'").replaceAll(
+						"Timestamp0('$3-$1-$2 $4')")
+						
+						.replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")\\s*(?i)AM#",
-						"Timestamp'$3-$1-$2 $4'").replaceAll(
+						"Timestamp0('$3-$1-$2 $4')")
+						
+						.replaceAll(
 						"#" + DATE_ACCESS_FORMAT + "\\s*("
 								+ HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
-						"Timestamp'$3-$1-$2 $4'+ 12 Hour ")
+						"(Timestamp0('$3-$1-$2 $4')+ 12 Hour) ")
 				// FORMAT yyyy-MM-dd
 				.replaceAll("#" + DATE_FORMAT + "#",
-						"Timestamp'$1-$2-$3 00:00:00'").replaceAll(
+						"Timestamp0('$1-$2-$3 00:00:00')")
+						
+						.replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
-								+ ")#", "Timestamp'$1-$2-$3 $4'").replaceAll(
+								+ ")#", "Timestamp0('$1-$2-$3 $4')")
+								
+						.replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
-								+ ")\\s*(?i)AM#", "Timestamp'$1-$2-$3 $4'")
-				.replaceAll(
+								+ ")\\s*(?i)AM#", "Timestamp0('$1-$2-$3 $4')")
+						
+						.replaceAll(
 						"#" + DATE_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT
 								+ ")\\s*(?i)PM#",
-						"Timestamp'$1-$2-$3 $4'+ 12 Hour ").replaceAll(
+						"(Timestamp0('$1-$2-$3 $4')+ 12 Hour)")
+						
+						.replaceAll(
 						"#(" + HHMMSS_ACCESS_FORMAT + ")#",
 						"Timestamp'" + BIG_BANG + " $1'").replaceAll(
 						"#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)AM#",
 						"Timestamp'" + BIG_BANG + " $1'").replaceAll(
 						"#(" + HHMMSS_ACCESS_FORMAT + ")\\s*(?i)PM#",
-						"Timestamp'" + BIG_BANG + " $1'+ 12 Hour");
+						"(Timestamp'" + BIG_BANG + " $1'+ 12 Hour)");
 		
 			return sql;
 	}

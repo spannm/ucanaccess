@@ -479,12 +479,30 @@ public class FunctionsTest extends UcanaccessTestBase {
 				"select Format (0.00000000000000015661112106, 'Scientific') from t234",
 				"1.57E-16");
 	}
-
+	
+	public void testTimestamp() throws SQLException, IOException{
+		checkQuery(
+				"select #2006-12-11#=timestamp '2006-12-11 00:00:00' from dual",true);
+		checkQuery(
+				"select #2006-12-11 1:2:3#=timestamp '2006-12-11 01:02:03' from dual",true);
+		checkQuery(
+				"select #2006-2-1 1:2:3#=timestamp '2006-02-01 01:02:03' from dual",true);
+		checkQuery(
+				"select #2/1/2006 1:2:3#=timestamp '2006-02-01 01:02:03' from dual",true);
+		checkQuery(
+				"select #12/11/2006 1:2:3#=timestamp '2006-12-11 01:02:03' from dual",true);
+		checkQuery(
+				"select #1392-01-10 1:2:3#=timestamp '1392-01-02 01:02:03' from dual",true);
+	
+		checkQuery(
+				"select #12/11/2006 1:2:3 am#=timestamp '2006-12-11 01:02:03' from dual",true);
+		checkQuery(
+				"select #12/11/2006 1:2:3 pm#=timestamp '2006-12-11 13:02:03' from dual",true);
+	
+	}
+	
 	public void testFormatDate() throws SQLException, IOException {
 		
-		checkQuery(
-				"select format(#1392-01-10 10:42:58 PM#,'Long date') from t234",
-				"Wednesday, January 10, 1392");
 		
 		checkQuery(
 				"select format(#05/13/1994 10:42:58 PM#,'Long date') from t234",

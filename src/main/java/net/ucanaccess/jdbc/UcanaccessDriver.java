@@ -56,6 +56,8 @@ public final class UcanaccessDriver implements Driver {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
+	
+	
 
 	public boolean acceptsURL(String url) throws SQLException {
 		return (url.startsWith(URL_PREFIX) && url.length() > URL_PREFIX
@@ -63,7 +65,7 @@ public final class UcanaccessDriver implements Driver {
 	}
 
 	public Connection connect(String url, Properties pr) throws SQLException {
-		// ok wimp
+		
 		if (!this.acceptsURL(url)) {
 			return null;
 		}
