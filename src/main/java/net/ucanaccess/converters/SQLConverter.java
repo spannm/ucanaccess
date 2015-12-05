@@ -378,6 +378,7 @@ public class SQLConverter {
 		sql = sql.trim();
 		
 		nsql.setSql(sql);
+		
 		return nsql;
 	}
 
@@ -728,7 +729,7 @@ public class SQLConverter {
 	
 	
 	private static String hsqlEscape(String escaped,boolean quote){
-		if (escaped.indexOf(" ") > 0) {
+		if (escaped.indexOf(" ") > 0||escaped.indexOf("$")>0) {
 			escaped =quote? "\"" + escaped + "\"":"[" + escaped + "]";
 		}
 		return escaped;
@@ -852,8 +853,7 @@ public class SQLConverter {
 		}
 		return likeContent.replaceAll("#", "\\\\d").replaceAll("\\*", ".*")
 				.replaceAll("_", ".").replaceAll("(\\[)\\!(\\w\\-\\w\\])",
-						"$1^$2")
-				+ "')";
+						"$1^$2");
 	}
 
 	private static String convert2LikeCondition(String likeContent) {
@@ -870,9 +870,11 @@ public class SQLConverter {
 	private static String convertLike(String conditionField, String closePar,
 			String likeContent) {
 		Pattern inter = ACCESS_LIKE_CHARINTERVAL_PATTERN;
-		if (likeContent.indexOf("#") >= 0 || inter.matcher(likeContent).find()) {
+		int i=likeContent.replaceAll("\\[#\\]","").indexOf("#");
+		
+		if (i >= 0|| inter.matcher(likeContent).find()) {
 			return "REGEXP_MATCHES(" + conditionField + ",'"
-					+ convert2RegexMatches(likeContent) + closePar + " ";
+					+ convert2RegexMatches(likeContent)+ "')" + closePar + " ";
 		}
 		return " " + conditionField + closePar + " like '"
 				+ convert2LikeCondition(likeContent) + "'";

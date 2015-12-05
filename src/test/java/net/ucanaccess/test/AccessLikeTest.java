@@ -63,10 +63,11 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			st.execute("INSERT INTO T21 (descr)  VALUES( 'PZ123')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( 'a*a')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( 'A*a')");
-			st.execute("INSERT INTO T21 (descr)  VALUES( '#')");
+			st.execute("INSERT INTO T21 (descr)  VALUES( 'ss#sss')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( '*')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( '132B')");
 			st.execute("INSERT INTO T21 (descr)  VALUES( '138')");
+			st.execute("INSERT INTO T21 (descr)  VALUES( '138#')");
 			Object[][] ver = { { "a*a" }, { "A*a" } };
 			checkQuery(
 					"select descr from T21 where descr like 'a[*]a' order by ID",
@@ -88,6 +89,17 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			"132B");
 			checkQuery("select descr from T21 where descr like '13[!1-4]'",
 			"138");
+			checkQuery("select descr from T21 where descr like '%s[#]%'",
+			"ss#sss");
+			checkQuery("select descr from T21 where descr like '###'",
+			"138");
+			checkQuery("select descr from T21 where descr like '###[#]'",
+			"138#");
+			
+			checkQuery("select descr from T21 where descr like '###[#]'",
+			"138#");
+			checkQuery("select descr from T21 where (( descr like '###[#]'))",
+			"138#");
 			
 		} finally {
 			if (st != null)
