@@ -370,7 +370,7 @@ public class SQLConverter {
 		sql = escape(sql);
 		sql = convertLike(sql);
 		sql = replaceWhiteSpacedTables(sql);
-		sql = replaceExclamationPoints(sql);
+		//sql = replaceExclamationPoints(sql);
 		if (!creatingQuery) {
 			Pivot.checkAndRefreshPivot(sql, conn);
 			sql = DFunction.convertDFunctions(sql, conn);
@@ -583,8 +583,9 @@ public class SQLConverter {
 
 	private static String convertResidualSQL(String sql) {
 		sql = convertSQLTokens(sql);
-		return replaceDigitStartingIdentifiers(sql.replaceAll(
-				UNDERSCORE_IDENTIFIERS, "$1Z$2$5"));
+		if(sql.equals("!"))return ".";
+		return replaceExclamationPoints(replaceDigitStartingIdentifiers(sql.replaceAll(
+				UNDERSCORE_IDENTIFIERS, "$1Z$2$5")));
 	}
 
 	private static String convertSQLTokens(String sql) {
