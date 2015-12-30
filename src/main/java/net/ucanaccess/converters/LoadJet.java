@@ -1124,7 +1124,8 @@ public class LoadJet {
 				String when, String className) throws SQLException {
 			String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
 			String triggerName = namePrefix + "_"
-					+ (tableName.replaceAll("\"", "").replaceAll(" ", "_"));
+					+ (tableName);
+							//.replaceAll(" ", "_"));
 			 triggerName= escapeIdentifier(triggerName);
 			exec("CREATE TRIGGER " + triggerName + "  " + when + " ON "
 					+ tableName + "   FOR EACH ROW	" + q0 + "   CALL \""
