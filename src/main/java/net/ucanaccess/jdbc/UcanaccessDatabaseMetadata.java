@@ -260,16 +260,16 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 			
 			 switch (scope) {
 
-	            case 0 :
-	            	scopeArr = new Integer[]{0,1,2};
+	            case bestRowTemporary :
+	            	scopeArr = new Integer[]{bestRowTemporary,bestRowTransaction,bestRowSession};
 
 	                break;
-	            case 1 :
-	            	scopeArr =  new Integer[]{1,2};
+	            case bestRowTransaction :
+	            	scopeArr =  new Integer[]{bestRowTransaction,bestRowSession};
 
 	                break;
-	            case 2 :
-	            	scopeArr =  new Integer[]{2};
+	            case bestRowSession :
+	            	scopeArr =  new Integer[]{bestRowSession};
 
 	                break;
 	           
