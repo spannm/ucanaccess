@@ -45,6 +45,7 @@ public class CrudTest extends UcanaccessTestBase {
 			st = super.ucanaccess.createStatement();
 			int id = 6666554;
 			int id1 = 5556664;
+		
 			st.execute("delete from t1");
 			st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id
 					+ ",'nel mezzo del cammin di nostra vita')");
