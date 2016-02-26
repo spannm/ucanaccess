@@ -495,6 +495,10 @@ public class Persist2Jet {
 				}
 			}
 		}
+		
 		conn.reloadDbIO();
+		
+		
 	}
+	
 }
