@@ -342,7 +342,9 @@ public class UcanaccessConnection implements Connection {
 				this.ref.getDbIO().flush();
 				this.unloadDB();
 			}
-			catch (IOException e) {}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
 			throw new UcanaccessSQLException(t);
 		}
 		try {
@@ -474,18 +476,35 @@ public class UcanaccessConnection implements Connection {
 	}
 
 	public CallableStatement prepareCall(String sql) throws SQLException {
-		throw new FeatureNotSupportedException();
+		try {
+			NormalizedSQL nsql= prepare(sql);
+			return new UcanaccessCallableStatement(nsql, hsqlDBConnection.prepareCall(sql), this);
+		} catch (SQLException e) {
+			throw new UcanaccessSQLException(e);
+		}
 	}
 
 	public CallableStatement prepareCall(String sql, int resultSetType,
 			int resultSetConcurrency) throws SQLException {
-		throw new FeatureNotSupportedException();
+		try {
+			NormalizedSQL nsql= prepare(sql);
+			return new UcanaccessCallableStatement(nsql, hsqlDBConnection.prepareCall(sql, resultSetType,
+				 resultSetConcurrency), this);
+		} catch (SQLException e) {
+			throw new UcanaccessSQLException(e);
+		}
 	}
 
 	public CallableStatement prepareCall(String sql, int resultSetType,
 			int resultSetConcurrency, int resultSetHoldability)
 			throws SQLException {
-		throw new FeatureNotSupportedException();
+		try {	
+			NormalizedSQL nsql= prepare(sql);
+			return new UcanaccessCallableStatement(nsql, hsqlDBConnection.prepareCall(sql, resultSetType,
+			 resultSetConcurrency, resultSetHoldability), this);
+		} catch (SQLException e) {
+			throw new UcanaccessSQLException(e);
+		}
 	}
 
 	private NormalizedSQL prepare(String sql) throws SQLException {
