@@ -78,8 +78,11 @@ public class DFunction {
 					sb.append(init).append(s).append("(").append(mtc.group(1))
 							.append(") FROM ").append(tableN).append(" AS ")
 							.append(alias).append(" WHERE ");
-					if (g3.indexOf("&") > 0) {
-						String[] pts = g3.split("&", -1);
+					boolean accessConcat=g3.indexOf("&") > 0;
+					boolean sqlConcat=g3.indexOf("||") > 0;
+					if ( accessConcat||sqlConcat) {
+						String concat=accessConcat?"&":Pattern.quote("||");
+						String[] pts = g3.split(concat, -1);
 						for (String tkn : pts) {
 							if (isQuoted(tkn)) {
 								tkn = tkn.trim();
