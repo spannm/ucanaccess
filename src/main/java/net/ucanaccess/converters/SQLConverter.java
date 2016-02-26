@@ -96,7 +96,7 @@ public class SQLConverter {
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
 	private static final String DELETE_ALL ="((?i)DELETE[\\s\n\r]+)(\\*)([\\s\n\r]+(?i)FROM[\\s\n\r]+)";
-	
+	private static final String PARAMETERS="(?i)PARAMETERS([^;]*);";
 	private static final Pattern ESPRESSION_DIGIT = Pattern
 			.compile("([\\d]+)(?![\\.\\d])");
 	public static final String BIG_BANG = "1899-12-30";
@@ -348,7 +348,7 @@ public class SQLConverter {
 	
 	private static String replaceAposNames(String sql) {
 		for(String an:apostrophisedNames)
-			sql= sql.replaceAll("(?i)"+Pattern.quote("["+an+"]"), "["+SQLConverter.escapeIdentifier(an)+"]");
+			sql= sql.replaceAll("(?i)"+Pattern.quote("["+an+"]"), "["+SQLConverter.basicEscapingIdentifier(an)+"]");
 		return sql;
 	}
 
@@ -690,10 +690,10 @@ public class SQLConverter {
 		escaped = name.replaceAll(
 				"\'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
     	
-		if (Character.isDigit(escaped.trim().charAt(0))) {
+		if (escaped.length()>0&&Character.isDigit(escaped.trim().charAt(0))) {
 			escaped = "Z_" + escaped.trim();
 		}
-		if (escaped.charAt(0) == '_') {
+		if (escaped.length()>0&&escaped.charAt(0) == '_') {
 			escaped = "Z" + escaped;
 		}
 		if (dualUsedAsTableName&&escaped.equalsIgnoreCase("DUAL")) {
@@ -730,7 +730,7 @@ public class SQLConverter {
 	
 	
 	private static String hsqlEscape(String escaped,boolean quote){
-		if (escaped.indexOf(" ") > 0||escaped.indexOf("$")>0) {
+		if (escaped.indexOf(" ") > 0||escaped.indexOf("$")>=0) {
 			escaped =quote? "\"" + escaped + "\"":"[" + escaped + "]";
 		}
 		return escaped;
@@ -1095,5 +1095,27 @@ public class SQLConverter {
 		SQLConverter.dualUsedAsTableName = dualUsedAsTableName;
 	}
 
+	public static String removeParameters(String qtxt){
+		return qtxt.replaceAll(PARAMETERS, "");
+	}
+
+
+	public static String getPreparedStatement(String qtxt, List<String> l ) {
+		String s=qtxt;
+		for(String p: l){
+			System.out.println("(\\W)((?i)"+Pattern.quote(p)+")(\\W)");
+			s=s.replaceAll("(\\W)((?i)"+Pattern.quote(p)+")(\\W)", "$1?$3");
+		}
+		return s.replaceAll(Pattern.quote("[?]"), "?");
+	}
 	
+	public static List<String> getParameters(String s){
+		ArrayList<String> ar=new ArrayList<String>();
+		
+		for(Matcher mtch=FORMULA_DEPENDENCIES.matcher(s);mtch.find();mtch=FORMULA_DEPENDENCIES.matcher(s)){
+			ar.add(mtch.group());
+			s=s.substring( mtch.end(),s.length());
+		}
+		return ar;
+	}
 }
