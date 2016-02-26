@@ -45,6 +45,8 @@ import net.ucanaccess.test.PivotTest;
 import net.ucanaccess.test.ByteTest;
 import net.ucanaccess.test.GeneratedKeysTest;
 import net.ucanaccess.test.ColumnOrderTest;
+import net.ucanaccess.test.UnproperExecuteQueryTest;
+import net.ucanaccess.test.ParametersTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -79,6 +81,8 @@ public class AllTestsBase {
 		suite.addTestSuite(ExceptionCodeTest.class);
 		suite.addTestSuite(MultipleGroupByTest.class);
 		suite.addTestSuite(MetaDataTest.class);
+		suite.addTestSuite(ParametersTest.class);
+		suite.addTestSuite(UnproperExecuteQueryTest.class);
 		return suite;
 	}
 }
