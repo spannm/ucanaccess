@@ -31,7 +31,7 @@ public class Logger {
 		ROW_COUNT,
 		TRIGGER_UPDATE_CF_ERR,
 		INVALID_CHARACTER_SEQUENCE,
-		STATEMENT_DDL, CONSTRAINT, LOBSCALE, FUNCTION_ALREADY_ADDED
+		STATEMENT_DDL, CONSTRAINT, LOBSCALE, FUNCTION_ALREADY_ADDED, NO_SELECT
 	}
 	private static PrintWriter logPrintWriter;  
 	private static ResourceBundle messageBundle=ResourceBundle.getBundle("net.ucanaccess.util.messages");
