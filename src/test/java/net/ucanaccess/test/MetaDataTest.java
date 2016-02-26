@@ -80,6 +80,12 @@ public class MetaDataTest extends UcanaccessTestBase {
 		st.execute("update noroman set [किआओ]='1vv'");
 	  checkQuery("select * from noroman order by [किआओ]");
 	}
+	
+	public void testRightCaseQuery() throws Exception {
+		Connection conn = ucanaccess;
+		Statement st = conn.createStatement();
+		assertEquals( st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1), "Ciao");
+	}
 
 	public void testBadMetadata() throws Exception {
 		dump("SELECT * FROM NOROMAN");
@@ -141,9 +147,9 @@ public class MetaDataTest extends UcanaccessTestBase {
 				 rs=dbmd.getTables(null, null,null, new String[]{"VIEW"})	;
 				 dump(rs);
 				 System.out.println(".getBestRowIdentifier...");
-				 rs=dbmd.getBestRowIdentifier(null, null, "??###", 0, true)	;
+				 rs=dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true)	;
 				 dump(rs);
-				 rs=dbmd.getBestRowIdentifier(null, null, "??###", 33, true)	;
+				 rs=dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowSession, true)	;
 				 dump(rs);
 				 System.out.println("getTypesInfo...");
 				 rs=dbmd.getTypeInfo();

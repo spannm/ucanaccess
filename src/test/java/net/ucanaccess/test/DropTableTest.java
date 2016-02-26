@@ -53,16 +53,18 @@ public class DropTableTest extends UcanaccessTestBase {
 	public void testDrop() throws SQLException, IOException {
 		Statement st = null;
 		try {
+			//super.ucanaccess.setAutoCommit(false);
 			createSimple("a", new Object[][] { { "33A", 11, "a" },
 					{ "33B", 111, "a" } });
 			st = super.ucanaccess.createStatement();
 			st.executeUpdate("DROP TABLE AAAn");
-			//dump("select * from AAAn");
+			//super.ucanaccess.commit();
 			st
 					.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
 			createSimple("b", new Object[][] { { "33A", 11, "b" },
 					{ "33B", 111, "b" } });
 			dump("select * from AAAn");
+			super.ucanaccess.commit();
 		} finally {
 			if (st != null)
 				st.close();

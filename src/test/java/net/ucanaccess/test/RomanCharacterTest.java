@@ -31,6 +31,14 @@ public class RomanCharacterTest extends UcanaccessTestBase {
 	public String getAccessPath() {
 		return "net/ucanaccess/test/resources/noroman.mdb";
 	}
+	
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		
+		
+	}
 
 	public void testNoRomanCharactersInColumnName() throws Exception {
 		dump("SELECT * FROM NOROMAN");

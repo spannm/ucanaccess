@@ -12,12 +12,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package net.ucanaccess.test;
 
+import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -34,15 +36,42 @@ public class MetaData extends UcanaccessTestBase {
 		return "net/ucanaccess/test/resources/noroman.mdb";
 	}
 
-	public void testNoRomanCharactersInColumnName() throws Exception {
-		dump("SELECT * FROM NOROMAN");
-	DatabaseMetaData dbmd=	this.ucanaccess.getMetaData();
-	ResultSet rs=dbmd.getColumns(null, null, "NOROMAN", "ID");//noroman tableName
-		while(rs.next()){
+	public void createSimple(String a, Object[][] ver) throws SQLException,
+			IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
+			st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
+			checkQuery("select * from AAAn", ver);
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
 
-			System.out.println("TABLE_NAME:"+rs.getString(3)+"="+rs.getString("TABLE_NAME"));
-			System.out.println("COLUMN_NAME:"+rs.getString(4)+"="+rs.getString("COLUMN_NAME"));
-			System.out.println("DATA_TYPE:"+rs.getInt(5)+"="+rs.getInt("DATA_TYPE"));
+	protected void setUp() throws Exception {
+		super.setUp();
+		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+	}
+
+	public void testDrop() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			super.ucanaccess.setAutoCommit(false);
+			createSimple("a", new Object[][] { { "33A", 11, "a" },
+					{ "33B", 111, "a" } });
+			st = super.ucanaccess.createStatement();
+			st.executeUpdate("DROP TABLE AAAn");
+
+			st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+			createSimple("b", new Object[][] { { "33A", 11, "b" },
+					{ "33B", 111, "b" } });
+			
+			super.ucanaccess.commit();
+		} finally {
+			if (st != null)
+				st.close();
 		}
 	}
 }
