@@ -36,6 +36,7 @@ public class TriggerAutoNumber extends TriggerBase {
 	
 	public void fire(int type, String name, String tableName, Object[] oldR,
 			Object[] newR) {
+		checkContext();
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		if (conn.isFeedbackState())
 			return;

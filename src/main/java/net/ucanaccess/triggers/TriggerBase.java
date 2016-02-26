@@ -23,6 +23,7 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.UcanaccessTable;
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
@@ -33,6 +34,18 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 	public void convertRowTypes(Object[] values, Table table)
 			throws SQLException {
 		p2a.convertRowTypes(values, table);
+	}
+	
+	
+	public void checkContext() {
+		if(!UcanaccessConnection.hasContext()||UcanaccessConnection.getCtxConnection()==null){
+			for(StackTraceElement el:Thread.currentThread().getStackTrace()){
+				if("executeQuery".equals(el.getMethodName())){
+					throw new TriggerException(Logger.getLogMessage(Logger.Messages.NO_SELECT));
+				}
+			}
+		}
+	
 	}
 	
 	protected Map<String, Object> getRowPattern(Object[] values, Table t)
