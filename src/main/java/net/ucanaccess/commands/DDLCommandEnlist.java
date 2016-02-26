@@ -109,12 +109,15 @@ public class DDLCommandEnlist {
 	
 	
 	
-	private void enlistDropTable(String sql, DDLType ddlType) {
+	private void enlistDropTable(String sql, DDLType ddlType) throws SQLException {
 		String tn = ddlType.getDBObjectName(sql);
 		String execId = UcanaccessConnection.getCtxExcId();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		DropTableCommand c4io = new DropTableCommand(tn, execId);
 		ac.add(c4io);
+		if(!ac.getAutoCommit()){
+			ac.commit();
+		}
 	}
 	private String[]  checkEscaped(String ll,String rl,String[] colDecls,String tknt){
 		if(colDecls[0].startsWith(ll)&&tknt.substring(1).indexOf(rl)>0){
