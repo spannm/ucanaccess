@@ -602,11 +602,14 @@ public class DBReference {
 	}
 
 	public void reloadDbIO() throws IOException {
+		this.dbIO.flush();
 		this.dbIO.close();
 		for (OnReloadReferenceListener listener : onReloadListeners) {
 			listener.onReload();
 		}
 		this.dbIO = open(dbFile, this.pwd);
+		
+		
 	}
 
 	
