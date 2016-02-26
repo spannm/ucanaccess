@@ -1127,7 +1127,7 @@ public class LoadJet {
 					+ (tableName);
 							//.replaceAll(" ", "_"));
 			 triggerName= escapeIdentifier(triggerName);
-			exec("CREATE TRIGGER " + triggerName + "  " + when + " ON "
+			 exec("CREATE TRIGGER " + triggerName + "  " + when + " ON "
 					+ tableName + "   FOR EACH ROW	" + q0 + "   CALL \""
 					+ className + "\" ",true);
 		}
@@ -1163,7 +1163,10 @@ public class LoadJet {
 
 	private final class ViewsLoader {
 		private HashMap<String,String> notLoaded = new HashMap<String,String>();
+		private HashMap<String,String>  notLoadedProcedure=new HashMap<String,String>();
 		private static final int OBJECT_ALREADY_EXISTS=-ErrorCode.X_42504;
+		private static final int OBJECT_NOT_FOUND = -ErrorCode.X_42501;
+		private static final int UNEXPECTED_TOKEN = -ErrorCode.X_42581;
 		
 		
 		private boolean loadView(Query q) throws SQLException {
@@ -1174,6 +1177,7 @@ public class LoadJet {
 		private void registerQueryColumns(Query q,int seq) throws SQLException{
 			QueryImpl qi=(QueryImpl)q;
 			for(QueryImpl.Row row:qi.getRows()){
+				
 				if(QueryFormat.COLUMN_ATTRIBUTE.equals(row.attribute)){
 					String name=row.name1;
 					
@@ -1184,9 +1188,22 @@ public class LoadJet {
 							continue;
 						}
 						name=row.expression.substring(beginIndex+1);
-						if(name.endsWith("]"))
+						if(name.endsWith("]")){
 							name=name.substring(0,name.length()-1);
+						}
+						if (name.contentEquals("*")) {
+	                            String table = row.expression.substring(0, beginIndex);
+	                            ArrayList<String> result =  metadata.getColumnNames(table);
+	                            if (result != null) {
+	                                for (String column : result) {
+	                                    metadata.newColumn(column, SQLConverter.preEscapingIdentifier(column), null, seq);
+	                                }
+	                               // return;
+	                            }
+	                            
+	                     }
 					}
+					
 					metadata.newColumn(name, SQLConverter.preEscapingIdentifier(name), null, seq);
 					
 				}
@@ -1239,9 +1256,29 @@ public class LoadJet {
 			} 
 			
 			catch (Exception e) {
-				if(e instanceof SQLSyntaxErrorException&&queryWKT==null&&((SQLSyntaxErrorException)e).getErrorCode()==OBJECT_ALREADY_EXISTS){
-					return loadView( q, solveAmbiguous(querySQL));
+				if(e instanceof SQLSyntaxErrorException){
+					if(queryWKT==null&&((SQLSyntaxErrorException)e).getErrorCode()==OBJECT_ALREADY_EXISTS){
+						return loadView( q, solveAmbiguous(querySQL));
+					}
+					else {
+						SQLSyntaxErrorException sqle=(SQLSyntaxErrorException)e;
+						if(sqle.getErrorCode()==OBJECT_NOT_FOUND 
+								||sqle.getErrorCode()==UNEXPECTED_TOKEN
+								){
+							ParametricQuery pq=new ParametricQuery(conn,(QueryImpl)q);
+							pq.setIssueWithParameterName(sqle.getErrorCode()==UNEXPECTED_TOKEN);
+							pq.createSelect();
+							if(pq.loaded()){
+								loadedQueries.add(q.getName());
+								this.notLoaded.remove(q.getName());
+								return true;
+							}
+
+							
+						}
+					}
 				}
+				
 				String cause=UcanaccessSQLException.explaneCause(e);
 				
 				this.notLoaded.put(q.getName(),": "+cause);
@@ -1308,6 +1345,7 @@ public class LoadJet {
 		
 		private void loadViews() throws SQLException, IOException {
 			List<Query> lq = null;
+			List<Query> procedures=new ArrayList<Query>();
 			try {
 				lq = dbIO.getQueries();
 				Iterator<Query> it = lq.iterator();
@@ -1316,7 +1354,8 @@ public class LoadJet {
 					if (!q.getType().equals(Query.Type.SELECT)
 							&& !q.getType().equals(Query.Type.UNION)
 							&& !q.getType().equals(Query.Type.CROSS_TAB)) {
-						  	it.remove();
+						procedures.add(q);
+						it.remove();
 					}
 						
 					
@@ -1325,6 +1364,27 @@ public class LoadJet {
 			} catch (Exception e) {
 				this.notLoaded.put("","");
 			}
+			loadProcedures(procedures);
+			
+		}
+		
+		private void loadProcedures(List<Query> procedures) throws SQLException{
+			for(Query q:procedures){
+				ParametricQuery pq=new ParametricQuery(conn,(QueryImpl)q);  	
+				if(!q.getType().equals(Query.Type.DATA_DEFINITION)){
+					pq.createProcedure();
+					if(pq.loaded()){
+						loadedProcedures.add(pq.getSignature());
+						System.out.println("loaded: "+q.getName());
+					}
+					else{
+						String msg=pq.getException()==null?"":pq.getException().getMessage();
+						this.notLoadedProcedure.put(q.getName(),msg );
+						System.out.println("not loaded: "+q.getName()+" "+msg);
+					}
+					
+				  }
+		    }
 		}
 
 		private void queryPorting(List<Query> lq) throws SQLException {
@@ -1374,6 +1434,7 @@ public class LoadJet {
 	private FunctionsLoader functionsLoader = new FunctionsLoader();
 	private ArrayList<String> loadedIndexes = new ArrayList<String>();
 	private ArrayList<String> loadedQueries = new ArrayList<String>();
+	private ArrayList<String> loadedProcedures = new ArrayList<String>();
 	private ArrayList<String> loadedTables = new ArrayList<String>();
 	private LogsFlusher logsFlusher = new LogsFlusher();
 	private TablesLoader tablesLoader = new TablesLoader();
@@ -1465,6 +1526,15 @@ public class LoadJet {
 				sqlw.setNextWarning(new SQLWarning(message));
 			}
 		}
+		for (String s : this.viewsLoader.notLoadedProcedure.keySet()) {
+			String message = s.length() > 0 ? "Cannot load procedure " + s+ " "+this.viewsLoader.notLoadedProcedure.get(s)
+					: "Cannot load procedures ";
+			if (sqlw == null) {
+				sqlw = new SQLWarning(message);
+			} else {
+				sqlw.setNextWarning(new SQLWarning(message));
+			}
+		}
 		for (String s : this.tablesLoader.unresolvedTables) {
 			String message = "Cannot resolve table " + s;
 			if (sqlw == null) {
@@ -1492,6 +1562,8 @@ public class LoadJet {
 			logsFlusher.dumpList(this.loadedTables);
 			Logger.log("Loaded Queries:");
 			logsFlusher.dumpList(this.loadedQueries);
+			Logger.log("Loaded Procedures:");
+			logsFlusher.dumpList(this.loadedProcedures);
 			Logger.log("Loaded Indexes:");
 			logsFlusher.dumpList(this.loadedIndexes, true);
 			conn.close();
