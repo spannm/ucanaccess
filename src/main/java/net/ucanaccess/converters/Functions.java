@@ -1669,7 +1669,6 @@ public class Functions {
 		   return "";
 	    }
 	   
-	   
 	   private static int lfloor(double d){
 		   return new Double(Math.floor(d-APPROX)).intValue();
 	   }
@@ -1686,6 +1685,8 @@ public class Functions {
 		  String tp=ext>0?String.valueOf(ext):"";
 		    return String.format("%1$" + n + "s", tp);  
 	   }
+	   
+	   
 
 	  
 }
