@@ -59,6 +59,7 @@ public class TriggerAutoNumber extends TriggerBase {
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {
 							int keyg=AutoNumberManager.getNext(cl);
+							
 							newR[i] = 	keyg;
 							conn.setGeneratedKey(keyg);
 						}

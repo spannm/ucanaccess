@@ -1103,7 +1103,6 @@ public class SQLConverter {
 	public static String getPreparedStatement(String qtxt, List<String> l ) {
 		String s=qtxt;
 		for(String p: l){
-			System.out.println("(\\W)((?i)"+Pattern.quote(p)+")(\\W)");
 			s=s.replaceAll("(\\W)((?i)"+Pattern.quote(p)+")(\\W)", "$1?$3");
 		}
 		return s.replaceAll(Pattern.quote("[?]"), "?");

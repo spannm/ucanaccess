@@ -1375,12 +1375,10 @@ public class LoadJet {
 					pq.createProcedure();
 					if(pq.loaded()){
 						loadedProcedures.add(pq.getSignature());
-						System.out.println("loaded: "+q.getName());
 					}
 					else{
 						String msg=pq.getException()==null?"":pq.getException().getMessage();
 						this.notLoadedProcedure.put(q.getName(),msg );
-						System.out.println("not loaded: "+q.getName()+" "+msg);
 					}
 					
 				  }

@@ -76,7 +76,6 @@ public class ParametricQuery {
 			return parameterList;
 		this.aposMap = new HashMap<String, String>();
 		int i = 0;
-		boolean find = false;
 		this.parameterList = new ArrayList<String>();
 		this.parameterList.addAll(l);
 		for (String par : parameterList) {
@@ -89,25 +88,22 @@ public class ParametricQuery {
 					decl = decl.substring(1, decl.length() - 1);
 				String h = treatApos(decl);
 				this.aposMap.put(h, decl);
-				find = true;
+				
 				parameterList.set(i, treatApos(par));
 			}
 			i++;
 		}
-		if (!find && l.size() > 0)
-			throw new RuntimeException();// It isn't worth to proceed
-		return parameterList;
+    	return parameterList;
 	}
 
 	public void createProcedure() throws SQLException {
 		this.isProcedure = true;
 		String sql = null;
 		try {
+			
 			List<String> l = queryParameters();
 			sql = getSQL();
-			if(this.qi.getName().equals("Insert_from_select_abxxx")){
-				System.out.println();
-			}
+			
 			
 			if (l == null || l.size() == 0) {
 				parametersEmpiric();
@@ -115,6 +111,9 @@ public class ParametricQuery {
 			} else {
 				sql = SQLConverter.removeParameters(sql);
 				parametersDeclared();
+				if(!conversionOk){
+					parametersEmpiric(true);
+				}
 			}
 			
 			if (conversionOk){
@@ -122,7 +121,6 @@ public class ParametricQuery {
 				
 			}
 			else{ 
-				
 				return;
 			}
 			String inside = convertSQL(convertApos(sql)).trim();
@@ -134,6 +132,7 @@ public class ParametricQuery {
 			String procedure = "CREATE PROCEDURE " + procedureName + "("
 					+ this.parameters + ") MODIFIES SQL DATA \n"
 					+ " BEGIN ATOMIC " + inside + "\n END";
+		
 			exec(procedure);
 			
 			this.signature=qi.getName() + "("
@@ -160,6 +159,9 @@ public class ParametricQuery {
 			} else {
 				sql = SQLConverter.removeParameters(sql);
 				parametersDeclared();
+				if(!conversionOk){
+					parametersEmpiric();
+				}
 			}
 			if (conversionOk){
 				this.e=null;
@@ -271,11 +273,18 @@ public class ParametricQuery {
 		.replaceAll("((?i)FORMS)\\.(\\w*)\\.(\\w*)", "[$1_$2_$3]")
 		;
 	}
-
+	
 	private void parametersEmpiric() {
+		parametersEmpiric(false);
+	}
+
+	private void parametersEmpiric(boolean partialParDecl) {
 		this.aposMap = new HashMap<String, String>();
 		LinkedHashMap<String, Integer> hm = new LinkedHashMap<String, Integer>();
 		String s = getSQL();
+		if(partialParDecl){
+			s=SQLConverter.removeParameters(s);
+		}
 		List<String> parameters = SQLConverter.getParameters(s);
 		getParametersEmpiric(hm, parameters, s, true);
 	}

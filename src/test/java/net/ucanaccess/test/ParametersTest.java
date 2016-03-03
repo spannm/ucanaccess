@@ -19,6 +19,7 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.SQLException;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -50,9 +51,20 @@ public class ParametersTest extends UcanaccessTestBase {
 		cs.setString(2,"YeaH!!!!");
 		cs.setString(3,"u can see it works");
 		cs.executeUpdate();
+		
+		
 		dump("select * from [ab\"\"\"xxx]");
 		checkQuery("select count(*) from [ab\"\"\"xxx]",6);
-		metaData();
+		//metaData();
+		cs= ucanaccess.prepareCall("{call InsertWithFewParameters(?,?,?)}");
+		
+		cs.setString(1, "555");
+		cs.setString(2,"YeaH!ddd!!!");
+		cs.setDate(3,new java.sql.Date(System.currentTimeMillis()));
+		cs.executeUpdate();
+		cs.executeUpdate();
+		cs.executeUpdate();
+		dump("select * from [table 1]");
 	
 	}
 	
