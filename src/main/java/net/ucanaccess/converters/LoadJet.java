@@ -1375,10 +1375,12 @@ public class LoadJet {
 					pq.createProcedure();
 					if(pq.loaded()){
 						loadedProcedures.add(pq.getSignature());
+						
 					}
 					else{
 						String msg=pq.getException()==null?"":pq.getException().getMessage();
 						this.notLoadedProcedure.put(q.getName(),msg );
+						
 					}
 					
 				  }
@@ -1527,7 +1529,7 @@ public class LoadJet {
 		for (String s : this.viewsLoader.notLoadedProcedure.keySet()) {
 			String message = s.length() > 0 ? "Cannot load procedure " + s+ " "+this.viewsLoader.notLoadedProcedure.get(s)
 					: "Cannot load procedures ";
-			if (sqlw == null) {
+  			if (sqlw == null) {
 				sqlw = new SQLWarning(message);
 			} else {
 				sqlw.setNextWarning(new SQLWarning(message));
