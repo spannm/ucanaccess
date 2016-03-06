@@ -82,7 +82,7 @@ public class DDLCommandEnlist {
     		   }
     		   c4io=new CreateTableCommand(tn, execId, this.columnMap);
     	   }catch(Exception ignore){
-    		   ignore.printStackTrace();
+    		   
     		   c4io=new CreateTableCommand(tn, execId);
     	   }
     	   
