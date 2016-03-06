@@ -254,26 +254,12 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 	public ResultSet getBestRowIdentifier(String catalog, String schema,
 			String table, int scope, boolean nullable) throws SQLException {
 		table = SQLConverter.escapeIdentifier(table).toUpperCase();
-		Integer[] scopeArr=null;
+	
 		try {
 			
-			
-			 switch (scope) {
+			Integer[] scopeArr = new Integer[]{bestRowTemporary,bestRowTransaction,bestRowSession};
 
-	            case bestRowTemporary :
-	            	scopeArr = new Integer[]{bestRowTemporary,bestRowTransaction,bestRowSession};
-
-	                break;
-	            case bestRowTransaction :
-	            	scopeArr =  new Integer[]{bestRowTransaction,bestRowSession};
-
-	                break;
-	            case bestRowSession :
-	            	scopeArr =  new Integer[]{bestRowSession};
-
-	                break;
-	           
-	        }
+	             
 	       
 
 	        String nullableS = (nullable) ? null
