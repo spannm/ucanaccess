@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.ucanaccess</groupId>
 	<artifactId>ucanaccess</artifactId>
-	<version>3.0.3.1</version>
+	<version>3.0.4</version>
 	<packaging>jar</packaging>
     <name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
     <organization>
@@ -13,8 +13,8 @@
     <url>http://ucanaccess.sourceforge.net/site.html</url>
     <licenses>
         <license>
-            <name>Apache License Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>GNU Lesser General Public License</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
         </license>
     </licenses>
     <developers>
@@ -45,7 +45,7 @@
         <url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
     </scm>
   	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
 	<build>
