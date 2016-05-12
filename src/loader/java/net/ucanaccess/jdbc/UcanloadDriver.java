@@ -38,7 +38,20 @@ public class UcanloadDriver implements Driver {
 		try {
 			DriverManager.registerDriver(new UcanloadDriver());
 			String home= System.getProperty("UCANACCESS_HOME");
-			if(home==null)throw noHome();
+			  if (home == null) {
+			        final String classLocation = UcanloadDriver.class.getName().replace('.', '/') + ".class";
+			        final ClassLoader loader = UcanloadDriver.class.getClassLoader();
+			        final String classLocationString = loader.getResource(classLocation).toString();
+                    final String jarLocationString = classLocationString.substring(9, classLocationString.indexOf("ucanload.jar!", 0));
+			        File jarFolder = new File(jarLocationString);
+			        home = jarFolder.getParent();
+			       
+			 }
+			  if (home == null) {
+				  throw noHome();
+			  }
+				
+				
 			File dir=new File(home);
 			File lib=new File(home,"lib");
 			if(!lib.exists()){
