@@ -113,7 +113,7 @@ public class SQLConverter {
 			"TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
 			"VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO",
 			"CONSTRAINT"
-			,"USER"
+			,"USER","ROW"
 			);
 	
 	private static final List<String> PROCEDURE_KEYWORDLIST = Arrays.asList("NEW","ROW");

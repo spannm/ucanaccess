@@ -37,6 +37,7 @@ public class IndexSelector {
 		@Override
 		public boolean matches(Table table, String columnName, Object currVal,
 				Object dbVal) {
+			
 			if (currVal == null && dbVal == null)
 				return true;
 			if (currVal == null || dbVal == null){
@@ -73,7 +74,10 @@ public class IndexSelector {
 			}
 			
 			if ((dbVal instanceof Float && currVal instanceof Double)||(dbVal instanceof Double && currVal instanceof Float)) {
-				return new BigDecimal(dbVal.toString()).compareTo(new BigDecimal( currVal.toString()))==0;
+				if( new BigDecimal(dbVal.toString()).compareTo(new BigDecimal( currVal.toString()))==0) return true;
+			    if(dbVal instanceof Float && currVal instanceof Double){
+			    	return ((Float)dbVal).doubleValue()==((Double)currVal);
+			    }
 			}
 			if (currVal instanceof byte[]
 					&& dbVal instanceof byte[]) {
