@@ -19,7 +19,7 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.DatabaseMetaData;
-import java.sql.Date;
+
 import java.sql.SQLException;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;

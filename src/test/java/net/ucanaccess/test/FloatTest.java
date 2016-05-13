@@ -18,7 +18,6 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 
 import java.util.Locale;
@@ -26,7 +25,7 @@ import java.util.Locale;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class FloatTest extends UcanaccessTestBase {
-	private static boolean init;
+	
 
 	public FloatTest() {
 		super();

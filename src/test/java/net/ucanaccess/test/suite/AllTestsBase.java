@@ -47,6 +47,7 @@ import net.ucanaccess.test.GeneratedKeysTest;
 import net.ucanaccess.test.ColumnOrderTest;
 import net.ucanaccess.test.UnproperExecuteQueryTest;
 import net.ucanaccess.test.ParametersTest;
+import net.ucanaccess.test.FloatTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -83,6 +84,7 @@ public class AllTestsBase {
 		suite.addTestSuite(MetaDataTest.class);
 		suite.addTestSuite(ParametersTest.class);
 		suite.addTestSuite(UnproperExecuteQueryTest.class);
+		suite.addTestSuite(FloatTest.class);
 		return suite;
 	}
 }
