@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package net.ucanaccess.jdbc;
 
 import java.io.File;
@@ -37,66 +37,76 @@ public class UcanloadDriver implements Driver {
 	static {
 		try {
 			DriverManager.registerDriver(new UcanloadDriver());
-			String home= System.getProperty("UCANACCESS_HOME");
-			  if (home == null) {
-			        final String classLocation = UcanloadDriver.class.getName().replace('.', '/') + ".class";
-			        final ClassLoader loader = UcanloadDriver.class.getClassLoader();
-			        final String classLocationString = loader.getResource(classLocation).toString();
-                    final String jarLocationString = classLocationString.substring(9, classLocationString.indexOf("ucanload.jar!", 0));
-			        File jarFolder = new File(jarLocationString);
-			        home = jarFolder.getParent();
-			       
-			 }
-			  if (home == null) {
-				  throw noHome();
-			  }
-				
-				
-			File dir=new File(home);
-			File lib=new File(home,"lib");
-			if(!lib.exists()){
+			String home = System.getProperty("UCANACCESS_HOME");
+			if (home == null) {
+				final String classLocation = UcanloadDriver.class.getName()
+						.replace('.', '/')
+						+ ".class";
+				final ClassLoader loader = UcanloadDriver.class
+						.getClassLoader();
+				final String classLocationString = loader.getResource(
+						classLocation).toString();
+				if (classLocationString.indexOf("ucanload.jar!")>0) {
+					final String jarLocationString = classLocationString
+							.substring(9, classLocationString.indexOf(
+									"ucanload.jar!", 0));
+					File jarFolder = new File(jarLocationString);
+					home = jarFolder.getParent();
+				}
+
+			}
+			if (home == null) {
+				throw noHome();
+			}
+
+			File dir = new File(home);
+			File lib = new File(home, "lib");
+			if (!lib.exists()) {
 				throw wrongHome();
 			}
-			FilenameFilter fnf=new FilenameFilter(){
-		
+			FilenameFilter fnf = new FilenameFilter() {
+
 				public boolean accept(File dir, String name) {
 					return name.toLowerCase().endsWith(".jar");
-				}};
-			File[] ucajar=dir.listFiles(fnf);
-			File[] libjars=lib.listFiles(fnf);
-			ArrayList<URL> au=new ArrayList<URL>();
-			for(File f:ucajar){
+				}
+			};
+			File[] ucajar = dir.listFiles(fnf);
+			File[] libjars = lib.listFiles(fnf);
+			ArrayList<URL> au = new ArrayList<URL>();
+			for (File f : ucajar) {
 				au.add(f.toURI().toURL());
 			}
-			for(File f:libjars){
-				
+			for (File f : libjars) {
+
 				au.add(f.toURI().toURL());
 			}
 			URL[] ucadURL = au.toArray(new URL[au.size()]);
-			
+
 			ClassLoader ucadLd = URLClassLoader.newInstance(ucadURL);
 			d = (Driver) ucadLd.loadClass(
 					"net.ucanaccess.jdbc.UcanaccessDriver").newInstance();
-			
 
 		} catch (Exception e) {
-			ex=(SQLException)(e instanceof SQLException? e:new SQLException(e) );
+			ex = (SQLException) (e instanceof SQLException ? e
+					: new SQLException(e));
 		}
 	}
-	
-	private static SQLException noHome(){
-		return  new SQLException("The UCANACCESS_HOME system variable isn't defined:\n it should be:\n-DUCANACCESS_HOME=<your path to the UCanAccess-3.x.x-bin folder> ");
+
+	private static SQLException noHome() {
+		return new SQLException(
+				"The UCANACCESS_HOME system variable isn't defined:\n it should be:\n-DUCANACCESS_HOME=<your path to the UCanAccess-3.x.x-bin folder> ");
 	}
-	
-	private static SQLException wrongHome(){
-		return new SQLException("UCANACCESS_HOME system variable doesn't point to the correct ucanaccess home\n it should be:\n -DUCANACCESS_HOME=<your path to the UCanAccess-3.x.x-bin folder>");
+
+	private static SQLException wrongHome() {
+		return new SQLException(
+				"UCANACCESS_HOME system variable doesn't point to the correct ucanaccess home\n it should be:\n -DUCANACCESS_HOME=<your path to the UCanAccess-3.x.x-bin folder>");
 	}
-	
-	private static void check() throws SQLException{
-		if(ex!=null){
+
+	private static void check() throws SQLException {
+		if (ex != null) {
 			throw ex;
 		}
-		if(d==null){
+		if (d == null) {
 			throw wrongHome();
 		}
 	}
@@ -124,7 +134,7 @@ public class UcanloadDriver implements Driver {
 	}
 
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		  throw new SQLFeatureNotSupportedException() ;
+		throw new SQLFeatureNotSupportedException();
 	}
 
 	public DriverPropertyInfo[] getPropertyInfo(String url, Properties arg1)
@@ -132,12 +142,8 @@ public class UcanloadDriver implements Driver {
 		return d.getPropertyInfo(url, arg1);
 	}
 
-	
-
 	public boolean jdbcCompliant() {
 		return d.jdbcCompliant();
 	}
-
-	
 
 }
