@@ -244,5 +244,12 @@ public class CreateTableTest extends UcanaccessTestBase {
 	public void testPs() throws SQLException{
 		PreparedStatement ps = super.ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
 		ps.execute();
+		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0);
+		ps.execute();
+		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0,0);
+		ps.execute();
+		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0,0,0);
+		ps.execute();
+		
 	}
 }
