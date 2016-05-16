@@ -100,8 +100,10 @@ public class Persist2Jet {
 	private List<String> getColumnNames(String ntn) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ntn=UcanaccessDatabaseMetadata.normalizeName(ntn);
+		String pref=conn.getDbIO().getFile().getAbsolutePath();
 		Connection conq=conn.getHSQLDBConnection();
-		if (!columnNamesCache.containsKey(ntn)) {
+		String key=pref+ntn;
+		if (!columnNamesCache.containsKey(key)) {
 			ArrayList<String> ar = new ArrayList<String>();
 			ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn,
 					null);
@@ -109,9 +111,9 @@ public class Persist2Jet {
 				String cbase=rs.getString("COLUMN_NAME");
 				ar.add(cbase.toUpperCase());
 			}
-			columnNamesCache.put(ntn, ar);
+			columnNamesCache.put(key, ar);
 		}
-		return columnNamesCache.get(ntn);
+		return columnNamesCache.get(key);
 	}
 	
 	private List<String> getColumnNamesCreate(String ntn) throws SQLException {
