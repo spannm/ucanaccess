@@ -48,6 +48,7 @@ public class BlobOleTest extends UcanaccessTestBase {
 	public void testBlobOLE() throws SQLException, IOException {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
+		File fl = new File("CopyElisaArt.JPG");
 		try {
 			Blob blob = super.ucanaccess.createBlob();
 			OutputStream out = blob.setBinaryStream(1);
@@ -69,7 +70,6 @@ public class BlobOleTest extends UcanaccessTestBase {
 			rs = st.executeQuery("select Pippo from T2");
 			rs.next();
 			InputStream isDB = rs.getBinaryStream(1);
-			File fl = new File("CopyElisaArt.JPG");
 			OutputStream outFile = new FileOutputStream(fl);
 			ByteArrayOutputStream outByte = new ByteArrayOutputStream();
 			ba = new byte[4096];
@@ -102,6 +102,8 @@ public class BlobOleTest extends UcanaccessTestBase {
 				rs.close();
 			if (ps != null)
 				ps.close();
+			if (fl != null)
+				fl.delete();
 		}
 	}
 }
