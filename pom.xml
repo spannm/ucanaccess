@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.ucanaccess</groupId>
 	<artifactId>ucanaccess</artifactId>
-	<version>3.0.5</version>
+	<version>3.0.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
     <name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
     <organization>
         <name>ucanaccess</name>
 		</organization>
-    <description>an open source Java JDBC Driver implementation which allows Java developers and jdbc client programs (e.g., Open Office, Libre Office, Squirrell) to read/write Microsoft Access database.</description>
+    <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
     <url>http://ucanaccess.sourceforge.net/site.html</url>
     <licenses>
         <license>
@@ -45,7 +45,7 @@
         <url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
     </scm>
   	<properties>
-		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
 	<build>
