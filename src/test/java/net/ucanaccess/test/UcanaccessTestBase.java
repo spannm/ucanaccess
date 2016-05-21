@@ -194,7 +194,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 							ob1 = ((Date) ob1).getTime();
 							ob2 = ((Date) ob2).getTime();
 						}
-						assertEquals(ob1, ob2);
+						assertEquals(ob2, ob1);
 					}
 				}
 			}

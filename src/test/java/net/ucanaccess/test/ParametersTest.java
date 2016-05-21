@@ -21,7 +21,6 @@ import java.sql.CallableStatement;
 import java.sql.DatabaseMetaData;
 
 import java.sql.SQLException;
-
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class ParametersTest extends UcanaccessTestBase {
@@ -79,6 +78,14 @@ public class ParametersTest extends UcanaccessTestBase {
 		cs.setInt(2, 1);
 		cs.executeUpdate();
 		dump("select * from Membership");
+
+		cs= ucanaccess.prepareCall("{call InsertNewMembership(?,?,?)}");
+		cs.setString(1, "Thompson");
+		cs.setString(2, "Gord");
+		cs.setString(3, "Basic");
+		cs.executeUpdate();
+		checkQuery("SELECT @@IDENTITY", 2);  // verify that we can retrieve the AutoNumber ID
+		
 	}
 	
 	@SuppressWarnings("unused")
