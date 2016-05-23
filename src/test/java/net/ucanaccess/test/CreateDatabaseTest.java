@@ -39,7 +39,11 @@ public class CreateDatabaseTest extends UcanaccessTestBase {
 	
 	public void testNewDatabase() throws Exception {
 		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-		File fileMdb = new File("./"+Math.random()+".mdb");
+		// <avoid polluting Java workspace >
+		// File fileMdb = new File("./"+Math.random()+".mdb");  // the old way
+		File fileMdb = File.createTempFile("ucaCreateDatabaseTest", ".mdb");
+		fileMdb.delete();  // delete 0-byte file
+		// </avoid polluting Java workspace >
 		Connection ucanaccessConnection = null;
 		try {
 			String url =UcanaccessDriver.URL_PREFIX

@@ -46,6 +46,7 @@ public class Metadata {
 		{"showschema",10,"false","see ucanaccess web site"},
 		{"inactivitytimeout",10,"2","see ucanaccess web site"},
 		{"singleconnection",10,"false","see ucanaccess web site"},
+		{"immediatelyreleaseresources",10,"false","see ucanaccess web site"},
 		{"lockmdb",10,"false","see ucanaccess web site"},
 		{"openexclusive",500,"false","see ucanaccess web site"},
 		{"remap",500,null,"see ucanaccess web site"},

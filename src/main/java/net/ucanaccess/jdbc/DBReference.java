@@ -61,7 +61,7 @@ public class DBReference {
 	private boolean showSchema;
 	private File tempHsql;
 	private File toKeepHsql;
-	private boolean singleConnection;
+	private boolean immediatelyReleaseResources;
 	private boolean encryptHSQLDB;
 	private String encryptionKey;
 	private String pwd;
@@ -92,7 +92,7 @@ public class DBReference {
 		private synchronized void decrementActiveConnection(
 				final Session session) {
 			activeConnection--;
-			if (DBReference.this.singleConnection && activeConnection == 0) {
+			if (DBReference.this.immediatelyReleaseResources && activeConnection == 0) {
 				try {
 					
 					shutdown(session);
@@ -349,7 +349,7 @@ public class DBReference {
 					hsqlF.delete();
 				}
 				hbase.delete();
-			} else if(!this.singleConnection){
+			} else if(!this.immediatelyReleaseResources){
 				this.toKeepHsql.delete();
 				this.toKeepHsql.createNewFile();
 				for (File hsqlf : this.getHSQLDBFiles()) {
@@ -582,6 +582,8 @@ public class DBReference {
 		try {
 			File flLock =fileLock();
 			flLock.createNewFile();
+			// suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess "locks" the file 
+			@SuppressWarnings("resource")
 			final RandomAccessFile raf = new RandomAccessFile(flLock, "rw");
 			FileLock tryLock = raf.getChannel().tryLock();
 			if (tryLock == null) {
@@ -646,8 +648,8 @@ public class DBReference {
 	}
 	
 	
-	public void setSingleConnection(boolean singleConnection) {
-		this.singleConnection = singleConnection;
+	public void setImmediatelyReleaseResources(boolean immediatelyReleaseResources) {
+		this.immediatelyReleaseResources = immediatelyReleaseResources;
 	}
 
 	public void setEncryptHSQLDB(boolean encryptHSQLDB) {

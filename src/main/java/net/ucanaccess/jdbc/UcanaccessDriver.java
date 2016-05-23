@@ -146,15 +146,19 @@ public final class UcanaccessDriver implements Driver {
 					}
 					
 					if (pr.containsKey("singleconnection")) {
-						ref.setSingleConnection("true".equalsIgnoreCase(pr
+						ref.setImmediatelyReleaseResources("true".equalsIgnoreCase(pr
 								.getProperty("singleconnection")));
+					}
+
+					if (pr.containsKey("immediatelyreleaseresources")) {
+						ref.setImmediatelyReleaseResources("true".equalsIgnoreCase(pr
+								.getProperty("immediatelyreleaseresources")));
 					}
 
 					if (pr.containsKey("lockmdb")) {
 						ref.setOpenExclusive("true".equalsIgnoreCase(pr
 								.getProperty("lockmdb")));
 					}
-					
 					
 					if (pr.containsKey("openexclusive")) {
 						ref.setOpenExclusive("true".equalsIgnoreCase(pr

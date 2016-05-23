@@ -85,7 +85,8 @@ public class ParametersTest extends UcanaccessTestBase {
 		cs.setString(3, "Basic");
 		cs.executeUpdate();
 		checkQuery("SELECT @@IDENTITY", 2);  // verify that we can retrieve the AutoNumber ID
-		
+		cs.executeUpdate();
+		checkQuery("SELECT @@IDENTITY", 3);  // and again, just to be sure
 	}
 	
 	@SuppressWarnings("unused")

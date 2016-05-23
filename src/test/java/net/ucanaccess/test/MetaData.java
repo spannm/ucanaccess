@@ -16,8 +16,6 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.io.IOException;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 

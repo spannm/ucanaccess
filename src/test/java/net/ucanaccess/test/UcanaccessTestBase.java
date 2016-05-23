@@ -194,7 +194,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 							ob1 = ((Date) ob1).getTime();
 							ob2 = ((Date) ob2).getTime();
 						}
-						assertEquals(ob2, ob1);
+						assertEquals(ob2, ob1);  // 2016-05-21 [gord] - swapped order so "expected" and "actual" reported correctly
 					}
 				}
 			}
