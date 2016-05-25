@@ -224,6 +224,26 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 		ref.add(new StringRefAddr("accessPath", this.getAccessPath()));
 		ref.add(new StringRefAddr("user", getUser()));
 		ref.add(new StringRefAddr("password", password));
+
+		ref.add(new StringRefAddr("columnorder", this.getColumnOrder().toString()));
+		ref.add(new StringRefAddr("concatnulls", this.getConcatNulls().toString()));
+		ref.add(new StringRefAddr("encrypt", this.getEncrypt().toString()));
+		ref.add(new StringRefAddr("ignorecase", this.getIgnoreCase().toString()));
+		ref.add(new StringRefAddr("immediatelyreleaseresources", this.getImmediatelyReleaseResources().toString()));
+		ref.add(new StringRefAddr("inactivitytimeout", this.getInactivityTimeout().toString()));
+		ref.add(new StringRefAddr("jackcessopener", this.getJackcessOpener().toString()));
+		ref.add(new StringRefAddr("keepmirror", this.getKeepMirror().toString()));
+		ref.add(new StringRefAddr("lobscale", this.getLobScale().toString()));
+		ref.add(new StringRefAddr("memory", this.getMemory().toString()));
+		ref.add(new StringRefAddr("mirrorfolder", this.getMirrorFolder().toString()));
+		ref.add(new StringRefAddr("newdatabaseversion", this.getNewDatabaseVersion().toString()));
+		ref.add(new StringRefAddr("openexclusive", this.getOpenExclusive().toString()));
+		ref.add(new StringRefAddr("preventreloading", this.getPreventReloading().toString()));
+		ref.add(new StringRefAddr("remap", this.getReMap().toString()));
+		ref.add(new StringRefAddr("showschema", this.getShowSchema().toString()));
+		ref.add(new StringRefAddr("skipindexes", this.getSkipIndexes().toString()));
+		ref.add(new StringRefAddr("sysschema", this.getSysSchema().toString()));
+		
 		return ref;
 	}
 	
