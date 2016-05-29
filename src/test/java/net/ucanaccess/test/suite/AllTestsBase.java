@@ -48,6 +48,7 @@ import net.ucanaccess.test.ColumnOrderTest;
 import net.ucanaccess.test.UnproperExecuteQueryTest;
 import net.ucanaccess.test.ParametersTest;
 import net.ucanaccess.test.FloatTest;
+import net.ucanaccess.test.WeirdObjectNamesTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -85,6 +86,7 @@ public class AllTestsBase {
 		suite.addTestSuite(ParametersTest.class);
 		suite.addTestSuite(UnproperExecuteQueryTest.class);
 		suite.addTestSuite(FloatTest.class);
+		suite.addTestSuite(WeirdObjectNamesTest.class);
 		return suite;
 	}
 }
