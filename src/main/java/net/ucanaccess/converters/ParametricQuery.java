@@ -133,12 +133,11 @@ public class ParametricQuery {
 					+ this.parameters + ") MODIFIES SQL DATA \n"
 					+ " BEGIN ATOMIC " + inside + "\n END";
 		
-			exec(procedure);
-			
-			this.signature=qi.getName() + "("
-			+ this.originalParameters + ")";
-		   
-			this.loaded = true;
+			if(exec(procedure)){
+				this.signature=qi.getName() + "("
+				+ this.originalParameters + ")";
+				this.loaded = true;
+			}
 		} catch (Exception e) {
 			this.e = e;
 		}
@@ -314,9 +313,15 @@ public class ParametricQuery {
 			String typeS = type.indexOf("(") > 0 ? type.substring(type
 					.indexOf("(")) : "";
 			HashMap<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
+			
 			type = hm.get(type0.toUpperCase()) + typeS;
+			if(type.equalsIgnoreCase("VARCHAR")){
+				type+="(255)";
+			}
+			
 			args.append(comma).append(decl).append(" ").append(type);
 			comma = ",";
+			
 		}
 		String sql = getSQL();
 		sql = convertApos(SQLConverter.removeParameters(sql));
@@ -342,7 +347,7 @@ public class ParametricQuery {
 			}
 			this.originalParameters=args;
 			this.parameters = SQLConverter.convertSQL(args.toString()).getSql();
-
+			
 			this.conversionOk = true;
 		} catch (SQLException e) {
 			this.e = e;

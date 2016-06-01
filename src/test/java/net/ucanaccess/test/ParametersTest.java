@@ -73,7 +73,7 @@ public class ParametersTest extends UcanaccessTestBase {
 		cs.executeUpdate();
 		dump("select * from Membership");
 		// same again, but with square brackets
-		cs= ucanaccess.prepareCall("{call [UpdateMembershipLevel](?,?)}");
+		cs= ucanaccess.prepareCall("{call UpdateMembershipLevel(?,?)}");
 		cs.setString(1, "Platinum");
 		cs.setInt(2, 1);
 		cs.executeUpdate();
