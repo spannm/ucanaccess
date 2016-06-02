@@ -538,13 +538,13 @@ public class SQLConverter {
 		StringBuffer sb = new StringBuffer("(");
 		String or = "";
 		for (String bst : whiteSpacedTableNames) {
-			sb.append(or).append("(?i)" + bst);
+			sb.append(or).append("(?i)" + Pattern.quote(bst));
 			or = "|";
 		}
 		// workaround o.o. and l.o.
 		for (String bst : whiteSpacedTableNames) {
 			String dw = bst.replaceAll(" ", "  ");
-			sql = sql.replaceAll(dw, bst);
+			sql = sql.replaceAll(Pattern.quote(dw), bst);
 		}
 		sb.append(")");
 		sql = sql.replaceAll("([^A-Za-z0-9\"])" + sb.toString()
