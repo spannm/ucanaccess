@@ -72,8 +72,8 @@ public class ParametersTest extends UcanaccessTestBase {
 		cs.setInt(2, 1);
 		cs.executeUpdate();
 		dump("select * from Membership");
-		// same again, but with square brackets
-		cs= ucanaccess.prepareCall("{call UpdateMembershipLevel(?,?)}");
+		// same again, but with space after the procedure name
+		cs= ucanaccess.prepareCall("{call UpdateMembershipLevel (?,?)}");
 		cs.setString(1, "Platinum");
 		cs.setInt(2, 1);
 		cs.executeUpdate();
