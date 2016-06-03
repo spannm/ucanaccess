@@ -636,6 +636,10 @@ public class DBReference {
 	void shutdown(Session session) throws Exception {
 		DBReferenceSingleton.getInstance()
 				.remove(this.dbFile.getAbsolutePath());
+		if(this.immediatelyReleaseResources)
+		for (OnReloadReferenceListener listener : onReloadListeners) {
+			listener.onReload();
+		}
 		this.memoryTimer.timer.cancel();
 		this.dbIO.flush();
 		this.dbIO.close();
