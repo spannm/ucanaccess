@@ -1,1 +1,1 @@
-UCanaccess 3.0.6-SNAPSHOT
+UCanaccess 3.0.6
