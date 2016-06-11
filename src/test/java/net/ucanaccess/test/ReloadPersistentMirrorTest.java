@@ -18,7 +18,10 @@ package net.ucanaccess.test;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
+
+import org.junit.Assert;
 
 import net.ucanaccess.jdbc.UcanaccessDriver;
 
@@ -40,6 +43,8 @@ public class ReloadPersistentMirrorTest extends UcanaccessTestBase {
 		Connection conn = null;
 		Statement stCreate = null;
 		Statement stUpdate = null;
+		Statement stSelect = null;
+		ResultSet rs = null;
 		try {
 			File dbFile = File.createTempFile("ucaTest", ".mdb");
 			dbFile.delete();
@@ -58,9 +63,8 @@ public class ReloadPersistentMirrorTest extends UcanaccessTestBase {
 
 			// create the persistent mirror
 			String urlMirror = UcanaccessDriver.URL_PREFIX + dbFile.getAbsolutePath() + 
-					";newDatabaseVersion=V2003" + 
-					";immediatelyReleaseResources=true" +
-					";keepMirror=" + mirrorFile.getAbsolutePath();
+					";keepMirror=" + mirrorFile.getAbsolutePath() +
+					";immediatelyReleaseResources=true";
 			conn = DriverManager.getConnection(urlMirror, "", "");
 			conn.close();
 			
@@ -75,13 +79,18 @@ public class ReloadPersistentMirrorTest extends UcanaccessTestBase {
 			
 			// now try and open the database with the (outdated) mirror
 			conn = DriverManager.getConnection(urlMirror, "", "");
-			System.out.println("Database (with mirror) successfully re-opened.");
+			stSelect = conn.createStatement();
+			rs = stSelect.executeQuery("SELECT COUNT(*) AS n FROM Table1");
+			rs.next();
+			Assert.assertEquals(1, rs.getInt(1));
 			conn.close();
 		} finally {
 			if (stCreate != null)
 				stCreate.close();
 			if (stUpdate != null)
 				stUpdate.close();
+			if (stSelect != null)
+				stSelect.close();
 			if (conn != null)
 				conn.close();
 		}
