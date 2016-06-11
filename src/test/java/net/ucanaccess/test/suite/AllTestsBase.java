@@ -49,6 +49,7 @@ import net.ucanaccess.test.UnproperExecuteQueryTest;
 import net.ucanaccess.test.ParametersTest;
 import net.ucanaccess.test.FloatTest;
 import net.ucanaccess.test.WeirdObjectNamesTest;
+import net.ucanaccess.test.ReloadPersistentMirrorTest;
 import junit.framework.TestSuite;
 
 public class AllTestsBase {
@@ -87,6 +88,7 @@ public class AllTestsBase {
 		suite.addTestSuite(UnproperExecuteQueryTest.class);
 		suite.addTestSuite(FloatTest.class);
 		suite.addTestSuite(WeirdObjectNamesTest.class);
+		suite.addTestSuite(ReloadPersistentMirrorTest.class);
 		return suite;
 	}
 }
