@@ -78,14 +78,47 @@ public class LoadJet {
 			functionsDefinition.add(getAggregate("LONGVARCHAR", "last"));
 			functionsDefinition.add(getAggregate("DECIMAL(100,10)", "last"));
 			functionsDefinition.add(getAggregate("BOOLEAN", "last"));
-			functionsDefinition.add(getAggregate("TIMESTAMP", "last"));
 			functionsDefinition.add(getAggregate("LONGVARCHAR", "first"));
 			functionsDefinition.add(getAggregate("DECIMAL(100,10)", "first"));
 			functionsDefinition.add(getAggregate("BOOLEAN", "first"));
-			functionsDefinition.add(getAggregate("TIMESTAMP", "first"));
+			functionsDefinition.add(getLastTimestamp());
+			functionsDefinition.add(getFirstTimestamp());
+			
 		}
-
 		
+		private String getLastTimestamp(){
+			return  "CREATE AGGREGATE FUNCTION last(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP, INOUT counter INT) "+
+			   "RETURNS TIMESTAMP "+ 
+			   "CONTAINS SQL "+
+			   "BEGIN ATOMIC "+
+			     "IF flag THEN "+
+			       "RETURN ts; "+
+			     "ELSE "+
+			       "IF counter IS NULL THEN SET counter = 0; END IF; "+
+			       "SET counter = counter + 1; "+
+			        "SET ts = val;"+
+			       "RETURN NULL; "+
+			     "END IF; "+
+			   "END ";
+		}
+		
+		
+		private String getFirstTimestamp(){
+			return  "CREATE AGGREGATE FUNCTION First(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP , INOUT counter INT) "+
+			   "RETURNS TIMESTAMP "+ 
+			   "CONTAINS SQL "+
+			   "BEGIN ATOMIC "+
+			     "IF flag THEN "+
+			       "RETURN ts; "+
+			     "ELSE "+
+			       "IF counter IS NULL THEN SET counter = 0; END IF; "+
+			       "SET counter = counter + 1; "+    
+			       " IF counter = 1 THEN  "+
+			       " SET ts = val; END IF; "+
+			       "RETURN NULL; "+
+			     "END IF; "+
+			   "END ";
+		}
 		
 		
 		private void addFunction(String functionName, String methodName,
