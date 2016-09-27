@@ -54,9 +54,33 @@ public class Pivot {
 	private boolean pivotInCondition = true;
 	private String originalQuery;
 	private final static HashMap<String, String> pivotMap = new HashMap<String, String>();
-
+	private final static HashMap<String, List<String>> prepareMap = new HashMap<String, List<String>>();
+	
+	
 	public Pivot(Connection conn) {
 		this.conn = conn;
+	}
+	
+	public Pivot(String name,Connection conn) {
+		
+		this.conn = conn;
+	}
+	
+	private void cachePrepare(String name){
+		if(this.pivotIn!=null){
+			prepareMap.put(name, this.pivotIn);
+		} 
+	}
+	
+	public static void clearPrepared(){
+		prepareMap.clear();
+		
+	}
+	
+	private void getPrepareFromCache(String name){
+		if(prepareMap.containsKey(name)){
+			this.pivotIn=prepareMap.get(name);
+		}
 	}
 
 	public void registerPivot(String name) {
@@ -83,7 +107,7 @@ public class Pivot {
 					Pivot pivot = new Pivot(conh);
 					
 					if(!pivot.parsePivot(pivotMap.get(name))) return;
-					String sqlh = pivot.toSQL();
+					String sqlh = pivot.toSQL(null);
 					if(sqlh==null) return;
 					st = conh.createStatement();
 					String escqn=SQLConverter.completeEscaping(name, false);;
@@ -168,6 +192,7 @@ public class Pivot {
 
 	public boolean prepare() {
 		try {
+			if(this.pivotInCondition)
 			this.pivotIn = new ArrayList<String>();
 			Statement st = conn.createStatement();
 			ResultSet rs = st.executeQuery(verifySQL());
@@ -216,10 +241,15 @@ public class Pivot {
 		return "[" + cn + "]";
 	}
 
-	public String toSQL() {
+	public String toSQL(String name) {
 		if (this.pivotIn == null) {
-			if (!prepare())
-				return null;
+			if(name!=null&&prepareMap.containsKey(name)){
+				this.getPrepareFromCache(name);
+			}
+			else if (prepare()){
+				this.cachePrepare(name);
+			}
+			else	return null;
 			this.pivotInCondition = false;
 		} 
 		StringBuffer sb = new StringBuffer();

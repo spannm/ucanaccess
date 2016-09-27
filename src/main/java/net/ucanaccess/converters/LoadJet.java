@@ -1263,7 +1263,7 @@ public class LoadJet {
 				pivot = new Pivot(conn);
 				
 				if (!pivot.parsePivot(querySQL)
-						|| (querySQL = pivot.toSQL()) == null) {
+						|| (querySQL = pivot.toSQL(q.getName())) == null) {
 					this.notLoaded.put(q.getName(),"cannot load this query");
 					
 					return false;
@@ -1458,6 +1458,7 @@ public class LoadJet {
 				}
 				lq.removeAll(arq);
 			}
+			Pivot.clearPrepared();
 		}
 	}
 
