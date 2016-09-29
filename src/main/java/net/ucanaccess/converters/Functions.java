@@ -23,7 +23,6 @@ package net.ucanaccess.converters;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
@@ -296,8 +295,9 @@ public class Functions {
 	
 	@FunctionType(functionName = "CLNG", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
 	public static Integer clng( String value) throws UcanaccessSQLException {
-		DecimalFormat dc=new DecimalFormat();
+		
 		try {
+			DecimalFormat dc=FormatCache.getNoArgs();
 			return clng(dc.parse(value).doubleValue());
 		} catch (ParseException e) {
 			throw new UcanaccessSQLException(e);
@@ -675,23 +675,19 @@ public class Functions {
 	public static String format(double d, String par)
 			throws UcanaccessSQLException {
 		if ("percent".equalsIgnoreCase(par)) {
-			DecimalFormat formatter = new DecimalFormat("0.00");
-			formatter.setRoundingMode(RoundingMode.HALF_UP);
+			DecimalFormat formatter = FormatCache.getZpzz();
 			return (formatter.format(d * 100) + "%");
 		}
 		if ("fixed".equalsIgnoreCase(par)) {
-			DecimalFormat formatter = new DecimalFormat("0.00");
-			formatter.setRoundingMode(RoundingMode.HALF_UP);
+			DecimalFormat formatter = FormatCache.getZpzz();
 			return formatter.format(d);
 		}
 		if ("standard".equalsIgnoreCase(par)) {
-			DecimalFormat formatter = new DecimalFormat("###,###.##");
+			DecimalFormat formatter = FormatCache.getSharp();
 			return formatter.format(d);
 		}
 		if ("general number".equalsIgnoreCase(par)) {
-			DecimalFormat formatter = new DecimalFormat();
-			formatter.setGroupingUsed(false);
-			
+			DecimalFormat formatter = FormatCache.getNoGrouping();
 			return formatter.format(d);
 		}
 		if ("yes/no".equalsIgnoreCase(par)) {
@@ -707,8 +703,7 @@ public class Functions {
 			return String.format( "%6.2E", d);
 		}
 		try {
-			DecimalFormat formatter = new DecimalFormat(par);
-			formatter.setRoundingMode(RoundingMode.HALF_UP);
+			DecimalFormat formatter = FormatCache.getDecimalFormat(par);
 			return formatter.format(d);
 		} catch (Exception e) {
 			throw new UcanaccessSQLException(e);
@@ -730,7 +725,7 @@ public class Functions {
 			if(incl){
 				return format(Double.parseDouble(s), par);
 			}
-			DecimalFormat df=new DecimalFormat();
+			DecimalFormat df=FormatCache.getNoArgs();
 		
 			try {
 				
