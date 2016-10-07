@@ -209,7 +209,7 @@ public class DBReference {
 				return true;
 			else {
 				try {
-					this.closeHSQLDB(session);
+					this.closeHSQLDB(session,true);
 				} catch (Exception e) {
 					throw new UcanaccessSQLException(e);
 				}
@@ -338,7 +338,12 @@ public class DBReference {
 		return lu;
 	}
 
-	private void closeHSQLDB(Session session) throws Exception {
+	
+	private void closeHSQLDB(Session session) throws Exception{
+		 closeHSQLDB( session, false) ;
+	}
+	
+	private void closeHSQLDB(Session session, boolean newConnection) throws Exception {
 		finalizeHSQLDB(session);
 		if (!this.inMemory) {
 			if (this.toKeepHsql == null) {
@@ -349,7 +354,7 @@ public class DBReference {
 					hsqlF.delete();
 				}
 				hbase.delete();
-			} else if(!this.immediatelyReleaseResources){
+			} else if(!this.immediatelyReleaseResources||newConnection){
 				this.toKeepHsql.delete();
 				this.toKeepHsql.createNewFile();
 				for (File hsqlf : this.getHSQLDBFiles()) {
