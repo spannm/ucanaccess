@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
@@ -132,7 +133,8 @@ public class ParametricQuery {
 			String procedure = "CREATE PROCEDURE " + procedureName + "("
 					+ this.parameters + ") MODIFIES SQL DATA \n"
 					+ " BEGIN ATOMIC " + inside + "\n END";
-		
+			
+	
 			if(exec(procedure)){
 				this.signature=qi.getName() + "("
 				+ this.originalParameters + ")";
@@ -285,7 +287,8 @@ public class ParametricQuery {
 			s=SQLConverter.removeParameters(s);
 		}
 		List<String> parameters = SQLConverter.getParameters(s);
-		getParametersEmpiric(hm, parameters, s, true);
+		HashMap<String,String> parem=new HashMap<String,String>();
+		getParametersEmpiric(hm, parameters,parem, s, true);
 	}
 
 	public Exception getException() {
@@ -384,8 +387,8 @@ public class ParametricQuery {
 	}
 
 	// now something truly naif, yeah! It was about time!!!
-	private void getParametersEmpiric(LinkedHashMap<String, Integer> m,
-			List<String> parameters, String sql, boolean init) {
+	private void getParametersEmpiric(LinkedHashMap<String, Integer> psmp,
+			List<String> parameters,HashMap<String,String> parem, String sql, boolean init) {
 		String psTxt = null;
 		try {
 			psTxt = convertSQL(sql, parameters);
@@ -414,7 +417,8 @@ public class ParametricQuery {
 			
 			ParameterMetaData pmd = ps.getParameterMetaData();
 			ArrayList<String> ar = new ArrayList<String>();
-			ar.addAll(m.keySet());
+			psmp=reorderIndexes(psmp,parem);
+			ar.addAll(psmp.keySet());
 			ArrayList<Integer> pI = parIndexes(sql);
 			StringBuffer parS = new StringBuffer();
 			StringBuffer defPar = new StringBuffer();
@@ -426,7 +430,7 @@ public class ParametricQuery {
 				
 				if(j>ar.size()-1)continue;
 				String key = ar.get(j);
-				int index = m.get(key);
+				int index = psmp.get(key);
 				if (index == pI.get(i - 1)) {
 					defPar.append(comma).append("NULL");
 					String type = completeTypeName(pmd.getParameterTypeName(i),
@@ -442,7 +446,9 @@ public class ParametricQuery {
 			this.parameters = parS.toString();
 			this.defaultParameterValues = defPar.toString();
 			this.conversionOk = true;
-		} catch (SQLException e) {
+		} 
+		
+		catch (SQLException e) {
 
 			for (String par : parameters) {
 				String par1 = SQLConverter.preEscapingIdentifier(par.substring(
@@ -451,10 +457,11 @@ public class ParametricQuery {
 				if (index >= 0 && e.getMessage() != null
 						&& e.getMessage().toUpperCase().endsWith(": " + par1)) {
 					sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
-					m.put(par1, index);
+					psmp.put(par1, index);
+					parem.put(par1, par);
 					String parname=this.originalParameters.length()==0?par:","+par;
 					this.originalParameters.append(parname);
-					getParametersEmpiric(m, parameters, sql, false);
+					getParametersEmpiric(psmp, parameters,parem, sql, false);
 					
 				} else {
 					
@@ -468,6 +475,40 @@ public class ParametricQuery {
 
 		}
 
+	}
+
+	private LinkedHashMap<String, Integer> reorderIndexes(
+			LinkedHashMap<String, Integer> psmp, HashMap<String, String> parem) {
+		TreeMap<Integer,String> tm=new TreeMap<Integer,String>();
+		Integer[] nI=new Integer[psmp.size()];
+		String[] sI=new String[psmp.size()];
+		HashMap<String, Integer> dI=new HashMap<String, Integer>();
+		int j=0;
+		for(Map.Entry<String, Integer> me:psmp.entrySet()){
+		  tm.put(me.getValue(), me.getKey());
+		  nI[j]=me.getValue();
+		  sI[j]=me.getKey();
+		  dI.put(sI[j], 0);
+		  j++;
+		}
+		
+	    for(int i=0; i<tm.size()-1;i++){
+	    	
+	    	for(j=i+1;j<tm.size();j++){
+	    		if(nI[j]<nI[i]){
+	    			dI.put(sI[i], dI.get(sI[i])-parem.get(sI[j]).length()+1);
+	    		}
+	    	}
+	    }
+		
+		LinkedHashMap<String, Integer> rlhm=new LinkedHashMap<String, Integer>();
+		for(Map.Entry<Integer,String> me:tm.entrySet()){
+			rlhm.put(me.getValue(), me.getKey()+dI.get(me.getValue()));
+		}
+		
+		
+		
+		return rlhm;
 	}
 
 	public boolean loaded() {
