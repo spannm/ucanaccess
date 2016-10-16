@@ -492,10 +492,12 @@ public class ParametricQuery {
 		  j++;
 		}
 		
-	    for(int i=0; i<tm.size()-1;i++){
+	    boolean changedSignature=false;
+		for(int i=0; i<tm.size()-1;i++){
 	    	
 	    	for(j=i+1;j<tm.size();j++){
 	    		if(nI[j]<nI[i]){
+	    			changedSignature=true;
 	    			dI.put(sI[i], dI.get(sI[i])-parem.get(sI[j]).length()+1);
 	    		}
 	    	}
@@ -505,7 +507,15 @@ public class ParametricQuery {
 		for(Map.Entry<Integer,String> me:tm.entrySet()){
 			rlhm.put(me.getValue(), me.getKey()+dI.get(me.getValue()));
 		}
-		
+		if(changedSignature){
+			StringBuffer sb=new StringBuffer();
+			String comma="";
+			for(String key:rlhm.keySet() ){
+				sb.append(comma).append(parem.get(key));
+				comma=",";
+			}
+			this.originalParameters=sb;
+		}
 		
 		
 		return rlhm;

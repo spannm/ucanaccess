@@ -37,7 +37,7 @@ public class ReloadPersistentMirrorTest extends UcanaccessTestBase {
 		super(accVer);
 	}
 	
-	protected void setUp() throws Exception {}
+	
 	
 	public void testReloadMirror() throws Exception {
 		Connection conn = null;

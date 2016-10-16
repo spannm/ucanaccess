@@ -52,7 +52,7 @@ public class AggregateFunctionsTest extends UcanaccessTestBase {
 				st
 						.execute("INSERT INTO t235 (id,descr,num,date0)  VALUES( 1234,'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)");
 				st
-				.execute("INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2003 10:42:58 PM#)");
+				.execute("INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
 				st.close();
 				init = true;
 			
@@ -93,12 +93,15 @@ public class AggregateFunctionsTest extends UcanaccessTestBase {
 	public void testLast() throws SQLException, IOException, ParseException {
 		checkQuery("select  last(descr) from t235", "Show must go up and down");
 		checkQuery("select  last(NUM) from t235", -113.5540);
+		dump("select  last(date0) from t235");
 
 	}
 
 	public void testFirst() throws SQLException, IOException, ParseException {
 		checkQuery("select  first(descr) from t235", "Show must go off");
 		checkQuery("select  first(NUM) from t235", -1110.5540);
+		dump("select  first(date0) from t235");
+
 
 	}
 

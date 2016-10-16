@@ -87,6 +87,11 @@ public class ParametersTest extends UcanaccessTestBase {
 		checkQuery("SELECT @@IDENTITY", 2);  // verify that we can retrieve the AutoNumber ID
 		cs.executeUpdate();
 		checkQuery("SELECT @@IDENTITY", 3);  // and again, just to be sure
+		cs= ucanaccess.prepareCall("{call UpdateWhere(?,?)}");
+		cs.setString(1, "updated");
+		cs.setString(2, "3x");
+		cs.executeUpdate();
+		dump("select * from [table 1]");
 	}
 	
 	@SuppressWarnings("unused")
