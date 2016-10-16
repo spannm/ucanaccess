@@ -80,6 +80,7 @@ public class DBReference {
 	private boolean sysSchema;
 	private boolean preventReloading;
 	private boolean concatNulls;
+	private boolean mirrorRecreated;
 
 	
 	private class MemoryTimer {
@@ -343,7 +344,7 @@ public class DBReference {
 		 closeHSQLDB( session, false) ;
 	}
 	
-	private void closeHSQLDB(Session session, boolean newConnection) throws Exception {
+	private void closeHSQLDB(Session session, boolean firstConnectionKeeptMirror) throws Exception {
 		finalizeHSQLDB(session);
 		if (!this.inMemory) {
 			if (this.toKeepHsql == null) {
@@ -354,13 +355,15 @@ public class DBReference {
 					hsqlF.delete();
 				}
 				hbase.delete();
-			} else if(!this.immediatelyReleaseResources||newConnection){
+			} else if(!this.immediatelyReleaseResources||firstConnectionKeeptMirror){
 				this.toKeepHsql.delete();
 				this.toKeepHsql.createNewFile();
 				for (File hsqlf : this.getHSQLDBFiles()) {
 					if(hsqlf.exists())
 					hsqlf.delete();
 				}
+				this.mirrorRecreated=true;
+				
 			}
 		}
 		
@@ -450,12 +453,13 @@ public class DBReference {
 		}
 		
 		if(this.firstConnection){
-			if (this.ignoreCase&&!keptMirror) {
+			if (this.ignoreCase&&(!keptMirror||mirrorRecreated)) {
 			  setIgnoreCase( conn);
 			}
-			if(!this.mirrorReadOnly||!keptMirror)
+			if(!this.mirrorReadOnly||(!keptMirror||mirrorRecreated))
 			initHSQLDB(conn);
 			this.firstConnection=false;
+			this.mirrorRecreated=false;
 		}
 		this.hsqldbShutdown=false;
 		conn.setAutoCommit(false);
