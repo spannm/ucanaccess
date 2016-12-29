@@ -81,6 +81,9 @@ public class SQLConverter {
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])" };
+	public static final Pattern DEFAULT_CATCH_0 =Pattern
+	.compile("([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)");
+	
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(?i)_(\\W)";
@@ -89,11 +92,12 @@ public class SQLConverter {
 	public static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
 	public static final String HHMMSS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
-
+	public  static final String namePattern="(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
 	
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
+	private static final String DEFAULT_VARCHAR_0 = "(\\W)(?i)VARCHAR([^\\(])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
 	private static final String DELETE_ALL ="((?i)DELETE[\\s\n\r]+)(\\*)([\\s\n\r]+(?i)FROM[\\s\n\r]+)";
 	private static final String PARAMETERS="(?i)PARAMETERS([^;]*);";
@@ -254,19 +258,26 @@ public class SQLConverter {
 	}
 
 	public static enum DDLType {
+		
+		
 		CREATE_TABLE_AS_SELECT(
-				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), CREATE_TABLE(
-				Pattern
-						.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|(`([^`])*`))")), DROP_TABLE(
-				Pattern
-						.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)")),
+								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern+"[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), 
+						CREATE_TABLE(
+								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern)), 
+						DROP_TABLE(
+								Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern)),
+						ALTER_RENAME(
+								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +namePattern+
+										"[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" +namePattern)),		
+						ADD_COLUMN(Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +namePattern+
+														"[\\s\n\r]+(?i)add[\\s\n\r]+(?i)column[\\s\n\r]+" +namePattern+"(.*)")),		
 				DISABLE_AUTOINCREMENT(Pattern
-						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)")),
+						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+namePattern)),
 				ENABLE_AUTOINCREMENT(Pattern
-								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)"))
+								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+namePattern))
 						;
 		private Pattern pattern;
+		
 
 		private DDLType(Pattern pattern) {
 			this.pattern = pattern;
@@ -295,6 +306,25 @@ public class SQLConverter {
 			Matcher m = pattern.matcher(s);
 			if (m.find()) {
 				return m.group(1);
+			}
+			return null;
+		}
+		
+		public String getNewName(String s) {
+			Matcher m = pattern.matcher(s);
+			if (m.find()) {
+//				for(int y=0;y<m.groupCount();y++){
+//					System.out.println(y+":"+m.group(y));
+//				}
+				return m.group(5);
+			}
+			return null;
+		}
+		
+		public String getColumnDefinition(String s) {
+			Matcher m = pattern.matcher(s);
+			if (m.find()) {
+				return m.group(9);
 			}
 			return null;
 		}
@@ -767,6 +797,21 @@ public class SQLConverter {
 		if (escaped == null)
 			return null;
 		return hsqlEscape(escaped,true);
+	}
+	
+	
+	public static String convertAddColumn(String tableName,
+			String columnName,String typeDeclaration) throws SQLException {
+		   for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
+			   typeDeclaration= typeDeclaration.replaceAll(entry.getKey(),  entry.getValue());
+		   }
+		   typeDeclaration=typeDeclaration.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
+		   Matcher mtc=DEFAULT_CATCH_0.matcher(typeDeclaration);
+		   if(mtc.find()){
+			   typeDeclaration=typeDeclaration.substring(0, mtc.start());
+		   }
+		   String ret="ALTER TABLE "+tableName+" ADD COLUMN "+columnName+typeDeclaration;
+		   return ret;
 	}
 	
 	

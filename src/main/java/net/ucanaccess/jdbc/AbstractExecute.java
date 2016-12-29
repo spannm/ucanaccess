@@ -15,6 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.jdbc;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -85,6 +86,21 @@ public abstract class AbstractExecute {
 
 	
 	
+	private Object enableDiasable(DDLType ddlType ,String sql0) throws SQLException, IOException{
+		String tn=ddlType.getDBObjectName(sql0);
+		if(tn==null&&sql0.indexOf('"')>0){
+			tn=sql0.substring(sql0.indexOf('"')+1,sql0.lastIndexOf('"'));
+		}
+		UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
+		Metadata mtd=new Metadata(conn.getHSQLDBConnection());
+		String rtn=mtd.getTableName(tn);
+		if(rtn==null){
+			throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tn);
+		}
+		boolean inable=ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
+		conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!inable);
+		return 	(this instanceof Execute) ?false:0;
+	}
 	
 	
 	private Object addDDLCommand() throws SQLException {
@@ -94,31 +110,22 @@ public abstract class AbstractExecute {
 			if (ddlType == null)
 				throw new FeatureNotSupportedException(
 						NotSupportedMessage.NOT_SUPPORTED_YET);
-			
-			
-			String sql0=SQLConverter.convertSQL(sql).getSql();
-			boolean inDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
+			String sql0=( ddlType.equals(DDLType.ADD_COLUMN))?
+				 SQLConverter.convertSQL(
+						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql), ddlType.getNewName(sql), ddlType.getColumnDefinition(sql))).getSql()
+						 :
+				 SQLConverter.convertSQL(sql).getSql();
+			boolean enDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
 					DDLType.DISABLE_AUTOINCREMENT);
-			this.statement.setEnableDisable(inDis);
-			if(inDis) {
-				String tn=ddlType.getDBObjectName(sql0);
-				if(tn==null&&sql0.indexOf('"')>0){
-					tn=sql0.substring(sql0.indexOf('"')+1,sql0.lastIndexOf('"'));
-				}
-				UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
-				Metadata mtd=new Metadata(conn.getHSQLDBConnection());
-				String rtn=mtd.getTableName(tn);
-				if(rtn==null){
-					throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tn);
-				}
-				boolean inable=ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
-				conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!inable);
-				return 	(this instanceof Execute) ?false:0;
+			this.statement.setEnableDisable(enDis);
+			if(enDis) {
+				return enableDiasable(ddlType ,sql0);
 			}
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql0) : sql0;
-				ret=	(this instanceof Execute) ?statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
+			
+					ret=	(this instanceof Execute) ?statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
 		
 					DDLCommandEnlist ddle = new DDLCommandEnlist();
 			ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);

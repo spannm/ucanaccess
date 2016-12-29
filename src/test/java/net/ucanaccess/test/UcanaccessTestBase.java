@@ -76,7 +76,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 		this.showSchema = showSchema;
 	}
 
-	private static  ArrayList<Class<? extends UcanaccessTestBase>> tableCreated=new   ArrayList<Class<? extends UcanaccessTestBase>>();
+	private static  ArrayList<String> tableCreated=new   ArrayList<String>();
 	
 	public UcanaccessTestBase() {
 		this(defaultFileFormat);
@@ -138,13 +138,18 @@ public abstract class UcanaccessTestBase extends TestCase {
 		checkQuery(expression,new Object[][] {  rowResult  });
 	}
 	
-    public void executeCreateTable(String createTableStatement) throws SQLException{
-    	if (!tableCreated.contains(this.getClass())) {
+	 public void executeCreateTable(String createTableStatement ) throws SQLException{
+		 executeCreateTable(createTableStatement,0);
+	 }
+	
+    public void executeCreateTable(String createTableStatement,Integer succ) throws SQLException{
+
+    	if (!tableCreated.contains(this.getClass().getName()+succ)) {
 			Statement st = null;
 			try {
 				st =this.ucanaccess.createStatement();
 				st.execute(createTableStatement);
-				tableCreated.add(this.getClass());
+				tableCreated.add(this.getClass().getName()+succ);
 			} finally {
 				if (st != null)
 					st.close();

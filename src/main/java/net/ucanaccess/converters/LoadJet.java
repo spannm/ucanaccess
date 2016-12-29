@@ -560,79 +560,97 @@ public class LoadJet {
 		private String procedureEscapingIdentifier(String name) throws SQLException{
 			return SQLConverter.procedureEscapingIdentifier( escapeIdentifier(name));
 		}
+		
+		
+		private void defaultValue(Column cl) throws SQLException, IOException {
+			String tn = cl.getTable().getName();
+			String ntn = escapeIdentifier(tn);
+			ArrayList<String> arTrigger = new ArrayList<String>();
+			defaultValue(cl,ntn, arTrigger);
+			for (String trigger : arTrigger) {
+				exec(trigger,true);
+			}
+		}
 
 
+		private void defaultValue(Column cl,String ntn,ArrayList<String> arTrigger) throws IOException, SQLException{
+
+			PropertyMap pm = cl.getProperties();
+			String ncn =procedureEscapingIdentifier(cl.getName());
+			Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
+			if (defaulT != null) {
+				String cdefaulT = SQLConverter.convertSQL(" "
+						+ defaulT.toString()).getSql();
+				if (cdefaulT.trim().startsWith("=")) {
+					cdefaulT = cdefaulT.trim().substring(1);
+				}
+				if (cl.getType().equals(DataType.BOOLEAN)
+						&& ("=yes".equalsIgnoreCase(cdefaulT) || "yes"
+								.equalsIgnoreCase(cdefaulT)))
+					cdefaulT = "true";
+				if (cl.getType().equals(DataType.BOOLEAN)
+						&& ("=no".equalsIgnoreCase(cdefaulT) || "no"
+								.equalsIgnoreCase(cdefaulT)))
+					cdefaulT = "false";
+				if(
+						(cl.getType().equals(DataType.MEMO)||
+						cl.getType().equals(DataType.TEXT))&&
+						(!defaulT.toString().startsWith("\"")||
+						 !defaulT.toString().endsWith("\"")		
+						)
+						
+				){
+					cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
+				}
+				String guidExp = "GenGUID()";
+				if (!guidExp.equals(defaulT)) {
+					Object defFound=cdefaulT;
+					boolean isNull=(cdefaulT+"").equalsIgnoreCase("null");
+					if (!isNull&&(defFound=tryDefault(cdefaulT))==null) {
+						
+						Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
+						""+ defaulT, cl.getName(), cl.getTable().getName());
+					} else {
+						if(defFound!=null){
+							metadata.columnDef(cl.getTable().getName(), cl.getName(), defFound.toString());
+						}
+						if(cl.getType()==DataType.TEXT
+								&&
+							defaulT.toString().startsWith("'")&&defaulT.toString().endsWith("'")&&
+							defaulT.toString().length()>cl.getLengthInUnits()
+						){
+							Logger.logParametricWarning(Messages.DEFAULT_VALUES_DELIMETERS,
+									""+defaulT,cl.getName(),cl.getTable().getName(),""+cl.getLengthInUnits());
+						}
+							arTrigger
+									.add("CREATE TRIGGER DEFAULT_TRIGGER"
+											+ (namingCounter++)
+											+ " BEFORE INSERT ON "
+											+ ntn
+											+ "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW."
+											+ ncn + " IS NULL THEN "
+											+ "SET NEW." + ncn + "= "
+											+ cdefaulT + " ; END IF");
+
+					}
+				}
+			}
+		
+		}
+		
 		private  void defaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
 			 String ntn = escapeIdentifier(tn);
 			List<? extends Column> lc = t.getColumns();
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
-				PropertyMap pm = cl.getProperties();
-				String ncn =procedureEscapingIdentifier(cl.getName());
-				Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-				if (defaulT != null) {
-					String cdefaulT = SQLConverter.convertSQL(" "
-							+ defaulT.toString()).getSql();
-					if (cdefaulT.trim().startsWith("=")) {
-						cdefaulT = cdefaulT.trim().substring(1);
-					}
-					if (cl.getType().equals(DataType.BOOLEAN)
-							&& ("=yes".equalsIgnoreCase(cdefaulT) || "yes"
-									.equalsIgnoreCase(cdefaulT)))
-						cdefaulT = "true";
-					if (cl.getType().equals(DataType.BOOLEAN)
-							&& ("=no".equalsIgnoreCase(cdefaulT) || "no"
-									.equalsIgnoreCase(cdefaulT)))
-						cdefaulT = "false";
-					if(
-							(cl.getType().equals(DataType.MEMO)||
-							cl.getType().equals(DataType.TEXT))&&
-							(!defaulT.toString().startsWith("\"")||
-							 !defaulT.toString().endsWith("\"")		
-							)
-							
-					){
-						cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
-					}
-					String guidExp = "GenGUID()";
-					if (!guidExp.equals(defaulT)) {
-						Object defFound=cdefaulT;
-						boolean isNull=(cdefaulT+"").equalsIgnoreCase("null");
-						if (!isNull&&(defFound=tryDefault(cdefaulT))==null) {
-							
-							Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
-							""+ defaulT, cl.getName(), cl.getTable().getName());
-						} else {
-							if(defFound!=null){
-								metadata.columnDef(cl.getTable().getName(), cl.getName(), defFound.toString());
-							}
-							if(cl.getType()==DataType.TEXT
-									&&
-								defaulT.toString().startsWith("'")&&defaulT.toString().endsWith("'")&&
-								defaulT.toString().length()>cl.getLengthInUnits()
-							){
-								Logger.logParametricWarning(Messages.DEFAULT_VALUES_DELIMETERS,
-										""+defaulT,cl.getName(),cl.getTable().getName(),""+cl.getLengthInUnits());
-							}
-								arTrigger
-										.add("CREATE TRIGGER DEFAULT_TRIGGER"
-												+ (namingCounter++)
-												+ " BEFORE INSERT ON "
-												+ ntn
-												+ "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW."
-												+ ncn + " IS NULL THEN "
-												+ "SET NEW." + ncn + "= "
-												+ cdefaulT + " ; END IF");
-
-						}
-					}
-				}
+				defaultValue(cl,ntn,arTrigger) ;
 			}
 			for (String trigger : arTrigger) {
 				exec(trigger,true);
 			}
 		}
+		
 		private int countFKs() throws IOException{
 			int i=0;
 			for (String tn : this.loadingOrder) {
@@ -1148,6 +1166,8 @@ public class LoadJet {
 			}
 			return value;
 		}
+
+		
 	}
 
 	private final class TriggersLoader {
@@ -1493,6 +1513,11 @@ public class LoadJet {
 	
 	public void loadDefaultValues(Table  t) throws SQLException, IOException{
 		this.tablesLoader.defaultValues(t);
+	}
+	
+	
+	public void loadDefaultValues(Column  cl) throws SQLException, IOException{
+		this.tablesLoader.defaultValue(cl);
 	}
 
 	private static boolean hasAutoNumberColumn(Table t) {

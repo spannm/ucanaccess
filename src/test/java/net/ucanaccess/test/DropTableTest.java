@@ -34,36 +34,61 @@ public class DropTableTest extends UcanaccessTestBase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+		executeCreateTable("CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ",1);
 	}
 	
-	public void createSimple(String a, Object[][] ver) throws SQLException,
+	public void createSimple(String tn,String a, Object[][] ver) throws SQLException,
 			IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
-			st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
-			checkQuery("select * from AAAn", ver);
+			st.execute("INSERT INTO "+tn+" VALUES ('33A',11,'" + a + "'   )");
+			st.execute("INSERT INTO "+tn+" VALUES ('33B',111,'" + a + "'    )");
+			checkQuery("select * from "+tn+ " ORDER BY c", ver);
 		} finally {
 			if (st != null)
 				st.close();
 		}
 	}
 	
+
+	
 	public void testDrop() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			//super.ucanaccess.setAutoCommit(false);
-			createSimple("a", new Object[][] { { "33A", 11, "a" },
+			createSimple("AAAn","a", new Object[][] { { "33A", 11, "a" },
 					{ "33B", 111, "a" } });
 			st = super.ucanaccess.createStatement();
 			st.executeUpdate("DROP TABLE AAAn");
 			//super.ucanaccess.commit();
 			st
 					.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-			createSimple("b", new Object[][] { { "33A", 11, "b" },
+			createSimple("AAAn","b", new Object[][] { { "33A", 11, "b" },
 					{ "33B", 111, "b" } });
 			dump("select * from AAAn");
+			super.ucanaccess.commit();
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	
+	public void testDropBlank() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			//super.ucanaccess.setAutoCommit(false);
+			createSimple("[AAA n]","a", new Object[][] { { "33A", 11, "a" },
+					{ "33B", 111, "a" } });
+			st = super.ucanaccess.createStatement();
+			st.executeUpdate("DROP TABLE [AAA n]");
+			//super.ucanaccess.commit();
+			st
+					.execute("CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+			createSimple("[AAA n]","b", new Object[][] { { "33A", 11, "b" },
+					{ "33B", 111, "b" } });
+			dump("select * from [AAA n]");
 			super.ucanaccess.commit();
 		} finally {
 			if (st != null)

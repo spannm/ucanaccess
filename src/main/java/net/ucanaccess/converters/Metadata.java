@@ -93,6 +93,7 @@ public class Metadata {
 	private final static String SELECT_COLUMNS="SELECT DISTINCT c.COLUMN_NAME,c.ORIGINAL_TYPE IN('COUNTER','GUID') as IS_AUTOINCREMENT, c.ORIGINAL_TYPE='MONEY' as IS_CURRENCY  " +
 			"				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t " +
 	    	"				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.ESCAPED_TABLE_NAME=nvl(?,t.ESCAPED_TABLE_NAME) ";
+	private static final String RENAME = "UPDATE UCA_METADATA.TABLES SET TABLE_NAME=?,ESCAPED_TABLE_NAME=? WHERE TABLE_NAME=?";
 	
 	public static enum Types{VIEW,TABLE}
 	
@@ -357,5 +358,21 @@ public class Metadata {
 		}finally{
 			if(ps!=null)ps.close();
 		}
+	}
+
+	public void rename(String oldTableName, String newTableName, String ntn) throws SQLException {
+		PreparedStatement ps=null;
+		try{
+			ps=conn.prepareStatement(RENAME);
+			ps.setString(1, newTableName);
+			ps.setString(2, ntn);
+			ps.setString(3, oldTableName);
+			ps.execute();
+			
+			
+		}finally{
+			if(ps!=null)ps.close();
+		}
+		
 	}
 }

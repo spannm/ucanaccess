@@ -207,7 +207,6 @@ public class UcanaccessStatement implements Statement {
 	
 			return new UcanaccessResultSet(wrapped.executeQuery(sql), this);
 		} catch (SQLException e) {
-			
 			throw new UcanaccessSQLException(e);
 		}
 	}
