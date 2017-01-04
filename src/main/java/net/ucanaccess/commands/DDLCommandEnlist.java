@@ -21,7 +21,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
 import java.util.HashMap;
 
 import net.ucanaccess.converters.LoadJet;
@@ -107,12 +106,27 @@ public class DDLCommandEnlist {
 		case ADD_COLUMN:
 			enlistAddColumn(sql, ddlType);
 			break;
+		case CREATE_INDEX:
+			enlistCreateIndex(sql, ddlType);
+			break;
+		}
+	}
+
+	private void enlistCreateIndex(String sql, DDLType ddlType) throws SQLException {
+		String indexName = ddlType.getDBObjectName(sql);
+		String tableName = ddlType.getSecondDBObjectName(sql);
+		String execId = UcanaccessConnection.getCtxExcId();
+		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+		CreateIndexCommand c4io = new CreateIndexCommand(indexName,tableName, execId );
+		ac.add(c4io);
+		if (!ac.getAutoCommit()) {
+			ac.commit();
 		}
 	}
 
 	private void enlistAddColumn(String sql, DDLType ddlType) throws SQLException {
 		String tableName = ddlType.getDBObjectName(sql);
-		String columnName = ddlType.getNewName(sql);
+		String columnName = ddlType.getSecondDBObjectName(sql);
 		String columnDefinition = ddlType.getColumnDefinition(sql);
 		String execId = UcanaccessConnection.getCtxExcId();
 		ArrayList<String> typeList = new ArrayList<String>();
@@ -145,7 +159,7 @@ public class DDLCommandEnlist {
 	private void enlistAlterRename(String sql, DDLType ddlType)
 			throws SQLException {
 		String oldTn = ddlType.getDBObjectName(sql);
-		String newTn = ddlType.getNewName(sql);
+		String newTn = ddlType.getSecondDBObjectName(sql);
 		String execId = UcanaccessConnection.getCtxExcId();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		AlterRenameCommand c4io = new AlterRenameCommand(oldTn, newTn, execId);

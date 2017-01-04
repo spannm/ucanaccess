@@ -92,8 +92,8 @@ public class SQLConverter {
 	public static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
 	private static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
 	public static final String HHMMSS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
-	public  static final String namePattern="(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
-	
+	public  static final String NAME_PATTERN="(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
+	public  static final int NAME_PATTERN_STEP=4;
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
@@ -261,20 +261,23 @@ public class SQLConverter {
 		
 		
 		CREATE_TABLE_AS_SELECT(
-								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern+"[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), 
+								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), 
 						CREATE_TABLE(
-								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern)), 
+								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN)), 
 						DROP_TABLE(
-								Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+"+namePattern)),
+								Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN)),
 						ALTER_RENAME(
-								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +namePattern+
-										"[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" +namePattern)),		
-						ADD_COLUMN(Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +namePattern+
-														"[\\s\n\r]+(?i)add[\\s\n\r]+(?i)column[\\s\n\r]+" +namePattern+"(.*)")),		
-				DISABLE_AUTOINCREMENT(Pattern
-						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+namePattern)),
-				ENABLE_AUTOINCREMENT(Pattern
-								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+namePattern))
+								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
+										"[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" +NAME_PATTERN)),		
+						ADD_COLUMN(Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
+														"[\\s\n\r]+(?i)add[\\s\n\r]+(?i)column[\\s\n\r]+" +NAME_PATTERN+"(.*)")),
+					    CREATE_INDEX(Pattern.compile("(?i)CREATE[\\s\n\r]+(?:(?i)UNIQUE)?[\\s\n\r]*(?i)INDEX[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)ON[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+")),								
+				
+					    DISABLE_AUTOINCREMENT(Pattern
+						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN)),
+				
+						ENABLE_AUTOINCREMENT(Pattern
+								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN))
 						;
 		private Pattern pattern;
 		
@@ -310,13 +313,10 @@ public class SQLConverter {
 			return null;
 		}
 		
-		public String getNewName(String s) {
+		public String getSecondDBObjectName(String s) {
 			Matcher m = pattern.matcher(s);
 			if (m.find()) {
-//				for(int y=0;y<m.groupCount();y++){
-//					System.out.println(y+":"+m.group(y));
-//				}
-				return m.group(5);
+				return m.group(1+NAME_PATTERN_STEP);
 			}
 			return null;
 		}
@@ -324,7 +324,7 @@ public class SQLConverter {
 		public String getColumnDefinition(String s) {
 			Matcher m = pattern.matcher(s);
 			if (m.find()) {
-				return m.group(9);
+				return m.group(2*NAME_PATTERN_STEP+1);
 			}
 			return null;
 		}

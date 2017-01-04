@@ -558,7 +558,7 @@ public class Persist2Jet {
 		if (t == null)
 			return;
 		Metadata mt = new Metadata(conn.getHSQLDBConnection());
-		mt.rename(t.getName(), newTableName, ntn);
+		mt.rename(t.getName(), tn, ntn);
 		DatabaseImpl dbi = (DatabaseImpl) db;
 		Table cat = dbi.getSystemCatalog();
 		Map<String, Object> row;
@@ -627,4 +627,37 @@ public class Persist2Jet {
 
 	}
 
+	public void createIndex(String tableName, String indexName) throws IOException, SQLException{
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Database db = conn.getDbIO();
+		String ntn = escape4Hsqldb(tableName);
+		String idn = escape4Hsqldb(indexName);
+		String tn=escape4Access(tableName);
+		String in=escape4Access(indexName);
+		Table t = db.getTable(tn);
+		
+		ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, "PUBLIC",
+				ntn, false, false);
+		boolean asc=false;
+		ArrayList<String> cols=new ArrayList<String>();
+		IndexBuilder ib = new IndexBuilder(in);
+		while (idxrs.next()) {
+			String dbIdxName = idxrs.getString("INDEX_NAME");
+			if (dbIdxName.equalsIgnoreCase(idn)) {
+				
+				boolean unique = !idxrs.getBoolean("NON_UNIQUE");
+
+				if (unique) {
+					ib.setUnique();
+				}
+				String colName =idxrs.getString("COLUMN_NAME");
+				Metadata mt=new Metadata(conn);
+				colName=mt.getColumnName(ntn, colName);
+				String ad = idxrs.getString("ASC_OR_DESC");
+				asc = ad == null || ad.equals("A");
+				 cols.add( colName);
+			}
+		}
+		ib.addColumns(asc, cols.toArray(new String[cols.size()])).addToTable(t);
+	}
 }

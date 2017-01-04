@@ -60,8 +60,7 @@ public class AutoNumberAction implements IFeedbackAction {
 					ps.executeUpdate();
 				
 					conn.setGeneratedKey(cnNew);
-					conn
-							.setFeedbackState(false);
+					conn.setFeedbackState(false);
 				} finally {
 					if (ps != null)
 						ps.close();

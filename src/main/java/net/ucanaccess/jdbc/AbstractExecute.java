@@ -112,7 +112,7 @@ public abstract class AbstractExecute {
 						NotSupportedMessage.NOT_SUPPORTED_YET);
 			String sql0=( ddlType.equals(DDLType.ADD_COLUMN))?
 				 SQLConverter.convertSQL(
-						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql), ddlType.getNewName(sql), ddlType.getColumnDefinition(sql))).getSql()
+						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql), ddlType.getSecondDBObjectName(sql), ddlType.getColumnDefinition(sql))).getSql()
 						 :
 				 SQLConverter.convertSQL(sql).getSql();
 			boolean enDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
@@ -124,7 +124,6 @@ public abstract class AbstractExecute {
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
 					.convertCreateTable(sql0) : sql0;
-			
 					ret=	(this instanceof Execute) ?statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
 		
 					DDLCommandEnlist ddle = new DDLCommandEnlist();
