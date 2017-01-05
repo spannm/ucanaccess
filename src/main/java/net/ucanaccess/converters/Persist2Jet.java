@@ -17,6 +17,7 @@ package net.ucanaccess.converters;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -55,6 +56,7 @@ import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.IndexBuilder;
 import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.RelationshipBuilder;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.TableBuilder;
@@ -659,5 +661,62 @@ public class Persist2Jet {
 			}
 		}
 		ib.addColumns(asc, cols.toArray(new String[cols.size()])).addToTable(t);
+	}
+
+	public void createPrimaryKey(String tableName)throws IOException, SQLException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Database db = conn.getDbIO();
+		String ntn = escape4Hsqldb(tableName);
+		String tn=escape4Access(tableName);
+		Table t = db.getTable(tn);
+		ResultSet pkrs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn);
+		ArrayList<String> cols=new ArrayList<String>();
+		IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
+		ib.setPrimaryKey();
+		while(pkrs.next()){
+			String colName =pkrs.getString("COLUMN_NAME");
+			Metadata mt=new Metadata(conn);
+			colName=mt.getColumnName(ntn, colName);
+			 cols.add(colName);
+		}
+		ib.addColumns(cols.toArray(new String[cols.size()])).addToTable(t);
+	}
+
+	public void createForeignKey(String tableName, String referencedTable)throws IOException, SQLException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Database db = conn.getDbIO();
+		String ntn = escape4Hsqldb(tableName);
+		String rntn = escape4Hsqldb(referencedTable);
+		String tn=escape4Access(tableName);
+		Table t = db.getTable(tn);
+		String rtn=escape4Access(referencedTable);
+		Table rt = db.getTable(rtn);
+		RelationshipBuilder rb=new RelationshipBuilder(rt,t); 
+		rb.setReferentialIntegrity();
+		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn);
+		Metadata mt=new Metadata(conn);
+		while(fkrs.next()){
+			String colName =fkrs.getString("FKCOLUMN_NAME");
+			colName=mt.getColumnName(ntn, colName);
+			String rcolName =fkrs.getString("PKCOLUMN_NAME");
+			rcolName=mt.getColumnName(rntn, rcolName);
+			rb.addColumns(rcolName, colName);
+			short dr=fkrs.getShort("DELETE_RULE");
+			short ur=fkrs.getShort("UPDATE_RULE");
+			switch(dr){
+				case DatabaseMetaData.importedKeyCascade:
+					rb.setCascadeDeletes();
+					break;
+				case DatabaseMetaData.importedKeySetNull:
+					rb.setCascadeNullOnDelete();
+					break;
+			}
+			if(ur== DatabaseMetaData.importedKeyCascade)
+				rb.setCascadeUpdates();
+		
+		}
+		
+		rb.toRelationship(db);
+	
 	}
 }

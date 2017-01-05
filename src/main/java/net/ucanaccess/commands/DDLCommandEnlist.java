@@ -109,6 +109,36 @@ public class DDLCommandEnlist {
 		case CREATE_INDEX:
 			enlistCreateIndex(sql, ddlType);
 			break;
+			
+		case CREATE_PRIMARY_KEY:
+			enlistCreatePrimaryKey(sql, ddlType);
+			break;	
+		case CREATE_FOREIGN_KEY:
+			enlistCreateForeignKey(sql, ddlType);
+			break;	
+		}
+	}
+
+	private void enlistCreateForeignKey(String sql, DDLType ddlType) throws SQLException {
+		String tableName= ddlType.getDBObjectName(sql);
+		String referencedTable=ddlType.getThirdDBObjectName(sql);
+		String execId = UcanaccessConnection.getCtxExcId();
+		CreateForeignKeyCommand c4io = new CreateForeignKeyCommand(tableName, referencedTable,execId );
+		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+		ac.add(c4io);
+		if (!ac.getAutoCommit()) {
+			ac.commit();
+		}
+	}
+
+	private void enlistCreatePrimaryKey(String sql, DDLType ddlType) throws SQLException {
+		String tableName= ddlType.getDBObjectName(sql);
+		String execId = UcanaccessConnection.getCtxExcId();
+		CreatePrimaryKeyCommand c4io = new CreatePrimaryKeyCommand(tableName, execId );
+		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+		ac.add(c4io);
+		if (!ac.getAutoCommit()) {
+			ac.commit();
 		}
 	}
 
