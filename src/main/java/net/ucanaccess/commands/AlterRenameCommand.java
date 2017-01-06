@@ -59,4 +59,6 @@ public class AlterRenameCommand implements ICommand {
 	public IFeedbackAction rollback() throws SQLException {
 		return null;
 	}
+
+	
 }

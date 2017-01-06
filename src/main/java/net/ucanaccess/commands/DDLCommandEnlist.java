@@ -166,7 +166,7 @@ public class DDLCommandEnlist {
 		String tknt=columnName+columnDefinition;
 		this.parseColumnTypes(typeList, defaultList, notNullList, tknt);
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
-		AddColumnCommand c4io = new AddColumnCommand(tableName, execId, this.columnMap,
+		AddColumnCommand c4io = new AddColumnCommand(tableName,columnName, execId, this.columnMap,
 				this.types, this.defaults, this.notNulls);
 		ac.add(c4io);
 		if (!ac.getAutoCommit()) {

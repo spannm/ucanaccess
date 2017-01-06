@@ -45,7 +45,7 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 public abstract class UcanaccessTestBase extends TestCase {
 	private static FileFormat defaultFileFormat = FileFormat.V2003;
-	private static File fileMdb;
+	private static File fileAccdb;
 	private static Class<?extends TestCase> testingClass;
 	
 
@@ -324,20 +324,20 @@ public abstract class UcanaccessTestBase extends TestCase {
 	}
 	
 	public String getAccessTempPath() throws IOException {
-		if (fileMdb == null||!this.getClass().equals(testingClass)) {
+		if (fileAccdb == null||!this.getClass().equals(testingClass)) {
 			testingClass=this.getClass();
 			if (this.getAccessPath() == null) {
-				fileMdb = File.createTempFile("test", ".mdb");
-				Database db = DatabaseBuilder.create(this.fileFormat, fileMdb);
+				fileAccdb = File.createTempFile("test", ".accdb");
+				Database db = DatabaseBuilder.create(this.fileFormat, fileAccdb);
 				db.flush();
 				db.close();
 				System.out.println("Access file version " + this.fileFormat
-						+ " created: " + fileMdb.getAbsolutePath());
+						+ " created: " + fileAccdb.getAbsolutePath());
 			} else {
-				fileMdb = copyResourceInTemp(this.getAccessPath());;
+				fileAccdb = copyResourceInTemp(this.getAccessPath());;
 			}
 		}
-		return fileMdb.getAbsolutePath();
+		return fileAccdb.getAbsolutePath();
 	}
 	
 	
@@ -407,7 +407,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 	
 	
 	protected void initVerifyConnection() throws SQLException, IOException {
-		InputStream is = new FileInputStream(fileMdb);
+		InputStream is = new FileInputStream(fileAccdb);
 		byte[] buffer = new byte[4096];
 		File tempVer = File.createTempFile("tempJunit", "mdb");
 		FileOutputStream fos = new FileOutputStream(tempVer);

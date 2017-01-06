@@ -245,7 +245,7 @@ public class Persist2Jet {
 								.name())
 						|| types[seq].equalsIgnoreCase(AccessType.COUNTER
 								.name()) || types[seq]
-						.equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {
+							.equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {
 			dt = TypesMap.map2Jackcess(AccessType.valueOf(types[seq]
 					.toUpperCase(Locale.US)));
 			cb.setType(dt);
@@ -286,13 +286,16 @@ public class Persist2Jet {
 	private ColumnBuilder getColumn(String tableName,
 			Map<String, String> columnMap, String[] types) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		String columnName=columnMap.keySet().iterator().next();
-		ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(
-				null, "PUBLIC", tableName.toUpperCase(), SQLConverter.preEscapingIdentifier(columnName));
-		
+		String columnName = columnMap.keySet().iterator().next();
+		ResultSet rs = conn
+				.getHSQLDBConnection()
+				.getMetaData()
+				.getColumns(null, "PUBLIC", tableName.toUpperCase(),
+						SQLConverter.preEscapingIdentifier(columnName));
+
 		if (rs.next()) {
 			return getColumn(rs, 0, tableName, columnMap, types);
-		
+
 		}
 		return null;
 	}
@@ -301,8 +304,8 @@ public class Persist2Jet {
 			Map<String, String> columnMap, String[] types) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		ArrayList<ColumnBuilder> arcl = new ArrayList<ColumnBuilder>();
-		ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(
-				null, "PUBLIC", tableName.toUpperCase(), null);
+		ResultSet rs = conn.getHSQLDBConnection().getMetaData()
+				.getColumns(null, "PUBLIC", tableName.toUpperCase(), null);
 		int i = 0;
 		while (rs.next()) {
 			arcl.add(getColumn(rs, i, tableName, columnMap, types));
@@ -392,22 +395,18 @@ public class Persist2Jet {
 			toIdx.addColumns(asc, colName);
 		}
 	}
-	
-	
+
 	private void saveColumnsDefaults(String[] defaults, Boolean[] required,
 			Column cl, int j) throws IOException {
-		
+
 		PropertyMap map = cl.getProperties();
-		if (defaults != null && j < defaults.length
-				&& defaults[j] != null) {
-			map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT,
-					defaults[j]);
+		if (defaults != null && j < defaults.length && defaults[j] != null) {
+			map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, defaults[j]);
 		}
 
-		if (required != null && j < required.length
-				&& required[j] != null && !cl.isAutoNumber()) {
-			map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN,
-					required[j]);
+		if (required != null && j < required.length && required[j] != null
+				&& !cl.isAutoNumber()) {
+			map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, required[j]);
 		}
 
 		map.save();
@@ -420,8 +419,7 @@ public class Persist2Jet {
 
 		if (defaults != null || required != null)
 			for (Column cl : cols) {
-				saveColumnsDefaults(defaults, required,
-						cl,  j) ;
+				saveColumnsDefaults(defaults, required, cl, j);
 				j++;
 			}
 
@@ -604,119 +602,170 @@ public class Persist2Jet {
 
 	}
 
-	public void addColumn(String tableName, Map<String, String> columnMap,
-			String[] types, String[] defaults, Boolean[] notNulls)
-			throws IOException, SQLException {
+	public void addColumn(String tableName, String columnName,
+			Map<String, String> columnMap, String[] types, String[] defaults,
+			Boolean[] notNulls) throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		String tn = escape4Access(tableName);
 		String ntn = escape4Hsqldb(tableName);
 		Metadata mtd = new Metadata(conn.getHSQLDBConnection());
-		ColumnBuilder cb= this.getColumn(ntn, columnMap, types);
-		Column cl=      cb.addToTable(
-				db.getTable(tn));
-		
-		 int idTable=mtd.newTable(tn, ntn, Metadata.Types.TABLE);
-	      mtd.newColumn(cb.getName(),
-		  SQLConverter.preEscapingIdentifier(cb.getName()),
-		  cb.getType().name(), idTable); 
-		  saveColumnsDefaults(defaults, notNulls,
-					cl,  0) ;
-	
-		  LoadJet lj=new LoadJet(conn.getHSQLDBConnection(),db);
-		  lj.loadDefaultValues(cl);
-		
+		ColumnBuilder cb = this.getColumn(ntn, columnMap, types);
+		Table t=db.getTable(tn);
+		Column cl = cb.addToTable(t);
 
+		int idTable = mtd.newTable(tn, ntn, Metadata.Types.TABLE);
+		mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb
+				.getName()), cb.getType().name(), idTable);
+		saveColumnsDefaults(defaults, notNulls, cl, 0);
+		updateNewColumn2Defaut(tableName, columnName,t, cl);
+		setHsqldbNotNull(tableName, columnName, cl);
 	}
 
-	public void createIndex(String tableName, String indexName) throws IOException, SQLException{
+	private void setHsqldbNotNull(String tableName, String columnName, Column cl)
+			throws SQLException, IOException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Boolean req = (Boolean) cl.getProperties().getValue(
+				PropertyMap.REQUIRED_PROP);
+		req = req != null && req;
+		Statement stNN = null;
+		try {
+			if (req) {
+				stNN = conn.getHSQLDBConnection().createStatement();
+				stNN.execute(SQLConverter.convertSQL(
+						"ALTER TABLE " + tableName + " ALTER COLUMN "
+								+ columnName + " NOT NULL ").getSql());
+			}
+		} finally {
+			if (stNN != null)
+				stNN.close();
+		}
+	}
+
+	private void updateNewColumn2Defaut(String tableName, String columnName,Table t,
+			Column cl) throws SQLException, IOException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());
+		lj.loadDefaultValues(cl);
+		
+		Statement st = null;
+		String default4SQL = lj.defaultValue4SQL(cl);
+		Object defObj=lj.tryDefault(default4SQL);
+		
+		for(Row row:t){
+			row.put(cl.getName(), defObj);
+			t.updateRow(row);
+		}
+		conn.getDbIO().flush();
+		conn.setFeedbackState(true);
+		if (default4SQL != null) {
+			try {
+				st = conn.getHSQLDBConnection().createStatement();
+				st.executeUpdate(SQLConverter.convertSQL(
+						"UPDATE " + tableName + " SET " + columnName + "="
+								+ default4SQL).getSql());
+			} finally {
+				if (st != null)
+					st.close();
+			}
+		}
+
+		conn.setFeedbackState(false);
+	}
+
+	public void createIndex(String tableName, String indexName)
+			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		String ntn = escape4Hsqldb(tableName);
 		String idn = escape4Hsqldb(indexName);
-		String tn=escape4Access(tableName);
-		String in=escape4Access(indexName);
+		String tn = escape4Access(tableName);
+		String in = escape4Access(indexName);
 		Table t = db.getTable(tn);
-		
-		ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, "PUBLIC",
-				ntn, false, false);
-		boolean asc=false;
-		ArrayList<String> cols=new ArrayList<String>();
+
+		ResultSet idxrs = conn.getHSQLDBConnection().getMetaData()
+				.getIndexInfo(null, "PUBLIC", ntn, false, false);
+		boolean asc = false;
+		ArrayList<String> cols = new ArrayList<String>();
 		IndexBuilder ib = new IndexBuilder(in);
 		while (idxrs.next()) {
 			String dbIdxName = idxrs.getString("INDEX_NAME");
 			if (dbIdxName.equalsIgnoreCase(idn)) {
-				
+
 				boolean unique = !idxrs.getBoolean("NON_UNIQUE");
 
 				if (unique) {
 					ib.setUnique();
 				}
-				String colName =idxrs.getString("COLUMN_NAME");
-				Metadata mt=new Metadata(conn);
-				colName=mt.getColumnName(ntn, colName);
+				String colName = idxrs.getString("COLUMN_NAME");
+				Metadata mt = new Metadata(conn);
+				colName = mt.getColumnName(ntn, colName);
 				String ad = idxrs.getString("ASC_OR_DESC");
 				asc = ad == null || ad.equals("A");
-				 cols.add( colName);
+				cols.add(colName);
 			}
 		}
 		ib.addColumns(asc, cols.toArray(new String[cols.size()])).addToTable(t);
 	}
 
-	public void createPrimaryKey(String tableName)throws IOException, SQLException {
+	public void createPrimaryKey(String tableName) throws IOException,
+			SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		String ntn = escape4Hsqldb(tableName);
-		String tn=escape4Access(tableName);
+		String tn = escape4Access(tableName);
 		Table t = db.getTable(tn);
-		ResultSet pkrs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn);
-		ArrayList<String> cols=new ArrayList<String>();
+		ResultSet pkrs = conn.getHSQLDBConnection().getMetaData()
+				.getPrimaryKeys(null, null, ntn);
+		ArrayList<String> cols = new ArrayList<String>();
 		IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
 		ib.setPrimaryKey();
-		while(pkrs.next()){
-			String colName =pkrs.getString("COLUMN_NAME");
-			Metadata mt=new Metadata(conn);
-			colName=mt.getColumnName(ntn, colName);
-			 cols.add(colName);
+		while (pkrs.next()) {
+			String colName = pkrs.getString("COLUMN_NAME");
+			Metadata mt = new Metadata(conn);
+			colName = mt.getColumnName(ntn, colName);
+			cols.add(colName);
 		}
 		ib.addColumns(cols.toArray(new String[cols.size()])).addToTable(t);
 	}
 
-	public void createForeignKey(String tableName, String referencedTable)throws IOException, SQLException {
+	public void createForeignKey(String tableName, String referencedTable)
+			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		String ntn = escape4Hsqldb(tableName);
 		String rntn = escape4Hsqldb(referencedTable);
-		String tn=escape4Access(tableName);
+		String tn = escape4Access(tableName);
 		Table t = db.getTable(tn);
-		String rtn=escape4Access(referencedTable);
+		String rtn = escape4Access(referencedTable);
 		Table rt = db.getTable(rtn);
-		RelationshipBuilder rb=new RelationshipBuilder(rt,t); 
+		RelationshipBuilder rb = new RelationshipBuilder(rt, t);
 		rb.setReferentialIntegrity();
-		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn);
-		Metadata mt=new Metadata(conn);
-		while(fkrs.next()){
-			String colName =fkrs.getString("FKCOLUMN_NAME");
-			colName=mt.getColumnName(ntn, colName);
-			String rcolName =fkrs.getString("PKCOLUMN_NAME");
-			rcolName=mt.getColumnName(rntn, rcolName);
+		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
+				.getImportedKeys(null, null, ntn);
+		Metadata mt = new Metadata(conn);
+		while (fkrs.next()) {
+			String colName = fkrs.getString("FKCOLUMN_NAME");
+			colName = mt.getColumnName(ntn, colName);
+			String rcolName = fkrs.getString("PKCOLUMN_NAME");
+			rcolName = mt.getColumnName(rntn, rcolName);
 			rb.addColumns(rcolName, colName);
-			short dr=fkrs.getShort("DELETE_RULE");
-			short ur=fkrs.getShort("UPDATE_RULE");
-			switch(dr){
-				case DatabaseMetaData.importedKeyCascade:
-					rb.setCascadeDeletes();
-					break;
-				case DatabaseMetaData.importedKeySetNull:
-					rb.setCascadeNullOnDelete();
-					break;
+			short dr = fkrs.getShort("DELETE_RULE");
+			short ur = fkrs.getShort("UPDATE_RULE");
+			switch (dr) {
+			case DatabaseMetaData.importedKeyCascade:
+				rb.setCascadeDeletes();
+				break;
+			case DatabaseMetaData.importedKeySetNull:
+				rb.setCascadeNullOnDelete();
+				break;
 			}
-			if(ur== DatabaseMetaData.importedKeyCascade)
+			if (ur == DatabaseMetaData.importedKeyCascade)
 				rb.setCascadeUpdates();
-		
+
 		}
-		
+
 		rb.toRelationship(db);
-	
+
 	}
 }

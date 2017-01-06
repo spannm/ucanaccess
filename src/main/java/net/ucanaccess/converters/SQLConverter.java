@@ -97,6 +97,7 @@ public class SQLConverter {
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
+	private static final String NOT_NULL = "[\\s\n\r](?i)NOT[\\s\n\r](?i)NULL"; 
 	private static final String DEFAULT_VARCHAR_0 = "(\\W)(?i)VARCHAR([^\\(])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
 	private static final String DELETE_ALL ="((?i)DELETE[\\s\n\r]+)(\\*)([\\s\n\r]+(?i)FROM[\\s\n\r]+)";
@@ -820,11 +821,13 @@ public class SQLConverter {
 			   typeDeclaration= typeDeclaration.replaceAll(entry.getKey(),  entry.getValue());
 		   }
 		   typeDeclaration=typeDeclaration.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
+		   typeDeclaration=typeDeclaration.replaceAll(NOT_NULL, "");
 		   Matcher mtc=DEFAULT_CATCH_0.matcher(typeDeclaration);
 		   if(mtc.find()){
 			   typeDeclaration=typeDeclaration.substring(0, mtc.start());
 		   }
 		   String ret="ALTER TABLE "+tableName+" ADD COLUMN "+columnName+typeDeclaration;
+		  
 		   return ret;
 	}
 	
@@ -880,6 +883,7 @@ public class SQLConverter {
 
 		return sql;
 	}
+		
 
 	public static String convertCreateTable(String sql) throws SQLException {
 		return convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());

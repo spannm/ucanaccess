@@ -562,51 +562,56 @@ public class LoadJet {
 		}
 		
 		
-		private void defaultValue(Column cl) throws SQLException, IOException {
+		private void setDefaultValue(Column cl) throws SQLException, IOException {
 			String tn = cl.getTable().getName();
 			String ntn = escapeIdentifier(tn);
 			ArrayList<String> arTrigger = new ArrayList<String>();
-			defaultValue(cl,ntn, arTrigger);
+			setDefaultValue(cl,ntn, arTrigger);
 			for (String trigger : arTrigger) {
 				exec(trigger,true);
 			}
 		}
-
-
-		private void defaultValue(Column cl,String ntn,ArrayList<String> arTrigger) throws IOException, SQLException{
-
-			PropertyMap pm = cl.getProperties();
-			String ncn =procedureEscapingIdentifier(cl.getName());
-			Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-			if (defaulT != null) {
-				String cdefaulT = SQLConverter.convertSQL(" "
+		
+		private String defaultValue4SQL(Object defaulT,DataType dt) throws SQLException, IOException{
+			if (defaulT == null) return null;
+			String default4SQL = SQLConverter.convertSQL(" "
 						+ defaulT.toString()).getSql();
-				if (cdefaulT.trim().startsWith("=")) {
-					cdefaulT = cdefaulT.trim().substring(1);
+				if (default4SQL.trim().startsWith("=")) {
+					default4SQL = default4SQL.trim().substring(1);
 				}
-				if (cl.getType().equals(DataType.BOOLEAN)
-						&& ("=yes".equalsIgnoreCase(cdefaulT) || "yes"
-								.equalsIgnoreCase(cdefaulT)))
-					cdefaulT = "true";
-				if (cl.getType().equals(DataType.BOOLEAN)
-						&& ("=no".equalsIgnoreCase(cdefaulT) || "no"
-								.equalsIgnoreCase(cdefaulT)))
-					cdefaulT = "false";
+				if (dt.equals(DataType.BOOLEAN)
+						&& ("=yes".equalsIgnoreCase(default4SQL) || "yes"
+								.equalsIgnoreCase(default4SQL)))
+					default4SQL = "true";
+				if (dt.equals(DataType.BOOLEAN)
+						&& ("=no".equalsIgnoreCase(default4SQL) || "no"
+								.equalsIgnoreCase(default4SQL)))
+					default4SQL = "false";
 				if(
-						(cl.getType().equals(DataType.MEMO)||
-						cl.getType().equals(DataType.TEXT))&&
+						(dt.equals(DataType.MEMO)||
+						dt.equals(DataType.TEXT))&&
 						(!defaulT.toString().startsWith("\"")||
 						 !defaulT.toString().endsWith("\"")		
 						)
 						
 				){
-					cdefaulT="'"+cdefaulT.replaceAll("'","''")+"'";
+					default4SQL="'"+default4SQL.replaceAll("'","''")+"'";
 				}
+				return default4SQL;
+		}
+		
+		
+		private void setDefaultValue(Column cl,String ntn,ArrayList<String> arTrigger) throws IOException, SQLException{
+			PropertyMap pm = cl.getProperties();
+			String ncn =procedureEscapingIdentifier(cl.getName());
+			Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
+			if (defaulT != null) {
+				String default4SQL = defaultValue4SQL(defaulT,cl.getType());
 				String guidExp = "GenGUID()";
 				if (!guidExp.equals(defaulT)) {
-					Object defFound=cdefaulT;
-					boolean isNull=(cdefaulT+"").equalsIgnoreCase("null");
-					if (!isNull&&(defFound=tryDefault(cdefaulT))==null) {
+					Object defFound=default4SQL;
+					boolean isNull=(default4SQL+"").equalsIgnoreCase("null");
+					if (!isNull&&(defFound=tryDefault(default4SQL))==null) {
 						
 						Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
 						""+ defaulT, cl.getName(), cl.getTable().getName());
@@ -630,7 +635,7 @@ public class LoadJet {
 											+ "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW."
 											+ ncn + " IS NULL THEN "
 											+ "SET NEW." + ncn + "= "
-											+ cdefaulT + " ; END IF");
+											+ default4SQL + " ; END IF");
 
 					}
 				}
@@ -638,13 +643,13 @@ public class LoadJet {
 		
 		}
 		
-		private  void defaultValues(Table t) throws SQLException, IOException {
+		private  void setDefaultValues(Table t) throws SQLException, IOException {
 			String tn = t.getName();
 			 String ntn = escapeIdentifier(tn);
 			List<? extends Column> lc = t.getColumns();
 			ArrayList<String> arTrigger = new ArrayList<String>();
 			for (Column cl : lc) {
-				defaultValue(cl,ntn,arTrigger) ;
+				setDefaultValue(cl,ntn,arTrigger) ;
 			}
 			for (String trigger : arTrigger) {
 				exec(trigger,true);
@@ -1107,7 +1112,7 @@ public class LoadJet {
 		}
 		
 		private void createSyncrTriggers(Table t) throws SQLException, IOException{
-			defaultValues(t);
+			setDefaultValues(t);
 			String ntn = escapeIdentifier(t.getName());
 			triggersGenerator.synchronisationTriggers(ntn,
 				hasAutoNumberColumn(t),hasAppendOnly(t));
@@ -1512,12 +1517,19 @@ public class LoadJet {
 	}
 	
 	public void loadDefaultValues(Table  t) throws SQLException, IOException{
-		this.tablesLoader.defaultValues(t);
+		this.tablesLoader.setDefaultValues(t);
 	}
 	
 	
 	public void loadDefaultValues(Column  cl) throws SQLException, IOException{
-		this.tablesLoader.defaultValue(cl);
+		this.tablesLoader.setDefaultValue(cl);
+	}
+	
+	public String defaultValue4SQL(Column  cl) throws SQLException, IOException{
+		PropertyMap pm = cl.getProperties();
+		Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
+		if(defaulT==null)return null;
+		return this.tablesLoader.defaultValue4SQL(defaulT,cl.getType());
 	}
 
 	private static boolean hasAutoNumberColumn(Table t) {
@@ -1637,7 +1649,7 @@ public class LoadJet {
 				hasAutoNumberColumn,hasAppendOnly);
 	}
 
-	private Object tryDefault(Object defaulT) throws SQLException {
+	public Object tryDefault(Object defaulT) throws SQLException {
 		Statement st = null;
 		try {
 			st = conn.createStatement();

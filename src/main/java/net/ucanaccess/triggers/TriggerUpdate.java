@@ -42,7 +42,7 @@ public class TriggerUpdate extends TriggerBase {
 				conn.add(c4j);
 			}
 		} catch (Exception e) {
-			throw new  TriggerException(e.getMessage());
+				throw new  TriggerException(e.getMessage());
 		}
 	}
 	

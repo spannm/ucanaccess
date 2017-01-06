@@ -17,8 +17,6 @@ package net.ucanaccess.commands;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
-
 import java.util.Map;
 
 import net.ucanaccess.converters.Persist2Jet;
@@ -31,89 +29,21 @@ public class AddColumnCommand implements ICommand {
 	private String[] defaults;
 	private Boolean[] notNulls;
 	private Map<String,String> columnMap;
+	private String columnName;
 	
 	
-	public AddColumnCommand(String  tableName, String execId2,Map<String,String> columnMap,
+	public AddColumnCommand(String  tableName, String columnName, String execId,Map<String,String> columnMap,
 			String[] types, String[] defaults, Boolean[] notNulls) {
 		this.tableName = tableName;
+		this.columnName=columnName;
 		this.types =types;
 		this.defaults=defaults;
 		this.notNulls=notNulls;
 		this.columnMap=columnMap;
+		this.execId=execId;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((columnMap == null) ? 0 : columnMap.hashCode());
-		result = prime * result + Arrays.hashCode(defaults);
-		result = prime * result + ((execId == null) ? 0 : execId.hashCode());
-		result = prime * result + Arrays.hashCode(notNulls);
-		result = prime * result
-				+ ((tableName == null) ? 0 : tableName.hashCode());
-		result = prime * result + Arrays.hashCode(types);
-		return result;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AddColumnCommand other = (AddColumnCommand) obj;
-		if (columnMap == null) {
-			if (other.columnMap != null)
-				return false;
-		} else if (!columnMap.equals(other.columnMap))
-			return false;
-		if (!Arrays.equals(defaults, other.defaults))
-			return false;
-		if (execId == null) {
-			if (other.execId != null)
-				return false;
-		} else if (!execId.equals(other.execId))
-			return false;
-		if (!Arrays.equals(notNulls, other.notNulls))
-			return false;
-		if (tableName == null) {
-			if (other.tableName != null)
-				return false;
-		} else if (!tableName.equals(other.tableName))
-			return false;
-		if (!Arrays.equals(types, other.types))
-			return false;
-		return true;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
+	
 	public String getExecId() {
 		return execId;
 	}
@@ -130,7 +60,7 @@ public class AddColumnCommand implements ICommand {
 	public IFeedbackAction persist() throws SQLException {
 		try {
 			Persist2Jet p2a = new Persist2Jet();
-			p2a.addColumn(tableName,columnMap, types,defaults,notNulls);
+			p2a.addColumn(tableName,columnName,columnMap, types,defaults,notNulls);
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -142,4 +72,6 @@ public class AddColumnCommand implements ICommand {
 	public IFeedbackAction rollback() throws SQLException {
 		return null;
 	}
+
+
 }

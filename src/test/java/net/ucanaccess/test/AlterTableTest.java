@@ -34,7 +34,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-		executeCreateTable("CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ",1);
+		executeCreateTable("CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4)) ",1);
 	}
 	
 	public void testAlter() throws SQLException,
@@ -49,11 +49,15 @@ public class AlterTableTest extends UcanaccessTestBase {
 			st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
 			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
-			st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT  DEFAULT 'PIPPO'");
+			st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT  NOT NULL DEFAULT 'PIPPO' ");
 			st.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
 			st.execute("CREATE unique INDEX [èèè 23] on [22 amadeimargmail111] (baaaa ASC,[ci ci] ASC )");
-		} finally {
+			st.execute("ALTER TABLE [AAA n] add constraint pippo Primary key (baaaa,a)"); 
+			st.execute("ALTER TABLE [AAA n] add constraint pippo1 foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");  
+		} 
+		
+		finally {
 			if (st != null)
 				st.close();
 		}
