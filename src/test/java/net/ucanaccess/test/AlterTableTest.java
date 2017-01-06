@@ -49,7 +49,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 			st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
 			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
-			st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT  NOT NULL DEFAULT 'PIPPO' ");
+			st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT  DEFAULT 'PIPPO' NOT NULL ");
 			st.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
 			st.execute("CREATE unique INDEX [èèè 23] on [22 amadeimargmail111] (baaaa ASC,[ci ci] ASC )");

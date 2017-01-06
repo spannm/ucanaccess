@@ -18,6 +18,7 @@ package net.ucanaccess.converters;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -619,10 +620,10 @@ public class Persist2Jet {
 				.getName()), cb.getType().name(), idTable);
 		saveColumnsDefaults(defaults, notNulls, cl, 0);
 		updateNewColumn2Defaut(tableName, columnName,t, cl);
-		setHsqldbNotNull(tableName, columnName, cl);
+		setHsqldbNotNull(tableName, columnName,types[0], cl);
 	}
 
-	private void setHsqldbNotNull(String tableName, String columnName, Column cl)
+	private void setHsqldbNotNull(String tableName, String columnName, String type, Column cl)
 			throws SQLException, IOException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Boolean req = (Boolean) cl.getProperties().getValue(
@@ -632,9 +633,10 @@ public class Persist2Jet {
 		try {
 			if (req) {
 				stNN = conn.getHSQLDBConnection().createStatement();
+				
 				stNN.execute(SQLConverter.convertSQL(
 						"ALTER TABLE " + tableName + " ALTER COLUMN "
-								+ columnName + " NOT NULL ").getSql());
+								+ columnName +" SET NOT NULL ").getSql());
 			}
 		} finally {
 			if (stNN != null)
@@ -647,26 +649,25 @@ public class Persist2Jet {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());
 		lj.loadDefaultValues(cl);
-		
-		Statement st = null;
 		String default4SQL = lj.defaultValue4SQL(cl);
+		PreparedStatement ps = null;
 		Object defObj=lj.tryDefault(default4SQL);
-		
-		for(Row row:t){
-			row.put(cl.getName(), defObj);
-			t.updateRow(row);
-		}
-		conn.getDbIO().flush();
 		conn.setFeedbackState(true);
 		if (default4SQL != null) {
+			for(Row row:t){
+				row.put(cl.getName(), defObj);
+				t.updateRow(row);
+			}
+			conn.getDbIO().flush();
 			try {
-				st = conn.getHSQLDBConnection().createStatement();
-				st.executeUpdate(SQLConverter.convertSQL(
+				ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(
 						"UPDATE " + tableName + " SET " + columnName + "="
-								+ default4SQL).getSql());
+								+ "?").getSql());
+				ps.setObject(1, defObj);
+				ps.executeUpdate();
 			} finally {
-				if (st != null)
-					st.close();
+				if (ps != null)
+					ps.close();
 			}
 		}
 

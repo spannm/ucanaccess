@@ -817,10 +817,7 @@ public class SQLConverter {
 	
 	public static String convertAddColumn(String tableName,
 			String columnName,String typeDeclaration) throws SQLException {
-		   for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
-			   typeDeclaration= typeDeclaration.replaceAll(entry.getKey(),  entry.getValue());
-		   }
-		   typeDeclaration=typeDeclaration.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
+		   typeDeclaration=convertTypeDeclaration(typeDeclaration);
 		   typeDeclaration=typeDeclaration.replaceAll(NOT_NULL, "");
 		   Matcher mtc=DEFAULT_CATCH_0.matcher(typeDeclaration);
 		   if(mtc.find()){
@@ -829,6 +826,13 @@ public class SQLConverter {
 		   String ret="ALTER TABLE "+tableName+" ADD COLUMN "+columnName+typeDeclaration;
 		  
 		   return ret;
+	}
+	
+	private static String convertTypeDeclaration(String sql){
+		for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
+			sql= sql.replaceAll(entry.getKey(),  entry.getValue());
+		   }
+		   return sql.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
 	}
 	
 	
