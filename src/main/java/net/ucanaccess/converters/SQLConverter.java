@@ -832,7 +832,7 @@ public class SQLConverter {
 	private static String convertTypeDeclaration(String typeDecl){
 		typeDecl= " "+typeDecl;
 		for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
-			typeDecl= typeDecl.replaceAll("([\\s\n\r]+)("+entry.getKey()+")([\\s\n\r]+)",  "$1"+entry.getValue()+"$3");
+			typeDecl= typeDecl.replaceAll("([\\s\n\r]+)((?i)"+entry.getKey()+")([\\s\n\r]+)",  "$1"+entry.getValue()+"$3");
 		   }
 		   return typeDecl.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
 	}
