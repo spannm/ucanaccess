@@ -659,7 +659,12 @@ public class Persist2Jet {
 				t.updateRow(row);
 			}
 			conn.getDbIO().flush();
+		
+		}
+		
+		if (default4SQL != null||cl.getType().equals(DataType.BOOLEAN)) {
 			try {
+				defObj=default4SQL == null&&cl.getType().equals(DataType.BOOLEAN)?Boolean.FALSE:defObj;
 				ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(
 						"UPDATE " + tableName + " SET " + columnName + "="
 								+ "?").getSql());

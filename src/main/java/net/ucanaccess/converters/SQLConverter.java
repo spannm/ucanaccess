@@ -829,11 +829,12 @@ public class SQLConverter {
 		   return ret;
 	}
 	
-	private static String convertTypeDeclaration(String sql){
+	private static String convertTypeDeclaration(String typeDecl){
+		typeDecl= " "+typeDecl;
 		for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
-			sql= sql.replaceAll(entry.getKey(),  entry.getValue());
+			typeDecl= typeDecl.replaceAll("([\\s\n\r]+)("+entry.getKey()+")([\\s\n\r]+)",  "$1"+entry.getValue()+"$3");
 		   }
-		   return sql.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
+		   return typeDecl.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
 	}
 	
 	
