@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
@@ -165,6 +166,7 @@ public class DDLCommandEnlist {
 		ArrayList<Boolean> notNullList = new ArrayList<Boolean>();
 		String tknt=columnName+columnDefinition;
 		this.parseColumnTypes(typeList, defaultList, notNullList, tknt);
+		check4OutOfPlacedNotNull(sql);
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		AddColumnCommand c4io = new AddColumnCommand(tableName,columnName, execId, this.columnMap,
 				this.types, this.defaults, this.notNulls);
@@ -172,6 +174,15 @@ public class DDLCommandEnlist {
 		if (!ac.getAutoCommit()) {
 			ac.commit();
 		}
+	}
+
+	private void check4OutOfPlacedNotNull(String sql) {
+		if(Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()){
+			if(this.notNulls.length>0&&(this.notNulls[0]==null||!this.notNulls[0])){
+				this.notNulls[0]=true;
+			}
+		}
+		
 	}
 
 	private void enlistDropTable(String sql, DDLType ddlType)

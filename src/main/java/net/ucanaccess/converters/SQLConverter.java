@@ -76,36 +76,37 @@ public class SQLConverter {
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
 	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
-	public static final String[] DEFAULT_CATCH = new String[] {
+	private static final String[] DEFAULT_CATCH = new String[] {
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\'(?:[^']*(?:'')*)*\')([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])" };
-	public static final Pattern DEFAULT_CATCH_0 =Pattern
+	private static final Pattern DEFAULT_CATCH_0 =Pattern
 	.compile("([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)");
+	public static final String NOT_NULL = "[\\s\n\r](?i)NOT[\\s\n\r](?i)NULL"; 
 	
 	private static final Pattern QUOTED_ALIAS = Pattern
 			.compile("([\\s\n\r]+(?i)AS[\\s\n\r]*)(\\[[^\\]]*\\])(\\W)");
 	private static final String TYPES_TRANSLATE = "(?i)_(\\W)";
-	private static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
+	public static final String DATE_ACCESS_FORMAT = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
 	
 	public static final String DATE_FORMAT = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
-	private static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
+	public static final String HHMMSS_ACCESS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
 	public static final String HHMMSS_FORMAT = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
-	public  static final String NAME_PATTERN="(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
-	public  static final int NAME_PATTERN_STEP=4;
+	private  static final String NAME_PATTERN="(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
+	private  static final int NAME_PATTERN_STEP=4;
 	private static final String UNION = "(;)([\\s\n\r]*)((?i)UNION)([\\s\n\r]*)";
 	private static final String DISTINCT_ROW = "[\\s\n\r]+(?i)DISTINCTROW[\\s\n\r]+";
 	private static final String DEFAULT_VARCHAR = "(\\W)(?i)VARCHAR([\\s\n\r,\\)])";
-	private static final String NOT_NULL = "[\\s\n\r](?i)NOT[\\s\n\r](?i)NULL"; 
+	
 	private static final String DEFAULT_VARCHAR_0 = "(\\W)(?i)VARCHAR([^\\(])";
 	private static final String BACKTRIK = "(`)([^`]*)(`)";
 	private static final String DELETE_ALL ="((?i)DELETE[\\s\n\r]+)(\\*)([\\s\n\r]+(?i)FROM[\\s\n\r]+)";
 	private static final String PARAMETERS="(?i)PARAMETERS([^;]*);";
 	private static final Pattern ESPRESSION_DIGIT = Pattern
 			.compile("([\\d]+)(?![\\.\\d])");
-	public static final String BIG_BANG = "1899-12-30";
-	public static final HashMap<String, String> noRomanCharacters = new HashMap<String, String>();
+	private static final String BIG_BANG = "1899-12-30";
+	private static final HashMap<String, String> noRomanCharacters = new HashMap<String, String>();
 	private static final List<String> KEYWORDLIST = Arrays.asList("ALL", "AND",
 			"ANY","ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE",
 			"CAST","CHECK", "COALESCE", "CORRESPONDING", "CONVERT", "COUNT", "CREATE",
