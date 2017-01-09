@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
@@ -94,6 +93,12 @@ public class AlterTableTest extends UcanaccessTestBase {
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
 			st
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
+			try{
+				st
+				.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 			st
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
 			st

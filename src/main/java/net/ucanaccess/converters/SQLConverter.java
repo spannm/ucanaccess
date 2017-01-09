@@ -816,6 +816,12 @@ public class SQLConverter {
 	}
 	
 	
+	public static boolean couldNeedDefault(String typeDeclaration){
+		 Matcher mtc=DEFAULT_CATCH_0.matcher(typeDeclaration);
+		  return !mtc.find()&&Pattern.compile(NOT_NULL).matcher(typeDeclaration).find();
+		
+	}
+	
 	public static String convertAddColumn(String tableName,
 			String columnName,String typeDeclaration) throws SQLException {
 		   typeDeclaration=convertTypeDeclaration(typeDeclaration);

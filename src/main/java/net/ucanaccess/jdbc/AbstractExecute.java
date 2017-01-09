@@ -103,6 +103,25 @@ public abstract class AbstractExecute {
 	}
 	
 	
+	private int count(String tableName) throws SQLException{
+		UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
+		Statement st=null;
+		ResultSet rs=null;
+		try{
+			st=conn.createStatement();
+			rs=st.executeQuery("select count(*) from "+tableName);
+			rs.next();
+			return rs.getInt(1);
+		}finally{
+			if(rs!=null){
+				rs.close();
+			}
+			if(st!=null){
+				st.close();
+			}
+		}
+	}
+	
 	private Object addDDLCommand() throws SQLException {
 		Object ret;
 		try {
@@ -110,6 +129,19 @@ public abstract class AbstractExecute {
 			if (ddlType == null)
 				throw new FeatureNotSupportedException(
 						NotSupportedMessage.NOT_SUPPORTED_YET);
+			if(DDLType.ADD_COLUMN.equals(ddlType)){
+				
+				if(SQLConverter.couldNeedDefault(ddlType.getColumnDefinition(sql))){
+					String cn= ddlType.getSecondDBObjectName(sql);
+					String tn=ddlType.getDBObjectName(sql);
+					int count=count(ddlType.getDBObjectName(sql));
+					if(count>0){
+						throw new UcanaccessSQLException(ExceptionMessages.DEFAULT_NEEDED,cn,tn,count);
+					}
+					
+				}
+			}
+			
 			String sql0=( ddlType.equals(DDLType.ADD_COLUMN))?
 				 SQLConverter.convertSQL(
 						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql), ddlType.getSecondDBObjectName(sql), ddlType.getColumnDefinition(sql))).getSql()
