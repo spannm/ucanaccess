@@ -615,7 +615,7 @@ public class Persist2Jet {
 		Table t=db.getTable(tn);
 		Column cl = cb.addToTable(t);
 
-		int idTable = mtd.newTable(tn, ntn, Metadata.Types.TABLE);
+		int idTable = mtd.getTableId(ntn.toUpperCase());
 		mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb
 				.getName()), cb.getType().name(), idTable);
 		saveColumnsDefaults(defaults, notNulls, cl, 0);
@@ -690,7 +690,7 @@ public class Persist2Jet {
 		Table t = db.getTable(tn);
 
 		ResultSet idxrs = conn.getHSQLDBConnection().getMetaData()
-				.getIndexInfo(null, "PUBLIC", ntn, false, false);
+				.getIndexInfo(null, "PUBLIC", ntn.toUpperCase(), false, false);
 		boolean asc = false;
 		ArrayList<String> cols = new ArrayList<String>();
 		IndexBuilder ib = new IndexBuilder(in);
@@ -709,6 +709,7 @@ public class Persist2Jet {
 				String ad = idxrs.getString("ASC_OR_DESC");
 				asc = ad == null || ad.equals("A");
 				cols.add(colName);
+							
 			}
 		}
 		ib.addColumns(asc, cols.toArray(new String[cols.size()])).addToTable(t);
@@ -722,7 +723,7 @@ public class Persist2Jet {
 		String tn = escape4Access(tableName);
 		Table t = db.getTable(tn);
 		ResultSet pkrs = conn.getHSQLDBConnection().getMetaData()
-				.getPrimaryKeys(null, null, ntn);
+				.getPrimaryKeys(null, null, ntn.toUpperCase());
 		ArrayList<String> cols = new ArrayList<String>();
 		IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
 		ib.setPrimaryKey();
@@ -748,7 +749,7 @@ public class Persist2Jet {
 		RelationshipBuilder rb = new RelationshipBuilder(rt, t);
 		rb.setReferentialIntegrity();
 		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
-				.getImportedKeys(null, null, ntn);
+				.getImportedKeys(null, null, ntn.toUpperCase());
 		Metadata mt = new Metadata(conn);
 		while (fkrs.next()) {
 			String colName = fkrs.getString("FKCOLUMN_NAME");
@@ -770,7 +771,6 @@ public class Persist2Jet {
 				rb.setCascadeUpdates();
 
 		}
-
 		rb.toRelationship(db);
 
 	}
