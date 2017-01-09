@@ -21,6 +21,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
@@ -92,13 +93,16 @@ public class AlterTableTest extends UcanaccessTestBase {
 			st
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
 			st
-					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
+						.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
+			boolean b=false;
 			try{
 				st
 				.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
-			}catch(Exception e){
-				e.printStackTrace();
+			}catch(UcanaccessSQLException e){
+				b=true;
+				System.err.println(e.getMessage());
 			}
+			assertTrue(b);
 			st
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
 			st
