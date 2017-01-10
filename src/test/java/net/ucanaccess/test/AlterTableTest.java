@@ -279,7 +279,82 @@ public class AlterTableTest extends UcanaccessTestBase {
 			st.execute("ALTER TABLE tx add column [my best friend] long ");
 			st.execute("ALTER TABLE tx add column [my worst friend] single ");
 			st.execute("ALTER TABLE tx add column  [Is Pippo] TEXT(100) ");
-			st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT");
+			st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT default \"what's this?\"");
+			
+			st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+			st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
+			st.execute("ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
+			st.execute("insert into tx1 values(1,\"ciao\")");
+			st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			checkQuery("select count(*) from tx",1);
+			st.execute("delete from tx1");
+			checkQuery("select count(*) from tx");
+			checkQuery("select count(*) from tx",0);
+			st.execute("drop table tx ");
+			st.execute("drop table tx1  ");
+			
+			st.execute("create table tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+			st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+			st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
+			st.execute("ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
+			st.execute("insert into tx1 values(1,\"ciao\")");
+			st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			checkQuery("select count(*) from tx",1);
+			st.execute("delete from tx1");
+			checkQuery("select count(*) from tx",1);
+			checkQuery("select * from tx",1 , null , 2.0 , null , "what's this?");
+			st.execute("CREATE  UNIQUE  INDEX IDX111 ON tx ([my best friend])");
+			
+			boolean b=false;
+			try{
+				st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			}catch(UcanaccessSQLException e){
+				b=true;
+				System.err.println(e.getMessage());
+			}
+			assertTrue(b);
+		}
+
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	private void executeErr(String ddl, String expectedMessage) throws SQLException{
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute(ddl);
+		}
+		catch(SQLException e){
+			System.err.println(e.getMessage());
+			assertTrue(e.getMessage().endsWith(expectedMessage));
+		}
+
+		finally {
+			if (st != null)
+				st.close();
+		}
+	} 
+	
+	
+	
+	public void testSQLErrors() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("create table tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+			st.execute("insert into tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ","unexpected token: PRIMARY");
+			executeErr("ALTER TABLE tx2 add column [my best friend]  ","unexpected end of statement");
+			executeErr("ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade","unexpected token: KEY");
+			executeErr("drop table tx2 cascade","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 add constraint primary key (id)","unexpected token: PRIMARY");
+			executeErr("ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 drop COLUMN [my best friend]","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 add COLUMN [1 my best friend]lonG not null","x2 already contains one or more records(1 records)");
+			
 			
 		}
 

@@ -266,6 +266,9 @@ public class SQLConverter {
 								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")), 
 						CREATE_TABLE(
 								Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN)), 
+					    DROP_TABLE_CASCADE(
+										Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)cascade")),
+								
 						DROP_TABLE(
 								Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN)),
 						ALTER_RENAME(
@@ -309,6 +312,7 @@ public class SQLConverter {
 			DDLType[] dts = DDLType.values();
 			for (DDLType cand : dts) {
 				if (cand.pattern.matcher(s).find()) {
+					if(cand.equals(DDLType.DROP_TABLE_CASCADE)) return null;
 					cand.ddl=elab(s);
 					return cand;
 				}

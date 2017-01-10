@@ -16,6 +16,7 @@ limitations under the License.
 package net.ucanaccess.jdbc;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -122,13 +123,30 @@ public abstract class AbstractExecute {
 		}
 	}
 	
+	private SQLException checkDDLException() throws SQLException{
+		UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
+		PreparedStatement ps=null;
+		try{
+			//hsqldb as parser by  using an unexecuted PreparedStatement: my latest trick 
+			ps=conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql());
+		}catch(SQLException ex){
+			return ex;
+		}finally{
+			if(ps!=null)ps.close();
+		}
+		return new FeatureNotSupportedException(
+				NotSupportedMessage.NOT_SUPPORTED_YET);
+	}
+	
+	
 	private Object addDDLCommand() throws SQLException {
 		Object ret;
 		try {
 			DDLType ddlType = SQLConverter.getDDLType(sql);
-			if (ddlType == null)
-				throw new FeatureNotSupportedException(
-						NotSupportedMessage.NOT_SUPPORTED_YET);
+			if (ddlType == null){
+				throw checkDDLException() ;
+			}
+			
 			if(DDLType.ADD_COLUMN.equals(ddlType)){
 				
 				if(SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())){
