@@ -612,7 +612,6 @@ public class Persist2Jet {
 		String ntn = escape4Hsqldb(tableName);
 		Metadata mtd = new Metadata(conn.getHSQLDBConnection());
 		ColumnBuilder cb = this.getColumn(ntn, columnMap, types);
-		System.out.println(cb+" "+ntn+" "+columnMap+" "+types);
 		Table t=db.getTable(tn);
 		Column cl = cb.addToTable(t);
 
