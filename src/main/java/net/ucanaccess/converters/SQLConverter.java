@@ -289,6 +289,7 @@ public class SQLConverter {
 								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN))
 						;
 		private Pattern pattern;
+		private String ddl;
 		
 
 		private DDLType(Pattern pattern) {
@@ -308,37 +309,43 @@ public class SQLConverter {
 			DDLType[] dts = DDLType.values();
 			for (DDLType cand : dts) {
 				if (cand.pattern.matcher(s).find()) {
+					cand.ddl=elab(s);
 					return cand;
 				}
 			}
 			return null;
 		}
 
-		public String getDBObjectName(String s) {
-			Matcher m = pattern.matcher(s);
+		private static String elab(String s) {
+			if(s.indexOf("[")<0|s.indexOf("]")<0)return s;
+			return s.replaceAll("\\[([^\\]]*)\\]", " $0 ");
+		}
+
+		public String getDBObjectName() {
+			Matcher m = pattern.matcher(this.ddl);
 			if (m.find()) {
 				return m.group(1);
 			}
 			return null;
 		}
 		
-		public String getSecondDBObjectName(String s) {
-			Matcher m = pattern.matcher(s);
+		public String getSecondDBObjectName() {
+			Matcher m = pattern.matcher(this.ddl);
 			if (m.find()) {
 				return m.group(1+NAME_PATTERN_STEP);
 			}
 			return null;
 		}
-		public String getThirdDBObjectName(String s) {
-			Matcher m = pattern.matcher(s);
+		public String getThirdDBObjectName() {
+			Matcher m = pattern.matcher(this.ddl);
 			if (m.find()) {
 				return m.group(1+2*NAME_PATTERN_STEP);
 			}
 			return null;
 		}
 		
-		public String getColumnDefinition(String s) {
-			Matcher m = pattern.matcher(s);
+		public String getColumnDefinition() {
+			Matcher m = pattern.matcher(this.ddl);
 			if (m.find()) {
 				return m.group(2*NAME_PATTERN_STEP+1);
 			}
@@ -836,9 +843,9 @@ public class SQLConverter {
 	}
 	
 	private static String convertTypeDeclaration(String typeDecl){
-		typeDecl= " "+typeDecl;
+		typeDecl= " "+typeDecl+" ";//padding for a generic RE use
 		for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
-			typeDecl= typeDecl.replaceAll("([\\s\n\r]+)((?i)"+entry.getKey()+")([\\s\n\r]+)",  "$1"+entry.getValue()+"$3");
+			typeDecl= typeDecl.replaceAll("([\\s\n\r]+)((?i)"+entry.getKey()+")([\\s\n\r\\(]+)",  "$1"+entry.getValue()+"$3");
 		   }
 		   return typeDecl.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
 	}

@@ -86,10 +86,10 @@ public abstract class AbstractExecute {
 
 	
 	
-	private Object enableDiasable(DDLType ddlType ,String sql0) throws SQLException, IOException{
-		String tn=ddlType.getDBObjectName(sql0);
-		if(tn==null&&sql0.indexOf('"')>0){
-			tn=sql0.substring(sql0.indexOf('"')+1,sql0.lastIndexOf('"'));
+	private Object enableDiasable(DDLType ddlType) throws SQLException, IOException{
+		String tn=ddlType.getDBObjectName();
+		if(tn.startsWith("[")&&tn.endsWith("]")){
+			tn=tn.substring(1,tn.length()-1);
 		}
 		UcanaccessConnection conn=(UcanaccessConnection)this.statement.getConnection();
 		Metadata mtd=new Metadata(conn.getHSQLDBConnection());
@@ -131,10 +131,10 @@ public abstract class AbstractExecute {
 						NotSupportedMessage.NOT_SUPPORTED_YET);
 			if(DDLType.ADD_COLUMN.equals(ddlType)){
 				
-				if(SQLConverter.couldNeedDefault(ddlType.getColumnDefinition(sql))){
-					String cn= ddlType.getSecondDBObjectName(sql);
-					String tn=ddlType.getDBObjectName(sql);
-					int count=count(ddlType.getDBObjectName(sql));
+				if(SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())){
+					String cn= ddlType.getSecondDBObjectName();
+					String tn=ddlType.getDBObjectName();
+					int count=count(ddlType.getDBObjectName());
 					if(count>0){
 						throw new UcanaccessSQLException(ExceptionMessages.DEFAULT_NEEDED,cn,tn,count);
 					}
@@ -144,14 +144,14 @@ public abstract class AbstractExecute {
 			
 			String sql0=( ddlType.equals(DDLType.ADD_COLUMN))?
 				 SQLConverter.convertSQL(
-						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql), ddlType.getSecondDBObjectName(sql), ddlType.getColumnDefinition(sql))).getSql()
+						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(), ddlType.getSecondDBObjectName(), ddlType.getColumnDefinition())).getSql()
 						 :
 				 SQLConverter.convertSQL(sql).getSql();
 			boolean enDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
 					DDLType.DISABLE_AUTOINCREMENT);
 			this.statement.setEnableDisable(enDis);
 			if(enDis) {
-				return enableDiasable(ddlType ,sql0);
+				return enableDiasable(ddlType );
 			}
 			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
 					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter

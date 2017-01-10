@@ -43,7 +43,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 		super.setUp();
 		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
 		executeCreateTable(
-				"CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime, e numeric(8,3)) ",
+				"CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ",
 				1);
 	}
 
@@ -89,7 +89,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
 			st
-					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT NOT NULL DEFAULT 'PIPPO'  ");
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
 			st
 					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
 			st
@@ -270,5 +270,24 @@ public class AlterTableTest extends UcanaccessTestBase {
 				st.close();
 		}
 	}
+	
+	public void testMiscellaneus() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("ALTER TABLE tx add constraint pk primary key ([i d]) ");
+			st.execute("ALTER TABLE tx add column [my best friend] long ");
+			st.execute("ALTER TABLE tx add column [my worst friend] single ");
+			st.execute("ALTER TABLE tx add column  [Is Pippo] TEXT(100) ");
+			st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT");
+			
+		}
+
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+
 
 }

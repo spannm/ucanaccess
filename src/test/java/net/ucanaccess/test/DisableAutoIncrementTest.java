@@ -34,7 +34,8 @@ public class DisableAutoIncrementTest extends UcanaccessTestBase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		 executeCreateTable("CREATE TABLE CT (id COUNTER PRIMARY KEY ,descr TEXT) ");
+		 executeCreateTable("CREATE TABLE CT (id COUNTER PRIMARY KEY ,descr TEXT) ",0);
+		 executeCreateTable("CREATE TABLE [C T] (id COUNTER PRIMARY KEY ,descr TEXT) ",1);
 		 
 	}
 	
@@ -68,6 +69,7 @@ public class DisableAutoIncrementTest extends UcanaccessTestBase {
 			assertTrue(exc);
 			st.execute("enable AUTOINCREMENT ON CT ");
 			st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
+			st.execute("DISABLE AUTOINCREMENT ON[C T]");
 		} finally {
 			if (st != null)
 				st.close();

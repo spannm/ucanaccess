@@ -609,6 +609,11 @@ public class LoadJet {
 				String default4SQL = defaultValue4SQL(defaulT,cl.getType());
 				String guidExp = "GenGUID()";
 				if (!guidExp.equals(defaulT)) {
+					boolean defaultIsFunction=defaulT.toString().trim().endsWith(")")&&
+					defaulT.toString().indexOf("(")>0;
+					if(defaultIsFunction){
+						metadata.columnDef(cl.getTable().getName(), cl.getName(), defaulT.toString());
+					}
 					Object defFound=default4SQL;
 					boolean isNull=(default4SQL+"").equalsIgnoreCase("null");
 					if (!isNull&&(defFound=tryDefault(default4SQL))==null) {
@@ -616,7 +621,7 @@ public class LoadJet {
 						Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION,
 						""+ defaulT, cl.getName(), cl.getTable().getName());
 					} else {
-						if(defFound!=null){
+						if(defFound!=null&&!defaultIsFunction){
 							metadata.columnDef(cl.getTable().getName(), cl.getName(), defFound.toString());
 						}
 						if(cl.getType()==DataType.TEXT

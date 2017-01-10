@@ -42,7 +42,7 @@ public class DDLCommandEnlist {
 
 	private void enlistCreateTable(String sql, DDLType ddlType)
 			throws SQLException {
-		String tn = ddlType.getDBObjectName(sql);
+		String tn = ddlType.getDBObjectName();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		String execId = UcanaccessConnection.getCtxExcId();
 		Connection hsqlConn = ac.getHSQLDBConnection();
@@ -121,8 +121,8 @@ public class DDLCommandEnlist {
 	}
 
 	private void enlistCreateForeignKey(String sql, DDLType ddlType) throws SQLException {
-		String tableName= ddlType.getDBObjectName(sql);
-		String referencedTable=ddlType.getThirdDBObjectName(sql);
+		String tableName= ddlType.getDBObjectName();
+		String referencedTable=ddlType.getThirdDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
 		CreateForeignKeyCommand c4io = new CreateForeignKeyCommand(tableName, referencedTable,execId );
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
@@ -133,7 +133,7 @@ public class DDLCommandEnlist {
 	}
 
 	private void enlistCreatePrimaryKey(String sql, DDLType ddlType) throws SQLException {
-		String tableName= ddlType.getDBObjectName(sql);
+		String tableName= ddlType.getDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
 		CreatePrimaryKeyCommand c4io = new CreatePrimaryKeyCommand(tableName, execId );
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
@@ -144,8 +144,8 @@ public class DDLCommandEnlist {
 	}
 
 	private void enlistCreateIndex(String sql, DDLType ddlType) throws SQLException {
-		String indexName = ddlType.getDBObjectName(sql);
-		String tableName = ddlType.getSecondDBObjectName(sql);
+		String indexName = ddlType.getDBObjectName();
+		String tableName = ddlType.getSecondDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		CreateIndexCommand c4io = new CreateIndexCommand(indexName,tableName, execId );
@@ -156,9 +156,9 @@ public class DDLCommandEnlist {
 	}
 
 	private void enlistAddColumn(String sql, DDLType ddlType) throws SQLException {
-		String tableName = ddlType.getDBObjectName(sql);
-		String columnName = ddlType.getSecondDBObjectName(sql);
-		String columnDefinition = ddlType.getColumnDefinition(sql);
+		String tableName = ddlType.getDBObjectName();
+		String columnName = ddlType.getSecondDBObjectName();
+		String columnDefinition = ddlType.getColumnDefinition();
 		String execId = UcanaccessConnection.getCtxExcId();
 		ArrayList<String> typeList = new ArrayList<String>();
 		ArrayList<String> defaultList = new ArrayList<String>();
@@ -187,7 +187,7 @@ public class DDLCommandEnlist {
 
 	private void enlistDropTable(String sql, DDLType ddlType)
 			throws SQLException {
-		String tn = ddlType.getDBObjectName(sql);
+		String tn = ddlType.getDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		DropTableCommand c4io = new DropTableCommand(tn, execId);
@@ -199,8 +199,8 @@ public class DDLCommandEnlist {
 
 	private void enlistAlterRename(String sql, DDLType ddlType)
 			throws SQLException {
-		String oldTn = ddlType.getDBObjectName(sql);
-		String newTn = ddlType.getSecondDBObjectName(sql);
+		String oldTn = ddlType.getDBObjectName();
+		String newTn = ddlType.getSecondDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		AlterRenameCommand c4io = new AlterRenameCommand(oldTn, newTn, execId);
