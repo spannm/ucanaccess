@@ -742,6 +742,7 @@ public class Persist2Jet {
 		}
 		ib.addColumns(cols.toArray(new String[cols.size()])).addToTable(t);
 	}
+	
 
 	public void createForeignKey(String tableName, String referencedTable)
 			throws IOException, SQLException {
@@ -756,7 +757,7 @@ public class Persist2Jet {
 		RelationshipBuilder rb = new RelationshipBuilder(rt, t);
 		rb.setReferentialIntegrity();
 		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
-				.getImportedKeys(null, null, ntn.toUpperCase());
+				.getCrossReference(null, null, rntn.toUpperCase(), null, null, ntn.toUpperCase());
 		Metadata mt = new Metadata(conn);
 		while (fkrs.next()) {
 			String colName = fkrs.getString("FKCOLUMN_NAME");
