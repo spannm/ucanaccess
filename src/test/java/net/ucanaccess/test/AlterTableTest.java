@@ -116,13 +116,20 @@ public class AlterTableTest extends UcanaccessTestBase {
 			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
 			dump("select * from [22 amadeimargmail111] ORDER BY c");
 			st
-			.execute("ALTER TABLE Sample ADD COLUMN YeSNo  YesNo  ");
+			.executeUpdate("Update sample set Description='wRRRw'");
+			st
+			.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
+			
+			st
+			.execute("Update sample set Description='ww'");
 			checkQuery("select * from Sample");
 			dump("select * from Sample");
 			
 			System.out.println("after having added a few columns....");
 			dump("select * from UCA_METADATA.Columns");
+			
 			this.createFK();
+			
 		}
 
 		finally {
@@ -189,7 +196,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 			}
 			
 			
-			st.execute("CREATE  INDEX ciao on Sample  (field)");
+			st.execute("CREATE  INDEX ciao on Sample  (description)");
 			for (Index idx : tb.getIndexes()) {
 				if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
 					found = true;
@@ -230,14 +237,14 @@ public class AlterTableTest extends UcanaccessTestBase {
 			
 			
 			
-			st.execute("ALTER TABLE Sample add  Primary key (id)");
+			st.execute("ALTER TABLE Sample add  Primary key (RegionId)");
 			tb = db.getTable("Sample");
 		    idx = tb.getPrimaryKeyIndex();
 		    ar.clear();
 			for (Column cl : idx.getColumns()) {
 				ar.add(cl.getName());
 			}
-			assertTrue(ar.contains("ID"));
+			assertTrue(ar.contains("RegionId"));
 			
 		}
 
