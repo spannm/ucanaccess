@@ -122,6 +122,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 			
 			System.out.println("after having added a few columns....");
 			dump("select * from UCA_METADATA.Columns");
+			this.createFK();
 		}
 
 		finally {
@@ -246,7 +247,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 		}
 	}
 
-	public void testCreateFK() throws SQLException, IOException {
+	private void createFK() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
