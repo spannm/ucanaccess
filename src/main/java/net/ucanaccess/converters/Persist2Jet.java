@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
@@ -110,10 +111,14 @@ public class Persist2Jet {
 			ArrayList<String> ar = new ArrayList<String>();
 			ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn,
 					null);
+			TreeMap<Integer,String> tm=new TreeMap<Integer,String>();
 			while (rs.next()) {
 				String cbase = rs.getString("COLUMN_NAME");
-				ar.add(cbase.toUpperCase());
+				Integer i=rs.getInt("ORDINAL_POSITION");
+				tm.put(i,cbase.toUpperCase());
+				
 			}
+			ar.addAll(tm.values());
 			columnNamesCache.put(key, ar);
 		}
 		return columnNamesCache.get(key);
@@ -621,6 +626,8 @@ public class Persist2Jet {
 		saveColumnsDefaults(defaults, notNulls, cl, 0);
 		updateNewColumn2Defaut(tableName, columnName,t, cl);
 		setHsqldbNotNull(tableName, columnName,types[0], cl);
+		conn.reloadDbIO();
+				
 	}
 
 	private void setHsqldbNotNull(String tableName, String columnName, String type, Column cl)
