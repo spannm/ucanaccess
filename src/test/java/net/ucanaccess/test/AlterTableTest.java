@@ -356,7 +356,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 			st.execute("insert into tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
 			executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ","unexpected token: PRIMARY");
 			executeErr("ALTER TABLE tx2 add column [my best friend]  ","unexpected end of statement");
-			executeErr("ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade","unexpected token: KEY");
+			executeErr("ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade","type not found or user lacks privilege: FOREIGN");
 			executeErr("drop table tx2 cascade","Feature not supported yet.");
 			executeErr("ALTER TABLE tx2 add constraint primary key (id)","unexpected token: PRIMARY");
 			executeErr("ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33","Feature not supported yet.");

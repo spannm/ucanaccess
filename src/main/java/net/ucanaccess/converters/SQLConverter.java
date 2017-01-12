@@ -274,16 +274,18 @@ public class SQLConverter {
 						ALTER_RENAME(
 								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
 										"[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" +NAME_PATTERN)),		
-						ADD_COLUMN(Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
-														"[\\s\n\r]+(?i)add[\\s\n\r]+(?i)column[\\s\n\r]+" +NAME_PATTERN+"(.*)")),
-					    CREATE_INDEX(Pattern.compile("(?i)CREATE[\\s\n\r]+(?:(?i)unique)?[\\s\n\r]*(?i)index[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)ON[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+")),								
-					    CREATE_PRIMARY_KEY(Pattern
-					    .compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+)?(?i)primary[\\s\n\r]+(?i)key(.*)")),
-					    
-					    CREATE_FOREIGN_KEY(Pattern
-							    .compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+)?(?i)foreign[\\s\n\r]+(?i)key[\\s\n\r]+"
-							    		+ "(?:\\(.*\\))[\\s\n\r]*(?i)references[\\s\n\r]+"+NAME_PATTERN+"(.*)"))
-							    		,
+					    CREATE_PRIMARY_KEY(
+					    		Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+)?(?i)primary[\\s\n\r]+(?i)key(.*)")),
+						CREATE_FOREIGN_KEY(
+								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+)?(?i)foreign[\\s\n\r]+(?i)key[\\s\n\r]+"
+														    		+ "(?:\\(.*\\))[\\s\n\r]*(?i)references[\\s\n\r]+"+NAME_PATTERN+"(.*)")),
+										
+						ADD_COLUMN(
+								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
+														"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)column[\\s\n\r]+)?" +NAME_PATTERN+"(.*)")),
+					    CREATE_INDEX(
+					    		Pattern.compile("(?i)CREATE[\\s\n\r]+(?:(?i)unique)?[\\s\n\r]*(?i)index[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)ON[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+")),								
+					   
 					    
 					    DISABLE_AUTOINCREMENT(Pattern
 						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN)),
