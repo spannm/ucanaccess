@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package net.ucanaccess.test;
 
 import java.io.IOException;
@@ -20,11 +20,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.Index.Column;
+import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 
@@ -36,11 +39,10 @@ public class CreateTableTest extends UcanaccessTestBase {
 	public CreateTableTest(FileFormat accVer) {
 		super(accVer);
 	}
-	
+
 	public String getAccessPath() {
 		return "net/ucanaccess/test/resources/badDB.accdb";
 	}
-	
 
 	private void createAsSelect() throws SQLException, IOException {
 		Statement st = null;
@@ -127,9 +129,6 @@ public class CreateTableTest extends UcanaccessTestBase {
 				st.close();
 		}
 	}
-	
-	
-	
 
 	public void setDPK() throws SQLException, IOException {
 		Statement st = null;
@@ -179,7 +178,7 @@ public class CreateTableTest extends UcanaccessTestBase {
 			st.close();
 		}
 	}
-	
+
 	private void notNullBug() throws SQLException, IOException {
 		Statement st = null;
 		try {
@@ -188,68 +187,99 @@ public class CreateTableTest extends UcanaccessTestBase {
 					+ "number decimal (23,5) default -4.6 not null , "
 					+ "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ,"
 					+ "txt3 text not null)");
-			
-			checkNotNull("nnb","number",true);
-			checkNotNull("nnb","txt1",true);
-			checkNotNull("nnb","blank",false);
-			checkNotNull("nnb","dt",true);
-			checkNotNull("nnb","txt2",false);
-			checkNotNull("nnb","txt3",true);
+
+			checkNotNull("nnb", "number", true);
+			checkNotNull("nnb", "txt1", true);
+			checkNotNull("nnb", "blank", false);
+			checkNotNull("nnb", "dt", true);
+			checkNotNull("nnb", "txt2", false);
+			checkNotNull("nnb", "txt3", true);
 		} finally {
 			st.close();
 		}
 	}
-    private void checkNotNull(String tn ,String cn,boolean notNull) throws IOException{
-    	Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+
+	private void checkNotNull(String tn, String cn, boolean notNull)
+			throws IOException {
+		Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
 		Table tb = db.getTable(tn);
 		PropertyMap pm = tb.getColumn(cn).getProperties();
 		assertEquals(notNull, pm.getValue(PropertyMap.REQUIRED_PROP));
-		
-    }
+
+	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		executeCreateTable(" CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
 				+ "d DATETIME default now(), e text default 'l''aria')");
-		
+
 	}
 
 	public void testCreate() throws Exception {
-		 createSimple();
-		 createPs();
-		 createAsSelect() ;
-		 createAsSelect2();
-		 setTableProperties();
+		createSimple();
+		createPs();
+		createAsSelect();
+		createAsSelect2();
+		setTableProperties();
 		setDPK();
-		 defaults();
-		 notNullBug();
+		defaults();
+		notNullBug();
 	}
-	
-	
-	public void testNaming() throws SQLException, IOException{
+
+	public void testNaming() throws SQLException, IOException {
 		Statement st = super.ucanaccess.createStatement();
-		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-		st.execute(" CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
-		st.execute(" CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-		st.execute(" drop table  [ggg kk]");
-		st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
-		st.execute(" CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-		st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
-		st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
-		
-		
+		try {
+			st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+			st.execute(" CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
+			st.execute(" CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+			st.execute(" drop table  [ggg kk]");
+			st.execute(" CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
+			st.execute(" CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+			st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
+			st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
+		} finally {
+			st.close();
+		}
+
 		dump("select * from counter");
 	}
-	
-	public void testPs() throws SQLException{
-		PreparedStatement ps = super.ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
-		ps.execute();
-		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0);
-		ps.execute();
-		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0,0);
-		ps.execute();
-		ps = super.ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0,0,0);
-		ps.execute();
+
+	public void testCreateWithFK() throws SQLException, IOException {
+		Statement st = super.ucanaccess.createStatement();
+		try {
+			st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");
+			st.execute(" CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y) REFERENCES Parent (x)  )");
+			Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+			Table tb = db.getTable("Babe");
+			Table tbr = db.getTable("Parent");
+			Index idx = tb.getForeignKeyIndex(tbr);
+			ArrayList<String> ar = new ArrayList<String>();
+			for (Column cl : idx.getColumns()) {
+				ar.add(cl.getName());
+			}
+			assertTrue(ar.contains("y"));
+			st.execute(" CREATE TABLE [1 Parent]( [x 0] long , y long, PRIMARY KEY([x 0],y))");
+			st.execute(" CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y)  )");
 		
+		} finally {
+			st.close();
+		}
+
+	}
+
+	public void testPs() throws SQLException {
+		PreparedStatement ps = super.ucanaccess
+				.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
+		ps.execute();
+		ps = super.ucanaccess.prepareStatement(
+				"CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0);
+		ps.execute();
+		ps = super.ucanaccess.prepareStatement(
+				"CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0);
+		ps.execute();
+		ps = super.ucanaccess.prepareStatement(
+				"CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0);
+		ps.execute();
+
 	}
 }

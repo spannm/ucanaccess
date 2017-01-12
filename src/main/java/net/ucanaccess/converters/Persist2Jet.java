@@ -25,6 +25,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -482,6 +483,7 @@ public class Persist2Jet {
 		saveColumnsDefaults(defaults, notNulls, table);
 		LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), db);
 		lj.loadDefaultValues(table);
+		createForeignKeys(tableName);
 		Statement st = null;
 		try {
 			st = conn.createStatement();
@@ -640,7 +642,6 @@ public class Persist2Jet {
 		try {
 			if (req) {
 				stNN = conn.getHSQLDBConnection().createStatement();
-				
 				stNN.execute(SQLConverter.convertSQL(
 						"ALTER TABLE " + tableName + " ALTER COLUMN "
 								+ columnName +" SET NOT NULL ").getSql());
@@ -746,24 +747,46 @@ public class Persist2Jet {
 
 	public void createForeignKey(String tableName, String referencedTable)
 			throws IOException, SQLException {
-		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		Database db = conn.getDbIO();
 		String ntn = escape4Hsqldb(tableName);
 		String rntn = escape4Hsqldb(referencedTable);
 		String tn = escape4Access(tableName);
-		Table t = db.getTable(tn);
 		String rtn = escape4Access(referencedTable);
-		Table rt = db.getTable(rtn);
+		createForeignKey( ntn, rntn, tn, rtn);
+	}
+	
+	public void createForeignKeys(String tableName)
+			throws IOException, SQLException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		String ntn = escape4Hsqldb(tableName);
+		String tn = escape4Access(tableName);
+		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
+				.getImportedKeys(null, null,  ntn.toUpperCase());
+		HashSet<String> hs=new HashSet<String>();
+		while (fkrs.next()) {
+			hs.add(fkrs.getString("PKTABLE_NAME"));
+		}
+		Metadata mt = new Metadata(conn);
+		for(String rntn:hs){
+			createForeignKey( ntn, rntn, tn, mt.getTableName(rntn));
+		}
+	}
+	
+	private void createForeignKey(String tn4Hsqldb, String refTn4Hsqldb,String tn4Access,String refTn4Access)
+			throws IOException, SQLException {
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Database db = conn.getDbIO();
+		Table t = db.getTable(tn4Access);
+		Table rt = db.getTable(refTn4Access);
 		RelationshipBuilder rb = new RelationshipBuilder(rt, t);
 		rb.setReferentialIntegrity();
 		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
-				.getCrossReference(null, null, rntn.toUpperCase(), null, null, ntn.toUpperCase());
+				.getCrossReference(null, null, refTn4Hsqldb.toUpperCase(), null, null, tn4Hsqldb.toUpperCase());
 		Metadata mt = new Metadata(conn);
 		while (fkrs.next()) {
 			String colName = fkrs.getString("FKCOLUMN_NAME");
-			colName = mt.getColumnName(ntn, colName);
+			colName = mt.getColumnName(tn4Hsqldb, colName);
 			String rcolName = fkrs.getString("PKCOLUMN_NAME");
-			rcolName = mt.getColumnName(rntn, rcolName);
+			rcolName = mt.getColumnName(refTn4Hsqldb, rcolName);
 			rb.addColumns(rcolName, colName);
 			short dr = fkrs.getShort("DELETE_RULE");
 			short ur = fkrs.getShort("UPDATE_RULE");
