@@ -120,12 +120,12 @@ public class Main {
 			if (fl != null) {
 				System.out.println("Given file does not exist");
 			}
-			System.out.print("Please, enter the full path to the access file (.mdb or accdb): ");
+			System.out.print("Please, enter the full path to the access file (.mdb or .accdb): ");
 			String path = input.readLine().trim();
 			if (path.endsWith(";"))
 				path = path.substring(0, path.length() - 1);
 			if(path.equalsIgnoreCase("quit")){
-				System.out.println("I'm so unhappy.Goodbye.");
+				System.out.println("I'm so unhappy. Goodbye.");
 				System.exit(1);
 			}
 			fl = new File(path);
@@ -262,7 +262,7 @@ public class Main {
 				}
 			} else {
 				int num = st.getUpdateCount();
-				prompt(num == 0 ? "No rows affected" : num + " rows affected");
+				prompt(num == 0 ? "No rows affected" : num + " row(s) affected");
 			}
 		} catch (Exception e) {
 			prompt(e.getMessage());
@@ -296,7 +296,7 @@ public class Main {
 	
 	private void sayHello(String version) {
 		prompt("");
-		System.out.println("Copyright (c) 2012 Marco Amadei");
+		System.out.printf("Copyright (c) %d Marco Amadei%n", java.util.Calendar.getInstance().get(java.util.Calendar.YEAR));
 		System.out.println("UCanAccess version "+version);
 		System.out.println("You are connected!! ");
 		
@@ -306,7 +306,7 @@ public class Main {
 		System.out.println();
 		System.out.println("use:   ");
 		System.out.println("   export <pathToCsv>;");
-		System.out.println("for exporting into a .csv file the result set from the last executed query");
+		System.out.println("for exporting the result set from the last executed query into a .csv file");
 		prompt();
 		
 	}
@@ -330,10 +330,10 @@ public class Main {
 				
 					StringTokenizer st = new StringTokenizer(cmd);
 					if (st.countTokens() != 2) {
-						prompt("Export Command right sintax is:export <pathToCsv>");
+						prompt("Export command syntax is: export <pathToCsv>");
 					}
 					if (this.lastSqlQuery == null) {
-						prompt("You must first execute a SQL query, then export the ResultSet!");
+						prompt("You must first execute an SQL query, then export the ResultSet!");
 					} else {
 						Statement statement = conn.createStatement();
 						ResultSet rs = statement
@@ -357,6 +357,6 @@ public class Main {
 				this.prompt();
 			}
 		}
-		System.out.println("Cheers. Thank you for using UCanAccess Jdbc Driver.");
+		System.out.println("Cheers! Thank you for using the UCanAccess JDBC Driver.");
 	}
 }
