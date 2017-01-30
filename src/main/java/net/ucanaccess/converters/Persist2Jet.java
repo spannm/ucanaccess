@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -307,18 +308,17 @@ public class Persist2Jet {
 		return null;
 	}
 
-	private List<ColumnBuilder> getColumns(String tableName,
+	private Collection<ColumnBuilder> getColumns(String tableName,
 			Map<String, String> columnMap, String[] types) throws SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		ArrayList<ColumnBuilder> arcl = new ArrayList<ColumnBuilder>();
+		TreeMap<Integer,ColumnBuilder>  ordm=new TreeMap<Integer,ColumnBuilder>() ;
 		ResultSet rs = conn.getHSQLDBConnection().getMetaData()
 				.getColumns(null, "PUBLIC", tableName.toUpperCase(), null);
-		int i = 0;
 		while (rs.next()) {
-			arcl.add(getColumn(rs, i, tableName, columnMap, types));
-			++i;
+			int seq=rs.getInt("ORDINAL_POSITION")-1;
+			ordm.put(seq, getColumn(rs, seq, tableName, columnMap, types));
 		}
-		return arcl;
+		return ordm.values();
 	}
 
 	private List<IndexBuilder> getIndexBuilders(String tableName,
@@ -461,7 +461,7 @@ public class Persist2Jet {
 		Metadata mtd = new Metadata(conn.getHSQLDBConnection());
 		TableBuilder tb = new TableBuilder(tn);
 		int idTable = mtd.newTable(tn, ntn, Metadata.Types.TABLE);
-		List<ColumnBuilder> lcb = getColumns(ntn, columnMap, types);
+		Collection<ColumnBuilder> lcb = getColumns(ntn, columnMap, types);
 		tb.addColumns(lcb);
 		for (ColumnBuilder cb : lcb) {
 			mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb
