@@ -460,7 +460,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
 	public String getDatabaseProductName() throws SQLException {
 
-		return "Ucanaccess for access db(Jet) using hasqldb";
+		return "UCanAccess driver for Microsoft Access databases using HSQLDB";
 
 	}
 
