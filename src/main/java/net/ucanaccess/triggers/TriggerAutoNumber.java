@@ -18,14 +18,19 @@ package net.ucanaccess.triggers;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.hsqldb.types.JavaObjectData;
 
 
+
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 
@@ -46,6 +51,16 @@ public class TriggerAutoNumber extends TriggerBase {
 			int i = 0;
 			for (Column cli : t.getColumns()) {
 				ColumnImpl cl=(ColumnImpl)cli;
+				if(cli.getType()
+						.equals(DataType.COMPLEX_TYPE)
+						&&(newR[i]==null||"".equals(newR[i]))){
+					if(cli.getComplexInfo().getType().equals(ComplexDataType.ATTACHMENT)){
+						newR[i]=new JavaObjectData(new Attachment[0]);
+					}
+					else if (cli.getComplexInfo().getType().equals(ComplexDataType.MULTI_VALUE)){
+						newR[i]=new JavaObjectData(new SingleValue[0]);
+					}
+				}else
 			
 				if (cl.isAutoNumber()&&!t.isAllowAutoNumberInsert()
 						) {
