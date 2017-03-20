@@ -100,9 +100,6 @@
 				
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
-					<excludes>
-						<exclude>**/*.java</exclude>
-					</excludes>
 					<includes>
 						<include>**/suite/AllTests2*.java</include>
 					</includes>
