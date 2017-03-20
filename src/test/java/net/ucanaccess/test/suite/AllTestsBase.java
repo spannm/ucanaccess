@@ -16,47 +16,48 @@ limitations under the License.
 package net.ucanaccess.test.suite;
 
 
+import junit.framework.TestSuite;
 import net.ucanaccess.test.AccessLikeTest;
 import net.ucanaccess.test.AddFunctionTest;
 import net.ucanaccess.test.AggregateFunctionsTest;
+import net.ucanaccess.test.AlterTableTest;
 import net.ucanaccess.test.BatchTest;
 import net.ucanaccess.test.BlobOleTest;
 import net.ucanaccess.test.BooleanTest;
+import net.ucanaccess.test.ByteTest;
+import net.ucanaccess.test.ColumnOrderTest;
 import net.ucanaccess.test.CounterTest;
 import net.ucanaccess.test.CreateTableTest;
 import net.ucanaccess.test.CrudTest;
+import net.ucanaccess.test.CsvDumpTest;
 import net.ucanaccess.test.DropTableTest;
 import net.ucanaccess.test.ExceptionCodeTest;
 import net.ucanaccess.test.ExternalResourcesTest;
+import net.ucanaccess.test.FloatTest;
 import net.ucanaccess.test.FunctionsTest;
+import net.ucanaccess.test.GeneratedKeysTest;
 import net.ucanaccess.test.GeneratedKeysTest1;
 import net.ucanaccess.test.InsertBigTest;
 import net.ucanaccess.test.LoadTypesAccessTest;
 import net.ucanaccess.test.MetaDataTest;
 import net.ucanaccess.test.MultiThreadAccessTest;
 import net.ucanaccess.test.MultipleGroupByTest;
-import net.ucanaccess.test.PasswordTest;
 import net.ucanaccess.test.NoRomanCharacterTest;
+import net.ucanaccess.test.ParametersTest;
+import net.ucanaccess.test.PasswordTest;
+import net.ucanaccess.test.PivotTest;
 import net.ucanaccess.test.RegexTest;
+import net.ucanaccess.test.ReloadPersistentMirrorTest;
 import net.ucanaccess.test.Size97Test;
 import net.ucanaccess.test.TransactionTest;
-import net.ucanaccess.test.WorkloadTest;
-import net.ucanaccess.test.PivotTest;
-import net.ucanaccess.test.ByteTest;
-import net.ucanaccess.test.GeneratedKeysTest;
-import net.ucanaccess.test.ColumnOrderTest;
 import net.ucanaccess.test.UnproperExecuteQueryTest;
-import net.ucanaccess.test.ParametersTest;
-import net.ucanaccess.test.FloatTest;
 import net.ucanaccess.test.WeirdObjectNamesTest;
-import net.ucanaccess.test.ReloadPersistentMirrorTest;
-import net.ucanaccess.test.AlterTableTest;
-import junit.framework.TestSuite;
+import net.ucanaccess.test.WorkloadTest;
 
 public class AllTestsBase {
 	public static TestSuite suite() throws ClassNotFoundException {
-		 TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
-		 suite.addTestSuite(AddFunctionTest.class);
+		TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
+		suite.addTestSuite(AddFunctionTest.class);
 		suite.addTestSuite(AccessLikeTest.class);
 		suite.addTestSuite(CounterTest.class);
 		suite.addTestSuite(BlobOleTest.class);
@@ -91,6 +92,7 @@ public class AllTestsBase {
 		suite.addTestSuite(WeirdObjectNamesTest.class);
 		suite.addTestSuite(ReloadPersistentMirrorTest.class);
 		suite.addTestSuite(AlterTableTest.class);
+		suite.addTestSuite(CsvDumpTest.class);
 		return suite;
 	}
 }

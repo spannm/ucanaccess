@@ -201,7 +201,7 @@ public class Main {
 					o=Arrays.toString((Object[])o);
 				}
 				if(o instanceof Date){
-					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					o=df.format((Date)o);
 				}
 				if(o instanceof BigDecimal){
