@@ -27,7 +27,7 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 import net.ucanaccess.console.Main;
 
 /**
- * Unit test for {@link net.ucanaccess.console.Main#dump()}.
+ * Unit test for {@link net.ucanaccess.console.Main#csvDump()}.
  */
 public class CsvDumpTest extends UcanaccessTestBase {
 	// Support both Linux and Windows.
@@ -90,8 +90,8 @@ public class CsvDumpTest extends UcanaccessTestBase {
 				+ "date_field"
 				+ LINE_SEPARATOR
 				+ "1;"
-				+ "embedded delimiter(;);" // TODO(btpark): fix this
-				+ "double-quote(\");" // TODO(btpark): fix this
+				+ "\"embedded delimiter(;)\";"
+				+ "\"double-quote(\"\")\";"
 				+ "embedded newline( );"
 				+ "2;"
 				+ "true;"
@@ -116,7 +116,7 @@ public class CsvDumpTest extends UcanaccessTestBase {
 		try {
 			st = ucanaccess.createStatement();
 			rs = st.executeQuery(select);
-			new Main(ucanaccess, null).dump(rs, ps, false /* consoleMode */);
+			new Main(ucanaccess, null).csvDump(rs, ";", ps);
 		} finally {
 			if (rs != null)
 				rs.close();

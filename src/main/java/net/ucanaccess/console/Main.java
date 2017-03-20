@@ -34,18 +34,26 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
-
-import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 
+import net.ucanaccess.util.Logger;
+
 public class Main {
+	private static final String EXPORT_USAGE = "export [-d <delimiter>] [-t <table>] <pathToCsv>";
+
+	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;	
+		
+	private static final String DEFAULT_CSV_DELIMITER = ";";
+	
 	private static boolean batchMode=false;
 	private Connection conn;
 	private boolean connected = true;
@@ -164,9 +172,32 @@ public class Main {
 	public static void setBatchMode(boolean batchMode) {
 		Main.batchMode = batchMode;
 	}
-	
-	private void consoleDump(ResultSet rs, int cols, PrintStream out)
+
+	/**
+	 * Prints the ResultSet {@code rs} in a format suitable for the terminal 
+	 * console given by {@code out}.
+	 */
+	public void consoleDump(ResultSet rs, PrintStream out)
 			throws SQLException {
+		ResultSetMetaData meta = rs.getMetaData();
+		int cols = meta.getColumnCount();
+
+		// Print the header.
+		StringBuilder header = new StringBuilder("| ");
+		for (int i = 1; i <= cols; ++i) {
+			header.append(meta.getColumnLabel(i));
+			header.append(" | ");
+		}
+		StringBuilder interline = new StringBuilder();
+		for (int i = 0; i < header.length(); ++i) {
+			interline.append("-");
+		}
+		out.println(interline);
+		out.println(header);
+		out.println(interline);
+		out.println();
+		
+		// Print the result set.
 		while (rs.next()) {
 			System.out.print("| ");
 			for (int i = 1; i <= cols; ++i) {
@@ -182,16 +213,26 @@ public class Main {
 		}
 	}
 	
-	private void csvDump(ResultSet rs, int cols, PrintStream out)
+	/**
+	 * Prints the ResultSet {@code rs} in CSV format using the {@code delimiter} to the
+	 * output file {@code out}.
+	 */
+	public void csvDump(ResultSet rs, String delimiter, PrintStream out)
 			throws SQLException {
 		ResultSetMetaData meta = rs.getMetaData();
+		int cols = meta.getColumnCount();
+		
+		// Print the CSV header row.
 		String comma = "";
 		for (int i = 1; i <= cols; ++i) {
 			String lb=meta.getColumnLabel(i);
-			out.print(comma + lb);
-			comma = ";";
+			out.print(comma);
+			out.print(toCsv(lb, delimiter));
+			comma = delimiter;
 		}
 		out.println();
+		
+		// Print the result set rows.
 		while (rs.next()) {
 			comma = "";
 			for (int i = 1; i <= cols; ++i) {
@@ -213,49 +254,60 @@ public class Main {
 					o=df.format(o);
 					
 				}
-				if(o instanceof String){
-					o=((String) o).replaceAll("\n", " ");
-				}
-				out.print(comma + o);
-				comma = ";";
+				out.print(comma);
+				out.print(toCsv(o.toString(), delimiter));
+				comma = delimiter;
 			}
 			out.println();
 			
 		}
 	}
 	
-	public void dump(ResultSet rs, PrintStream out, boolean consoleMode)
-			throws SQLException {
-		ResultSetMetaData meta = rs.getMetaData();
-		int cols = meta.getColumnCount();
-		if (consoleMode) {
-			StringBuffer header = new StringBuffer("| ");
-			for (int i = 1; i <= cols; ++i) {
-				header.append(meta.getColumnLabel(i) + " | ");
-			}
-			String interline = "";
-			for (int i = 0; i < header.length(); ++i) {
-				interline += "-";
-			}
-			out.println(interline);
-			out.println(header);
-			out.println(interline);
-			out.println();
+	/**
+	 * Returns the CSV representation of the string {@code s}.
+	 * <ul>
+	 * <li> double-quote characters (") are doubled (""), and then enclosed in double-quotes
+	 * <li> if the string contains the delimiter character, wrap the string in double-quotes
+	 * <li> replace newline character with the space character
+	 * </li>
+	 * This supports only a small subset of various CSV transformations such as those given in  
+	 * https://www.csvreader.com/csv_format.php.
+	 * 
+	 * <p>TODO: Consider using a 3rd party formatter like {@code org.apache.commons.csv.CSVFormat}
+	 * if we don't mind adding another dependency.
+	 */
+	private static String toCsv(String s, String delimiter) {
+		boolean needsTextQualifier = false;
+		
+		// A double-quote is replaced with 2 double-quotes.
+		if (s.contains("\"")) {
+			s = s.replace("\"",  "\"\"");
+			needsTextQualifier = true;
 		}
-		if (consoleMode) {
-			consoleDump(rs, cols, out);
+		
+		// If the string contains the delimiter, then we must wrap it in quotes.
+		if (s.contains(delimiter)) {
+			needsTextQualifier = true;
+		}
+		
+		// Newlines are replaced with spaces. 
+		// TODO(btpark): Add an option to preserve newline characters.
+		s = s.replace("\n", " ");
+		
+		if (needsTextQualifier) {
+			return "\"" + s + "\"";
 		} else {
-			csvDump(rs, cols, out);
+			return s;
 		}
 	}
 	
-	private void executeStatement(String sql) {
+	private void executeStatement(String sql) throws SQLException {
+		Statement st = conn.createStatement();
 		try {
-			Statement st = conn.createStatement();
 			if (st.execute(sql)) {
 				ResultSet rs = st.getResultSet();
 				if (rs != null) {
-					dump(rs, System.out, true);
+					consoleDump(rs, System.out);
 					this.lastSqlQuery = sql;
 				} else {
 					System.out.println("Ok!");
@@ -264,21 +316,20 @@ public class Main {
 				int num = st.getUpdateCount();
 				prompt(num == 0 ? "No rows affected" : num + " row(s) affected");
 			}
-		} catch (Exception e) {
-			prompt(e.getMessage());
-			//e.printStackTrace();
+		} finally {
+			st.close();
 		}
 	}
 
 	private void prompt() {
 		System.out.println();
-		if(!batchMode)
-		System.out.print("UCanAccess>");
+		if (!batchMode)
+			System.out.print("UCanAccess>");
 	}
 	
 	private void prompt(String content) {
-		if(!batchMode)
-		System.out.println("UCanAccess>" + content);
+		if (!batchMode)
+			System.out.println("UCanAccess>" + content);
 	}
 	
 	private String readInput() {
@@ -304,59 +355,141 @@ public class Main {
 		System.out.println();
 		System.out.println("Commands end with ; ");
 		System.out.println();
-		System.out.println("use:   ");
-		System.out.println("   export <pathToCsv>;");
-		System.out.println("for exporting the result set from the last executed query into a .csv file");
+		System.out.println("Use:   ");
+		System.out.printf("   %s;%n", EXPORT_USAGE);
+		System.out.println("for exporting the result set from the last executed query or a specific table into a .csv file");
 		prompt();
 		
 	}
 	
-	private void start() throws SQLException {
-		String userInput;
-		StringBuffer sb = new StringBuffer();
+	private void start() {
+		StringBuilder sb = new StringBuilder();
 		while (connected) {
-			if ((userInput = readInput()).toLowerCase()
-					.equalsIgnoreCase("quit")) {
+			String userInput = readInput();
+			if (userInput.equalsIgnoreCase("quit")) {
 				connected = false;
 				break;
 			}
 			sb.append(" ").append(userInput);
-			if (sb.length() == 0) {
-				this.prompt();
-			}
-			if (userInput.trim().endsWith(";")) {
+
+			// If the current userInput ends with ';', then execute the buffered command.
+			if (userInput.endsWith(";")) {
 				String cmd = sb.toString().substring(0, sb.length() - 1).trim();
-				if (cmd.toLowerCase().startsWith("export ")) {
-				
-					StringTokenizer st = new StringTokenizer(cmd);
-					if (st.countTokens() != 2) {
-						prompt("Export command syntax is: export <pathToCsv>");
-					}
-					if (this.lastSqlQuery == null) {
-						prompt("You must first execute an SQL query, then export the ResultSet!");
+				try {
+					if (cmd.toLowerCase().startsWith("export ")) {
+						executeExport(cmd);
 					} else {
-						Statement statement = conn.createStatement();
-						ResultSet rs = statement
-								.executeQuery(this.lastSqlQuery);
-						st.nextToken();
-						File fl = new File(st.nextToken());
-						try {
-							PrintStream out = new PrintStream(fl);
-							dump(rs, out, false);
-							out.flush();
-							out.close();
-							prompt("Created file: "+fl.getAbsolutePath());
-						} catch (FileNotFoundException e) {
-							prompt(e.getMessage());
-						}
+						executeStatement(cmd);
 					}
-				} else {
-					executeStatement(cmd);
+				} catch (Exception e) {
+					prompt(e.getMessage());
 				}
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				this.prompt();
 			}
 		}
 		System.out.println("Cheers! Thank you for using the UCanAccess JDBC Driver.");
+	}
+
+	/**
+	 * Parse the {@code cmd} to handle command line flags of the form:
+	 * "export [-d delimiter] [-t table] pathToCsv". For example:
+	 * <pre>
+	 * export -d , -t License License.csv
+	 * </pre>
+	 * The {@code -d ,} option changes the delimiter character to a comma instead of the 
+	 * default semicolon.
+	 * The {@code -t table} option dumps the {@code License} table using the SQL statement
+	 * "select * from [License]".
+	 */
+	private void executeExport(String cmd) throws SQLException, FileNotFoundException {
+		List<String> tokens = tokenize(cmd);
+
+		String delimiter = DEFAULT_CSV_DELIMITER;
+		String table = null;
+
+		// Process the command line flags.
+		// TODO: Consider using a 3rd party command line argument parser.
+		int i = 1; // skip the first token which will always be "export"
+		for (; i < tokens.size(); i++) {
+			String arg = tokens.get(i);
+			if (!arg.startsWith("-")) {
+				break;
+			}
+			if ("-d".equals(arg)) {
+				++i;
+				if (i >= tokens.size()) {
+					prompt("Missing parameter for -d flag");
+					prompt(EXPORT_PROMPT);
+					return;
+				}
+				delimiter = tokens.get(i);
+			} else if ("-t".equals(arg)) {
+				++i;
+				if (i >= tokens.size()) {
+					prompt("Missing parameter for -t flag");
+					prompt(EXPORT_PROMPT);
+					return;
+				}
+				table = tokens.get(i);
+			} else {
+				prompt("Unknown flag " + arg);
+				prompt(EXPORT_PROMPT);
+				return;
+			}
+			
+		}
+		if (i >= tokens.size()) {
+			prompt("File name not found");
+			prompt(EXPORT_PROMPT);
+			return;
+		}
+		if (i < tokens.size() - 1) {
+			prompt("Too many arguments");
+			prompt(EXPORT_PROMPT);
+			return;
+		}
+		String fileName = tokens.get(i);
+		
+		// Determine the SQL statement to execute. If the '-t table' option is given
+		// run a 'select * from [table]' query to export the table, instead of 
+		// executing the 'lastSqlQuery'.
+		String sqlQuery;
+		if (table != null && !table.isEmpty()) {
+			sqlQuery = "select * from [" + table + "]";
+		} else if (lastSqlQuery != null) {
+			sqlQuery = lastSqlQuery;
+		} else {
+			prompt("You must first execute an SQL query, then export the ResultSet!");
+			return;
+		}
+		
+		// Run the SQL statement and write to fileName.
+		Statement statement = conn.createStatement();
+		try {
+			ResultSet rs = statement.executeQuery(sqlQuery);
+			File fl = new File(fileName);
+			PrintStream out = new PrintStream(fl);
+			try {
+				csvDump(rs, delimiter, out);
+				out.flush();
+			} finally {
+				out.close();
+			}
+			prompt("Created file: " + fl.getAbsolutePath());
+		} finally {
+			statement.close();
+		}
+	}
+	
+	// TODO: Consider using a smarter tokenizer that knows how to handle quoted strings.
+	// Maybe StreamTokenizer.
+	private static List<String> tokenize(String s) {
+		StringTokenizer st = new StringTokenizer(s);
+		List<String> tokens = new ArrayList<String>(st.countTokens());
+		while (st.hasMoreTokens()) {
+			tokens.add(st.nextToken());
+		}
+		return tokens;
 	}
 }

@@ -33,15 +33,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-import junit.framework.TestCase;
-import net.ucanaccess.complex.ComplexBase;
-import net.ucanaccess.console.Main;
-import net.ucanaccess.jdbc.UcanaccessDriver;
-
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 
+import junit.framework.TestCase;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.console.Main;
+import net.ucanaccess.jdbc.UcanaccessDriver;
 
 public abstract class UcanaccessTestBase extends TestCase {
 	private static FileFormat defaultFileFormat = FileFormat.V2003;
@@ -281,7 +280,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 	}
 	
 	public void dump(ResultSet rs) throws SQLException {
-		new Main(ucanaccess, null).dump(rs, System.out, true);
+		new Main(ucanaccess, null).consoleDump(rs, System.out);
 	}
 	
 	public void dump(String expression) throws SQLException, IOException {
