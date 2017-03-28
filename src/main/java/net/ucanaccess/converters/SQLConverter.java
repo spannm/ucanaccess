@@ -656,6 +656,9 @@ public class SQLConverter {
 		
 		Matcher mtc = DIGIT_STARTING_IDENTIFIERS.matcher(sql);
 		if (mtc.find()) {
+			if(Character.isLetter(mtc.group(0).charAt(0))){
+				return sql;
+			}
 			String prefix = (mtc.group(0).matches("\\.([0-9])+[Ee]([0-9])+\\s") || mtc
 					.group(0).matches("\\.([0-9])+[Ee][-+]")) ? "" : "Z_";
 			String build = mtc.group(1) + prefix + mtc.group(2) ;

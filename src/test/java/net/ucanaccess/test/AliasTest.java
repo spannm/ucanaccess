@@ -35,7 +35,7 @@ public class AliasTest extends UcanaccessTestBase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		 executeCreateTable("CREATE TABLE Talias (id LONG,descr memo) ");
+		 executeCreateTable("CREATE TABLE Talias (id LONG,descr memo,  Actuación  text) ");
 		
 	}
 	
@@ -51,6 +51,23 @@ public class AliasTest extends UcanaccessTestBase {
 			rs.next();
 			System.out.println(rs.getMetaData().getColumnLabel(1));
 			System.out.println(rs.getObject("cipol%'&la"));
+			
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	public void testAccent() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.executeQuery("select  Actuación as Actuació8_0_0_ , descr from Talias " );
+			ResultSet rs=st.executeQuery("select  [Actuación] as Actuació8_0_0_ from Talias " );
+			rs.next();
+			System.out.println(rs.getMetaData().getColumnLabel(1));
+			System.out.println(rs.getObject("Actuació8_0_0_"));
+			
 			
 		} finally {
 			if (st != null)
