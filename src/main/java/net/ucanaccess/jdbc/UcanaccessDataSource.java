@@ -295,7 +295,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 
 	/**
-	 * Controls the order in which columns are returned by operations like SELECT *. The default is "DATA". See the UCanAccess website for details. 
+	 * Controls the order in which columns are returned by operations like SELECT *. The default
+	 * is "DATA". See the UCanAccess website for details. 
 	 *
 	 * @param value	Valid values for this parameter are: "DATA", or "DISPLAY".
 	 * @since	2.0.9
@@ -305,12 +306,13 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 	
 	/**
-	 * Controls what is returned by concatenations involving null values. This setting affects <i>all</i> concatenation operators (&, +, ||).
+	 * Controls what is returned by concatenations involving null values. This setting affects
+	 * <i>all</i> concatenation operators (&amp;, +, ||).
 	 *
 	 * @param value	
 	 * <ul> 
-	 * <li><b>false</b> (the default): null & 'thing' returns 'thing' 
-	 * <li><b>true</b>: null & 'thing' returns null 
+	 * <li><b>false</b> (the default): null &amp; 'thing' returns 'thing' 
+	 * <li><b>true</b>: null &amp; 'thing' returns null 
 	 * </ul> 
 	 * @since	 3.0.0
 	 */
@@ -321,7 +323,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	/**
 	 * Encrypts the backing database.
 	 *
-	 * @param value	Setting this value to <b>true</b> tells UCanAccess to encrypt the HSQLDB backing database.
+	 * @param value	Setting this value to <b>true</b> tells UCanAccess to encrypt the HSQLDB backing
+	 * database.
 	 * @since	 1.0.4
 	 */
 	public void setEncrypt(Boolean value) {
@@ -340,15 +343,20 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	/**
 	 * Releases the Access database and shuts down HSQLDB immediately after the Connection is closed.
 	 *
-	 * @param value	Setting this value to <b>true</b> tells UCanAccess to close the Access database file, shut down HSQLDB, and release all related resources (e.g., memory or disk space) as soon as the Connection is closed.
-	 * Otherwise, UCanAccess will "hold on" to those resources for the {@link #setInactivityTimeout(Integer)} in case the Access database gets re-opened. 
+	 * @param value	Setting this value to <b>true</b> tells UCanAccess to close the Access database
+	 * file, shut down HSQLDB, and release all related resources (e.g., memory or disk space) as
+	 * soon as the Connection is closed.
+	 * Otherwise, UCanAccess will "hold on" to those resources for the {@link
+	 * #setInactivityTimeout(Integer)} in case the Access database gets re-opened. 
 	 */
 	public void setImmediatelyReleaseResources(Boolean value) {
 		setProp("immediatelyreleaseresources", value, null);
 	}
 	
 	/**
-	 * For an in-memory backing database (memory=true), this parameter controls the time (in minutes, default=2), that HSQLDB remains active and the in-memory database remains available after the last connection is closed.
+	 * For an in-memory backing database (memory=true), this parameter controls the time (in
+	 * minutes, default=2), that HSQLDB remains active and the in-memory database remains available
+	 * after the last connection is closed.
 	 * 
 	 * @param value	(in minutes)
 	 * @since	0.1.1
@@ -358,8 +366,9 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 
 	/**
-	 * Specifies the name of the custom class to be used by Jackcess when opening the Access database. 
-	 * Mainly for use with Jackcess Encrypt to open encrypted databases. See the UCanAccess website for details. 
+	 * Specifies the name of the custom class to be used by Jackcess when opening the Access
+	 * database. Mainly for use with Jackcess Encrypt to open encrypted databases. See the
+	 * UCanAccess website for details. 
 	 *
 	 * @param value	
 	 * @since	0.0.2
@@ -369,8 +378,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 	
 	/**
-	 * Specifies the path where a persistent copy of the HSQLDB backing database files should be stored. 
-	 * Implies memory=false. See the UCanAccess website for details. 
+	 * Specifies the path where a persistent copy of the HSQLDB backing database files should be
+	 * stored. Implies memory=false. See the UCanAccess website for details. 
 	 *
 	 * @param value	
 	 * @since	2.0.2
@@ -380,9 +389,11 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 
 	/**
-	 * Controls the allocation unit size for "OLE Object" (i.e., BLOB) data in the HSQLDB backing database. See the UCanAccess website for details.
+	 * Controls the allocation unit size for "OLE Object" (i.e., BLOB) data in the HSQLDB backing
+	 * database. See the UCanAccess website for details.
 	 * 
-	 * @param value	Values allowed are 1, 2, 4, 8, 16, or 32 (the unit is Kb). Default is 2 if memory=true, and 32 (the HSQLDB default) otherwise.
+	 * @param value	Values allowed are 1, 2, 4, 8, 16, or 32 (the unit is kB). Default is 2 if
+	 * memory=true, and 32 (the HSQLDB default) otherwise.
 	 * @since	2.0.9.4
 	 */
 	public void setLobScale(Integer value) {
@@ -400,16 +411,18 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	/**
 	 * Controls whether the HSQLDB backing database is created in memory (the default) or on disk.
 	 *
-	 * @param value	Create the backing database in memory (value=true, the default) or on disk (value=false).
-	 * Creating the backing database on disk will be slower, but it can greatly reduce JVM memory usage.
+	 * @param value	Create the backing database in memory (value=true, the default) or on disk
+	 * (value=false). Creating the backing database on disk will be slower, but it can greatly
+	 * reduce JVM memory usage.
 	 */
 	public void setMemory(Boolean value) {
 		setProp("memory", value, null);
 	}
 
 	/**
-	 * Specifies the path where the temporary HSQLDB backing database files should be stored. Implies memory=false. 
-	 * To create a persistent copy of the backing database, use {@link #setKeepMirror(String)} instead.  See the UCanAccess website for details.  
+	 * Specifies the path where the temporary HSQLDB backing database files should be stored.
+	 * Implies memory=false. To create a persistent copy of the backing database, use {@link
+	 * #setKeepMirror(String)} instead.  See the UCanAccess website for details.  
 	 *
 	 * @param value	
 	 * @since	2.0.9.3
@@ -419,7 +432,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 	
 	/**
-	 * Creates a new, empty Access database in this format if the database specified by {@link #setAccessPath(String)} does not exist. 
+	 * Creates a new, empty Access database in this format if the database specified by {@link
+	 * #setAccessPath(String)} does not exist. 
 	 *
 	 * @param value	Valid values for this parameter are: "V2000", "V2003", "V2007", or "V2010".
 	 */
@@ -430,7 +444,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	/**
 	 * Opens the Access database in "exclusive" mode.
 	 *
-	 * @param value	Setting this value to <b>true</b> tells UCanAccess to open the Access database as "exclusive" (preventing other processes from opening it at the same time).
+	 * @param value	Setting this value to <b>true</b> tells UCanAccess to open the Access database
+	 * as "exclusive" (preventing other processes from opening it at the same time).
 	 */
 	public void setOpenExclusive(Boolean value) {
 		setProp("openexclusive", value, null);
@@ -441,9 +456,11 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 
 	/**
-	 * Prevents unnecessary re-loading of backing database under very specific circumstances. USE WITH CAUTION! See the UCanAccess website for details.
+	 * Prevents unnecessary re-loading of backing database under very specific circumstances. USE
+	 * WITH CAUTION! See the UCanAccess website for details.
 	 *
-	 * @param value	Setting this value to <b>true</b> prevents UCanAccess from unnecessarily re-loading the backing database under very specific circumstances.
+	 * @param value	Setting this value to <b>true</b> prevents UCanAccess from unnecessarily
+	 * re-loading the backing database under very specific circumstances.
 	 * @since	3.0.0
 	 */
 	public void setPreventReloading(Boolean value) {
@@ -471,7 +488,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	}
 
 	/**
-	 * For this connection, temporarily re-directs linked tables in the Access database to point to a different Access database. See the UCanAccess website for details. 
+	 * For this connection, temporarily re-directs linked tables in the Access database to point to
+	 * a different Access database. See the UCanAccess website for details. 
 	 *
 	 * @param value	
 	 * @since	2.0.2
@@ -492,8 +510,9 @@ public class UcanaccessDataSource implements Serializable, Referenceable,
 	/**
 	 * Reduces memory consumption by not creating simple indexes in the backing database.
 	 *
-	 * @param value	Setting this value to <b>true</b> tells UCanAccess to skip the creation of simple indexes (not associated with a constraint).
-	 * It doesn't have an effect on referential integrity constraints (i.e., Index Unique, Foreign Key or Primary Key).
+	 * @param value	Setting this value to <b>true</b> tells UCanAccess to skip the creation of
+	 * simple indexes (not associated with a constraint). It doesn't have an effect on referential
+	 * integrity constraints (i.e., Index Unique, Foreign Key or Primary Key).
 	 * @since	2.0.9.4
 	 */
 	public void setSkipIndexes(Boolean value) {
