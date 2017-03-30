@@ -5,46 +5,46 @@
 	<artifactId>ucanaccess</artifactId>
 	<version>4.0.1</version>
 	<packaging>jar</packaging>
-    <name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
-    <organization>
-        <name>ucanaccess</name>
-		</organization>
-    <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
-    <url>http://ucanaccess.sourceforge.net/site.html</url>
-    <licenses>
-        <license>
-            <name>Apache 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <name>Marco Amadei</name>
-            <id>marco-amadei</id>
-            <email>amadei.mar@gmail.com</email>
-            <roles>
-                <role>Lead developer</role>
-                <role>Committer</role>
-            </roles>
-            <timezone>0</timezone> <!-- please change -->
-        </developer>
-    </developers>
-    <inceptionYear>2012</inceptionYear> <!-- verify -->
-    <mailingLists>
-        <mailingList>
-            <name>ucanaccess-users</name>
-            <subscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</subscribe>
-            <unsubscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</unsubscribe>
-            <post>ucanaccess-users@lists.sourceforge.net</post>
-            <archive>http://sourceforge.net/p/ucanaccess/ucanaccess/ucanaccess-users/</archive>
-        </mailingList>
-    </mailingLists>
-    <scm>
-        <connection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</connection> <!-- read only svn url -->
-        <developerConnection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</developerConnection> <!-- verify this is read/write svn url-->
-        <url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
-    </scm>
-  	<properties>
+	<name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
+	<organization>
+		<name>ucanaccess</name>
+	</organization>
+	<description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
+	<url>http://ucanaccess.sourceforge.net/site.html</url>
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Marco Amadei</name>
+			<id>marco-amadei</id>
+			<email>amadei.mar@gmail.com</email>
+			<roles>
+				<role>Lead developer</role>
+				<role>Committer</role>
+			</roles>
+			<timezone>0</timezone> <!-- please change -->
+		</developer>
+	</developers>
+	<inceptionYear>2012</inceptionYear> <!-- verify -->
+	<mailingLists>
+		<mailingList>
+			<name>ucanaccess-users</name>
+			<subscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</subscribe>
+			<unsubscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</unsubscribe>
+			<post>ucanaccess-users@lists.sourceforge.net</post>
+			<archive>http://sourceforge.net/p/ucanaccess/ucanaccess/ucanaccess-users/</archive>
+		</mailingList>
+	</mailingLists>
+	<scm>
+		<connection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</connection> <!-- read only svn url -->
+		<developerConnection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</developerConnection> <!-- verify this is read/write svn url-->
+		<url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
+	</scm>
+	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
@@ -72,40 +72,35 @@
 		</testResources>
 		<pluginManagement></pluginManagement>
 		<plugins>
-		 <plugin>
-     	 	<groupId>org.apache.maven.plugins</groupId>
-     		 <artifactId>maven-jar-plugin</artifactId>
-      		<configuration>
-        		<archive>
-          		<manifest>
-            		<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-         	 	</manifest>
-        		</archive>
-     		 </configuration>
-    		</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-			
 				</configuration>
-				
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
-				
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
 					<includes>
 						<include>**/suite/AllTests2*.java</include>
 					</includes>
-					
 				</configuration>
-				
 			</plugin>
 		</plugins>
 	</build>
@@ -133,86 +128,85 @@
 			<optional>false</optional>
 		</dependency>
 	</dependencies>
-	    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.2</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.8.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- Sonatype Release -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <configuration>
-                            <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <releaseProfiles>release</releaseProfiles>
-                            <arguments>-Psonatype-oss-release -Prelease -Dgpg.passphrase=${gpg.passphrase}</arguments>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
+		<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.2</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.8.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Sonatype Release -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+						<configuration>
+							<autoVersionSubmodules>true</autoVersionSubmodules>
+							<useReleaseProfile>false</useReleaseProfile>
+							<releaseProfiles>release</releaseProfiles>
+							<arguments>-Psonatype-oss-release -Prelease -Dgpg.passphrase=${gpg.passphrase}</arguments>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
