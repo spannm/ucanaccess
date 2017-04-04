@@ -99,6 +99,7 @@
 					<skipTests>${skipTests}</skipTests>
 					<includes>
 						<include>**/suite/AllTests2*.java</include>
+						<include>**/suite/AllUnitTests.java</include>
 					</includes>
 				</configuration>
 			</plugin>

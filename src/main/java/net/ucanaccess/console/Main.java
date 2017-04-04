@@ -484,7 +484,7 @@ public class Main {
 	
 	// TODO: Consider using a smarter tokenizer that knows how to handle quoted strings.
 	// Maybe StreamTokenizer.
-	private static List<String> tokenize(String s) {
+	static List<String> tokenize(String s) {
 		StringTokenizer st = new StringTokenizer(s);
 		List<String> tokens = new ArrayList<String>(st.countTokens());
 		while (st.hasMoreTokens()) {
