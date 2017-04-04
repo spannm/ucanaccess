@@ -92,34 +92,33 @@ public class Exporter {
 		// Print the CSV header row.
 		String comma = "";
 		for (int i = 1; i <= cols; ++i) {
-			String lb=meta.getColumnLabel(i);
+			String lb = meta.getColumnLabel(i);
 			out.print(comma);
 			out.print(toCsv(lb, delimiter));
 			comma = delimiter;
 		}
 		out.println();
-		
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DecimalFormat decimalFormat = new DecimalFormat("0.0########");
+		DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+		dfs.setDecimalSeparator('.');
+		decimalFormat.setDecimalFormatSymbols(dfs);
+		decimalFormat.setGroupingUsed(false);
+
 		// Print the result set rows.
 		while (rs.next()) {
 			comma = "";
 			for (int i = 1; i <= cols; ++i) {
 				Object o = rs.getObject(i);
-				if(o==null)o="";
-				if(o!=null&&o.getClass().isArray()){
-					o=Arrays.toString((Object[])o);
-				}
-				if(o instanceof Date){
-					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					o=df.format((Date)o);
-				}
-				if(o instanceof BigDecimal){
-					DecimalFormat df = new DecimalFormat("0.0########");
-					DecimalFormatSymbols dfs=new DecimalFormatSymbols();
-					dfs.setDecimalSeparator('.');
-					df.setDecimalFormatSymbols(dfs);
-					df.setGroupingUsed(false);
-					o=df.format(o);
-					
+				if (o == null) {
+					o = "";
+				} else if (o.getClass().isArray()) {
+					o = Arrays.toString((Object[]) o);
+				} else if (o instanceof Date){
+					o = dateFormat.format((Date) o);
+				} else if (o instanceof BigDecimal) {
+					o = decimalFormat.format(o);
 				}
 				out.print(comma);
 				out.print(toCsv(o.toString(), delimiter));
