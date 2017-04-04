@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -40,7 +42,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -269,7 +270,7 @@ public class Main {
 	 * <li> double-quote characters (") are doubled (""), and then enclosed in double-quotes
 	 * <li> if the string contains the delimiter character, wrap the string in double-quotes
 	 * <li> replace newline character with the space character
-	 * </li>
+	 * </ul>
 	 * This supports only a small subset of various CSV transformations such as those given in  
 	 * https://www.csvreader.com/csv_format.php.
 	 * 
@@ -399,10 +400,10 @@ public class Main {
 	 * </pre>
 	 * The {@code -d ,} option changes the delimiter character to a comma instead of the 
 	 * default semicolon.
-	 * The {@code -t table} option dumps the {@code License} table using the SQL statement
+	 * The {@code -t License} option dumps the {@code License} table using the SQL statement
 	 * "select * from [License]".
 	 */
-	private void executeExport(String cmd) throws SQLException, FileNotFoundException {
+	private void executeExport(String cmd) throws SQLException, FileNotFoundException, IOException {
 		List<String> tokens = tokenize(cmd);
 
 		String delimiter = DEFAULT_CSV_DELIMITER;
@@ -482,13 +483,34 @@ public class Main {
 		}
 	}
 	
-	// TODO: Consider using a smarter tokenizer that knows how to handle quoted strings.
-	// Maybe StreamTokenizer.
-	static List<String> tokenize(String s) {
-		StringTokenizer st = new StringTokenizer(s);
-		List<String> tokens = new ArrayList<String>(st.countTokens());
-		while (st.hasMoreTokens()) {
-			tokens.add(st.nextToken());
+
+	static List<String> tokenize(String s) throws IOException {
+		// Create a tokenizer that creates tokens delimited by whitespace. Also handles single and
+		// double quotes. Does not support comments or numbers. All characters between U+0000
+		// U+0020 are considered to be whitespace characters (this includes \r, \n, and \t).
+		// All characters from U+0021 to U+00FF are normal word characters.
+		// Internally, StreamTokenzier treats all characters >= U+0100 to be a normal 
+		// word character, and unfortunately, this cannot be changed. 
+		//
+		// Non-breaking-space character U+00A0 is currently treated as a normal character,
+		// but I could be convinced that it should be considered a whitespace.
+		StreamTokenizer st = new StreamTokenizer(new StringReader(s));
+		st.resetSyntax();
+		st.wordChars(33, 255);
+		st.whitespaceChars(0, ' ');
+		st.quoteChar('"');
+		st.quoteChar('\'');
+
+		List<String> tokens = new ArrayList<String>();
+		while (true) {
+			int ttype = st.nextToken();
+			if (ttype == StreamTokenizer.TT_EOF) {
+				break;
+			} else if (ttype == StreamTokenizer.TT_WORD) {
+				tokens.add(st.sval);
+			} else if (ttype == '\'' || ttype == '"') {
+				tokens.add(st.sval);
+			}
 		}
 		return tokens;
 	}
