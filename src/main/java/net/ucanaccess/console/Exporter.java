@@ -15,6 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.console;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -38,13 +39,19 @@ import java.util.Date;
  * </pre> 
  */
 public class Exporter {
+	// The default delimiter is semi-colon for historical reasons.
 	private static final String DEFAULT_CSV_DELIMITER = ";";
 	
+	// See http://unicode.org/faq/utf_bom.html#bom2
+	private static final byte[] UTF8_BYTE_ORDER_MARK = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+	
 	private final String delimiter;
+	private final boolean includeBom;
 	
 	/** Builder for {@link Exporter}. */
 	public static class Builder {
 		String delimiter = DEFAULT_CSV_DELIMITER;
+		boolean includeBom = false;
 		
 		/** Sets the CSV column delimiter. */
 		public Builder setDelimiter(String delimiter) {
@@ -52,21 +59,33 @@ public class Exporter {
 			return this;
 		}
 		
+		/** Includes the Byte Order Mark. Needed by Excel to read UTF-8. */
+		public Builder includeBom(boolean includeBom) {
+			this.includeBom = includeBom;
+			return this;
+		}
+		
 		public Exporter build() {
-			return new Exporter(delimiter);
+			return new Exporter(delimiter, includeBom);
 		}
 	}
 	
-	private Exporter(String delimter) {
+	private Exporter(String delimter, boolean includeBom) {
 		this.delimiter = delimter;
+		this.includeBom = includeBom;
 	}
 	
 	/**
 	 * Prints the ResultSet {@code rs} in CSV format using the {@code delimiter} to the
 	 * output file {@code out}.
 	 */
-	public void csvDump(ResultSet rs, PrintStream out)
-			throws SQLException {
+	public void csvDump(ResultSet rs, PrintStream out) throws SQLException, IOException {
+
+		// Print the UTF-8 byte order mark. 
+		if (includeBom) {
+			out.write(UTF8_BYTE_ORDER_MARK);
+		}
+		
 		ResultSetMetaData meta = rs.getMetaData();
 		int cols = meta.getColumnCount();
 		

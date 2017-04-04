@@ -44,7 +44,8 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.util.Logger;
 
 public class Main {
-	private static final String EXPORT_USAGE = "export [-d <delimiter>] [-t <table>] <pathToCsv>";
+	private static final String EXPORT_USAGE =
+			"export [--bom] [-d <delimiter>] [-t <table>] <pathToCsv>";
 
 	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
 			
@@ -338,6 +339,8 @@ public class Main {
 					return;
 				}
 				table = tokens.get(i);
+			} else if ("--bom".equals(arg)) {
+				exporterBuilder.includeBom(true);
 			} else if ("--".equals(arg)) {
 				++i;
 				break;

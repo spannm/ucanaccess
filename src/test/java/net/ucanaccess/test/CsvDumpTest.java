@@ -16,6 +16,7 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
@@ -106,7 +107,7 @@ public class CsvDumpTest extends UcanaccessTestBase {
 	 * Verifies that the CSV dump of the {@code select} statement is equal to {@code expected}.
 	 */
 	private void csvDumpVerify(String expected, String select)
-			throws SQLException, UnsupportedEncodingException {
+			throws IOException, SQLException, UnsupportedEncodingException {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(baos);
