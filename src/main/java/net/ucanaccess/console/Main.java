@@ -45,7 +45,7 @@ import net.ucanaccess.util.Logger;
 
 public class Main {
 	private static final String EXPORT_USAGE =
-			"export [--bom] [-d <delimiter>] [-t <table>] <pathToCsv>";
+			"export [--help] [--bom] [-d <delimiter>] [-t <table>] <pathToCsv>";
 
 	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
 			
@@ -266,7 +266,19 @@ public class Main {
 		System.out.printf("   %s;%n", EXPORT_USAGE);
 		System.out.println("for exporting the result set from the last executed query or a specific table into a .csv file");
 		prompt();
-		
+	}
+	
+	private void printExportHelp() {
+		System.out.printf("Usage: %s;%n", EXPORT_USAGE);
+		System.out.println("Export the most recent SQL query to the given <pathToCsv> file.");
+		System.out.println("  -d <delimiter> Set the CSV column delimiter (default: ';')");
+		System.out.println("  -t <table>     Output the <table> instead of the previous query.");
+		System.out.println("  --bom          Output the UTF-8 byte order mark.");
+		System.out.println("  --help         Print this help message.");
+		System.out.println("Single (') or double (\") quoted strings are supported.");
+		System.out.println("Backslash (\\) escaping (e.g. \\n, \\t) is enabled within quotes.");
+		System.out.println("Use two backslashes (\\\\) to insert one backslash within quotes "
+				+ "(e.g. \"c:\\\\temp\\\\newfile.csv\")");
 	}
 	
 	private void start() {
@@ -341,6 +353,9 @@ public class Main {
 				table = tokens.get(i);
 			} else if ("--bom".equals(arg)) {
 				exporterBuilder.includeBom(true);
+			} else if ("--help".equals(arg)) {
+				printExportHelp();
+				return;
 			} else if ("--".equals(arg)) {
 				++i;
 				break;
