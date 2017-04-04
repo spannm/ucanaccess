@@ -433,6 +433,9 @@ public class Main {
 					return;
 				}
 				table = tokens.get(i);
+			} else if ("--".equals(arg)) {
+				++i;
+				break;
 			} else {
 				prompt("Unknown flag " + arg);
 				prompt(EXPORT_PROMPT);
