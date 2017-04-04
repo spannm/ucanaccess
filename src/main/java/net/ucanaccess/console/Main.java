@@ -278,7 +278,7 @@ public class Main {
 		System.out.println("Single (') or double (\") quoted strings are supported.");
 		System.out.println("Backslash (\\) escaping (e.g. \\n, \\t) is enabled within quotes.");
 		System.out.println("Use two backslashes (\\\\) to insert one backslash within quotes "
-				+ "(e.g. \"c:\\\\temp\\\\newfile.csv\")");
+				+ "(e.g. \"c:\\\\temp\\\\newfile.csv\").");
 	}
 	
 	private void start() {
