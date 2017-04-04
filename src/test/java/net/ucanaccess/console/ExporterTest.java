@@ -14,18 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package net.ucanaccess.test.suite;
+package net.ucanaccess.console;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.assertEquals;
 
-import net.ucanaccess.console.ExporterTest;
-import net.ucanaccess.console.MainTest;
+import org.junit.Test;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-	ExporterTest.class,
-	MainTest.class
-})
-public class AllUnitTests {}
+/** Unit test for {@link Exporter}. */
+public class ExporterTest {
+
+	@Test
+	public void testToCsv() {
+		assertEquals("\"a,b\"", Exporter.toCsv("a,b", ","));
+		assertEquals("\"a,,b\"", Exporter.toCsv("a,,b", ","));
+		assertEquals("\"a\"\"b\"", Exporter.toCsv("a\"b", ","));
+		assertEquals("a b", Exporter.toCsv("a\nb", ","));		
+		assertEquals("a'b'c", Exporter.toCsv("a'b'c", ","));
+	}
+}

@@ -25,7 +25,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -33,12 +32,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -51,10 +46,8 @@ import net.ucanaccess.util.Logger;
 public class Main {
 	private static final String EXPORT_USAGE = "export [-d <delimiter>] [-t <table>] <pathToCsv>";
 
-	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;	
-		
-	private static final String DEFAULT_CSV_DELIMITER = ";";
-	
+	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
+			
 	private static boolean batchMode=false;
 	private Connection conn;
 	private boolean connected = true;
@@ -214,94 +207,6 @@ public class Main {
 		}
 	}
 	
-	/**
-	 * Prints the ResultSet {@code rs} in CSV format using the {@code delimiter} to the
-	 * output file {@code out}.
-	 */
-	public void csvDump(ResultSet rs, String delimiter, PrintStream out)
-			throws SQLException {
-		ResultSetMetaData meta = rs.getMetaData();
-		int cols = meta.getColumnCount();
-		
-		// Print the CSV header row.
-		String comma = "";
-		for (int i = 1; i <= cols; ++i) {
-			String lb=meta.getColumnLabel(i);
-			out.print(comma);
-			out.print(toCsv(lb, delimiter));
-			comma = delimiter;
-		}
-		out.println();
-		
-		// Print the result set rows.
-		while (rs.next()) {
-			comma = "";
-			for (int i = 1; i <= cols; ++i) {
-				Object o = rs.getObject(i);
-				if(o==null)o="";
-				if(o!=null&&o.getClass().isArray()){
-					o=Arrays.toString((Object[])o);
-				}
-				if(o instanceof Date){
-					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					o=df.format((Date)o);
-				}
-				if(o instanceof BigDecimal){
-					DecimalFormat df = new DecimalFormat("0.0########");
-					DecimalFormatSymbols dfs=new DecimalFormatSymbols();
-					dfs.setDecimalSeparator('.');
-					df.setDecimalFormatSymbols(dfs);
-					df.setGroupingUsed(false);
-					o=df.format(o);
-					
-				}
-				out.print(comma);
-				out.print(toCsv(o.toString(), delimiter));
-				comma = delimiter;
-			}
-			out.println();
-			
-		}
-	}
-	
-	/**
-	 * Returns the CSV representation of the string {@code s}.
-	 * <ul>
-	 * <li> double-quote characters (") are doubled (""), and then enclosed in double-quotes
-	 * <li> if the string contains the delimiter character, wrap the string in double-quotes
-	 * <li> replace newline character with the space character
-	 * </ul>
-	 * This supports only a small subset of various CSV transformations such as those given in  
-	 * https://www.csvreader.com/csv_format.php.
-	 * 
-	 * <p>TODO: Consider using a 3rd party formatter like {@code org.apache.commons.csv.CSVFormat}
-	 * if we don't mind adding another dependency.
-	 */
-	private static String toCsv(String s, String delimiter) {
-		boolean needsTextQualifier = false;
-		
-		// A double-quote is replaced with 2 double-quotes.
-		if (s.contains("\"")) {
-			s = s.replace("\"",  "\"\"");
-			needsTextQualifier = true;
-		}
-		
-		// If the string contains the delimiter, then we must wrap it in quotes.
-		if (s.contains(delimiter)) {
-			needsTextQualifier = true;
-		}
-		
-		// Newlines are replaced with spaces. 
-		// TODO(btpark): Add an option to preserve newline characters.
-		s = s.replace("\n", " ");
-		
-		if (needsTextQualifier) {
-			return "\"" + s + "\"";
-		} else {
-			return s;
-		}
-	}
-	
 	private void executeStatement(String sql) throws SQLException {
 		Statement st = conn.createStatement();
 		try {
@@ -406,7 +311,7 @@ public class Main {
 	private void executeExport(String cmd) throws SQLException, FileNotFoundException, IOException {
 		List<String> tokens = tokenize(cmd);
 
-		String delimiter = DEFAULT_CSV_DELIMITER;
+		Exporter.Builder exporterBuilder = new Exporter.Builder();
 		String table = null;
 
 		// Process the command line flags.
@@ -424,7 +329,7 @@ public class Main {
 					prompt(EXPORT_PROMPT);
 					return;
 				}
-				delimiter = tokens.get(i);
+				exporterBuilder.setDelimiter(tokens.get(i));
 			} else if ("-t".equals(arg)) {
 				++i;
 				if (i >= tokens.size()) {
@@ -469,13 +374,14 @@ public class Main {
 		}
 		
 		// Run the SQL statement and write to fileName.
+		Exporter exporter = exporterBuilder.build();
 		Statement statement = conn.createStatement();
 		try {
 			ResultSet rs = statement.executeQuery(sqlQuery);
 			File fl = new File(fileName);
 			PrintStream out = new PrintStream(fl);
 			try {
-				csvDump(rs, delimiter, out);
+				exporter.csvDump(rs, out);
 				out.flush();
 			} finally {
 				out.close();

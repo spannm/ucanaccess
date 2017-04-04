@@ -24,7 +24,7 @@ import java.sql.Statement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
-import net.ucanaccess.console.Main;
+import net.ucanaccess.console.Exporter;
 
 /**
  * Unit test for {@link net.ucanaccess.console.Main#csvDump()}.
@@ -116,7 +116,10 @@ public class CsvDumpTest extends UcanaccessTestBase {
 		try {
 			st = ucanaccess.createStatement();
 			rs = st.executeQuery(select);
-			new Main(ucanaccess, null).csvDump(rs, ";", ps);
+			Exporter exporter = new Exporter.Builder()
+					.setDelimiter(";")
+					.build();
+			exporter.csvDump(rs, ps);
 		} finally {
 			if (rs != null)
 				rs.close();
