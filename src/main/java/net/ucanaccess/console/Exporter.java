@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -76,10 +77,9 @@ public class Exporter {
 	}
 	
 	/**
-	 * Prints the ResultSet {@code rs} in CSV format using the {@code delimiter} to the
-	 * output file {@code out}.
+	 * Prints the ResultSet {@code rs} in CSV format to the output file {@code out}.
 	 */
-	public void csvDump(ResultSet rs, PrintStream out) throws SQLException, IOException {
+	public void dumpCsv(ResultSet rs, PrintStream out) throws SQLException, IOException {
 
 		// Print the UTF-8 byte order mark. 
 		if (includeBom) {
@@ -112,6 +112,7 @@ public class Exporter {
 			for (int i = 1; i <= cols; ++i) {
 				Object o = rs.getObject(i);
 				if (o == null) {
+					// TODO: Distinguish between a null string and an empty string.
 					o = "";
 				} else if (o.getClass().isArray()) {
 					o = Arrays.toString((Object[]) o);
@@ -128,6 +129,26 @@ public class Exporter {
 		}
 	}
 	
+	/**
+	 * Prints the Google BigQuery schema of the table given by {@code rs} in JSON format to the
+	 * {@code out} stream. See https://cloud.google.com/bigquery/bq-command-line-tool for a 
+	 * description of the JSON schema format.
+	 */
+	public void dumpSchema(ResultSet rs, PrintStream out) throws SQLException, IOException {
+		ResultSetMetaData meta = rs.getMetaData();
+		int cols = meta.getColumnCount();
+		out.println("[");;
+		for (int i = 1; i <= cols; ++i) {
+			String name = meta.getColumnName(i);
+			int sqlType = meta.getColumnType(i);
+			int nullable = meta.isNullable(i);
+			
+			out.print(toSchemaRow(name, sqlType, nullable));
+			out.printf((i != cols) ? ",%n": "%n");
+		}
+		out.println("]");;
+	}
+
 	/**
 	 * Returns the CSV representation of the string {@code s}.
 	 * <ul>
@@ -157,12 +178,67 @@ public class Exporter {
 		
 		// Newlines are replaced with spaces. 
 		// TODO(btpark): Add an option to preserve newline characters.
+		// TODO(btpark): Should also escape \r.
 		s = s.replace("\n", " ");
 		
 		if (needsTextQualifier) {
 			return "\"" + s + "\"";
 		} else {
 			return s;
+		}
+	}	
+
+	/** Returns one row of the BigQuery JSON schema file. */
+	static String toSchemaRow(String name, int sqlType, int nullable) {
+		return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}",
+				name, // TODO: Do we need to escape special characters?
+				toBigQueryType(sqlType),
+				toBigQueryNullable(nullable));
+	}
+
+	/**
+	 * Maps the {@code java.sql.Types} values to BigQuery data types.
+	 * We map to the BigQuery Standard SQL data types 
+	 * (https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types)
+	 * instead of the legacy SQL data types
+	 * (https://cloud.google.com/bigquery/data-types).
+	 *
+	 * <p>Any JDBC type not explicitly defined will be mapped to a BigQuery "string" type.
+	 */
+	static String toBigQueryType(int sqlType) {
+		switch (sqlType) {
+		case Types.TINYINT:
+		case Types.SMALLINT:
+		case Types.INTEGER:
+		case Types.BIGINT:
+			return "int64";
+		case Types.FLOAT:
+		case Types.DOUBLE:
+		case Types.NUMERIC:
+		case Types.DECIMAL:
+			return "float64";
+		case Types.TIMESTAMP:
+			return "timestamp";
+		case Types.BOOLEAN:
+			return "bool";
+		default:
+			return "string";
+		}
+	}
+	
+	/**
+	 * Converts the {@code nullable} indicator from {@code ResultSetMetaData.isNullable()} to the
+	 * equivalent BigQuery schema value.
+	 */
+	static String toBigQueryNullable(int nullable) {
+		switch (nullable) {
+		case ResultSetMetaData.columnNoNulls:
+			return "required";
+		case ResultSetMetaData.columnNullable:
+		case ResultSetMetaData.columnNullableUnknown:
+			return "nullable";
+		default:
+			return "nullable";
 		}
 	}
 }

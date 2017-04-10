@@ -45,7 +45,8 @@ import net.ucanaccess.util.Logger;
 
 public class Main {
 	private static final String EXPORT_USAGE =
-			"export [--help] [--bom] [-d <delimiter>] [-t <table>] <pathToCsv>";
+			"export [--help] [--bom] [-d <delimiter>] [-t <table>] "
+			+ "[--big_query_schema <pathToSchemaFile>] <pathToCsv>";
 
 	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
 			
@@ -197,8 +198,8 @@ public class Main {
 			System.out.print("| ");
 			for (int i = 1; i <= cols; ++i) {
 				Object o = rs.getObject(i);
-				if(o!=null&&o.getClass().isArray()){
-					o=Arrays.toString((Object[])o);
+				if (o != null && o.getClass().isArray()) {
+					o = Arrays.toString((Object[]) o);
 				}
 				
 				out.print(o + " | ");
@@ -271,8 +272,10 @@ public class Main {
 	private void printExportHelp() {
 		System.out.printf("Usage: %s;%n", EXPORT_USAGE);
 		System.out.println("Export the most recent SQL query to the given <pathToCsv> file.");
-		System.out.println("  -d <delimiter> Set the CSV column delimiter (default: ';')");
+		System.out.println("  -d <delimiter> Set the CSV column delimiter (default: ';').");
 		System.out.println("  -t <table>     Output the <table> instead of the previous query.");
+		System.out.println("  --big_query_schema <schemaFile>  Output the BigQuery schema"
+				+ " to <schemaFile>.");
 		System.out.println("  --bom          Output the UTF-8 byte order mark.");
 		System.out.println("  --help         Print this help message.");
 		System.out.println("Single (') or double (\") quoted strings are supported.");
@@ -326,7 +329,8 @@ public class Main {
 
 		Exporter.Builder exporterBuilder = new Exporter.Builder();
 		String table = null;
-
+		String schemaFileName = null;
+		
 		// Process the command line flags.
 		// TODO: Consider using a 3rd party command line argument parser.
 		int i = 1; // skip the first token which will always be "export"
@@ -353,6 +357,14 @@ public class Main {
 				table = tokens.get(i);
 			} else if ("--bom".equals(arg)) {
 				exporterBuilder.includeBom(true);
+			} else if ("--big_query_schema".equals(arg)) {
+				++i;
+				if (i >= tokens.size()) {
+					prompt("Missing parameter for --big_query_schema flag");
+					prompt(EXPORT_PROMPT);
+					return;
+				}
+				schemaFileName = tokens.get(i);
 			} else if ("--help".equals(arg)) {
 				printExportHelp();
 				return;
@@ -376,7 +388,8 @@ public class Main {
 			prompt(EXPORT_PROMPT);
 			return;
 		}
-		String fileName = tokens.get(i);
+		String csvFileName = tokens.get(i);		
+		Exporter exporter = exporterBuilder.build();
 		
 		// Determine the SQL statement to execute. If the '-t table' option is given
 		// run a 'select * from [table]' query to export the table, instead of 
@@ -391,20 +404,43 @@ public class Main {
 			return;
 		}
 		
-		// Run the SQL statement and write to fileName.
-		Exporter exporter = exporterBuilder.build();
+		exportCsvAndSchema(sqlQuery, csvFileName, schemaFileName, exporter);
+	}
+	
+	/**
+	 * Runs the given{@code sqlQuery} and exports the CSV to {@code csvFileName}.
+	 * and the BigQuery schema to {@code schemaFileName} (if given). 
+	 * Uses the given {@code exporter} to perform the actual CSV and schema export operations.
+	 */
+	private void exportCsvAndSchema(String sqlQuery, String csvFileName, String schemaFileName, 
+			Exporter exporter) throws SQLException, IOException {
 		Statement statement = conn.createStatement();
 		try {
 			ResultSet rs = statement.executeQuery(sqlQuery);
-			File fl = new File(fileName);
-			PrintStream out = new PrintStream(fl);
+			
+			// output the csvFile
+			File csvFile = new File(csvFileName);
+			PrintStream out = new PrintStream(csvFile);
 			try {
-				exporter.csvDump(rs, out);
+				exporter.dumpCsv(rs, out);
 				out.flush();
 			} finally {
 				out.close();
 			}
-			prompt("Created file: " + fl.getAbsolutePath());
+			prompt("Created CSV file: " + csvFile.getAbsolutePath());
+			
+			// output the schema file if requested
+			if (schemaFileName != null) {
+				File schemaFile = new File(schemaFileName);
+				out = new PrintStream(schemaFile);
+				try {
+					exporter.dumpSchema(rs, out);
+					out.flush();
+				} finally {
+					out.close();
+				}
+				prompt("Created schema file: " + schemaFile.getAbsolutePath());
+			}
 		} finally {
 			statement.close();
 		}

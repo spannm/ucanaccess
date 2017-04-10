@@ -18,6 +18,9 @@ package net.ucanaccess.console;
 
 import static org.junit.Assert.assertEquals;
 
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
+
 import org.junit.Test;
 
 /** Unit test for {@link Exporter}. */
@@ -30,5 +33,31 @@ public class ExporterTest {
 		assertEquals("\"a\"\"b\"", Exporter.toCsv("a\"b", ","));
 		assertEquals("a b", Exporter.toCsv("a\nb", ","));		
 		assertEquals("a'b'c", Exporter.toCsv("a'b'c", ","));
+	}
+	
+	@Test
+	public void testToBigQueryType() {
+		assertEquals("int64", Exporter.toBigQueryType(Types.INTEGER));
+		assertEquals("float64", Exporter.toBigQueryType(Types.DECIMAL));
+		assertEquals("timestamp", Exporter.toBigQueryType(Types.TIMESTAMP));
+		assertEquals("string", Exporter.toBigQueryType(Types.CHAR));
+		assertEquals("string", Exporter.toBigQueryType(Types.VARCHAR));
+
+		// any type not explicitly defined in the switch statement is mapped to a "string".
+		assertEquals("string", Exporter.toBigQueryType(Types.BIT));
+	}
+	
+	@Test
+	public void testToBigQueryNullable() {
+		assertEquals("required", Exporter.toBigQueryNullable(0));
+		assertEquals("nullable", Exporter.toBigQueryNullable(1));
+		assertEquals("nullable", Exporter.toBigQueryNullable(2));
+		assertEquals("nullable", Exporter.toBigQueryNullable(3));
+	}
+	
+	@Test
+	public void testToSchemaRow() throws Exception {
+		assertEquals("{\"name\": \"MyName\", \"type\": \"int64\", \"mode\": \"nullable\"}",
+				Exporter.toSchemaRow("MyName", Types.INTEGER, ResultSetMetaData.columnNullable));
 	}
 }
