@@ -408,7 +408,7 @@ public abstract class UcanaccessTestBase extends TestCase {
 	protected void initVerifyConnection() throws SQLException, IOException {
 		InputStream is = new FileInputStream(fileAccdb);
 		byte[] buffer = new byte[4096];
-		File tempVer = File.createTempFile("tempJunit", "mdb");
+		File tempVer = File.createTempFile("tempJunit", ".mdb");
 		FileOutputStream fos = new FileOutputStream(tempVer);
 		int bread;
 		while ((bread = is.read(buffer)) != -1) {
