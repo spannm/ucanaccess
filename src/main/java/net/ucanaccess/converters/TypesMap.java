@@ -20,32 +20,30 @@ import java.util.HashMap;
 import com.healthmarketscience.jackcess.DataType;
 
 public class TypesMap {
-	public static enum AccessType{
-			BYTE,
-			COUNTER,
-			CURRENCY, 
-			DATETIME,
-			DOUBLE,
-			GUID,
-			INTEGER,
-			LONG,
-			MEMO, 
-			NUMERIC,
-			OLE,
-			SINGLE,
-			TEXT,
-			YESNO,
-			AUTOINCREMENT,
-			COMPLEX
+	public static enum AccessType {
+		BYTE,
+		COUNTER,
+		CURRENCY, 
+		DATETIME,
+		DOUBLE,
+		GUID,
+		INTEGER,
+		LONG,
+		MEMO, 
+		NUMERIC,
+		OLE,
+		SINGLE,
+		TEXT,
+		YESNO,
+		AUTOINCREMENT,
+		COMPLEX
 	}
+
 	private static final HashMap<String, String> access2HsqlTypesMap = new HashMap<String, String>();
 	private static final HashMap<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
-	
-	
 	private static final HashMap< DataType,String> jackcess2HsqldbTypesMap = new HashMap< DataType,String>();
 	
 	static {
-		
 		access2HsqlTypesMap.put(AccessType.BYTE.name(), "SMALLINT");
 		access2HsqlTypesMap.put(AccessType.INTEGER.name(), "SMALLINT");
 		access2HsqlTypesMap.put(AccessType.LONG.name(), "INTEGER");
@@ -78,42 +76,39 @@ public class TypesMap {
 		access2JackcessTypesMap.put(AccessType.SINGLE, DataType.FLOAT);
 		access2JackcessTypesMap.put(AccessType.DOUBLE, DataType.DOUBLE);
 		
-		
-		jackcess2HsqldbTypesMap.put( DataType.BYTE,"SMALLINT");
-		jackcess2HsqldbTypesMap.put( DataType.INT,"SMALLINT");
-		jackcess2HsqldbTypesMap.put( DataType.LONG,"INTEGER"); 
-		jackcess2HsqldbTypesMap.put( DataType.TEXT,"VARCHAR");
-		jackcess2HsqldbTypesMap.put( DataType.BINARY,"BLOB");
-		jackcess2HsqldbTypesMap.put( DataType.MEMO,"LONGVARCHAR" );
-		jackcess2HsqldbTypesMap.put( DataType.MONEY,"DECIMAL(100,4)");
-		jackcess2HsqldbTypesMap.put( DataType.GUID,"CHAR(38)");
-		jackcess2HsqldbTypesMap.put( DataType.OLE,"BLOB");
-		jackcess2HsqldbTypesMap.put( DataType.NUMERIC,"NUMERIC");
-		jackcess2HsqldbTypesMap.put( DataType.BOOLEAN,"BOOLEAN");
+		jackcess2HsqldbTypesMap.put(DataType.BYTE,"SMALLINT");
+		jackcess2HsqldbTypesMap.put(DataType.INT,"SMALLINT");
+		jackcess2HsqldbTypesMap.put(DataType.LONG,"INTEGER"); 
+		jackcess2HsqldbTypesMap.put(DataType.TEXT,"VARCHAR");
+		jackcess2HsqldbTypesMap.put(DataType.BINARY,"BLOB");
+		jackcess2HsqldbTypesMap.put(DataType.MEMO,"LONGVARCHAR" );
+		jackcess2HsqldbTypesMap.put(DataType.MONEY,"DECIMAL(100,4)");
+		jackcess2HsqldbTypesMap.put(DataType.GUID,"CHAR(38)");
+		jackcess2HsqldbTypesMap.put(DataType.OLE,"BLOB");
+		jackcess2HsqldbTypesMap.put(DataType.NUMERIC,"NUMERIC");
+		jackcess2HsqldbTypesMap.put(DataType.BOOLEAN,"BOOLEAN");
 		jackcess2HsqldbTypesMap.put(DataType.SHORT_DATE_TIME,"TIMESTAMP");
-		jackcess2HsqldbTypesMap.put( DataType.FLOAT,"FLOAT");
-		jackcess2HsqldbTypesMap.put( DataType.DOUBLE,"DOUBLE");
-		jackcess2HsqldbTypesMap.put( DataType.COMPLEX_TYPE,"OBJECT");
-		jackcess2HsqldbTypesMap.put( DataType.UNKNOWN_11,"BLOB");
-		jackcess2HsqldbTypesMap.put( DataType.UNKNOWN_0D,"BLOB");
-		jackcess2HsqldbTypesMap.put( DataType.UNSUPPORTED_FIXEDLEN,"BLOB");
-		jackcess2HsqldbTypesMap.put( DataType.UNSUPPORTED_VARLEN,"BLOB");
-		
+		jackcess2HsqldbTypesMap.put(DataType.FLOAT,"FLOAT");
+		jackcess2HsqldbTypesMap.put(DataType.DOUBLE,"DOUBLE");
+		jackcess2HsqldbTypesMap.put(DataType.COMPLEX_TYPE,"OBJECT");
+		jackcess2HsqldbTypesMap.put(DataType.UNKNOWN_11,"BLOB");
+		jackcess2HsqldbTypesMap.put(DataType.UNKNOWN_0D,"BLOB");
+		jackcess2HsqldbTypesMap.put(DataType.UNSUPPORTED_FIXEDLEN,"BLOB");
+		jackcess2HsqldbTypesMap.put(DataType.UNSUPPORTED_VARLEN,"BLOB");
 	}
 	
 	public static HashMap<String, String> getAccess2HsqlTypesMap() {
 		return access2HsqlTypesMap;
 	}
+
 	public static String map2hsqldb(DataType type) {
-			if (jackcess2HsqldbTypesMap.containsKey(type)) {
+		if (jackcess2HsqldbTypesMap.containsKey(type)) {
 			return jackcess2HsqldbTypesMap.get(type);
 		}
 		return type.name();
 	}
 	
 	public static DataType map2Jackcess(AccessType type) {
-			return access2JackcessTypesMap.get(type);
+		return access2JackcessTypesMap.get(type);
 	}
-	
-	
 }
