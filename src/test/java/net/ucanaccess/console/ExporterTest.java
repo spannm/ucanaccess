@@ -27,14 +27,22 @@ import org.junit.Test;
 public class ExporterTest {
 
 	@Test
-	public void testToCsv() {
-		assertEquals("\"a,b\"", Exporter.toCsv("a,b", ","));
-		assertEquals("\"a,,b\"", Exporter.toCsv("a,,b", ","));
-		assertEquals("\"a\"\"b\"", Exporter.toCsv("a\"b", ","));
-		assertEquals("a b", Exporter.toCsv("a\nb", ","));		
-		assertEquals("a'b'c", Exporter.toCsv("a'b'c", ","));
+	public void testToCsvReplacingNewlines() {
+		boolean preserveNewlines = false;
+		assertEquals("\"a,b\"", Exporter.toCsv("a,b", ",", preserveNewlines));
+		assertEquals("\"a,,b\"", Exporter.toCsv("a,,b", ",", preserveNewlines));
+		assertEquals("\"a\"\"b\"", Exporter.toCsv("a\"b", ",", preserveNewlines));
+		assertEquals("a  b", Exporter.toCsv("a\r\nb", ",", preserveNewlines));		
+		assertEquals("a\tb", Exporter.toCsv("a\tb", ",", preserveNewlines));		
+		assertEquals("a'b'c", Exporter.toCsv("a'b'c", ",", preserveNewlines));
 	}
-	
+
+	@Test
+	public void testToCsvPreservingNewlines() {
+		boolean preserveNewlines = true;
+		assertEquals("\"a\r\nb\"", Exporter.toCsv("a\r\nb", ",", preserveNewlines));
+	}
+
 	@Test
 	public void testToBigQueryType() {
 		assertEquals("int64", Exporter.toBigQueryType(Types.INTEGER));

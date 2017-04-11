@@ -46,7 +46,8 @@ import net.ucanaccess.util.Logger;
 public class Main {
 	private static final String EXPORT_USAGE =
 			"export [--help] [--bom] [-d <delimiter>] [-t <table>] "
-			+ "[--big_query_schema <pathToSchemaFile>] <pathToCsv>";
+			+ "[--big_query_schema <pathToSchemaFile>] "
+			+ "[--newlines] <pathToCsv>";
 
 	private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
 			
@@ -277,6 +278,7 @@ public class Main {
 		System.out.println("  --big_query_schema <schemaFile>  Output the BigQuery schema"
 				+ " to <schemaFile>.");
 		System.out.println("  --bom          Output the UTF-8 byte order mark.");
+		System.out.println("  --newlines     Preserve embedded newlines (\\r, \\n).");
 		System.out.println("  --help         Print this help message.");
 		System.out.println("Single (') or double (\") quoted strings are supported.");
 		System.out.println("Backslash (\\) escaping (e.g. \\n, \\t) is enabled within quotes.");
@@ -357,6 +359,8 @@ public class Main {
 				table = tokens.get(i);
 			} else if ("--bom".equals(arg)) {
 				exporterBuilder.includeBom(true);
+			} else if ("--newlines".equals(arg)) {
+				exporterBuilder.preserveNewlines(true);
 			} else if ("--big_query_schema".equals(arg)) {
 				++i;
 				if (i >= tokens.size()) {
