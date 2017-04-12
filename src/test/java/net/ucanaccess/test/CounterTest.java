@@ -44,11 +44,28 @@ public class CounterTest extends UcanaccessTestBase {
 			st = super.ucanaccess.createStatement();
 			
 			st.execute("INSERT INTO " + tableName
-					+ " (B,C,D) VALUES ('W' ,NULL,NULL)");
+					+ " (Z,B,C,D) VALUES (3,'C',NULL,NULL)");  // insert arbitrary AutoNumber value
 			st.execute("INSERT INTO " + tableName
-					+ " (B,C,D) VALUES ('B',NULL,NULL  )");
-			Object[][] ver = { { 1, "W   ", null, null },
-					{ 2, "B   ", null, null } };
+					+ " (B,C,D) VALUES ('D',NULL,NULL)");  // 4 (verify AutoNumber seed updated)
+			st.execute("INSERT INTO " + tableName
+					+ " (B,C,D) VALUES ('E' ,NULL,NULL)");  // 5
+			st.execute("INSERT INTO " + tableName
+					+ " (B,C,D) VALUES ('F',NULL,NULL)");  // 6
+			st.execute("INSERT INTO " + tableName
+					+ " (Z,B,C,D) VALUES (8,'H',NULL,NULL)");  // arbitrary, new seed = 9
+			st.execute("INSERT INTO " + tableName
+					+ " (Z,B,C,D) VALUES (7,'G',NULL,NULL)");  // arbitrary smaller than current seed
+			st.execute("INSERT INTO " + tableName
+					+ " (B,C,D) VALUES ('I',NULL,NULL)");  // 9
+			Object[][] ver = { 
+					{ 3, "C   ", null, null },
+					{ 4, "D   ", null, null },
+					{ 5, "E   ", null, null },
+					{ 6, "F   ", null, null },
+					{ 7, "G   ", null, null },
+					{ 8, "H   ", null, null },
+					{ 9, "I   ", null, null },
+					};
 			checkQuery("select * from " + tableName + " order by Z", ver);
 		} finally {
 			if (st != null)

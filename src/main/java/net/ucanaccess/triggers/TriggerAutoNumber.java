@@ -62,21 +62,24 @@ public class TriggerAutoNumber extends TriggerBase {
 					}
 				}else
 			
-				if (cl.isAutoNumber()&&!t.isAllowAutoNumberInsert()
-						) {
+				if (cl.isAutoNumber()) {
 					if (type == TriggerAutoNumber.INSERT_BEFORE_ROW) {
 						if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.GUID)){
-							
-							newR[i] = "{" + UUID.randomUUID() + "}";
-							conn.setGeneratedKey(newR[i]);
+							if (newR[i] == null) {
+								newR[i] = "{" + UUID.randomUUID() + "}";
+								conn.setGeneratedKey(newR[i]);
+							}
 						}
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {
-							int keyg=AutoNumberManager.getNext(cl);
-							
-							newR[i] = 	keyg;
-							conn.setGeneratedKey(keyg);
+							if (newR[i] == null) {
+								int keyg=AutoNumberManager.getNext(cl);
+								newR[i] = 	keyg;
+								conn.setGeneratedKey(keyg);
+							} else {
+								AutoNumberManager.bump(cl, ((Integer) newR[i])); 
+							}
 						}
 					} else if(type == TriggerAutoNumber.UPDATE_BEFORE_ROW&&cl.getAutoNumberGenerator().getType().equals(
 							DataType.LONG)){

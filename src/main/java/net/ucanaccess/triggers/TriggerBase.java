@@ -52,6 +52,7 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 			throws SQLException {
 		return p2a.getRowPattern(values, t);
 	}
+	
 	protected Table getTable(String tableName,UcanaccessConnection conn ) throws IOException{
 		Table t=conn.getDbIO().getTable(tableName);
 		if(t==null&&tableName.startsWith(ESCAPE_PREFIX )&&
@@ -66,12 +67,13 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 			for (String cand:db.getTableNames()){
 				if(	SQLConverter.preEscapingIdentifier(cand).equals(tableName)||
 						SQLConverter.escapeIdentifier(cand).equals(tableName)){
-					return new UcanaccessTable(db.getTable(cand),cand);
+					t = new UcanaccessTable(db.getTable(cand),cand);
+					break;
 				}
-				
 			}
 		}
-		 return new  UcanaccessTable(t,tableName);
+		t.setAllowAutoNumberInsert(true);
+		return new  UcanaccessTable(t,tableName);
 	}
 	
 }
