@@ -26,11 +26,15 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 
 public class AutoNumberManager {
+	// Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance
+	// becomes an issue. Never use an Integer here because Integer is an immutable object.
 	private static final Map<Column, AtomicInteger> register = new HashMap<Column, AtomicInteger>();
 	
 	static {
 		DBReference.addOnReloadRefListener(new OnReloadReferenceListener() {
 			public void onReload() {
+				// Must call AutoNumberManager.clear() for proper thread synchronization.
+				// Do not call register.clear() directly.
 				clear();
 			}
 		});
