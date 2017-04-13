@@ -73,13 +73,13 @@ public class TriggerAutoNumber extends TriggerBase {
 						}
 						else if (cl.getAutoNumberGenerator().getType().equals(
 								DataType.LONG)) {
-							if (newR[i] == null) {
+							if (newR[i] == null || ((Integer) newR[i]) <= 0) {
 								int keyg=AutoNumberManager.getNext(cl);
 								newR[i] = 	keyg;
-								conn.setGeneratedKey(keyg);
 							} else {
 								AutoNumberManager.bump(cl, ((Integer) newR[i])); 
 							}
+							conn.setGeneratedKey(newR[i]);
 						}
 					} else if(type == TriggerAutoNumber.UPDATE_BEFORE_ROW&&cl.getAutoNumberGenerator().getType().equals(
 							DataType.LONG)){
