@@ -89,9 +89,6 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-					<forceJavacCompilerUse>true</forceJavacCompilerUse>
-					<fork>true</fork>
-					<executable>${JAVAC_BIN_PATH}</executable>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -99,8 +96,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
 				<configuration>
-					<jvm>${JAVA_BIN_PATH}</jvm>
-					<forkMode>always</forkMode>
 					<skipTests>${skipTests}</skipTests>
 					<includes>
 						<include>**/suite/AllTests2*.java</include>
