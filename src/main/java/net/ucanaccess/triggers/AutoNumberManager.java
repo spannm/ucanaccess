@@ -15,53 +15,61 @@ limitations under the License.
 */
 package net.ucanaccess.triggers;
 
-import java.util.Hashtable;
-
-import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.OnReloadReferenceListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.OnReloadReferenceListener;
+
 public class AutoNumberManager {
-	private static Hashtable<Column, Integer> register = new Hashtable<Column, Integer>();
+	private static final Map<Column, AtomicInteger> register = new HashMap<Column, AtomicInteger>();
+	
 	static {
 		DBReference.addOnReloadRefListener(new OnReloadReferenceListener() {
 			public void onReload() {
-				register.clear();
+				clear();
 			}
 		});
 	}
+	
+	/** Clears all AutoNumber column seeds to 0. */
+	private static synchronized void clear() {
+		register.clear();
+	}
 
+	/** Returns the next AutoNumber value, and increments the seed. */
 	static synchronized int getNext(Column cl) {
 		// Note: This code assumes *sequential* integer AutoNumber values.
 		// (Access also supports *random* integer AutoNumber values, but they
 		// are not very common.)
 		ColumnImpl ci = (ColumnImpl) cl;
-		if (!register.containsKey(ci)) {
-			register.put(ci, ((Integer) ci.getAutoNumberGenerator().getLast()));
+		AtomicInteger next = register.get(ci);
+		if (next == null) {
+			next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
+			register.put(ci, next);
 		}
-		int next = register.get(ci);
-		register.put(ci, ++next);
-		return next;
+		return next.incrementAndGet();
 	}
 
+	/** Sets the AutoNumber seed to {@code newVal}. */
 	public static synchronized void reset(Column cl, int newVal) {
-		register.put(cl, newVal);
+		register.put(cl, new AtomicInteger(newVal));
 	}
 
-	/**
-	 * "bump" AutoNumber seed to new value (i.e., update only if new seed value
-	 * is higher than the existing one)
-	 */
+	/** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
 	public static synchronized void bump(Column cl, int newVal) {
 		ColumnImpl ci = (ColumnImpl) cl;
-		if (!register.containsKey(ci)) {
-			register.put(ci, ((Integer) ci.getAutoNumberGenerator().getLast()));
+		AtomicInteger next = register.get(ci); 
+		if (next == null) {
+			next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
+			register.put(ci, next);
 		}
-		int next = register.get(ci);
-		if (newVal > next) {
-			register.put(ci, newVal);
+		if (newVal > next.get()) {
+			next.set(newVal);
 		}
 	}
 
