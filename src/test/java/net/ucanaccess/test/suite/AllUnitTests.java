@@ -22,9 +22,11 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import net.ucanaccess.console.ExporterTest;
 import net.ucanaccess.console.MainTest;
+import net.ucanaccess.triggers.AutoNumberManagerTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	AutoNumberManagerTest.class,
 	ExporterTest.class,
 	MainTest.class
 })

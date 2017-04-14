@@ -41,7 +41,7 @@ public class AutoNumberManager {
 	}
 	
 	/** Clears all AutoNumber column seeds to 0. */
-	private static synchronized void clear() {
+	static synchronized void clear() {
 		register.clear();
 	}
 
