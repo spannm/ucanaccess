@@ -36,7 +36,8 @@ public class TypesMap {
 		TEXT,
 		YESNO,
 		AUTOINCREMENT,
-		COMPLEX
+		COMPLEX,
+		CHAR
 	}
 
 	private static final HashMap<String, String> access2HsqlTypesMap = new HashMap<String, String>();
@@ -59,6 +60,7 @@ public class TypesMap {
 		access2HsqlTypesMap.put(AccessType.DATETIME.name(), "TIMESTAMP");
 		access2HsqlTypesMap.put(AccessType.SINGLE.name(), "FLOAT");
 		access2HsqlTypesMap.put(AccessType.COMPLEX.name(), "OBJECT");
+		access2HsqlTypesMap.put(AccessType.CHAR.name(), "VARCHAR"); //CHAR mapped into TEXT when used in  CREATE TABLE.
 				
 		access2JackcessTypesMap.put(AccessType.BYTE, DataType.BYTE);
 		access2JackcessTypesMap.put(AccessType.INTEGER, DataType.INT);

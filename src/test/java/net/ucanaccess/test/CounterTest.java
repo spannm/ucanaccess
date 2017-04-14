@@ -18,6 +18,7 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -58,15 +59,19 @@ public class CounterTest extends UcanaccessTestBase {
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('I',NULL,NULL)");  // 9
 			Object[][] ver = { 
-					{ 3, "C   ", null, null },
-					{ 4, "D   ", null, null },
-					{ 5, "E   ", null, null },
-					{ 6, "F   ", null, null },
-					{ 7, "G   ", null, null },
-					{ 8, "H   ", null, null },
-					{ 9, "I   ", null, null },
+					{ 3, "C", null, null },
+					{ 4, "D", null, null },
+					{ 5, "E", null, null },
+					{ 6, "F", null, null },
+					{ 7, "G", null, null },
+					{ 8, "H", null, null },
+					{ 9, "I", null, null }
 					};
+			
 			checkQuery("select * from " + tableName + " order by Z", ver);
+			
+			
+			
 		} finally {
 			if (st != null)
 				st.close();
