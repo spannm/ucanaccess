@@ -176,10 +176,8 @@ public class DBReference {
 					Map<String, String> emr = DBReference.this.externalResourcesMapping;
 					if (!linkeeFile.exists()
 							&& emr != null
-							&& emr.containsKey(linkeeFile.getAbsolutePath()
-									.toLowerCase())) {
-						linkeeFile = new File(emr.get(linkeeFile
-								.getAbsolutePath().toLowerCase()));
+							&& emr.containsKey(linkeeFileName.toLowerCase())) {
+						linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
 					}
 					if (!linkeeFile.exists()) {
 						Logger.logWarning("External file "
