@@ -329,7 +329,7 @@ public class FunctionsTest extends UcanaccessTestBase {
 				"alphahydr");
 	}
 
-	public void testRigth() throws SQLException, IOException {
+	public void testRight() throws SQLException, IOException {
 		checkQuery(
 				"select Right ('Tech on the Net', 3),Right(null,12) from t234 ",
 				"Net", null);

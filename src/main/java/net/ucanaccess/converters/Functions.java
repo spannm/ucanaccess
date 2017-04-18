@@ -949,6 +949,18 @@ public class Functions {
 		}
 		return false;
 	}
+	
+	@FunctionType(functionName = "LEFT", namingConflict=true, argumentTypes = { AccessType.MEMO,AccessType.LONG}, returnType = AccessType.MEMO)
+	public static String left(String input, int i) {
+		if(input==null||i<0)return null;
+		if(i>=input.length())return input;
+		else return input.substring(0, i);
+	}
+	
+	@FunctionType(functionName = "\"LEFT$\"", argumentTypes = { AccessType.MEMO,AccessType.LONG}, returnType = AccessType.MEMO)
+	public static String leftS(String input, int i) {
+		return left(input,i);
+	}
 
 	@FunctionType(functionName = "LEN", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
 	public static Integer len(String o) {
@@ -1625,6 +1637,21 @@ public class Functions {
 		     return tr;
 	   } 
 	   
+	   
+	   @FunctionType(functionName = "RIGHT", namingConflict=true, argumentTypes = { AccessType.MEMO,AccessType.LONG}, returnType = AccessType.MEMO)
+		public static String right(String input, int i) {
+			if(input==null||i<0)return null;
+			int ln=input.length();
+			if(i>=ln)return input;
+			
+			else return input.substring(ln-i, ln);
+		}
+	   
+	   @FunctionType(functionName = "\"RIGHT$\"", argumentTypes = { AccessType.MEMO,AccessType.LONG}, returnType = AccessType.MEMO)
+		public static String rightS(String input, int i) {
+			return right(input,i);
+		}
+	   
 	   @FunctionType(namingConflict = true,functionName = "ROUND", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
 	   public static double round(double d, double p) {
 	        double f = Math.pow(10d, p);
@@ -1635,6 +1662,7 @@ public class Functions {
 	   public static double fix(double d) throws UcanaccessSQLException {
 		   return  sign(d) * mint(Math.abs(d));
 	    }
+	   
 	   
 	   @FunctionType(functionName = "PARTITION", argumentTypes = { AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE,AccessType.DOUBLE}, returnType = AccessType.MEMO)
 	   public static String partition(Double number,double start,double stop,double interval) throws UcanaccessSQLException {

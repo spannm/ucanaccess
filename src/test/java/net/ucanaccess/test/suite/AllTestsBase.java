@@ -25,6 +25,7 @@ import net.ucanaccess.test.BatchTest;
 import net.ucanaccess.test.BlobOleTest;
 import net.ucanaccess.test.BooleanTest;
 import net.ucanaccess.test.ByteTest;
+import net.ucanaccess.test.CalculatedFieldTest;
 import net.ucanaccess.test.ColumnOrderTest;
 import net.ucanaccess.test.CounterTest;
 import net.ucanaccess.test.CreateTableTest;
@@ -93,6 +94,7 @@ public class AllTestsBase {
 		suite.addTestSuite(ReloadPersistentMirrorTest.class);
 		suite.addTestSuite(AlterTableTest.class);
 		suite.addTestSuite(CsvDumpTest.class);
+		suite.addTestSuite(CalculatedFieldTest.class);
 		return suite;
 	}
 }
