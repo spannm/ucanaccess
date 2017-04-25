@@ -75,7 +75,6 @@ public class SQLConverter {
 			.compile("(\\W)(([0-9])+(([_a-zA-Z])+([0-9])*)+)(\\W)");
 	private static final String UNDERSCORE_IDENTIFIERS = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
 	private static final String XESCAPED = "(\\W)((?i)X)((?i)_)(\\W)";
-	private static final String KEYWORD_ALIAS = "([\\s\n\r]+(?i)AS[\\s\n\r]*)((?i)_)(\\W)";
 	private static final String[] DEFAULT_CATCH = new String[] {
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\'(?:[^']*(?:'')*)*\')([\\s\n\r\\)\\,])",
 			"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
@@ -121,7 +120,7 @@ public class SQLConverter {
 			"CONSTRAINT"
 			,"USER","ROW"
 			);
-	
+	 private static final String KEYWORD_ALIAS = createKeywordAliasRegex();
 	private static final List<String> PROCEDURE_KEYWORDLIST = Arrays.asList("NEW","ROW");
 	private static ArrayList<String> whiteSpacedTableNames = new ArrayList<String>();
 	private static final HashSet<String> xescapedIdentifiers = new HashSet<String>();
@@ -154,6 +153,20 @@ public class SQLConverter {
 		return sql.indexOf("@@")>0&& sql.toUpperCase().indexOf("@@IDENTITY")>0;
 	}
 	
+	
+	private static String createKeywordAliasRegex() {
+		ArrayList<String> keywordList = new ArrayList<String>(KEYWORDLIST);
+		keywordList.remove("SELECT");
+		StringBuffer keywords = new StringBuffer();
+		String sep="";
+		for (String s : keywordList) {
+		   keywords.append(sep).append(s);
+		   sep="|";
+	    }
+		return "([\\s\\n\\r]+AS[\\s\\n\\r]+)(" + keywords + ")(\\W)";
+    }
+	
+
 		
 	private static void aliases(String sql,NormalizedSQL nsql ){
 		Matcher mtc=SELECT_FROM_PATTERN_START.matcher(sql);
@@ -288,10 +301,10 @@ public class SQLConverter {
 					   
 					    
 					    DISABLE_AUTOINCREMENT(Pattern
-						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN)),
+						.compile("[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*"+NAME_PATTERN)),
 				
 						ENABLE_AUTOINCREMENT(Pattern
-								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]+"+NAME_PATTERN))
+								.compile("[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*"+NAME_PATTERN))
 						;
 		private Pattern pattern;
 		private String ddl;
@@ -684,11 +697,7 @@ public class SQLConverter {
 			sqlc = sqlc.replaceAll("(?i)\"" + entry.getKey() + "\"", "\""
 					+ entry.getValue() + "\"");
 		}
-		for (String xidt : KEYWORDLIST) {
-			if (!xidt.equals("SELECT"))
-				sqlc = sqlc.replaceAll(KEYWORD_ALIAS.replaceAll("_", xidt),
-						"$1\"$2\"$3");
-		}
+		sqlc = Pattern.compile(KEYWORD_ALIAS, Pattern.CASE_INSENSITIVE).matcher(sqlc).replaceAll("$1\"$2\"$3");
 		return sqlc;
 	}
 
