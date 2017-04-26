@@ -75,5 +75,19 @@ public class AliasTest extends UcanaccessTestBase {
 		}
 	}
 	
+	public void testAsin() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("create table xxxx (asin text, ff text)" );
+			dump("select  asin, ff from xxxx" );
+			
+			
+			
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
 	
 }
