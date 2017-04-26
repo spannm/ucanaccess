@@ -18,7 +18,6 @@ package net.ucanaccess.test;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
@@ -43,19 +42,27 @@ public class CounterTest extends UcanaccessTestBase {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
-			
+			st.execute("DISABLE AUTOINCREMENT ON "+tableName);
 			st.execute("INSERT INTO " + tableName
 					+ " (Z,B,C,D) VALUES (3,'C',NULL,NULL)");  // insert arbitrary AutoNumber value
+			
+			st.execute("ENABLE AUTOINCREMENT ON "+tableName);
+			
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('D',NULL,NULL)");  // 4 (verify AutoNumber seed updated)
+			
+			
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('E' ,NULL,NULL)");  // 5
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('F',NULL,NULL)");  // 6
+			
+			st.execute("DISABLE AUTOINCREMENT ON "+tableName);
 			st.execute("INSERT INTO " + tableName
 					+ " (Z,B,C,D) VALUES (8,'H',NULL,NULL)");  // arbitrary, new seed = 9
 			st.execute("INSERT INTO " + tableName
 					+ " (Z,B,C,D) VALUES (7,'G',NULL,NULL)");  // arbitrary smaller than current seed
+			st.execute("ENABLE AUTOINCREMENT ON "+tableName);
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('I',NULL,NULL)");  // 9
 			Object[][] ver = { 
@@ -67,7 +74,7 @@ public class CounterTest extends UcanaccessTestBase {
 					{ 8, "H", null, null },
 					{ 9, "I", null, null }
 					};
-			
+			dump("select * from "+tableName);
 			checkQuery("select * from " + tableName + " order by Z", ver);
 			
 			
