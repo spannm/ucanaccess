@@ -64,22 +64,27 @@ public class TriggerAutoNumber extends TriggerBase {
 			
 				if (cl.isAutoNumber()) {
 					if (type == TriggerAutoNumber.INSERT_BEFORE_ROW) {
-						if (cl.getAutoNumberGenerator().getType().equals(
-								DataType.GUID)){
-							if (newR[i] == null) {
-								newR[i] = "{" + UUID.randomUUID() + "}";
-								conn.setGeneratedKey(newR[i]);
+						
+						if(t.isAllowAutoNumberInsert()){
+							if (cl.getAutoNumberGenerator().getType().equals(
+									DataType.LONG)&&newR[i]!=null ) {
+									AutoNumberManager.bump(cl,(Integer)newR[i]);
 							}
 						}
-						else if (cl.getAutoNumberGenerator().getType().equals(
-								DataType.LONG)) {
-							if (newR[i] == null || ((Integer) newR[i]) <= 0) {
-								int keyg=AutoNumberManager.getNext(cl);
-								newR[i] = 	keyg;
-							} else {
-								AutoNumberManager.bump(cl, ((Integer) newR[i])); 
+						else{
+							if (cl.getAutoNumberGenerator().getType().equals(
+									DataType.GUID)){
+								
+						    if(newR[i]==null)
+									newR[i] = "{" + UUID.randomUUID().toString().toUpperCase() + "}";
+									conn.setGeneratedKey(newR[i]);
 							}
-							conn.setGeneratedKey(newR[i]);
+							else if (cl.getAutoNumberGenerator().getType().equals(
+									DataType.LONG)) {
+									int keyg=AutoNumberManager.getNext(cl);
+									newR[i] = 	keyg;
+									conn.setGeneratedKey(newR[i]);
+							}
 						}
 					} else if(type == TriggerAutoNumber.UPDATE_BEFORE_ROW&&cl.getAutoNumberGenerator().getType().equals(
 							DataType.LONG)){

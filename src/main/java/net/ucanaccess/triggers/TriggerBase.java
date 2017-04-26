@@ -72,7 +72,6 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
 				}
 			}
 		}
-		t.setAllowAutoNumberInsert(true);
 		return new  UcanaccessTable(t,tableName);
 	}
 	
