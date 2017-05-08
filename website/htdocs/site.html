@@ -1,0 +1,1440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF8">
+<meta name="keywords" content="Access, jdbc, driver, Java, mdb, accdb, ms, linux, unix, mac,pure" /> 
+<title>UCanAccess-A Pure Java JDBC Driver for Access</title>
+<style>
+body, li {
+    font-family: Verdana,Helvetica,Arial,sans-serif;
+    font-size: 13px;
+    padding: 1px;
+}
+h1 {
+    font-family: Verdana,Helvetica,Arial,sans-serif;
+    font-size: 21px;
+}
+h2 {
+    font-family: Verdana,Helvetica,Arial,sans-serif;
+    font-size: 18px;
+}
+
+.source {
+  padding: 12px;
+  margin: 1em 7px 1em 7px;
+  border: 1px solid #999999;
+  background-color:#FFFFD0;
+}
+span.red1 {
+     color: red;
+}
+
+
+.inlineCode {
+  padding: 0px 0px 3px 3px;
+  background-color: #eff0f1;
+  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+}
+
+#page-margins {
+ width: 80%;
+ margin: 2em 12em;
+ padding: 0 0 3em 0;
+ 
+}
+
+
+#buttonsDiv{
+	margin-top:4em;
+	border-bottom: 3px solid #DDDDDD;
+	
+}
+a {
+    color: #0099CC;
+    text-decoration: none;
+}
+a:hover {
+   text-decoration: underline;
+   cursor:pointer;
+}
+.menubutton  {
+  font-size: 20px;
+  margin-left: 20px;
+
+}
+
+
+.download {
+    border: medium none;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 -3px 1px rgba(0, 0, 0, 0.45) inset, 0 2px 2px rgba(0, 0, 0, 0.25);
+    color: #FFFFFF;
+    margin-right: 15px;
+    padding: 8px 14px 10px;
+    position: relative;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+	 background: none repeat scroll 0 0 #337733;
+	font-size: 15px;
+	margin-left:20px;
+	background: -moz-linear-gradient(center top , #339933 0%, #337733 100%) repeat scroll 0 0 #336633;
+}
+
+
+
+</style>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-37155261-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<script type="text/javascript" src="./jquery-3.2.1.min.js"></script>
+<script>
+  function selectDiv() {
+    var divid = window.location.hash ? window.location.hash.substring(1) : 'home';
+    $(window).scrollTop(0);
+    $("#"+divid+"_div").show().siblings().hide();
+    if(divid!='donate'){
+      $("#"+divid).css('color','#3399CC').siblings().css('color','grey');
+      $("#donate_img").css('border','0px solid yellow');
+    } else {
+      $("#donate_img").css('border','2px solid yellow');
+      $(".menubutton").css('color','grey');
+    }
+  }
+  $(document).ready(function() {
+    selectDiv();
+    $(window).on('hashchange', selectDiv);
+  });
+</script> 
+<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+</head>
+<body style="background-color:#FFFFFD">
+<div id='page-margins'>
+<div>
+<a class="download" href="http://sourceforge.net/projects/ucanaccess/files/">Download UCanAccess 4.0.2</a>
+<g:plusone size="tall"></g:plusone>
+<a id="donate" href="#donate" class="menubutton" style="position:relative;left:5em;top:40px"><img id="donate_img" src="donate.png" border="0"  width="120" /></a>
+
+<div id="buttonsDiv"> 
+
+<a id="home" href="#home" class="menubutton">Home</a>
+<a id="examples" href="#examples" class="menubutton">Getting Started</a>
+<a id="clients" href="#clients" class="menubutton">JDBC Client Tools</a>
+<a id="change" href="#change" class="menubutton">Change Log</a>
+<a id="clicense" href="#license" class="menubutton">Links/Licensing</a>
+<a id="about" href="#about" class="menubutton">About</a>
+
+</div>
+
+
+<div id="content">
+<div id="home_div">
+<h1>UCanAccess</h1>
+<p>This is the home page of UCanAccess, an open-source Java JDBC driver implementation that allows Java developers and JDBC client programs (e.g., DBeaver, NetBeans, SQLeo, OpenOffice Base, LibreOffice Base, Squirrel SQL) to read/write Microsoft Access databases.</p>
+<p>Because it is a pure Java implementation it runs on both Windows and non-Windows operating systems (e.g., Linux/unix). <b>No ODBC needed</b>. UCanAccess uses: </p>
+<ul>
+ <li>Jackcess as MS Access input/output library (Web site: <a href='http://jackcess.sourceforge.net/'>http://jackcess.sourceforge.net/</a>).</li>
+ <li>HSQLDB as synchronized DBMS (Web site: <a href='http://hsqldb.org/'>http://hsqldb.org/</a>).</li>
+ </ul>
+<h2>Features</h2>
+<ul>
+  <li>Supported Access formats: 2000, 2002/2003, 2007, 2010/2013/2016 databases. (Access 97 format supported for <b>read-only</b>.)</li>
+  <li>SELECT, INSERT, UPDATE, DELETE statements. Transactions and savepoints.</li>
+  <li>Access data types: <i>YESNO, BYTE, INTEGER, LONG, SINGLE, DOUBLE, NUMERIC, CURRENCY, COUNTER, TEXT, OLE, MEMO, GUID, DATETIME.</i></li>
+  <li>Concurrent access from multiple application server threads.</li>
+  <li>Connection pooling.</li>
+  <li>ANSI 92 SQL, core SQL-2008.</li>
+  <li>Access SQL.</li>
+  <li>Core built-in functions for Access SQL are supported (e.g., <span class="inlineCode">Date()</span>, <span class="inlineCode">Now()</span>, <span class="inlineCode">IIf()</span>, ...).</li>
+  <li>You can execute Select queries defined and saved in Access. Since version 1.0.1, UCanAccess can execute Crosstab queries (<span class="inlineCode">TRANSFORM ... PIVOT ...</span>) </li>
+  <li>LIKE operator accepts both standard <span class="inlineCode">%</span> and Access-specific <span class="inlineCode">*</span> as multi-character wildcards, both standard <span class="inlineCode">_</span> and Access-specific <span class="inlineCode">?</span> as single-character wildcards, <span class="inlineCode">#</span> for single digit and <span class="inlineCode">[xxx][!xxx]</span> for character intervals (Access).</li>
+  <li>Both <span class="inlineCode">&</span> and <span class="inlineCode">+</span> (Access SQL) as well as <span class="inlineCode">||</span > (ANSI SQL) for string concatenation.</li>
+  <li>Square brackets for field names, table names and view names (saved Access queries) that include spaces or other special characters, e.g., <span class="inlineCode">SELECT [my column] FROM [my table]</span>.</li>
+  <li>Access date format (e.g., <span class="inlineCode">#11/22/2003 10:42:58 PM#</span>).</li>
+  <li>Both double quote <span class="inlineCode">"</span> and single quote <span class="inlineCode">'</span> as SQL string delimiters.</li>
+   <li>Read and write support to complex types (i.e., array of Version, Attachment, SingleValue).</i></li>
+   <li>
+   Since version 2.0.1, UCanAccess supports  both constants and functions as default column values in CREATE TABLE statements<br>
+   e.g., <span class="inlineCode">CREATE TABLE tbl (fld1 TEXT PRIMARY KEY, fld2 LONG DEFAULT 3 NOT NULL, fld3 TEXT(255) NOT NULL, fld4 DATETIME DEFAULT Now(), fld5 TEXT DEFAULT 'bla')</span>
+   </li>
+  <li>Command-line console ("console.bat" and "console.sh"). You can run SQL commands and display their results. CSV export command included.</li>
+ </ul>
+<h2>Limitations</h2>
+<ul>
+  <li> In the versions up to UCanAccess 4.0.0, only basic DDL was supported (<span class="inlineCode">CREATE TABLE</span> with Primary Key, <span class="inlineCode">DROP TABLE</span>).<br>
+  Since the version 4.0.0 UCanAccess can now support DDL for <b>Table metadata modification</b>. <br>
+  Columns, Primary Keys and other Indexes can now be added to an <b>existing</b> table.<br>
+  UCanAccess 4.x.x has also the ability to create Foreign Keys  and to rename Tables.<br>
+  A full DDL implementation will be available soon.</li>
+
+  <li>Very limited multiprocess access support. Nevertheless, it tries to synchronize data when a concurrent process modifies the Access database file.</li>
+</ul>
+<h2>Requirements</h2>
+UCanAccess requires Java 6 or later to run.
+<p>When dealing with large databases and using the default "memory" setting (i.e., with driver property <span class="inlineCode">memory=true</span>), it is recommended that users allocate sufficient memory to the JVM using the <span class="inlineCode">-Xms</span> and <span class="inlineCode">-Xmx</span> options. 
+<b>Otherwise it will be necessary to set the driver's "memory" property to "false":</b><br><br>
+<span class="inlineCode">Connection conn = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/data/pippo.mdb;memory=false&quot;);</span>
+
+<br>
+<h2>Dependencies</h2>
+<p><b>UCanAccess 2.x.x</b> requires (at least) the following dependencies in your classpath:</p>
+<ul>
+  <li>jackcess-2.0.0.jar or later<ul><li>commons-lang-2.4.jar</li><li>commons-logging-1.0.4.jar</li></ul></li>
+  <li>hsqldb.jar(2.2.5)<br><br></li>
+</ul>
+<p>In order to open encrypted files you must use UCanAccess 2.x.x or later with jackcess-encrypt-2.x.x and all related dependencies.</p>
+
+<p><b>Old versions of UCanAccess</b> (0.x.x or 1.x.x) require (at least) the following dependencies in your classpath:</p>
+<ul>
+  <li>jackcess-1.2.9.jar or later<ul><li>commons-lang-2.4.jar</li><li>commons-logging-1.0.4.jar</li></ul></li>
+   <li>hsqldb.jar(2.2.x)<br><br></li>
+</ul>
+
+
+</div>
+<div id="examples_div">
+<h1>Getting Started</h1>
+	<p>The distribution comes with both a number of jUnit test cases (package <i>net.ucanaccess.test</i>) and a simple Java example class (<i>net.ucanaccess.example.Example</i>) which illustrate how UCanAccess may be used.</p>
+ <h2> Establishing a UCanAccess connection</h2>
+<div class="source">
+        <i>Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);  /* often not required for Java 6 and later (JDBC 4.x) */<br>
+        Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://&lt;mdb or accdb file path&gt;&quot;,user, password);</i>
+
+<br>    // for example:
+
+<br><i>Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/pippo.mdb&quot;);</i>
+</div>
+<h2>Connection Properties</h2>
+   <p><b>memory</b>: set if HSQLDB will store its backing database only in memory. Default is <span class="inlineCode">memory=true</span>. </p>
+    <p><b>lobScale</b> (since UCanAccess 2.0.9.4): to optimize memory occupation when a relevant percent of memory occupation is for OLE (BLOB) data.
+	This may also allow, in many cases, to use the memory=true setting, whilst it was impossible before.
+	It should be set to a value close to the average size of  OLE instances.
+	According with the HSQLDB documentation, the values allowed are 1, 2, 4, 8, 16, 32 (the unit is Kb).
+	Default is 2 if memory=true, 32 (HSQLDB default) otherwise.</p>
+	<p><b>skipIndexes</b> (since UCanAccess 2.0.9.4): in order to minimize memory occupation, it allows  skipping the creation of  simple (untied to contraints) indexes. 
+It doesn't have effect on referential integrity constraints (i.e.,  Index Unique, Foreign Key or Primary Key).</p>
+   <p><b>newDatabaseVersion</b>: UCanAccess will create a new Access database file in the specified version if this parameter is set and the file specified in the JDBC connection URL does not exist. Valid values for this parameter are: V2000, V2003, V2007, V2010.</p>
+   <p><b>openExclusive</b> (replaces <i>lockMdb</i> which has been deprecated since UCanAccess 2.0.9.4): if openExclusive is enabled (<span class="inlineCode">openExclusive=true</span>), UCanAccess locks the mdb/accdb file to prevent updates from other processes. Default=false.<br><br>
+      <b>showSchema</b>: if true, catalog &quot;PUBLIC&quot; and schema &quot;PUBLIC&quot; and other HSQLDB schemas are shown in  the DatabaseMetadata implementation. Default=false. Using <i>showSchema=true</i>  is recommended with Squirrel SQL.</p>
+    <p><b>inactivityTimeout</b> (since UcanAccess 0.1.1): it is used only with the default memory mode (memory=true). If there are no active connections for the inactivityTimeout period (in minutes) HSQLDB will be temporarily shut down and any filesystem resources will be released. 
+    It will be restarted at the next connection. Setting <span class="inlineCode">inactivityTimeout=0</span> can be used for avoiding this behaviour. Default = 2 minutes.  </p>
+    <p><b>immediatelyReleaseResources</b> (replaces <i>singleConnection</i> which has been deprecated since UCanAccess 3.0.6): it is used for for ETL jobs, scheduled tasks,  or "one-shot" use of UCanAccess  with only one connection open. All resources (memory and filesystem) will be released at the closing of the connection.  Default=false.</p>
+    <p><b>encrypt</b> (since UCanAccess 1.0.4): it allows HSQLDB files encryption. You can use it in conjunction with memory=false. Default=false.</p>
+    <p><b>sysSchema</b> (since UCanAccess 1.0.4): if true the  Access system tables will be loaded in the "sys" readonly schema. Default=false.</p>
+	<p><b>ignoreCase</b>: Disables (ignoreCase=true) or enables (ignoreCase=false) the case sensitivity of text comparison. Default=true.</p> 
+	
+   
+
+</b>
+<div class="source">
+// for example:
+<br>
+<i>Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/pippo.mdb;openExclusive=true;ignoreCase=true&quot;);</i>
+</div>
+<p><b>remap</b> (since UCanAccess-2.0.2): it allows to remap the paths to one or more external linked databases. <div class="source">
+The syntax is: <br>
+<br><i>jdbc:ucanaccess://C:/db/&lt;main db&gt;;remap=&lt;original db1 path&gt;|&lt;new db1 path&gt;&amp;&lt;original i-db path&gt;|&lt;new i-db path&gt;</i><br>
+<br>e.g.,<br>
+<br><i>jdbc:ucanaccess://C:/db/main.mdb;remap=c:\db\linkee1.mdb|C:\pluto\linkee1.mdb&c:\db\linkee2.mdb|C:\pluto\linkee2.mdb</i><br>
+<br>Original path and new path must be separated by &apos;|&apos;, different pairs must be separated by  &apos;&amp;&apos; .</li>
+</p>
+</div>
+<br>
+<b>mirrorFolder</b> (since UCanAccess 2.0.9.3): it allows users to set the directory in which the mirror db will be created.<br>
+It forces <i>memory=false</i>.<br>
+Simply use <span class="inlineCode">mirrorFolder=java.io.tmpdir</span> in order to specify the system temp folder for that.<br><br>
+
+ <b>keepMirror</b> (since UCanAccess 2.0.2): keeps the HSQLDB mirror database after the VM ends so it can be reused by subsequent VM processes.<br>
+ It forces <i>memory=false</i>.<br>
+ In other words, using this parameter, the time-expensive process of creating and populating the database hsqldb (with memory=false), is executed only once.<br>
+ 
+ 
+ <div class="source">
+ <i>jdbc:ucanaccess://C:/db/main.mdb;keepMirror=C:/db/mirrorName</i><br>
+ </div>
+ Reusing the same keepMirror setting (e.g. <span class="inlineCode">keepMirror=C:/db/mirrorName</span>) at the next VM process execution allows you to dramatically reduce the time of first connection.
+It should be used only with very large databases (e.g., 1GB with many binary OLE objects) and when:
+<ul>
+<li>
+ You have to change the default  memory=true setting because you can't allocate sufficient JVM heap space (<span class="inlineCode">Xmx</span> VM paramenter).  
+</li>
+<li>
+ UCanAccess takes too much time to establish the  first connection (because it's populating the HSQLDB mirror database).
+ </li>
+ </ul>
+
+ Caution! - If the access database is modified by a different program (so not using UCanAccess) after the HSQLDB creates the mirror database, UCanAccess recreates and repopulates the whole mirror database for avoiding unchecked misalignments. 
+
+ 
+ </li>
+<br>
+<br>
+<b>columnOrder</b> (since UCanAccess 2.0.9): use the "DISPLAY" order of columns with <span class="inlineCode">SELECT *</span> statements. ("DATA" order is still the default).<br>
+ <div class="source">
+ <i>jdbc:ucanaccess://c:/db/cico.mdb;columnOrder=DISPLAY</i>  </div>
+ Note that once a column order has been set on the first connection to a given database, that setting will be the same for all the following connections to that database, in the whole VM life.</li>
+<br><br>
+<b>concatNulls</b> (since UCanAccess 3.0.0): controls the behaviour of all concatenation operators (<span class="inlineCode">&</span>,<span class="inlineCode">+</span>,<span class="inlineCode">||</span>) with null values:<br>
+	<span class="inlineCode">null & 'thing'</span> -> <span class="inlineCode">'thing'</span>. (It gave <span class="inlineCode">null</span> prior to version 3.0.0.)<br>
+	<span class="inlineCode">null + 'thing'</span> -> <span class="inlineCode">'thing'</span>. (It gave <span class="inlineCode">null</span> prior to version 3.0.0.)<br>
+If you want to switch to the old behaviour, you have to set the new connection property <span class="inlineCode">concatNulls=true</span>.<br>
+<br>
+<b>preventReloading</b> (since UCanAccess 3.0.0): optimize the reloading of db instances. If and only if you're sure that your db can be accessed by the MS Access GUI and just one JVM instance (using UCanAccess), you can  use the connection parameter
+<span class="inlineCode">preventReloading=true</span>. It avoids the data being reloaded when they aren't actually changed by the GUI.
+
+<p><b>jackcessOpener</b> (since UCanAccess 0.0.2): in order to use <i>Jackcess Encrypt</i> extension, you can specify a class that implements the <i>net.ucanaccess.jdbc.JackcessOpenerInterface</i> interface 
+(in that case you need additional jar files in your classpath: a version of jackcess-encrypt.jar and all related dependencies).<br> 
+The following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file:</p> 
+<div class="source">
+<i>
+<b>Example for UCanAccess2. Notice that you must use UCanAccess 2.x.x with jackcess-encrypt-2.x.x and all related dependecies </b><br>
+package yourPackage.example;<br>
+<br>
+import java.io.File;<br>
+import net.ucanaccess.jdbc.JackcessOpenerInterface;<br>
+
+
+//imports from Jackcess Encrypt<br>
+import com.healthmarketscience.jackcess.CryptCodecProvider;<br>
+import com.healthmarketscience.jackcess.Database;<br>
+import com.healthmarketscience.jackcess.DatabaseBuilder;<br>
+<br>
+import net.ucanaccess.jdbc.JackcessOpenerInterface;<br>
+<br>
+public class CryptCodecOpener implements JackcessOpenerInterface  {<br>
+	
+&nbsp;	public Database open(File fl,String pwd) throws IOException {<br>
+&nbsp;&nbsp;&nbsp;DatabaseBuilder dbd =new DatabaseBuilder(fl);<br>
+&nbsp;&nbsp;&nbsp;dbd.setAutoSync(false);<br>
+&nbsp;&nbsp;&nbsp;dbd.setCodecProvider(new CryptCodecProvider(pwd));<br>
+&nbsp;&nbsp;&nbsp;dbd.setReadOnly(false);<br>
+&nbsp;&nbsp;&nbsp;return  dbd.open();<br>
+&nbsp;&nbsp;&nbsp;<br>
+&nbsp;	}<br>
+&nbsp;&nbsp;//Notice that the parameter setting <b>autosync =true</b> is recommended with UCanAccess for performance reasons. <br>
+&nbsp;&nbsp;//UCanAccess flushes the updates to disk at transaction end. <br>
+&nbsp;&nbsp;//For more details about autosync parameter (and related tradeoff), see the Jackcess documentation. <br>
+}<br>
+<br>
+</i>
+</div>
+<br>
+<div class="source">
+<i>
+<br>
+Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);<br>
+Connection conn=<br>
+DriverManager.getConnection(&quot;jdbc:ucanaccess:///opt/prova1.mny;jackcessOpener=yourPackage.example.CryptCodecOpener&quot;, &quot;sa&quot;, pwd);<br>
+...
+</i>
+</div>
+<br>
+<div class="source">
+<i>
+
+<b>For old UCanAccess versions (0.x.x,1.x.x)  JackcessOpenerInterface should be implemented in a different way, because of the  jackcess API  changes  from jackcess1 to jackcess2.</b><br>
+package yourPackage.example;<br>
+<br>
+import java.io.File;<br>
+import java.io.IOException;<br>
+//imports from Jackcess Encrypt<br>
+import com.healthmarketscience.jackcess.CryptCodecProvider;<br>
+import com.healthmarketscience.jackcess.Database;<br>
+<br>
+import net.ucanaccess.jdbc.JackcessOpenerInterface;<br>
+<br>
+public class CryptCodecOpener implements JackcessOpenerInterface  {<br>
+	
+&nbsp;	public Database open(File fl,String pwd) throws IOException {<br>
+&nbsp;&nbsp;&nbsp;return Database.open(fl, true, true, null, null, new CryptCodecProvider(pwd));<br>
+&nbsp;	}<br>
+}<br>
+<br>
+ 
+...
+
+</i>
+</div>
+<h1>Identifiers escaping</h1>
+You should escaping identifiers including a blank space using square brackets or backtick character (`).<br>
+Also you shold escaping identifiers that equal a SQL keyword (e.g. SELECT * FROM [SELECT] or SELECT * FROM `SELECT`).<br>
+SQL Keywords are:
+ALL, AND,ANY, AS, AT, AVG, BETWEEN, BOTH, BY, CALL, CASE, CAST, COALESCE, CONSTRAINT, CORRESPONDING, CONVERT, COUNT, CREATE,
+			CROSS, DEFAULT, DISTINCT,DO, DROP, ELSE, EVERY, EXISTS, EXCEPT, FOR, FROM, FULL, GRANT, GROUP, HAVING, IN,
+			INNER , INTERSECT, INTO, IS, JOIN, LEFT, LEADING, LIKE, MAX , MIN, NATURAL, NOT, NULLIF, ON, ORDER,
+			OR, OUTER, PRIMARY, REFERENCES, RIGHT, SELECT, SET,	SOME, STDDEV_POP, STDDEV_SAMP, SUM, TABLE, THEN, TO,
+			TRAILING, TRIGGER, UNION, UNIQUE, USING, USER, VALUES, VAR_POP, VAR_SAMP, WHEN, WHERE, WITH, END.
+
+
+
+
+<h1>Examples</h1>
+<h2>Creating tables with DDL</h2>
+<div class="source">
+<i>Statement st =conn.createStatement();
+st.execute(&quot;CREATE TABLE example1 (id COUNTER PRIMARY KEY,descr text(400), number numeric(12,3), date0 datetime) &quot;);<br>
+...st.execute(&quot;create table dkey(c counter  , number numeric(23,5)  , PRIMARY KEY (C,NUMBER) &quot;);<br>
+...st.execute(&quot;create table dtrx(c text  , number numeric(23,5) , unique (C,NUMBER)) &quot;);<br>
+...st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");<br>
+...st.execute(" CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), <span class="red1">FOREIGN KEY (y) REFERENCES Parent (x) </span> )");<br>
+Notice that the part highlighted <span class="red1">in red</span> in the statement above is only supported since UCanAccess 4.0.0.<br>
+</i><br>Also UCanAccess supports create table as (<sql select>) syntax:<br>
+<i>st.executeUpdate(&quot;CREATE TABLE copy as (select * from example1) WITH DATA &quot;);</i>
+</div>
+<h2>Executing queries</h2>
+<div class="source">
+The following example shows a <b>full outer join</b><b>:</b>
+<br><i>st =conn.createStatement();<br>
+ResultSet rs=st.executeQuery("SELECT * FROM example3 full outer join example4 on (example3.id=example4.id)");</i>
+</div>
+<h2>Using Access functions</h2>
+<div class="source">
+<i>ResultSet rs=st.executeQuery(&quot;SELECT IIf(descr='Show must go off','tizio','caio&amp;sempronio'&amp;'&amp;Marco Amadei'&amp;' '&amp; Now() &amp; RTrim(' I''m proud of you ')) FROM example1&quot;);
+</i><br><br>// Domain Aggregate functions:<br><i>ResultSet rs=st.executeQuery(</i>&quot;select id, DCount('*','t234','1=1') from t234&quot;);</div><br>
+More complete examples of access functions implementation are shown in the <i>net.ucanaccess.test.FunctionsTest</i> junit test suite.
+The following functions are already implemented: <br>ASC, ATN, CBOOL, CCUR, CDATE, CDBL, CDEC, CINT, CLONG, CSIGN, CSTR, CVAR, DATEADD, DATEDIFF, DATEPART, DATE, DATESERIAL, DATEVALUE, FIX, FORMAT, IIF, INSTR, INSTRREV, ISDATE, ISNUMERIC, INT,
+IsNull, LEN, MID, MONTHNAME, NOW, NZ, PARTITION, SIGN, SPACE, SQR, STR,, STRING, STRCOMP, STRCONV, STRREVERSE, SWITCH, RND, TIME, TIMESERIAL, VAL, WEEKDAY, WEEKDAYNAME; 
+<br>Aggregate and Domain Functions: FIRST,  LAST, DCOUNT, DAVG, DSUM, DMAX, DMIN, DFIRST, DLAST, DLOOKUP.
+<br>Financial Functions(since UCanAccess 2.0.7.1): PMT, NPER, IPMT, PPMT, RATE, PV, FV, DDB, SYD, SLN. 
+<br>Also you can use the following functions from the hsqldb implementation: <br>COS, SIN,   LTRIM, RTRIM, UCASE, LCASE; <br>Aggregate Functions: COUNT, AVG, SUM, MAX, MIN, STDEV, STDEVP, VAR, VARP.<br>
+
+<h2>User-defined functions</h2>
+Step 1: implementation of a new function:
+<div class="source">
+	<i>public class XXX{<br>
+	...
+	<br>&nbsp;@FunctionType(functionName="justconcat",argumentTypes={AccessType.TEXT,AccessType.TEXT},returnType=AccessType.TEXT)
+	<br>&nbsp;&nbsp;public static String concat(String s1,String s2){
+	<br>&nbsp;&nbsp;return s1+" >>>>"+s2;
+	<br>&nbsp;}
+	…
+	<br>}
+	</i>
+</div>
+    Step 2: registration:
+<div class="source">
+  	<i>UcanaccessConnection uc=(UcanaccessConnection)this.ucaConn;
+ 	 uc.addFunctions(XXX.class);
+</i></div>
+
+    Step 3: trying your new fuction:
+<div class="source">
+	<i>ResultSet rs=st.executeQuery(&quot;SELECT justConcat(descr,''&amp;now()) from example1&quot;);
+	</i>
+</div>
+<h2>Using criteria in LIKE clause</h2>
+<div class="source">
+	<i>ResultSet rs=st.executeQuery("select descr from example2 where descr like 'P%'");
+	<br>//access * jolly
+	<br>rs=st.executeQuery("select descr from example2 where descr like 'P*'");
+	<br>//number and interval patterns
+	<br>rs=st.executeQuery("select descr from example2 where descr like 'P[A-F]###'");
+	<br>//number pattern
+	<br>rs=st.executeQuery("select descr from example2 where descr like 'C#V##'");
+	</i>
+</div>
+<h2>Limit and offset SQL pagination</h2>
+<div class="source">
+	<i>	rs=st.executeQuery("SELECT * FROM example2 order by id desc limit 5 offset 1");</i><br>
+	<i>	rs=st.executeQuery("SELECT TOP 10 * FROM example2 order by id");</i>
+</div>
+
+<h2>Performing transactions</h2>
+<div class="source">
+	<i>conn.setAutoCommit(false);
+    <br>st =this.ucaConn.createStatement();<br>
+    st.executeUpdate("update example4 set descr='Lugo di Romagna'");
+    <br>st.execute("insert into example4 (ID, descr) values(5,'DALLAS')");
+    <br>conn.commit();</i>
+</div>
+<h2>Using updatable ResultSet</h2>
+<div class="source">
+	<i>PreparedStatement ps = super.ucanaccess.prepareStatement(
+     "SELECT * FROM T1", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);<br>
+     rs = ps.executeQuery();<br>
+     rs.next();
+     <br>rs.updateString(2, "show must go off");
+     <br>rs.updateRow();</i>
+</div>
+
+<h2>Working with date type</h2>
+<div class="source">
+	<i>st.execute("INSERT INTO example1 (descr,number,date0) VALUES( \"Show must go up and down\",-113.55446,#11/22/2003 10:42:58 PM#)");</i>
+</div>
+
+
+<h2>Working with OLE type</h2>
+<div class="source">
+	<i>InputStream isDB = rs.getBinaryStream('OleColumn');<br>
+	File fl = new File("CopyElisaArt.JPG");<br>
+	OutputStream outFile = new FileOutputStream(fl);<br>
+	ba = new byte[4096];
+	<br>while ((len = isDB.read(ba)) != -1) {
+	<br>outFile.write(ba, 0, len);
+	}
+	<br>out.flush();
+	<br>out.close();
+	<br>System.out.println("CopyElisaArt.JPG was created in "
+	+ fl.getAbsolutePath());</i>
+</div>
+
+
+<h2>About ' and " escaping </h2>
+<div class="source">
+Both ' and " are valid string delimeters.<br>
+So the following SQL statements are correct:<br>
+
+	<i>UPDATE TABLE1 SET SURN='D''Ambrogio';(value saved=D'Ambrogio)</i><br>
+	<i>UPDATE TABLE1 SET SURN="""D'Ambrogio""";(value saved="D'Ambrogio")</i><br>
+</div>
+
+<h2>Working with Complex Types </h2>
+<div class="source">
+	<i>
+	        ...<br>
+	        PreparedStatement ps=conn.prepareStatement("INSERT INTO TABLE1(ID  , MEMO_DATA , APPEND_MEMO_DATA , MULTI_VALUE_DATA , ATTACH_DATA) VALUES (?,?,?,?,?)");<br>
+			
+			ps.setString(1, "row12");<br>
+			ps.setString(2,"ciao");<br>
+			ps.setString(3,"to version");<br>
+			SingleValue[] svs=new SingleValue[]{new SingleValue("ccc16"),new SingleValue("ccc24") };<br>
+			//Array of net.ucanaccess.complex.SingleValue<br><br>
+			ps.setObject(4,svs);<br>
+			Attachment[] atcs=new Attachment[]{new Attachment(null,"ccc.txt","txt","ddddd ddd".getBytes(), new Date(),null),<br>
+					new Attachment(null,"ccczz.txt","txt","ddddd zzddd".getBytes(), new Date(),null) };<br>
+					//Array of net.ucanaccess.complex.Attachment<br><br>
+					
+			ps.setObject(5,atcs);<br>
+			ps.execute();<br>
+			...<br><br><br>
+			ps=conn.prepareStatement("UPDATE TABLE1 SET APPEND_MEMO_DATA='THE CAT' ");<br>
+			//APPEND_MEMO_DATA is an append only column: a new net.ucanaccess.complex.Version will be added  to the version array<br><br> 
+			ps.execute();<br>
+			...<br><br><br>
+			ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=? ");<br>
+			Attachment[] atc;<br>
+			ps.setObject(1,atc=new Attachment[]{new Attachment(null,"cccsss.cvs","cvs","ddddd ;sssssssssssssssssssddd".getBytes(), new Date(),null) });<br>
+			ps.execute();<br>
+			//you can't use = operator here: use the Equals or  the EqualsIgnoreOrder functions instead
+			ps=conn.prepareStatement("select * from Table1 where Equals(ATTACH_DATA,?);<br>
+			ps.setObject(1,atc);<br>
+			ResultSet rs=ps.executeQuery();<br>
+			while(rs.next()){<br>
+			&nbsp;&nbsp;System.out.println(rs.getObject("ATTACH_DATA"));<br>
+			//rs.getObject("ATTACH_DATA") will return an array of net.ucanaccess.complex.Attachment<br>
+			}<br>
+	        ...<br>
+	</i>
+</div>
+<h2>Filtering on  Complex Type Columns (feature available since UCanAccess 2.0.9)</h2>
+<div class="source">
+
+
+	<i>		 	
+	         <b>The equality operator (=) can't be used on complex type columns, use the following functions instead. 
+			 <br>
+			 <br>
+			 <br>
+			 -Equals. It returns true if the two specified arrays of  SingleValue, Attachment or Version  are equal to one another, false otherwise.<br>
+			  In other words they  are equal if all corresponding pairs of elements in the two arrays are equal. </b>
+			<br>
+			<br>
+			//true for all records whose  MULTI_VALUE_COLUMN value equals  [value1,value2]<br>
+			    ...<br>
+				PreparedStatement ps=conn.prepareStatement("select * from TABLE1 WHERE  <b>Equals(MULTI_VALUE_COLUMN,?)</b>");<br>
+				ps.setObject(1, SingleValue.multipleValue("value1","value2",));<br>
+				ResultSet rs=ps.executeQuery();<br>
+				 ...<br>
+			<br>
+			<br>
+			
+			 <b>-EqualsIgnoreOrder. It returns true if the two specified arrays of  SingleValue, Attachment or Version  are equal to one another regardless the order, false otherwise.</b>
+			<br>
+			<br>
+			//true for all records whose  MULTI_VALUE_COLUMN value equals  [value1,value2] or [value2,value1]<br>
+			 ...<br>
+				PreparedStatement ps=conn.prepareStatement("select * from TABLE1 WHERE  <b>EqualsIgnoreOrder(MULTI_VALUE_COLUMN,?)</b>");<br>
+				ps.setObject(1, SingleValue.multipleValue("value1","value2",));<br>
+				ResultSet rs=ps.executeQuery();<br>
+				 ...<br>
+			<br>
+			<br>
+	    
+			<b>-Contains. It returns true if the Array of SingleValue, Attachment or Version(column value) passed as first argument contains<br>
+			all the element of the Array passed as second argument. </b>
+			<br>
+			<br>
+			    //true for all records whose  MULTI_VALUE_COLUMN value contains  both value1 and value2<br>
+	            ...<br>
+				PreparedStatement ps=conn.prepareStatement("select * from TABLE1 WHERE  <b>Contains(MULTI_VALUE_COLUMN,?)</b> ");<br>
+			    ps.setObject(1, SingleValue.multipleValue("value1","value3"));<br>
+				ResultSet rs=ps.executeQuery();<br>
+				 ...<br>
+			<br>
+	       <br>
+	</i>
+</div>
+
+<h2>Table renaming (feature available since UCanAccess 4.0.0)</h2>
+<div class="source">
+st.execute("ALTER TABLE [My old name] RENAME TO [My new name]");
+</div>
+
+<h2>Add new Column to existing table (feature available since UCanAccess 4.0.0)</h2>
+<div class="source">
+st.execute("ALTER TABLE xxx ADD COLUMN yyy TEXT");
+</div>
+<div class="source">
+st.execute("ALTER TABLE zzz ADD COLUMN kkk  DATETIME NOT NULL DEFAULT now()");
+</div>
+
+<div class="source">
+st.execute("ALTER TABLE [222 crazy name] ADD COLUMN [another crazy name] numeric (23,6) default 13.031955 not null");
+</div>
+
+<h2>Add new Index to existing table (feature available since UCanAccess 4.0.0)</h2>
+<div class="source">
+st.execute("CREATE unique INDEX [index name] on [table name]  (a ASC,c ASC )");
+</div>
+<div class="source">
+st.execute("CREATE  INDEX [index name] on bbb  (a ASC,c ASC )");
+</div>
+
+<h2>Add Primary Key to existing table (feature available since UCanAccess 4.0.0)</h2>
+<div class="source">
+st.execute("ALTER TABLE xxx ADD PRIMARY KEY (column1,column2)");
+</div>
+
+<h2>Foreign Key creation (feature available since UCanAccess 4.0.0)</h2>
+<div class="source">
+st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE CASCADE");
+or <br>
+st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE SET NULL");
+</div>
+
+<h2>Counters handling (feature available since UCanAccess 3.0.0)  </h2>
+<div class="source">
+st.execute("DISABLE AUTOINCREMENT ON TABLE_NAME");<br>
+and <br>
+st.execute("ENABLE AUTOINCREMENT ON TABLE_NAME"); <br>
+
+</div>
+
+</div>
+<div id="clients_div">
+
+<h2>Using the UCanAccess command-line console</h2>
+
+Execute <i>console.bat </i>(Windows) or <i>console.sh </i>(Linux/unix) in the distribution to 
+run the command-line tool (main class: <i>net.ucanaccess.console.Main</i>). It will
+prompt you to enter the path to the Access DB file. Once it reads in the database file, it will 
+print out a prompt. You can enter SQL queries or commands at this prompt.
+All queries and commands end with a semicolon (";").
+
+<p>A SQL query looks like this:
+<div class="source">
+UCanAccess&gt;SELECT * FROM License;
+</div>
+
+<p>You can export the result of the most recent SQL query to a CSV file using the
+<span class="inlineCode">export</span> command:
+<div class="source">
+UCanAccess&gt;export License.csv;
+</div>
+
+<p>The <span class="inlineCode">export</span> command supports a number of flags, which are
+described by the --help flag:
+<div class="source">
+<pre>UCanAccess&gt;export --help;
+Usage: export [--help] [--bom] [-d &lt;delimiter&gt;] [-t &lt;table&gt;] [--big_query_schema &lt;pathToSchemaFile&gt;] [--newlines] &lt;pathToCsv&gt;;
+Export the most recent SQL query to the given &lt;pathToCsv&gt; file.
+  -d &lt;delimiter&gt; Set the CSV column delimiter (default: ';').
+  -t &lt;table&gt;     Output the &lt;table&gt; instead of the previous query.
+  --big_query_schema &lt;schemaFile&gt;  Output the BigQuery schema to &lt;schemaFile&gt;.
+  --bom          Output the UTF-8 byte order mark.
+  --newlines     Preserve embedded newlines (\r, \n).
+  --help         Print this help message.
+Single (') or double (") quoted strings are supported.
+Backslash (\) escaping (e.g. \n, \t) is enabled within quotes.
+Use two backslashes (\\) to insert one backslash within quotes (e.g. "c:\\temp\\newfile.csv").
+</pre>
+</div>
+
+<p><b>-d &lt;delimiter&gt;</b> By default the delimiter between columns in the CSV
+file is the semicolon (;) for historical reasons. If you want to change this to a
+comma, use this flag like this:
+<div class="source">
+UCanAccess&gt;export -d , License.csv;
+</div>
+
+<p><b>-t &lt;table&gt;</b> By default the export command uses the result set of the 
+previous SQL command. This flag sends the given &lt;table&gt; to the CSV file by
+executing the SQL query <span class="inlineCode">SELECT * FROM [table]</span>.
+For example,
+<div class="source">
+UCanAccess&gt;export -t License License.csv;
+</div>
+
+<p><b>-big_query_schema &lt;schemaFile&gt;</b> This flag generates the JSON formatted
+schema file which contains the data type information (e.g. "string", "integer") of
+each column which are required by
+<a href="https://cloud.google.com/bigquery/">Google BigQuery</a>.
+This schema file can be used by the 
+<a href="https://cloud.google.com/bigquery/bq-command-line-tool">BigQuery load tool</a>.
+For example,
+<div class="source">
+UCanAccess&gt;export -d , -t License --big_query_schema License.schema License.csv;
+</div>
+will generate two files,
+<span class="inlineCode">License.csv</span> and
+<span class="inlineCode">License.schema</span>.
+These can be imported into Google BigQuery using the
+<span class="inlineCode">bq load</span> command like this:
+<div class="source">
+$ bq load --skip_leading_rows=1 mydataset.License License.csv License.schema
+</div>
+
+<p><b>--bom</b> The CSV file will be encoded in UTF-8 format.
+Microsoft Excel does not support UTF-8 encoding unless the file contains a
+<a href="http://unicode.org/faq/utf_bom.html#BOM">Byte Order Mark</a>. This
+flag produces that byte order mark (EF BB BF).
+<div class="source">
+UCanAccess&gt;export --bom -t License License.csv;
+</div>
+
+<p><b>--newlines</b> By default any embedded newlines (\n or \r, in other words,
+ASCII characters 0x0A and 0x0D respectively) are converted into a space character
+in the CSV file. This is because many CSV readers are not able to read multi-line
+records. This flag preserves newline characters by enclosing them in double-quote characters.
+<div class="source">
+UCanAccess&gt;export --newlines -t License License.csv;
+</div>
+Microsoft Excel supports newline characters within quotes.
+Google BigQuery requires the <span class="inlineCode">--allow_quoted_newlines</span> flag
+to be given, like this:
+<div class="source">
+$ bq load --allow_quoted_newlines --skip_leading_rows=1 mydataset.License License.csv License.schema
+</div>
+
+<p><b>Quotes</b> The export command supports single or double quotes in the arguments, which
+allows table names and file names to contain embedded spaces and other special characters.
+For example, the command
+<div class="source">
+UCanAccess&gt;export -d '\t' -t "License and Address" 'License and Address.csv';
+</div>
+exports the table named "License and Address" to a file named "License and Address.csv",
+using the TAB character as a delimiter between columns.
+
+<p>Within the quotes, backslash escaping of the following special
+characters are supported:
+<ul>
+<li> '\a' - bell (0x07)
+<li> '\b' - backspace (0x08)
+<li> '\f' - form feed (0x0C)
+<li> '\n' - newline (0x0A)
+<li> '\r' - carriage return (0x0D)
+<li> '\t' - tab (0x09)
+<li> '\v' - vertical tab (0x0B)
+<li> '\\' - backslash (\, 0x5C))
+<li> '\nn', '\nnn' - octal character escapes
+</ul>
+In Windows, the backslash character is the file path separator. If we use quotes, we need to use
+two backslashes to represent one backslash of a Windows file path. For example the following
+two commands are identical:
+<div class="source">
+<pre>
+UCanAccess&gt;export -t License c:\temp\new\License.csv;
+UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
+</pre>
+</div>
+
+
+<h2>DBeaver</h2>
+<p> DBeaver (Universal Database Manager) will automatically download and install UCanAccess as the default MS Access driver.<br>
+<br>DBeaver web site: <a href='http://dbeaver.jkiss.org'>http://dbeaver.jkiss.org</a></p>
+
+<h2>SQLeo</h2>
+<p>UcanAccess 2.0.2 has been successfully tested with the SQLeo Visual Query Builder.<br>
+<br>SQLeo project: <a href='http://sourceforge.net/projects/sqleo/'>http://sourceforge.net/projects/sqleo/</a></p>
+
+<h2>LibreOffice Base / OpenOffice Base</h2>
+<p>
+For detailed instructions on how to configure LibreOffice Base or OpenOffice Base with UCanAccess please see <a href='http://askubuntu.com/questions/187389/is-it-possible-to-open-an-access-2010-database-file-without-using-wine-or-virtua/519571#519571'>this question on Ask Ubuntu</a>.<br/>
+<br>OpenOffice web site: <a href='http://www.openoffice.org'>http://www.openoffice.org</a><br/>
+LibreOffice web site: <a href='http://www.libreoffice.org/'>http://www.libreoffice.org/</a>
+
+</p>
+<h2>Using UCanAccess as NetBeans service<br></h2>
+<p>
+ Integration tested with UCanAccess 2.0.4.1. It doesn't work with previous UCanAccess versions.<br><br>
+ 1)	Define a new Driver in the Netbeans "Services" tab: <i>Services &gt; Databases &gt; Drivers &gt; New Driver...</i><br><br>
+ 2)	In the field <i>"Driver File(s)"</i>  add "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>.jar" <b>and all dependencies</b> (all jars in the <span class="inlineCode">lib/</span> folder of the UCanAccess distribution: "commons-lang-<i>2</i>.<i>x</i>.jar", "commons-logging-<i>1</i>.<i>x</i>.<i>y</i>.jar", "hsqldb.jar", "jackcess-<i>2</i>.<i>x</i>.<i>y</i>.jar").<br><br>
+  <b>Note:</b> The "commons-logging-<i>1</i>.<i>x</i>.<i>y</i>.jar" version must be the same used by NetBeans (in NetBeans8 the path is "NetBeans 8.0\ide\modules\org-apache-commons-logging.jar").
+  The commons-logging version in the recent UCanAccess distributions is the same as in NetBeans8 ("commons-logging-1.1.1.jar").<br><br>
+  Setting the field <i>Driver Class</i>: net.ucanaccess.jdbc.UcanaccessDriver.<br><br>
+ 3)	Create a connection using the following JDBC Connection URL examples:<br>
+	<div class="source">
+	Windows local path: <span class="inlineCode">jdbc:ucanaccess://C:/Users/Public/Database1.accdb;showSchema=true</span>
+	<br><br>
+	Windows UNC path: <span class="inlineCode">jdbc:ucanaccess:////servername/sharename/foldername/Database1.accdb;showSchema=true</span>
+	<br><br>
+	Linux/unix: <span class="inlineCode">jdbc:ucanaccess:///home/gord/Documents/Database1.accdb;showSchema=true</span>
+	</div>
+  (Notice that the <span class="inlineCode">showSchema</span> connection property must be set to <span class="inlineCode">true</span>.)<br><br>
+  4) Now you can see your db tables listed in the PUBLIC schema.
+  <br><br>
+  NetBeans web site: <a href='https://netbeans.org'/>https://netbeans.org</a> <br>
+ </p>
+
+<h2>Squirrel SQL<br></h2>
+<p>
+For detailed instructions on how to configure Squirrel SQL with UCanAccess please see <a href="http://stackoverflow.com/a/36608661/2144390">this answer on Stack Overflow</a>.<br><br>
+Squirrel SQL web site: <a href='http://www.squirrelsql.org/'>http://www.squirrelsql.org/</a> <br> 
+</div>
+<div id="change_div">
+
+<h2>4.0.2 Release</h2>
+<ul> 
+<li>Enhanced the console features
+<ul> 
+<li>Better escaping of exported CSV fields with embedded delimiters and quotes</li> 
+<li>Add -d flag to change delimiter</li> 
+<li>Add -t flag to export large tables directly</li>
+<li>Add --big_query_schema flag to export the Google BigQuery schema file</li>
+<li>Add --newlines flag to preserve embedded newlines when exporting to CSV</li>
+<li>Print UTF-8 byte order mark if --bom flag is given</li>
+<li>Fix incorrect SimpleDateFormat which outputs 12:00:00 for midnight in the "export" command</li>
+</ul></li>
+<li>Optimized the preparser</li>
+<li>Fix problem with remap= under Linux</li> 
+<li>Fix bug with built-in functions used in calculated field expressions. Added fake left$ and right$ functions</li>
+<li>Patched mapping of CHAR type when used in DDL</li>
+<li>Fix insert of arbitrary AutoNumber values</li>
+<li>Fix bug with the setting of Null values on complex type columns(i.e., Attachment, Multivalue)</li>
+<li>Fix bug on column aliases containing an accented character (aliases generated by Hibernate)</li>
+</ul>
+
+<h2>4.0.1 Release. Fix release</h2>
+<ul> 
+<li>Fixed bug  that could affect columns order when creating a new table via ALTER TABLE statement and using a particular DDL statements sequence</li>
+<li>Minor fix on the UCanAccess console</li>
+</ul>
+
+<h2>4.0.0 First step towards a full DDL implementation</h2>
+<ul> 
+<li>Before this version only limited DDL was supported (CREATE TABLE and DROP TABLE). Now we've implemented: 
+
+<ul> 
+<li>table renaming, e.g.:
+<div class="source">
+ALTER TABLE [My old name] RENAME TO [My new name]
+</div>
+</li>
+<li>add new Column to existing table, e.g.:
+<div class="source">
+ALTER TABLE xxx ADD COLUMN yyy TEXT
+</div>
+<div class="source">
+ALTER TABLE zzz ADD COLUMN kkk  DATETIME NOT NULL DEFAULT now()
+</div>
+
+<div class="source">
+ALTER TABLE [222 crazy name] ADD COLUMN [another crazy name] numeric (23,6) default 13.031955 not null
+</div>
+</li>
+<li>add new Index to existing table, e.g.:
+<div class="source">
+CREATE unique INDEX [index name] on [table name]  (a ASC,c ASC )
+</div>
+<div class="source">
+CREATE  INDEX [index name] on bbb  (a ASC,c ASC )
+</div>
+</li>
+<li>add Primary Key to existing table,, e.g.:
+<div class="source">
+ALTER TABLE xxx add  Primary key (column1,column2)
+</div>
+</li>
+<li>Foreign key creation, e.g.:
+<div class="source">
+ALTER TABLE x add constraint constr foreign key (colx1,colx2) references y (coly1, coly2) ON delete cascade<br>
+Now you can also create FKs while creating a new table, e.g.,<br>
+CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y),<span class="red1">FOREIGN KEY (y) REFERENCES Parent (x) </span>)
+
+</li>
+
+
+</ul> 
+</li>
+<li>Upgrade to Jackcess 2.1.6</li>
+</ul>
+
+
+<h2>3.0.7</h2>
+<ul> 
+<li>Fixed aggregate functions on the datatype DATE (e.g. select first(date_init) from ...)</li>
+<li>Fixed update queries having a parametric condition in the where clause (e.g. UPDATE COL1 SET COL1=[PAR1] WHERE COL2=[PAR2])</li>
+<li>Optimized the CLNG function</li>
+<li>Fixed a few bugs the happened when the parameter keepMirror is being used: 
+see ReloadPersistentMirrorTest, a bug on the ORDER BY case-sensitivity  when the access db is updated externally</li>
+</ul>
+<h2>3.0.6</h2>
+<ul> 
+<li>Enhanced DataSource implementation</li>
+<li>Fixed bug that could have effect when a column name contained both a question mark '?' and a space ' ' characters</li>
+<li>Fixed bug with  APPEND or UPDATE access queries which used a variable of type TEXT as paramenter</li>
+<li>Fixed naming-conflict bug that could have effect  when updating tables  with the same name and a different structure from multiple databases connections</li>
+</ul>
+<h2>3.0.5</h2>
+<ul> 
+<li>Fixed major bug on single-precision numeric column management: in particular conditions it could cause misalignment between  hsqldb mirror and access db</li>
+<li>Enhanced DDL(Create Table) compatibility with PreparedStatement for use with other ORM tools</li>
+<li>Fixed bug on keyword "ROW" (it wasn't listed as keyword)</li>
+<li>When using the net.ucanaccess.jdbc.UcanloadDriver and the loader.jar, the setting -DUCANACCESS_HOME=D:\301\UCanAccess-3.0.1-bin
+is no more needed if the loader.jar of your classpath is picked up directly from a standard ucanaccess  distribution.
+(i.e. from the loader folder in the unziped  content of the ucanaccess-xxx.bin.zip)
+Thanks to Gord Thompson for the idea and  having suggested the code</li>
+</ul>
+<h2>3.0.4</h2>
+<ul> 
+<li>Implemented MS Access parametric SELECT queries. They will be available, where possibile, using the "table()" syntax, e.g., 	
+<div class="source">select * from table(queryWithParameters(#1971-03-13#,'hi babe'))</div>
+A default query, parametrized with all parameters to null, will be available as well.</li>
+
+<li>Implemented APPEND, DELETE and UPDATE MS Access queries. They will be available, where possibile, as stored precedures and via CallableStatement, e.g.:  
+<div class="source">CallableStatement cs= ucanaccess.prepareCall("{call insert_xxx(?,?,?)}");</div></li>
+
+<li>fixed issue(in the connecting phase) with table/column names starting with the $ character</li>
+<li>fixed issue(in querying) with table/column names within both a single quote character and a blank space character</li>
+<li>fixed bug that happened in subsequent drop and create table statements when executed without calling a commit between them</li>
+<li>fixed dlookup function</li>
+<li>fixed capitalisation  in column metadata for MS Access queries(views) like 
+SELECT tablename.* FROM ....</li>
+<li>fixed getBestRowIdentifier DatabaseMatadata method</li>
+<li>the proper exception is thrown when calling executeQuery method for update, insert and delete executions</li>
+<li>fixed bug on conflicting table names(e.g., my table and my_table)</li>
+</ul>
+
+
+<h2>3.0.3.1</h2>
+<ul> 
+<li>
+Fixed major bug: in several cases exclamation mark in literal textual values (i.e., if you didn't use a PreparedStatement) was saved as point. 
+</li>
+</ul>
+<h2>3.0.3 Release: still a fix-bugs version, enhancements coming soon</h2>
+<ul> 
+<li>fixed bug related to linked tables(from external db) with a complex type column.</li>
+<li>fixed bug on concurrent access in append on the same table by two or more different processes when using an auto increment key.</li>
+<li>fixed bug on iif function that now accepts null(interpreted as false) values as first argument.</li>
+<li> bug on like criteria: now  digit intervals  are supported ([4-7] or [!2-6]).</li>
+<li>fixed bug on metadata reloading when a concurrent process does structural upgrades(e.g., when creating a  table).</li>
+<li>fixed bug when connecting to a database with a table/column whose the name contains the reserved character $.</li>
+<li>fixed bug on # special character escaping in like criteria expressions (to be escaped as usual with [#]).</li>
+<li>
+About date values antecedent to the October 15, 1582 (Gregorian):
+<ul> 
+
+<li> when using a date in literal form (e.g. #1095-05-10#, or passing the string '1095-05-10' to the dateValue function ) this is interpreted in an MS Access compatible way, i.e., pure Gregorian calendar</li>
+<li> also the FORMAT function is now consistent with this convention </li>
+<li> when passing to a PreparedStatement a date antecedent to  the October 15, 1582, it's an applicative duty to create it consistently within the proper Calendar, i.e. by using GregorianCalendar.setGregorianChange(new java.util.Date(Long.MIN_VALUE)).</li>
+</ul> 
+</li>
+</ul>
+
+
+<h2>3.0.2 Release</h2>
+<ul> 
+<li>Fixed bug in CREATE TABLE DDL implementation, when using DECIMAL or NUMERIC columns on nullable(required) column property.</li>
+
+</ul>
+
+
+<h2>3.0.1 Release</h2>
+<ul> 
+<li>Fixed bug in "create table as select..." statement where there is a name conflict in  columns defined in the select.</li>
+<li>Fixed bug in "create table" where one or more column names are the same names of specific access types(e.g., create table ttt(counter counter primary key, text text)).</li>
+<li>Classloading isolation: in order to avoid conflicts in dependencies jars used by user development environment
+    a new jar named ucanload.jar has been added to this distribution. 
+	This is strongly suggested for the use of ucanaccess with LibreOffice/OpenOffice.
+	In other words, this allows you to use in your applications/tools the version of commons-lang, commons-logging, jackcess and hsqldb you need,
+	without any issue or impact on ucanaccess. If you are facing with a library conflict issue, you MUSTN'T add neither ucanaccess.jar nor any of the dependencies jars to your classpath but:<br>
+	<ul>
+	<li> unzip the UCanAccess-3.X.X-bin.zip distribution</li>
+	<li>  add to your classpath just the ucanload.jar from the "loader" folder of the distribution</li>
+	<li> set the system variable UCANACCESS_HOME so that it points the UCanAccess-3.x.x-bin folder (e.g. -DUCANACCESS_HOME=D:\301\UCanAccess-3.0.1-bin). </li>
+	<li> when required  (e.g. with java 6)  use the net.ucanaccess.jdbc.UcanloadDriver (e.g., Class.forName("net.ucanaccess.jdbc.UcanloadDriver")) 
+	instead of the original one net.ucanaccess.jdbc.UcanaccessDriver.</li>
+	</ul>
+	See also the updates to the LibreOffice/OpenOffice configuration on the "JDBC Client Tools" tab of this site. </li>
+</ul>
+
+<h2>3.0.0 Release</h2>
+<ul> 
+<li>Relicense to Apache 2.0!!</li>
+<li>Upgrade to jackcess 2.1.2.</li>
+<li>Metadata issues:
+<ul>
+	<li>Solved capitalization issues in both DatabaseMetaData and ResultSetMetaData implementations.
+They both have  been reimplemented for this specific purpose.
+Now UCanAccess can provide metadata with the correct capitalization(and no more all in upper case).</li>
+	<li>Changed escaping of column and table names containing special characters or out-of-rules(e.g. starting with a number): 
+now, in these cases, you can and must use the names defined in access(obviously in a case insensitive manner). </li>
+	<li>Supported all characterset with metadata (they were supported in data but not always in metadata elements like column or table names)</li>
+	<li>Fixed isAutoIncrement and isCurrency ResultSetMetaData methods.</li>
+	<li>Customized DatabaseMetaData.getColumns so that it can now provide:<br>
+ the default column values in the COLUMN_DEF columm<br>
+ the correct IS_AUTOINCREMENT informations<br>
+ the correct IS_GENERATEDCOLUMN	(used for calculated fields)<br>
+ the customized column ORIGINAL_TYPE(original type in access)<br></li>
+ <li>Customized DatabaseMetaData.getClientInfoProperties method that now returns ucanaccess driver available properties. </li>
+</ul>
+</li>
+<li>
+Implemented, for counters handling  :
+<div class="source">
+DISABLE AUTOINCREMENT ON TABLE_NAME<br>
+and <br>
+ENABLE AUTOINCREMENT ON TABLE_NAME <br>
+
+</div>
+It may be useful in import/export of data from and to different tables with the same structure, avoiding to break some FK constraint.
+</li>
+<li>Optimization issues:
+<ul>
+	<li>Fixed memory leak in MemoryTimer. 
+	It had effect in some particular situations (using the single connection mode if you're connecting to multiple db,in the case continous update by a different process, in the case of pooling on the db with intervals greater than the InactivityTimeout).</li>
+	<li>Optimized reloading of db instances. If and only if you're sure that your db can be accessed by the MS Access GUI and just one JVM instance (using UCanAccess), you can now use the connection parameter
+PreventReloading=true. It avoid the data to be reloaded when they aren't actually changed by the GUI.</li>
+</ul>
+</li>
+
+<li>Changed behaviour:
+<ul>
+	<li>In updatable ResultSet removed the  constraint to set all columns before inserting new rows, even if they are null or autoincrement.</li>
+	<li>Extended SELECT @@IDENTITY and Statement.getGeneratedKeys() features to the GUID type.</li>
+	<li>Concat character operators (&,+,||) behaviour with null:
+	<div class="source">
+	null & 'thing' -&gt; 'thing'. It gave null in previous versions.<br>
+	null + 'thing' -&gt; 'thing'. It gave null in previous versions.<br>
+	</div>
+If you want to switch to the old behaviour, you have to set the new connection property concatnulls=true.</li>
+</ul>
+</li>
+</ul>
+
+<h2>2.0.9.5 Release(A fix-bugs release waiting for the 3.0.0)</h2>
+<ul>
+<li>Upgrade to Jackcess 2.1.0</li>
+<li>Re-implemented SWITCH function with a different approach</li>
+<li>Fixed 2.0.9.4 regression related to databases with corrupted metadata(wrong rows number)</li>
+<li>Changed read-only exception message for Access 97 files</li>
+<li>Fixed bug on the value returned by the Statement.execute method when a ddl statement(create table) is executed</li>
+</ul>
+
+<h2>2.0.9.4 Release</h2>
+<ul>
+<li>Porting to HSQLDB 2.3.1.</li>
+<li>Fixed bug that may have effect in the case of a  naming conflict between a table in the opened database and a linked table in an external database.</li>
+<li>Allowed connecting to a corrupted database even if data violate an Unique, Not Null or Foreign Key constraint:  tables containing bad data are set read only, and a warning is logged.</li>
+<li>Added parameter Lobscale, to optimize memory occupation when a relevant percent of memory occupation is for Ole(Blob) data.
+This may also allow, in many cases, to use the memory=true setting, whilst it was impossible before.
+It should be set to a value close to the average size of  Ole instances.
+According with the HSQLDB documentation, the values allowed are 1,2,4,8,18,32 (the unit is Kb).
+Default is 2 if memory=true, 32 (hsqldb default) otherwise. </li>
+<li>Added parameter Skipindexes(default=false), in order to minimize memory occupation. It allows  skipping the creation of  simple, untied to contraints, indexes. 
+It doesn't have effect on referential integrity constraints (i.e.,  Index Unique, Foreign Key or Primary Key). </li>  
+<li>Solved bug related to the ß character, when used in column names.</li>
+<li>Fixed the error message logged when a db link metadata is broken(for metadata corruption).</li>
+<li>Overloaded NZ function: it can now accept numeric double values as argument.</li>
+<li>Speeded database loading (first connection time to a given database).</li>
+<li>Fixed bug that happened with table or column names containing an apostrophe or a quotation mark.</li>
+<li>Fixed bug in the switch function parsing.</li>
+<li>Deprecated and substituted parameter lockMdb: the new name for this parameter is openexclusive.</li>
+<li>Fixed bug on table autoreferential  constraint checks (indipendence from storage order).</li>
+<li>Supported exclamation point, as well as in the Access SQL syntax.</li>
+</ul>
+
+<h2>2.0.9.3 Release</h2>
+<ul>
+<li>Upgrade to jackcess 2.0.8 </li>
+<li>Fixed console output(it sometime showed correctly loaded queries in the list of the queries it wasn't able to load)</li>
+<li>Fixed issues that may happen with few unregistred keywords(e.g. 'cardinality')  if used as column name with a default value.
+Those keywords didn't have any effect on SQL, except for the particular case above.  </li>
+<li>Fixed Connection setSavepoint(String spn) method(setSavepoint only worked fine with no-arguments);</li>
+<li>Fixed "Create table as select ..." DDL statement when using with a group by clause with two or more columns.</li>
+<li>Allowed DDL with PreparedStatement(for ORM libraries' use).</li>
+<li>Implemented ErrorHandler for invalid characters sequences: an Exception will be thrown  to identify in which table, column and row the error occured.</li>
+<li>Fixed ResultSet.getString when called on a numeric decimal column.</li>
+<li>Fixed bug on logging/shutdown. At the vm end some unneccessary operation was performed in the case of memory=false and singleConnection=true
+Logs about on-disk database were shown when program terminates (long after the latest connection was closed).</li>
+<li>Added mirrorFolder connection parameter that forces memory=false and allows users to set the directory in which the mirror db will be created.
+Simply set this parameter to java.io.tmpdir in order to specify the system temp folder for that.</li>
+<li>Fixed residual issue (access 2007) creating new tables on NOT NULL property.</li>
+<li>Added orderJet function to allow compliance with Jet sorting logic that skip hyphen minus '-', en dash '–', em dash '—'  <br>
+and  in the middle of a string:<br>
+i.e. even  if "-" comes before  "/"<br>
+and "a-" before  "a/"<br>
+and "a- b" before  "a/ b"<br>
+	unexpectedly, likely to handle compound words "a/b" comes before "a-b"<br>
+ WORKAROUND suggested: if you want the same behaviour of Access: select * from table2 order by orderJet( COLUMN1).</li>
+</ul>
+ 
+ 
+<h2>2.0.9.2 Release</h2>
+<ul>
+<li>Upgrade to jackcess 2.0.6. </li>
+<li>Fixed methods getErrorCode and getSQLState in the UCanAccess SQLException  implementation (class UcanaccessSQLException). 
+SQL error codes and states are those gotten from hsqldb (you can handle them by using the constants in  net.ucanaccess.jdbc.UcanaccessErrorCodes) 
+except for the internal UCanAccess or Jackcess exceptions that always give the  error code  UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR.</li>
+
+</ul>
+
+
+
+<h2>2.0.9.1 Release</h2>
+<ul>
+<li>Now UCanAccess  completely supports calculated fields, even in insert and/or update statements. </li>
+<li>Speeded  the first connection (loading time) when dealing  with large databases, especially with the memory=false.Optimized the use of resources(memory, filesystem).</li>
+<li>Upgrade to jackcess 2.0.5.  A later fix from the jackcess trunk to the 2.0.5 release  has been included in this distribution. See either the README.txt or the NOTICE.txt files for further details. </li>
+</ul>
+
+
+
+<h2>2.0.9 Release</h2>
+<ul>
+
+<li>A major issue, involving some already damaged mdb, has been solved: the data of some table could be partially loaded with the previous UCanAccess versions.
+A table in an access database has a row count in its metadata(saved the database), and this issue was due to a misalignment between row count in the metadata and the real number of table rows. 
+So, it has been fixed in UCanAccess 2.0.9 by avoiding to rely on this metadata information while loading data.
+Also, UCanAccess 2.0.9 will raise a warning in these cases, suggesting to repair the mdb file.</li>
+<li>Strongly improved the UCanAccess behaviour in the case of multiple processes concurrency.</li>
+<li>Added connection parameter columnOrder to allow to use, in your SQL, the "display" order ("data" order is still the default).<br>
+e.g. <i>jdbc:ucanaccess://c:/db/cico.mdb;COLUMNORDER=DISPLAY.</i> <br>Once a column order has been setted on the first
+connection to a given database, the column order setting will be the same for all the following connections to that database, in the whole VM life.</li>
+<li>Allowed special characters and blank spaces in DDL.
+Column and table names, in this specific case, are not more escaped in the persisted table definition on the access file, but just in the mirror hsqldb database.
+<br>e.g. <i>CREATE TABLE [result ccc]( [aa a()] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')
+<br>DROP TABLE [result ccc]</i></li>
+<li>Allowed the use of the "autoincrement" keyword as "counter" synonymous in DDL.</li>
+<li>Implemented @@IDENTITY: <i>SELECT @@IDENTITY</i> query will return the latest generated key in the context of the current connection.</li>
+<li>Implemented <i>Statement.getGeneratedKeys()</i>: it returns the latest  key generated by the statement.</li>
+<li>Allowed filtering on complex type columns(version, attachment, multi-value).<br>  
+ You can do that through one of the following functions: Equals, EqualsIgnoreOrder, Contains.</li>
+<li>Implemented Partition function.</li>
+<li>Added support to PreparedStatement.setTime</li>
+</ul>
+
+<h2>2.0.8 Release</h2>
+<ul>
+<li>Added support to not standard syntax(accepted by MS Access) DELETE * FROM TABLENAME 
+(besides the always supported standard syntax DELETE  FROM TABLENAME).</li>
+<li>Fixed behaviour when the USER SQL keyword is used as column name. 
+You still need to escape it using square brackets, to avoid ambiguity(e.g. SELECT [USER] FROM USERS). 
+Notice that the user keyword, in general, refers to the database user.</li>
+<li>Fixed bug  that could have effect, in the previous versions, on delete and update statements,  when a SQL keyword is used as table name.</li>
+</ul>
+
+<h2>2.0.7.1 Release</h2>
+<ul>
+<li>Fix bug on byte type management (when the byte value is between 128 and 255).</li>
+<li>Strongly enhanced  implementation of calculated fields (support to power operator ^, return type management, fixed rounding bug in operations involving  integer literals and so on).
+ Nevertheless tables with one or more  calculated  field are still marked as read-only, waiting for an enhanced I/O support.
+	Also notice that calculated fields values are currently "calculated on fly" (that's, for the moment, just a simulation) and they aren't read from the database through jackcess. 
+	As result, elaborating the expressions that depend on the Regional Settings(e.g character string parsed to date value), there could be a difference between UCanAccess  output and the value saved in the database, 
+	if  data were inserted with a locale setting and then they are read with another one.</li>
+<li>Added financial functions (PMT, NPER, IPMT, PPMT, RATE, PV, FV, DDB, SYD, SLN), SQR and FIX function.</li>
+<li>Treated some more "special characters" (e.g. °) in column and table names.</li>
+<li>Fix bugs on DATEVALUE function (internationalisation).</li>
+<li>Overloading  of all "date functions", so that they can accept a string (VARCHAR) instead of a date as argument. 
+Nevertheless keep in mind that this kind of calls forces a parsing operation, with a result which depend on the regional settings (locale), 
+so you had better use the # delimiters and thus pass a date value instead of a character string.</li>
+</ul>
+<h2>2.0.7 Release</h2>
+<ul>
+<li>Strongly enhanced internationalisation support in date formatting.</li>
+<li>Solved residual bug on boolean type management.</li>
+<li>Introduced implementation of calculated fields. Tables with one or more  calculated  field are still marked as read-only, waiting for an enhanced I/O support.</li>
+<li>Fixed bug on  working mode.</li>
+
+</ul>
+<h2>2.0.6.3 Release</h2>
+<ul>
+<li>Fix bugs on Format and IsNumeric functions implementation: fixed  the internationalization of numeric values, introduced internationalization (related to the current locale ) in the formatting of date values,  
+ rounding mode "Round Half Up"  for numeric values when a pattern is passed as argument
+(e.g., format(48.1425,'.###') gives the string 48.143 as result). </li>
+<li>Fix bug on Int function: now it returns an Integer value (in previous versions it wrongly returned a short).</li>
+<li>Added ResultSet.deleteRow implementation.</li>
+
+</ul>
+
+<h2>2.0.6.2 Release</h2>
+<ul>
+<li>Fix bugs on DDL implementation (in the previous version a Unique Key  was created instead of a Primary Key, issue using a space string " " as default value, multiple columns Primary Key).</li>
+<li>Driver version read directly from the manifest file (Package.getImplementationVersion()),  pom.xml modified to include default implementation entries in the manifest file.</li>
+
+</ul>
+
+
+<h2>2.0.6.1 Release</h2>
+<ul>
+<li>Fix bug on batch implementation: consecutive SQL update operations on the same record using executeBatch(). </li>
+<li>Fix bug on saving column "required" property,in the case of autonumber type columns.</li>
+<li>Fix bug on boolean type management (the handling of null values  is different between Access and hsqldb).</li>
+</ul>
+
+<h2>2.0.6 Release</h2>
+<ul>
+<li>Fix bug on re-authentication with encrypted databases.</li>
+<li>Fix bug on the size of textual columns with access-97 files (which are read-only). This bug could cause a failure while connecting to access-97 databases.
+Therefore, successfully tested read-only connection to .eap files.</li>
+<li>"CONSTRAINTS" listed and handled as hsqldb keyword (and "patched" MAX which had a space at the end).</li>
+<li>Allowed non-standard SQL operation with date values: select date()+1 from atable (instead of:  select date()+1 DAY from atable) gave error before this release.</li>
+<li>"select table1.sameName, table2.sameName from ..." ambiguity solved by UCanAccess(for compatibility with the access permissive syntax), when detected in access queries.</li>
+
+</ul>
+
+
+
+<h2>2.0.5 Release</h2>
+<ul>
+<li>Fix bug on handling "scale" property in the case of numeric columns with dimension "decimal".</li>
+<li>Improved integration with NetBeans. You can use  UCanAccess 2.0.5 with NetBeans8 Reverse Engineer (e.g., "Entity classes from database", "Database Schema")</li>
+<li>Fix escaping of '?' character in column names.</li>
+<li>Jackcess upgrade to the 2.0.4.</li>
+
+</ul>
+
+
+
+<h2>2.0.4.1 Release</h2>
+<ul>
+<li>Fix bug in ResultSet.insertRow() implementation.</li>
+<li>Fix bug on DatabaseMetadata.getTables implementation (this patch allows configuring UCanAccess as NetBeans service).</li>
+<li>Commons-logging upgrade to the 1.1.1.</li>
+
+</ul>
+
+
+
+<h2>2.0.4 Release</h2>
+<ul>
+<li>Fix bug in DDL execution(create table) with the  latest jet formats.</li>
+<li>iif function extension for boolean and numeric and date types.</li>
+<li>"DO" listed and handled as hsqldb keyword.</li>
+<li>clng function implementation (it was wrongly named clong).</li>
+
+</ul>
+
+
+
+
+<h2>2.0.3 Release</h2>
+<ul>
+<li>Changed UCanAccess behaviour in handling (incorrect) default column values with a size greater than the column size. 
+UCanAccess has now the same behaviour of Access: a data truncation error will be thrown  at the real attempt to insert an incorrect value  and no more at the accdb/mdb opening
+(or, in other words, at the first connection).</li>
+<li>Improved performances in conversions. In the precedent versions, UCanAccess  ran slow in some particular case, 
+e.g., sql statement not parametric(not Prepared Statement), with a very long string containing a double quote (") character.</li>
+<li>Fixed bug in handling column name with both numbers and spaces (e.g. 'bla 1err').</li> 
+<li>Fixed bug related to numbers passed in scientific notation when not using a PreparedStatement.</li> 
+<li>Jackcess upgrade to 2.0.3.</li>
+</ul>
+<h2>2.0.2 Release</h2>
+<ul>
+<li>Added connection parameter remap. It allows to remap the paths to one or more external linked databases. The syntax is: <br>
+<i>jdbc:ucanaccess://C:/db/&lt;main db&gt;remap=&lt;original db1 path&gt;|&lt;new db1 path&gt;&amp;&lt;original i-db path&gt;|&lt;new i-db path&gt;</i><br>
+e.g.,<br>
+<i>jdbc:ucanaccess://C:/db/main.mdb;remap=c:\db\linkee1.mdb|C:\pluto\linkee1.mdb&c:\db\linkee2.mdb|C:\pluto\linkee2.mdb.</i>
+<br>Original path and new path must be separated by &apos;|&apos;, different pairs must be separated by  &apos;&amp;&apos;.</li>
+<li>Added connection parameter keepMirror for keeping the  mirror hsqldb database after the VM ends and so for reusing it in the following VM processes. <br>
+e.g.,<br>
+jdbc:ucanaccess://C:/db/main.mdb;keepMirror=C:/db/mirrorName</i><br>
+It make sense only with memory=false (so it forces this setting). It should be used with very large databases only (e.g., 1GB with many OLE binary data) and when UCanAccess takes too much time to establish the  first connection.
+</li>
+
+<li>Added support for some ISO-8859 non-roman characters (e.g Euro symbol)  in column and table names.</li>
+
+<li>Added "END" to the keywords list.</li>
+<li>Fixed minor bugs on DatabaseMetadata. Thanks to the SQLeo team. </li>
+ </ul>
+
+
+<h2>2.0.1 Release</h2>
+<ul>
+<li>Added support for persisting the column properties defined  in create table statements: default column value and nullability(i.e. required property).
+Supported both constants and functions as default values<br>
+e.g.,
+<i>CREATE TABLE AAA ( baaaa text PRIMARY KEY,A long   default 3 not null, C text(255) not null, d DATETIME default now(), e text default &apos;bla&apos;)</i></li>
+<li>Fix method closeOnCompletion of UcanaccessStatement (patch missed in the 2.0.0) </li>
+ </ul>
+
+
+<h2>2.0.0 Release</h2>
+<ul>
+<li>jackcess upgrade to version 2.0.1. So UCanAccess 2.0.0 is compliant with jackcess2  API</li>
+<li>implemented backtick character (`) for escaping  identifiers including blank characters(as alternative of using square brackets) </li>
+<li>fixed major bug on update and delete statements on tables having one or more column names that contain a blank character: it caused a desync between hsqldb and the access file</li>
+<li>fixed interfacing problem about using UCanAccess from Open Office or Libre Office (the office tools, in some cases, weren't able to open few tables)</li>
+<li>fixed problem about turning off jackcess logging</li>
+<li>added META-INF\services\java.sql.Driver file</li>
+ </ul>
+
+<h2> 1.0.4.1 Release</h2>
+<ul>
+<li>Fixed method closeOnCompletion of UcanaccessStatement</li>
+<li>fixed memory leak in jet loading (it caused OutOfMemoryError during the loading of very large databases even with the connection parameter memory=false)</li>
+</ul>
+<h2> 1.0.4 Release</h2>
+<ul>
+<li>Improved sql conversion so that access keywords (if used as table names, column names, query names) are no more escaped (with an x before the keyword).
+Old  sql code(if hard-coded in your sources) is still supported so you don't need to change anything.</li>
+<li>memory=false connection parameter allowed even for encrypted databases by encrypting hsqldb files (file system cache) with a random key.</li>
+<li>fixed bug on yes/no constants conversion to true/false.</li>
+<li>added "encrypt" connection parameter for allowing hsqldb files encryption. You can use it in conjunction with Memory=false. False by default.</li>
+<li>added "sysschema" connection parameter. If this connection parameter is true the  msaccess system tables will be loaded in the "sys" readonly schema. False by default.</li>
+<li>jackcess upgrade to version 1.2.14.2</li>
+</ul>
+<h2> 1.0.3 Release</h2>
+<ul>
+Fix bug release:
+<li>fixed escaping for access (no standard sql) access keywords referring to data types:COUNTER,CURRENCY,DATETIME,MEMO,OLE,	SINGLE,TEXT,YESNO,GUID
+	when they are used as name of column or table or query </li>
+<li>improved escaping of  column, table, query names for allowing the use of '(' and ')' character</li>
+<li>fixed a 1.0.2 bug in inserting or updating string with new line or carriage return characters: under particular conditions,  \n and \r  characters were replaced  by a blank character</li>
+<li>in create table ddl statement, text columns default lenght to 255 where not specified (before the explicit setting of length of text columns was mandatory)</li>
+<li>patched handling of temporary access artefacts (i.e. temporary tables, queries, foreign key and indexes with the name starting with a tilde)</li>
+<li>jackcess upgrade to version 1.2.14</li>
+</ul>
+
+<h2> 1.0.2 Release</h2>
+<ul>
+<li>added write support complex  types (i.e., array of Version, Attachment, SingleValue)</li>
+<li>added Lookup domain function</li>
+<li>added support for dynamic domain function (e.g.SELECT DCount("ID","Table1","ID <=" &amp;ID) AS Sequence, tValue FROM table1)</li>
+<li>added support for count aggregate function in cross_tab functions(it was missed in the previous version)</li>
+<li>added switch function</li>
+<li>added support for "yes"(converted in true)  and "no"(converted in false) boolean constants in queries</li>
+<li>added functions int, strcomp, strconv, strreverse, rnd, timeserial, string, weekday</li>
+<li>added support for non-standard subquery sintax    [SELECT ... FROM ...]. As T</li>
+<li>patched "create table" implementation for the right size of text columns</li> 
+<li>fixed regular expression support  in like conditions</li>
+<li>jackess upgrade to version 1.2.13</li>
+</ul>
+<h2> 1.0.1 Release</h2>
+<ul>
+<li>crosstab queries implementation(Transform... Pivot...)</li> 
+<li>added support to STDEV, STDEVP, VAR, VARP aggregate functions</li>   
+<li>basic, readonly support to complex types (i.e., array of Version, Attachment, SingleValue)</li> 
+<li>fix handling of datatime values with millisecond precision(so not inserted with standard ms access api)</li> 
+<li>fix handling of hsqldb keywords and ms access reserved words and other problems escaping related</li> 
+</ul>
+<h2> 1.0.0 Release</h2>
+<ul>
+<li>improved csv export</li> 
+<li>added support to optional parameters (firstdayofweek,firstweekofyear) in DatePart function: <br/>DatePart(interval, date [, firstdayofweek] [, firstweekofyear] )</li>
+<li>added date() function</li>
+<li>added support to 'yyyy-MM-dd' and 'yyyy-MM-dd hh:mm:ss' date formats</li>
+<li>extended support for non-standard naming of tables and columns</li>
+<li>patched problems   in the binding of a column default value to a function (during the access file opening)</li>
+<li>added the singleConnection driver parameter, for etl job, scheduled tasks  or "one-shot" use of UCanAccess</li>
+<li>patched bug in insert/update operations with  very long text values (1000+ characters) using Statement interface</li>
+<li>cleared the resetting of the Connection AUTOCOMMIT property at the end of each transaction</li>
+<li>patched SQL bug: '_' wildcard character misinterpreted</li>
+<li>jackess upgrade to version 1.2.12</li>
+<li>fixed problems with  single precision numeric (float) db type</li>
+</ul>
+<h2> 0.1.1 Release(Beta)</h2>
+<ul>
+<li>Memory usage optimisation: added inactivityTimeout driver parameter. Added a specific junit test case for this (net.ucanaccess.test.MemoryTest)</li>
+<li>Fixed some bugs (ccur function scale, setted jackcess log level to Level.OFF by default)</li>
+</ul>
+</div>
+<div id="license_div">
+
+<h1>Sourceforge UCanAccess Home</h1>
+  <p><A HREF="http://sourceforge.net/projects/ucanaccess/">Sourceforge Project Home</A></p>
+
+<h2>Licensing</h2>
+ <p>UCanAccess is issued on under the GNU Lesser General Public License 2.1. For further information click <A HREF=" http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt">here</A>.</p>
+ <p>Starting with the 3.0.0 version, UCanAccess has been relicensed to Apache 2.0. For further information click <A HREF="http://www.apache.org/licenses/LICENSE-2.0">here</A><p>
+  </div>
+  <div id="donate_div">
+
+  <br/>
+<p>
+We are constantly adding new features, fixing bugs, improving the documentation, answering on the web forums. 
+Please support our effort by donating to the project. Many thanks!
+</p>
+
+
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHNwYJKoZIhvcNAQcEoIIHKDCCByQCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYAVuLRJtEicS6NxCOdSNziBVVzCOgSPxceDytvyg8m7JhlV/7b9palWyLAAn2g07iMtDOHAuhDDS2Kc0aFC/AtGhERiIIVU2h/au9ab2JXxydArRFmHPf4P3sTwnxA4qYhoNPejyLzcqC2WnzHP6LkLJypeXLoM4L66mC35H/AAETELMAkGBSsOAwIaBQAwgbQGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIyvfkYh4jCgyAgZDEfcwqLA7UlzUr2zpZpoMJxMUwil/n0K7x/cddh735rFsXnKvLj+ZHvIH2Uy+RjJhiwD9PxvRSx+ievMJEJT/wIEgfBZzlK7sIDDIrnwdXMKx29IuIJxIcq7yK4AM6TMoRgZBZrHfzuuS/kPGDxzGJqG2LWEMUiaypjl+ZN3v4jU8XJKJ4RgOk2oWKAn4+RZ2gggOHMIIDgzCCAuygAwIBAgIBADANBgkqhkiG9w0BAQUFADCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wHhcNMDQwMjEzMTAxMzE1WhcNMzUwMjEzMTAxMzE1WjCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMFHTt38RMxLXJyO2SmS+Ndl72T7oKJ4u4uw+6awntALWh03PewmIJuzbALScsTS4sZoS1fKciBGoh11gIfHzylvkdNe/hJl66/RGqrj5rFb08sAABNTzDTiqqNpJeBsYs/c2aiGozptX2RlnBktH+SUNpAajW724Nv2Wvhif6sFAgMBAAGjge4wgeswHQYDVR0OBBYEFJaffLvGbxe9WT9S1wob7BDWZJRrMIG7BgNVHSMEgbMwgbCAFJaffLvGbxe9WT9S1wob7BDWZJRroYGUpIGRMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbYIBADAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAIFfOlaagFrl71+jq6OKidbWFSE+Q4FqROvdgIONth+8kSK//Y/4ihuE4Ymvzn5ceE3S/iBSQQMjyvb+s2TWbQYDwcp129OPIbD9epdr4tJOUNiSojw7BHwYRiPh58S1xGlFgHFXwrEBb3dgNbMUa+u4qectsMAXpVHnD9wIyfmHMYIBmjCCAZYCAQEwgZQwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tAgEAMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xNTA5MjUwOTMwMDJaMCMGCSqGSIb3DQEJBDEWBBTaPcwMfeKCEK7Wlh0x7HFDLreftTANBgkqhkiG9w0BAQEFAASBgAArWHthgPPtZCYqP7BVfmMlSS9OKPtg3wKOW9OYLIMt/C4M56nUTiRA7sP2x4+qDwKPUwxhTRnGsBg5Y38MabZ9OeZ/d4+/sye8r2zF5pPTJnmcZk3ml/apwcLVTqifzOfuxUQ8mSoMw1q6+YTUV7/WwDW7Qz5iFioW0zPEFnuW-----END PKCS7-----
+"><label>Paypal(USD): </label>
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1">
+</form><br/>
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+"><label>Paypal(EUR): </label>
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+
+
+
+
+
+</div>
+  
+  <div id='about_div'>
+ 
+  <div style="float:left;width:60%">
+  <h2>Author</h2>
+  <p><b>Marco Amadei</b></p>
+<p><a href="https://it.linkedin.com/pub/marco-amadei-pmp%C2%AE-itil-expert%C2%AE-cobit%C2%AE-prince2%C2%AE/4/784/8" style="text-decoration:none;"><span style="font: 80% Arial,sans-serif; color:#0783B6;"><img src="https://static.licdn.com/scds/common/u/img/webpromo/btn_in_20x15.png" width="20" height="15" alt="Follow me" style="vertical-align:middle;" border="0">&nbsp;Follow me</span></a></p>
+
+  <h2>Voice of the customer</h2>
+  <p><b>Gord Thompson</b> is contributing to the UCanAccess project with excellent tutorials on <a href='http://stackoverflow.com/questions/tagged/ucanaccess?sort=frequent&pageSize=30'>stackoverflow.com</a>,  
+	and by effectively suggesting improvement and enhancement opportunities, managing forums, fixing bugs.
+  </p> 
+   
+  <h2>Contributors</h2>
+ 
+  <p><b>Tom Hallman</b> contributed with bug reports, testing, and useful comments to the release of UCanAccess v1.0.0, while he was involved in the porting from odbc to jdbc of the <A HREF="https://code.google.com/p/tntmpd-mist/">MIST</A> project. 
+  </p>
+  <p><b>Rafael Sisto</b> contributed to the release of UCanAccess v1.0.3 by identifying bugs and suggesting patches, in particular regarding escaping of column names and handling of temporary tables.</p>
+  <p><b>Marcel Merkel</b> sent a major patch about the JDBC 4.1 feature closeOnCompletion. 
+  </div>
+  <div style="float:left;width:40%;margin-top:5px">
+   <img width='100%' src="contributors.jpg"/>
+   </div>
+</div>
+
+
+</div> 
+
+
+<a style="font-size: 15px;margin-left:80%;color:#FFFFFF" href="http://sourceforge.net/projects/ucanaccess/files/"><img width='120px'src="logo_96.png"/></a>
+</div>
+
+  </div>
+</body>
+ 
+
+</html>
