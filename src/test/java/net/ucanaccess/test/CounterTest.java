@@ -62,10 +62,13 @@ public class CounterTest extends UcanaccessTestBase {
 					+ " (Z,B,C,D) VALUES (8,'H',NULL,NULL)");  // arbitrary, new seed = 9
 			st.execute("INSERT INTO " + tableName
 					+ " (Z,B,C,D) VALUES (7,'G',NULL,NULL)");  // arbitrary smaller than current seed
+			st.execute("INSERT INTO " + tableName
+					+ " (Z,B,C,D) VALUES (-1,'A',NULL,NULL)");  // arbitrary negative value
 			st.execute("ENABLE AUTOINCREMENT ON "+tableName);
 			st.execute("INSERT INTO " + tableName
 					+ " (B,C,D) VALUES ('I',NULL,NULL)");  // 9
 			Object[][] ver = { 
+					{-1, "A", null, null },
 					{ 3, "C", null, null },
 					{ 4, "D", null, null },
 					{ 5, "E", null, null },

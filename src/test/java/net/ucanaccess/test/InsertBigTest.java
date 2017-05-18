@@ -16,46 +16,48 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class InsertBigTest extends UcanaccessTestBase {
-	public static boolean tableCreated;
-	
+
 	public InsertBigTest() {
 		super();
 	}
-	
+
 	public InsertBigTest(FileFormat accVer) {
 		super(accVer);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
-		 executeCreateTable("CREATE TABLE Tbig (id LONG,descr memo) ");
-		
+		executeCreateTable("CREATE TABLE Tbig (id LONG, descr MEMO) ");
 	}
-	
+
 	public void testBig() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
 			int id = 6666554;
-			String s="t";
-			for(int i=0;i<10000;i++){
-				s+="t\n";
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < 100000; i++) {
+				sb.append(String.format("%05d", i));
+				sb.append("\r\n");
 			}
-			st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id
-					+ ",'"+s+"')");
-			dump("select * from Tbig");
-			
+			String s = sb.toString();
+			assertTrue(s.length() >= 65536);
+			st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id + ",'" + s + "')");
+			ResultSet rs = st.executeQuery("SELECT descr FROM Tbig WHERE id=" + id);
+			rs.next();
+			String retrieved = rs.getString(1);
+			assertEquals(s, retrieved);
 		} finally {
 			if (st != null)
 				st.close();
 		}
 	}
-	
-	
+
 }
