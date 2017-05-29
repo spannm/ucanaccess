@@ -15,8 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.test;
 
-
-
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -33,10 +32,6 @@ public class CalculatedFieldTest extends UcanaccessTestBase {
 	public String getAccessPath() {
 		return "net/ucanaccess/test/resources/calculatedField.accdb";
 	}
-	
-	
-	
-	
 	
 	public void testFunctionBuiltInCall() throws Exception {
 		Statement st = null;
@@ -62,6 +57,19 @@ public class CalculatedFieldTest extends UcanaccessTestBase {
 		}
 	}
 		
+	public void testCalculatedFieldNameContainsPercentSign() throws Exception {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("INSERT INTO Product (wholesale, retail) VALUES (4, 5)");
+			ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM Product WHERE [ID]=3");
+			rs.next();
+			assertEquals(25.0, rs.getDouble("%markup"));
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
 		
 	
 }
