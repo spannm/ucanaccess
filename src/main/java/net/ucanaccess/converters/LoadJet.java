@@ -400,6 +400,7 @@ public class LoadJet {
 			}
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
 			String ecl=procedureEscapingIdentifier(cl.getName());
+			ecl = ecl.replaceAll("%", "%%");
 			String trg=isCreate? "CREATE TRIGGER expr%d before insert ON "+ntn+
 			   " REFERENCING NEW  AS newrow  FOR EACH ROW "+
 			   " BEGIN  ATOMIC "+
@@ -411,7 +412,7 @@ public class LoadJet {
 			   " BEGIN  ATOMIC IF %s THEN "+
 			   " SET newrow."+ecl+" = "+call+
 			   "; ELSEIF newrow."+ecl+" <> oldrow."+ecl
-			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName()+"'"
+			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName().replaceAll("%", "%%")+"'"
 			   +";  END IF ; END ";
 			
 			return trg;
@@ -474,6 +475,7 @@ public class LoadJet {
 				if(expr!=null&&constraints){
 					String tgrI=getCalculatedFieldTrigger(ntn,cl,true);
 					String tgrU=getCalculatedFieldTrigger(ntn,cl,false);
+					System.out.printf("%s\n%s\n%s\n%s\n", tgrI, tgrU, expr, SQLConverter.convertFormula(expr));
 					calculatedFieldsTriggers.add(String.format(tgrI,namingCounter++,SQLConverter.convertFormula(expr)));
 					String uc=getUpdateConditions(cl);
 					if(uc.length()>0){
