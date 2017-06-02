@@ -5,7 +5,7 @@
 	<artifactId>ucanaccess</artifactId>
 	<version>4.0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>UCanAccess</name><!-- Alternative name <name>${project.groupId}:${project.artifactId}</name> -->
+	<name>UCanAccess</name>
 	<organization>
 		<name>ucanaccess</name>
 	</organization>
@@ -26,7 +26,22 @@
 				<role>Lead developer</role>
 				<role>Committer</role>
 			</roles>
-			<timezone>0</timezone> <!-- please change -->
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<name>Gord Thompson</name>
+			<email>gordonthompson@users.sf.net</email>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<name>Brian Park</name>
+			<email>btpark@users.sf.net</email>
+			<timezone>-6</timezone> <!-- verify -->
+		</developer>
+		<developer>
+			<name>Markus Spann</name>
+			<email>markussp@users.sf.net</email>
+			<timezone>+1</timezone>
 		</developer>
 	</developers>
 	<inceptionYear>2012</inceptionYear> <!-- verify -->
@@ -40,11 +55,13 @@
 		</mailingList>
 	</mailingLists>
 	<scm>
-		<connection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</connection> <!-- read only svn url -->
-		<developerConnection>scm:svn://svn.code.sf.net/p/ucanaccess/code/ucanaccess/trunk</developerConnection> <!-- verify this is read/write svn url-->
-		<url>http://sourceforge.net/p/ucanaccess/code/HEAD/tree/ucanaccess/trunk/</url>
+		<connection>scm:git:http://git.code.sf.net/p/ucanaccess/git-code</connection>
+		<developerConnection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</developerConnection>
 	</scm>
 	<properties>
+		<javaVersion>1.7</javaVersion>
+		<hsqldbVersion>2.3.1</hsqldbVersion>
+		<jackcessVersion>2.1.7</jackcessVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 	</properties>
@@ -63,18 +80,22 @@
 			</resource>
 		</resources>
 		<testResources>
-		   <testResource>
+			<testResource>
 				<directory>src/test/java</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</testResource>
 		</testResources>
-		<pluginManagement></pluginManagement>
+
+		<pluginManagement>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -84,17 +105,18 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.6.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>${javaVersion}</source>
+					<target>${javaVersion}</target>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.4</version>
+				<version>2.18.1</version>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
 					<includes>
@@ -103,36 +125,50 @@
 					</includes>
 				</configuration>
 			</plugin>
+				<plugin>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.4.1</version>
+					<configuration>
+						<rules>
+							<requireMavenVersion>
+								<version>3.3</version>
+							</requireMavenVersion>
+							<requireJavaVersion>
+								<version>${javaVersion}</version>
+							</requireJavaVersion>
+						</rules>
+					</configuration>
+				</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.3.1</version>
-			<type>jar</type>
-			<optional>false</optional>
+			<version>${hsqldbVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.healthmarketscience.jackcess</groupId>
 			<artifactId>jackcess</artifactId>
-			<version>2.1.7</version>
+			<version>${jackcessVersion}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<type>jar</type>
+			<version>4.12</version>
 			<scope>test</scope>
-			<optional>false</optional>
 		</dependency>
 		<dependency>
-		    <groupId>org.mockito</groupId>
+			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.7.22</version>
+			<version>2.8.9</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
-		<distributionManagement>
+
+	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -142,6 +178,7 @@
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
+
 	<profiles>
 		<profile>
 			<id>release</id>
@@ -150,7 +187,7 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.2</version>
+						<version>1.6.8</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
@@ -161,7 +198,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>2.2.1</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -174,7 +211,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.8.1</version>
+						<version>2.10.4</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -198,7 +235,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
+						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
