@@ -26,16 +26,22 @@ public class CreateForeignKeyCommand implements ICommand {
 	private String tableName;
 	private String referencedTable;
 	private String execId;
+	private String relationshipName;
 
 
     public CreateForeignKeyCommand(String tableName, String referencedTable,
-			String execId) {
+			String execId, String relationshipName) {
 		super();
 		this.tableName = tableName;
 		this.referencedTable = referencedTable;
 		this.execId = execId;
+		this.relationshipName = relationshipName;
 	}
 
+    public String getRelationshipName() {
+    	return relationshipName;
+    }
+    
 	public String getExecId() {
 		return execId;
 	}
@@ -52,7 +58,7 @@ public class CreateForeignKeyCommand implements ICommand {
 	public IFeedbackAction persist() throws SQLException {
 		try {
 			Persist2Jet p2a = new Persist2Jet();
-			p2a.createForeignKey(this.tableName,this.referencedTable);
+			p2a.createForeignKey(this.tableName, this.referencedTable, this.relationshipName);
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
