@@ -165,18 +165,45 @@ public abstract class AbstractExecute {
 						 SQLConverter.convertAddColumn(ddlType.getDBObjectName(), ddlType.getSecondDBObjectName(), ddlType.getColumnDefinition())).getSql()
 						 :
 				 SQLConverter.convertSQL(sql).getSql();
-			boolean enDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT,
-					DDLType.DISABLE_AUTOINCREMENT);
+			
+			boolean enDis=ddlType.in(DDLType.ENABLE_AUTOINCREMENT, DDLType.DISABLE_AUTOINCREMENT);
 			this.statement.setEnableDisable(enDis);
 			if(enDis) {
 				return enableDiasable(ddlType );
 			}
-			String ddlExpr = ddlType.in(DDLType.CREATE_TABLE,
-					DDLType.CREATE_TABLE_AS_SELECT) ? SQLConverter
-					.convertCreateTable(sql0) : sql0;
-					ret=	(this instanceof Execute) ?statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
-		
-					DDLCommandEnlist ddle = new DDLCommandEnlist();
+			
+			String ddlExpr = null;
+			if (ddlType.in(DDLType.CREATE_TABLE, DDLType.CREATE_TABLE_AS_SELECT)) {
+				ddlExpr = SQLConverter.convertCreateTable(sql0);
+			} else if (ddlType.equals(DDLType.CREATE_FOREIGN_KEY)) {
+				String constraintName = ddlType.getSecondDBObjectName();
+				if (constraintName == null) {
+					ddlExpr = sql0;
+				} else {
+					if (constraintName.startsWith("[") && constraintName.endsWith("]")) {
+						constraintName = constraintName.substring(1, constraintName.length()-1);
+					}
+					String tableName = ddlType.getDBObjectName();
+					if (tableName.startsWith("[") && tableName.endsWith("]")) {
+						tableName = tableName.substring(1, tableName.length()-1);
+					}
+					UcanaccessConnection conn = (UcanaccessConnection)this.statement.getConnection();
+					Metadata mtd = new Metadata(conn.getHSQLDBConnection());
+					tableName = mtd.getEscapedTableName(tableName);
+					if (tableName == null) {
+						throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tableName);
+					}
+					ddlExpr = sql0.replaceFirst(
+							"(?i)\\s+ADD\\s+CONSTRAINT\\s+.*\\s+FOREIGN\\s+KEY\\s+", 
+							" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase() + "\" FOREIGN KEY ");
+				}
+			} else {
+				ddlExpr = sql0;
+			}
+			
+			ret = (this instanceof Execute) ? statement.getWrapped().execute(ddlExpr):statement.getWrapped().executeUpdate(ddlExpr);
+
+			DDLCommandEnlist ddle = new DDLCommandEnlist();
 			ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage());

@@ -748,11 +748,20 @@ public class Persist2Jet {
 
 	public void createForeignKey(String tableName, String referencedTable)
 			throws IOException, SQLException {
+		createForeignKey(tableName, referencedTable, null);
+	}
+	
+	public void createForeignKey(String tableName, String referencedTable, String relationshipName)
+			throws IOException, SQLException {
 		String ntn = escape4Hsqldb(tableName);
 		String rntn = escape4Hsqldb(referencedTable);
 		String tn = escape4Access(tableName);
 		String rtn = escape4Access(referencedTable);
-		createForeignKey( ntn, rntn, tn, rtn);
+		String relName = null;
+		if (relationshipName != null) {
+			relName = escape4Access(relationshipName);
+		}
+		createForeignKey( ntn, rntn, tn, rtn, relName);
 	}
 	
 	public void createForeignKeys(String tableName)
@@ -768,17 +777,19 @@ public class Persist2Jet {
 		}
 		Metadata mt = new Metadata(conn);
 		for(String rntn:hs){
-			createForeignKey( ntn, rntn, tn, mt.getTableName(rntn));
+			createForeignKey( ntn, rntn, tn, mt.getTableName(rntn), null);
 		}
 	}
 	
-	private void createForeignKey(String tn4Hsqldb, String refTn4Hsqldb,String tn4Access,String refTn4Access)
+	private void createForeignKey(String tn4Hsqldb, String refTn4Hsqldb, 
+			String tn4Access, String refTn4Access, String relationshipName)
 			throws IOException, SQLException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		Database db = conn.getDbIO();
 		Table t = db.getTable(tn4Access);
 		Table rt = db.getTable(refTn4Access);
 		RelationshipBuilder rb = new RelationshipBuilder(rt, t);
+		rb.setName(relationshipName);
 		rb.setReferentialIntegrity();
 		ResultSet fkrs = conn.getHSQLDBConnection().getMetaData()
 				.getCrossReference(null, null, refTn4Hsqldb.toUpperCase(), null, null, tn4Hsqldb.toUpperCase());

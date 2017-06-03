@@ -83,6 +83,9 @@ public class Metadata {
 	"				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t " +
 	"				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.TABLE_NAME=nvl(?,t.TABLE_NAME) AND c.COLUMN_NAME=? ";
 	
+	private final static String SELECT_TABLE_ESCAPED = 
+			"SELECT ESCAPED_TABLE_NAME FROM UCA_METADATA.TABLES WHERE TABLE_NAME=?";
+	
 	private final static String SELECT_TABLE_METADATA="SELECT TABLE_ID, TABLE_NAME FROM UCA_METADATA.TABLES WHERE ESCAPED_TABLE_NAME=? ";
 	private final static String DROP_TABLE="DELETE FROM UCA_METADATA.TABLES WHERE TABLE_NAME=?";
 	private final static String UPDATE_COLUMN_DEF="UPDATE UCA_METADATA.COLUMNS c SET c.COLUMN_DEF=? WHERE COLUMN_NAME=? " +
@@ -244,6 +247,24 @@ public class Metadata {
 			
 		}finally{
 			if(ps!=null)ps.close();
+		}
+	}
+	
+	public String getEscapedTableName(String tableName) throws SQLException {
+		PreparedStatement ps = null;
+		try {
+			ps = conn.prepareStatement(SELECT_TABLE_ESCAPED);
+			ps.setString(1, tableName);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getString("ESCAPED_TABLE_NAME");
+			} else {
+				return null;
+			}
+		} finally {
+			if (ps != null) {
+				ps.close();
+			}
 		}
 	}
 	

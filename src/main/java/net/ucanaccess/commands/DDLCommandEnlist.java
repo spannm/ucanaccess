@@ -122,9 +122,11 @@ public class DDLCommandEnlist {
 
 	private void enlistCreateForeignKey(String sql, DDLType ddlType) throws SQLException {
 		String tableName= ddlType.getDBObjectName();
+		String relationshipName = ddlType.getSecondDBObjectName();
 		String referencedTable=ddlType.getThirdDBObjectName();
 		String execId = UcanaccessConnection.getCtxExcId();
-		CreateForeignKeyCommand c4io = new CreateForeignKeyCommand(tableName, referencedTable,execId );
+		CreateForeignKeyCommand c4io = new CreateForeignKeyCommand(
+				tableName, referencedTable, execId, relationshipName);
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		ac.add(c4io);
 		if (!ac.getAutoCommit()) {

@@ -16,18 +16,23 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.healthmarketscience.jackcess.CursorBuilder;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.Index.Column;
+import com.healthmarketscience.jackcess.IndexCursor;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
+
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
-
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.Index.Column;
 
 public class AlterTableTest extends UcanaccessTestBase {
 
@@ -258,7 +263,9 @@ public class AlterTableTest extends UcanaccessTestBase {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
-			st.execute("ALTER TABLE [AAA n] add constraint pippo1 foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
+			
+			// test case: constraint name specified
+			st.execute("ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
 			Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
 			Table tb = db.getTable("AAA n");
 			Table tbr = db.getTable("22 amadeimargmail111");
@@ -268,7 +275,22 @@ public class AlterTableTest extends UcanaccessTestBase {
 				ar.add(cl.getName());
 			}
 			assertTrue(ar.contains("C"));
+			//
+			// also verify that the Relationship name was actually used in the Access database ...
+			tb = db.getSystemTable("MSysRelationships");
+			IndexCursor crsr = CursorBuilder.createCursor(tb.getIndex("szRelationship"));
+			Row r = crsr.findRowByEntry("pippo1");
+			assertTrue(r != null);
+			// ... and the right name was used in the HSQLDB database
+			Connection hsqldbConn = ((UcanaccessConnection) super.ucanaccess).getHSQLDBConnection();
+			Statement hsqldbStmt = hsqldbConn.createStatement();
+			ResultSet hsqldbRs = hsqldbStmt.executeQuery(
+					"SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
+					"WHERE CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_NAME='AAA N'");
+			hsqldbRs.next();
+			assertEquals("AAA N_PIPPO1", hsqldbRs.getString(1));
 			
+			// test case: constraint name not specified
 			st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");
 			
 		}
