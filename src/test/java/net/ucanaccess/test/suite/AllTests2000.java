@@ -24,7 +24,7 @@ import junit.framework.Test;
 
 public class AllTests2000 {
 	public static Test suite() throws ClassNotFoundException {
-		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2010);
+		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2000);
 		return AllTestsBase.suite();
 		
 	}
