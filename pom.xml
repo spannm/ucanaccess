@@ -7,7 +7,7 @@
 	<packaging>jar</packaging>
 	<name>UCanAccess</name>
 	<organization>
-		<name>ucanaccess</name>
+		<name>UCanAccess</name>
 	</organization>
 	<description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
 	<url>http://ucanaccess.sourceforge.net/site.html</url>
@@ -31,12 +31,12 @@
 		<developer>
 			<name>Gord Thompson</name>
 			<email>gordonthompson@users.sf.net</email>
-			<timezone>-6</timezone>
+			<timezone>-7</timezone>
 		</developer>
 		<developer>
 			<name>Brian Park</name>
 			<email>btpark@users.sf.net</email>
-			<timezone>-6</timezone> <!-- verify -->
+			<timezone>-8</timezone> <!-- verify -->
 		</developer>
 		<developer>
 			<name>Markus Spann</name>
@@ -45,21 +45,12 @@
 		</developer>
 	</developers>
 	<inceptionYear>2012</inceptionYear> <!-- verify -->
-	<mailingLists>
-		<mailingList>
-			<name>ucanaccess-users</name>
-			<subscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</subscribe>
-			<unsubscribe>https://lists.sourceforge.net/lists/listinfo/ucanaccess-users</unsubscribe>
-			<post>ucanaccess-users@lists.sourceforge.net</post>
-			<archive>http://sourceforge.net/p/ucanaccess/ucanaccess/ucanaccess-users/</archive>
-		</mailingList>
-	</mailingLists>
 	<scm>
 		<connection>scm:git:http://git.code.sf.net/p/ucanaccess/git-code</connection>
 		<developerConnection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</developerConnection>
 	</scm>
 	<properties>
-		<javaVersion>1.7</javaVersion>
+		<javaVersion>1.6</javaVersion>
 		<hsqldbVersion>2.3.1</hsqldbVersion>
 		<jackcessVersion>2.1.7</jackcessVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
