@@ -399,7 +399,7 @@ public class LoadJet {
 				fun="formulaToText";
 			}
 			String call= fun==null?"%s":fun+"(%s,'"+dt.name()+"')";
-			String ecl=procedureEscapingIdentifier(cl.getName());
+			String ecl = procedureEscapingIdentifier(cl.getName()).replace("%", "%%");
 			String trg=isCreate? "CREATE TRIGGER expr%d before insert ON "+ntn+
 			   " REFERENCING NEW  AS newrow  FOR EACH ROW "+
 			   " BEGIN  ATOMIC "+
@@ -411,7 +411,7 @@ public class LoadJet {
 			   " BEGIN  ATOMIC IF %s THEN "+
 			   " SET newrow."+ecl+" = "+call+
 			   "; ELSEIF newrow."+ecl+" <> oldrow."+ecl
-			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName()+"'"
+			   +" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"+Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name())+cl.getName().replace("%", "%%")+"'"
 			   +";  END IF ; END ";
 			
 			return trg;

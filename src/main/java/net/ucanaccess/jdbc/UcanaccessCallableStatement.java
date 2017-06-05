@@ -643,9 +643,4 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
 		return super.executeUpdate();
 	}
 	
-	
-	
-
-	
-	
 }
