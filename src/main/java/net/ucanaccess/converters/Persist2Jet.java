@@ -280,9 +280,10 @@ public class Persist2Jet {
 
 		if (types != null && seq < types.length) {
 			if (types[seq].equalsIgnoreCase(AccessType.COUNTER.name())
-					|| types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT
-							.name()))
+					|| types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())) {
 				cb.setAutoNumber(true);
+				cb.putProperty("Required", false);  // re: Ticket #2
+			}
 			if (types[seq].equalsIgnoreCase(AccessType.GUID.name())) {
 				cb.setType(DataType.GUID);
 				cb.setAutoNumber(true);
