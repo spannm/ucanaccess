@@ -1,6 +1,4 @@
-# UCanAccess
-
-This is the official source code repository for UCanAccess, a pure Java JDBC driver for working with
+This is the official source code repository for **UCanAccess**, a pure Java JDBC driver for working with
 Microsoft Access database files.
 
 If you want to download the latest release, you can do that [here](https://sourceforge.net/projects/ucanaccess/files/latest/download).
