@@ -61,6 +61,7 @@ public class BlobOleTest extends UcanaccessTestBase {
 			}
 			out.flush();
 			out.close();
+			
 			ps = super.ucanaccess
 					.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
 			ps.setString(1, "TestOle");
@@ -86,6 +87,7 @@ public class BlobOleTest extends UcanaccessTestBase {
 			checkQuery("select * from T2", new Object[][] { { 1, "TestOle",
 					outByte.toByteArray() } });
 			ps.close();
+			
 			ps = super.ucanaccess
 					.prepareStatement("UPDATE T2 SET descr=? WHERE  descr=?");
 			ps.setString(1, "TestOleOk");
@@ -97,6 +99,17 @@ public class BlobOleTest extends UcanaccessTestBase {
 			ps.setString(1, "TestOleOk");
 			ps.executeUpdate();
 			checkQuery("select * from T2", new Object[][] {});
+			ps.close();
+			
+			ps = super.ucanaccess
+					.prepareStatement("INSERT INTO t2 (descr) VALUES (?)");
+			ps.setString(1, "OLE column is null");
+			ps.executeUpdate();
+			rs = st.executeQuery("SELECT pippo FROM t2 WHERE descr='OLE column is null'");
+			rs.next();
+			assertNull(rs.getBinaryStream(1));
+			assertNull(rs.getBlob(1));
+			
 		} finally {
 			if (rs != null)
 				rs.close();
