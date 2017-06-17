@@ -242,7 +242,11 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Blob getBlob(int idx) throws SQLException {
 		try {
-			return new UcanaccessBlob(wrapped.getBlob(idx));
+			Blob blb = wrapped.getBlob(idx);
+			if (blb != null) {
+				blb = new UcanaccessBlob(blb);
+			}
+			return blb;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
@@ -250,7 +254,11 @@ public class UcanaccessResultSet implements ResultSet {
 	
 	public Blob getBlob(String columnLabel) throws SQLException {
 		try {
-			return new UcanaccessBlob( wrapped.getBlob(checkEscaped(columnLabel)));
+			Blob blb = wrapped.getBlob(checkEscaped(columnLabel));
+			if (blb != null) {
+				blb = new UcanaccessBlob(blb);
+			}
+			return blb;
 		} catch (SQLException e) {
 			throw new UcanaccessSQLException(e);
 		}
