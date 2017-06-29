@@ -43,8 +43,10 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
+import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.HibernateSupport;
 
 import org.hsqldb.HsqlDateTime;
 import org.hsqldb.SessionInterface;
@@ -56,9 +58,11 @@ import org.hsqldb.types.TimestampData;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.ColumnBuilder;
 import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.CursorBuilder;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.IndexBuilder;
+import com.healthmarketscience.jackcess.IndexCursor;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.RelationshipBuilder;
 import com.healthmarketscience.jackcess.Row;
@@ -515,9 +519,11 @@ public class Persist2Jet {
 			return;
 		Metadata mt = new Metadata(conn.getHSQLDBConnection());
 		mt.dropTable(t.getName());
-		Cursor c = t.getDefaultCursor();
-		while (c.getNextRow() != null) {
-			c.deleteCurrentRow();
+		if (!HibernateSupport.isActive()) {
+			Cursor c = t.getDefaultCursor();
+			while (c.getNextRow() != null) {
+				c.deleteCurrentRow();
+			}
 		}
 		DatabaseImpl dbi = (DatabaseImpl) db;
 		Table cat = dbi.getSystemCatalog();
@@ -817,4 +823,42 @@ public class Persist2Jet {
 		rb.toRelationship(db);
 
 	}
+	
+	public void dropForeignKey(String relationshipName) throws IOException, SQLException {
+		relationshipName = escape4Access(relationshipName);
+		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+		Database db = conn.getDbIO();
+		Table tbl = db.getSystemTable("MSysRelationships");
+		IndexCursor crsr = CursorBuilder.createCursor(tbl.getIndex("szRelationship"));
+		Row r = crsr.findRowByEntry(relationshipName);
+		if (r == null) {
+			//System.out.printf("Relationship [%s] not found.%n", relationshipName);
+		} else {
+			while (r != null) {
+				tbl.deleteRow(r);
+				r = crsr.findRowByEntry(relationshipName);
+			}
+			tbl = db.getSystemTable("MSysObjects");
+			crsr = CursorBuilder.createCursor(tbl.getIndex("ParentIdName"));
+			Map<String, Object> rowPattern = new HashMap<String, Object>();
+			rowPattern.put("Name", "Relationships");
+			rowPattern.put("Type", 3);
+			if (crsr.findFirstRow(rowPattern)) {
+				Integer relationshipsId = crsr.getCurrentRow().getInt("Id");
+				r = crsr.findRowByEntry(relationshipsId, relationshipName);
+				if (r != null) {
+					Integer relationshipId = r.getInt("Id");
+					tbl.deleteRow(r);
+					tbl = db.getSystemTable("MSysACEs");
+					crsr = CursorBuilder.createCursor(tbl.getIndex("ObjectId"));
+					r = crsr.findRowByEntry(relationshipId);
+					while (r != null) {
+						tbl.deleteRow(r);
+						r = crsr.findRowByEntry(relationshipId);
+					}
+				}
+			}
+		}	
+	}
+	
 }

@@ -292,6 +292,8 @@ public class SQLConverter {
 						CREATE_FOREIGN_KEY(
 								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+)?(?i)foreign[\\s\n\r]+(?i)key[\\s\n\r]+"
 														    		+ "(?:\\(.*\\))[\\s\n\r]*(?i)references[\\s\n\r]+"+NAME_PATTERN+"(.*)")),
+						DROP_FOREIGN_KEY(
+								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+"+NAME_PATTERN+"[\\s\n\r]+(?i)drop[\\s\n\r]+(?i)constraint[\\s\n\r]+"+NAME_PATTERN)),
 										
 						ADD_COLUMN(
 								Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" +NAME_PATTERN+
