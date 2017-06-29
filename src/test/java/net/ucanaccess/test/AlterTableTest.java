@@ -33,6 +33,7 @@ import com.healthmarketscience.jackcess.Table;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.HibernateSupport;
 
 public class AlterTableTest extends UcanaccessTestBase {
 
@@ -289,6 +290,23 @@ public class AlterTableTest extends UcanaccessTestBase {
 					"WHERE CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_NAME='AAA N'");
 			hsqldbRs.next();
 			assertEquals("AAA N_PIPPO1", hsqldbRs.getString(1));
+			//
+			// now test dropping the foreign key
+			// first try with Hibernate mode inactive
+			HibernateSupport.setActive(false);
+			try {
+				st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
+				org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+			} catch (UcanaccessSQLException ucaSqlEx) { }
+			// now try again with Hibernate mode active
+			HibernateSupport.setActive(true);
+			st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
+			// and verify that it actually got dropped
+			try {
+				st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");  // again
+				org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+			} catch (UcanaccessSQLException ucaSqlEx) { }
+			HibernateSupport.setActive(null);
 			
 			// test case: constraint name not specified
 			st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");

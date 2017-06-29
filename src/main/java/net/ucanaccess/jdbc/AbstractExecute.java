@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 
 import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
@@ -27,6 +28,7 @@ import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.FeatureNotSupportedException.NotSupportedMessage;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.HibernateSupport;
 
 
 
@@ -147,6 +149,13 @@ public abstract class AbstractExecute {
 				throw checkDDLException() ;
 			}
 			
+			if (DDLType.DROP_FOREIGN_KEY.equals(ddlType)) {
+				if (!HibernateSupport.isActive()) {
+					throw new UnsupportedOperationException(
+							"DROP CONSTRAINT is only supported for Hibernate hbm2ddl.auto \"create\"");
+				}
+			}
+			
 			if(DDLType.ADD_COLUMN.equals(ddlType)){
 				
 				if(SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())){
@@ -195,7 +204,29 @@ public abstract class AbstractExecute {
 					}
 					ddlExpr = sql0.replaceFirst(
 							"(?i)\\s+ADD\\s+CONSTRAINT\\s+.*\\s+FOREIGN\\s+KEY\\s+", 
-							" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase() + "\" FOREIGN KEY ");
+							" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\" FOREIGN KEY ");
+				}
+			} else if (ddlType.equals(DDLType.DROP_FOREIGN_KEY)) {
+				String constraintName = ddlType.getSecondDBObjectName();
+				if (constraintName == null) {
+					throw new UcanaccessSQLException();
+				} else {
+					if (constraintName.startsWith("[") && constraintName.endsWith("]")) {
+						constraintName = constraintName.substring(1, constraintName.length()-1);
+					}
+					String tableName = ddlType.getDBObjectName();
+					if (tableName.startsWith("[") && tableName.endsWith("]")) {
+						tableName = tableName.substring(1, tableName.length()-1);
+					}
+					UcanaccessConnection conn = (UcanaccessConnection)this.statement.getConnection();
+					Metadata mtd = new Metadata(conn.getHSQLDBConnection());
+					tableName = mtd.getEscapedTableName(tableName);
+					if (tableName == null) {
+						throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tableName);
+					}
+					ddlExpr = sql0.replaceFirst(
+							"(?i)\\s+DROP\\s+CONSTRAINT\\s+.*", 
+							" DROP CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\"");
 				}
 			} else {
 				ddlExpr = sql0;
