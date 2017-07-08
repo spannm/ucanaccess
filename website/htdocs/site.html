@@ -203,16 +203,29 @@ UCanAccess requires Java 6 or later to run.
 
 </div>
 <div id="examples_div">
-<h1>Getting Started</h1>
-	<p>The distribution comes with both a number of jUnit test cases (package <i>net.ucanaccess.test</i>) and a simple Java example class (<i>net.ucanaccess.example.Example</i>) which illustrate how UCanAccess may be used.</p>
- <h2> Establishing a UCanAccess connection</h2>
+<!-- <h1>Getting Started</h1> -->
+	<p>Note that the distribution comes with both a number of jUnit test cases (package <i>net.ucanaccess.test</i>) and a simple Java example class (<i>net.ucanaccess.example.Example</i>) which illustrate how UCanAccess may be used.</p>
+	
+ <h2>Adding UCanAccess to your Java project</h2>
+ 	<p>If your project uses <a href="https://maven.apache.org/index.html">Maven</a> you can simply include UCanAccess via the following coordinates:</p>
+ 	<table border=0>
+ 	<tr>
+ 	<td align="right"><b>groupId:</b></td><td>net.sf.ucanaccess<br></td>
+ 	</tr>
+ 	<tr>
+ 	<td align="right"><b>artifactId:</b></td><td>ucanaccess</td>
+ 	</tr>
+ 	</table>
+ 	<p>Otherwise, see <a href="https://stackoverflow.com/a/21955257/2144390">this Stack Overflow answer</a> for details on how to configure your Java project.
+ 
+ <h2>Establishing a UCanAccess connection</h2>
 <div class="source">
         <i>Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);  /* often not required for Java 6 and later (JDBC 4.x) */<br>
         Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://&lt;mdb or accdb file path&gt;&quot;,user, password);</i>
 
 <br>    // for example:
 
-<br><i>Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/pippo.mdb&quot;);</i>
+<br><i>Connection conn=DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/pippo.mdb;memory=true&quot;);</i>
 </div>
 <h2>Connection Properties</h2>
    <p><b>memory</b>: set if HSQLDB will store its backing database only in memory. Default is <span class="inlineCode">memory=true</span>. </p>
