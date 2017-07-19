@@ -32,7 +32,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -84,6 +83,8 @@ public abstract class UcanaccessTestBase extends TestCase {
 	public UcanaccessTestBase(FileFormat accVer) {
 		super();
 		this.fileFormat = accVer;
+		//TODO look for a cleaner way to run test suites under a specific Locale
+		//java.util.Locale.setDefault(new java.util.Locale("tr"));
 	}
 	
 

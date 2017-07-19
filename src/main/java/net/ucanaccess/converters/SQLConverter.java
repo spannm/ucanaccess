@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -150,7 +151,7 @@ public class SQLConverter {
 	
 	
 	public static boolean hasIdentity(String sql ){
-		return sql.indexOf("@@")>0&& sql.toUpperCase().indexOf("@@IDENTITY")>0;
+		return sql.indexOf("@@")>0&& sql.toUpperCase(java.util.Locale.US).indexOf("@@IDENTITY")>0;
 	}
 	
 	
@@ -745,7 +746,7 @@ public class SQLConverter {
 		if(name.length()==0)return name;
 		if (name.startsWith("~"))
 			return null;
-		String nl = name.toUpperCase();
+		String nl = name.toUpperCase(Locale.US);
 		if (TableBuilder.isReservedWord(nl)) {
 			xescapedIdentifiers.add(nl);
 		}
@@ -771,7 +772,7 @@ public class SQLConverter {
 			escaped = "DUAL_13031971";
 		}
 		
-		return escaped.toUpperCase();
+		return escaped.toUpperCase(Locale.US);
 	}
 	
 	private static String escapeKeywordIdentifier(String escaped,boolean quote) {
