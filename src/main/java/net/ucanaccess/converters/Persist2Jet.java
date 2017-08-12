@@ -314,7 +314,7 @@ public class Persist2Jet {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
 		TreeMap<Integer,ColumnBuilder>  ordm=new TreeMap<Integer,ColumnBuilder>() ;
 		ResultSet rs = conn.getHSQLDBConnection().getMetaData()
-				.getColumns(null, "PUBLIC", tableName.toUpperCase(), null);
+				.getColumns(null, "PUBLIC", tableName.toUpperCase(Locale.US), null);
 		while (rs.next()) {
 			int seq=rs.getInt("ORDINAL_POSITION")-1;
 			ordm.put(seq, getColumn(rs, seq, tableName, columnMap, types));
