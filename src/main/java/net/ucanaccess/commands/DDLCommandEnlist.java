@@ -117,6 +117,9 @@ public class DDLCommandEnlist {
 		case CREATE_FOREIGN_KEY:
 			enlistCreateForeignKey(sql, ddlType);
 			break;	
+		case DROP_FOREIGN_KEY:
+			enlistDropForeignKey(sql, ddlType);
+			break;	
 		}
 	}
 
@@ -127,6 +130,17 @@ public class DDLCommandEnlist {
 		String execId = UcanaccessConnection.getCtxExcId();
 		CreateForeignKeyCommand c4io = new CreateForeignKeyCommand(
 				tableName, referencedTable, execId, relationshipName);
+		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+		ac.add(c4io);
+		if (!ac.getAutoCommit()) {
+			ac.commit();
+		}
+	}
+
+	private void enlistDropForeignKey(String sql, DDLType ddlType) throws SQLException {
+		String relationshipName = ddlType.getSecondDBObjectName();
+		String execId = UcanaccessConnection.getCtxExcId();
+		DropForeignKeyCommand c4io = new DropForeignKeyCommand(execId, relationshipName);
 		UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
 		ac.add(c4io);
 		if (!ac.getAutoCommit()) {
