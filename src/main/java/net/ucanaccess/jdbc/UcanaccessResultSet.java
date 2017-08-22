@@ -808,11 +808,20 @@ public class UcanaccessResultSet implements ResultSet {
 		try {
 			if (obj instanceof String) {
 				String s = (String) obj;
-				if (s.startsWith("#") && s.endsWith("#")) {
-					return new URL(s.substring(1, s.length() - 1));
+				String[] parts = s.split("#");
+				StringBuffer url = new StringBuffer();
+				if (parts.length > 1) {
+					url.append(parts[1]);
+					if (parts.length > 2) {
+						if (parts[2].length() > 0) {
+							url.append("#");
+							url.append(parts[2]);
+						}
+					}
+					return new URL(url.toString());
 				}
 			}
-			throw new SQLException("Invalid or unsupported url format");
+			throw new SQLException("Invalid or unsupported URL format");
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage());
 		}

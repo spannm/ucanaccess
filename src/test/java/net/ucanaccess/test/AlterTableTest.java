@@ -136,6 +136,10 @@ public class AlterTableTest extends UcanaccessTestBase {
 			
 			this.createFK();
 			
+			st.execute("ALTER TABLE Sample ADD COLUMN website HYPERLINK");
+			ResultSet rs = super.ucanaccess.getMetaData().getColumns(null, null, "Sample", "website");
+			rs.next();
+			assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
 		}
 
 		finally {
@@ -319,7 +323,7 @@ public class AlterTableTest extends UcanaccessTestBase {
 		}
 	}
 	
-	public void testMiscellaneus() throws SQLException, IOException {
+	public void testMiscellaneous() throws SQLException, IOException {
 		Statement st = null;
 		try {
 			st = super.ucanaccess.createStatement();
