@@ -485,12 +485,14 @@ public class LoadJet {
 				String htype= getHsqldbColumnType(cl) ;
 				String cn=SQLConverter.preEscapingIdentifier(cl.getName());
 				String ctype=cl.getType().name();
-				if(cl.isAutoNumber()){
+				if (cl.isAutoNumber()) {
 					ColumnImpl cli=(ColumnImpl)cl;
 					AutoNumberGenerator ang=cli.getAutoNumberGenerator();
 					if(ang.getType().equals(
 								DataType.LONG))ctype="COUNTER";
 						
+				} else if (cl.isHyperlink()) {
+					ctype = "HYPERLINK";
 				}
 				metadata.newColumn(cl.getName(),cn,ctype,seq);
 				if(expr!=null&&constraints)

@@ -16,6 +16,7 @@ limitations under the License.
 package net.ucanaccess.converters;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import com.healthmarketscience.jackcess.DataType;
 
@@ -37,10 +38,11 @@ public class TypesMap {
 		YESNO,
 		AUTOINCREMENT,
 		COMPLEX,
-		CHAR
+		CHAR,
+		HYPERLINK
 	}
 
-	private static final HashMap<String, String> access2HsqlTypesMap = new HashMap<String, String>();
+	private static final HashMap<String, String> access2HsqlTypesMap = new LinkedHashMap<String, String>();
 	private static final HashMap<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
 	private static final HashMap< DataType,String> jackcess2HsqldbTypesMap = new HashMap< DataType,String>();
 	
@@ -61,7 +63,8 @@ public class TypesMap {
 		access2HsqlTypesMap.put(AccessType.SINGLE.name(), "FLOAT");
 		access2HsqlTypesMap.put(AccessType.COMPLEX.name(), "OBJECT");
 		access2HsqlTypesMap.put(AccessType.CHAR.name(), "VARCHAR"); //CHAR mapped into TEXT when used in  CREATE TABLE.
-				
+		access2HsqlTypesMap.put(AccessType.HYPERLINK.name(), "LONGVARCHAR");  // HYPERLINK is a special type of MEMO field
+		
 		access2JackcessTypesMap.put(AccessType.BYTE, DataType.BYTE);
 		access2JackcessTypesMap.put(AccessType.INTEGER, DataType.INT);
 		access2JackcessTypesMap.put(AccessType.LONG, DataType.LONG); 
@@ -77,6 +80,7 @@ public class TypesMap {
 		access2JackcessTypesMap.put(AccessType.DATETIME, DataType.SHORT_DATE_TIME);
 		access2JackcessTypesMap.put(AccessType.SINGLE, DataType.FLOAT);
 		access2JackcessTypesMap.put(AccessType.DOUBLE, DataType.DOUBLE);
+		access2JackcessTypesMap.put(AccessType.HYPERLINK, DataType.MEMO );
 		
 		jackcess2HsqldbTypesMap.put(DataType.BYTE,"SMALLINT");
 		jackcess2HsqldbTypesMap.put(DataType.INT,"SMALLINT");

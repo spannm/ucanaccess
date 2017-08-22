@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
@@ -282,4 +283,40 @@ public class CreateTableTest extends UcanaccessTestBase {
 		ps.execute();
 
 	}
+
+	public void testCreateHyperlink() throws SQLException {
+		Statement st = super.ucanaccess.createStatement();
+		ResultSet rs = null;
+		try {
+			st.execute("CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)");
+			st.execute("INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')");
+			st.execute("INSERT INTO urlTest (id, website) VALUES (2, 'example.com#http://example.com#')");
+			st.execute("INSERT INTO urlTest (id, website) VALUES (3, 'the works#http://burger#with_bacon#and_cheese')");
+			st.execute("INSERT INTO urlTest (id, website) VALUES (4, 'http://bad_link_no_hash_characters')");
+			rs = super.ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website");
+			rs.next();
+			assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
+			rs = st.executeQuery("SELECT website FROM urlTest ORDER BY id");
+			rs.next();
+			assertEquals("http://whatever", rs.getURL(1).toString());
+			rs.next();
+			assertEquals("http://example.com", rs.getURL(1).toString());
+			rs.next();
+			assertEquals("http://burger#with_bacon", rs.getURL(1).toString());
+			rs.next();
+			try {
+				rs.getURL(1);
+				fail("UcanaccessSQLException should have been thrown");
+			} catch (UcanaccessSQLException use) {
+				if (!use.getMessage().endsWith("Invalid or unsupported URL format")) {
+					throw use;
+				}
+			}
+		} finally {
+			rs.close();
+			st.close();
+		}
+
+	}
+	
 }

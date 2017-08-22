@@ -43,7 +43,6 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
-import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.HibernateSupport;
@@ -229,9 +228,12 @@ public class Persist2Jet {
 		byte scale = (byte) rs.getInt("DECIMAL_DIGITS");
 		DataType dt = null;
 		if (length == 0 && types != null) {
-			if (types[seq].equalsIgnoreCase(AccessType.MEMO.name())) {
+			if (types[seq].equalsIgnoreCase(AccessType.MEMO.name()) || types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
 				dt = DataType.MEMO;
 				cb.setType(dt);
+				if (types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
+					cb.setHyperlink(true);
+				}
 			}
 			if (types[seq].equalsIgnoreCase(AccessType.TEXT.name())) {
 				dt = DataType.TEXT;
@@ -456,6 +458,16 @@ public class Persist2Jet {
 		return tn;
 	}
 
+	private String getUcaMetadataTypeName (int colIdx, ColumnBuilder cb, String[] types) {
+		String ucaMetadataTypeName = cb.getType().name();
+		if ((types != null) && (colIdx < types.length)) {
+			if (types[colIdx].toUpperCase(Locale.US).equals("HYPERLINK")) {
+				ucaMetadataTypeName = types[colIdx].toUpperCase(Locale.US);
+			}
+		}
+		return ucaMetadataTypeName;
+	}
+
 	public void createTable(String tableName, Map<String, String> columnMap,
 			String[] types, String[] defaults, Boolean[] notNulls)
 			throws IOException, SQLException {
@@ -468,9 +480,11 @@ public class Persist2Jet {
 		int idTable = mtd.newTable(tn, ntn, Metadata.Types.TABLE);
 		Collection<ColumnBuilder> lcb = getColumns(ntn, columnMap, types);
 		tb.addColumns(lcb);
+		int colIdx = 0;
 		for (ColumnBuilder cb : lcb) {
-			mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb
-					.getName()), cb.getType().name(), idTable);
+			mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()), 
+					getUcaMetadataTypeName(colIdx, cb, types), idTable);
+			colIdx++;
 		}
 
 		List<IndexBuilder> arcl = getIndexBuilders(ntn, columnMap);
@@ -628,17 +642,15 @@ public class Persist2Jet {
 		ColumnBuilder cb = this.getColumn(ntn, columnMap, types);
 		Table t=db.getTable(tn);
 		Column cl = cb.addToTable(t);
-
 		int idTable = mtd.getTableId(ntn.toUpperCase());
-		mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb
-				.getName()), cb.getType().name(), idTable);
+		mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()), 
+				getUcaMetadataTypeName(0, cb, types), idTable);
 		saveColumnsDefaults(defaults, notNulls, cl, 0);
 		updateNewColumn2Defaut(tableName, columnName,t, cl);
 		setHsqldbNotNull(tableName, columnName,types[0], cl);
 		conn.reloadDbIO();
-				
 	}
-
+	
 	private void setHsqldbNotNull(String tableName, String columnName, String type, Column cl)
 			throws SQLException, IOException {
 		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
