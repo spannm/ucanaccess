@@ -516,8 +516,7 @@ public class UcanaccessConnection implements Connection {
 		try {
 			if(SQLConverter.checkDDL(sql)){
 			    Logger.log(Logger.Messages.STATEMENT_DDL);
-			    return new UcanaccessPreparedStatement(prepare(sql),
-						null, this);
+			    return new UcanaccessPreparedStatement(sql, this);
 		     }
 		
 			NormalizedSQL nsql= prepare(sql);

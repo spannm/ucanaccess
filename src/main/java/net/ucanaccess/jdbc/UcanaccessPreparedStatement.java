@@ -66,6 +66,14 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements
 		}
 	}
 	
+	public UcanaccessPreparedStatement(String sql,
+			UcanaccessConnection connection) throws SQLException {
+		super(null, connection);
+		this.sql=sql;
+		super.wrapped=connection.createStatement();
+		
+	}
+	
 	private class ParameterReset{
 		private String methodName;
 		private Object[] args;

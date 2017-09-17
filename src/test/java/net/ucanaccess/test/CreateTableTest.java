@@ -283,6 +283,12 @@ public class CreateTableTest extends UcanaccessTestBase {
 		ps.execute();
 
 	}
+	public void testPsHyphen() throws SQLException {
+		String ddl = "CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))";
+		//#9 hyphen in DDL column name confuses PreparedStatement
+		PreparedStatement prepStmt = super.ucanaccess.prepareStatement(ddl);
+		prepStmt.executeUpdate();
+	}
 
 	public void testCreateHyperlink() throws SQLException {
 		Statement st = super.ucanaccess.createStatement();
