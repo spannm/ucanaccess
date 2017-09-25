@@ -74,6 +74,7 @@ public class AccessLikeTest extends UcanaccessTestBase {
 					ver);
 			ver = new Object[][] { { "aa" }, { "aBa" }, { "aBBBa" }, { "a*a" },
 					{ "A*a" } };
+			
 			checkQuery(
 					"select descr from T21 where descr like \"a*a\"  AND '1'='1' and (descr) like \"a*a\" ORDER BY ID",
 					ver);
@@ -100,6 +101,24 @@ public class AccessLikeTest extends UcanaccessTestBase {
 			"138#");
 			checkQuery("select descr from T21 where (( descr like '###[#]'))",
 			"138#");
+			
+		} finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	public void testNotLikeExternal() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st
+					.executeUpdate("CREATE TABLE Tx21 (id counter primary key, descr memo)");
+			st.close();
+			st = super.ucanaccess.createStatement();
+			st.execute("INSERT INTO Tx21 (descr)  VALUES( 't11114')");
+			st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111C')");
+			st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111')");
+			checkQuery("SELECT DESCR FROM Tx21 WHERE descr NOT LIKE \"t#####\" ORDER BY ID",new Object[][] {{"t1111C"},{"t1111"}});
 			
 		} finally {
 			if (st != null)

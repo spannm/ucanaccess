@@ -50,7 +50,7 @@ public class SQLConverter {
 	private static final Pattern DOUBLE_QUOTE_M_PATTERN = Pattern
 			.compile("\"(([^\"])*)\"");
 	private static final Pattern FIND_LIKE_PATTERN = Pattern
-			.compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
+			.compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)((?i)NOT[\\s\n\r]*)*(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
 	private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN = Pattern
 			.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
 	private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN = Pattern
@@ -940,8 +940,8 @@ public class SQLConverter {
 		Matcher matcher = ptfl.matcher(sql);
 		if (matcher.find()) {
 			return sql.substring(0, matcher.start(1))
-					+ convertLike(matcher.group(1), matcher.group(2), matcher
-							.group(3))
+					+ convertLike(matcher.group(1),matcher.group(2), matcher.group(3), matcher
+							.group(4))
 					+ convertLike(sql.substring(matcher.end(0)));
 		} else
 			return sql;
@@ -971,16 +971,16 @@ public class SQLConverter {
 		return likeContent.replaceAll("\\*", "%").replaceAll("\\?", "_");
 	}
 
-	private static String convertLike(String conditionField, String closePar,
+	private static String convertLike(String conditionField,String closePar,String not, 
 			String likeContent) {
 		Pattern inter = ACCESS_LIKE_CHARINTERVAL_PATTERN;
 		int i=likeContent.replaceAll("\\[#\\]","").indexOf("#");
-		
+		not=(not==null)?"":" NOT ";
 		if (i >= 0|| inter.matcher(likeContent).find()) {
-			return "REGEXP_MATCHES(" + conditionField + ",'"
+		    return not+"REGEXP_MATCHES(" + conditionField + ",'"
 					+ convert2RegexMatches(likeContent)+ "')" + closePar + " ";
 		}
-		return " " + conditionField + closePar + " like '"
+		return " " + conditionField + closePar +not+ " like '"
 				+ convert2LikeCondition(likeContent) + "'";
 	}
 
