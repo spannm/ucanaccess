@@ -318,11 +318,11 @@ public class Main {
     /**
      * Parse the {@code cmd} to handle command line flags of the form: "export [-d delimiter] [-t table] pathToCsv". For
      * example:
-     * 
+     *
      * <pre>
      * export -d , -t License License.csv
      * </pre>
-     * 
+     *
      * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The
      * {@code -t License} option dumps the {@code License} table using the SQL statement "select * from [License]".
      */
