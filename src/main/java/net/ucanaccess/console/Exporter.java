@@ -31,7 +31,7 @@ import java.util.Date;
 /**
  * Class that exports the given {@link ResultSet} to CSV format. Use the {@link Builder} to configure the Exporter
  * before calling its {@code csvDump()} method. For example:
- * 
+ *
  * <pre>
  * Exporter exporter = new Exporter.Builder()
  *     .setDelimiter(",")
@@ -170,7 +170,7 @@ public class Exporter {
      * </ul>
      * This supports only a small subset of various CSV transformations such as those given in
      * https://www.csvreader.com/csv_format.php.
-     * 
+     *
      * <p>
      * TODO: Consider using a 3rd party formatter like {@code org.apache.commons.csv.CSVFormat} if we don't mind adding
      * another dependency.

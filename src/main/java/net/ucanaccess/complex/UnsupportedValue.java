@@ -21,7 +21,7 @@ import com.healthmarketscience.jackcess.complex.ComplexValue;
 
 public class UnsupportedValue extends ComplexBase {
 
-    private static final long serialVersionUID = 1L;;
+    private static final long   serialVersionUID = 1L;;
     private Map<String, Object> values;
 
     public UnsupportedValue(com.healthmarketscience.jackcess.complex.UnsupportedValue cv) {

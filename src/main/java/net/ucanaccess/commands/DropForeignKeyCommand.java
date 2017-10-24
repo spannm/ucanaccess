@@ -23,42 +23,47 @@ import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class DropForeignKeyCommand implements ICommand {
 
-	private String	execId;
-	private String	relationshipName;
+    private String execId;
+    private String relationshipName;
 
-	public DropForeignKeyCommand(String execId, String relationshipName) {
-		super();
-		this.execId = execId;
-		this.relationshipName = relationshipName;
-	}
+    public DropForeignKeyCommand(String execId, String relationshipName) {
+        super();
+        this.execId = execId;
+        this.relationshipName = relationshipName;
+    }
 
-	public String getRelationshipName() {
-		return relationshipName;
-	}
+    public String getRelationshipName() {
+        return relationshipName;
+    }
 
-	public String getExecId() {
-		return execId;
-	}
+    @Override
+    public String getExecId() {
+        return execId;
+    }
 
-	public String getTableName() {
-		throw new UnsupportedOperationException("The getTableName method is not applicable to this object.");
-	}
+    @Override
+    public String getTableName() {
+        throw new UnsupportedOperationException("The getTableName method is not applicable to this object.");
+    }
 
-	public TYPES getType() {
-		return TYPES.DDL;
-	}
+    @Override
+    public TYPES getType() {
+        return TYPES.DDL;
+    }
 
-	public IFeedbackAction persist() throws SQLException {
-		try {
-			Persist2Jet p2a = new Persist2Jet();
-			p2a.dropForeignKey(this.relationshipName);
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Persist2Jet p2a = new Persist2Jet();
+            p2a.dropForeignKey(this.relationshipName);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
 
-	public IFeedbackAction rollback() throws SQLException {
-		return null;
-	}
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        return null;
+    }
 }

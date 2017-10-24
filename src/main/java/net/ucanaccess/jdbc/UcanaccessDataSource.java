@@ -48,7 +48,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     /**
-     * 
+     *
      * See {@link #setAccessPath(String)} for details.
      */
     public String getAccessPath() {
@@ -71,7 +71,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     /**
      * Opens the connection to the Access database.
-     * 
+     *
      * @return java.sql.Connection object
      */
     @Override
@@ -81,7 +81,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     /**
      * Opens the connection to the Access database using the provided username and password.
-     * 
+     *
      * @param username
      * @param password
      * @return java.sql.Connection object
@@ -359,7 +359,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     /**
      * For an in-memory backing database (memory=true), this parameter controls the time (in minutes, default=2), that
      * HSQLDB remains active and the in-memory database remains available after the last connection is closed.
-     * 
+     *
      * @param value
      *            (in minutes)
      * @since 0.1.1
@@ -393,7 +393,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     /**
      * Controls the allocation unit size for "OLE Object" (i.e., BLOB) data in the HSQLDB backing database. See the
      * UCanAccess website for details.
-     * 
+     *
      * @param value
      *            Values allowed are 1, 2, 4, 8, 16, or 32 (the unit is kB). Default is 2 if memory=true, and 32 (the
      *            HSQLDB default) otherwise.
