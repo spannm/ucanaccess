@@ -25,56 +25,45 @@ import java.util.Locale;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class ByteTest extends UcanaccessTestBase {
-	private static boolean init;
+    private static boolean init;
 
-	public ByteTest() {
-		super();
-		Locale.setDefault(Locale.US);
-	}
+    public ByteTest() {
+        super();
+        Locale.setDefault(Locale.US);
+    }
 
-	public ByteTest(FileFormat accVer) {
-		super(accVer);
-		Locale.setDefault(Locale.US);
-	}
+    public ByteTest(FileFormat accVer) {
+        super(accVer);
+        Locale.setDefault(Locale.US);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
 
-		super.setUp();
-		if (!init) {
-			Statement st = null;
-		
-			st = super.ucanaccess.createStatement();
-			st
-					.executeUpdate("CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed byte); ");
-			st.close();
-			st = super.ucanaccess.createStatement();
-			st
-					.executeUpdate("insert into tblMain (id,company)values(1,'pippo')");
-			st
-			.executeUpdate("update tblMain set closed=255");
-			try{
-			st
-			.executeUpdate("update tblMain set closed=-1");
-			}catch(Exception e){}
-			
-		
-		}
+        super.setUp();
+        if (!init) {
+            Statement st = null;
 
-	}
-	
-	
-	
-	
-	public void testCreate() throws SQLException, IOException, ParseException {
-		dump("select * from  tblMain");
-		checkQuery("select * from  tblMain");
-		
-	}
-	
-	
-	
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate(
+                    "CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed byte); ");
+            st.close();
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate("insert into tblMain (id,company)values(1,'pippo')");
+            st.executeUpdate("update tblMain set closed=255");
+            try {
+                st.executeUpdate("update tblMain set closed=-1");
+            } catch (Exception e) {
+            }
 
-	
-	
+        }
+
+    }
+
+    public void testCreate() throws SQLException, IOException, ParseException {
+        dump("select * from  tblMain");
+        checkQuery("select * from  tblMain");
+
+    }
+
 }

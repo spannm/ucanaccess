@@ -25,46 +25,45 @@ import net.ucanaccess.jdbc.UcanaccessDriver;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class CreateDatabaseTest extends UcanaccessTestBase {
-	public CreateDatabaseTest() {
-		super();
-	}
-	
-	public CreateDatabaseTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	
-	protected void setUp() throws Exception {}
-	
-	
-	public void testNewDatabase() throws Exception {
-		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-		// <avoid polluting Java workspace >
-		// File fileMdb = new File("./"+Math.random()+".mdb");  // the old way
-		File fileMdb = File.createTempFile("ucaCreateDatabaseTest", ".mdb");
-		fileMdb.delete();  // delete 0-byte file
-		// </avoid polluting Java workspace >
-		Connection ucanaccessConnection = null;
-		try {
-			String url =UcanaccessDriver.URL_PREFIX
-			+ fileMdb.getAbsolutePath()+";newdatabaseversion="+FileFormat.V2003.name();
-			
-			ucanaccessConnection = DriverManager.getConnection(url, "", "");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		assertNotNull(ucanaccessConnection);
-		System.out.println("Mdb was successfull created @ "+fileMdb .getAbsolutePath());
-		Statement st = null;
-		st =ucanaccessConnection.createStatement();
-		st.execute(" CREATE TABLE AAA ( baaaa text(3) PRIMARY KEY,A long default 3, C text(4) ) ");
-		st.close();
-		st =ucanaccessConnection.createStatement();
-		st.execute("INSERT INTO AAA(baaaa,c) VALUES ('33A','G'   )");
-		st.execute("INSERT INTO AAA VALUES ('33B',111,'G'   )");
-		super.ucanaccess=ucanaccessConnection;
-		dump("SELECT * FROM AAA");
-		
-	
-	}
+    public CreateDatabaseTest() {
+        super();
+    }
+
+    public CreateDatabaseTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+    }
+
+    public void testNewDatabase() throws Exception {
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        // <avoid polluting Java workspace >
+        // File fileMdb = new File("./"+Math.random()+".mdb"); // the old way
+        File fileMdb = File.createTempFile("ucaCreateDatabaseTest", ".mdb");
+        fileMdb.delete(); // delete 0-byte file
+        // </avoid polluting Java workspace >
+        Connection ucanaccessConnection = null;
+        try {
+            String url = UcanaccessDriver.URL_PREFIX + fileMdb.getAbsolutePath() + ";newdatabaseversion="
+                    + FileFormat.V2003.name();
+
+            ucanaccessConnection = DriverManager.getConnection(url, "", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertNotNull(ucanaccessConnection);
+        System.out.println("Mdb was successfull created @ " + fileMdb.getAbsolutePath());
+        Statement st = null;
+        st = ucanaccessConnection.createStatement();
+        st.execute(" CREATE TABLE AAA ( baaaa text(3) PRIMARY KEY,A long default 3, C text(4) ) ");
+        st.close();
+        st = ucanaccessConnection.createStatement();
+        st.execute("INSERT INTO AAA(baaaa,c) VALUES ('33A','G'   )");
+        st.execute("INSERT INTO AAA VALUES ('33B',111,'G'   )");
+        super.ucanaccess = ucanaccessConnection;
+        dump("SELECT * FROM AAA");
+
+    }
 }

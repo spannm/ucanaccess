@@ -19,33 +19,33 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 public class UcanaccessSavepoint implements Savepoint {
-	private Savepoint wrapped;
-	
-	public UcanaccessSavepoint(Savepoint wrapped) {
-		super();
-		this.wrapped = wrapped;
-	}
-	
-	public int getSavepointId() throws SQLException {
-		try {
-			return wrapped.getSavepointId();
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
-	
-	public String getSavepointName() throws SQLException {
-		try {
-			return wrapped.getSavepointName();
-		} catch (SQLException e) {
-			throw new UcanaccessSQLException(e);
-		}
-	}
+    private Savepoint wrapped;
 
-	Savepoint getWrapped() {
-		return wrapped;
-	}
+    public UcanaccessSavepoint(Savepoint wrapped) {
+        super();
+        this.wrapped = wrapped;
+    }
 
-	
-	
+    @Override
+    public int getSavepointId() throws SQLException {
+        try {
+            return wrapped.getSavepointId();
+        } catch (SQLException e) {
+            throw new UcanaccessSQLException(e);
+        }
+    }
+
+    @Override
+    public String getSavepointName() throws SQLException {
+        try {
+            return wrapped.getSavepointName();
+        } catch (SQLException e) {
+            throw new UcanaccessSQLException(e);
+        }
+    }
+
+    Savepoint getWrapped() {
+        return wrapped;
+    }
+
 }

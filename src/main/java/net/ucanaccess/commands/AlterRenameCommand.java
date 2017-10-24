@@ -22,43 +22,46 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class AlterRenameCommand implements ICommand {
-	private String execId;
-	private String oldTableName;
-	private String newTableName;
-	
-	public AlterRenameCommand(String oldTableName,String newTableName, String execId) {
-		super();
-		this.oldTableName=oldTableName;
-		this.newTableName = newTableName;
-		this.execId = execId;
-	}
-	
-	public String getExecId() {
-		return execId;
-	}
-		
-	public String getTableName() {
-		return oldTableName;
-	}
+    private String execId;
+    private String oldTableName;
+    private String newTableName;
 
-	public TYPES getType() {
-		return TYPES.DDL;
-	}
-	
-		
-	public IFeedbackAction  persist() throws SQLException {
-		try {
-			Persist2Jet p2a = new Persist2Jet();
-			p2a.renameTable(oldTableName,newTableName);
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
+    public AlterRenameCommand(String oldTableName, String newTableName, String execId) {
+        super();
+        this.oldTableName = oldTableName;
+        this.newTableName = newTableName;
+        this.execId = execId;
+    }
 
-	public IFeedbackAction rollback() throws SQLException {
-		return null;
-	}
+    @Override
+    public String getExecId() {
+        return execId;
+    }
 
-	
+    @Override
+    public String getTableName() {
+        return oldTableName;
+    }
+
+    @Override
+    public TYPES getType() {
+        return TYPES.DDL;
+    }
+
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Persist2Jet p2a = new Persist2Jet();
+            p2a.renameTable(oldTableName, newTableName);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        return null;
+    }
+
 }

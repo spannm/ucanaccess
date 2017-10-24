@@ -25,11 +25,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTests2010 {
-	public static Test suite() throws ClassNotFoundException {
-		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2010);
-		TestSuite ts= AllTestsBase.suite();
-		ts.addTestSuite(ComplexTest.class);
-		ts.addTestSuite(CorruptedTest.class);
-		return ts;
-	}
+    public static Test suite() throws ClassNotFoundException {
+        UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2010);
+        TestSuite ts = AllTestsBase.suite();
+        ts.addTestSuite(ComplexTest.class);
+        ts.addTestSuite(CorruptedTest.class);
+        return ts;
+    }
 }

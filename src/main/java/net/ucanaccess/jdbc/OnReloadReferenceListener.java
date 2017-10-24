@@ -16,6 +16,6 @@ limitations under the License.
 package net.ucanaccess.jdbc;
 
 public interface OnReloadReferenceListener {
-	public void onReload();
+    public void onReload();
 
 }

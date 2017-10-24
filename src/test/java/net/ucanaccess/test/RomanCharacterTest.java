@@ -20,38 +20,38 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class RomanCharacterTest extends UcanaccessTestBase {
-	public RomanCharacterTest() {
-		super();
-	}
+    public RomanCharacterTest() {
+        super();
+    }
 
-	public RomanCharacterTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public RomanCharacterTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/noroman.mdb";
-	}
-	
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/noroman.mdb";
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
-	public void testNoRomanCharactersInColumnName() throws Exception {
-		dump("SELECT * FROM NOROMAN");
-		System.out.println("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß");
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
-			st.execute("UPDATE NOROMAN SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
-			checkQuery("SELECT * FROM NOROMAN");
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    }
+
+    public void testNoRomanCharactersInColumnName() throws Exception {
+        dump("SELECT * FROM NOROMAN");
+        System.out.println("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß");
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
+            st.execute("UPDATE NOROMAN SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
+            checkQuery("SELECT * FROM NOROMAN");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 }

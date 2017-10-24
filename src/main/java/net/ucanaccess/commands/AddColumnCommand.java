@@ -23,55 +23,54 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class AddColumnCommand implements ICommand {
-	private String execId;
-	private String tableName;
-	private String[] types;
-	private String[] defaults;
-	private Boolean[] notNulls;
-	private Map<String,String> columnMap;
-	private String columnName;
-	
-	
-	public AddColumnCommand(String  tableName, String columnName, String execId,Map<String,String> columnMap,
-			String[] types, String[] defaults, Boolean[] notNulls) {
-		this.tableName = tableName;
-		this.columnName=columnName;
-		this.types =types;
-		this.defaults=defaults;
-		this.notNulls=notNulls;
-		this.columnMap=columnMap;
-		this.execId=execId;
-	}
+    private String              execId;
+    private String              tableName;
+    private String[]            types;
+    private String[]            defaults;
+    private Boolean[]           notNulls;
+    private Map<String, String> columnMap;
+    private String              columnName;
 
-	
-	public String getExecId() {
-		return execId;
-	}
-	
-	public String getTableName() {
-		return tableName;
-	}
-	
-	public TYPES getType() {
-		return TYPES.DDL;
-	}
-	
+    public AddColumnCommand(String tableName, String columnName, String execId, Map<String, String> columnMap,
+            String[] types, String[] defaults, Boolean[] notNulls) {
+        this.tableName = tableName;
+        this.columnName = columnName;
+        this.types = types;
+        this.defaults = defaults;
+        this.notNulls = notNulls;
+        this.columnMap = columnMap;
+        this.execId = execId;
+    }
 
-	public IFeedbackAction persist() throws SQLException {
-		try {
-			Persist2Jet p2a = new Persist2Jet();
-			p2a.addColumn(tableName,columnName,columnMap, types,defaults,notNulls);
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
+    @Override
+    public String getExecId() {
+        return execId;
+    }
 
+    @Override
+    public String getTableName() {
+        return tableName;
+    }
 
+    @Override
+    public TYPES getType() {
+        return TYPES.DDL;
+    }
 
-	public IFeedbackAction rollback() throws SQLException {
-		return null;
-	}
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Persist2Jet p2a = new Persist2Jet();
+            p2a.addColumn(tableName, columnName, columnMap, types, defaults, notNulls);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
 
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        return null;
+    }
 
 }

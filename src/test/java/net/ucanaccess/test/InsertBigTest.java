@@ -24,40 +24,42 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class InsertBigTest extends UcanaccessTestBase {
 
-	public InsertBigTest() {
-		super();
-	}
+    public InsertBigTest() {
+        super();
+    }
 
-	public InsertBigTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public InsertBigTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		executeCreateTable("CREATE TABLE Tbig (id LONG, descr MEMO) ");
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        executeCreateTable("CREATE TABLE Tbig (id LONG, descr MEMO) ");
+    }
 
-	public void testBig() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			int id = 6666554;
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < 100000; i++) {
-				sb.append(String.format("%05d", i));
-				sb.append("\r\n");
-			}
-			String s = sb.toString();
-			assertTrue(s.length() >= 65536);
-			st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id + ",'" + s + "')");
-			ResultSet rs = st.executeQuery("SELECT descr FROM Tbig WHERE id=" + id);
-			rs.next();
-			String retrieved = rs.getString(1);
-			assertEquals(s, retrieved);
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    public void testBig() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            int id = 6666554;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 100000; i++) {
+                sb.append(String.format("%05d", i));
+                sb.append("\r\n");
+            }
+            String s = sb.toString();
+            assertTrue(s.length() >= 65536);
+            st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id + ",'" + s + "')");
+            ResultSet rs = st.executeQuery("SELECT descr FROM Tbig WHERE id=" + id);
+            rs.next();
+            String retrieved = rs.getString(1);
+            assertEquals(s, retrieved);
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 
 }

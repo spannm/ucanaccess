@@ -24,60 +24,61 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class BatchTest extends UcanaccessTestBase {
-	public static boolean tableCreated;
-	
-	public BatchTest() {
-		super();
-	}
-	
-	public BatchTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	protected void setUp() throws Exception {
-		super.setUp();
-		 executeCreateTable("CREATE TABLE Tb (id LONG,name TEXT, age LONG) ");
-		 
-		Statement	st = super.ucanaccess.createStatement();
-			st
-					.execute("INSERT INTO Tb VALUES(1,'Sophia', 33)");
+    public static boolean tableCreated;
 
-			st.close();
-		
-	}
-	
-	public void testBatch() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.addBatch("UPDATE Tb SET [name]='ccc'");
-			st.addBatch("UPDATE Tb SET age=95");
-			st.executeBatch();
-			checkQuery("select * from tb");
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public void testBatchPS() throws SQLException, IOException {
-		PreparedStatement st = null;
-		try {
-			st = super.ucanaccess.prepareStatement("UPDATE Tb SET [name]=?,age=? ");
-			
-			st.setString(1, "ciao");
-			st.setInt(2, 23);
-			st.addBatch();
-			st.setString(1, "ciao1");
-			st.setInt(2, 43);
-			st.addBatch();
-			st.executeBatch();
-			checkQuery("select * from tb");
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	
+    public BatchTest() {
+        super();
+    }
+
+    public BatchTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        executeCreateTable("CREATE TABLE Tb (id LONG,name TEXT, age LONG) ");
+
+        Statement st = super.ucanaccess.createStatement();
+        st.execute("INSERT INTO Tb VALUES(1,'Sophia', 33)");
+
+        st.close();
+
+    }
+
+    public void testBatch() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.addBatch("UPDATE Tb SET [name]='ccc'");
+            st.addBatch("UPDATE Tb SET age=95");
+            st.executeBatch();
+            checkQuery("select * from tb");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testBatchPS() throws SQLException, IOException {
+        PreparedStatement st = null;
+        try {
+            st = super.ucanaccess.prepareStatement("UPDATE Tb SET [name]=?,age=? ");
+
+            st.setString(1, "ciao");
+            st.setInt(2, 23);
+            st.addBatch();
+            st.setString(1, "ciao1");
+            st.setInt(2, 43);
+            st.addBatch();
+            st.executeBatch();
+            checkQuery("select * from tb");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
 }

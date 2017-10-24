@@ -28,49 +28,47 @@ import net.ucanaccess.jdbc.UcanaccessDriver;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class FolderTest extends UcanaccessTestBase {
-	public FolderTest() {
-		super();
-	}
-	
-	public FolderTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
+    public FolderTest() {
+        super();
+    }
 
-	protected void setUp() throws Exception {
-		//super.setIgnoreCase(true);
-		//ignorecase=true is the default
-		super.setUp();
-	}
-	
-	
-	public void testFolderContent() throws SQLException, IOException, ClassNotFoundException {
-		Statement st = null;
-		String folderPath=System.getProperty("accessFolder");
-		if(folderPath==null)return;
-		File folder=new File(folderPath);
-		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-		for(File fl:folder.listFiles())
-		
-		try {
-			String url=UcanaccessDriver.URL_PREFIX
-			+ fl.getAbsolutePath();
-			Connection conn=DriverManager.getConnection(url  );
-			SQLWarning sqlw= conn.getWarnings();
-			System.out.println("open "+fl.getAbsolutePath());
-			while(sqlw!=null){
-				System.out.println(sqlw.getMessage());
-				sqlw=sqlw.getNextWarning();	
-			}
-		
-			
-		} 
-		catch(Exception e){
-			System.out.println("error "+fl.getAbsolutePath());
-		}
-		finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    public FolderTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        // super.setIgnoreCase(true);
+        // ignorecase=true is the default
+        super.setUp();
+    }
+
+    public void testFolderContent() throws SQLException, IOException, ClassNotFoundException {
+        Statement st = null;
+        String folderPath = System.getProperty("accessFolder");
+        if (folderPath == null) {
+            return;
+        }
+        File folder = new File(folderPath);
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        for (File fl : folder.listFiles()) {
+            try {
+                String url = UcanaccessDriver.URL_PREFIX + fl.getAbsolutePath();
+                Connection conn = DriverManager.getConnection(url);
+                SQLWarning sqlw = conn.getWarnings();
+                System.out.println("open " + fl.getAbsolutePath());
+                while (sqlw != null) {
+                    System.out.println(sqlw.getMessage());
+                    sqlw = sqlw.getNextWarning();
+                }
+
+            } catch (Exception e) {
+                System.out.println("error " + fl.getAbsolutePath());
+            } finally {
+                if (st != null) {
+                    st.close();
+                }
+            }
+        }
+    }
 }

@@ -22,27 +22,26 @@ import java.sql.ResultSet;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class Size97Test extends UcanaccessTestBase {
-	public Size97Test() {
-		super();
-	}
-	
-	public Size97Test(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/size97.mdb";
-	}
-	
-	
-	public void testSize() throws Exception {
-		
-		Connection	conn = getUcanaccessConnection();
-		DatabaseMetaData dbmd=conn.getMetaData();
-		ResultSet rs=dbmd.getColumns(null, null, "table1", "field1");
-		rs.next();
-		super.assertEquals(10, rs.getInt("COLUMN_SIZE"));
-		
-		
-	}
+    public Size97Test() {
+        super();
+    }
+
+    public Size97Test(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/size97.mdb";
+    }
+
+    public void testSize() throws Exception {
+
+        Connection conn = getUcanaccessConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
+        ResultSet rs = dbmd.getColumns(null, null, "table1", "field1");
+        rs.next();
+        super.assertEquals(10, rs.getInt("COLUMN_SIZE"));
+
+    }
 }

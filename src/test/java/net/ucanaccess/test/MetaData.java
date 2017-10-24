@@ -22,54 +22,55 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class MetaData extends UcanaccessTestBase {
-	public MetaData() {
-		super();
-	}
+    public MetaData() {
+        super();
+    }
 
-	public MetaData(FileFormat accVer) {
-		super(accVer);
-	}
+    public MetaData(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/noroman.mdb";
-	}
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/noroman.mdb";
+    }
 
-	public void createSimple(String a, Object[][] ver) throws SQLException,
-			IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
-			st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
-			checkQuery("select * from AAAn", ver);
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    public void createSimple(String a, Object[][] ver) throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
+            st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
+            checkQuery("select * from AAAn", ver);
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+    }
 
-	public void testDrop() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			super.ucanaccess.setAutoCommit(false);
-			createSimple("a", new Object[][] { { "33A", 11, "a" },
-					{ "33B", 111, "a" } });
-			st = super.ucanaccess.createStatement();
-			st.executeUpdate("DROP TABLE AAAn");
+    public void testDrop() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            super.ucanaccess.setAutoCommit(false);
+            createSimple("a", new Object[][] { { "33A", 11, "a" }, { "33B", 111, "a" } });
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate("DROP TABLE AAAn");
 
-			st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-			createSimple("b", new Object[][] { { "33A", 11, "b" },
-					{ "33B", 111, "b" } });
-			
-			super.ucanaccess.commit();
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+            st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+            createSimple("b", new Object[][] { { "33A", 11, "b" }, { "33B", 111, "b" } });
+
+            super.ucanaccess.commit();
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 }

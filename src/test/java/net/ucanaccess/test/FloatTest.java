@@ -25,44 +25,37 @@ import java.util.Locale;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class FloatTest extends UcanaccessTestBase {
-	
 
-	public FloatTest() {
-		super();
-		Locale.setDefault(Locale.US);
-	}
+    public FloatTest() {
+        super();
+        Locale.setDefault(Locale.US);
+    }
 
-	public FloatTest(FileFormat accVer) {
-		super(accVer);
-		Locale.setDefault(Locale.US);
-	}
+    public FloatTest(FileFormat accVer) {
+        super(accVer);
+        Locale.setDefault(Locale.US);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
 
-		super.setUp();
-		
+        super.setUp();
 
-	}
-	
-	
-	
-	
-	public void testCreate() throws SQLException, IOException, ParseException {
-		PreparedStatement ps= ucanaccess.prepareStatement("insert into t (row) values(?)");
-		ps.setFloat(1, 1.4f);
-		ps.execute();
-		 ps= ucanaccess.prepareStatement("update t  set [row]=?");
-		 ps.setObject(1, 4.9d);
-		 ps.execute();
-		 checkQuery("select [row] from t");
-	}
-	
-	public String getAccessPath() {
-		return  "net/ucanaccess/test/resources/float.accdb";
-	}
-	
+    }
 
-	
-	
+    public void testCreate() throws SQLException, IOException, ParseException {
+        PreparedStatement ps = ucanaccess.prepareStatement("insert into t (row) values(?)");
+        ps.setFloat(1, 1.4f);
+        ps.execute();
+        ps = ucanaccess.prepareStatement("update t  set [row]=?");
+        ps.setObject(1, 4.9d);
+        ps.execute();
+        checkQuery("select [row] from t");
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/float.accdb";
+    }
+
 }

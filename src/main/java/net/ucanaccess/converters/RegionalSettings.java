@@ -19,56 +19,55 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class RegionalSettings {
-	
-	
-	private   final ResourceBundle dateBundle;
-	
-	
-	public RegionalSettings(){
-		this.dateBundle=ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat");
-	}
-	
-	public RegionalSettings(Locale l){
-		this.dateBundle=ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat",l);
-	}
 
+    private final ResourceBundle dateBundle;
 
-	
-	public   String getAM() {
-		return dateBundle.getString("AM");
-	}
-	
-	public   String getPM() {
-		return dateBundle.getString("PM");
-	}
-	
-	public   String getRS() {
-		return dateBundle.getString("RS");
-	}
-	
-	public   String getLongDatePattern() {
-		return dateBundle.getString("longDate");
-	}
-	public     String getMediumDatePattern() {
-		return dateBundle.getString("mediumDate");
-	}
-	public    String getShortDatePattern() {
-		return dateBundle.getString("shortDate");
-	}
-	public    String getLongTimePattern() {
-	 return dateBundle.getString("longTime");
-	}
-	public    String getMediumTimePattern() {
-		 return  dateBundle.getString("mediumTime");
-	}
-	public  String getShortTimePattern() {
-		return dateBundle.getString("shortTime");
-	}
-		
-	public String getGeneralPattern() {
-		return dateBundle.getString("generalDate");
-	}
-	
-	
+    public RegionalSettings() {
+        this.dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat");
+    }
+
+    public RegionalSettings(Locale l) {
+        this.dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat", l);
+    }
+
+    public String getAM() {
+        return dateBundle.getString("AM");
+    }
+
+    public String getPM() {
+        return dateBundle.getString("PM");
+    }
+
+    public String getRS() {
+        return dateBundle.getString("RS");
+    }
+
+    public String getLongDatePattern() {
+        return dateBundle.getString("longDate");
+    }
+
+    public String getMediumDatePattern() {
+        return dateBundle.getString("mediumDate");
+    }
+
+    public String getShortDatePattern() {
+        return dateBundle.getString("shortDate");
+    }
+
+    public String getLongTimePattern() {
+        return dateBundle.getString("longTime");
+    }
+
+    public String getMediumTimePattern() {
+        return dateBundle.getString("mediumTime");
+    }
+
+    public String getShortTimePattern() {
+        return dateBundle.getString("shortTime");
+    }
+
+    public String getGeneralPattern() {
+        return dateBundle.getString("generalDate");
+    }
 
 }

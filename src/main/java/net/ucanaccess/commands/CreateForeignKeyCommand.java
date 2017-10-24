@@ -22,47 +22,46 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class CreateForeignKeyCommand implements ICommand {
-	
-	private String tableName;
-	private String referencedTable;
-	private String execId;
 
+    private String tableName;
+    private String referencedTable;
+    private String execId;
 
-    public CreateForeignKeyCommand(String tableName, String referencedTable,
-			String execId) {
-		super();
-		this.tableName = tableName;
-		this.referencedTable = referencedTable;
-		this.execId = execId;
-	}
+    public CreateForeignKeyCommand(String tableName, String referencedTable, String execId) {
+        super();
+        this.tableName = tableName;
+        this.referencedTable = referencedTable;
+        this.execId = execId;
+    }
 
-	public String getExecId() {
-		return execId;
-	}
-	
-	public String getTableName() {
-		return tableName;
-	}
-	
-	public TYPES getType() {
-		return TYPES.DDL;
-	}
-	
-	
-	public IFeedbackAction persist() throws SQLException {
-		try {
-			Persist2Jet p2a = new Persist2Jet();
-			p2a.createForeignKey(this.tableName,this.referencedTable);
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
+    @Override
+    public String getExecId() {
+        return execId;
+    }
 
+    @Override
+    public String getTableName() {
+        return tableName;
+    }
 
+    @Override
+    public TYPES getType() {
+        return TYPES.DDL;
+    }
 
-	
-	public IFeedbackAction rollback() throws SQLException {
-		return null;
-	}
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Persist2Jet p2a = new Persist2Jet();
+            p2a.createForeignKey(this.tableName, this.referencedTable);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        return null;
+    }
 }

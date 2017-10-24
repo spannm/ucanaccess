@@ -33,46 +33,46 @@ limitations under the License.
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class UnproperExecuteQueryTest extends UcanaccessTestBase {
-	public UnproperExecuteQueryTest() {
-		super();
-	}
+    public UnproperExecuteQueryTest() {
+        super();
+    }
 
-	public UnproperExecuteQueryTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public UnproperExecuteQueryTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/noroman.mdb";
-	}
-	
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/noroman.mdb";
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
-		execute("UPDATE NOROMAN SET [ENd]='BLeah'");
-		
-		execute("delete from NOROMAN");
-		
-	}
-	 private void execute(String s) throws SQLException{
-		 Statement st = super.ucanaccess.createStatement();
-		 try{
-			
-			 st.executeQuery(s);
-			 throw new RuntimeException("not reacheable here");
-		 }catch(Exception e){
-			// e.printStackTrace();
-			 System.out.println(e.getMessage());
-		 }
-		 st.execute(s);
-	 }
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
+        execute("UPDATE NOROMAN SET [ENd]='BLeah'");
 
-	public void testOk() throws Exception {
-		System.out.println("ok");
-	}
+        execute("delete from NOROMAN");
+
+    }
+
+    private void execute(String s) throws SQLException {
+        Statement st = super.ucanaccess.createStatement();
+        try {
+
+            st.executeQuery(s);
+            throw new RuntimeException("not reacheable here");
+        } catch (Exception e) {
+            // e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+        st.execute(s);
+    }
+
+    public void testOk() throws Exception {
+        System.out.println("ok");
+    }
 }

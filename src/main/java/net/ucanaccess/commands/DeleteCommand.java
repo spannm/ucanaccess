@@ -22,71 +22,73 @@ import java.util.Map;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
-
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Table;
 
 public class DeleteCommand extends AbstractCursorCommand {
-	private String execId;
-	private IndexSelector indexSelector;
-	private Map<String, Object> rowPattern;
-	private Table table;
-	
-	
-	public DeleteCommand(Table table, Map<String, Object> rowPattern, String execId) {
-		super();
-		this.indexSelector = new IndexSelector(table);
-		this.rowPattern =rowPattern;
-		this.execId = execId;
-		this.table=table;
-		
-	}
-	
-	public String getExecId() {
-		return execId;
-	}
+    private String              execId;
+    private IndexSelector       indexSelector;
+    private Map<String, Object> rowPattern;
+    private Table               table;
 
-	public IndexSelector getIndexSelector() {
-		return indexSelector;
-	}
-	
-	public Map<String, Object> getRowPattern() {
-		return rowPattern;
-	}
-	
-	public String getTableName() {
-		return table.getName();
-	}
-	
-	public TYPES getType() {
-		return TYPES.DELETE;
-	}
-	
-	public IFeedbackAction  persist() throws SQLException {
-		try {
-			Cursor cur = indexSelector.getCursor();
-			if (cur.findNextRow(rowPattern)) {
-				cur.deleteCurrentRow();
-			}
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
-	
-	public void persistCurrentRow(Cursor cur) throws IOException {
-		cur.deleteCurrentRow();
-	}
-	
-	
-	public IFeedbackAction rollback() throws SQLException {
-		   InsertCommand ic = new InsertCommand(
-					this.table,
-					new Persist2Jet().getValues(this.rowPattern, this.table),
-					this.execId);
-			return ic.persist();
-		
-	}
+    public DeleteCommand(Table table, Map<String, Object> rowPattern, String execId) {
+        super();
+        this.indexSelector = new IndexSelector(table);
+        this.rowPattern = rowPattern;
+        this.execId = execId;
+        this.table = table;
 
+    }
+
+    @Override
+    public String getExecId() {
+        return execId;
+    }
+
+    @Override
+    public IndexSelector getIndexSelector() {
+        return indexSelector;
+    }
+
+    @Override
+    public Map<String, Object> getRowPattern() {
+        return rowPattern;
+    }
+
+    @Override
+    public String getTableName() {
+        return table.getName();
+    }
+
+    @Override
+    public TYPES getType() {
+        return TYPES.DELETE;
+    }
+
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Cursor cur = indexSelector.getCursor();
+            if (cur.findNextRow(rowPattern)) {
+                cur.deleteCurrentRow();
+            }
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public void persistCurrentRow(Cursor cur) throws IOException {
+        cur.deleteCurrentRow();
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        InsertCommand ic =
+                new InsertCommand(this.table, new Persist2Jet().getValues(this.rowPattern, this.table), this.execId);
+        return ic.persist();
+
+    }
 
 }

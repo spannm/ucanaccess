@@ -25,57 +25,49 @@ import java.util.Locale;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class BooleanTest extends UcanaccessTestBase {
-	private static boolean init;
+    private static boolean init;
 
-	public BooleanTest() {
-		super();
-		Locale.setDefault(Locale.US);
-	}
+    public BooleanTest() {
+        super();
+        Locale.setDefault(Locale.US);
+    }
 
-	public BooleanTest(FileFormat accVer) {
-		super(accVer);
-		Locale.setDefault(Locale.US);
-	}
+    public BooleanTest(FileFormat accVer) {
+        super(accVer);
+        Locale.setDefault(Locale.US);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
 
-		super.setUp();
-		if (!init) {
-			Statement st = null;
-		
-			st = super.ucanaccess.createStatement();
-			st
-					.executeUpdate("CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed YESNO); ");
-			st.close();
-			st = super.ucanaccess.createStatement();
-			st
-					.executeUpdate("insert into tblMain (id,company)values(1,'pippo')");
-			st
-			.executeUpdate("update tblMain set closed=yes");
-			
-			st
-			.executeUpdate("insert into t (pk)values('pippo')");
-			init = true;
-		}
+        super.setUp();
+        if (!init) {
+            Statement st = null;
 
-	}
-	
-	
-	
-	
-	public void testCreate() throws SQLException, IOException, ParseException {
-		dump("select * from  tblMain");
-		dump("select * from  t");
-		checkQuery("select * from  tblMain");
-		checkQuery("select * from  t");
-	}
-	
-	public String getAccessPath() {
-		return  "net/ucanaccess/test/resources/bool.accdb";
-	}
-	
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate(
+                    "CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL,  Closed YESNO); ");
+            st.close();
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate("insert into tblMain (id,company)values(1,'pippo')");
+            st.executeUpdate("update tblMain set closed=yes");
 
-	
-	
+            st.executeUpdate("insert into t (pk)values('pippo')");
+            init = true;
+        }
+
+    }
+
+    public void testCreate() throws SQLException, IOException, ParseException {
+        dump("select * from  tblMain");
+        dump("select * from  t");
+        checkQuery("select * from  tblMain");
+        checkQuery("select * from  t");
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/bool.accdb";
+    }
+
 }

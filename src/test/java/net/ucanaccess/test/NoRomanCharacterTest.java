@@ -21,36 +21,38 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class NoRomanCharacterTest extends UcanaccessTestBase {
-	public NoRomanCharacterTest() {
-		super();
-	}
+    public NoRomanCharacterTest() {
+        super();
+    }
 
-	public NoRomanCharacterTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public NoRomanCharacterTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/noroman.mdb";
-	}
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/noroman.mdb";
+    }
 
-	public void testNoRomanCharactersInColumnName() throws Exception {
-		dump("SELECT * FROM NOROMAN");
-		
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			
-			 st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
-			st.execute("UPDATE NOROMAN SET  [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
-			ResultSet rs=st.executeQuery("SELECT * FROM NOROMAN");
-			while(rs.next()){
-				System.out.println(rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));
-			}
-			
-			checkQuery("SELECT * FROM NOROMAN");
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    public void testNoRomanCharactersInColumnName() throws Exception {
+        dump("SELECT * FROM NOROMAN");
+
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+
+            st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
+            st.execute("UPDATE NOROMAN SET  [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
+            ResultSet rs = st.executeQuery("SELECT * FROM NOROMAN");
+            while (rs.next()) {
+                System.out.println(rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));
+            }
+
+            checkQuery("SELECT * FROM NOROMAN");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 }

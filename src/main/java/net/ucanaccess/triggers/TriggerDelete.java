@@ -18,23 +18,21 @@ package net.ucanaccess.triggers;
 import net.ucanaccess.commands.DeleteCommand;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
-
 import com.healthmarketscience.jackcess.Table;
 
 public class TriggerDelete extends TriggerBase {
-	public void fire(int type, String name, String tableName, Object[] oldR,
-			Object[] newR) {
-		checkContext();
-		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		String execId = UcanaccessConnection.getCtxExcId();
-		try {
-			Table t = getTable(tableName,conn);
-			super.convertRowTypes(oldR, t);
-			DeleteCommand c4j = new DeleteCommand(t, getRowPattern(oldR, t),
-					execId);
-			conn.add(c4j);
-		} catch (Exception e) {
-			throw new  TriggerException(e.getMessage());
-		}
-	}
+    @Override
+    public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
+        checkContext();
+        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        String execId = UcanaccessConnection.getCtxExcId();
+        try {
+            Table t = getTable(tableName, conn);
+            super.convertRowTypes(oldR, t);
+            DeleteCommand c4j = new DeleteCommand(t, getRowPattern(oldR, t), execId);
+            conn.add(c4j);
+        } catch (Exception e) {
+            throw new TriggerException(e.getMessage());
+        }
+    }
 }
