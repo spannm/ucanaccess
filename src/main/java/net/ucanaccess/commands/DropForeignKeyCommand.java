@@ -21,53 +21,43 @@ import java.sql.SQLException;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
-public class CreateForeignKeyCommand implements ICommand {
-	
-	private String tableName;
-	private String referencedTable;
-	private String execId;
-	private String relationshipName;
+public class DropForeignKeyCommand implements ICommand {
 
+	private String	execId;
+	private String	relationshipName;
 
-    public CreateForeignKeyCommand(String tableName, String referencedTable,
-			String execId, String relationshipName) {
+	public DropForeignKeyCommand(String execId, String relationshipName) {
 		super();
-		this.tableName = tableName;
-		this.referencedTable = referencedTable;
 		this.execId = execId;
 		this.relationshipName = relationshipName;
 	}
 
-    public String getRelationshipName() {
-    	return relationshipName;
-    }
-    
+	public String getRelationshipName() {
+		return relationshipName;
+	}
+
 	public String getExecId() {
 		return execId;
 	}
-	
+
 	public String getTableName() {
-		return tableName;
+		throw new UnsupportedOperationException("The getTableName method is not applicable to this object.");
 	}
-	
+
 	public TYPES getType() {
 		return TYPES.DDL;
 	}
-	
-	
+
 	public IFeedbackAction persist() throws SQLException {
 		try {
 			Persist2Jet p2a = new Persist2Jet();
-			p2a.createForeignKey(this.tableName, this.referencedTable, this.relationshipName);
+			p2a.dropForeignKey(this.relationshipName);
 		} catch (IOException e) {
 			throw new UcanaccessSQLException(e);
 		}
 		return null;
 	}
 
-
-
-	
 	public IFeedbackAction rollback() throws SQLException {
 		return null;
 	}

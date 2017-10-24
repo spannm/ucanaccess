@@ -16,356 +16,405 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.healthmarketscience.jackcess.CursorBuilder;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.Index.Column;
+import com.healthmarketscience.jackcess.IndexCursor;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
+
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
-
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.Index.Column;
+import net.ucanaccess.util.HibernateSupport;
 
 public class AlterTableTest extends UcanaccessTestBase {
 
-    public AlterTableTest() {
-        super();
-    }
+	public AlterTableTest() {
+		super();
+	}
 
-    public AlterTableTest(FileFormat accVer) {
-        super(accVer);
-    }
+	public AlterTableTest(FileFormat accVer) {
+		super(accVer);
+	}
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-        executeCreateTable(
-                "CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ",
-                1);
-    }
+	protected void setUp() throws Exception {
+		super.setUp();
+		executeCreateTable("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+		executeCreateTable(
+				"CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ",
+				1);
+	}
 
-    @Override
-    public String getAccessPath() {
-        return "net/ucanaccess/test/resources/badDB.accdb";
-    }
+	public String getAccessPath() {
+		return "net/ucanaccess/test/resources/badDB.accdb";
+	}
 
-    public void testRename() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
-            boolean b = false;
-            try {
-                st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]");
-            } catch (SQLException e) {
-                b = true;
-            }
-            assertTrue(b);
-            checkQuery("select * from [1GIà GIà]");
-            dump("select * from [1GIà GIà]");
-            System.out.println("after having renamed a few tables....");
-            dump("select * from UCA_METADATA.TABLES");
+	public void testRename() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
+			boolean b = false;
+			try {
+				st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]");
+			} catch (SQLException e) {
+				b = true;
+			}
+			assertTrue(b);
+			checkQuery("select * from [1GIà GIà]");
+			dump("select * from [1GIà GIà]");
+			System.out.println("after having renamed a few tables....");
+			dump("select * from UCA_METADATA.TABLES");
+			
+		}
 
-        }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
 
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
+	public void testAddColumn() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("ALTER TABLE AAAn RENAME TO [GIà GIà]");
+			st.execute("Insert into [GIà GIà] (baaaa) values('chi')");
+			checkQuery("select * from [GIà GIà] ORDER BY c");
+			dump("select * from [GIà GIà] ORDER BY c");
+			st
+					.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
+			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
+			dump("select * from [22 amadeimargmail111] ORDER BY c");
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
+			st
+						.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
+			boolean b=false;
+			try{
+				st
+				.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
+			}catch(UcanaccessSQLException e){
+				b=true;
+				System.err.println(e.getMessage());
+			}
+			assertTrue(b);
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci2]  YESNO  ");
+			st
+					.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN Memo  Memo  ");
+			st
+					.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
+			checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
+			dump("select * from [22 amadeimargmail111] ORDER BY c");
+			st
+			.executeUpdate("Update sample set Description='wRRRw'");
+			st
+			.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
+			
+			st
+			.execute("Update sample set Description='ww'");
+			checkQuery("select * from Sample");
+			dump("select * from Sample");
+			
+			System.out.println("after having added a few columns....");
+			dump("select * from UCA_METADATA.Columns");
+			
+			this.createFK();
+			
+			st.execute("ALTER TABLE Sample ADD COLUMN website HYPERLINK");
+			ResultSet rs = super.ucanaccess.getMetaData().getColumns(null, null, "Sample", "website");
+			rs.next();
+			assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
+		}
 
-    public void testAddColumn() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute("ALTER TABLE AAAn RENAME TO [GIà GIà]");
-            st.execute("Insert into [GIà GIà] (baaaa) values('chi')");
-            checkQuery("select * from [GIà GIà] ORDER BY c");
-            dump("select * from [GIà GIà] ORDER BY c");
-            st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
-            checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
-            dump("select * from [22 amadeimargmail111] ORDER BY c");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
-            boolean b = false;
-            try {
-                st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
-            } catch (UcanaccessSQLException e) {
-                b = true;
-                System.err.println(e.getMessage());
-            }
-            assertTrue(b);
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci2]  YESNO  ");
-            st.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN Memo  Memo  ");
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
-            checkQuery("select * from [22 amadeimargmail111] ORDER BY c");
-            dump("select * from [22 amadeimargmail111] ORDER BY c");
-            st.executeUpdate("Update sample set Description='wRRRw'");
-            st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
+		finally {
+			if (st != null)
+				st.close();
+		}
 
-            st.execute("Update sample set Description='ww'");
-            checkQuery("select * from Sample");
-            dump("select * from Sample");
+	}
 
-            System.out.println("after having added a few columns....");
-            dump("select * from UCA_METADATA.Columns");
+	public void testCreateIndex() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st
+					.execute("CREATE unique INDEX [èèè 23] on [AAA n]  (a ASC,c ASC )");
+			boolean b = false;
+			try {
+				st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
+				st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
+			} catch (Exception e) {
+				b = true;
+			}
+			assertTrue(b);
+			Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+			Table tb = db.getTable("AAA n");
 
-            this.createFK();
+			boolean found = false;
+			for (Index idx : tb.getIndexes()) {
+				if ("èèè 23".equals(idx.getName()) && idx.isUnique()) {
+					found = true;
+					ArrayList<String> ar = new ArrayList<String>();
+					for (Column cl : idx.getColumns()) {
+						ar.add(cl.getName());
+					}
+					assertTrue(ar.contains("A"));
+					assertTrue(ar.contains("C"));
+				}
+			}
+			assertTrue(found);
+			found = false;
+			st.execute("CREATE  INDEX [健 康] on [AAA n]  (c DESC )");
+			for (Index idx : tb.getIndexes()) {
+				if ("健 康".equals(idx.getName()) && !idx.isUnique()) {
+					found = true;
+					assertTrue(idx.getColumns().get(0).getName().equals("C"));
 
-        }
+				}
+			}
 
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
+			st.execute("CREATE  INDEX [%健 康] on [AAA n]  (b,d,e )");
+			for (Index idx : tb.getIndexes()) {
+				if ("%健 康".equals(idx.getName()) && !idx.isUnique()) {
+					found = true;
+					ArrayList<String> ar = new ArrayList<String>();
+					for (Column cl : idx.getColumns()) {
+						ar.add(cl.getName());
+					}
+					assertTrue(ar.size() == 3);
+					assertTrue(ar.contains("b"));
+					assertTrue(ar.contains("d"));
+					assertTrue(ar.contains("e"));
 
-    }
+				}
+			}
+			
+			
+			st.execute("CREATE  INDEX ciao on Sample  (description)");
+			for (Index idx : tb.getIndexes()) {
+				if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
+					found = true;
+					ArrayList<String> ar = new ArrayList<String>();
+					for (Column cl : idx.getColumns()) {
+						ar.add(cl.getName());
+					}
+					assertTrue(ar.size() == 1);
+				    assertTrue(ar.contains("field"));
+					
 
-    public void testCreateIndex() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute("CREATE unique INDEX [èèè 23] on [AAA n]  (a ASC,c ASC )");
-            boolean b = false;
-            try {
-                st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
-                st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
-            } catch (Exception e) {
-                b = true;
-            }
-            assertTrue(b);
-            Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
-            Table tb = db.getTable("AAA n");
+				}
+			}
 
-            boolean found = false;
-            for (Index idx : tb.getIndexes()) {
-                if ("èèè 23".equals(idx.getName()) && idx.isUnique()) {
-                    found = true;
-                    ArrayList<String> ar = new ArrayList<String>();
-                    for (Column cl : idx.getColumns()) {
-                        ar.add(cl.getName());
-                    }
-                    assertTrue(ar.contains("A"));
-                    assertTrue(ar.contains("C"));
-                }
-            }
-            assertTrue(found);
-            found = false;
-            st.execute("CREATE  INDEX [健 康] on [AAA n]  (c DESC )");
-            for (Index idx : tb.getIndexes()) {
-                if ("健 康".equals(idx.getName()) && !idx.isUnique()) {
-                    found = true;
-                    assertTrue(idx.getColumns().get(0).getName().equals("C"));
+			assertTrue(found);
+		}
 
-                }
-            }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
 
-            st.execute("CREATE  INDEX [%健 康] on [AAA n]  (b,d,e )");
-            for (Index idx : tb.getIndexes()) {
-                if ("%健 康".equals(idx.getName()) && !idx.isUnique()) {
-                    found = true;
-                    ArrayList<String> ar = new ArrayList<String>();
-                    for (Column cl : idx.getColumns()) {
-                        ar.add(cl.getName());
-                    }
-                    assertTrue(ar.size() == 3);
-                    assertTrue(ar.contains("b"));
-                    assertTrue(ar.contains("d"));
-                    assertTrue(ar.contains("e"));
+	public void testCreatePK() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("ALTER TABLE [AAA n] add  Primary key (baaaa,a)");
+			Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+			Table tb = db.getTable("AAA n");
+			Index idx = tb.getPrimaryKeyIndex();
+			ArrayList<String> ar = new ArrayList<String>();
+			for (Column cl : idx.getColumns()) {
+				ar.add(cl.getName());
+			}
+			assertTrue(ar.contains("A"));
+			assertTrue(ar.contains("baaaa"));
+			
+			
+			
+			st.execute("ALTER TABLE Sample add  Primary key (RegionId)");
+			tb = db.getTable("Sample");
+		    idx = tb.getPrimaryKeyIndex();
+		    ar.clear();
+			for (Column cl : idx.getColumns()) {
+				ar.add(cl.getName());
+			}
+			assertTrue(ar.contains("RegionId"));
+			
+		}
 
-                }
-            }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
 
-            st.execute("CREATE  INDEX ciao on Sample  (description)");
-            for (Index idx : tb.getIndexes()) {
-                if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
-                    found = true;
-                    ArrayList<String> ar = new ArrayList<String>();
-                    for (Column cl : idx.getColumns()) {
-                        ar.add(cl.getName());
-                    }
-                    assertTrue(ar.size() == 1);
-                    assertTrue(ar.contains("field"));
+	private void createFK() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			
+			// test case: constraint name specified
+			st.execute("ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
+			Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
+			Table tb = db.getTable("AAA n");
+			Table tbr = db.getTable("22 amadeimargmail111");
+			Index idx = tb.getForeignKeyIndex(tbr);
+			ArrayList<String> ar = new ArrayList<String>();
+			for (Column cl : idx.getColumns()) {
+				ar.add(cl.getName());
+			}
+			assertTrue(ar.contains("C"));
+			//
+			// also verify that the Relationship name was actually used in the Access database ...
+			tb = db.getSystemTable("MSysRelationships");
+			IndexCursor crsr = CursorBuilder.createCursor(tb.getIndex("szRelationship"));
+			Row r = crsr.findRowByEntry("pippo1");
+			assertTrue(r != null);
+			// ... and the right name was used in the HSQLDB database
+			Connection hsqldbConn = ((UcanaccessConnection) super.ucanaccess).getHSQLDBConnection();
+			Statement hsqldbStmt = hsqldbConn.createStatement();
+			ResultSet hsqldbRs = hsqldbStmt.executeQuery(
+					"SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
+					"WHERE CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_NAME='AAA N'");
+			hsqldbRs.next();
+			assertEquals("AAA N_PIPPO1", hsqldbRs.getString(1));
+			//
+			// now test dropping the foreign key
+			// first try with Hibernate mode inactive
+			HibernateSupport.setActive(false);
+			try {
+				st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
+				org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+			} catch (UcanaccessSQLException ucaSqlEx) { }
+			// now try again with Hibernate mode active
+			HibernateSupport.setActive(true);
+			st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
+			// and verify that it actually got dropped
+			try {
+				st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");  // again
+				org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+			} catch (UcanaccessSQLException ucaSqlEx) { }
+			HibernateSupport.setActive(null);
+			
+			// test case: constraint name not specified
+			st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");
+			
+		}
 
-                }
-            }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	public void testMiscellaneous() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("ALTER TABLE tx add constraint pk primary key ([i d]) ");
+			st.execute("ALTER TABLE tx add column [my best friend] long ");
+			st.execute("ALTER TABLE tx add column [my worst friend] single ");
+			st.execute("ALTER TABLE tx add column  [Is Pippo] TEXT(100) ");
+			st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT default \"what's this?\"");
+			
+			st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+			st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
+			st.execute("ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
+			st.execute("insert into tx1 values(1,\"ciao\")");
+			st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			checkQuery("select count(*) from tx",1);
+			st.execute("delete from tx1");
+			checkQuery("select count(*) from tx");
+			checkQuery("select count(*) from tx",0);
+			st.execute("drop table tx ");
+			st.execute("drop table tx1  ");
+			
+			st.execute("create table tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+			st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+			st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
+			st.execute("ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
+			st.execute("insert into tx1 values(1,\"ciao\")");
+			st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			checkQuery("select count(*) from tx",1);
+			st.execute("delete from tx1");
+			checkQuery("select count(*) from tx",1);
+			checkQuery("select * from tx",1 , null , 2.0 , null , "what's this?");
+			st.execute("CREATE  UNIQUE  INDEX IDX111 ON tx ([my best friend])");
+			
+			boolean b=false;
+			try{
+				st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			}catch(UcanaccessSQLException e){
+				b=true;
+				System.err.println(e.getMessage());
+			}
+			assertTrue(b);
+		}
 
-            assertTrue(found);
-        }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
+	
+	private void executeErr(String ddl, String expectedMessage) throws SQLException{
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute(ddl);
+		}
+		catch(SQLException e){
+			System.err.println(e.getMessage());
+			assertTrue(e.getMessage().endsWith(expectedMessage));
+		}
 
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
+		finally {
+			if (st != null)
+				st.close();
+		}
+	} 
+	
+	
+	
+	public void testSQLErrors() throws SQLException, IOException {
+		Statement st = null;
+		try {
+			st = super.ucanaccess.createStatement();
+			st.execute("create table tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+			st.execute("insert into tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
+			executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ","unexpected token: PRIMARY");
+			executeErr("ALTER TABLE tx2 add column [my best friend]  ","unexpected end of statement");
+			executeErr("ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade","type not found or user lacks privilege: FOREIGN");
+			executeErr("drop table tx2 cascade","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 add constraint primary key (id)","unexpected token: PRIMARY");
+			executeErr("ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 drop COLUMN [my best friend]","Feature not supported yet.");
+			executeErr("ALTER TABLE tx2 add COLUMN [1 my best friend]lonG not null","x2 already contains one or more records(1 records)");
+			
+			
+		}
 
-    public void testCreatePK() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute("ALTER TABLE [AAA n] add  Primary key (baaaa,a)");
-            Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
-            Table tb = db.getTable("AAA n");
-            Index idx = tb.getPrimaryKeyIndex();
-            ArrayList<String> ar = new ArrayList<String>();
-            for (Column cl : idx.getColumns()) {
-                ar.add(cl.getName());
-            }
-            assertTrue(ar.contains("A"));
-            assertTrue(ar.contains("baaaa"));
+		finally {
+			if (st != null)
+				st.close();
+		}
+	}
 
-            st.execute("ALTER TABLE Sample add  Primary key (RegionId)");
-            tb = db.getTable("Sample");
-            idx = tb.getPrimaryKeyIndex();
-            ar.clear();
-            for (Column cl : idx.getColumns()) {
-                ar.add(cl.getName());
-            }
-            assertTrue(ar.contains("RegionId"));
-
-        }
-
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
-
-    private void createFK() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute(
-                    "ALTER TABLE [AAA n] add constraint pippo1 foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
-            Database db = ((UcanaccessConnection) super.ucanaccess).getDbIO();
-            Table tb = db.getTable("AAA n");
-            Table tbr = db.getTable("22 amadeimargmail111");
-            Index idx = tb.getForeignKeyIndex(tbr);
-            ArrayList<String> ar = new ArrayList<String>();
-            for (Column cl : idx.getColumns()) {
-                ar.add(cl.getName());
-            }
-            assertTrue(ar.contains("C"));
-
-            st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");
-
-        }
-
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
-
-    public void testMiscellaneus() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute("ALTER TABLE tx add constraint pk primary key ([i d]) ");
-            st.execute("ALTER TABLE tx add column [my best friend] long ");
-            st.execute("ALTER TABLE tx add column [my worst friend] single ");
-            st.execute("ALTER TABLE tx add column  [Is Pippo] TEXT(100) ");
-            st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT default \"what's this?\"");
-
-            st.execute("create TABLE tx1  (n1 long, [n 2] text)");
-            st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
-            st.execute(
-                    "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
-            st.execute("insert into tx1 values(1,\"ciao\")");
-            st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-            checkQuery("select count(*) from tx", 1);
-            st.execute("delete from tx1");
-            checkQuery("select count(*) from tx");
-            checkQuery("select count(*) from tx", 0);
-            st.execute("drop table tx ");
-            st.execute("drop table tx1  ");
-
-            st.execute(
-                    "create table tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
-            st.execute("create TABLE tx1  (n1 long, [n 2] text)");
-            st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
-            st.execute(
-                    "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
-            st.execute("insert into tx1 values(1,\"ciao\")");
-            st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-            checkQuery("select count(*) from tx", 1);
-            st.execute("delete from tx1");
-            checkQuery("select count(*) from tx", 1);
-            checkQuery("select * from tx", 1, null, 2.0, null, "what's this?");
-            st.execute("CREATE  UNIQUE  INDEX IDX111 ON tx ([my best friend])");
-
-            boolean b = false;
-            try {
-                st.execute("insert into tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-            } catch (UcanaccessSQLException e) {
-                b = true;
-                System.err.println(e.getMessage());
-            }
-            assertTrue(b);
-        }
-
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
-
-    private void executeErr(String ddl, String expectedMessage) throws SQLException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute(ddl);
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-            assertTrue(e.getMessage().endsWith(expectedMessage));
-        }
-
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
-
-    public void testSQLErrors() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = super.ucanaccess.createStatement();
-            st.execute(
-                    "create table tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
-            st.execute("insert into tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-            executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ", "unexpected token: PRIMARY");
-            executeErr("ALTER TABLE tx2 add column [my best friend]  ", "unexpected end of statement");
-            executeErr(
-                    "ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade",
-                    "type not found or user lacks privilege: FOREIGN");
-            executeErr("drop table tx2 cascade", "Feature not supported yet.");
-            executeErr("ALTER TABLE tx2 add constraint primary key (id)", "unexpected token: PRIMARY");
-            executeErr("ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported yet.");
-            executeErr("ALTER TABLE tx2 drop COLUMN [my best friend]", "Feature not supported yet.");
-            executeErr("ALTER TABLE tx2 add COLUMN [1 my best friend]lonG not null",
-                    "x2 already contains one or more records(1 records)");
-
-        }
-
-        finally {
-            if (st != null) {
-                st.close();
-            }
-        }
-    }
 
 }
