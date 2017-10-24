@@ -16,6 +16,7 @@ limitations under the License.
 package net.ucanaccess.test;
 
 import java.sql.Statement;
+import java.util.Locale;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
@@ -23,25 +24,38 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class AddFunctionTest extends UcanaccessTestBase {
 
-    public AddFunctionTest() {
-        super();
-    }
+	
+	public AddFunctionTest() {
+		super();
+	}
+	
+	public AddFunctionTest(FileFormat accVer) {
+		super(accVer);
+	}
 
-    public AddFunctionTest(FileFormat accVer) {
-        super(accVer);
-    }
-
-    public void testAddFunction() throws Exception {
-        Statement st = super.ucanaccess.createStatement();
-        st.executeUpdate("CREATE TABLE gooo (id INTEGER) ");
-        st.close();
-        st = super.ucanaccess.createStatement();
-        st.execute("INSERT INTO gooo (id )  VALUES(1)");
-        UcanaccessConnection uc = (UcanaccessConnection) super.ucanaccess;
-        uc.addFunctions(AddFunctionClass.class);
-        super.dump("select pluto('hello',' world ',  now ()) from gooo");
-        checkQuery("select concat('Hello World, ','Ucanaccess') from gooo", "Hello World, Ucanaccess");
-        // uc.addFunctions(AddFunctionClass.class);
-    }
-
+	public void testAddFunction() throws Exception {
+		/*
+		 * Display the Locale language in effect (assuming that this is the first test in the suite).
+		 * Unfortunately, `-Duser.language=tr` (for Turkish) can be used for an individual test 
+		 *   but does does not seem to affect an entire suite 
+		 */
+		System.out.printf("%nLocale language is \"%s\"%n", Locale.getDefault().getLanguage());
+		Thread.sleep(1500);
+		
+			Statement st = super.ucanaccess.createStatement();
+			st.executeUpdate("CREATE TABLE gooo (id INTEGER) ");
+			st.close();
+			st = super.ucanaccess.createStatement();
+			st.execute("INSERT INTO gooo (id )  VALUES(1)");
+			UcanaccessConnection uc=(UcanaccessConnection)super.ucanaccess;
+			uc.addFunctions(AddFunctionClass.class);
+			super.dump("select pluto('hello',' world ',  now ()) from gooo");
+			checkQuery("select concat('Hello World, ','Ucanaccess') from gooo","Hello World, Ucanaccess");
+			//uc.addFunctions(AddFunctionClass.class);
+	}
+	
+	
 }
+
+
+
