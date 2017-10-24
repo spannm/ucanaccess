@@ -15,7 +15,6 @@ limitations under the License.
 */
 package net.ucanaccess.test.suite;
 
-
 import junit.framework.TestSuite;
 import net.ucanaccess.test.AccessLikeTest;
 import net.ucanaccess.test.AddFunctionTest;
@@ -56,45 +55,45 @@ import net.ucanaccess.test.WeirdObjectNamesTest;
 import net.ucanaccess.test.WorkloadTest;
 
 public class AllTestsBase {
-	public static TestSuite suite() throws ClassNotFoundException {
-		TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
-		suite.addTestSuite(AddFunctionTest.class);
-		suite.addTestSuite(AccessLikeTest.class);
-		suite.addTestSuite(CounterTest.class);
-		suite.addTestSuite(BlobOleTest.class);
-		suite.addTestSuite(CreateTableTest.class);
-		suite.addTestSuite(CrudTest.class);
-		suite.addTestSuite(DropTableTest.class);
-		suite.addTestSuite(FunctionsTest.class);
-		suite.addTestSuite(AggregateFunctionsTest.class);
-		suite.addTestSuite(LoadTypesAccessTest.class);
-		suite.addTestSuite(MultiThreadAccessTest.class);
-		suite.addTestSuite(PasswordTest.class);
-		suite.addTestSuite(TransactionTest.class);
-		suite.addTestSuite(WorkloadTest.class);
-		suite.addTestSuite(PivotTest.class);
-		suite.addTestSuite(InsertBigTest.class);
-		suite.addTestSuite(NoRomanCharacterTest.class);
-		suite.addTestSuite(ExternalResourcesTest.class);
-		suite.addTestSuite(RegexTest.class);
-		suite.addTestSuite(Size97Test.class);
-		suite.addTestSuite(BatchTest.class);
-		suite.addTestSuite(BooleanTest.class);
-		suite.addTestSuite(ByteTest.class);
-		suite.addTestSuite(GeneratedKeysTest.class);
-		suite.addTestSuite(GeneratedKeysTest1.class);
-		suite.addTestSuite(ColumnOrderTest.class);
-		suite.addTestSuite(ExceptionCodeTest.class);
-		suite.addTestSuite(MultipleGroupByTest.class);
-		suite.addTestSuite(MetaDataTest.class);
-		suite.addTestSuite(ParametersTest.class);
-		suite.addTestSuite(UnproperExecuteQueryTest.class);
-		suite.addTestSuite(FloatTest.class);
-		suite.addTestSuite(WeirdObjectNamesTest.class);
-		suite.addTestSuite(ReloadPersistentMirrorTest.class);
-		suite.addTestSuite(AlterTableTest.class);
-		suite.addTestSuite(CsvDumpTest.class);
-		suite.addTestSuite(CalculatedFieldTest.class);
-		return suite;
-	}
+    public static TestSuite suite() throws ClassNotFoundException {
+        TestSuite suite = new TestSuite("Test for net.ucanaccess.test");
+        suite.addTestSuite(AddFunctionTest.class);
+        suite.addTestSuite(AccessLikeTest.class);
+        suite.addTestSuite(CounterTest.class);
+        suite.addTestSuite(BlobOleTest.class);
+        suite.addTestSuite(CreateTableTest.class);
+        suite.addTestSuite(CrudTest.class);
+        suite.addTestSuite(DropTableTest.class);
+        suite.addTestSuite(FunctionsTest.class);
+        suite.addTestSuite(AggregateFunctionsTest.class);
+        suite.addTestSuite(LoadTypesAccessTest.class);
+        suite.addTestSuite(MultiThreadAccessTest.class);
+        suite.addTestSuite(PasswordTest.class);
+        suite.addTestSuite(TransactionTest.class);
+        suite.addTestSuite(WorkloadTest.class);
+        suite.addTestSuite(PivotTest.class);
+        suite.addTestSuite(InsertBigTest.class);
+        suite.addTestSuite(NoRomanCharacterTest.class);
+        suite.addTestSuite(ExternalResourcesTest.class);
+        suite.addTestSuite(RegexTest.class);
+        suite.addTestSuite(Size97Test.class);
+        suite.addTestSuite(BatchTest.class);
+        suite.addTestSuite(BooleanTest.class);
+        suite.addTestSuite(ByteTest.class);
+        suite.addTestSuite(GeneratedKeysTest.class);
+        suite.addTestSuite(GeneratedKeysTest1.class);
+        suite.addTestSuite(ColumnOrderTest.class);
+        suite.addTestSuite(ExceptionCodeTest.class);
+        suite.addTestSuite(MultipleGroupByTest.class);
+        suite.addTestSuite(MetaDataTest.class);
+        suite.addTestSuite(ParametersTest.class);
+        suite.addTestSuite(UnproperExecuteQueryTest.class);
+        suite.addTestSuite(FloatTest.class);
+        suite.addTestSuite(WeirdObjectNamesTest.class);
+        suite.addTestSuite(ReloadPersistentMirrorTest.class);
+        suite.addTestSuite(AlterTableTest.class);
+        suite.addTestSuite(CsvDumpTest.class);
+        suite.addTestSuite(CalculatedFieldTest.class);
+        return suite;
+    }
 }

@@ -24,90 +24,90 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class CreateTableCommand implements ICommand {
-	private String execId;
-	private String tableName;
-	private String[] types;
-	private String[] defaults;
-	private Boolean[] notNulls;
-	private Map<String,String> columnMap;
-	
-	public CreateTableCommand(String tableName, String execId) {
-		super();
-		this.tableName = tableName;
-		this.execId = execId;
-	}
-	
-	
-	
-	public CreateTableCommand(String tn, String execId2,Map<String,String> columnMap,
-			String[] types, String[] defaults, Boolean[] notNulls) {
-		this(tn, execId2);
-		this.types =types;
-		this.defaults=defaults;
-		this.notNulls=notNulls;
-		this.columnMap=columnMap;
-	}
+    private String              execId;
+    private String              tableName;
+    private String[]            types;
+    private String[]            defaults;
+    private Boolean[]           notNulls;
+    private Map<String, String> columnMap;
 
+    public CreateTableCommand(String tableName, String execId) {
+        super();
+        this.tableName = tableName;
+        this.execId = execId;
+    }
 
+    public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap, String[] types,
+            String[] defaults, Boolean[] notNulls) {
+        this(tn, execId2);
+        this.types = types;
+        this.defaults = defaults;
+        this.notNulls = notNulls;
+        this.columnMap = columnMap;
+    }
 
-	public CreateTableCommand(String tn, String execId2,
-			HashMap<String, String> columnMap2) {
-		this(tn,execId2,columnMap2,null,null,null );
-	}
+    public CreateTableCommand(String tn, String execId2, HashMap<String, String> columnMap2) {
+        this(tn, execId2, columnMap2, null, null, null);
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CreateTableCommand other = (CreateTableCommand) obj;
+        if (tableName == null) {
+            if (other.tableName != null) {
+                return false;
+            }
+        } else if (!tableName.equals(other.tableName)) {
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public String getExecId() {
+        return execId;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		CreateTableCommand other = (CreateTableCommand) obj;
-		if (tableName == null) {
-			if (other.tableName != null)
-				return false;
-		} else if (!tableName.equals(other.tableName))
-			return false;
-		return true;
-	}
-	
-	public String getExecId() {
-		return execId;
-	}
-	
-	public String getTableName() {
-		return tableName;
-	}
-	
-	public TYPES getType() {
-		return TYPES.DDL;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((tableName == null) ? 0 : tableName.hashCode());
-		return result;
-	}
-	
-	public IFeedbackAction persist() throws SQLException {
-		try {
-			Persist2Jet p2a = new Persist2Jet();
-			p2a.createTable(tableName,columnMap, types,defaults,notNulls);
-		} catch (IOException e) {
-			throw new UcanaccessSQLException(e);
-		}
-		return null;
-	}
+    @Override
+    public String getTableName() {
+        return tableName;
+    }
 
+    @Override
+    public TYPES getType() {
+        return TYPES.DDL;
+    }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+        return result;
+    }
 
-	public IFeedbackAction rollback() throws SQLException {
-		return null;
-	}
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+            Persist2Jet p2a = new Persist2Jet();
+            p2a.createTable(tableName, columnMap, types, defaults, notNulls);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        return null;
+    }
 }

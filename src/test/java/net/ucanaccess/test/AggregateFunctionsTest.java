@@ -24,93 +24,85 @@ import java.util.Locale;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class AggregateFunctionsTest extends UcanaccessTestBase {
-	private static boolean init;
-	
+    private static boolean init;
 
-	public AggregateFunctionsTest() {
-		super();
-		Locale.setDefault(Locale.US);
-	}
+    public AggregateFunctionsTest() {
+        super();
+        Locale.setDefault(Locale.US);
+    }
 
-	public AggregateFunctionsTest(FileFormat accVer) {
-		super(accVer);
-		Locale.setDefault(Locale.US);
-	}
+    public AggregateFunctionsTest(FileFormat accVer) {
+        super(accVer);
+        Locale.setDefault(Locale.US);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
 
-		super.setUp();
-		if (!init) {
-			Statement st = null;
-			
-				st = super.ucanaccess.createStatement();
-				st
-						.executeUpdate("CREATE TABLE t235 (id INTEGER,descr text(400), num numeric(12,3), date0 datetime) ");
-				st.close();
-				st = super.ucanaccess.createStatement();
-				st
-						.execute("INSERT INTO t235 (id,descr,num,date0)  VALUES( 1234,'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)");
-				st
-				.execute("INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
-				st.close();
-				init = true;
-			
+        super.setUp();
+        if (!init) {
+            Statement st = null;
 
-		}
+            st = super.ucanaccess.createStatement();
+            st.executeUpdate("CREATE TABLE t235 (id INTEGER,descr text(400), num numeric(12,3), date0 datetime) ");
+            st.close();
+            st = super.ucanaccess.createStatement();
+            st.execute(
+                    "INSERT INTO t235 (id,descr,num,date0)  VALUES( 1234,'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)");
+            st.execute(
+                    "INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
+            st.close();
+            init = true;
 
-	}
+        }
 
-	
+    }
 
-	public void testDCount() throws SQLException, IOException, ParseException {
-		
+    public void testDCount() throws SQLException, IOException, ParseException {
 
-		checkQuery("select id  , DCount('*','t235','1=1') from [t235]",
-				new Object[][] { { 1234, 2 }, { 12344, 2 } });
-		checkQuery("select id as [WW \"SS], DCount('descr','t235','1=1')from t235",
-				new Object[][] { { 1234, 2 }, { 12344, 2 } });
-		checkQuery("select  DCount('*','t235','1=1') ", 2);
+        checkQuery("select id  , DCount('*','t235','1=1') from [t235]", new Object[][] { { 1234, 2 }, { 12344, 2 } });
+        checkQuery("select id as [WW \"SS], DCount('descr','t235','1=1')from t235",
+                new Object[][] { { 1234, 2 }, { 12344, 2 } });
+        checkQuery("select  DCount('*','t235','1=1') ", 2);
 
-	}
+    }
 
-	public void testDSum() throws SQLException, IOException, ParseException {
-		checkQuery("select  DSum('id','t235','1=1') ", 13578);
-	}
+    public void testDSum() throws SQLException, IOException, ParseException {
+        checkQuery("select  DSum('id','t235','1=1') ", 13578);
+    }
 
-	public void testDMax() throws SQLException, IOException, ParseException {
-		checkQuery("select  DMax('id','t235') ", 12344);
-	}
+    public void testDMax() throws SQLException, IOException, ParseException {
+        checkQuery("select  DMax('id','t235') ", 12344);
+    }
 
-	public void testDMin() throws SQLException, IOException, ParseException {
-		checkQuery("select  DMin('id','t235') ", 1234);
-	}
+    public void testDMin() throws SQLException, IOException, ParseException {
+        checkQuery("select  DMin('id','t235') ", 1234);
+    }
 
-	public void testDAvg() throws SQLException, IOException, ParseException {
-		checkQuery("select  DAvg('id','t235') ", 6789);
-	}
+    public void testDAvg() throws SQLException, IOException, ParseException {
+        checkQuery("select  DAvg('id','t235') ", 6789);
+    }
 
-	public void testLast() throws SQLException, IOException, ParseException {
-		checkQuery("select  last(descr) from t235", "Show must go up and down");
-		checkQuery("select  last(NUM) from t235", -113.5540);
-		dump("select  last(date0) from t235");
+    public void testLast() throws SQLException, IOException, ParseException {
+        checkQuery("select  last(descr) from t235", "Show must go up and down");
+        checkQuery("select  last(NUM) from t235", -113.5540);
+        dump("select  last(date0) from t235");
 
-	}
+    }
 
-	public void testFirst() throws SQLException, IOException, ParseException {
-		checkQuery("select  first(descr) from t235", "Show must go off");
-		checkQuery("select  first(NUM) from t235", -1110.5540);
-		dump("select  first(date0) from t235");
+    public void testFirst() throws SQLException, IOException, ParseException {
+        checkQuery("select  first(descr) from t235", "Show must go off");
+        checkQuery("select  first(NUM) from t235", -1110.5540);
+        dump("select  first(date0) from t235");
 
+    }
 
-	}
+    public void testDLast() throws SQLException, IOException, ParseException {
+        checkQuery("select  DLast('descr','t235') ", "Show must go up and down");
+    }
 
-	public void testDLast() throws SQLException, IOException, ParseException {
-		checkQuery("select  DLast('descr','t235') ", "Show must go up and down");
-	}
-
-	public void testDFirst() throws SQLException, IOException, ParseException {
-		checkQuery("select  DFIrst('descr','t235') ", "Show must go off");
-	}
+    public void testDFirst() throws SQLException, IOException, ParseException {
+        checkQuery("select  DFIrst('descr','t235') ", "Show must go off");
+    }
 
 }

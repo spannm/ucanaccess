@@ -24,17 +24,18 @@ import javax.naming.spi.ObjectFactory;
 
 public class UcanaccessDataSourceFactory implements ObjectFactory {
 
-    public Object getObjectInstance(Object uref, Name name, Context nameCtx,
-                                    Hashtable<?,?> environment) throws Exception {
+    @Override
+    public Object getObjectInstance(Object uref, Name name, Context nameCtx, Hashtable<?, ?> environment)
+            throws Exception {
 
-        String    dataSourceClass =UcanaccessDataSource.class.getName();
-        Reference ref     = (Reference) uref;
+        String dataSourceClass = UcanaccessDataSource.class.getName();
+        Reference ref = (Reference) uref;
         if (ref.getClassName().equals(dataSourceClass)) {
-            UcanaccessDataSource dataSource = new  UcanaccessDataSource();
+            UcanaccessDataSource dataSource = new UcanaccessDataSource();
             dataSource.setAccessPath((String) ref.get("accessPath").getContent());
             dataSource.setUser((String) ref.get("user").getContent());
             dataSource.setPassword((String) ref.get("password").getContent());
-            
+
             dataSource.setColumnOrder((String) ref.get("columnorder").getContent());
             dataSource.setConcatNulls((Boolean) ref.get("concatnulls").getContent());
             dataSource.setEncrypt((Boolean) ref.get("encrypt").getContent());
@@ -53,7 +54,7 @@ public class UcanaccessDataSourceFactory implements ObjectFactory {
             dataSource.setShowSchema((Boolean) ref.get("showschema").getContent());
             dataSource.setSkipIndexes((Boolean) ref.get("skipindexes").getContent());
             dataSource.setSysSchema((Boolean) ref.get("sysschema").getContent());
-            
+
             return dataSource;
         } else {
             return null;

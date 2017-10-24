@@ -17,20 +17,22 @@ package net.ucanaccess.commands;
 
 import java.sql.SQLException;
 
-
-
 public interface ICommand {
-	public enum TYPES {
-		COMPOSITE, DDL, DELETE, INSERT, UPDATE
-	};
-	
-	public String getExecId();
-	
-	public String getTableName();
-	
-	public TYPES getType();
-	
-	public IFeedbackAction persist() throws SQLException;
-	
-	public IFeedbackAction rollback() throws SQLException;
+    public enum TYPES {
+        COMPOSITE,
+        DDL,
+        DELETE,
+        INSERT,
+        UPDATE
+    };
+
+    public String getExecId();
+
+    public String getTableName();
+
+    public TYPES getType();
+
+    public IFeedbackAction persist() throws SQLException;
+
+    public IFeedbackAction rollback() throws SQLException;
 }

@@ -23,12 +23,11 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 public class AllTests2007 {
-	public static Test suite() throws ClassNotFoundException {
-		UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2007);
-		TestSuite ts= AllTestsBase.suite();
-		ts.addTestSuite(ComplexTest.class);
-		return ts;
-	}
+    public static Test suite() throws ClassNotFoundException {
+        UcanaccessTestBase.setDefaultFileFormat(FileFormat.V2007);
+        TestSuite ts = AllTestsBase.suite();
+        ts.addTestSuite(ComplexTest.class);
+        return ts;
+    }
 }

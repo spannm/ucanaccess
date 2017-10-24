@@ -17,37 +17,35 @@ package net.ucanaccess.test;
 
 import java.sql.PreparedStatement;
 
-
 import net.ucanaccess.jdbc.UcanaccessStatement;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class CloseOnCompletionTest extends UcanaccessTestBase {
 
+    public CloseOnCompletionTest() {
+        super();
+    }
 
-	public CloseOnCompletionTest() {
-		super();
-	}
+    public CloseOnCompletionTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public CloseOnCompletionTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public void testCloseOnCompletion() throws Exception {
 
-	
-	public void testCloseOnCompletion() throws Exception {
-	
-		PreparedStatement st = null;
-		try {
-			st = super.ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23)) ");
-			((UcanaccessStatement) st).closeOnCompletion();
+        PreparedStatement st = null;
+        try {
+            st = super.ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23)) ");
+            ((UcanaccessStatement) st).closeOnCompletion();
 
-			st.execute();
+            st.execute();
 
-		} finally {
-			if (st != null)
-				st.close();
-		}
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
 
-	}
+    }
 
 }

@@ -25,9 +25,6 @@ import net.ucanaccess.console.MainTest;
 import net.ucanaccess.triggers.AutoNumberManagerTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	AutoNumberManagerTest.class,
-	ExporterTest.class,
-	MainTest.class
-})
-public class AllUnitTests {}
+@SuiteClasses({ AutoNumberManagerTest.class, ExporterTest.class, MainTest.class })
+public class AllUnitTests {
+}

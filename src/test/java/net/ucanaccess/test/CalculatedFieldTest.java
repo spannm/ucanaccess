@@ -21,55 +21,54 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class CalculatedFieldTest extends UcanaccessTestBase {
-	public CalculatedFieldTest() {
-		super();
-	}
-	
-	public CalculatedFieldTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/calculatedField.accdb";
-	}
-	
-	public void testFunctionBuiltInCall() throws Exception {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO T (c1) VALUES ('my')"); 
-			st.execute("INSERT INTO T (c1) VALUES ('myc')"); 
-			st.execute("INSERT INTO T (c1) VALUES ('mycat')"); 
-			st.execute("INSERT INTO T (c1) VALUES ('mycattom')"); 
-			st.execute("INSERT INTO T (c1) VALUES (null)"); 
-			dump("select * from T");
-			checkQuery("select c2,c3,c4,c5 from T order by id",new String[][]{
-					{"my","my","my","my"},
-					{"myc","myc","myc","myc"},
-					{"myc","myc","cat","cat"},
-					{"myc","myc","tom","tom"},
-					{null,null,null,null}
-					});
-			
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-		
-	public void testCalculatedFieldNameContainsPercentSign() throws Exception {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO Product (wholesale, retail) VALUES (4, 5)");
-			ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM Product WHERE [ID]=3");
-			rs.next();
-			assertEquals(25.0, rs.getDouble("%markup"));
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-		
-	
+    public CalculatedFieldTest() {
+        super();
+    }
+
+    public CalculatedFieldTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/calculatedField.accdb";
+    }
+
+    public void testFunctionBuiltInCall() throws Exception {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.execute("INSERT INTO T (c1) VALUES ('my')");
+            st.execute("INSERT INTO T (c1) VALUES ('myc')");
+            st.execute("INSERT INTO T (c1) VALUES ('mycat')");
+            st.execute("INSERT INTO T (c1) VALUES ('mycattom')");
+            st.execute("INSERT INTO T (c1) VALUES (null)");
+            dump("select * from T");
+            checkQuery("select c2,c3,c4,c5 from T order by id",
+                    new String[][] { { "my", "my", "my", "my" }, { "myc", "myc", "myc", "myc" },
+                            { "myc", "myc", "cat", "cat" }, { "myc", "myc", "tom", "tom" },
+                            { null, null, null, null } });
+
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testCalculatedFieldNameContainsPercentSign() throws Exception {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.execute("INSERT INTO Product (wholesale, retail) VALUES (4, 5)");
+            ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM Product WHERE [ID]=3");
+            rs.next();
+            assertEquals(25.0, rs.getDouble("%markup"));
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
 }

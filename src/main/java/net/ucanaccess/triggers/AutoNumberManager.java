@@ -26,55 +26,56 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.OnReloadReferenceListener;
 
 public class AutoNumberManager {
-	// Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance
-	// becomes an issue. Never use an Integer here because Integer is an immutable object.
-	private static final Map<Column, AtomicInteger> register = new HashMap<Column, AtomicInteger>();
-	
-	static {
-		DBReference.addOnReloadRefListener(new OnReloadReferenceListener() {
-			public void onReload() {
-				// Must call AutoNumberManager.clear() for proper thread synchronization.
-				// Do not call register.clear() directly.
-				clear();
-			}
-		});
-	}
-	
-	/** Clears all AutoNumber column seeds to 0. */
-	static synchronized void clear() {
-		register.clear();
-	}
+    // Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance
+    // becomes an issue. Never use an Integer here because Integer is an immutable object.
+    private static final Map<Column, AtomicInteger> register = new HashMap<Column, AtomicInteger>();
 
-	/** Returns the next AutoNumber value, and increments the seed. */
-	static synchronized int getNext(Column cl) {
-		// Note: This code assumes *sequential* integer AutoNumber values.
-		// (Access also supports *random* integer AutoNumber values, but they
-		// are not very common.)
-		ColumnImpl ci = (ColumnImpl) cl;
-		AtomicInteger next = register.get(ci);
-		if (next == null) {
-			next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
-			register.put(ci, next);
-		}
-		return next.incrementAndGet();
-	}
+    static {
+        DBReference.addOnReloadRefListener(new OnReloadReferenceListener() {
+            @Override
+            public void onReload() {
+                // Must call AutoNumberManager.clear() for proper thread synchronization.
+                // Do not call register.clear() directly.
+                clear();
+            }
+        });
+    }
 
-	/** Sets the AutoNumber seed to {@code newVal}. */
-	public static synchronized void reset(Column cl, int newVal) {
-		register.put(cl, new AtomicInteger(newVal));
-	}
+    /** Clears all AutoNumber column seeds to 0. */
+    static synchronized void clear() {
+        register.clear();
+    }
 
-	/** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
-	public static synchronized void bump(Column cl, int newVal) {
-		ColumnImpl ci = (ColumnImpl) cl;
-		AtomicInteger next = register.get(ci); 
-		if (next == null) {
-			next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
-			register.put(ci, next);
-		}
-		if (newVal > next.get()) {
-			next.set(newVal);
-		}
-	}
+    /** Returns the next AutoNumber value, and increments the seed. */
+    static synchronized int getNext(Column cl) {
+        // Note: This code assumes *sequential* integer AutoNumber values.
+        // (Access also supports *random* integer AutoNumber values, but they
+        // are not very common.)
+        ColumnImpl ci = (ColumnImpl) cl;
+        AtomicInteger next = register.get(ci);
+        if (next == null) {
+            next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
+            register.put(ci, next);
+        }
+        return next.incrementAndGet();
+    }
+
+    /** Sets the AutoNumber seed to {@code newVal}. */
+    public static synchronized void reset(Column cl, int newVal) {
+        register.put(cl, new AtomicInteger(newVal));
+    }
+
+    /** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
+    public static synchronized void bump(Column cl, int newVal) {
+        ColumnImpl ci = (ColumnImpl) cl;
+        AtomicInteger next = register.get(ci);
+        if (next == null) {
+            next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
+            register.put(ci, next);
+        }
+        if (newVal > next.get()) {
+            next.set(newVal);
+        }
+    }
 
 }

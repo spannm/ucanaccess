@@ -30,92 +30,86 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
+import org.hsqldb.error.ErrorCode;
+
 public class ExceptionCodeTest extends UcanaccessTestBase {
-	
-	public ExceptionCodeTest() {
-		super();
-		Locale.setDefault(Locale.US);
-	}
 
-	public ExceptionCodeTest(FileFormat accVer) {
-		super(accVer);
-		Locale.setDefault(Locale.US);
-	}
+    public ExceptionCodeTest() {
+        super();
+        Locale.setDefault(Locale.US);
+    }
 
-	@Override
-	protected void setUp() throws Exception {
+    public ExceptionCodeTest(FileFormat accVer) {
+        super(accVer);
+        Locale.setDefault(Locale.US);
+    }
 
-		super.setUp();
-		
-	}
-	
-	
-	
-	
-	public void testVUKException() throws SQLException, IOException, ParseException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-		
-			st.execute("INSERT INTO T(pk,b)  VALUES( 'pippo',true)");
-			st.execute("INSERT INTO T(pk,b)  VALUES( 'pippo',true)");
-					
-			
-			
-		}catch(SQLException e){
-			
-			assertEquals(e.getErrorCode(), -UcanaccessErrorCodes.X_23505);
-			assertEquals(e.getSQLState(), "23505");
-		}
-		
-		finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public void testGenException() throws SQLException, IOException, ParseException {
-		Statement st = null;
-		try {
-			throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko",11111);
-					
-			
-			
-		}catch(SQLException e){
-			assertEquals(e.getErrorCode(),11111);
-			assertEquals(e.getSQLState(),"ko");
-		}
-		
-		finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public void testGException() throws SQLException, IOException, ParseException {
-		Statement st = null;
-		try {
-			DriverManager.getConnection(UcanaccessDriver.URL_PREFIX +"ciao ciao");
-				
-			
-			
-		}catch(SQLException e){
-		
-			assertEquals(e.getErrorCode(),UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
-			assertEquals(e.getSQLState(),UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR+"");
-		}
-		
-		finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public String getAccessPath() {
-		return  "net/ucanaccess/test/resources/bool.accdb";
-	}
-	
+    @Override
+    protected void setUp() throws Exception {
 
-	
-	
+        super.setUp();
+
+    }
+
+    public void testVUKException() throws SQLException, IOException, ParseException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+
+            st.execute("INSERT INTO T(pk,b)  VALUES( 'pippo',true)");
+            st.execute("INSERT INTO T(pk,b)  VALUES( 'pippo',true)");
+
+        } catch (SQLException e) {
+
+            assertEquals(e.getErrorCode(), -ErrorCode.X_23505);
+            assertEquals(e.getSQLState(), "23505");
+        }
+
+        finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testGenException() throws SQLException, IOException, ParseException {
+        Statement st = null;
+        try {
+            throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
+
+        } catch (SQLException e) {
+            assertEquals(e.getErrorCode(), 11111);
+            assertEquals(e.getSQLState(), "ko");
+        }
+
+        finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testGException() throws SQLException, IOException, ParseException {
+        Statement st = null;
+        try {
+            DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao");
+
+        } catch (SQLException e) {
+
+            assertEquals(e.getErrorCode(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+            assertEquals(e.getSQLState(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
+        }
+
+        finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/bool.accdb";
+    }
+
 }

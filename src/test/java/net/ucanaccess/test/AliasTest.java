@@ -23,71 +23,71 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class AliasTest extends UcanaccessTestBase {
-	public static boolean tableCreated;
-	
-	public AliasTest() {
-		super();
-	}
-	
-	public AliasTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	protected void setUp() throws Exception {
-		super.setUp();
-		 executeCreateTable("CREATE TABLE Talias (id LONG,descr memo,  Actuación  text) ");
-		
-	}
-	
-	public void testBig() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			int id = 6666554;
-			st.execute("INSERT INTO Talias (id,descr)  VALUES( " + id
-					+ ",'t')");
-			ResultSet rs=st.executeQuery("select descr as [cipol%'&la]  from Talias " +
-					" where descr<>'ciao'&'bye'&'pippo'");
-			rs.next();
-			System.out.println(rs.getMetaData().getColumnLabel(1));
-			System.out.println(rs.getObject("cipol%'&la"));
-			
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public void testAccent() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.executeQuery("select  Actuación as Actuació8_0_0_ , descr from Talias " );
-			ResultSet rs=st.executeQuery("select  [Actuación] as Actuació8_0_0_ from Talias " );
-			rs.next();
-			System.out.println(rs.getMetaData().getColumnLabel(1));
-			System.out.println(rs.getObject("Actuació8_0_0_"));
-			
-			
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
-	public void testAsin() throws SQLException, IOException {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			st.execute("create table xxxx (asin text, ff text)" );
-			dump("select  asin, ff from xxxx" );
-			
-			
-			
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
-	
+    public static boolean tableCreated;
+
+    public AliasTest() {
+        super();
+    }
+
+    public AliasTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        executeCreateTable("CREATE TABLE Talias (id LONG,descr memo,  Actuación  text) ");
+
+    }
+
+    public void testBig() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            int id = 6666554;
+            st.execute("INSERT INTO Talias (id,descr)  VALUES( " + id + ",'t')");
+            ResultSet rs = st
+                    .executeQuery("select descr as [cipol%'&la]  from Talias " + " where descr<>'ciao'&'bye'&'pippo'");
+            rs.next();
+            System.out.println(rs.getMetaData().getColumnLabel(1));
+            System.out.println(rs.getObject("cipol%'&la"));
+
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testAccent() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.executeQuery("select  Actuación as Actuació8_0_0_ , descr from Talias ");
+            ResultSet rs = st.executeQuery("select  [Actuación] as Actuació8_0_0_ from Talias ");
+            rs.next();
+            System.out.println(rs.getMetaData().getColumnLabel(1));
+            System.out.println(rs.getObject("Actuació8_0_0_"));
+
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    public void testAsin() throws SQLException, IOException {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            st.execute("create table xxxx (asin text, ff text)");
+            dump("select  asin, ff from xxxx");
+
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
 }

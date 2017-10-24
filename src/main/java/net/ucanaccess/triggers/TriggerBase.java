@@ -29,50 +29,47 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 
 public abstract class TriggerBase implements org.hsqldb.Trigger {
-	public static final Persist2Jet p2a = new Persist2Jet();
-	public static final String ESCAPE_PREFIX = "X";
-	public void convertRowTypes(Object[] values, Table table)
-			throws SQLException {
-		p2a.convertRowTypes(values, table);
-	}
-	
-	
-	public void checkContext() {
-		if(!UcanaccessConnection.hasContext()||UcanaccessConnection.getCtxConnection()==null){
-			for(StackTraceElement el:Thread.currentThread().getStackTrace()){
-				if("executeQuery".equals(el.getMethodName())){
-					throw new TriggerException(Logger.getLogMessage(Logger.Messages.NO_SELECT));
-				}
-			}
-		}
-	
-	}
-	
-	protected Map<String, Object> getRowPattern(Object[] values, Table t)
-			throws SQLException {
-		return p2a.getRowPattern(values, t);
-	}
-	
-	protected Table getTable(String tableName,UcanaccessConnection conn ) throws IOException{
-		Table t=conn.getDbIO().getTable(tableName);
-		if(t==null&&tableName.startsWith(ESCAPE_PREFIX )&&
-				SQLConverter.isXescaped(tableName.substring(1))){
-			t=conn.getDbIO().getTable(tableName.substring(1));
-			if(t!=null){
-				return new  UcanaccessTable(t,tableName.substring(1));
-			}
-		}
-		if(t==null){
-			Database db=conn.getDbIO();
-			for (String cand:db.getTableNames()){
-				if(	SQLConverter.preEscapingIdentifier(cand).equals(tableName)||
-						SQLConverter.escapeIdentifier(cand).equals(tableName)){
-					t = new UcanaccessTable(db.getTable(cand),cand);
-					break;
-				}
-			}
-		}
-		return new  UcanaccessTable(t,tableName);
-	}
-	
+    public static final Persist2Jet p2a           = new Persist2Jet();
+    public static final String      ESCAPE_PREFIX = "X";
+
+    public void convertRowTypes(Object[] values, Table table) throws SQLException {
+        p2a.convertRowTypes(values, table);
+    }
+
+    public void checkContext() {
+        if (!UcanaccessConnection.hasContext() || UcanaccessConnection.getCtxConnection() == null) {
+            for (StackTraceElement el : Thread.currentThread().getStackTrace()) {
+                if ("executeQuery".equals(el.getMethodName())) {
+                    throw new TriggerException(Logger.getLogMessage(Logger.Messages.NO_SELECT));
+                }
+            }
+        }
+
+    }
+
+    protected Map<String, Object> getRowPattern(Object[] values, Table t) throws SQLException {
+        return p2a.getRowPattern(values, t);
+    }
+
+    protected Table getTable(String tableName, UcanaccessConnection conn) throws IOException {
+        Table t = conn.getDbIO().getTable(tableName);
+        if (t == null && tableName.startsWith(ESCAPE_PREFIX) && SQLConverter.isXescaped(tableName.substring(1))) {
+            t = conn.getDbIO().getTable(tableName.substring(1));
+            if (t != null) {
+                return new UcanaccessTable(t, tableName.substring(1));
+            }
+        }
+        if (t == null) {
+            Database db = conn.getDbIO();
+            for (String cand : db.getTableNames()) {
+                if (SQLConverter.preEscapingIdentifier(cand).equals(tableName)
+                        || SQLConverter.escapeIdentifier(cand).equals(tableName)) {
+                    t = new UcanaccessTable(db.getTable(cand), cand);
+                    break;
+                }
+            }
+        }
+        return new UcanaccessTable(t, tableName);
+    }
+
 }

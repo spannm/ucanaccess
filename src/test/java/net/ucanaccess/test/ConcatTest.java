@@ -15,38 +15,32 @@ limitations under the License.
 */
 package net.ucanaccess.test;
 
-
-
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class ConcatTest extends UcanaccessTestBase {
-	public ConcatTest() {
-		super();
-	}
-	
-	public ConcatTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/baddb.accdb";
-	}
-	
-	
-	
-	protected void setUp() throws Exception {
-		this.append2JdbcURL(";concatnulls=true");
-	}
-	
-	
-	public void testConcat() throws Exception {
-		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-		this.ucanaccess= getUcanaccessConnection();
-		
-		checkQuery("select 'aa2'& null from dual",new Object[][]{{null}});
-		
-		
-		
-		
-	}
+    public ConcatTest() {
+        super();
+    }
+
+    public ConcatTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/baddb.accdb";
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        this.append2JdbcURL(";concatnulls=true");
+    }
+
+    public void testConcat() throws Exception {
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        this.ucanaccess = getUcanaccessConnection();
+
+        checkQuery("select 'aa2'& null from dual", new Object[][] { { null } });
+
+    }
 }

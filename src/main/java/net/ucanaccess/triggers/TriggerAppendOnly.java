@@ -17,6 +17,7 @@ package net.ucanaccess.triggers;
 
 import java.util.Date;
 
+import org.hsqldb.Trigger;
 import org.hsqldb.types.JavaObjectData;
 
 import net.ucanaccess.complex.Version;
@@ -29,51 +30,46 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class TriggerAppendOnly extends TriggerBase {
-	public static int autorandom = -1;
+    public static int autorandom = -1;
 
-	public void fire(int type, String name, String tableName, Object[] oldR,
-			Object[] newR) {
-		checkContext();
-		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		if (conn.isFeedbackState())
-			return;
-		try {
-			Table t = this.getTable(tableName,conn);
-			if (t == null)
-				throw new RuntimeException(
-						Logger.getMessage("TABLE_DOESNT_EXIST") + " :"
-								+ tableName);
-			int i = 0;
-			for (Column cl : t.getColumns()) {
-				if (cl.isAppendOnly()) {
-					ColumnImpl verCol = (ColumnImpl)cl.getVersionHistoryColumn();
-					Date upTime = new Date();
-					String val = newR[i] == null ? null : newR[i].toString();
-					if (type == TriggerBase.INSERT_BEFORE_ROW)
-						newR[verCol.getColumnNumber()] = new JavaObjectData(
-								new Version[] { new Version(val, upTime) });
-					else if (type == TriggerBase.UPDATE_BEFORE_ROW
-							&& (oldR[i] != null || newR[i] != null)) {
-						if ((oldR[i] == null && newR[i] != null)
-								|| (oldR[i] != null && newR[i] == null)
-								|| (!oldR[i].equals(newR[i]))) {
-							Version[] oldV = (Version[]) ((JavaObjectData)oldR[verCol
-									.getColumnNumber()]).getObject();
-							
-							Version[] newV =new Version[oldV.length + 1];
-							for(int j=0;j<oldV.length;j++){
-								newV[j+1]=oldV[j];
-							}
-							newV[0] = new Version(val, upTime);
-							newR[verCol.getColumnNumber()] = new JavaObjectData(
-									newV);
-						}
-					}
-				}
-				++i;
-			}
-		} catch (Exception e) {
-			throw new TriggerException(e.getMessage());
-		}
-	}
+    @Override
+    public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
+        checkContext();
+        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        if (conn.isFeedbackState()) {
+            return;
+        }
+        try {
+            Table t = this.getTable(tableName, conn);
+            if (t == null) {
+                throw new RuntimeException(Logger.getMessage("TABLE_DOESNT_EXIST") + " :" + tableName);
+            }
+            int i = 0;
+            for (Column cl : t.getColumns()) {
+                if (cl.isAppendOnly()) {
+                    ColumnImpl verCol = (ColumnImpl) cl.getVersionHistoryColumn();
+                    Date upTime = new Date();
+                    String val = newR[i] == null ? null : newR[i].toString();
+                    if (type == Trigger.INSERT_BEFORE_ROW) {
+                        newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] { new Version(val, upTime) });
+                    } else if (type == Trigger.UPDATE_BEFORE_ROW && (oldR[i] != null || newR[i] != null)) {
+                        if ((oldR[i] == null && newR[i] != null) || (oldR[i] != null && newR[i] == null)
+                                || (!oldR[i].equals(newR[i]))) {
+                            Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
+
+                            Version[] newV = new Version[oldV.length + 1];
+                            for (int j = 0; j < oldV.length; j++) {
+                                newV[j + 1] = oldV[j];
+                            }
+                            newV[0] = new Version(val, upTime);
+                            newR[verCol.getColumnNumber()] = new JavaObjectData(newV);
+                        }
+                    }
+                }
+                ++i;
+            }
+        } catch (Exception e) {
+            throw new TriggerException(e.getMessage());
+        }
+    }
 }

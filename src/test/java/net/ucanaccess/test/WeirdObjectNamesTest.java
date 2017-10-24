@@ -20,35 +20,35 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class WeirdObjectNamesTest extends UcanaccessTestBase {
-	public WeirdObjectNamesTest() {
-		super();
-	}
+    public WeirdObjectNamesTest() {
+        super();
+    }
 
-	public WeirdObjectNamesTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public WeirdObjectNamesTest(FileFormat accVer) {
+        super(accVer);
+    }
 
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/WeirdObjectNames.mdb";
-	}
-	
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/WeirdObjectNames.mdb";
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
-	public void testTableNameEndsInQuestionMarks() throws Exception {
-		Statement st = null;
-		try {
-			st = super.ucanaccess.createStatement();
-			checkQuery("SELECT * FROM [19 MB 01 BEZAHLT ???]");
-		} finally {
-			if (st != null)
-				st.close();
-		}
-	}
+    }
+
+    public void testTableNameEndsInQuestionMarks() throws Exception {
+        Statement st = null;
+        try {
+            st = super.ucanaccess.createStatement();
+            checkQuery("SELECT * FROM [19 MB 01 BEZAHLT ???]");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 
 }

@@ -22,31 +22,32 @@ import java.sql.PreparedStatement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class ColumnOrderTest extends UcanaccessTestBase {
-	public ColumnOrderTest() {
-		super();
-	}
-	
-	public ColumnOrderTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/columnOrder.accdb";
-	}
-	protected void setUp() throws Exception {}
-	
-	
-	
-	
-	public void testColumnOrder1() throws Exception {
-	
-		super.setColumnOrder("display");
-		Connection uca = getUcanaccessConnection();
-		PreparedStatement ps=uca.prepareStatement("insert into t1 values (?,?,?)");
-		ps.setInt(3, 3);
-		ps.setDate(2, new Date(System.currentTimeMillis()));
-		ps.setString(1, "This is the display order");
-		ps.close();
-		uca.close();
-	}
+    public ColumnOrderTest() {
+        super();
+    }
+
+    public ColumnOrderTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/columnOrder.accdb";
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+    }
+
+    public void testColumnOrder1() throws Exception {
+
+        super.setColumnOrder("display");
+        Connection uca = getUcanaccessConnection();
+        PreparedStatement ps = uca.prepareStatement("insert into t1 values (?,?,?)");
+        ps.setInt(3, 3);
+        ps.setDate(2, new Date(System.currentTimeMillis()));
+        ps.setString(1, "This is the display order");
+        ps.close();
+        uca.close();
+    }
 }

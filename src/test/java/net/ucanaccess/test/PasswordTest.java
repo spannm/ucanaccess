@@ -20,35 +20,38 @@ import java.sql.Connection;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class PasswordTest extends UcanaccessTestBase {
-	public PasswordTest() {
-		super();
-	}
-	
-	public PasswordTest(FileFormat accVer) {
-		super(accVer);
-	}
-	
-	public String getAccessPath() {
-		return "net/ucanaccess/test/resources/pwd.mdb";
-	}
-	protected void setUp() throws Exception {}
-	
-	
-	public void testPassword() throws Exception {
-		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-		Connection ucanaccessConnection = null;
-		try {
-			ucanaccessConnection = getUcanaccessConnection();
-		} catch (Exception e) {
-		}
-		assertNull(ucanaccessConnection);
-		super.setPassword("ucanaccess");
-		//url will be
-		try {
-			ucanaccessConnection = getUcanaccessConnection();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		assertNotNull(ucanaccessConnection);
-	}
+    public PasswordTest() {
+        super();
+    }
+
+    public PasswordTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    public String getAccessPath() {
+        return "net/ucanaccess/test/resources/pwd.mdb";
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+    }
+
+    public void testPassword() throws Exception {
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        Connection ucanaccessConnection = null;
+        try {
+            ucanaccessConnection = getUcanaccessConnection();
+        } catch (Exception e) {
+        }
+        assertNull(ucanaccessConnection);
+        super.setPassword("ucanaccess");
+        // url will be
+        try {
+            ucanaccessConnection = getUcanaccessConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertNotNull(ucanaccessConnection);
+    }
 }

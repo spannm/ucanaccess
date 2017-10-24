@@ -23,30 +23,25 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class AddFunctionTest extends UcanaccessTestBase {
 
-	
-	public AddFunctionTest() {
-		super();
-	}
-	
-	public AddFunctionTest(FileFormat accVer) {
-		super(accVer);
-	}
+    public AddFunctionTest() {
+        super();
+    }
 
-	public void testAddFunction() throws Exception {
-			Statement st = super.ucanaccess.createStatement();
-			st.executeUpdate("CREATE TABLE gooo (id INTEGER) ");
-			st.close();
-			st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO gooo (id )  VALUES(1)");
-			UcanaccessConnection uc=(UcanaccessConnection)super.ucanaccess;
-			uc.addFunctions(AddFunctionClass.class);
-			super.dump("select pluto('hello',' world ',  now ()) from gooo");
-			checkQuery("select concat('Hello World, ','Ucanaccess') from gooo","Hello World, Ucanaccess");
-			//uc.addFunctions(AddFunctionClass.class);
-	}
-	
-	
+    public AddFunctionTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    public void testAddFunction() throws Exception {
+        Statement st = super.ucanaccess.createStatement();
+        st.executeUpdate("CREATE TABLE gooo (id INTEGER) ");
+        st.close();
+        st = super.ucanaccess.createStatement();
+        st.execute("INSERT INTO gooo (id )  VALUES(1)");
+        UcanaccessConnection uc = (UcanaccessConnection) super.ucanaccess;
+        uc.addFunctions(AddFunctionClass.class);
+        super.dump("select pluto('hello',' world ',  now ()) from gooo");
+        checkQuery("select concat('Hello World, ','Ucanaccess') from gooo", "Hello World, Ucanaccess");
+        // uc.addFunctions(AddFunctionClass.class);
+    }
+
 }
-
-
-

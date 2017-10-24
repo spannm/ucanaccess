@@ -24,45 +24,42 @@ import java.sql.Statement;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public class GeneratedKeysTest extends UcanaccessTestBase {
-	private String tableName = "T_Key";
-	public GeneratedKeysTest() {
-		super();
-	}
-	
-	public GeneratedKeysTest(FileFormat accVer) {
-		super(accVer);
-	}
-	protected void setUp() throws Exception {
-		super.setUp();
-			executeCreateTable("CREATE TABLE "
-					+ tableName
-					+ " ( Z COUNTER PRIMARY KEY, B char(4) )");
-	}
-	
-	public void testGeneratedKeys() throws SQLException, IOException {
-	
-			PreparedStatement ps=  super.ucanaccess.prepareStatement("INSERT INTO " + tableName
-					+ " (B) VALUES (?)");
-			ps.setString(1,"");
-			ps.execute();
-			ResultSet rs=ps.getGeneratedKeys();
-			rs.next();
-			assertEquals(1, rs.getInt(1));
-			ps.close();
-			ps=super.ucanaccess.prepareStatement("Select @@identity ");
-			rs=ps.executeQuery();
-			rs.next();
-			assertEquals(1, rs.getInt(1));
-			Statement st = super.ucanaccess.createStatement();
-			st.execute("INSERT INTO " + tableName
-					+ " (B) VALUES ('W')");
-			
-			checkQuery("Select @@identity ",2);
-			 rs=st.getGeneratedKeys();
-			rs.next();
-			assertEquals(2, rs.getInt(1));
-			
-			
-		
-	}
+    private String tableName = "T_Key";
+
+    public GeneratedKeysTest() {
+        super();
+    }
+
+    public GeneratedKeysTest(FileFormat accVer) {
+        super(accVer);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        executeCreateTable("CREATE TABLE " + tableName + " ( Z COUNTER PRIMARY KEY, B char(4) )");
+    }
+
+    public void testGeneratedKeys() throws SQLException, IOException {
+
+        PreparedStatement ps = super.ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)");
+        ps.setString(1, "");
+        ps.execute();
+        ResultSet rs = ps.getGeneratedKeys();
+        rs.next();
+        assertEquals(1, rs.getInt(1));
+        ps.close();
+        ps = super.ucanaccess.prepareStatement("Select @@identity ");
+        rs = ps.executeQuery();
+        rs.next();
+        assertEquals(1, rs.getInt(1));
+        Statement st = super.ucanaccess.createStatement();
+        st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
+
+        checkQuery("Select @@identity ", 2);
+        rs = st.getGeneratedKeys();
+        rs.next();
+        assertEquals(2, rs.getInt(1));
+
+    }
 }

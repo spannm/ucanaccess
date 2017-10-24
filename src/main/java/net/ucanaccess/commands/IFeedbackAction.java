@@ -18,6 +18,6 @@ package net.ucanaccess.commands;
 import java.sql.SQLException;
 
 public interface IFeedbackAction {
-	public void doAction(ICommand toChange) throws SQLException; 
+    public void doAction(ICommand toChange) throws SQLException;
 
 }

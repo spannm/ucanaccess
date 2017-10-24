@@ -20,43 +20,43 @@ import java.util.Map;
 import net.ucanaccess.commands.UpdateCommand;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 
-
 import com.healthmarketscience.jackcess.Table;
 
 public class TriggerUpdate extends TriggerBase {
-	public void fire(int type, String name, String tableName, Object[] oldR,
-			Object[] newR) {
-		checkContext();
-		UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-		if (conn.isFeedbackState())
-			return;
-		String execId = UcanaccessConnection.getCtxExcId();
-		try {
-			Table t = getTable(tableName,conn);
-			super.convertRowTypes(oldR, t);
-			super.convertRowTypes(newR, t);
-			if (valuesChanged(oldR, newR)) {
-				Map<String, Object> rowPattern = getRowPattern(oldR, t);
-				UpdateCommand c4j = new UpdateCommand(t, rowPattern, newR,
-						execId);
-				conn.add(c4j);
-			}
-		} catch (Exception e) {
-				throw new  TriggerException(e.getMessage());
-		}
-	}
-	
-	public boolean valuesChanged(Object[] oldR, Object[] newR) {
-		if (oldR.length != newR.length) {
-			return true;
-		}
-		for (int i = 0; i < oldR.length; ++i) {
-			if (oldR[i] == null ^ newR[i] == null)
-				return true;
-			if (oldR[i] != null && newR[i] != null && !oldR[i].equals(newR[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
+        checkContext();
+        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        if (conn.isFeedbackState()) {
+            return;
+        }
+        String execId = UcanaccessConnection.getCtxExcId();
+        try {
+            Table t = getTable(tableName, conn);
+            super.convertRowTypes(oldR, t);
+            super.convertRowTypes(newR, t);
+            if (valuesChanged(oldR, newR)) {
+                Map<String, Object> rowPattern = getRowPattern(oldR, t);
+                UpdateCommand c4j = new UpdateCommand(t, rowPattern, newR, execId);
+                conn.add(c4j);
+            }
+        } catch (Exception e) {
+            throw new TriggerException(e.getMessage());
+        }
+    }
+
+    public boolean valuesChanged(Object[] oldR, Object[] newR) {
+        if (oldR.length != newR.length) {
+            return true;
+        }
+        for (int i = 0; i < oldR.length; ++i) {
+            if (oldR[i] == null ^ newR[i] == null) {
+                return true;
+            }
+            if (oldR[i] != null && newR[i] != null && !oldR[i].equals(newR[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
