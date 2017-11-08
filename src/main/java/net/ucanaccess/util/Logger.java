@@ -38,7 +38,7 @@ public class Logger {
     }
 
     private static PrintWriter    logPrintWriter;
-    private static ResourceBundle messageBundle = ResourceBundle.getBundle("net.ucanaccess.util.messages");
+    private static ResourceBundle messageBundle = ResourceBundle.getBundle("net.ucanaccess.util.logger_messages");
 
     public static void dump() {
         StackTraceElement[] ste = Thread.currentThread().getStackTrace();

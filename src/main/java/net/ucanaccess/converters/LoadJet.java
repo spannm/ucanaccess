@@ -188,6 +188,7 @@ public class LoadJet {
                 try {
                     exec(functionDef, true);
                 } catch (SQLException e) {
+                    e.printStackTrace();
                     Logger.logParametricWarning(Messages.FUNCTION_ALREADY_ADDED, functionDef);
                 }
             }

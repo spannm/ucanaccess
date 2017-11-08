@@ -35,28 +35,32 @@ import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.healthmarketscience.jackcess.DataType;
 
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
-import com.healthmarketscience.jackcess.DataType;
-
 public class Functions {
     private static Double                           rnd;
     private static Double                           lastRnd;
     public final static ArrayList<SimpleDateFormat> LDF    = new ArrayList<SimpleDateFormat>();
     public final static ArrayList<Boolean>          LDFY   = new ArrayList<Boolean>();
-    public final static RegionalSettings            reg    = new RegionalSettings();
+    static final Map<Locale, RegionalSettings>      regMap = new HashMap<Locale, RegionalSettings>();
     private final static double                     APPROX = 0.00000001;
     private static boolean                          pointDateSeparator;
+
     static {
-        pointDateSeparator = getPointDateSeparator();
+        RegionalSettings reg = getRegionalSettings();
+        pointDateSeparator = getPointDateSeparator(reg);
         addDateP("yyyy-MM-dd h:m:s a");
         addDateP("yyyy-MM-dd H:m:s");
         addDateP("yyyy-MM-dd");
@@ -72,7 +76,7 @@ public class Functions {
 
         if (!Locale.getDefault().equals(Locale.US)) {
 
-            RegionalSettings s = new RegionalSettings(Locale.US);
+            RegionalSettings s = getRegionalSettings(Locale.US);
             addDateP(s.getGeneralPattern(), false);
             addDateP(s.getLongDatePattern(), true);
             addDateP(s.getMediumDatePattern(), true);
@@ -92,9 +96,9 @@ public class Functions {
 
     }
 
-    private static boolean getPointDateSeparator() {
-        String[] dfsp = new String[] { reg.getGeneralPattern(), reg.getLongDatePattern(), reg.getMediumDatePattern(),
-                reg.getShortDatePattern() };
+    private static boolean getPointDateSeparator(RegionalSettings _reg) {
+        String[] dfsp = new String[] { _reg.getGeneralPattern(), _reg.getLongDatePattern(), _reg.getMediumDatePattern(),
+                _reg.getShortDatePattern() };
         for (String pattern : dfsp) {
             if (pattern.indexOf(".") > 0 && pattern.indexOf("h.") < 0 && pattern.indexOf("H.") < 0) {
                 return true;
@@ -135,19 +139,19 @@ public class Functions {
         return sdf;
     }
 
-    private static void addDateP(String sdfs, boolean euristic, boolean yearOverride) {
+    private static void addDateP(String _pattern, boolean euristic, boolean _yearOverride) {
         if (euristic) {
-            if (sdfs.indexOf("a") < 0 && sdfs.indexOf("H") > 0) {
-                String chg = sdfs.replaceAll("H", "h") + " a";
+            if (_pattern.indexOf("a") < 0 && _pattern.indexOf("H") > 0) {
+                String chg = _pattern.replaceAll("H", "h") + " a";
                 addDateP(chg);
                 addTogglePattern(chg);
             }
         }
 
-        SimpleDateFormat sdf = simpleDateFormat(sdfs);
+        SimpleDateFormat sdf = simpleDateFormat(_pattern);
         sdf.setLenient(false);
 
-        if ("true".equalsIgnoreCase(reg.getRS())) {
+        if ("true".equalsIgnoreCase(getRegionalSettings().getRS())) {
 
             DateFormatSymbols df = new DateFormatSymbols();
             df.setAmPmStrings(new String[] { "AM", "PM" });
@@ -155,11 +159,11 @@ public class Functions {
         }
 
         LDF.add(sdf);
-        LDFY.add(yearOverride);
+        LDFY.add(_yearOverride);
         if (euristic) {
-            addTogglePattern(sdfs);
-            if (sdfs.endsWith(" a") && sdfs.indexOf("h") > 0) {
-                String chg = sdfs.substring(0, sdfs.length() - 2).trim().replaceAll("h", "H");
+            addTogglePattern(_pattern);
+            if (_pattern.endsWith(" a") && _pattern.indexOf("h") > 0) {
+                String chg = _pattern.substring(0, _pattern.length() - 2).trim().replaceAll("h", "H");
                 addDateP(chg);
                 addTogglePattern(chg);
             }
@@ -610,6 +614,7 @@ public class Functions {
     }
 
     private static Timestamp dateValue(String dt, boolean onlyDate) {
+        RegionalSettings reg = getRegionalSettings();
         if (!"true".equalsIgnoreCase(reg.getRS())
                 && (!"PM".equalsIgnoreCase(reg.getPM()) || !"AM".equalsIgnoreCase(reg.getAM()))) {
             dt = dt.replaceAll("(?i)" + Pattern.quote(reg.getPM()), "PM")
@@ -714,6 +719,7 @@ public class Functions {
     }
 
     private static String formatDate(Timestamp t, String pattern) {
+        RegionalSettings reg = getRegionalSettings();
         SimpleDateFormat sdf = simpleDateFormat(pattern);
         String ret = sdf.format(t);
         if (!reg.getRS().equalsIgnoreCase("true")) {
@@ -734,13 +740,12 @@ public class Functions {
     @FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.DATETIME,
             AccessType.TEXT }, returnType = AccessType.TEXT)
     public static String format(Timestamp t, String par) throws UcanaccessSQLException {
+        RegionalSettings reg = getRegionalSettings();
 
         if ("long date".equalsIgnoreCase(par)) {
-
             return formatDate(t, reg.getLongDatePattern());
         }
         if ("medium date".equalsIgnoreCase(par)) {
-
             return formatDate(t, reg.getMediumDatePattern());
         }
         if ("short date".equalsIgnoreCase(par)) {
@@ -1773,6 +1778,22 @@ public class Functions {
     private static String padLeft(int ext, int n) {
         String tp = ext > 0 ? String.valueOf(ext) : "";
         return String.format("%1$" + n + "s", tp);
+    }
+
+    static RegionalSettings getRegionalSettings() {
+        return getRegionalSettings(Locale.getDefault());
+    }
+
+    static RegionalSettings getRegionalSettings(Locale _locale) {
+        if (_locale == null) {
+            _locale = Locale.getDefault();
+        }
+        RegionalSettings rs = regMap.get(_locale);
+        if (rs == null) {
+            rs = new RegionalSettings(_locale);
+            regMap.put(_locale, rs);
+        }
+        return rs;
     }
 
 }

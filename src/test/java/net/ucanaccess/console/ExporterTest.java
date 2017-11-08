@@ -16,15 +16,15 @@ limitations under the License.
 
 package net.ucanaccess.console;
 
-import static org.junit.Assert.assertEquals;
-
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 
 import org.junit.Test;
 
+import net.ucanaccess.test.util.AbstractTestBase;
+
 /** Unit test for {@link Exporter}. */
-public class ExporterTest {
+public class ExporterTest extends AbstractTestBase {
 
     @Test
     public void testToCsvReplacingNewlines() {

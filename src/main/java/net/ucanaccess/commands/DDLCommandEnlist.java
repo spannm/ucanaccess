@@ -103,7 +103,6 @@ public class DDLCommandEnlist {
         case CREATE_INDEX:
             enlistCreateIndex(sql, ddlType);
             break;
-
         case CREATE_PRIMARY_KEY:
             enlistCreatePrimaryKey(sql, ddlType);
             break;
@@ -112,6 +111,8 @@ public class DDLCommandEnlist {
             break;
         case DROP_FOREIGN_KEY:
             enlistDropForeignKey(sql, ddlType);
+            break;
+        default:
             break;
         }
     }

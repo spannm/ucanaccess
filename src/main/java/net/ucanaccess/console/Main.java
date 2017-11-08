@@ -32,11 +32,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.StringJoiner;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -170,41 +172,10 @@ public class Main {
     }
 
     /**
-     * Prints the ResultSet {@code rs} in a format suitable for the terminal console given by {@code out}.
+     * Prints the ResultSet {@code _resultSet} in a format suitable for the terminal console given by {@code _printStream}.
      */
-    public void consoleDump(ResultSet rs, PrintStream out) throws SQLException {
-        ResultSetMetaData meta = rs.getMetaData();
-        int cols = meta.getColumnCount();
-
-        // Print the header.
-        StringBuilder header = new StringBuilder("| ");
-        for (int i = 1; i <= cols; ++i) {
-            header.append(meta.getColumnLabel(i));
-            header.append(" | ");
-        }
-        StringBuilder interline = new StringBuilder();
-        for (int i = 0; i < header.length(); ++i) {
-            interline.append("-");
-        }
-        out.println(interline);
-        out.println(header);
-        out.println(interline);
-        out.println();
-
-        // Print the result set.
-        while (rs.next()) {
-            System.out.print("| ");
-            for (int i = 1; i <= cols; ++i) {
-                Object o = rs.getObject(i);
-                if (o != null && o.getClass().isArray()) {
-                    o = Arrays.toString((Object[]) o);
-                }
-
-                out.print(o + " | ");
-            }
-            out.println();
-            out.println();
-        }
+    public void consoleDump(ResultSet _resultSet, PrintStream _printStream) throws SQLException {
+        new TableFormat(_resultSet).output(_printStream);
     }
 
     private void executeStatement(String sql) throws SQLException {
@@ -479,5 +450,112 @@ public class Main {
             }
         }
         return tokens;
+    }
+
+    /**
+     * Helper to produce table-formatted output of a JDBC resultset.
+     * @author Markus Spann
+     */
+    static class TableFormat {
+        final static List<Integer> NUMERIC_JDBC_TYPES =
+                Arrays.asList(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
+                        Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
+        private int              maxColWidth = 50;
+        final List<String>       colNames;
+        final List<Integer>      colWidths;
+        final List<Integer>      colTypes;
+        final List<List<String>> records     = new ArrayList<List<String>>();
+
+        TableFormat(ResultSet _resultSet) throws SQLException {
+            this(_resultSet, -1);
+        }
+
+        TableFormat(ResultSet _resultSet, int _maxRows) throws SQLException {
+            ResultSetMetaData meta = _resultSet.getMetaData();
+            int columnCount = meta.getColumnCount();
+
+            colNames = new ArrayList<String>(columnCount);
+            colWidths = new ArrayList<Integer>(columnCount);
+            colTypes = new ArrayList<Integer>(columnCount);
+            for (int col = 1; col <= columnCount; ++col) {
+                String colLabel = meta.getColumnLabel(col);
+                colNames.add(colLabel);
+                colWidths.add(Math.min(colLabel.length(), maxColWidth));
+                colTypes.add(meta.getColumnType(col));
+            }
+
+            records.add(colNames); // header record
+            while (_resultSet.next() && (_maxRows < 0 || _maxRows < records.size())) {
+                List<String> record = new ArrayList<String>();
+                records.add(record);
+                for (int col = 1; col <= columnCount; ++col) {
+                    Object obj = _resultSet.getObject(col);
+                    if (obj != null && obj.getClass().isArray()) {
+                        obj = Arrays.toString((Object[]) obj);
+                    }
+
+                    String s = obj == null ? "" : obj.toString();
+                    record.add(s);
+
+                    int colWidth = colWidths.get(col - 1);
+                    if (colWidth < s.length() && colWidth < maxColWidth) {
+                        colWidths.set(col - 1, s.length());
+                    }
+                }
+            }
+        }
+
+        void output(PrintStream _printStream) {
+            String interline = null;
+            String divider = "|";
+            for (int idx = 0; idx < records.size(); idx++) {
+                List<String> rec = records.get(idx);
+                String line = " " + joinWithLen(" " + divider + " ", rec) + " ";
+                if (idx == 0) { // index 0 holds header
+                    interline = line.replaceAll("[^\\" + divider + "]", "-").replace(divider, "+");
+                    interline = "·" + interline + "·";
+                    _printStream.println();
+                    _printStream.println(interline);
+                    _printStream.println(divider + line + divider);
+                    _printStream.println(interline);
+
+                } else {
+                    _printStream.println(divider + line + divider);
+                }
+            }
+
+            if (records.size() > 1) {
+                _printStream.println(interline);
+            }
+            _printStream.println();
+        }
+
+        String joinWithLen(CharSequence _delim, List<? extends String> _elems) {
+            StringJoiner joiner = new StringJoiner(_delim);
+            for (int i = 0; i < _elems.size(); i++) {
+                int width = colWidths.get(i);
+                int type = colTypes.get(i);
+                String str = _elems.get(i);
+                joiner.add(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
+            }
+            return joiner.toString();
+        }
+
+        static boolean isNumericJdbcType(int _type) {
+            return NUMERIC_JDBC_TYPES.contains(_type);
+        }
+
+        static String rightPad(String _str, int _width) {
+            return (_str + repeat(" ", _width - _str.length())).substring(0, _width);
+        }
+
+        static String leftPad(String _str, int _width) {
+            return (repeat(" ", _width - _str.length()) + _str).substring(0, _width);
+        }
+
+        static String repeat(String _str, int _count) {
+            return _count > 0 ? String.format("%0" + _count + "d", 0).replace("0", _str) : "";
+        }
+
     }
 }

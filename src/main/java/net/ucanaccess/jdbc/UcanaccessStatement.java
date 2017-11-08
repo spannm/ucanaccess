@@ -121,12 +121,13 @@ public class UcanaccessStatement implements Statement {
         try {
             if (wrapped instanceof JDBCStatement) {
                 ((JDBCStatement) wrapped).closeOnCompletion();
+            } else if (wrapped instanceof JDBCPreparedStatement) {
+                ((JDBCPreparedStatement) wrapped).closeOnCompletion();
+            } else if (wrapped instanceof UcanaccessStatement) {
+                UcanaccessStatement stat = (UcanaccessStatement) wrapped;
+                stat.closeOnCompletion();
             } else {
-                if (wrapped instanceof JDBCPreparedStatement) {
-                    ((JDBCPreparedStatement) wrapped).closeOnCompletion();
-                } else {
-                    throw new UcanaccessSQLException(ExceptionMessages.CLOSE_ON_COMPLETION_STATEMENT);
-                }
+                throw new UcanaccessSQLException(ExceptionMessages.CLOSE_ON_COMPLETION_STATEMENT);
             }
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);

@@ -91,6 +91,9 @@ public class AutoNumberAction implements IFeedbackAction {
             for (ICommand ic : cc.getComposite()) {
                 doAction(ic);
             }
+            break;
+        default:
+            break;
         }
     }
 }
