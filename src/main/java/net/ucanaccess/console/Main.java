@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.StringJoiner;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -531,14 +530,17 @@ public class Main {
         }
 
         String joinWithLen(CharSequence _delim, List<? extends String> _elems) {
-            StringJoiner joiner = new StringJoiner(_delim);
+            StringBuffer sb = new StringBuffer();
             for (int i = 0; i < _elems.size(); i++) {
                 int width = colWidths.get(i);
                 int type = colTypes.get(i);
                 String str = _elems.get(i);
-                joiner.add(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
+                sb.append(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
+                if (i < _elems.size() - 1) {
+                    sb.append(_delim);
+                }
             }
-            return joiner.toString();
+            return sb.toString();
         }
 
         static boolean isNumericJdbcType(int _type) {
