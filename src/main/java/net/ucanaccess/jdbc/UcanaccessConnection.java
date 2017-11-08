@@ -316,10 +316,9 @@ public class UcanaccessConnection implements Connection {
 
             }
             if (testRollback) {
-                throw new Error("Test");
+                throw new RuntimeException("PhysicalRollbackTest");
             }
         } catch (Throwable t) {
-            t.printStackTrace();
             this.hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -776,8 +775,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public String toString() {
-        String w = super.toString();
-        return w + "[" + this.ref.getDbFile() + "]";
+        return super.toString() + "[" + this.ref.getDbFile() + "]";
     }
 
     void checkLastModified() throws UcanaccessSQLException {

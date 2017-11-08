@@ -16,8 +16,10 @@ limitations under the License.
 
 package net.ucanaccess.triggers;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,11 +27,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
-import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
+import net.ucanaccess.test.util.AbstractTestBase;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AutoNumberManagerTest {
+public class AutoNumberManagerTest extends AbstractTestBase {
 
     @Mock
     private ColumnImpl          column;

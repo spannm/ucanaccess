@@ -55,7 +55,7 @@ public class DBReference {
     private boolean                                     inMemory          = true;
     private long                                        lastModified;
     private boolean                                     openExclusive     = false;
-    private MemoryTimer                                 memoryTimer       = new MemoryTimer();
+    private MemoryTimer                                 memoryTimer;
     private boolean                                     readOnly;
     private boolean                                     readOnlyFileFormat;
     private boolean                                     showSchema;
@@ -82,41 +82,49 @@ public class DBReference {
     private boolean                                     concatNulls;
     private boolean                                     mirrorRecreated;
 
-    private class MemoryTimer {
-        private final static int INACTIVITY_TIMEOUT_DEFAULT = 120000;
-        private int              activeConnection;
-        private int              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;
-        private long             lastConnectionTime;
-        private Timer            timer                      = new Timer(true);
+    private static class MemoryTimer {
+        private final static long INACTIVITY_TIMEOUT_DEFAULT = 120000;
 
-        private synchronized void decrementActiveConnection(final Session session) {
+        private final DBReference dbReference;
+        private final Timer       timer;
+        private int               activeConnection;
+        private long              inactivityTimeout = INACTIVITY_TIMEOUT_DEFAULT;
+        private long              lastConnectionTime;
+
+        MemoryTimer(DBReference _dbReference) {
+            dbReference = _dbReference;
+            timer = new Timer(getClass().getSimpleName() + '-' + _dbReference.getDbFile().getName(), true);
+        }
+
+        private synchronized void decrementActiveConnection(final Session _session) {
             activeConnection--;
-            if (DBReference.this.immediatelyReleaseResources && activeConnection == 0) {
+            if (dbReference.immediatelyReleaseResources && activeConnection == 0) {
                 try {
 
-                    shutdown(session);
+                    dbReference.shutdown(_session);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return;
             }
-            if (DBReference.this.inMemory && inactivityTimeout > 0) {
+            if (dbReference.inMemory && inactivityTimeout > 0) {
                 if (activeConnection == 0) {
-                    timer.schedule(new TimerTask() {
+                    TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            try {
-                                synchronized (UcanaccessDriver.class) {
-                                    if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
-                                            && getActiveConnection() == 0) {
-                                        shutdown(session);
-                                        System.gc();
+                            synchronized (UcanaccessDriver.class) {
+                                if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
+                                        && getActiveConnection() == 0) {
+                                    try {
+                                        dbReference.shutdown(_session);
+                                    } catch (Exception e) {
                                     }
+                                    System.gc();
                                 }
-                            } catch (Exception e) {
                             }
                         }
-                    }, inactivityTimeout);
+                    };
+                    timer.schedule(task, inactivityTimeout);
                 }
             }
         }
@@ -125,7 +133,7 @@ public class DBReference {
             return activeConnection;
         }
 
-        private int getInactivityTimeout() {
+        private long getInactivityTimeout() {
             return inactivityTimeout;
         }
 
@@ -135,7 +143,7 @@ public class DBReference {
 
         private synchronized void incrementActiveConnection() {
             activeConnection++;
-            if (DBReference.this.inMemory && inactivityTimeout > 0) {
+            if (dbReference.inMemory && inactivityTimeout > 0) {
                 lastConnectionTime = System.currentTimeMillis();
             }
         }
@@ -151,6 +159,7 @@ public class DBReference {
         this.pwd = pwd;
         this.jko = jko;
         this.lastModified = System.currentTimeMillis();
+        memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
             dbIO = DatabaseBuilder.create(ff, fl);
@@ -530,7 +539,7 @@ public class DBReference {
         }
     }
 
-    public int getInactivityTimeout() {
+    public long getInactivityTimeout() {
         return memoryTimer.getInactivityTimeout();
     }
 
@@ -623,7 +632,7 @@ public class DBReference {
         this.showSchema = showSchema;
     }
 
-    void shutdown(Session session) throws Exception {
+    void shutdown(Session _session) throws Exception {
         DBReferenceSingleton.getInstance().remove(this.dbFile.getAbsolutePath());
         if (this.immediatelyReleaseResources) {
             for (OnReloadReferenceListener listener : onReloadListeners) {
@@ -633,7 +642,7 @@ public class DBReference {
         this.memoryTimer.timer.cancel();
         this.dbIO.flush();
         this.dbIO.close();
-        this.closeHSQLDB(session);
+        this.closeHSQLDB(_session);
 
     }
 
@@ -719,6 +728,15 @@ public class DBReference {
 
     public void setConcatNulls(boolean concatNulls) {
         this.concatNulls = concatNulls;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (memoryTimer != null) {
+            memoryTimer.timer.cancel();
+            memoryTimer = null;
+        }
+        super.finalize();
     }
 
 }

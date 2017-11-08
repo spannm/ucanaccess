@@ -22,11 +22,11 @@ public class RegionalSettings {
 
     private final ResourceBundle dateBundle;
 
-    public RegionalSettings() {
-        this.dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat");
+    RegionalSettings() {
+        this(Locale.getDefault());
     }
 
-    public RegionalSettings(Locale l) {
+    RegionalSettings(Locale l) {
         this.dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat", l);
     }
 
@@ -68,6 +68,11 @@ public class RegionalSettings {
 
     public String getGeneralPattern() {
         return dateBundle.getString("generalDate");
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[dateBundle=" + dateBundle + "]";
     }
 
 }

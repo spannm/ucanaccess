@@ -15,14 +15,14 @@ limitations under the License.
 */
 package net.ucanaccess.console;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 
-public class MainTest {
+import net.ucanaccess.test.util.AbstractTestBase;
+
+public class MainTest extends AbstractTestBase {
 
     @Test
     public void testTokenize() throws IOException {
@@ -77,11 +77,5 @@ public class MainTest {
         // any unicode > U+00FF is treated like a normal character, U+202F is NARROW NO-BREAK SPACE
         tokens = Main.tokenize("export License\u202Fand\u202FAddress.csv");
         assertListEquals(tokens, "export", "License\u202Fand\u202FAddress.csv");
-    }
-
-    private static void assertListEquals(List<String> actualList, String... expected) {
-        String[] actual = new String[actualList.size()];
-        actualList.toArray(actual);
-        assertArrayEquals(expected, actual);
     }
 }
