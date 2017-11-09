@@ -21,6 +21,8 @@ The  Apache POI project is licensed under Apache License, Version 2.0 http://www
  */
 package net.ucanaccess.converters;
 
+import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
@@ -29,16 +31,14 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,125 +50,14 @@ import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class Functions {
-    private static Double                           rnd;
-    private static Double                           lastRnd;
-    public final static ArrayList<SimpleDateFormat> LDF    = new ArrayList<SimpleDateFormat>();
-    public final static ArrayList<Boolean>          LDFY   = new ArrayList<Boolean>();
-    static final Map<Locale, RegionalSettings>      regMap = new HashMap<Locale, RegionalSettings>();
-    private final static double                     APPROX = 0.00000001;
-    private static boolean                          pointDateSeparator;
+    private static Double       rnd;
+    private static Double       lastRnd;
+    private final static double APPROX = 0.00000001;
 
-    static {
-        RegionalSettings reg = getRegionalSettings();
-        pointDateSeparator = getPointDateSeparator(reg);
-        addDateP("yyyy-MM-dd h:m:s a");
-        addDateP("yyyy-MM-dd H:m:s");
-        addDateP("yyyy-MM-dd");
-        addDateP("yyyy/MM/dd h:m:s a");
-        addDateP("yyyy/MM/dd H:m:s");
-        addDateP("yyyy/MM/dd");
-
-        addDateP(reg.getGeneralPattern(), true);
-        addDateP(reg.getLongDatePattern(), true);
-        addDateP(reg.getMediumDatePattern(), true);
-
-        addDateP(reg.getShortDatePattern(), true);
-
-        if (!Locale.getDefault().equals(Locale.US)) {
-
-            RegionalSettings s = getRegionalSettings(Locale.US);
-            addDateP(s.getGeneralPattern(), false);
-            addDateP(s.getLongDatePattern(), true);
-            addDateP(s.getMediumDatePattern(), true);
-            addDateP(s.getShortDatePattern(), true);
-
-        }
-        addDateP("MMM dd,yyyy");
-        addDateP("MM dd,yyyy");
-        addDateP("MMM dd hh:mm:ss", false, true);
-        addDateP("MM dd hh:mm:ss", false, true);
-        addDateP("MMM yy hh:mm:ss");
-        addDateP("MM yy hh:mm:ss");
-        // locale is MM/dd/yyyy like in US but user is trying to parse something like 22/11/2003
-        addDateP("dd/MM/yyyy h:m:s a", true);
-        addDateP("dd/MM/yyyy H:m:s", true);
-        addDateP("dd/MM/yyyy", true);
-
-    }
-
-    private static boolean getPointDateSeparator(RegionalSettings _reg) {
-        String[] dfsp = new String[] { _reg.getGeneralPattern(), _reg.getLongDatePattern(), _reg.getMediumDatePattern(),
-                _reg.getShortDatePattern() };
-        for (String pattern : dfsp) {
-            if (pattern.indexOf(".") > 0 && pattern.indexOf("h.") < 0 && pattern.indexOf("H.") < 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static void addDateP(String sdfs) {
-        addDateP(sdfs, false, false);
-    }
-
-    private static void addDateP(String sdfs, boolean euristic) {
-        addDateP(sdfs, euristic, false);
-    }
-
-    private static void addTogglePattern(String pattern) {
-
-        if (pattern.indexOf("/") > 0) {
-            addDateP(pattern.replaceAll("/", "-"));
-            if (pointDateSeparator) {
-                addDateP(pattern.replaceAll("/", "."));
-            }
-        } else if (pattern.indexOf("-") > 0) {
-            addDateP(pattern.replaceAll(Pattern.quote("-"), "/"));
-            if (pointDateSeparator) {
-                addDateP(pattern.replaceAll(Pattern.quote("-"), "."));
-            }
-
-        } else if (pattern.indexOf(".") > 0 && pattern.indexOf("h.") < 0 && pattern.indexOf("H.") < 0) {
-            addDateP(pattern.replaceAll(Pattern.quote("."), "/"));
-        }
-    }
-
-    private static SimpleDateFormat simpleDateFormat(String pt) {
+    static SimpleDateFormat createSimpleDateFormat(String pt) {
         SimpleDateFormat sdf = new SimpleDateFormat(pt);
         ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new java.util.Date(Long.MIN_VALUE));
         return sdf;
-    }
-
-    private static void addDateP(String _pattern, boolean euristic, boolean _yearOverride) {
-        if (euristic) {
-            if (_pattern.indexOf("a") < 0 && _pattern.indexOf("H") > 0) {
-                String chg = _pattern.replaceAll("H", "h") + " a";
-                addDateP(chg);
-                addTogglePattern(chg);
-            }
-        }
-
-        SimpleDateFormat sdf = simpleDateFormat(_pattern);
-        sdf.setLenient(false);
-
-        if ("true".equalsIgnoreCase(getRegionalSettings().getRS())) {
-
-            DateFormatSymbols df = new DateFormatSymbols();
-            df.setAmPmStrings(new String[] { "AM", "PM" });
-            sdf.setDateFormatSymbols(df);
-        }
-
-        LDF.add(sdf);
-        LDFY.add(_yearOverride);
-        if (euristic) {
-            addTogglePattern(_pattern);
-            if (_pattern.endsWith(" a") && _pattern.indexOf("h") > 0) {
-                String chg = _pattern.substring(0, _pattern.length() - 2).trim().replaceAll("h", "H");
-                addDateP(chg);
-                addTogglePattern(chg);
-            }
-        }
-
     }
 
     @FunctionType(functionName = "ASC", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
@@ -621,14 +510,16 @@ public class Functions {
                     .replaceAll("(?i)" + Pattern.quote(reg.getAM()), "AM");
         }
 
-        for (SimpleDateFormat sdf : LDF) {
-            try {
+        for (Entry<SimpleDateFormat, Boolean> entry : reg.getDateFormats().entrySet()) {
+            SimpleDateFormat sdf = entry.getKey();
+            boolean yearOverride = entry.getValue();
 
+            try {
                 Timestamp t = new Timestamp(sdf.parse(dt).getTime());
                 if (onlyDate) {
                     t = dateValue(t);
                 }
-                if (LDFY.get(LDF.indexOf(sdf))) {
+                if (yearOverride) {
                     Calendar cl = Calendar.getInstance();
                     int y = cl.get(Calendar.YEAR);
                     cl.setTime(t);
@@ -636,7 +527,8 @@ public class Functions {
                     t = new Timestamp(cl.getTime().getTime());
                 }
                 return t;
-            } catch (ParseException e) {
+            } catch (ParseException _ex) {
+                // System.err.println(_ex.getClass().getName() + ": " + _ex.getMessage());
             }
         }
         return null;
@@ -703,16 +595,15 @@ public class Functions {
             if (incl) {
                 return format(Double.parseDouble(s), par);
             }
-            DecimalFormat df = FormatCache.getNoArgs();
 
+            DecimalFormat df = FormatCache.getNoArgs();
             try {
 
                 return format(df.parse(s).doubleValue(), par);
             } catch (ParseException e) {
                 throw new UcanaccessSQLException(e);
             }
-        }
-        if (isDate(s)) {
+        } else if (isDate(s)) {
             return format(dateValue(s, false), par);
         }
         return s;
@@ -720,7 +611,7 @@ public class Functions {
 
     private static String formatDate(Timestamp t, String pattern) {
         RegionalSettings reg = getRegionalSettings();
-        SimpleDateFormat sdf = simpleDateFormat(pattern);
+        SimpleDateFormat sdf = createSimpleDateFormat(pattern);
         String ret = sdf.format(t);
         if (!reg.getRS().equalsIgnoreCase("true")) {
             if (!reg.getAM().equals("AM")) {
@@ -766,8 +657,8 @@ public class Functions {
         if ("q".equalsIgnoreCase(par)) {
             return String.valueOf(datePart(par, t));
         }
-        return simpleDateFormat(par.replaceAll("m", "M").replaceAll("n", "m").replaceAll("(?i)AM/PM|A/P|AMPM", "a")
-                .replaceAll("dddd", "EEEE")).format(t);
+        return createSimpleDateFormat(par.replaceAll("m", "M").replaceAll("n", "m")
+                .replaceAll("(?i)AM/PM|A/P|AMPM", "a").replaceAll("dddd", "EEEE")).format(t);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.MEMO,
@@ -1778,22 +1669,6 @@ public class Functions {
     private static String padLeft(int ext, int n) {
         String tp = ext > 0 ? String.valueOf(ext) : "";
         return String.format("%1$" + n + "s", tp);
-    }
-
-    static RegionalSettings getRegionalSettings() {
-        return getRegionalSettings(Locale.getDefault());
-    }
-
-    static RegionalSettings getRegionalSettings(Locale _locale) {
-        if (_locale == null) {
-            _locale = Locale.getDefault();
-        }
-        RegionalSettings rs = regMap.get(_locale);
-        if (rs == null) {
-            rs = new RegionalSettings(_locale);
-            regMap.put(_locale, rs);
-        }
-        return rs;
     }
 
 }
