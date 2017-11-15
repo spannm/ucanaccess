@@ -487,6 +487,17 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         st.close();
     }
 
+    /**
+     * Execute the specified sql on the given statement logging the root cause of an exception encountered.
+     */
+    protected void executeStatement(Statement _statement, String _sql) throws SQLException {
+        try {
+            _statement.execute(_sql);
+        } catch (SQLException _ex) {
+            getLogger().warn("Exception executing [" + _sql + "].", _ex.getCause() != null ? _ex.getCause() : _ex);
+        }
+    }
+
     @Before
     public final void beforeTestCaseBase() throws Exception {
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
@@ -496,10 +507,19 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     @After
     public final void afterTestCaseBase() throws Exception {
         if (ucanaccess != null && !ucanaccess.isClosed()) {
-            ucanaccess.close();
+            try {
+                ucanaccess.close();
+            } catch (Exception _ex) {
+                getLogger().warn("Database {} already closed: {}", fileAccDb, _ex);
+            }
         }
+
         if (verifyConnection != null && !verifyConnection.isClosed()) {
-            verifyConnection.close();
+            try {
+                verifyConnection.close();
+            } catch (Exception _ex) {
+                getLogger().warn("Verify connection {} already closed: {}", verifyConnection, _ex);
+            }
         }
     }
 

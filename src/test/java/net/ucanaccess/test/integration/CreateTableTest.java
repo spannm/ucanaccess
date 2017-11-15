@@ -28,8 +28,6 @@ import com.healthmarketscience.jackcess.Index.Column;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -91,18 +89,12 @@ public class CreateTableTest extends AccessVersionAllTest {
     }
 
     private void createSimple() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
-            st.execute("INSERT INTO AAA(baaaa,c)   VALUES ('33A','G'   )");
-            st.execute("INSERT INTO AAA(baaaa,a,c) VALUES ('33B',111,'G'   )");
-            Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
-            checkQuery("SELECT baaaa,a,c FROM AAA ORDER BY baaaa", ver);
-        } finally {
-            if (st != null) {
-                st.close();
-            }
-        }
+        Statement st = ucanaccess.createStatement();
+        st.execute("INSERT INTO AAA(baaaa,c)   VALUES ('33A','G'     )");
+        st.execute("INSERT INTO AAA(baaaa,a,c) VALUES ('33B',111,'G' )");
+        Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
+        checkQuery("SELECT baaaa,a,c FROM AAA ORDER BY baaaa", ver);
+        st.close();
     }
 
     public void defaults() throws Exception {
@@ -149,7 +141,7 @@ public class CreateTableTest extends AccessVersionAllTest {
                 st.execute("insert into  dtrx values('I''ll be forgotten sob sob ',55555.3)");
                 st.close();
                 st = ucanaccess.createStatement();
-                st.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number))");
+                st.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number)");
                 st.close();
             } catch (Exception e) {
                 ucanaccess.rollback();
@@ -205,20 +197,12 @@ public class CreateTableTest extends AccessVersionAllTest {
 
     }
 
-    @Before
-    public void beforeTestCase() throws Exception {
-        executeStatements(
-                " CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
-                        + "d DATETIME default now(), e text default 'l''aria')");
-    }
-
-    @After
-    public void afterTestCase() throws Exception {
-        dropTable("AAA");
-    }
-
     @Test
     public void testCreate() throws Exception {
+        executeStatements(
+                "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
+                        + "d DATETIME default now(), e text default 'l''aria')");
+
         createSimple();
         createPs();
         createAsSelect();
@@ -227,6 +211,8 @@ public class CreateTableTest extends AccessVersionAllTest {
         setDPK();
         defaults();
         notNullBug();
+
+        dropTable("AAA");
     }
 
     @Test

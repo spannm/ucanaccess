@@ -18,6 +18,7 @@ package net.ucanaccess.test.integration;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,13 +59,13 @@ public class WorkloadTest extends AccessVersionDefaultTest {
         ucanaccess.commit();
         long time1 = System.currentTimeMillis();
         getLogger().info("Autoincrement insert performance test, {} records inserted in {} seconds.", nbRecords,
-                time1 - startTime);
+                TimeUnit.MILLISECONDS.toSeconds(time1 - startTime));
         st = ucanaccess.createStatement();
         st.executeUpdate("update aaAB set c='yessssss'&a");
         ucanaccess.commit();
         long time2 = System.currentTimeMillis();
         getLogger().info("Update performance test, all {} table records updated in {} seconds.", nbRecords,
-                time2 - time1);
+                TimeUnit.MILLISECONDS.toSeconds(time2 - time1));
 
         st.close();
     }

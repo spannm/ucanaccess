@@ -235,7 +235,7 @@ public abstract class AbstractExecute {
             DDLCommandEnlist ddle = new DDLCommandEnlist();
             ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
         } catch (Exception e) {
-            throw new SQLException(e.getMessage());
+            throw new SQLException(e);
         }
         return ret;
     }
