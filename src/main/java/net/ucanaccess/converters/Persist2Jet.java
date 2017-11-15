@@ -184,7 +184,7 @@ public class Persist2Jet {
                 }
             }
         } catch (Exception e) {
-            throw new SQLException(e.getMessage());
+            throw new SQLException(e);
         }
     }
 

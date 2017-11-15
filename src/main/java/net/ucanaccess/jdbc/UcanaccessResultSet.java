@@ -905,7 +905,7 @@ public class UcanaccessResultSet implements ResultSet {
             }
             throw new SQLException("Invalid or unsupported URL format");
         } catch (Exception e) {
-            throw new SQLException(e.getMessage());
+            throw new SQLException(e);
         }
     }
 
