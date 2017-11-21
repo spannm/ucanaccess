@@ -21,10 +21,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
+import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
-public class CorruptedTest extends AccessVersion2010Test {
+public class CorruptedTest extends AccessVersion2007Test {
 
     public CorruptedTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -32,7 +32,7 @@ public class CorruptedTest extends AccessVersion2010Test {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/corrupted.accdb";
+        return "testdbs/corrupted.accdb"; // Access 2007
     }
 
     @Test

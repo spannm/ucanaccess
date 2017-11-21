@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Test;
@@ -33,15 +32,10 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
-public class ComplexTest extends UcanaccessTestBase {
-
-    @Parameterized.Parameters(name="{index}: {0}")
-    public static Iterable<Object[]> getAccessVersions() {
-        return Arrays.asList(new Object[] { AccessVersion.V2007 }, new Object[] { AccessVersion.V2010 });
-    }
+public class ComplexTest extends AccessVersion2010Test {
 
     public ComplexTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -49,7 +43,7 @@ public class ComplexTest extends UcanaccessTestBase {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/2010.accdb";
+        return "testdbs/2010.accdb"; // Access 2010
     }
 
     @Test
