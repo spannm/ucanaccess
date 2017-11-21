@@ -26,10 +26,10 @@ import org.junit.runners.Parameterized;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 
 @RunWith(Parameterized.class)
-public class CreateDatabaseTest extends AccessVersionDefaultTest {
+public class CreateDatabaseTest extends AccessVersionAllTest {
 
     public CreateDatabaseTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -41,7 +41,7 @@ public class CreateDatabaseTest extends AccessVersionDefaultTest {
         File fileMdb = File.createTempFile("CreateDatabaseTest", fileFormat.getFileExtension(), TEST_DB_TEMP_DIR);
         fileMdb.delete();
 
-        String url = UcanaccessDriver.URL_PREFIX + fileMdb.getAbsolutePath() + ";immediatelyreleaseresources=true;newdatabaseversion=" + fileFormat.name();
+        String url = UcanaccessDriver.URL_PREFIX + fileMdb.getAbsolutePath() + ";immediatelyReleaseResources=true;newDatabaseVersion=" + fileFormat.name();
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         UcanaccessConnection ucanaccessConnection = (UcanaccessConnection) DriverManager.getConnection(url, "", "");
         assertNotNull(ucanaccessConnection);
