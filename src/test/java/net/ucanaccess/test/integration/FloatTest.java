@@ -26,10 +26,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
-public class FloatTest extends AccessVersionAllTest {
+public class FloatTest extends AccessVersion2007Test {
 
     public FloatTest(AccessVersion _accessVersion) {
         super(_accessVersion);
