@@ -41,14 +41,14 @@ public class ReloadPersistentMirrorTest extends AccessVersionAllTest {
     public void testReloadMirror() throws Exception {
         Connection conn = null;
 
-        File dbFile = File.createTempFile("mirrorTest", ".mdb", TEST_DB_TEMP_DIR);
+        File dbFile = File.createTempFile("mirrorTest", fileFormat.getFileExtension(), TEST_DB_TEMP_DIR);
         dbFile.delete();
         File mirrorFile = File.createTempFile("mirrorTest", "", TEST_DB_TEMP_DIR);
         mirrorFile.delete();
 
         // create the database
         String urlCreate =
-                UcanaccessDriver.URL_PREFIX + dbFile.getAbsolutePath() + ";memory=true" + ";newDatabaseVersion=V2003";
+                UcanaccessDriver.URL_PREFIX + dbFile.getAbsolutePath() + ";memory=true" + ";newDatabaseVersion=" + fileFormat.name();
         conn = DriverManager.getConnection(urlCreate, "", "");
         Statement stCreate = conn.createStatement();
         stCreate.execute("CREATE TABLE Table1 (ID COUNTER PRIMARY KEY, TextField TEXT(50))");
