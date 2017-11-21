@@ -23,10 +23,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
-public class CalculatedFieldTest extends AccessVersionAllTest {
+public class CalculatedFieldTest extends AccessVersion2010Test {
 
     public CalculatedFieldTest(AccessVersion _accessVersion) {
         super(_accessVersion);

@@ -35,7 +35,7 @@ public class AccessLikeTest extends AccessVersionAllTest {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/likeTest.mdb";
+        return "testdbs/likeTest.mdb"; // Access 2000
     }
 
     @Test

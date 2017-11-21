@@ -24,10 +24,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
-public class ParametersTest extends AccessVersionAllTest {
+public class ParametersTest extends AccessVersion2007Test {
 
     public ParametersTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -35,7 +35,7 @@ public class ParametersTest extends AccessVersionAllTest {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/Parameters.accdb";
+        return "testdbs/Parameters.accdb";  // Access 2007
     }
 
     @Test

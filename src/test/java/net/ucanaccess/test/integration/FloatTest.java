@@ -38,7 +38,7 @@ public class FloatTest extends AccessVersionAllTest {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/float.accdb";
+        return "testdbs/float.accdb"; // Access 2007
     }
 
     @Test

@@ -24,10 +24,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 
 @RunWith(Parameterized.class)
-public class ColumnOrderTest extends AccessVersionAllTest {
+public class ColumnOrderTest extends AccessVersionDefaultTest {
 
     public ColumnOrderTest(AccessVersion _accessVersion) {
         super(_accessVersion);

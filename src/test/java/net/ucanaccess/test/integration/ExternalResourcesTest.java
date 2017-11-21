@@ -27,10 +27,10 @@ import org.junit.runners.Parameterized;
 
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 
 @RunWith(Parameterized.class)
-public class ExternalResourcesTest extends AccessVersionAllTest {
+public class ExternalResourcesTest extends AccessVersionDefaultTest {
 
     public ExternalResourcesTest(AccessVersion _accessVersion) {
         super(_accessVersion);
