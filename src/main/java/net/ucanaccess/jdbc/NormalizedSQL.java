@@ -26,8 +26,8 @@ public class NormalizedSQL {
         return sql;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
+    public void setSql(String _sql) {
+        this.sql = _sql;
     }
 
     public Map<String, String> getAliases() {

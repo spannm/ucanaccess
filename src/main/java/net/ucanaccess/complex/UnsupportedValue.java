@@ -29,9 +29,9 @@ public class UnsupportedValue extends ComplexBase {
         this.values = cv.getValues();
     }
 
-    public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> values) {
+    public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> _values) {
         super(id, tableName, columnName);
-        this.values = values;
+        this.values = _values;
     }
 
     @Override
@@ -67,8 +67,8 @@ public class UnsupportedValue extends ComplexBase {
         return result;
     }
 
-    public void setValues(Map<String, Object> values) {
-        this.values = values;
+    public void setValues(Map<String, Object> _values) {
+        this.values = _values;
     }
 
 }

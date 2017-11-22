@@ -29,13 +29,12 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 
     private Map<String, String> aliases;
 
-    public UcanaccessResultSetMetaData(ResultSetMetaData wrapped, Map<String, String> aliases,
-            UcanaccessResultSet resultSet) throws SQLException {
-        super();
-        this.wrapped = wrapped;
+    public UcanaccessResultSetMetaData(ResultSetMetaData _wrapped, Map<String, String> _aliases,
+            UcanaccessResultSet _resultSet) throws SQLException {
+        this.wrapped = _wrapped;
 
-        this.metadata = new Metadata(resultSet.getStatement().getConnection());
-        this.aliases = aliases;
+        this.metadata = new Metadata(_resultSet.getStatement().getConnection());
+        this.aliases = _aliases;
     }
 
     @Override

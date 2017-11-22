@@ -44,7 +44,7 @@ public abstract class AbstractTestBase extends Assert {
 
 
     /**
-     * The SLF4J logger (https://www.slf4j.org/)
+     * The SLF4J logger (https://www.slf4j.org/).
      */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

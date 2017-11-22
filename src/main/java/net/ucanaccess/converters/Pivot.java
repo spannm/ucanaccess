@@ -41,55 +41,55 @@ public class Pivot {
     private String                                 expression;
     private String                                 pivot;
     private List<String>                           pivotIn;
-    private final Pattern                          PIVOT            =
+    private static final Pattern                   PIVOT            =
             Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
-    private final Pattern                          PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
-    private final Pattern                          PIVOT_AGGR       =
+    private static final Pattern                   PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
+    private static final Pattern                   PIVOT_AGGR       =
             Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
-    private final Pattern                          PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
-    private final String                           PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
+    private static final Pattern                   PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
+    private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
     private String                                 aggregateFun;
     private Connection                             conn;
     private boolean                                pivotInCondition = true;
     private String                                 originalQuery;
-    private final static Map<String, String>       pivotMap         = new HashMap<String, String>();
-    private final static Map<String, List<String>> prepareMap       = new HashMap<String, List<String>>();
+    private static final Map<String, String>       PIVOT_MAP        = new HashMap<String, String>();
+    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<String, List<String>>();
 
-    public Pivot(Connection conn) {
-        this.conn = conn;
+    public Pivot(Connection _conn) {
+        this.conn = _conn;
     }
 
-    public Pivot(String name, Connection conn) {
+    public Pivot(String _name, Connection _conn) {
 
-        this.conn = conn;
+        this.conn = _conn;
     }
 
     private void cachePrepare(String name) {
         if (this.pivotIn != null) {
-            prepareMap.put(name, this.pivotIn);
+            PREPARE_MAP.put(name, this.pivotIn);
         }
     }
 
     public static void clearPrepared() {
-        prepareMap.clear();
+        PREPARE_MAP.clear();
 
     }
 
     private void getPrepareFromCache(String name) {
-        if (prepareMap.containsKey(name)) {
-            this.pivotIn = prepareMap.get(name);
+        if (PREPARE_MAP.containsKey(name)) {
+            this.pivotIn = PREPARE_MAP.get(name);
         }
     }
 
     public void registerPivot(String name) {
         if (!this.pivotInCondition) {
-            pivotMap.put(name, this.originalQuery);
+            PIVOT_MAP.put(name, this.originalQuery);
         }
     }
 
     public static void checkAndRefreshPivot(String currSql, UcanaccessConnection conu) {
 
-        for (String name : pivotMap.keySet()) {
+        for (String name : PIVOT_MAP.keySet()) {
             Pattern ptrn = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
             Matcher mtc = ptrn.matcher(currSql);
             if (mtc.find()) {
@@ -104,7 +104,7 @@ public class Pivot {
                     Connection conh = conu.getHSQLDBConnection();
                     Pivot pivot = new Pivot(conh);
 
-                    if (!pivot.parsePivot(pivotMap.get(name))) {
+                    if (!pivot.parsePivot(PIVOT_MAP.get(name))) {
                         return;
                     }
                     String sqlh = pivot.toSQL(null);
@@ -113,7 +113,7 @@ public class Pivot {
                     }
                     st = conh.createStatement();
                     String escqn = SQLConverter.completeEscaping(name, false);
-                    ;
+
                     st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
                     StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn).append(" AS ").append(sqlh);
                     NormalizedSQL nsql = SQLConverter.convertSQL(sb.toString(), true);
@@ -143,14 +143,14 @@ public class Pivot {
         }
     }
 
-    public boolean parsePivot(String originalQuery) {
-        this.originalQuery = originalQuery;
-        originalQuery = originalQuery.replaceAll("\n", " ").replaceAll("\r", " ")
+    public boolean parsePivot(String _originalQuery) {
+        this.originalQuery = _originalQuery;
+        _originalQuery = _originalQuery.replaceAll("\n", " ").replaceAll("\r", " ")
                 .replaceAll("(?i)(\\[PIVOT\\])", "XPIVOT").trim();
-        if (originalQuery.endsWith(";")) {
-            originalQuery = originalQuery.substring(0, originalQuery.length() - 1);
+        if (_originalQuery.endsWith(";")) {
+            _originalQuery = _originalQuery.substring(0, _originalQuery.length() - 1);
         }
-        Matcher mtc = PIVOT.matcher(originalQuery);
+        Matcher mtc = PIVOT.matcher(_originalQuery);
         if (mtc.groupCount() < 4) {
             return false;
         }
@@ -255,7 +255,7 @@ public class Pivot {
 
     public String toSQL(String name) {
         if (this.pivotIn == null) {
-            if (name != null && prepareMap.containsKey(name)) {
+            if (name != null && PREPARE_MAP.containsKey(name)) {
                 this.getPrepareFromCache(name);
             } else if (prepare()) {
                 this.cachePrepare(name);

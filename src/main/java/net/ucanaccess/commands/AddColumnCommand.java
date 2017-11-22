@@ -31,15 +31,15 @@ public class AddColumnCommand implements ICommand {
     private Map<String, String> columnMap;
     private String              columnName;
 
-    public AddColumnCommand(String tableName, String columnName, String execId, Map<String, String> columnMap,
-            String[] types, String[] defaults, Boolean[] notNulls) {
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.types = types;
-        this.defaults = defaults;
-        this.notNulls = notNulls;
-        this.columnMap = columnMap;
-        this.execId = execId;
+    public AddColumnCommand(String _tableName, String _columnName, String _execId, Map<String, String> _columnMap,
+            String[] _types, String[] _defaults, Boolean[] _notNulls) {
+        this.tableName = _tableName;
+        this.columnName = _columnName;
+        this.types = _types;
+        this.defaults = _defaults;
+        this.notNulls = _notNulls;
+        this.columnMap = _columnMap;
+        this.execId = _execId;
     }
 
     @Override

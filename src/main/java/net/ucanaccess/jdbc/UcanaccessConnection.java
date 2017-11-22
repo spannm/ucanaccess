@@ -74,39 +74,39 @@ public class UcanaccessConnection implements Connection {
     private Object              lastGeneratedKey;
     private String              refId;
 
-    final static String BATCH_ID = "BATCH_ID";
+    static final String BATCH_ID = "BATCH_ID";
 
-    public synchronized static UcanaccessConnection getCtxConnection() {
+    public static synchronized UcanaccessConnection getCtxConnection() {
         if (ctx == null) {
             return null;
         }
         return ctx.get().getCurrentConnection();
     }
 
-    public synchronized static boolean hasContext() {
+    public static synchronized boolean hasContext() {
         return ctx.get() != null;
     }
 
-    public synchronized static String getCtxExcId() {
+    public static synchronized String getCtxExcId() {
         return ctx.get().getCurrentExecId();
     }
 
-    public synchronized static void setCtxConnection(UcanaccessConnection conn) {
+    public static synchronized void setCtxConnection(UcanaccessConnection conn) {
         ctx.set(new Context(conn));
     }
 
-    public synchronized static void setCtxExecId(String id) {
+    public static synchronized void setCtxExecId(String id) {
         ctx.get().setCurrentExecId(id);
     }
 
-    public UcanaccessConnection(DBReference ref, Properties clientInfo, Session session) throws UcanaccessSQLException {
+    public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session) throws UcanaccessSQLException {
         try {
-            this.ref = ref;
-            this.refId = ref.getId();
-            ref.incrementActiveConnection();
-            this.session = session;
-            this.hsqlDBConnection = ref.getHSQLDBConnection(session);
-            this.clientInfo = clientInfo;
+            this.ref = _ref;
+            this.refId = _ref.getId();
+            _ref.incrementActiveConnection();
+            this.session = _session;
+            this.hsqlDBConnection = _ref.getHSQLDBConnection(_session);
+            this.clientInfo = _clientInfo;
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -123,8 +123,8 @@ public class UcanaccessConnection implements Connection {
         return sql;
     }
 
-    void setCurrentStatement(UcanaccessStatement currentStatement) {
-        this.currentStatement = currentStatement;
+    void setCurrentStatement(UcanaccessStatement _currentStatement) {
+        this.currentStatement = _currentStatement;
     }
 
     public void setGeneratedKey(Object key) {
@@ -140,8 +140,8 @@ public class UcanaccessConnection implements Connection {
 
     // test only!!!!
     @SuppressWarnings("unused")
-    private void setTestRollback(boolean testRollback) {
-        this.testRollback = testRollback;
+    private void setTestRollback(boolean _testRollback) {
+        this.testRollback = _testRollback;
     }
 
     public void addFunctions(Class<?> clazz) throws SQLException {
@@ -432,15 +432,15 @@ public class UcanaccessConnection implements Connection {
         return this.warnings;
     }
 
-    public void setWarnings(SQLWarning warnings) {
-        this.warnings = warnings;
+    public void setWarnings(SQLWarning _warnings) {
+        this.warnings = _warnings;
     }
 
-    public void addWarnings(SQLWarning warnings) {
+    public void addWarnings(SQLWarning _warnings) {
         if (this.warnings == null) {
-            setWarnings(warnings);
+            setWarnings(_warnings);
         } else {
-            this.warnings.setNextWarning(warnings);
+            this.warnings.setNextWarning(_warnings);
         }
     }
 
@@ -568,14 +568,12 @@ public class UcanaccessConnection implements Connection {
             return new UcanaccessPreparedStatement(nsql,
                     hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), resultSetType, resultSetConcurrency),
                     this);
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException _ex) {
             if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE
                     && resultSetConcurrency == ResultSet.CONCUR_UPDATABLE) {
                 return prepareStatement(oldSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             }
-            throw new UcanaccessSQLException(e);
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -672,17 +670,17 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (!autoCommit) {
+    public void setAutoCommit(boolean _autoCommit) throws SQLException {
+        if (!_autoCommit) {
             this.checkLastModified();
         } else {
             this.checkModified = false;
         }
-        this.autoCommit = autoCommit;
+        this.autoCommit = _autoCommit;
     }
 
-    public void setFeedbackState(boolean feedbackState) {
-        this.feedbackState = feedbackState;
+    public void setFeedbackState(boolean _feedbackState) {
+        this.feedbackState = _feedbackState;
     }
 
     @Override
@@ -801,8 +799,8 @@ public class UcanaccessConnection implements Connection {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUrl(String _url) {
+        this.url = _url;
     }
 
     public boolean isShowSchema() {

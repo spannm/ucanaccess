@@ -32,13 +32,12 @@ public abstract class ComplexBase implements Serializable {
     private int                         id;
     private String                      tableName;
     private String                      columnName;
-    public final static ComplexValue.Id CREATE_ID        = ComplexColumnInfoImpl.INVALID_ID;
+    public static final ComplexValue.Id CREATE_ID        = ComplexColumnInfoImpl.INVALID_ID;
 
-    public ComplexBase(ComplexValue.Id id, String tableName, String columnName) {
-        super();
-        this.id = id.get();
-        this.tableName = tableName;
-        this.columnName = columnName;
+    public ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
+        this.id = _id.get();
+        this.tableName = _tableName;
+        this.columnName = _columnName;
     }
 
     public ComplexBase(ComplexValue cv) {
@@ -50,16 +49,16 @@ public abstract class ComplexBase implements Serializable {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTableName(String _tableName) {
+        this.tableName = _tableName;
     }
 
     public String getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    public void setColumnName(String _columnName) {
+        this.columnName = _columnName;
     }
 
     @Override
@@ -104,7 +103,7 @@ public abstract class ComplexBase implements Serializable {
         return true;
     }
 
-    public final static Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {
+    public static final Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {
         if (fk.getComplexType().equals(ComplexDataType.ATTACHMENT)) {
             List<com.healthmarketscience.jackcess.complex.Attachment> lst = fk.getAttachments();
             Attachment[] lat = new Attachment[lst.size()];

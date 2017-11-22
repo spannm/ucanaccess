@@ -27,13 +27,13 @@ public class SingleValue extends ComplexBase {
         this.value = cv.get();
     }
 
-    public SingleValue(ComplexValue.Id id, String tableName, String columnName, String value) {
+    public SingleValue(ComplexValue.Id id, String tableName, String columnName, String _value) {
         super(id, tableName, columnName);
-        this.value = value;
+        this.value = _value;
     }
 
-    public SingleValue(String value) {
-        this(CREATE_ID, null, null, value);
+    public SingleValue(String _value) {
+        this(CREATE_ID, null, null, _value);
 
     }
 
@@ -68,8 +68,8 @@ public class SingleValue extends ComplexBase {
         return result;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    public void setValue(Object _value) {
+        this.value = _value;
     }
 
     @Override

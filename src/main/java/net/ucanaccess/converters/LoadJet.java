@@ -529,8 +529,7 @@ public class LoadJet {
             return default4SQL;
         }
 
-        private void setDefaultValue(Column cl, String ntn, List<String> arTrigger)
-                throws IOException, SQLException {
+        private void setDefaultValue(Column cl, String ntn, List<String> arTrigger) throws IOException, SQLException {
             PropertyMap pm = cl.getProperties();
             String ncn = procedureEscapingIdentifier(cl.getName());
             Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
@@ -775,6 +774,8 @@ public class LoadJet {
             case HSQL_UK_VIOLATION:
                 type = "Unique";
                 break;
+            default:
+                break;
             }
             Logger.logParametricWarning(Messages.CONSTRAINT, type, t.getName(), record.toString(), t.getName());
 
@@ -866,8 +867,8 @@ public class LoadJet {
             if (this.readOnlyTables.contains(tn)) {
                 return;
             }
-            Table t = null;
-            UcanaccessTable table = new UcanaccessTable(t = dbIO.getTable(tn), tn);
+            Table t = dbIO.getTable(tn);
+            UcanaccessTable table = new UcanaccessTable(t, tn);
             if (t != null) {
                 for (Index idxi : table.getIndexes()) {
                     // riw
@@ -894,8 +895,8 @@ public class LoadJet {
         }
 
         private void loadTableIndexesUK(String tn) throws IOException, SQLException {
-            Table t = null;
-            UcanaccessTable table = new UcanaccessTable(t = dbIO.getTable(tn), tn);
+            Table t = dbIO.getTable(tn);
+            UcanaccessTable table = new UcanaccessTable(t, tn);
             if (t != null) {
                 for (Index idx : table.getIndexes()) {
                     if (!idx.isForeignKey() && (idx.isPrimaryKey() || idx.isUnique())) {
@@ -907,8 +908,8 @@ public class LoadJet {
         }
 
         private void loadTableIndexesNotUK(String tn) throws IOException, SQLException {
-            Table t = null;
-            UcanaccessTable table = new UcanaccessTable(t = dbIO.getTable(tn), tn);
+            Table t = dbIO.getTable(tn);
+            UcanaccessTable table = new UcanaccessTable(t, tn);
             if (!skipIndexes && t != null) {
                 for (Index idx : table.getIndexes()) {
                     if (!idx.isForeignKey() && !idx.isPrimaryKey() && !idx.isUnique()) {
@@ -926,7 +927,8 @@ public class LoadJet {
                 UcanaccessTable t = null;
                 Table t2 = null;
                 try {
-                    t = new UcanaccessTable(t2 = dbIO.getTable(tn), tn);
+                    t2 = dbIO.getTable(tn);
+                    t = new UcanaccessTable(t2, tn);
                 } catch (Exception e) {
                     Logger.logWarning(e.getMessage());
                     this.unresolvedTables.add(tn);
@@ -1105,7 +1107,7 @@ public class LoadJet {
     }
 
     private final class TriggersLoader {
-        private final static String DEFAULT_TRIGGERS_PACKAGE = "net.ucanaccess.triggers";
+        private static final String DEFAULT_TRIGGERS_PACKAGE = "net.ucanaccess.triggers";
 
         private void loadTrigger(String tableName, String namePrefix, String when, String className)
                 throws SQLException {
@@ -1139,11 +1141,11 @@ public class LoadJet {
     }
 
     private final class ViewsLoader {
-        private Map<String, String> notLoaded = new HashMap<String, String>();
-        private Map<String, String> notLoadedProcedure = new HashMap<String, String>();
-        private static final int        OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
-        private static final int        OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
-        private static final int        UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
+        private Map<String, String> notLoaded             = new HashMap<String, String>();
+        private Map<String, String> notLoadedProcedure    = new HashMap<String, String>();
+        private static final int    OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
+        private static final int    OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
+        private static final int    UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
 
         private boolean loadView(Query q) throws SQLException {
             return loadView(q, null);
@@ -1228,9 +1230,7 @@ public class LoadJet {
                     pivot.registerPivot(SQLConverter.preEscapingIdentifier(q.getName()));
                 }
                 return true;
-            }
-
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (e instanceof SQLSyntaxErrorException) {
                     if (queryWKT == null && ((SQLSyntaxErrorException) e).getErrorCode() == OBJECT_ALREADY_EXISTS) {
                         return loadView(q, solveAmbiguous(querySQL));
@@ -1414,16 +1414,15 @@ public class LoadJet {
     private boolean         skipIndexes;
     private Metadata        metadata;
 
-    public LoadJet(Connection conn, Database dbIO) throws SQLException {
-        super();
-        this.conn = conn;
-        this.dbIO = dbIO;
+    public LoadJet(Connection _conn, Database _dbIo) throws SQLException {
+        this.conn = _conn;
+        this.dbIO = _dbIo;
         try {
             this.ff1997 = FileFormat.V1997.equals(this.dbIO.getFileFormat());
         } catch (Exception ignore) {
             // Logger.logWarning(e.getMessage());
         }
-        this.metadata = new Metadata(conn);
+        this.metadata = new Metadata(_conn);
     }
 
     public void loadDefaultValues(Table t) throws SQLException, IOException {
@@ -1470,9 +1469,7 @@ public class LoadJet {
             }
 
             throw e;
-        }
-
-        finally {
+        } finally {
             if (st != null) {
                 st.close();
             }
@@ -1574,13 +1571,13 @@ public class LoadJet {
         }
     }
 
-    public void setSysSchema(boolean sysSchema) {
-        this.sysSchema = sysSchema;
+    public void setSysSchema(boolean _sysSchema) {
+        this.sysSchema = _sysSchema;
 
     }
 
-    public void setSkipIndexes(boolean skipIndexes) {
-        this.skipIndexes = skipIndexes;
+    public void setSkipIndexes(boolean _skipIndexes) {
+        this.skipIndexes = _skipIndexes;
 
     }
 

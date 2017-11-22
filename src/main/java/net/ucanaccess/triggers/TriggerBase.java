@@ -29,11 +29,11 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 
 public abstract class TriggerBase implements org.hsqldb.Trigger {
-    public static final Persist2Jet p2a           = new Persist2Jet();
+    public static final Persist2Jet P2A           = new Persist2Jet();
     public static final String      ESCAPE_PREFIX = "X";
 
     public void convertRowTypes(Object[] values, Table table) throws SQLException {
-        p2a.convertRowTypes(values, table);
+        P2A.convertRowTypes(values, table);
     }
 
     public void checkContext() {
@@ -48,7 +48,7 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
     }
 
     protected Map<String, Object> getRowPattern(Object[] values, Table t) throws SQLException {
-        return p2a.getRowPattern(values, t);
+        return P2A.getRowPattern(values, t);
     }
 
     protected Table getTable(String tableName, UcanaccessConnection conn) throws IOException {

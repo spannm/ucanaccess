@@ -56,9 +56,9 @@ public class Main {
     private BufferedReader input;
     private String         lastSqlQuery;
 
-    public Main(Connection conn, BufferedReader input) {
-        this.conn = conn;
-        this.input = input;
+    public Main(Connection _conn, BufferedReader _input) {
+        this.conn = _conn;
+        this.input = _input;
 
     }
 
@@ -166,8 +166,8 @@ public class Main {
         main.start();
     }
 
-    public static void setBatchMode(boolean batchMode) {
-        Main.batchMode = batchMode;
+    public static void setBatchMode(boolean _batchMode) {
+        Main.batchMode = _batchMode;
     }
 
     /**
@@ -456,14 +456,14 @@ public class Main {
      * @author Markus Spann
      */
     static class TableFormat {
-        final static List<Integer> NUMERIC_JDBC_TYPES =
+        static final List<Integer> NUMERIC_JDBC_TYPES =
                 Arrays.asList(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
                         Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
         private int              maxColWidth = 50;
-        final List<String>       colNames;
-        final List<Integer>      colWidths;
-        final List<Integer>      colTypes;
-        final List<List<String>> records     = new ArrayList<List<String>>();
+        private final List<String>       colNames;
+        private final List<Integer>      colWidths;
+        private final List<Integer>      colTypes;
+        private final List<List<String>> records     = new ArrayList<List<String>>();
 
         TableFormat(ResultSet _resultSet) throws SQLException {
             this(_resultSet, -1);

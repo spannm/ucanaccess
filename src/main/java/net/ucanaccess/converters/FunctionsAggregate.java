@@ -19,7 +19,11 @@ package net.ucanaccess.converters;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-public class FunctionsAggregate {
+public final class FunctionsAggregate {
+
+    private FunctionsAggregate() {
+    }
+
     public static Object first(Object in, Boolean flag, Object[] register, Integer[] counter) {
         if (flag) {
             return register[0];

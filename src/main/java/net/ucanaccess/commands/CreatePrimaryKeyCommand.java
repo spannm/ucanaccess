@@ -25,10 +25,9 @@ public class CreatePrimaryKeyCommand implements ICommand {
     private String tableName;
     private String execId;
 
-    public CreatePrimaryKeyCommand(String tableName, String execId) {
-        super();
-        this.tableName = tableName;
-        this.execId = execId;
+    public CreatePrimaryKeyCommand(String _tableName, String _execId) {
+        this.tableName = _tableName;
+        this.execId = _execId;
     }
 
     @Override

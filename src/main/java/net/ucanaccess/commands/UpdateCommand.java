@@ -45,15 +45,14 @@ public class UpdateCommand extends AbstractCursorCommand {
     private List<? extends Column> tableColumns;
     private boolean                isRollbacking;
 
-    public UpdateCommand(Table table, Map<String, Object> map, Object[] modifiedRow, String execId) {
-        super();
-        this.tableColumns = table.getColumns();
-        this.indexSelector = new IndexSelector(table);
-        this.rowPattern = map;
-        this.modifiedRow = modifiedRow;
-        this.execId = execId;
-        checkBlob(modifiedRow);
-        this.table = table;
+    public UpdateCommand(Table _table, Map<String, Object> _map, Object[] _modifiedRow, String _execId) {
+        this.tableColumns = _table.getColumns();
+        this.indexSelector = new IndexSelector(_table);
+        this.rowPattern = _map;
+        this.modifiedRow = _modifiedRow;
+        this.execId = _execId;
+        checkBlob(_modifiedRow);
+        this.table = _table;
     }
 
     private void checkBlob(Object[] newRow2) {

@@ -109,9 +109,9 @@ public class ComplexTest extends AccessVersion2010Test {
         ps.execute();
         ps.close();
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [ATTACH-DATA]=? WHERE ID=?");
-        Attachment[] atc;
-        ps.setObject(1, atc = new Attachment[] { new Attachment(null, "cccsss.cvs", "cvs",
-                "ddddd ;sssssssssssssssssssddd".getBytes(), new Date(), null) });
+        Attachment[] atc = new Attachment[] { new Attachment(null, "cccsss.cvs", "cvs",
+                "ddddd ;sssssssssssssssssssddd".getBytes(), new Date(), null) };
+        ps.setObject(1, atc);
         ps.setString(2, "row12");
         ps.execute();
 
@@ -121,7 +121,7 @@ public class ComplexTest extends AccessVersion2010Test {
         rs.next();
         assertEquals(rs.getInt(1), 1);
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [MULTi-VALUE-DATA]=? ");
-        svs = new SingleValue[] { new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee") };
+        svs = new SingleValue[] {new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee")};
         ps.setObject(1, svs);
         ps.execute();
         checkQuery("SELECT * FROM TABLE1 order by id");

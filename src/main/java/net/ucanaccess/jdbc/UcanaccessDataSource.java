@@ -83,17 +83,17 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     /**
      * Opens the connection to the Access database using the provided username and password.
      *
-     * @param username
-     * @param password
+     * @param _username
+     * @param _password
      * @return java.sql.Connection object
      */
     @Override
-    public Connection getConnection(String username, String password) throws SQLException {
-        if (username != null) {
-            props.put("user", username);
+    public Connection getConnection(String _username, String _password) throws SQLException {
+        if (_username != null) {
+            props.put("user", _username);
         }
-        if (password != null) {
-            props.put("password", password);
+        if (_password != null) {
+            props.put("password", _password);
         }
         return new UcanaccessDriver().connect(UcanaccessDriver.URL_PREFIX + accessPath, props);
     }
@@ -286,14 +286,14 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     /**
-     * Specifies the path to the Access database file, for example,
+     * Specifies the path to the Access database file.
      * <p>
-     * C:/folder/database.accdb
+     * For example: C:/folder/database.accdb
      *
-     * @param accessPath
+     * @param _accessPath
      */
-    public void setAccessPath(String accessPath) {
-        this.accessPath = accessPath;
+    public void setAccessPath(String _accessPath) {
+        this.accessPath = _accessPath;
     }
 
     /**
@@ -410,8 +410,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public void setLogWriter(PrintWriter logWriter) throws SQLException {
-        Logger.setLogPrintWriter(logWriter);
+    public void setLogWriter(PrintWriter _logWriter) throws SQLException {
+        Logger.setLogPrintWriter(_logWriter);
     }
 
     /**
@@ -459,8 +459,8 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
         setProp("openexclusive", value, null);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(String _password) {
+        this.password = _password;
     }
 
     /**
@@ -540,12 +540,12 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
         setProp("sysschema", value, null);
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUser(String _user) {
+        this.user = _user;
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
+    public <T> T unwrap(Class<T> _iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

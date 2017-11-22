@@ -5,13 +5,16 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FormatCache {
+public final class FormatCache {
     private static DecimalFormat noArgs;
     private static DecimalFormat zpzz;
     private static DecimalFormat sharp;
     private static DecimalFormat noGrouping;
 
     private static final Map<String, DecimalFormat> CACHE = new HashMap<String, DecimalFormat>();
+
+    private FormatCache() {
+    }
 
     public static synchronized DecimalFormat getDecimalFormat(String _pattern) {
         if (!CACHE.containsKey(_pattern)) {

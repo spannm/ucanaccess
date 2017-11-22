@@ -21,9 +21,8 @@ import java.sql.Savepoint;
 public class UcanaccessSavepoint implements Savepoint {
     private Savepoint wrapped;
 
-    public UcanaccessSavepoint(Savepoint wrapped) {
-        super();
-        this.wrapped = wrapped;
+    public UcanaccessSavepoint(Savepoint _wrapped) {
+        this.wrapped = _wrapped;
     }
 
     @Override

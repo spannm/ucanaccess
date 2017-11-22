@@ -40,10 +40,10 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
 
     private CallableStatement hidden;
 
-    public UcanaccessCallableStatement(NormalizedSQL nsql, CallableStatement hidden, UcanaccessConnection connection)
+    public UcanaccessCallableStatement(NormalizedSQL _nsql, CallableStatement _hidden, UcanaccessConnection _connection)
             throws SQLException {
-        super(nsql, hidden, connection);
-        this.hidden = hidden;
+        super(_nsql, _hidden, _connection);
+        this.hidden = _hidden;
     }
 
     @Override

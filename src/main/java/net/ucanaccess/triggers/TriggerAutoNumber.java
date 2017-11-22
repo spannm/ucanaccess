@@ -33,7 +33,6 @@ import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class TriggerAutoNumber extends TriggerBase {
-    public static int           autorandom   = -1;
     private static final String GUID_PATTERN =
             "\\s*[{]?([\\p{XDigit}]{8})-([\\p{XDigit}]{4})-([\\p{XDigit}]{4})-([\\p{XDigit}]{4})-([\\p{XDigit}]{12})[}]?\\s*";
 
@@ -85,9 +84,7 @@ public class TriggerAutoNumber extends TriggerBase {
                         if (!oldR[i].equals(newR[i])) {
                             throw new RuntimeException("Cannot update autoincrement column");
                         }
-                    }
-
-                    else if (cl.getAutoNumberGenerator().getType().equals(DataType.GUID)) {
+                    } else if (cl.getAutoNumberGenerator().getType().equals(DataType.GUID)) {
                         validateGUID(newR[i]);
                     }
                 } else if (DataType.BOOLEAN.equals(cl.getType())) {

@@ -30,7 +30,9 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class UcanaccessStatement implements Statement {
     private UcanaccessConnection connection;
+    //CHECKSTYLE:OFF
     protected Statement          wrapped;
+    //CHECKSTYLE:ON
     private Object               generatedKey;
     private Map<String, String>  aliases;
     private boolean              enableDisable;
@@ -39,13 +41,13 @@ public class UcanaccessStatement implements Statement {
         return aliases;
     }
 
-    protected void setAliases(Map<String, String> aliases) {
-        this.aliases = aliases;
+    protected void setAliases(Map<String, String> _aliases) {
+        this.aliases = _aliases;
     }
 
-    public UcanaccessStatement(Statement wrapped, UcanaccessConnection conn) throws SQLException {
-        this.wrapped = wrapped;
-        this.connection = conn;
+    public UcanaccessStatement(Statement _wrapped, UcanaccessConnection _conn) throws SQLException {
+        this.wrapped = _wrapped;
+        this.connection = _conn;
     }
 
     private String convertSQL(String sql, UcanaccessConnection conn) {
@@ -569,8 +571,8 @@ public class UcanaccessStatement implements Statement {
         return enableDisable;
     }
 
-    void setEnableDisable(boolean enableDisable) {
-        this.enableDisable = enableDisable;
+    void setEnableDisable(boolean _enableDisable) {
+        this.enableDisable = _enableDisable;
     }
 
 }

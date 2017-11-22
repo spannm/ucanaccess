@@ -28,12 +28,11 @@ public class CreateForeignKeyCommand implements ICommand {
     private String execId;
     private String relationshipName;
 
-    public CreateForeignKeyCommand(String tableName, String referencedTable, String execId, String relationshipName) {
-        super();
-        this.tableName = tableName;
-        this.referencedTable = referencedTable;
-        this.execId = execId;
-        this.relationshipName = relationshipName;
+    public CreateForeignKeyCommand(String _tableName, String _referencedTable, String _execId, String _relationshipName) {
+        this.tableName = _tableName;
+        this.referencedTable = _referencedTable;
+        this.execId = _execId;
+        this.relationshipName = _relationshipName;
     }
 
     public String getRelationshipName() {

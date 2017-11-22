@@ -60,9 +60,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
 
             assertEquals(e.getErrorCode(), -ErrorCode.X_23505);
             assertEquals(e.getSQLState(), "23505");
-        }
-
-        finally {
+        } finally {
             if (st != null) {
                 st.close();
             }
@@ -78,9 +76,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
         } catch (SQLException e) {
             assertEquals(e.getErrorCode(), 11111);
             assertEquals(e.getSQLState(), "ko");
-        }
-
-        finally {
+        } finally {
             if (st != null) {
                 st.close();
             }
@@ -97,9 +93,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
 
             assertEquals(_ex.getErrorCode(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
             assertEquals(_ex.getSQLState(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
-        }
-
-        finally {
+        } finally {
             if (st != null) {
                 st.close();
             }
