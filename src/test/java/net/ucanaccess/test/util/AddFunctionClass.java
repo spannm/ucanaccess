@@ -20,7 +20,10 @@ import java.sql.Timestamp;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 
-public class AddFunctionClass {
+public final class AddFunctionClass {
+
+    private AddFunctionClass() {
+    }
 
     @FunctionType(functionName = "pluto", argumentTypes = { AccessType.TEXT, AccessType.TEXT,
             AccessType.DATETIME }, returnType = AccessType.TEXT)

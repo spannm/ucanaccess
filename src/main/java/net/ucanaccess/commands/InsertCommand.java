@@ -47,21 +47,19 @@ public class InsertCommand implements ICommand {
     private Table    table;
     private String   tableName;
 
-    public InsertCommand(String tableName, Database dbIO, Object[] newRow, String execId) {
-        super();
-        this.tableName = tableName;
-        this.dbIO = dbIO;
-        this.newRow = newRow;
-        this.execId = execId;
+    public InsertCommand(String _tableName, Database _dbIo, Object[] _newRow, String _execId) {
+        this.tableName = _tableName;
+        this.dbIO = _dbIo;
+        this.newRow = _newRow;
+        this.execId = _execId;
 
     }
 
-    public InsertCommand(Table table, Object[] newRow, String execId) {
-        super();
-        this.table = table;
-        this.tableName = table.getName();
-        this.newRow = newRow;
-        this.execId = execId;
+    public InsertCommand(Table _table, Object[] _newRow, String _execId) {
+        this.table = _table;
+        this.tableName = _table.getName();
+        this.newRow = _newRow;
+        this.execId = _execId;
     }
 
     @Override
@@ -97,11 +95,11 @@ public class InsertCommand implements ICommand {
         }
     }
 
-    public void insertRow(Table table, Object[] row) throws IOException {
+    public void insertRow(Table _table, Object[] _row) throws IOException {
         try {
-            table.addRow(newRow);
+            _table.addRow(newRow);
         } catch (ConstraintViolationException e) {
-            List<? extends Column> lc = table.getColumns();
+            List<? extends Column> lc = _table.getColumns();
             boolean retry = false;
             for (Column cl : lc) {
                 if (cl.isAutoNumber()) {
@@ -112,14 +110,14 @@ public class InsertCommand implements ICommand {
             if (!retry) {
                 throw e;
             }
-            Database db = table.getDatabase();
+            Database db = _table.getDatabase();
             File fl = db.getFile();
             DBReferenceSingleton dbsin = DBReferenceSingleton.getInstance();
             DBReference ref = dbsin.getReference(fl);
             ref.reloadDbIO();
             this.dbIO = ref.getDbIO();
-            table = this.dbIO.getTable(this.tableName);
-            table.addRow(newRow);
+            _table = this.dbIO.getTable(this.tableName);
+            _table.addRow(newRow);
         }
     }
 

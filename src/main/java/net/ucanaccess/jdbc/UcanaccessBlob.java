@@ -23,9 +23,8 @@ import java.sql.SQLException;
 public class UcanaccessBlob implements Blob {
     private Blob blob;
 
-    public UcanaccessBlob(Blob blob) {
-        super();
-        this.blob = blob;
+    public UcanaccessBlob(Blob _blob) {
+        this.blob = _blob;
     }
 
     @Override

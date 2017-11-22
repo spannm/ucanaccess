@@ -94,23 +94,23 @@ public class UcanaccessSQLException extends SQLException {
         super(Logger.getMessage(reason), SQLState, vendorCode);
     }
 
-    public UcanaccessSQLException(String reason, String sqlState, int vendorCode, Throwable cause) {
-        super(Logger.getMessage(reason), sqlState, vendorCode, cause);
+    public UcanaccessSQLException(String reason, String _sqlState, int _vendorCode, Throwable _cause) {
+        super(Logger.getMessage(reason), _sqlState, _vendorCode, _cause);
     }
 
-    public UcanaccessSQLException(String reason, String sqlState, Throwable cause) {
-        super(Logger.getMessage(reason), sqlState, cause);
+    public UcanaccessSQLException(String _reason, String _sqlState, Throwable _cause) {
+        super(Logger.getMessage(_reason), _sqlState, _cause);
     }
 
-    public UcanaccessSQLException(String reason, Throwable cause) {
-        super(Logger.getMessage(reason), cause);
+    public UcanaccessSQLException(String reason, Throwable _cause) {
+        super(Logger.getMessage(reason), _cause);
     }
 
-    public UcanaccessSQLException(Throwable cause) {
-        super(explaneCause(cause));
-        this.cause = cause;
-        if (cause instanceof SQLException) {
-            SQLException se = (SQLException) cause;
+    public UcanaccessSQLException(Throwable _cause) {
+        super(explaneCause(_cause));
+        this.cause = _cause;
+        if (_cause instanceof SQLException) {
+            SQLException se = (SQLException) _cause;
             this.errorCode = se.getErrorCode();
             this.sqlState = se.getSQLState();
         } else {

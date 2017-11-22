@@ -26,11 +26,10 @@ public class AlterRenameCommand implements ICommand {
     private String oldTableName;
     private String newTableName;
 
-    public AlterRenameCommand(String oldTableName, String newTableName, String execId) {
-        super();
-        this.oldTableName = oldTableName;
-        this.newTableName = newTableName;
-        this.execId = execId;
+    public AlterRenameCommand(String _oldTableName, String _newTableName, String _execId) {
+        this.oldTableName = _oldTableName;
+        this.newTableName = _newTableName;
+        this.execId = _execId;
     }
 
     @Override

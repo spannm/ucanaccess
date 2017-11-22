@@ -15,13 +15,14 @@ limitations under the License.
 */
 package net.ucanaccess.converters;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.healthmarketscience.jackcess.DataType;
 
-public class TypesMap {
+public final class TypesMap {
     public static enum AccessType {
         BYTE,
         COUNTER,
@@ -43,80 +44,83 @@ public class TypesMap {
         HYPERLINK
     }
 
-    private static final Map<String, String>       access2HsqlTypesMap     = new LinkedHashMap<String, String>();
-    private static final Map<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
-    private static final Map<DataType, String>     jackcess2HsqldbTypesMap = new HashMap<DataType, String>();
+    private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     = new LinkedHashMap<String, String>();
+    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new HashMap<AccessType, DataType>();
+    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new HashMap<DataType, String>();
 
     static {
-        access2HsqlTypesMap.put(AccessType.BYTE.name(), "SMALLINT");
-        access2HsqlTypesMap.put(AccessType.INTEGER.name(), "SMALLINT");
-        access2HsqlTypesMap.put(AccessType.LONG.name(), "INTEGER");
-        access2HsqlTypesMap.put(AccessType.TEXT.name(), "VARCHAR");
-        access2HsqlTypesMap.put(AccessType.OLE.name(), "BLOB");
-        access2HsqlTypesMap.put(AccessType.MEMO.name(), "LONGVARCHAR");
-        access2HsqlTypesMap.put(AccessType.CURRENCY.name(), "DECIMAL(" + DataType.MONEY.getFixedSize() + ",4)");
-        access2HsqlTypesMap.put(AccessType.GUID.name(), "CHAR(38)");
-        access2HsqlTypesMap.put(AccessType.COUNTER.name(), "INTEGER");
-        access2HsqlTypesMap.put(AccessType.AUTOINCREMENT.name(), "INTEGER");
-        access2HsqlTypesMap.put(AccessType.NUMERIC.name(), "DECIMAL");
-        access2HsqlTypesMap.put(AccessType.YESNO.name(), "BOOLEAN");
-        access2HsqlTypesMap.put(AccessType.DATETIME.name(), "TIMESTAMP");
-        access2HsqlTypesMap.put(AccessType.SINGLE.name(), "FLOAT");
-        access2HsqlTypesMap.put(AccessType.COMPLEX.name(), "OBJECT");
-        access2HsqlTypesMap.put(AccessType.CHAR.name(), "VARCHAR"); // CHAR mapped into TEXT when used in CREATE TABLE.
-        access2HsqlTypesMap.put(AccessType.HYPERLINK.name(), "LONGVARCHAR"); // HYPERLINK is a special type of MEMO
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.BYTE.name(), "SMALLINT");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.INTEGER.name(), "SMALLINT");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.LONG.name(), "INTEGER");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.TEXT.name(), "VARCHAR");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.OLE.name(), "BLOB");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.MEMO.name(), "LONGVARCHAR");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.CURRENCY.name(), "DECIMAL(" + DataType.MONEY.getFixedSize() + ",4)");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.GUID.name(), "CHAR(38)");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.COUNTER.name(), "INTEGER");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.AUTOINCREMENT.name(), "INTEGER");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.NUMERIC.name(), "DECIMAL");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.YESNO.name(), "BOOLEAN");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.DATETIME.name(), "TIMESTAMP");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.SINGLE.name(), "FLOAT");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.COMPLEX.name(), "OBJECT");
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.CHAR.name(), "VARCHAR"); // CHAR mapped into TEXT when used in CREATE TABLE.
+        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.HYPERLINK.name(), "LONGVARCHAR"); // HYPERLINK is a special type of MEMO
                                                                              // field
 
-        access2JackcessTypesMap.put(AccessType.BYTE, DataType.BYTE);
-        access2JackcessTypesMap.put(AccessType.INTEGER, DataType.INT);
-        access2JackcessTypesMap.put(AccessType.LONG, DataType.LONG);
-        access2JackcessTypesMap.put(AccessType.TEXT, DataType.TEXT);
-        access2JackcessTypesMap.put(AccessType.OLE, DataType.OLE);
-        access2JackcessTypesMap.put(AccessType.MEMO, DataType.MEMO);
-        access2JackcessTypesMap.put(AccessType.CURRENCY, DataType.MONEY);
-        access2JackcessTypesMap.put(AccessType.GUID, DataType.GUID);
-        access2JackcessTypesMap.put(AccessType.COUNTER, DataType.LONG);
-        access2JackcessTypesMap.put(AccessType.AUTOINCREMENT, DataType.LONG);
-        access2JackcessTypesMap.put(AccessType.NUMERIC, DataType.NUMERIC);
-        access2JackcessTypesMap.put(AccessType.YESNO, DataType.BOOLEAN);
-        access2JackcessTypesMap.put(AccessType.DATETIME, DataType.SHORT_DATE_TIME);
-        access2JackcessTypesMap.put(AccessType.SINGLE, DataType.FLOAT);
-        access2JackcessTypesMap.put(AccessType.DOUBLE, DataType.DOUBLE);
-        access2JackcessTypesMap.put(AccessType.HYPERLINK, DataType.MEMO);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.BYTE, DataType.BYTE);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.INTEGER, DataType.INT);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.LONG, DataType.LONG);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.TEXT, DataType.TEXT);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.OLE, DataType.OLE);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.MEMO, DataType.MEMO);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.CURRENCY, DataType.MONEY);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.GUID, DataType.GUID);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.COUNTER, DataType.LONG);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.AUTOINCREMENT, DataType.LONG);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.NUMERIC, DataType.NUMERIC);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.YESNO, DataType.BOOLEAN);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.DATETIME, DataType.SHORT_DATE_TIME);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.SINGLE, DataType.FLOAT);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.DOUBLE, DataType.DOUBLE);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.HYPERLINK, DataType.MEMO);
 
-        jackcess2HsqldbTypesMap.put(DataType.BYTE, "SMALLINT");
-        jackcess2HsqldbTypesMap.put(DataType.INT, "SMALLINT");
-        jackcess2HsqldbTypesMap.put(DataType.LONG, "INTEGER");
-        jackcess2HsqldbTypesMap.put(DataType.TEXT, "VARCHAR");
-        jackcess2HsqldbTypesMap.put(DataType.BINARY, "BLOB");
-        jackcess2HsqldbTypesMap.put(DataType.MEMO, "LONGVARCHAR");
-        jackcess2HsqldbTypesMap.put(DataType.MONEY, "DECIMAL(100,4)");
-        jackcess2HsqldbTypesMap.put(DataType.GUID, "CHAR(38)");
-        jackcess2HsqldbTypesMap.put(DataType.OLE, "BLOB");
-        jackcess2HsqldbTypesMap.put(DataType.NUMERIC, "NUMERIC");
-        jackcess2HsqldbTypesMap.put(DataType.BOOLEAN, "BOOLEAN");
-        jackcess2HsqldbTypesMap.put(DataType.SHORT_DATE_TIME, "TIMESTAMP");
-        jackcess2HsqldbTypesMap.put(DataType.FLOAT, "FLOAT");
-        jackcess2HsqldbTypesMap.put(DataType.DOUBLE, "DOUBLE");
-        jackcess2HsqldbTypesMap.put(DataType.COMPLEX_TYPE, "OBJECT");
-        jackcess2HsqldbTypesMap.put(DataType.UNKNOWN_11, "BLOB");
-        jackcess2HsqldbTypesMap.put(DataType.UNKNOWN_0D, "BLOB");
-        jackcess2HsqldbTypesMap.put(DataType.UNSUPPORTED_FIXEDLEN, "BLOB");
-        jackcess2HsqldbTypesMap.put(DataType.UNSUPPORTED_VARLEN, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BYTE, "SMALLINT");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.INT, "SMALLINT");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.LONG, "INTEGER");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.TEXT, "VARCHAR");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BINARY, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.MEMO, "LONGVARCHAR");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.MONEY, "DECIMAL(100,4)");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.GUID, "CHAR(38)");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.OLE, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.NUMERIC, "NUMERIC");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BOOLEAN, "BOOLEAN");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.SHORT_DATE_TIME, "TIMESTAMP");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.FLOAT, "FLOAT");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.DOUBLE, "DOUBLE");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.COMPLEX_TYPE, "OBJECT");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.UNKNOWN_11, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.UNKNOWN_0D, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.UNSUPPORTED_FIXEDLEN, "BLOB");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.UNSUPPORTED_VARLEN, "BLOB");
+    }
+
+    private TypesMap() {
     }
 
     public static Map<String, String> getAccess2HsqlTypesMap() {
-        return access2HsqlTypesMap;
+        return Collections.unmodifiableMap(ACCESS_TO_HSQL_TYPES_MAP);
     }
 
-    public static String map2hsqldb(DataType type) {
-        if (jackcess2HsqldbTypesMap.containsKey(type)) {
-            return jackcess2HsqldbTypesMap.get(type);
+    public static String map2hsqldb(DataType _type) {
+        if (JACKCESS_TO_HSQLDB_TYPES_MAP.containsKey(_type)) {
+            return JACKCESS_TO_HSQLDB_TYPES_MAP.get(_type);
         }
-        return type.name();
+        return _type.name();
     }
 
-    public static DataType map2Jackcess(AccessType type) {
-        return access2JackcessTypesMap.get(type);
+    public static DataType map2Jackcess(AccessType _type) {
+        return ACCESS_TO_JACKCESS_TYPES_MAP.get(_type);
     }
 }

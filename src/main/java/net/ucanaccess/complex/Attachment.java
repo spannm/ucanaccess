@@ -40,19 +40,19 @@ public class Attachment extends ComplexBase {
         this.flags = atc.getFileFlags();
     }
 
-    public Attachment(ComplexValue.Id id, String tableName, String columnName, String url, String name, String type,
-            byte[] data, Date timeStamp, Integer flags) {
+    public Attachment(ComplexValue.Id id, String tableName, String columnName, String _url, String _name, String _type,
+            byte[] _data, Date _timeStamp, Integer _flags) {
         super(id, tableName, columnName);
-        this.url = url;
-        this.name = name;
-        this.type = type;
-        this.data = data;
-        this.timeStamp = timeStamp;
-        this.flags = flags;
+        this.url = _url;
+        this.name = _name;
+        this.type = _type;
+        this.data = _data;
+        this.timeStamp = _timeStamp;
+        this.flags = _flags;
     }
 
-    public Attachment(String url, String name, String type, byte[] data, Date timeStamp, Integer flags) {
-        this(CREATE_ID, null, null, url, name, type, data, timeStamp, flags);
+    public Attachment(String _url, String _name, String _type, byte[] _data, Date _timeStamp, Integer _flags) {
+        this(CREATE_ID, null, null, _url, _name, _type, _data, _timeStamp, _flags);
 
     }
 
@@ -145,28 +145,28 @@ public class Attachment extends ComplexBase {
         return result;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
+    public void setData(byte[] _data) {
+        this.data = _data;
     }
 
-    public void setFlags(Integer flags) {
-        this.flags = flags;
+    public void setFlags(Integer _flags) {
+        this.flags = _flags;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String _name) {
+        this.name = _name;
     }
 
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTimeStamp(Date _timeStamp) {
+        this.timeStamp = _timeStamp;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(String _type) {
+        this.type = _type;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUrl(String _url) {
+        this.url = _url;
     }
 
     @Override

@@ -44,9 +44,9 @@ public class DFunction {
     private static final List<String> DFUNCTIONLIST            =
             Arrays.asList("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
 
-    public DFunction(Connection conn, String sql) {
-        this.conn = conn;
-        this.sql = sql;
+    public DFunction(Connection _conn, String _sql) {
+        this.conn = _conn;
+        this.sql = _sql;
     }
 
     private String convertDFunctions() {

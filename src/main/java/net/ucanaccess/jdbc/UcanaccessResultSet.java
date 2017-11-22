@@ -50,10 +50,9 @@ public class UcanaccessResultSet implements ResultSet {
     private Set<String>         metadata;
     private Set<Integer>        updIndexes = new HashSet<Integer>();
 
-    public UcanaccessResultSet(ResultSet wrapped, UcanaccessStatement statement) {
-        super();
-        this.wrapped = wrapped;
-        this.wrappedStatement = statement;
+    public UcanaccessResultSet(ResultSet _wrapped, UcanaccessStatement _statement) {
+        this.wrapped = _wrapped;
+        this.wrappedStatement = _statement;
     }
 
     private String checkEscaped(String label) throws SQLException {

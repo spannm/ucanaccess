@@ -25,10 +25,9 @@ public class DropTableCommand implements ICommand {
     private String execId;
     private String tableName;
 
-    public DropTableCommand(String tableName, String execId) {
-        super();
-        this.tableName = tableName;
-        this.execId = execId;
+    public DropTableCommand(String _tableName, String _execId) {
+        this.tableName = _tableName;
+        this.execId = _execId;
     }
 
     @Override

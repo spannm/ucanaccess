@@ -26,19 +26,19 @@ import java.util.List;
 public class Metadata {
 
     private Connection          conn;
-    private final static String SCHEMA = "CREATE SCHEMA UCA_METADATA AUTHORIZATION DBA";
+    private static final String SCHEMA = "CREATE SCHEMA UCA_METADATA AUTHORIZATION DBA";
 
-    private final static String TABLES  =
+    private static final String TABLES  =
             "CREATE  TABLE UCA_METADATA.TABLES(TABLE_ID INTEGER IDENTITY, TABLE_NAME LONGVARCHAR,ESCAPED_TABLE_NAME LONGVARCHAR, TYPE VARCHAR(5),UNIQUE(TABLE_NAME)) ";
-    private final static String COLUMNS = "CREATE MEMORY TABLE    "
+    private static final String COLUMNS = "CREATE MEMORY TABLE    "
             + "				UCA_METADATA.COLUMNS(COLUMN_ID INTEGER IDENTITY, COLUMN_NAME LONGVARCHAR,ESCAPED_COLUMN_NAME LONGVARCHAR, "
             + "				ORIGINAL_TYPE VARCHAR(20),COLUMN_DEF  LONGVARCHAR,IS_GENERATEDCOLUMN VARCHAR(3),TABLE_ID INTEGER, UNIQUE(TABLE_ID,COLUMN_NAME) )";
 
-    private final static String PROP =
+    private static final String PROP =
             "CREATE MEMORY TABLE   UCA_METADATA.PROP(NAME LONGVARCHAR PRIMARY KEY, MAX_LEN INTEGER,DEFAULT_VALUE VARCHAR(20),DESCRIPTION LONGVARCHAR) ";
 
-    public final static String      SYSTEM_SUBQUERY = "SYSTEM_SUBQUERY";
-    private final static Object[][] PROP_DATA       = new Object[][] {
+    public static final String      SYSTEM_SUBQUERY = "SYSTEM_SUBQUERY";
+    private static final Object[][] PROP_DATA       = new Object[][] {
             { "newdatabaseversion", 8, null, "see ucanaccess website" },
             { "jackcessopener", 500, null, "see ucanaccess web site" },
             { "password", 500, null, "see ucanaccess web site" }, { "memory", 10, "true", "see ucanaccess web site" },
@@ -59,43 +59,43 @@ public class Metadata {
 
     };
 
-    private final static String COLUMNS_VIEW = "CREATE VIEW   UCA_METADATA.COLUMNS_VIEW as "
+    private static final String COLUMNS_VIEW = "CREATE VIEW   UCA_METADATA.COLUMNS_VIEW as "
             + "SELECT t.TABLE_NAME, c.COLUMN_NAME,t.ESCAPED_TABLE_NAME, c.ESCAPED_COLUMN_NAME,c.COLUMN_DEF,c.IS_GENERATEDCOLUMN,"
             + "CASE WHEN(c.ORIGINAL_TYPE 	IN ('COUNTER' ,'GUID')) THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT,c.ORIGINAL_TYPE "
             + "FROM UCA_METADATA.COLUMNS c INNER JOIN UCA_METADATA.TABLES t ON (t.TABLE_ID=c.TABLE_ID)";
 
-    private final static String FK = "ALTER TABLE UCA_METADATA.COLUMNS   "
+    private static final String FK = "ALTER TABLE UCA_METADATA.COLUMNS   "
             + "ADD CONSTRAINT UCA_METADATA_FK FOREIGN KEY (TABLE_ID) REFERENCES UCA_METADATA.TABLES (TABLE_ID) ON DELETE CASCADE";
 
-    private final static String TABLE_RECORD  =
+    private static final String TABLE_RECORD  =
             "INSERT INTO UCA_METADATA.TABLES( TABLE_NAME,ESCAPED_TABLE_NAME, TYPE) VALUES(?,?,?)";
-    private final static String COLUMN_RECORD =
+    private static final String COLUMN_RECORD =
             "INSERT INTO UCA_METADATA.COLUMNS(COLUMN_NAME,ESCAPED_COLUMN_NAME,ORIGINAL_TYPE, IS_GENERATEDCOLUMN,TABLE_ID) "
                     + "VALUES(?,?,?,'NO',?)";
 
-    private final static String SELECT_COLUMN =
+    private static final String SELECT_COLUMN =
             "SELECT DISTINCT c.COLUMN_NAME,c.ORIGINAL_TYPE IN('COUNTER','GUID') as IS_AUTOINCREMENT, c.ORIGINAL_TYPE='MONEY' as IS_CURRENCY "
                     + "				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t "
                     + "				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.ESCAPED_TABLE_NAME=nvl(?,t.ESCAPED_TABLE_NAME) AND c.ESCAPED_COLUMN_NAME=? ";
 
-    private final static String SELECT_COLUMN_ESCAPED = "SELECT c.ESCAPED_COLUMN_NAME"
+    private static final String SELECT_COLUMN_ESCAPED = "SELECT c.ESCAPED_COLUMN_NAME"
             + "				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t "
             + "				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.TABLE_NAME=nvl(?,t.TABLE_NAME) AND c.COLUMN_NAME=? ";
 
-    private final static String SELECT_TABLE_ESCAPED =
+    private static final String SELECT_TABLE_ESCAPED =
             "SELECT ESCAPED_TABLE_NAME FROM UCA_METADATA.TABLES WHERE TABLE_NAME=?";
 
-    private final static String SELECT_TABLE_METADATA     =
+    private static final String SELECT_TABLE_METADATA     =
             "SELECT TABLE_ID, TABLE_NAME FROM UCA_METADATA.TABLES WHERE ESCAPED_TABLE_NAME=? ";
-    private final static String DROP_TABLE                = "DELETE FROM UCA_METADATA.TABLES WHERE TABLE_NAME=?";
-    private final static String UPDATE_COLUMN_DEF         =
+    private static final String DROP_TABLE                = "DELETE FROM UCA_METADATA.TABLES WHERE TABLE_NAME=?";
+    private static final String UPDATE_COLUMN_DEF         =
             "UPDATE UCA_METADATA.COLUMNS c SET c.COLUMN_DEF=? WHERE COLUMN_NAME=? "
                     + " AND EXISTS(SELECT * FROM UCA_METADATA.TABLES t WHERE t.TABLE_NAME=? AND t.TABLE_ID=c.TABLE_ID) ";
     private static final String UPDATE_IS_GENERATEDCOLUMN =
             "UPDATE UCA_METADATA.COLUMNS c SET c.IS_GENERATEDCOLUMN='YES' WHERE COLUMN_NAME=? "
                     + " AND EXISTS(SELECT * FROM UCA_METADATA.TABLES t WHERE t.TABLE_NAME=? AND t.TABLE_ID=c.TABLE_ID) ";
 
-    private final static String SELECT_COLUMNS =
+    private static final String SELECT_COLUMNS =
             "SELECT DISTINCT c.COLUMN_NAME,c.ORIGINAL_TYPE IN('COUNTER','GUID') as IS_AUTOINCREMENT, c.ORIGINAL_TYPE='MONEY' as IS_CURRENCY  "
                     + "				FROM UCA_METADATA.COLUMNS  c INNER JOIN UCA_METADATA.TABLES  t "
                     + "				ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.ESCAPED_TABLE_NAME=nvl(?,t.ESCAPED_TABLE_NAME) ";
@@ -107,9 +107,8 @@ public class Metadata {
         TABLE
     }
 
-    public Metadata(Connection conn) throws SQLException {
-        super();
-        this.conn = conn;
+    public Metadata(Connection _conn) throws SQLException {
+        this.conn = _conn;
 
     }
 
@@ -144,9 +143,7 @@ public class Metadata {
                 ps.execute();
             }
 
-        }
-
-        finally {
+        } finally {
             if (ps != null) {
                 ps.close();
             }
@@ -189,9 +186,7 @@ public class Metadata {
             ps.executeUpdate();
         } catch (SQLException e) {
 
-        }
-
-        finally {
+        } finally {
             if (ps != null) {
                 ps.close();
             }

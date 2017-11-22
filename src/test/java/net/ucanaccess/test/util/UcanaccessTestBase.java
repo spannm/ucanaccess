@@ -60,11 +60,13 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     private File                   fileAccDb;
-    protected FileFormat           fileFormat;
     private String                 password          = "";
+    // CHECKSTYLE:OFF
+    protected FileFormat           fileFormat;
     protected UcanaccessConnection ucanaccess;
+    // CHECKSTYLE:ON
     private String                 user              = "ucanaccess";
-    protected Connection           verifyConnection;
+    private Connection             verifyConnection;
     private Boolean                ignoreCase;
     private long                   inactivityTimeout = -1;
     private String                 columnOrder;
@@ -74,10 +76,10 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     @Parameterized.Parameters(name="{index}: {0}")
     public static Iterable<Object[]> getAllAccessFileFormats() {
         List<Object[]> fileFormats = Arrays.asList(
-                new Object[] { FileFormat.V2000 },
-                new Object[] { FileFormat.V2003 },
-                new Object[] { FileFormat.V2007 },
-                new Object[] { FileFormat.V2010 });
+                new Object[] {FileFormat.V2000},
+                new Object[] {FileFormat.V2003},
+                new Object[] {FileFormat.V2007},
+                new Object[] {FileFormat.V2010});
         return fileFormats;
     }
 
@@ -227,6 +229,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 
                 if (ob1 == null && ob2 == null) {
                     // both null, ok
+                    assertNull(ob1);
                 } else if (ob1 == null) {
                     assertTrue("Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + ob2 + " in [" + _query + "]", ob2 == null);
                 } else {
@@ -246,9 +249,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                         }
                     } else if (ob1 instanceof ComplexBase[] && ob2 instanceof ComplexBase[]) {
                         assertTrue(Arrays.equals((ComplexBase[]) ob1, (ComplexBase[]) ob2));
-                    }
-
-                    else {
+                    } else {
                         if (ob1 instanceof Number && ob2 instanceof Number) {
                             BigDecimal ob1b = new BigDecimal(ob1.toString());
                             BigDecimal ob2b = new BigDecimal(ob2.toString());

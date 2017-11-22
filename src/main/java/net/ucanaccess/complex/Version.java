@@ -31,14 +31,14 @@ public class Version extends ComplexBase {
         this.modifiedDate = cv.getModifiedDate();
     }
 
-    public Version(ComplexValue.Id id, String tableName, String columnName, String value, Date modifiedDate) {
+    public Version(ComplexValue.Id id, String tableName, String columnName, String _value, Date _modifiedDate) {
         super(id, tableName, columnName);
-        this.value = value;
-        this.modifiedDate = modifiedDate;
+        this.value = _value;
+        this.modifiedDate = _modifiedDate;
     }
 
-    public Version(String value, Date modifiedDate) {
-        this(CREATE_ID, null, null, value, modifiedDate);
+    public Version(String _value, Date _modifiedDate) {
+        this(CREATE_ID, null, null, _value, _modifiedDate);
     }
 
     @Override
@@ -84,12 +84,12 @@ public class Version extends ComplexBase {
         return result;
     }
 
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
+    public void setModifiedDate(Date _modifiedDate) {
+        this.modifiedDate = _modifiedDate;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setValue(String _value) {
+        this.value = _value;
     }
 
     @Override

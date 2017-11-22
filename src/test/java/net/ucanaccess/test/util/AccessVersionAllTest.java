@@ -7,7 +7,7 @@ import org.junit.runners.Parameterized;
 
 public abstract class AccessVersionAllTest extends UcanaccessTestBase {
 
-    private static final List<Object[]> versions = Arrays.asList(
+    private static final List<Object[]> VERSIONS = Arrays.asList(
             new Object[] { AccessVersion.V2000 },
             new Object[] { AccessVersion.V2003 },
             new Object[] { AccessVersion.V2007 },
@@ -15,7 +15,7 @@ public abstract class AccessVersionAllTest extends UcanaccessTestBase {
 
     @Parameterized.Parameters(name="{index}: {0}")
     public static Iterable<Object[]> getAllAccessVersions() {
-        return versions;
+        return VERSIONS;
     }
 
     public AccessVersionAllTest(AccessVersion _fileFormat) {

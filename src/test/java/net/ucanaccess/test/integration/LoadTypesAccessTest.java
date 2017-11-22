@@ -30,7 +30,7 @@ import net.ucanaccess.test.util.AccessVersionAllTest;
 
 @RunWith(Parameterized.class)
 public class LoadTypesAccessTest extends AccessVersionAllTest {
-    private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     public LoadTypesAccessTest(AccessVersion _accessVersion) {
         super(_accessVersion);

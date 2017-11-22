@@ -47,7 +47,7 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.util.Logger;
 
 public class DBReference {
-    private final static String                         CIPHER_SPEC       = "AES";
+    private static final String                         CIPHER_SPEC       = "AES";
     private static List<OnReloadReferenceListener>      onReloadListeners = new ArrayList<OnReloadReferenceListener>();
     private static String                               version;
     private File                                        dbFile;
@@ -85,7 +85,7 @@ public class DBReference {
     private boolean                                     mirrorRecreated;
 
     private static class MemoryTimer {
-        private final static long INACTIVITY_TIMEOUT_DEFAULT = 120000;
+        private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
 
         private final DBReference dbReference;
         private final Timer       timer;
@@ -150,23 +150,23 @@ public class DBReference {
             }
         }
 
-        private void setInactivityTimeout(int inactivityTimeout) {
-            this.inactivityTimeout = inactivityTimeout;
+        private void setInactivityTimeout(int _inactivityTimeout) {
+            this.inactivityTimeout = _inactivityTimeout;
         }
     }
 
-    public DBReference(File fl, FileFormat ff, JackcessOpenerInterface jko, final String pwd)
+    public DBReference(File fl, FileFormat ff, JackcessOpenerInterface _jko, final String _pwd)
             throws IOException, SQLException {
         this.dbFile = fl;
-        this.pwd = pwd;
-        this.jko = jko;
+        this.pwd = _pwd;
+        this.jko = _jko;
         this.lastModified = System.currentTimeMillis();
         memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
             dbIO = DatabaseBuilder.create(ff, fl);
         } else {
-            dbIO = jko.open(fl, pwd);
+            dbIO = _jko.open(fl, _pwd);
             try {
                 this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(FileFormat.V1997);
                 this.dbFormat = dbIO.getFileFormat();
@@ -189,7 +189,7 @@ public class DBReference {
                     } else {
                         links.add(linkeeFile);
                     }
-                    Database ldb = open(linkeeFile, pwd);
+                    Database ldb = open(linkeeFile, _pwd);
                     return ldb;
                 }
             });
@@ -197,9 +197,9 @@ public class DBReference {
         }
     }
 
-    public Database open(File dbfl, String pwd) throws IOException {
+    public Database open(File _dbfl, String _pwd) throws IOException {
         Logger.turnOffJackcessLog();
-        Database ret = jko.open(dbfl, pwd);
+        Database ret = jko.open(_dbfl, _pwd);
         if (this.columnOrderDisplay) {
             ret.setColumnOrder(ColumnOrder.DISPLAY);
         }
@@ -472,7 +472,7 @@ public class DBReference {
         return id;
     }
 
-    private String key(String pwd) throws SQLException {
+    private String key(String _pwd) throws SQLException {
         Connection conn = null;
         try {
             if (this.encryptionKey == null) {
@@ -622,16 +622,16 @@ public class DBReference {
         memoryTimer.setInactivityTimeout(inactivityTimeout);
     }
 
-    public void setInMemory(boolean inMemory) {
-        this.inMemory = inMemory;
+    public void setInMemory(boolean _inMemory) {
+        this.inMemory = _inMemory;
     }
 
-    public void setOpenExclusive(boolean openExclusive) {
-        this.openExclusive = openExclusive;
+    public void setOpenExclusive(boolean _openExclusive) {
+        this.openExclusive = _openExclusive;
     }
 
-    public void setShowSchema(boolean showSchema) {
-        this.showSchema = showSchema;
+    public void setShowSchema(boolean _showSchema) {
+        this.showSchema = _showSchema;
     }
 
     void shutdown(Session _session) throws Exception {
@@ -652,24 +652,24 @@ public class DBReference {
         this.lastModified = this.filesUpdateTime();
     }
 
-    public void setImmediatelyReleaseResources(boolean immediatelyReleaseResources) {
-        this.immediatelyReleaseResources = immediatelyReleaseResources;
+    public void setImmediatelyReleaseResources(boolean _immediatelyReleaseResources) {
+        this.immediatelyReleaseResources = _immediatelyReleaseResources;
     }
 
-    public void setEncryptHSQLDB(boolean encryptHSQLDB) {
-        this.encryptHSQLDB = encryptHSQLDB;
+    public void setEncryptHSQLDB(boolean _encryptHSQLDB) {
+        this.encryptHSQLDB = _encryptHSQLDB;
     }
 
-    public void setExternalResourcesMapping(Map<String, String> externalResourcesMapping) {
-        this.externalResourcesMapping = externalResourcesMapping;
+    public void setExternalResourcesMapping(Map<String, String> _externalResourcesMapping) {
+        this.externalResourcesMapping = _externalResourcesMapping;
     }
 
     public File getToKeepHsql() {
         return toKeepHsql;
     }
 
-    public void setToKeepHsql(File toKeepHsql) {
-        this.toKeepHsql = toKeepHsql;
+    public void setToKeepHsql(File _toKeepHsql) {
+        this.toKeepHsql = _toKeepHsql;
     }
 
     public boolean isEncryptHSQLDB() {
@@ -687,8 +687,8 @@ public class DBReference {
         return inMemory;
     }
 
-    public void setMirrorFolder(File mirrorFolder) {
-        this.mirrorFolder = mirrorFolder;
+    public void setMirrorFolder(File _mirrorFolder) {
+        this.mirrorFolder = _mirrorFolder;
 
     }
 
@@ -696,40 +696,40 @@ public class DBReference {
         return ignoreCase;
     }
 
-    public void setIgnoreCase(boolean ignoreCase) {
-        this.ignoreCase = ignoreCase;
+    public void setIgnoreCase(boolean _ignoreCase) {
+        this.ignoreCase = _ignoreCase;
     }
 
-    public void setMirrorReadOnly(boolean mirrorReadOnly) {
-        this.mirrorReadOnly = mirrorReadOnly;
+    public void setMirrorReadOnly(boolean _mirrorReadOnly) {
+        this.mirrorReadOnly = _mirrorReadOnly;
     }
 
-    public void setLobScale(Integer lobScale) {
-        this.lobScale = lobScale;
+    public void setLobScale(Integer _lobScale) {
+        this.lobScale = _lobScale;
     }
 
-    public void setSkipIndexes(boolean skipIndexes) {
-        this.skipIndexes = skipIndexes;
+    public void setSkipIndexes(boolean _skipIndexes) {
+        this.skipIndexes = _skipIndexes;
     }
 
-    public void setSysSchema(boolean sysSchema) {
-        this.sysSchema = sysSchema;
+    public void setSysSchema(boolean _sysSchema) {
+        this.sysSchema = _sysSchema;
     }
 
     public boolean isPreventReloading() {
         return preventReloading;
     }
 
-    public void setPreventReloading(boolean preventReloading) {
-        this.preventReloading = preventReloading;
+    public void setPreventReloading(boolean _preventReloading) {
+        this.preventReloading = _preventReloading;
     }
 
     public boolean isConcatNulls() {
         return concatNulls;
     }
 
-    public void setConcatNulls(boolean concatNulls) {
-        this.concatNulls = concatNulls;
+    public void setConcatNulls(boolean _concatNulls) {
+        this.concatNulls = _concatNulls;
     }
 
     @Override

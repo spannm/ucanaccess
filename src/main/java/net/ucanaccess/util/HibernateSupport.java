@@ -23,7 +23,7 @@ package net.ucanaccess.util;
  * @author Gord
  *
  */
-public class HibernateSupport {
+public final class HibernateSupport {
 
     private static final String UCA_HIBERNATE_ISACTIVE_PROPERTY =
             "net.ucanaccess.hibernate.dialect.UCanAccessDialect.isActive";
@@ -33,7 +33,7 @@ public class HibernateSupport {
     /**
      * Checks the Java system property set by the constructor of the UCanAccessDialect class, indicating that we are
      * running under a Hibernate process.
-     * 
+     *
      * @return whether the property was found and its value was "true"
      */
     public static Boolean isActive() {

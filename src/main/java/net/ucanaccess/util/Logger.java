@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
-public class Logger {
+public final class Logger {
     public enum Messages {
         HSQLDB_DRIVER_NOT_FOUND,
         COMPLEX_TYPE_UNSUPPORTED,
@@ -40,9 +40,11 @@ public class Logger {
     private static PrintWriter    logPrintWriter;
     private static ResourceBundle messageBundle = ResourceBundle.getBundle("net.ucanaccess.util.logger_messages");
 
+    private Logger() {
+    }
+
     public static void dump() {
-        StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-        for (StackTraceElement el : ste) {
+        for (StackTraceElement el : Thread.currentThread().getStackTrace()) {
             logPrintWriter.println(el.toString());
             logPrintWriter.flush();
         }
@@ -92,7 +94,7 @@ public class Logger {
         logWarning(String.format(messageBundle.getString(cod.name()), (Object[]) par));
     }
 
-    public static void setLogPrintWriter(PrintWriter logPrintWriter) {
-        Logger.logPrintWriter = logPrintWriter;
+    public static void setLogPrintWriter(PrintWriter _logPrintWriter) {
+        Logger.logPrintWriter = _logPrintWriter;
     }
 }

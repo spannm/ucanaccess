@@ -49,10 +49,13 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
-public class Functions {
+public final class Functions {
     private static Double       rnd;
     private static Double       lastRnd;
-    private final static double APPROX = 0.00000001;
+    private static final double APPROX = 0.00000001;
+
+    private Functions() {
+    }
 
     static SimpleDateFormat createSimpleDateFormat(String pt) {
         SimpleDateFormat sdf = new SimpleDateFormat(pt);
@@ -1072,16 +1075,28 @@ public class Functions {
     @FunctionType(functionName = "RND", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static Double rnd(Double d) {
         if (d == null) {
-            return lastRnd = Math.random();
+            lastRnd = Math.random();
+            return lastRnd;
         }
         if (d > 0) {
-            return lastRnd = Math.random();
+            lastRnd = Math.random();
+            return lastRnd;
         }
         if (d < 0) {
-            return rnd == null ? rnd = d : rnd;
+            if (rnd == null) {
+                rnd = d;
+                return rnd;
+            } else {
+                return rnd;
+            }
         }
         if (d == 0) {
-            return lastRnd == null ? lastRnd = Math.random() : lastRnd;
+            if (lastRnd == null) {
+                lastRnd = Math.random();
+                return lastRnd;
+            } else {
+                return lastRnd;
+            }
         }
         return null;
     }
@@ -1367,12 +1382,12 @@ public class Functions {
         // FROM MS http://office.microsoft.com/en-us/excel-help/rate-HP005209232.aspx
 
         type = (Math.abs(type) >= 1) ? 1 : 0; // the only change to the implementation Apache POI
-        int FINANCIAL_MAX_ITERATIONS = 20;// Bet accuracy with 128
-        double FINANCIAL_PRECISION = 0.0000001;// 1.0e-8
+        final int financialMaxIterations = 20;// Bet accuracy with 128
+        final double financialPrecision = 0.0000001;// 1.0e-8
 
         double y, y0, y1, x0, x1 = 0, f = 0, i = 0;
         double rate = guess;
-        if (Math.abs(rate) < FINANCIAL_PRECISION) {
+        if (Math.abs(rate) < financialPrecision) {
             y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
         } else {
             f = Math.exp(nper * Math.log(1 + rate));
@@ -1382,14 +1397,15 @@ public class Functions {
         y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
 
         // find root by Newton secant method
-        i = x0 = 0.0;
+        i = 0.0;
+        x0 = 0.0;
         x1 = rate;
-        while ((Math.abs(y0 - y1) > FINANCIAL_PRECISION) && (i < FINANCIAL_MAX_ITERATIONS)) {
+        while ((Math.abs(y0 - y1) > financialPrecision) && (i < financialMaxIterations)) {
             rate = (y1 * x0 - y0 * x1) / (y1 - y0);
             x0 = x1;
             x1 = rate;
 
-            if (Math.abs(rate) < FINANCIAL_PRECISION) {
+            if (Math.abs(rate) < financialPrecision) {
                 y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
             } else {
                 f = Math.exp(nper * Math.log(1 + rate));

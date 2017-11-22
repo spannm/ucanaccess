@@ -30,19 +30,18 @@ public class CreateTableCommand implements ICommand {
     private Boolean[]           notNulls;
     private Map<String, String> columnMap;
 
-    public CreateTableCommand(String tableName, String execId) {
-        super();
-        this.tableName = tableName;
-        this.execId = execId;
+    public CreateTableCommand(String _tableName, String _execId) {
+        this.tableName = _tableName;
+        this.execId = _execId;
     }
 
-    public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap, String[] types,
-            String[] defaults, Boolean[] notNulls) {
+    public CreateTableCommand(String tn, String execId2, Map<String, String> _columnMap, String[] _types,
+            String[] _defaults, Boolean[] _notNulls) {
         this(tn, execId2);
-        this.types = types;
-        this.defaults = defaults;
-        this.notNulls = notNulls;
-        this.columnMap = columnMap;
+        this.types = _types;
+        this.defaults = _defaults;
+        this.notNulls = _notNulls;
+        this.columnMap = _columnMap;
     }
 
     public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap2) {

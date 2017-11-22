@@ -33,7 +33,7 @@ import net.ucanaccess.test.util.AccessVersionDefaultTest;
 
 @RunWith(Parameterized.class)
 public class MultiThreadAccessTest extends AccessVersionDefaultTest {
-    static int           i;
+    private static int intVal;
 
     private String       dbPath;
     private final String tableName = "T1";
@@ -57,8 +57,8 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
-        ++i;
-        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + (i) + ",'" + (i) + "Bla bla bla bla:"
+        ++intVal;
+        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + (intVal) + ",'" + (intVal) + "Bla bla bla bla:"
                 + Thread.currentThread() + "')");
         conn.commit();
         conn.close();
@@ -68,7 +68,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr)  VALUES(?, ?)");
-        ps.setInt(1, ++i);
+        ps.setInt(1, ++intVal);
         ps.setString(2, "ciao");
         ps.execute();
         ps = conn.prepareStatement("UPDATE " + tableName + " SET descr='" + Thread.currentThread() + "'");
@@ -82,7 +82,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
-        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES(" + (++i) + "  ,'" + Thread.currentThread() + "')");
+        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES(" + (++intVal) + "  ,'" + Thread.currentThread() + "')");
         PreparedStatement ps = conn.prepareStatement("SELECT *  FROM " + tableName + "", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();

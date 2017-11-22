@@ -36,9 +36,9 @@ public class UcanaccessTable implements Table {
     private Table  wrapped;
     private String tableName;
 
-    public UcanaccessTable(Table t, String tableName) {
-        this.wrapped = t;
-        this.tableName = tableName;
+    public UcanaccessTable(Table _table, String _tableName) {
+        this.wrapped = _table;
+        this.tableName = _tableName;
     }
 
     @Override

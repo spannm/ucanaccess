@@ -45,19 +45,18 @@ public class ParametricQuery {
     private boolean             issueWithParameterName;
     private Map<String, String> aposMap;
     private List<String>        parameterList;
-    private Exception           e;
+    private Exception           exception;
     private boolean             isProcedure;
     private String              sqlContent;
     private String              signature;
     private StringBuffer        originalParameters = new StringBuffer();
 
-    public ParametricQuery(Connection hsqldb, QueryImpl qi) throws SQLException {
-        super();
-        this.hsqldb = hsqldb;
-        if (qi.getType() == Query.Type.APPEND) {
-            this.qi = new AppendQueryTemp((AppendQueryImpl) qi);
+    public ParametricQuery(Connection _hsqldb, QueryImpl _qi) throws SQLException {
+        this.hsqldb = _hsqldb;
+        if (_qi.getType() == Query.Type.APPEND) {
+            this.qi = new AppendQueryTemp((AppendQueryImpl) _qi);
         } else {
-            this.qi = qi;
+            this.qi = _qi;
         }
     }
 
@@ -65,8 +64,8 @@ public class ParametricQuery {
         return issueWithParameterName;
     }
 
-    public void setIssueWithParameterName(boolean issueWithParameterName) {
-        this.issueWithParameterName = issueWithParameterName;
+    public void setIssueWithParameterName(boolean _issueWithParameterName) {
+        this.issueWithParameterName = _issueWithParameterName;
     }
 
     private List<String> queryParameters() {
@@ -116,7 +115,7 @@ public class ParametricQuery {
             }
 
             if (conversionOk) {
-                this.e = null;
+                this.exception = null;
 
             } else {
                 return;
@@ -133,8 +132,8 @@ public class ParametricQuery {
                 this.signature = qi.getName() + "(" + this.originalParameters + ")";
                 this.loaded = true;
             }
-        } catch (Exception e) {
-            this.e = e;
+        } catch (Exception _ex) {
+            this.exception = _ex;
         }
     }
 
@@ -157,7 +156,7 @@ public class ParametricQuery {
                 }
             }
             if (conversionOk) {
-                this.e = null;
+                this.exception = null;
 
             } else {
                 return;
@@ -180,8 +179,8 @@ public class ParametricQuery {
                 return;
             }
             this.loaded = true;
-        } catch (Exception e) {
-            this.e = e;
+        } catch (Exception _ex) {
+            this.exception = _ex;
         }
     }
 
@@ -235,12 +234,10 @@ public class ParametricQuery {
             st = hsqldb.createStatement();
             st.execute(expression);
             return true;
-        } catch (SQLException e) {
-            this.e = e;
+        } catch (SQLException _ex) {
+            this.exception = _ex;
             return false;
-        }
-
-        finally {
+        } finally {
             if (st != null) {
                 st.close();
             }
@@ -271,13 +268,13 @@ public class ParametricQuery {
         if (partialParDecl) {
             s = SQLConverter.removeParameters(s);
         }
-        List<String> parameters = SQLConverter.getParameters(s);
+        List<String> params = SQLConverter.getParameters(s);
         Map<String, String> parem = new HashMap<String, String>();
-        getParametersEmpiric(hm, parameters, parem, s, true);
+        getParametersEmpiric(hm, params, parem, s, true);
     }
 
     public Exception getException() {
-        return e;
+        return exception;
     }
 
     private void parametersDeclared() {
@@ -335,8 +332,8 @@ public class ParametricQuery {
             this.parameters = SQLConverter.convertSQL(args.toString()).getSql();
 
             this.conversionOk = true;
-        } catch (SQLException e) {
-            this.e = e;
+        } catch (SQLException _ex) {
+            this.exception = _ex;
         }
 
     }
@@ -371,25 +368,27 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void getParametersEmpiric(Map<String, Integer> psmp, List<String> parameters,
+    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters,
             Map<String, String> parem, String sql, boolean init) {
         String psTxt = null;
         try {
-            psTxt = convertSQL(sql, parameters);
+            psTxt = convertSQL(sql, _parameters);
 
             List<String> l = SQLConverter.getParameters(psTxt);
 
             // apostrophe treatment
             for (String s : l) {
                 String h = treatApos(s);
-                for (String modf : parameters) {
-                    if (convertSQL(modf).equals(s) && !this.aposMap.containsKey(h = treatApos(modf))) {
-                        parameters.set(parameters.indexOf(modf), h);
-                        psTxt = psTxt.replaceAll("(?i)" + Pattern.quote(s), convertSQL(h));
-                        sql = sql.replaceAll("(?i)" + Pattern.quote(modf), h);
-                        h = h.substring(1, h.length() - 1);
-                        this.aposMap.put(h, modf.substring(1, modf.length() - 1));
-
+                for (String modf : _parameters) {
+                    if (convertSQL(modf).equals(s)) {
+                        h = treatApos(modf);
+                        if (!this.aposMap.containsKey(h)) {
+                            _parameters.set(_parameters.indexOf(modf), h);
+                            psTxt = psTxt.replaceAll("(?i)" + Pattern.quote(s), convertSQL(h));
+                            sql = sql.replaceAll("(?i)" + Pattern.quote(modf), h);
+                            h = h.substring(1, h.length() - 1);
+                            this.aposMap.put(h, modf.substring(1, modf.length() - 1));
+                        }
                     }
                 }
             }
@@ -398,8 +397,8 @@ public class ParametricQuery {
 
             ParameterMetaData pmd = ps.getParameterMetaData();
             List<String> ar = new ArrayList<String>();
-            psmp = reorderIndexes(psmp, parem);
-            ar.addAll(psmp.keySet());
+            _psmp = reorderIndexes(_psmp, parem);
+            ar.addAll(_psmp.keySet());
             List<Integer> pI = parIndexes(sql);
             StringBuffer parS = new StringBuffer();
             StringBuffer defPar = new StringBuffer();
@@ -414,7 +413,7 @@ public class ParametricQuery {
                     continue;
                 }
                 String key = ar.get(j);
-                int index = psmp.get(key);
+                int index = _psmp.get(key);
                 if (index == pI.get(i - 1)) {
                     defPar.append(comma).append("NULL");
                     String type =
@@ -428,28 +427,27 @@ public class ParametricQuery {
             this.parameters = parS.toString();
             this.defaultParameterValues = defPar.toString();
             this.conversionOk = true;
-        }
 
-        catch (SQLException e) {
+        } catch (SQLException _ex) {
 
-            for (String par : parameters) {
+            for (String par : _parameters) {
                 String par1 = SQLConverter.preEscapingIdentifier(par.substring(1, par.length() - 1));
                 int index = sql.toUpperCase().indexOf(par.toUpperCase());
-                if (index >= 0 && e.getMessage() != null && e.getMessage().toUpperCase().endsWith(": " + par1)) {
+                if (index >= 0 && _ex.getMessage() != null && _ex.getMessage().toUpperCase().endsWith(": " + par1)) {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
-                    psmp.put(par1, index);
+                    _psmp.put(par1, index);
                     parem.put(par1, par);
                     String parname = this.originalParameters.length() == 0 ? par : "," + par;
                     this.originalParameters.append(parname);
-                    getParametersEmpiric(psmp, parameters, parem, sql, false);
+                    getParametersEmpiric(_psmp, _parameters, parem, sql, false);
 
                 } else {
 
-                    this.e = e;
+                    this.exception = _ex;
                 }
             }
-            if (this.e == null) {
-                this.e = e;
+            if (this.exception == null) {
+                this.exception = _ex;
 
             }
 

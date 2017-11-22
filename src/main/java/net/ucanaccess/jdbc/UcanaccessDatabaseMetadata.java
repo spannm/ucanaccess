@@ -44,9 +44,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private UcanaccessConnection connection;
     private DatabaseMetaData     wrapped;
 
-    public UcanaccessDatabaseMetadata(DatabaseMetaData wrapped, UcanaccessConnection connection) {
-        this.wrapped = wrapped;
-        this.connection = connection;
+    public UcanaccessDatabaseMetadata(DatabaseMetaData _wrapped, UcanaccessConnection _connection) {
+        this.wrapped = _wrapped;
+        this.connection = _connection;
     }
 
     private String from(String left, String right) {
@@ -142,9 +142,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     sb.append(CAST_EXPR + cn);
                 } else if (es.equals("PUBLIC")) {
                     sb.append("'PUBLIC' AS " + cn);
-                }
-
-                else if (es.startsWith(CAST_EXPR) || es.equals("PUBLIC")) {
+                } else if (es.startsWith(CAST_EXPR) || es.equals("PUBLIC")) {
                     sb.append(es);
                 } else {
                     String suffix = es.indexOf(".") > 0 ? "" : "r.";

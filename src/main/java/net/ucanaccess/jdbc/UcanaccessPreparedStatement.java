@@ -64,22 +64,22 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         }
     }
 
-    public UcanaccessPreparedStatement(String sql, UcanaccessConnection connection) throws SQLException {
-        super(null, connection);
-        this.sql = sql;
-        super.wrapped = connection.createStatement();
+    public UcanaccessPreparedStatement(String _sql, UcanaccessConnection _connection) throws SQLException {
+        super(null, _connection);
+        this.sql = _sql;
+        super.wrapped = _connection.createStatement();
 
     }
 
-    private class ParameterReset {
+    private final class ParameterReset {
         private String     methodName;
         private Object[]   args;
         private Class<?>[] argClasses;
 
-        private ParameterReset(String methodName, Class<?>[] argClasses, Object... args) {
-            this.methodName = methodName;
-            this.args = args;
-            this.argClasses = argClasses;
+        private ParameterReset(String _methodName, Class<?>[] _argClasses, Object... _args) {
+            this.methodName = _methodName;
+            this.args = _args;
+            this.argClasses = _argClasses;
         }
 
         private void execute() {

@@ -121,9 +121,7 @@ public class CrudTest extends AccessVersionAllTest {
             assertTrue("Failed Delete", ret);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        finally {
+        } finally {
             if (ps != null) {
                 ps.close();
             }

@@ -786,6 +786,8 @@ public class Persist2Jet {
             case DatabaseMetaData.importedKeySetNull:
                 rb.setCascadeNullOnDelete();
                 break;
+            default:
+                break;
             }
             if (ur == DatabaseMetaData.importedKeyCascade) {
                 rb.setCascadeUpdates();
@@ -803,9 +805,7 @@ public class Persist2Jet {
         Table tbl = db.getSystemTable("MSysRelationships");
         IndexCursor crsr = CursorBuilder.createCursor(tbl.getIndex("szRelationship"));
         Row r = crsr.findRowByEntry(relationshipName);
-        if (r == null) {
-            // System.out.printf("Relationship [%s] not found.%n", relationshipName);
-        } else {
+        if (r != null) {
             while (r != null) {
                 tbl.deleteRow(r);
                 r = crsr.findRowByEntry(relationshipName);

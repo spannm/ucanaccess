@@ -40,7 +40,7 @@ import java.util.Date;
  * exporter.csvDump(rs, System.out);
  * </pre>
  */
-public class Exporter {
+public final class Exporter {
     // The default delimiter is semi-colon for historical reasons.
     private static final String DEFAULT_CSV_DELIMITER = ";";
 
@@ -53,19 +53,19 @@ public class Exporter {
 
     /** Builder for {@link Exporter}. */
     public static class Builder {
-        String  delimiter        = DEFAULT_CSV_DELIMITER;
-        boolean includeBom       = false;
-        boolean preserveNewlines = false;
+        private String  delimiter        = DEFAULT_CSV_DELIMITER;
+        private boolean includeBom       = false;
+        private boolean preserveNewlines = false;
 
         /** Sets the CSV column delimiter. */
-        public Builder setDelimiter(String delimiter) {
-            this.delimiter = delimiter;
+        public Builder setDelimiter(String _delimiter) {
+            this.delimiter = _delimiter;
             return this;
         }
 
         /** Includes the Byte Order Mark. Needed by Excel to read UTF-8. */
-        public Builder includeBom(boolean includeBom) {
-            this.includeBom = includeBom;
+        public Builder includeBom(boolean _includeBom) {
+            this.includeBom = _includeBom;
             return this;
         }
 
@@ -80,10 +80,10 @@ public class Exporter {
         }
     }
 
-    private Exporter(String delimter, boolean includeBom, boolean preserveNewlines) {
-        this.delimiter = delimter;
-        this.includeBom = includeBom;
-        this.preserveNewlines = preserveNewlines;
+    private Exporter(String _delimter, boolean _includeBom, boolean _preserveNewlines) {
+        this.delimiter = _delimter;
+        this.includeBom = _includeBom;
+        this.preserveNewlines = _preserveNewlines;
     }
 
     /**
@@ -147,7 +147,7 @@ public class Exporter {
         ResultSetMetaData meta = rs.getMetaData();
         int cols = meta.getColumnCount();
         out.println("[");
-        ;
+
         for (int i = 1; i <= cols; ++i) {
             String name = meta.getColumnName(i);
             int sqlType = meta.getColumnType(i);
@@ -157,7 +157,6 @@ public class Exporter {
             out.printf((i != cols) ? ",%n" : "%n");
         }
         out.println("]");
-        ;
     }
 
     /**
@@ -205,10 +204,9 @@ public class Exporter {
 
     /** Returns one row of the BigQuery JSON schema file. */
     static String toSchemaRow(String name, int sqlType, int nullable) {
-        return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}", name, // TODO: Do we need to
-                                                                                             // escape special
-                                                                                             // characters?
-                toBigQueryType(sqlType), toBigQueryNullable(nullable));
+        return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}", name, toBigQueryType(sqlType),
+                toBigQueryNullable(nullable));
+        // TODO: Do we need to escape special characters?
     }
 
     /**

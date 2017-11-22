@@ -29,8 +29,6 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 
 public class TriggerAppendOnly extends TriggerBase {
-    public static int autorandom = -1;
-
     @Override
     public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
         checkContext();
