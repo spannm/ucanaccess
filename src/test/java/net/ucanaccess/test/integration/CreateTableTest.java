@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
@@ -246,7 +247,7 @@ public class CreateTableTest extends AccessVersionAllTest {
         Table tb = db.getTable("Babe");
         Table tbr = db.getTable("Parent");
         Index idx = tb.getForeignKeyIndex(tbr);
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }

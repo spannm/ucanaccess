@@ -38,16 +38,17 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import net.ucanaccess.converters.SQLConverter;
+import java.util.Set;
 
 import org.hsqldb.jdbc.JDBCResultSet;
+
+import net.ucanaccess.converters.SQLConverter;
 
 public class UcanaccessResultSet implements ResultSet {
     private ResultSet           wrapped;
     private UcanaccessStatement wrappedStatement;
-    private HashSet<String>     metadata;
-    private HashSet<Integer>    updIndexes = new HashSet<Integer>();
+    private Set<String>         metadata;
+    private Set<Integer>        updIndexes = new HashSet<Integer>();
 
     public UcanaccessResultSet(ResultSet wrapped, UcanaccessStatement statement) {
         super();

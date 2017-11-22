@@ -42,14 +42,15 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 
 import net.ucanaccess.converters.SQLConverter;
 
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
 
-    private PreparedStatement                wrapped;
-    private String                           sql;
-    private HashMap<Integer, ParameterReset> memento = new HashMap<Integer, ParameterReset>();
+    private PreparedStatement            wrapped;
+    private String                       sql;
+    private Map<Integer, ParameterReset> memento = new HashMap<Integer, ParameterReset>();
 
     public UcanaccessPreparedStatement(NormalizedSQL nsql, PreparedStatement hidden, UcanaccessConnection connection)
             throws SQLException {

@@ -32,27 +32,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
-import net.ucanaccess.commands.InsertCommand;
-import net.ucanaccess.complex.ComplexBase;
-import net.ucanaccess.complex.UnsupportedValue;
-import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.OnReloadReferenceListener;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import net.ucanaccess.util.HibernateSupport;
-
-import org.hsqldb.HsqlDateTime;
-import org.hsqldb.SessionInterface;
-import org.hsqldb.jdbc.JDBCConnection;
-import org.hsqldb.types.BlobData;
-import org.hsqldb.types.JavaObjectData;
-import org.hsqldb.types.TimestampData;
 
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.ColumnBuilder;
@@ -69,6 +51,25 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.TableBuilder;
 import com.healthmarketscience.jackcess.impl.DatabaseImpl;
 
+import org.hsqldb.HsqlDateTime;
+import org.hsqldb.SessionInterface;
+import org.hsqldb.jdbc.JDBCConnection;
+import org.hsqldb.types.BlobData;
+import org.hsqldb.types.JavaObjectData;
+import org.hsqldb.types.TimestampData;
+
+import net.ucanaccess.commands.InsertCommand;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.complex.UnsupportedValue;
+import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.OnReloadReferenceListener;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.HibernateSupport;
+
 public class Persist2Jet {
     private static HashMap<String, List<String>> columnNamesCache = new HashMap<String, List<String>>();
     static {
@@ -83,7 +84,7 @@ public class Persist2Jet {
 
     public Map<String, Object> getRowPattern(Object[] varr, Table t) throws SQLException {
         String ntn = SQLConverter.basicEscapingIdentifier(t.getName()).toUpperCase();
-        LinkedHashMap<String, Object> vl = new LinkedHashMap<String, Object>();
+        Map<String, Object> vl = new LinkedHashMap<String, Object>();
         int i = 0;
         Iterator<String> it = getColumnNames(ntn).iterator();
         while (it.hasNext()) {
@@ -111,9 +112,9 @@ public class Persist2Jet {
         Connection conq = conn.getHSQLDBConnection();
         String key = pref + ntn;
         if (!columnNamesCache.containsKey(key)) {
-            ArrayList<String> ar = new ArrayList<String>();
+            List<String> ar = new ArrayList<String>();
             ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn, null);
-            TreeMap<Integer, String> tm = new TreeMap<Integer, String>();
+            Map<Integer, String> tm = new TreeMap<Integer, String>();
             while (rs.next()) {
                 String cbase = rs.getString("COLUMN_NAME");
                 Integer i = rs.getInt("ORDINAL_POSITION");
@@ -128,7 +129,7 @@ public class Persist2Jet {
 
     private List<String> getColumnNamesCreate(String ntn) throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC", ntn, null);
         while (rs.next()) {
             String cbase = rs.getString("COLUMN_NAME");
@@ -188,9 +189,9 @@ public class Persist2Jet {
         }
     }
 
-    private LinkedHashMap<String, Object> escapeIdentifiers(LinkedHashMap<String, Object> map, Table t) {
+    private Map<String, Object> escapeIdentifiers(Map<String, Object> map, Table t) {
         List<? extends Column> colums = t.getColumns();
-        LinkedHashMap<String, Object> vl = new LinkedHashMap<String, Object>();
+        Map<String, Object> vl = new LinkedHashMap<String, Object>();
         for (Column cl : colums) {
             String key = cl.getName();
             String keyu = key.toUpperCase();
@@ -299,7 +300,7 @@ public class Persist2Jet {
     private Collection<ColumnBuilder> getColumns(String tableName, Map<String, String> columnMap, String[] types)
             throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        TreeMap<Integer, ColumnBuilder> ordm = new TreeMap<Integer, ColumnBuilder>();
+        Map<Integer, ColumnBuilder> ordm = new TreeMap<Integer, ColumnBuilder>();
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC",
                 tableName.toUpperCase(Locale.US), null);
         while (rs.next()) {
@@ -310,7 +311,7 @@ public class Persist2Jet {
     }
 
     private List<IndexBuilder> getIndexBuilders(String tableName, Map<String, String> columnMap) throws SQLException {
-        ArrayList<IndexBuilder> arcl = new ArrayList<IndexBuilder>();
+        List<IndexBuilder> arcl = new ArrayList<IndexBuilder>();
         addIndexBuildersSimple(tableName, columnMap, arcl);
         return arcl;
     }
@@ -321,7 +322,7 @@ public class Persist2Jet {
         }
         Iterator<IndexBuilder> itib = arcl.iterator();
         List<IndexBuilder.Column> clspk = ibpk.getColumns();
-        ArrayList<String> columnNamesPK = new ArrayList<String>();
+        List<String> columnNamesPK = new ArrayList<String>();
         for (IndexBuilder.Column clpk : clspk) {
             columnNamesPK.add(clpk.getName().toUpperCase());
         }
@@ -360,11 +361,11 @@ public class Persist2Jet {
         return indpk;
     }
 
-    private void addIndexBuildersSimple(String tableName, Map<String, String> columnMap, ArrayList<IndexBuilder> arcl)
+    private void addIndexBuildersSimple(String tableName, Map<String, String> columnMap, List<IndexBuilder> arcl)
             throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         ResultSet idxrs = conn.getMetaData().getIndexInfo(null, "PUBLIC", tableName, false, false);
-        HashMap<String, IndexBuilder> hi = new HashMap<String, IndexBuilder>();
+        Map<String, IndexBuilder> hi = new HashMap<String, IndexBuilder>();
         for (IndexBuilder ib : arcl) {
             hi.put(ib.getName(), ib);
         }
@@ -521,7 +522,7 @@ public class Persist2Jet {
             if (name != null && name.equalsIgnoreCase(tableName)) {
                 Integer id = (Integer) row.get("Id");
                 Table tsa = db.getSystemTable("MSysACEs");
-                HashMap<String, Object> rowtsa = new HashMap<String, Object>();
+                Map<String, Object> rowtsa = new HashMap<String, Object>();
                 rowtsa.put("ObjectId", id);
                 Cursor cur = tsa.getDefaultCursor();
                 if (cur.findNextRow(rowtsa)) {
@@ -566,7 +567,7 @@ public class Persist2Jet {
             String name = (String) row.get("Name");
             if (name != null && name.equalsIgnoreCase(oldTableName)) {
                 Integer id = (Integer) row.get("Id");
-                HashMap<String, Object> rowtsa = new HashMap<String, Object>();
+                Map<String, Object> rowtsa = new HashMap<String, Object>();
                 rowtsa.put("ObjectId", id);
                 Row r = catc.getCurrentRow();
                 r.put("Name", tn);
@@ -684,7 +685,7 @@ public class Persist2Jet {
         ResultSet idxrs =
                 conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, "PUBLIC", ntn.toUpperCase(), false, false);
         boolean asc = false;
-        ArrayList<String> cols = new ArrayList<String>();
+        List<String> cols = new ArrayList<String>();
         IndexBuilder ib = new IndexBuilder(in);
         while (idxrs.next()) {
             String dbIdxName = idxrs.getString("INDEX_NAME");
@@ -714,7 +715,7 @@ public class Persist2Jet {
         String tn = escape4Access(tableName);
         Table t = db.getTable(tn);
         ResultSet pkrs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase());
-        ArrayList<String> cols = new ArrayList<String>();
+        List<String> cols = new ArrayList<String>();
         IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
         ib.setPrimaryKey();
         while (pkrs.next()) {
@@ -748,7 +749,7 @@ public class Persist2Jet {
         String ntn = escape4Hsqldb(tableName);
         String tn = escape4Access(tableName);
         ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase());
-        HashSet<String> hs = new HashSet<String>();
+        Set<String> hs = new HashSet<String>();
         while (fkrs.next()) {
             hs.add(fkrs.getString("PKTABLE_NAME"));
         }

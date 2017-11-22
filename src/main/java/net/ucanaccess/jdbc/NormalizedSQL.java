@@ -16,10 +16,11 @@ limitations under the License.
 package net.ucanaccess.jdbc;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class NormalizedSQL {
-    private String                  sql;
-    private HashMap<String, String> aliases = new HashMap<String, String>();
+    private String              sql;
+    private Map<String, String> aliases = new HashMap<String, String>();
 
     public String getSql() {
         return sql;
@@ -29,7 +30,7 @@ public class NormalizedSQL {
         this.sql = sql;
     }
 
-    public HashMap<String, String> getAliases() {
+    public Map<String, String> getAliases() {
         return aliases;
     }
 

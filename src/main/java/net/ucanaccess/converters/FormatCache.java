@@ -2,7 +2,8 @@ package net.ucanaccess.converters;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FormatCache {
     private static DecimalFormat noArgs;
@@ -10,15 +11,15 @@ public class FormatCache {
     private static DecimalFormat sharp;
     private static DecimalFormat noGrouping;
 
-    private static Hashtable<String, DecimalFormat> ht = new Hashtable<String, DecimalFormat>();
+    private static final Map<String, DecimalFormat> CACHE = new HashMap<String, DecimalFormat>();
 
-    public static DecimalFormat getDecimalFormat(String s) {
-        if (!ht.containsKey(s)) {
-            DecimalFormat dc = new DecimalFormat(s);
+    public static synchronized DecimalFormat getDecimalFormat(String _pattern) {
+        if (!CACHE.containsKey(_pattern)) {
+            DecimalFormat dc = new DecimalFormat(_pattern);
             dc.setRoundingMode(RoundingMode.HALF_UP);
-            ht.put(s, dc);
+            CACHE.put(_pattern, dc);
         }
-        return ht.get(s);
+        return CACHE.get(_pattern);
     }
 
     public static DecimalFormat getNoArgs() {

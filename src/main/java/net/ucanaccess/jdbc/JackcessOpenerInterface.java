@@ -17,6 +17,7 @@ package net.ucanaccess.jdbc;
 
 import java.io.File;
 import java.io.IOException;
+
 import com.healthmarketscience.jackcess.Database;
 
 public interface JackcessOpenerInterface {

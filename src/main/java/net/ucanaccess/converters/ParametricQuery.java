@@ -35,21 +35,21 @@ import com.healthmarketscience.jackcess.impl.query.QueryImpl;
 import com.healthmarketscience.jackcess.query.Query;
 
 public class ParametricQuery {
-    private Connection              hsqldb;
-    private QueryImpl               qi;
-    private boolean                 loaded;
-    private PreparedStatement       ps;
-    private String                  parameters;
-    private String                  defaultParameterValues;
-    private boolean                 conversionOk;
-    private boolean                 issueWithParameterName;
-    private HashMap<String, String> aposMap;
-    private List<String>            parameterList;
-    private Exception               e;
-    private boolean                 isProcedure;
-    private String                  sqlContent;
-    private String                  signature;
-    private StringBuffer            originalParameters = new StringBuffer();
+    private Connection          hsqldb;
+    private QueryImpl           qi;
+    private boolean             loaded;
+    private PreparedStatement   ps;
+    private String              parameters;
+    private String              defaultParameterValues;
+    private boolean             conversionOk;
+    private boolean             issueWithParameterName;
+    private Map<String, String> aposMap;
+    private List<String>        parameterList;
+    private Exception           e;
+    private boolean             isProcedure;
+    private String              sqlContent;
+    private String              signature;
+    private StringBuffer        originalParameters = new StringBuffer();
 
     public ParametricQuery(Connection hsqldb, QueryImpl qi) throws SQLException {
         super();
@@ -266,13 +266,13 @@ public class ParametricQuery {
 
     private void parametersEmpiric(boolean partialParDecl) {
         this.aposMap = new HashMap<String, String>();
-        LinkedHashMap<String, Integer> hm = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> hm = new LinkedHashMap<String, Integer>();
         String s = getSQL();
         if (partialParDecl) {
             s = SQLConverter.removeParameters(s);
         }
         List<String> parameters = SQLConverter.getParameters(s);
-        HashMap<String, String> parem = new HashMap<String, String>();
+        Map<String, String> parem = new HashMap<String, String>();
         getParametersEmpiric(hm, parameters, parem, s, true);
     }
 
@@ -284,7 +284,7 @@ public class ParametricQuery {
         List<String> ls = queryParameters();
         StringBuffer args = new StringBuffer();
         String comma = "";
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         for (String par : ls) {
             par = par.trim();
             int index = Math.max(Math.max(par.lastIndexOf(' '), par.lastIndexOf('\n')), par.lastIndexOf('\r'));
@@ -297,7 +297,7 @@ public class ParametricQuery {
             ar.add(decl);
             String type0 = type.indexOf("(") > 0 ? type.substring(0, type.indexOf("(")) : type;
             String typeS = type.indexOf("(") > 0 ? type.substring(type.indexOf("(")) : "";
-            HashMap<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
+            Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
 
             type = hm.get(type0.toUpperCase()) + typeS;
             if (type.equalsIgnoreCase("VARCHAR")) {
@@ -341,8 +341,8 @@ public class ParametricQuery {
 
     }
 
-    private ArrayList<Integer> parIndexes(String s) {
-        ArrayList<Integer> ar = new ArrayList<Integer>();
+    private List<Integer> parIndexes(String s) {
+        List<Integer> ar = new ArrayList<Integer>();
         char character = '?';
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == character) {
@@ -371,8 +371,8 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void getParametersEmpiric(LinkedHashMap<String, Integer> psmp, List<String> parameters,
-            HashMap<String, String> parem, String sql, boolean init) {
+    private void getParametersEmpiric(Map<String, Integer> psmp, List<String> parameters,
+            Map<String, String> parem, String sql, boolean init) {
         String psTxt = null;
         try {
             psTxt = convertSQL(sql, parameters);
@@ -397,10 +397,10 @@ public class ParametricQuery {
             this.ps = hsqldb.prepareStatement(psTxt);
 
             ParameterMetaData pmd = ps.getParameterMetaData();
-            ArrayList<String> ar = new ArrayList<String>();
+            List<String> ar = new ArrayList<String>();
             psmp = reorderIndexes(psmp, parem);
             ar.addAll(psmp.keySet());
-            ArrayList<Integer> pI = parIndexes(sql);
+            List<Integer> pI = parIndexes(sql);
             StringBuffer parS = new StringBuffer();
             StringBuffer defPar = new StringBuffer();
             int j = 0;
@@ -457,12 +457,11 @@ public class ParametricQuery {
 
     }
 
-    private LinkedHashMap<String, Integer> reorderIndexes(LinkedHashMap<String, Integer> psmp,
-            HashMap<String, String> parem) {
-        TreeMap<Integer, String> tm = new TreeMap<Integer, String>();
+    private Map<String, Integer> reorderIndexes(Map<String, Integer> psmp, Map<String, String> parem) {
+        Map<Integer, String> tm = new TreeMap<Integer, String>();
         Integer[] nI = new Integer[psmp.size()];
         String[] sI = new String[psmp.size()];
-        HashMap<String, Integer> dI = new HashMap<String, Integer>();
+        Map<String, Integer> dI = new HashMap<String, Integer>();
         int j = 0;
         for (Map.Entry<String, Integer> me : psmp.entrySet()) {
             tm.put(me.getValue(), me.getKey());
@@ -483,7 +482,7 @@ public class ParametricQuery {
             }
         }
 
-        LinkedHashMap<String, Integer> rlhm = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> rlhm = new LinkedHashMap<String, Integer>();
         for (Map.Entry<Integer, String> me : tm.entrySet()) {
             rlhm.put(me.getValue(), me.getKey() + dI.get(me.getValue()));
         }

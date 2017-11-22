@@ -30,7 +30,6 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.TableImpl;
 import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
-
 import com.healthmarketscience.jackcess.util.ErrorHandler;
 
 public class UcanaccessTable implements Table {

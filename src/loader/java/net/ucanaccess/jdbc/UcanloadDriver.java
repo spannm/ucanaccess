@@ -72,7 +72,7 @@ public class UcanloadDriver implements Driver {
 			};
 			File[] ucajar = dir.listFiles(fnf);
 			File[] libjars = lib.listFiles(fnf);
-			ArrayList<URL> au = new ArrayList<URL>();
+			List<URL> au = new ArrayList<URL>();
 			for (File f : ucajar) {
 				au.add(f.toURI().toURL());
 			}

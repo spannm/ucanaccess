@@ -138,7 +138,7 @@ public class DFunction {
     }
 
     private List<String> getColumnNames(String tableName) throws SQLException {
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         if (conn == null) {
             UcanaccessConnection conu = UcanaccessConnection.getCtxConnection();
             if (conu == null) {

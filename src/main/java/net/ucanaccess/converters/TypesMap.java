@@ -17,6 +17,7 @@ package net.ucanaccess.converters;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.healthmarketscience.jackcess.DataType;
 
@@ -42,9 +43,9 @@ public class TypesMap {
         HYPERLINK
     }
 
-    private static final HashMap<String, String>       access2HsqlTypesMap     = new LinkedHashMap<String, String>();
-    private static final HashMap<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
-    private static final HashMap<DataType, String>     jackcess2HsqldbTypesMap = new HashMap<DataType, String>();
+    private static final Map<String, String>       access2HsqlTypesMap     = new LinkedHashMap<String, String>();
+    private static final Map<AccessType, DataType> access2JackcessTypesMap = new HashMap<AccessType, DataType>();
+    private static final Map<DataType, String>     jackcess2HsqldbTypesMap = new HashMap<DataType, String>();
 
     static {
         access2HsqlTypesMap.put(AccessType.BYTE.name(), "SMALLINT");
@@ -104,7 +105,7 @@ public class TypesMap {
         jackcess2HsqldbTypesMap.put(DataType.UNSUPPORTED_VARLEN, "BLOB");
     }
 
-    public static HashMap<String, String> getAccess2HsqlTypesMap() {
+    public static Map<String, String> getAccess2HsqlTypesMap() {
         return access2HsqlTypesMap;
     }
 

@@ -25,7 +25,6 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Logger;
 
 import com.healthmarketscience.jackcess.Column;
-
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 

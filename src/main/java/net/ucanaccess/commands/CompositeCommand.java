@@ -18,20 +18,21 @@ package net.ucanaccess.commands;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import java.util.Set;
 
 import com.healthmarketscience.jackcess.Cursor;
 
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+
 public class CompositeCommand implements ICommand {
-    private ArrayList<ICursorCommand> composite     = new ArrayList<ICursorCommand>();
-    private Map<String, Object>       currentRow;
-    private String                    execId;
-    private IndexSelector             indexSelector;
-    private ArrayList<ICursorCommand> rollbackCache = new ArrayList<ICursorCommand>();
+    private List<ICursorCommand> composite     = new ArrayList<ICursorCommand>();
+    private Map<String, Object>  currentRow;
+    private String               execId;
+    private IndexSelector        indexSelector;
+    private List<ICursorCommand> rollbackCache = new ArrayList<ICursorCommand>();
 
     public CompositeCommand() {
     }
@@ -44,7 +45,7 @@ public class CompositeCommand implements ICommand {
         return composite.add(c4io);
     }
 
-    public ArrayList<ICursorCommand> getComposite() {
+    public List<ICursorCommand> getComposite() {
         return composite;
     }
 
@@ -63,7 +64,7 @@ public class CompositeCommand implements ICommand {
         return TYPES.COMPOSITE;
     }
 
-    public boolean moveToNextRow(Cursor cur, Collection<String> columnNames) throws IOException {
+    public boolean moveToNextRow(Cursor cur, Set<String> columnNames) throws IOException {
         boolean hasNext = cur.moveToNextRow();
         if (hasNext) {
             this.currentRow = cur.getCurrentRow(columnNames);
@@ -76,7 +77,7 @@ public class CompositeCommand implements ICommand {
         try {
             Cursor cur = indexSelector.getCursor();
             cur.beforeFirst();
-            Collection<String> columnNames = composite.get(0).getRowPattern().keySet();
+            Set<String> columnNames = composite.get(0).getRowPattern().keySet();
             while (composite.size() > 0 && moveToNextRow(cur, columnNames)) {
                 Iterator<ICursorCommand> it = composite.iterator();
                 while (it.hasNext()) {

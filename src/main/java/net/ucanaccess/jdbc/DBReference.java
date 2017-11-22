@@ -28,25 +28,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import net.ucanaccess.converters.LoadJet;
-import net.ucanaccess.util.Logger;
-
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import com.healthmarketscience.jackcess.util.LinkResolver;
 
+import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.util.Logger;
+
 public class DBReference {
     private final static String                         CIPHER_SPEC       = "AES";
-    private static ArrayList<OnReloadReferenceListener> onReloadListeners = new ArrayList<OnReloadReferenceListener>();
+    private static List<OnReloadReferenceListener>      onReloadListeners = new ArrayList<OnReloadReferenceListener>();
     private static String                               version;
     private File                                        dbFile;
     private Database                                    dbIO;
@@ -72,7 +74,7 @@ public class DBReference {
     private boolean                                     columnOrderDisplay;
     private boolean                                     hsqldbShutdown;
     private File                                        mirrorFolder;
-    private HashSet<File>                               links             = new HashSet<File>();
+    private Set<File>                                   links             = new HashSet<File>();
     private boolean                                     ignoreCase        = true;
     private boolean                                     mirrorReadOnly;
     private Integer                                     lobScale;

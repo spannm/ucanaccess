@@ -35,25 +35,25 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Logger;
 
 public class Pivot {
-    private String                                     transform;
-    private String                                     select;
-    private String                                     from;
-    private String                                     expression;
-    private String                                     pivot;
-    private List<String>                               pivotIn;
-    private final Pattern                              PIVOT            =
+    private String                                 transform;
+    private String                                 select;
+    private String                                 from;
+    private String                                 expression;
+    private String                                 pivot;
+    private List<String>                           pivotIn;
+    private final Pattern                          PIVOT            =
             Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
-    private final Pattern                              PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
-    private final Pattern                              PIVOT_AGGR       =
+    private final Pattern                          PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
+    private final Pattern                          PIVOT_AGGR       =
             Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
-    private final Pattern                              PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
-    private final String                               PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
-    private String                                     aggregateFun;
-    private Connection                                 conn;
-    private boolean                                    pivotInCondition = true;
-    private String                                     originalQuery;
-    private final static HashMap<String, String>       pivotMap         = new HashMap<String, String>();
-    private final static HashMap<String, List<String>> prepareMap       = new HashMap<String, List<String>>();
+    private final Pattern                          PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
+    private final String                           PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
+    private String                                 aggregateFun;
+    private Connection                             conn;
+    private boolean                                pivotInCondition = true;
+    private String                                 originalQuery;
+    private final static Map<String, String>       pivotMap         = new HashMap<String, String>();
+    private final static Map<String, List<String>> prepareMap       = new HashMap<String, List<String>>();
 
     public Pivot(Connection conn) {
         this.conn = conn;
