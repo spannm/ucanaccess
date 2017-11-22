@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -475,7 +476,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
         setProp("preventreloading", value, null);
     }
 
-    private void setProp(String key, Object value, ArrayList<Object> validValues) {
+    private void setProp(String key, Object value, List<Object> validValues) {
         if (value == null) {
             props.remove(key);
         } else {

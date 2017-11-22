@@ -28,7 +28,6 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +39,24 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.DataType;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.PropertyMap.Property;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
+import com.healthmarketscience.jackcess.impl.IndexData;
+import com.healthmarketscience.jackcess.impl.IndexImpl;
+import com.healthmarketscience.jackcess.impl.query.QueryFormat;
+import com.healthmarketscience.jackcess.impl.query.QueryImpl;
+import com.healthmarketscience.jackcess.query.Query;
+
 import org.hsqldb.error.ErrorCode;
 
 import net.ucanaccess.complex.ComplexBase;
@@ -50,29 +67,11 @@ import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
 import net.ucanaccess.util.Logger.Messages;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.PropertyMap.Property;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
-import com.healthmarketscience.jackcess.impl.IndexData;
-import com.healthmarketscience.jackcess.impl.IndexImpl;
-import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
-import com.healthmarketscience.jackcess.impl.query.QueryFormat;
-import com.healthmarketscience.jackcess.impl.query.QueryImpl;
-import com.healthmarketscience.jackcess.query.Query;
-
 public class LoadJet {
     private static int namingCounter = 0;
 
     private final class FunctionsLoader {
-        private HashSet<String> functionsDefinition = new HashSet<String>();
+        private Set<String> functionsDefinition = new HashSet<String>();
 
         private void addAggregates() {
             functionsDefinition.add(getAggregate("LONGVARCHAR", "last"));
@@ -122,7 +121,7 @@ public class LoadJet {
 
         private void addFunctions(Class<?> clazz, boolean cswitch) throws SQLException {
             Method[] mths = clazz.getDeclaredMethods();
-            HashMap<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
+            Map<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
             for (Method mth : mths) {
                 Annotation[] ants = mth.getAnnotations();
                 for (Annotation ant : ants) {
@@ -265,11 +264,11 @@ public class LoadJet {
         private static final int    HSQL_FK_VIOLATION        = -ErrorCode.X_23503;
         private static final int    HSQL_UK_VIOLATION        = -ErrorCode.X_23505;
         private static final String SYSTEM_SCHEMA            = "SYS";
-        private ArrayList<String>   unresolvedTables         = new ArrayList<String>();
-        private ArrayList<String>   calculatedFieldsTriggers = new ArrayList<String>();
+        private List<String>        unresolvedTables         = new ArrayList<String>();
+        private List<String>        calculatedFieldsTriggers = new ArrayList<String>();
         private LinkedList<String>  loadingOrder             = new LinkedList<String>();
-        private HashSet<Column>     alreadyIndexed           = new HashSet<Column>();
-        private HashSet<String>     readOnlyTables           = new HashSet<String>();
+        private Set<Column>         alreadyIndexed           = new HashSet<Column>();
+        private Set<String>         readOnlyTables           = new HashSet<String>();
 
         private String commaSeparated(List<? extends Index.Column> columns, boolean escape) throws SQLException {
             String comma = "";
@@ -498,7 +497,7 @@ public class LoadJet {
         private void setDefaultValue(Column cl) throws SQLException, IOException {
             String tn = cl.getTable().getName();
             String ntn = escapeIdentifier(tn);
-            ArrayList<String> arTrigger = new ArrayList<String>();
+            List<String> arTrigger = new ArrayList<String>();
             setDefaultValue(cl, ntn, arTrigger);
             for (String trigger : arTrigger) {
                 exec(trigger, true);
@@ -530,7 +529,7 @@ public class LoadJet {
             return default4SQL;
         }
 
-        private void setDefaultValue(Column cl, String ntn, ArrayList<String> arTrigger)
+        private void setDefaultValue(Column cl, String ntn, List<String> arTrigger)
                 throws IOException, SQLException {
             PropertyMap pm = cl.getProperties();
             String ncn = procedureEscapingIdentifier(cl.getName());
@@ -574,7 +573,7 @@ public class LoadJet {
             String tn = t.getName();
             String ntn = escapeIdentifier(tn);
             List<? extends Column> lc = t.getColumns();
-            ArrayList<String> arTrigger = new ArrayList<String>();
+            List<String> arTrigger = new ArrayList<String>();
             for (Column cl : lc) {
                 setDefaultValue(cl, ntn, arTrigger);
             }
@@ -605,7 +604,7 @@ public class LoadJet {
 
             for (int i = 0; i < maxIteration; i++) {
                 boolean change = false;
-                ArrayList<String> loadingOrder0 = new ArrayList<String>();
+                List<String> loadingOrder0 = new ArrayList<String>();
                 loadingOrder0.addAll(this.loadingOrder);
                 for (String tn : loadingOrder0) {
                     UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn), tn);
@@ -820,16 +819,14 @@ public class LoadJet {
 
                 while (it.hasNext()) {
                     Row row = it.next();
-                    ArrayList<Object> values = new ArrayList<Object>();
+                    List<Object> values = new ArrayList<Object>();
                     if (row == null) {
                         continue;
                     }
                     if (ps == null) {
                         ps = sqlInsert(t, row, systemTable);
                     }
-                    Collection<Object> ce = row.values();
-
-                    for (Object obj : ce) {
+                    for (Object obj : row.values()) {
                         values.add(value(obj));
                     }
                     execInsert(ps, values);
@@ -1142,8 +1139,8 @@ public class LoadJet {
     }
 
     private final class ViewsLoader {
-        private HashMap<String, String> notLoaded             = new HashMap<String, String>();
-        private HashMap<String, String> notLoadedProcedure    = new HashMap<String, String>();
+        private Map<String, String> notLoaded = new HashMap<String, String>();
+        private Map<String, String> notLoadedProcedure = new HashMap<String, String>();
         private static final int        OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
         private static final int        OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
         private static final int        UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
@@ -1172,7 +1169,7 @@ public class LoadJet {
                         }
                         if (name.contentEquals("*")) {
                             String table = row.expression.substring(0, beginIndex);
-                            ArrayList<String> result = metadata.getColumnNames(table);
+                            List<String> result = metadata.getColumnNames(table);
                             if (result != null) {
                                 for (String column : result) {
                                     metadata.newColumn(column, SQLConverter.preEscapingIdentifier(column), null, seq);
@@ -1277,7 +1274,7 @@ public class LoadJet {
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
                     String[] splitted = select.split(",", -1);
                     StringBuffer sb = new StringBuffer(pre + " select ");
-                    LinkedList<String> lkl = new LinkedList<String>();
+                    List<String> lkl = new LinkedList<String>();
 
                     for (String s : splitted) {
                         int j = s.lastIndexOf(".");
@@ -1358,13 +1355,13 @@ public class LoadJet {
         }
 
         private void queryPorting(List<Query> lq) throws SQLException {
-            ArrayList<String> arn = new ArrayList<String>();
+            List<String> arn = new ArrayList<String>();
             for (Query q : lq) {
                 arn.add(q.getName().toLowerCase());
             }
             boolean heavy = false;
             while (lq.size() > 0) {
-                ArrayList<Query> arq = new ArrayList<Query>();
+                List<Query> arq = new ArrayList<Query>();
                 for (Query q : lq) {
                     String qtxt = null;
                     boolean qryGot = true;
@@ -1400,22 +1397,22 @@ public class LoadJet {
         }
     }
 
-    private Connection        conn;
-    private Database          dbIO;
-    private boolean           err;
-    private FunctionsLoader   functionsLoader   = new FunctionsLoader();
-    private ArrayList<String> loadedIndexes     = new ArrayList<String>();
-    private ArrayList<String> loadedQueries     = new ArrayList<String>();
-    private ArrayList<String> loadedProcedures  = new ArrayList<String>();
-    private ArrayList<String> loadedTables      = new ArrayList<String>();
-    private LogsFlusher       logsFlusher       = new LogsFlusher();
-    private TablesLoader      tablesLoader      = new TablesLoader();
-    private TriggersLoader    triggersGenerator = new TriggersLoader();
-    private ViewsLoader       viewsLoader       = new ViewsLoader();
-    private boolean           sysSchema;
-    private boolean           ff1997;
-    private boolean           skipIndexes;
-    private Metadata          metadata;
+    private Connection      conn;
+    private Database        dbIO;
+    private boolean         err;
+    private FunctionsLoader functionsLoader   = new FunctionsLoader();
+    private List<String>    loadedIndexes     = new ArrayList<String>();
+    private List<String>    loadedQueries     = new ArrayList<String>();
+    private List<String>    loadedProcedures  = new ArrayList<String>();
+    private List<String>    loadedTables      = new ArrayList<String>();
+    private LogsFlusher     logsFlusher       = new LogsFlusher();
+    private TablesLoader    tablesLoader      = new TablesLoader();
+    private TriggersLoader  triggersGenerator = new TriggersLoader();
+    private ViewsLoader     viewsLoader       = new ViewsLoader();
+    private boolean         sysSchema;
+    private boolean         ff1997;
+    private boolean         skipIndexes;
+    private Metadata        metadata;
 
     public LoadJet(Connection conn, Database dbIO) throws SQLException {
         super();
@@ -1482,7 +1479,7 @@ public class LoadJet {
         }
     }
 
-    private void execInsert(PreparedStatement st, ArrayList<Object> values) throws SQLException {
+    private void execInsert(PreparedStatement st, List<Object> values) throws SQLException {
         int i = 1;
         for (Object value : values) {
             st.setObject(i++, value);

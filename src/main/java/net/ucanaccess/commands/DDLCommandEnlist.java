@@ -22,7 +22,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.healthmarketscience.jackcess.Database;
 
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
@@ -32,13 +36,11 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
-import com.healthmarketscience.jackcess.Database;
-
 public class DDLCommandEnlist {
-    private String[]                types;
-    private String[]                defaults;
-    private Boolean[]               notNulls;
-    private HashMap<String, String> columnMap = new HashMap<String, String>();
+    private String[]            types;
+    private String[]            defaults;
+    private Boolean[]           notNulls;
+    private Map<String, String> columnMap = new HashMap<String, String>();
 
     private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
         String tn = ddlType.getDBObjectName();
@@ -170,10 +172,10 @@ public class DDLCommandEnlist {
         String columnName = ddlType.getSecondDBObjectName();
         String columnDefinition = ddlType.getColumnDefinition();
         String execId = UcanaccessConnection.getCtxExcId();
-        ArrayList<String> typeList = new ArrayList<String>();
-        ArrayList<String> defaultList = new ArrayList<String>();
+        List<String> typeList = new ArrayList<String>();
+        List<String> defaultList = new ArrayList<String>();
         this.columnMap = new HashMap<String, String>();
-        ArrayList<Boolean> notNullList = new ArrayList<Boolean>();
+        List<Boolean> notNullList = new ArrayList<Boolean>();
         String tknt = columnName + columnDefinition;
         this.parseColumnTypes(typeList, defaultList, notNullList, tknt);
         check4OutOfPlacedNotNull(sql);
@@ -235,8 +237,8 @@ public class DDLCommandEnlist {
         return colDecls;
     }
 
-    private void parseColumnTypes(ArrayList<String> typeList, ArrayList<String> defaultList,
-            ArrayList<Boolean> notNullList, String tknt) {
+    private void parseColumnTypes(List<String> typeList, List<String> defaultList,
+            List<Boolean> notNullList, String tknt) {
 
         String[] colDecls = tknt.split("[\\s\n\r]+");
         colDecls = checkEscaped("[", "]", colDecls, tknt);
@@ -295,10 +297,10 @@ public class DDLCommandEnlist {
         String decl = sql.substring(startDecl + 1, endDecl);
         String[] tokens = decl.split(",");
 
-        ArrayList<String> typeList = new ArrayList<String>();
-        ArrayList<String> defaultList = new ArrayList<String>();
+        List<String> typeList = new ArrayList<String>();
+        List<String> defaultList = new ArrayList<String>();
         this.columnMap = new HashMap<String, String>();
-        ArrayList<Boolean> notNullList = new ArrayList<Boolean>();
+        List<Boolean> notNullList = new ArrayList<Boolean>();
         for (int j = 0; j < tokens.length; ++j) {
             String tknt = tokens[j].trim();
             parseColumnTypes(typeList, defaultList, notNullList, tknt);

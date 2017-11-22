@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Metadata {
 
@@ -197,7 +198,7 @@ public class Metadata {
         }
     }
 
-    public ArrayList<String> getColumnNames(String tableName) throws SQLException {
+    public List<String> getColumnNames(String tableName) throws SQLException {
         PreparedStatement ps = null;
         try {
             boolean camb = SYSTEM_SUBQUERY.equals(tableName);
@@ -205,7 +206,7 @@ public class Metadata {
             ps = conn.prepareStatement(SELECT_COLUMNS);
             ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
-            ArrayList<String> result = new ArrayList<String>();
+            List<String> result = new ArrayList<String>();
             while (rs.next()) {
                 result.add(rs.getString("COLUMN_NAME"));
             }

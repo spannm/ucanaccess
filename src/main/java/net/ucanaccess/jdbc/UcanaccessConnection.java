@@ -36,30 +36,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import com.healthmarketscience.jackcess.Database;
+
 import org.hsqldb.jdbc.JDBCConnection;
 
 import net.ucanaccess.commands.CompositeCommand;
-import net.ucanaccess.commands.IFeedbackAction;
 import net.ucanaccess.commands.ICommand;
-import net.ucanaccess.commands.ICursorCommand;
 import net.ucanaccess.commands.ICommand.TYPES;
+import net.ucanaccess.commands.ICursorCommand;
+import net.ucanaccess.commands.IFeedbackAction;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.Logger;
-
-import com.healthmarketscience.jackcess.Database;
 
 public class UcanaccessConnection implements Connection {
     private static ThreadLocal<Context> ctx           = new ThreadLocal<Context>();
     private boolean                     feedbackState;
     private LinkedList<ICommand>        commands      = new LinkedList<ICommand>();
     private Connection                  hsqlDBConnection;
-    private HashMap<Savepoint, String>  savepointsMap = new HashMap<Savepoint, String>();
+    private Map<Savepoint, String>      savepointsMap = new HashMap<Savepoint, String>();
     private DBReference                 ref;
     private boolean                     checkModified = false;
     private boolean                     autoCommit    = true;
@@ -299,7 +300,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     private void flushIO() throws SQLException {
-        ArrayList<IFeedbackAction> ibal = new ArrayList<IFeedbackAction>();
+        List<IFeedbackAction> ibal = new ArrayList<IFeedbackAction>();
         LinkedList<ICommand> executed = new LinkedList<ICommand>();
 
         try {

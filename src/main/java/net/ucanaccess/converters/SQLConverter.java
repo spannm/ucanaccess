@@ -105,7 +105,7 @@ public class SQLConverter {
     private static final String                  PARAMETERS                   = "(?i)PARAMETERS([^;]*);";
     private static final Pattern                 ESPRESSION_DIGIT             = Pattern.compile("([\\d]+)(?![\\.\\d])");
     private static final String                  BIG_BANG                     = "1899-12-30";
-    private static final HashMap<String, String> noRomanCharacters            = new HashMap<String, String>();
+    private static final Map<String, String>     noRomanCharacters = new HashMap<String, String>();
     private static final List<String>            KEYWORDLIST                  = Arrays.asList("ALL", "AND", "ANY",
             "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
             "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
@@ -116,13 +116,13 @@ public class SQLConverter {
             "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
     private static final String                  KEYWORD_ALIAS                = createKeywordAliasRegex();
     private static final List<String>            PROCEDURE_KEYWORDLIST        = Arrays.asList("NEW", "ROW");
-    private static ArrayList<String>             whiteSpacedTableNames        = new ArrayList<String>();
-    private static final HashSet<String>         xescapedIdentifiers          = new HashSet<String>();
-    private static final HashSet<String>         alreadyEscapedIdentifiers    = new HashSet<String>();
-    private static final HashMap<String, String> identifiersContainingKeyword = new HashMap<String, String>();
-    private static final HashSet<String>         apostrophisedNames           = new HashSet<String>();
+    private static List<String>                  whiteSpacedTableNames        = new ArrayList<String>();
+    private static final Set<String>             xescapedIdentifiers          = new HashSet<String>();
+    private static final Set<String>             alreadyEscapedIdentifiers    = new HashSet<String>();
+    private static final Map<String, String>     identifiersContainingKeyword = new HashMap<String, String>();
+    private static final Set<String>             apostrophisedNames           = new HashSet<String>();
 
-    private static final HashSet<String> waFunctions = new HashSet<String>();
+    private static final Set<String>             waFunctions = new HashSet<String>();
 
     private static boolean supportsAccessLike  = true;
     private static boolean dualUsedAsTableName = false;
@@ -147,7 +147,7 @@ public class SQLConverter {
     }
 
     private static String createKeywordAliasRegex() {
-        ArrayList<String> keywordList = new ArrayList<String>(KEYWORDLIST);
+        List<String> keywordList = new ArrayList<String>(KEYWORDLIST);
         keywordList.remove("SELECT");
         StringBuffer keywords = new StringBuffer();
         String sep = "";
@@ -492,7 +492,7 @@ public class SQLConverter {
             }
             sql = sql.substring(0, mtc.start()) + "(" + g2 + ")" + sql.substring(mtc.end());
         }
-        HashSet<String> hs = new HashSet<String>();
+        Set<String> hs = new HashSet<String>();
         String sqle = sql;
         String sqlN = "";
         for (Matcher mtc = QUOTED_ALIAS.matcher(sqle); mtc.find(); mtc = QUOTED_ALIAS.matcher(sqle)) {
@@ -1150,7 +1150,7 @@ public class SQLConverter {
 
     public static Set<String> getFormulaDependencies(String formula) {
         Matcher mtc = FORMULA_DEPENDENCIES.matcher(formula);
-        HashSet<String> fd = new HashSet<String>();
+        Set<String> fd = new HashSet<String>();
         while (mtc.find()) {
             fd.add(escapeIdentifier(mtc.group(1)));
         }
@@ -1178,7 +1178,7 @@ public class SQLConverter {
     }
 
     public static List<String> getParameters(String s) {
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
 
         for (Matcher mtch = FORMULA_DEPENDENCIES.matcher(s); mtch.find(); mtch = FORMULA_DEPENDENCIES.matcher(s)) {
             ar.add(mtch.group());

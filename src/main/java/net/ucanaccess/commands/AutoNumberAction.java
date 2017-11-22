@@ -28,8 +28,8 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Table;
 
 public class AutoNumberAction implements IFeedbackAction {
-    private HashMap<String, Object> newAutoValues = new HashMap<String, Object>();
-    private HashMap<String, Object> oldAutoValues = new HashMap<String, Object>();
+    private Map<String, Object> newAutoValues = new HashMap<String, Object>();
+    private Map<String, Object> oldAutoValues = new HashMap<String, Object>();
     private Table                   table;
 
     public AutoNumberAction(Table table, Object[] memento, Object[] byAccess) throws SQLException {

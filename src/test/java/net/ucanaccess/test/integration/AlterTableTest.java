@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.healthmarketscience.jackcess.CursorBuilder;
 import com.healthmarketscience.jackcess.Database;
@@ -147,7 +148,7 @@ public class AlterTableTest extends AccessVersionAllTest {
         for (Index idx : tb.getIndexes()) {
             if ("èèè 23".equals(idx.getName()) && idx.isUnique()) {
                 found = true;
-                ArrayList<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<String>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -170,7 +171,7 @@ public class AlterTableTest extends AccessVersionAllTest {
         for (Index idx : tb.getIndexes()) {
             if ("%健 康".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
-                ArrayList<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<String>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -186,7 +187,7 @@ public class AlterTableTest extends AccessVersionAllTest {
         for (Index idx : tb.getIndexes()) {
             if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
-                ArrayList<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<String>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -208,7 +209,7 @@ public class AlterTableTest extends AccessVersionAllTest {
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("AAA n");
         Index idx = tb.getPrimaryKeyIndex();
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }
@@ -238,7 +239,7 @@ public class AlterTableTest extends AccessVersionAllTest {
         Table tb = db.getTable("AAA n");
         Table tbr = db.getTable("22 amadeimargmail111");
         Index idx = tb.getForeignKeyIndex(tbr);
-        ArrayList<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<String>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }

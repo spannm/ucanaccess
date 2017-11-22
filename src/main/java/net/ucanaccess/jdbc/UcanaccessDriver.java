@@ -259,7 +259,7 @@ public final class UcanaccessDriver implements Driver {
     }
 
     private Map<String, String> toMap(String property) {
-        HashMap<String, String> hm = new HashMap<String, String>();
+        Map<String, String> hm = new HashMap<String, String>();
         StringTokenizer st = new StringTokenizer(property, "&");
         while (st.hasMoreTokens()) {
             String entry = st.nextToken();
