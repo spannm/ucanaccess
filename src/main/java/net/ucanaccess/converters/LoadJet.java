@@ -822,7 +822,6 @@ public class LoadJet {
             int step = errorCheck ? 1 : DEFAULT_STEP;
             try {
                 int i = 0;
-
                 Iterator<Row> it = t.iterator();
 
                 while (it.hasNext()) {
