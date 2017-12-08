@@ -839,7 +839,7 @@ public class LoadJet {
                     }
                     execInsert(ps, values);
 
-                    if ((i > 0 && i % step == 0) || !it.hasNext()) {
+                    if (errorCheck || (i > 0 && i % step == 0) || !it.hasNext()) {
                         try {
                             ps.executeBatch();
                         } catch (SQLException e) {
