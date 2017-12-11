@@ -31,11 +31,11 @@ import net.ucanaccess.test.util.AccessVersion2007Test;
 @RunWith(Parameterized.class)
 public class CorruptedTest extends AccessVersion2007Test {
 
-    private final static ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private final static ByteArrayOutputStream ERR_CONTENT = new ByteArrayOutputStream();
 
     @BeforeClass
     public static void setUpStreams() {
-        System.setErr(new PrintStream(errContent));
+        System.setErr(new PrintStream(ERR_CONTENT));
     }
 
     @AfterClass
@@ -54,7 +54,6 @@ public class CorruptedTest extends AccessVersion2007Test {
 
     @Test
     public void testCorrupted() {
-        System.err.println();
         getLogger().info("UcanaccessConnection: {}", ucanaccess);
         String err = "WARNING:integrity constraint violation: foreign key no parent; BABY_DADDYBABY table: BABY"
                 + System.lineSeparator()
@@ -67,6 +66,6 @@ public class CorruptedTest extends AccessVersion2007Test {
                 + "WARNING:Detected Foreign Key constraint breach, table NotNull, record Row[140:3][{ID=4,notnull=t,vvv=t,fk1=2}]: making the table NotNull  readonly "
                 + System.lineSeparator()
                 + "WARNING:Detected Unique constraint breach, table UK, record Row[181:1][{ID=2,uk=1}]: making the table UK  readonly";
-        assertEquals(new String(err), new String(errContent.toByteArray()).trim());
+        assertEquals(new String(err), new String(ERR_CONTENT.toByteArray()).trim());
     }
 }
