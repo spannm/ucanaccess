@@ -264,6 +264,7 @@ public class LoadJet {
         private static final int    HSQL_FK_VIOLATION        = -ErrorCode.X_23503;
         private static final int    HSQL_UK_VIOLATION        = -ErrorCode.X_23505;
         private static final String SYSTEM_SCHEMA            = "SYS";
+        private static final int    DEFAULT_STEP             = 2000;
         private List<String>        unresolvedTables         = new ArrayList<String>();
         private List<String>        calculatedFieldsTriggers = new ArrayList<String>();
         private LinkedList<String>  loadingOrder             = new LinkedList<String>();
@@ -759,6 +760,7 @@ public class LoadJet {
             this.readOnlyTables.add(t.getName());
             String ntn = schema(escapeIdentifier(tn), systemTable);
             exec("SET TABLE " + ntn + " READONLY TRUE ", false);
+            loadedTables.add(tn + " READONLY");
         }
 
         private void recreate(Table t, boolean systemTable, Row record, int errorCode)
@@ -810,12 +812,16 @@ public class LoadJet {
             }
             return false;
         }
-
+        
         private void loadTableData(Table t, boolean systemTable) throws IOException, SQLException {
+            loadTableData(t, systemTable, false);
+        }
+
+        private void loadTableData(Table t, boolean systemTable, boolean errorCheck) throws IOException, SQLException {
             PreparedStatement ps = null;
+            int step = errorCheck ? 1 : DEFAULT_STEP;
             try {
                 int i = 0;
-                int step = 2000;
                 Iterator<Row> it = t.iterator();
 
                 while (it.hasNext()) {
@@ -832,26 +838,36 @@ public class LoadJet {
                     }
                     execInsert(ps, values);
 
-                    if ((i > 0 && i % step == 0) || !it.hasNext()) {
+                    if (errorCheck || (i > 0 && i % step == 0) || !it.hasNext()) {
                         try {
                             ps.executeBatch();
                         } catch (SQLException e) {
                             int ec = e.getErrorCode();
-                            if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
-                                if (ec == HSQL_FK_VIOLATION) {
-                                    Logger.logWarning(e.getMessage());
-                                }
-                                recreate(t, systemTable, row, e.getErrorCode());
+                            if (!errorCheck && ec == HSQL_NOT_NULL) {
+                                dropTable(t, systemTable);
+                                createSyncrTable(t, systemTable, true);
+                                loadTableData(t, systemTable, true);
                             } else {
-                                throw e;
+                                if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
+                                    if (ec == HSQL_FK_VIOLATION) {
+                                        Logger.logWarning(e.getMessage());
+                                    }
+                                    recreate(t, systemTable, row, e.getErrorCode());
+                                } else {
+                                    throw e;
+                                }
                             }
                         }
-                        conn.commit();
+                        if (errorCheck) {
+                            conn.rollback();
+                        } else {
+                            conn.commit();
+                        }
                     }
                     i++;
 
                 }
-                if (i != t.getRowCount()) {
+                if (i != t.getRowCount() && step != 1) {
                     Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(), String.valueOf(t.getRowCount()),
                             String.valueOf(i));
 
