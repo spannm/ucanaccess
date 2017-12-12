@@ -31,7 +31,7 @@ import net.ucanaccess.test.util.AccessVersion2007Test;
 @RunWith(Parameterized.class)
 public class CorruptedTest extends AccessVersion2007Test {
 
-    private final static ByteArrayOutputStream ERR_CONTENT = new ByteArrayOutputStream();
+    private static final ByteArrayOutputStream ERR_CONTENT = new ByteArrayOutputStream();
 
     @BeforeClass
     public static void setUpStreams() {
