@@ -56,15 +56,15 @@ public class CorruptedTest extends AccessVersion2007Test {
     public void testCorrupted() {
         getLogger().info("UcanaccessConnection: {}", ucanaccess);
         String err = "WARNING:integrity constraint violation: foreign key no parent; BABY_DADDYBABY table: BABY"
-                + System.lineSeparator()
+                + System.getProperty("line.separator")
                 + "WARNING:Detected Foreign Key constraint breach, table Baby, record Row[162:1][{ID=2,fk1=34}]: making the table Baby  readonly "
-                + System.lineSeparator()
+                + System.getProperty("line.separator")
                 + "WARNING:Detected Not Null constraint breach, table NotNull, record Row[140:0][{ID=1,notnull=<null>,vvv=gg,fk1=34}]: making the table NotNull  readonly "
-                + System.lineSeparator()
+                + System.getProperty("line.separator")
                 + "WARNING:integrity constraint violation: foreign key no parent; NOTNULL_DADDYNOTNULL table: NOTNULL"
-                + System.lineSeparator()
+                + System.getProperty("line.separator")
                 + "WARNING:Detected Foreign Key constraint breach, table NotNull, record Row[140:3][{ID=4,notnull=t,vvv=t,fk1=2}]: making the table NotNull  readonly "
-                + System.lineSeparator()
+                + System.getProperty("line.separator")
                 + "WARNING:Detected Unique constraint breach, table UK, record Row[181:1][{ID=2,uk=1}]: making the table UK  readonly";
         assertEquals(new String(err), new String(ERR_CONTENT.toByteArray()).trim());
     }
