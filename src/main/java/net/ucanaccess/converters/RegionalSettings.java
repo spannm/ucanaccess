@@ -66,8 +66,8 @@ public final class RegionalSettings {
 
         addDateP(getShortDatePattern(), true, false);
 
-        if (!Locale.getDefault().equals(Locale.US)) {
-            RegionalSettings regUs = getRegionalSettings(Locale.US);
+        if (!locale.equals(Locale.US)) {
+            RegionalSettings regUs = new RegionalSettings(Locale.US);
             addDateP(regUs.getGeneralPattern(), false, false);
             addDateP(regUs.getLongDatePattern(), true, false);
             addDateP(regUs.getMediumDatePattern(), true, false);
