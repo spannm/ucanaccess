@@ -45,8 +45,9 @@
     </developers>
     <inceptionYear>2012</inceptionYear>
     <scm>
-        <connection>scm:git:http://git.code.sf.net/p/ucanaccess/git-code</connection>
+        <connection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</connection>
         <developerConnection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</developerConnection>
+        <url>https://sourceforge.net/p/ucanaccess/git-code/ci/master/tree/</url>
     </scm>
     <properties>
         <javaVersion>1.6</javaVersion>
