@@ -205,14 +205,23 @@ a:hover {
           </ul>
           <h2>Limitations</h2>
           <ul>
-            <li>In the versions up to UCanAccess 4.0.0, only basic DDL was supported (<span class="inlineCode">CREATE
-                TABLE</span> with Primary Key, <span class="inlineCode">DROP TABLE</span>).<br> Since the version 4.0.0
-              UCanAccess can now support DDL for <b>Table metadata modification</b>. <br> Columns, Primary Keys and
-              other Indexes can now be added to an <b>existing</b> table.<br> UCanAccess 4.x.x has also the ability
-              to create Foreign Keys and to rename Tables.<br> A full DDL implementation will be available soon.
+            <li>Access 
+              <a href=https://support.office.com/en-us/article/Create-a-data-macro-b1b94bca-4f17-47ad-a66d-f296ef834200>data macros</a>
+              are not supported. UCanAccess can update tables for which event-driven data macros are defined, but the macros
+              themselves are ignored.</li>
+            <li>In versions prior to UCanAccess 4.0.0, only basic DDL was supported (<span class="inlineCode">CREATE
+                TABLE</span> with Primary Key, <span class="inlineCode">DROP TABLE</span>).<br>
+                Since version 4.0.0
+              UCanAccess can now support DDL for <b>Table metadata modification</b>: 
+              <ul>
+                <li>Columns, Primary Keys and other Indexes can now be added to an <b>existing</b> table.</li>
+                <li>UCanAccess 4.x.x has also the ability to create Foreign Keys and to rename Tables.</li>
+              </ul>
             </li>
 
-            <li>Very limited multiprocess access support. Nevertheless, it tries to synchronize data when a
+            <li>Very limited multiprocess access support (details 
+              <a href=http://ucanaccess.blogspot.ca/2017/07/multiuser-concurrent-write-access.html>here</a>). 
+              Nevertheless, it tries to synchronize data when a
               concurrent process modifies the Access database file.</li>
           </ul>
           <h2>Requirements</h2>
@@ -226,35 +235,30 @@ a:hover {
               DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/data/pippo.mdb;memory=false&quot;);</span> <br>
           <h2>Dependencies</h2>
           <p>
-            <b>UCanAccess 2.x.x</b> requires (at least) the following dependencies in your classpath:
-          </p>
-          <ul>
-            <li>jackcess-2.0.0.jar or later
-              <ul>
-                <li>commons-lang-2.4.jar</li>
-                <li>commons-logging-1.0.4.jar</li>
-              </ul>
-            </li>
-            <li>hsqldb.jar(2.2.5)<br>
-            <br></li>
-          </ul>
-          <p>In order to open encrypted files you must use UCanAccess 2.x.x or later with jackcess-encrypt-2.x.x and
-            all related dependencies.</p>
-
+            UCanAccess depends on Jackcess and HSQLDB. If you are using 
+            <a href=https://maven.apache.org>Apache Maven</a> to manage your dependencies (recommended) 
+            simply add the following to your pom.xml&nbsp;...<br>
+            <pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;net.sf.ucanaccess&lt;/groupId&gt;
+    &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
+    &lt;version&gt;4.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+            </pre>
+            ... and Maven will add the other dependencies for you. If you are manually adding the dependencies to your classpath
+            you will need to add the ucanaccess&#8209;4.0.3.jar file along with <b>all</b> of the jar files in the lib/ folder of
+            UCanAccess&#8209;4.0.3&#8209;bin.zip (details <a href=https://stackoverflow.com/a/21955257/2144390>here</a>).
           <p>
-            <b>Old versions of UCanAccess</b> (0.x.x or 1.x.x) require (at least) the following dependencies in your
-            classpath:
-          </p>
-          <ul>
-            <li>jackcess-1.2.9.jar or later
-              <ul>
-                <li>commons-lang-2.4.jar</li>
-                <li>commons-logging-1.0.4.jar</li>
-              </ul>
-            </li>
-            <li>hsqldb.jar(2.2.x)<br>
-            <br></li>
-          </ul>
+            In order to open encrypted files you must use UCanAccess 2.x.x or later with jackcess-encrypt-2.x.x and
+            all related dependencies. Again, if you are using Maven, simply add this extra dependency:
+            <pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;com.healthmarketscience.jackcess&lt;/groupId&gt;
+    &lt;artifactId&gt;jackcess-encrypt&lt;/artifactId&gt;
+    &lt;version&gt;2.1.4&lt;/version&gt;
+&lt;/dependency&gt;
+            </pre>
+            Otherwise, check the <a href=http://jackcessencrypt.sourceforge.net>Jackcess Encrypt website</a> for more information.
         </div>
 
         <!--  
