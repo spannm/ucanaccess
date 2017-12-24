@@ -283,6 +283,16 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     }
 
     @Override
+    public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
+        return hidden.getObject(parameterIndex, type);
+    }
+
+    @Override
+    public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
+        return hidden.getObject(parameterName, type);
+    }
+
+    @Override
     public Ref getRef(int parameterIndex) throws SQLException {
         return hidden.getRef(parameterIndex);
     }
@@ -656,32 +666,6 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
             UcanaccessConnection.setCtxConnection((UcanaccessConnection) super.getConnection());
         }
         return super.executeUpdate();
-    }
-
-    /**
-     * <p>
-     * Returns an object representing the value of OUT parameter {@code parameterIndex} and will convert from the SQL
-     * type of the parameter to the requested Java data type, if the conversion is supported.
-     * <p>
-     * Added without Override annotation for compatibility with Java >= 7 compilers.
-     *
-     * @since 1.7
-     */
-    public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
-        throw new UnsupportedOperationException("Method not implemented. Requires Java >= 7.");
-    }
-
-    /**
-     * <p>
-     * Returns an object representing the value of OUT parameter {@code parameterName} and will convert from the SQL
-     * type of the parameter to the requested Java data type, if the conversion is supported.
-     * <p>
-     * Added without Override annotation for compatibility with Java >= 7 compilers.
-     *
-     * @since 1.7
-     */
-    public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
-        throw new UnsupportedOperationException("Method not implemented. Requires Java >= 7.");
     }
 
 }
