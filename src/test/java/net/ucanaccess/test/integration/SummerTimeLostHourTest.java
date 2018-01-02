@@ -21,7 +21,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -32,7 +32,6 @@ import com.healthmarketscience.jackcess.Table;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,8 +40,6 @@ import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
-// TODO: enable this once we have a fix for Ticket_5
-@Ignore
 public class SummerTimeLostHourTest extends AccessVersion2007Test {
 
     private static Locale   prevLocale;
@@ -89,20 +86,12 @@ public class SummerTimeLostHourTest extends AccessVersion2007Test {
         Statement ucaStmt = ucanaccess.createStatement();
         ucaStmt.executeUpdate("UPDATE Table1 SET txtField='updated' WHERE id=1");
         //
-        TimeZone tzUtc = TimeZone.getTimeZone("UTC");
-        //
-        Calendar expectedBackFromAccess = Calendar.getInstance(tzUtc);
-        expectedBackFromAccess.clear();
-        expectedBackFromAccess.set(2017, 2, 26, 2, 0, 0);
-        //
+        LocalDateTime expectedBackFromAccess = LocalDateTime.of(2017, 3, 26, 2, 0);
         Database db = ucanaccess.getDbIO();
-        TimeZone prevJackcessTimeZone = db.getTimeZone();
-        db.setTimeZone(tzUtc);
         Table tbl = db.getTable("Table1");
         Row r = CursorBuilder.findRowByPrimaryKey(tbl, 1);
-        assertEquals(expectedBackFromAccess.getTimeInMillis(), r.getDate("dtmField").getTime());
+        assertEquals(expectedBackFromAccess, r.get("dtmField"));
         //
-        db.setTimeZone(prevJackcessTimeZone);
     }
 
 }

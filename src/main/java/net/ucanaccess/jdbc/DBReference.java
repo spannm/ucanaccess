@@ -38,6 +38,7 @@ import java.util.UUID;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.DateTimeType;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
@@ -190,9 +191,11 @@ public class DBReference {
                         links.add(linkeeFile);
                     }
                     Database ldb = open(linkeeFile, _pwd);
+                    ldb.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
                     return ldb;
                 }
             });
+            dbIO.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
             dbIO.setEnforceForeignKeys(false);
         }
     }

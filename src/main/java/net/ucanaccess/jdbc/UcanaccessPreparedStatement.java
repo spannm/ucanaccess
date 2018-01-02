@@ -661,9 +661,20 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             throw new UcanaccessSQLException(e);
         }
     }
+    
+    private Object mapLocalTimeToLocalDateTime(Object x) {
+        Object rtn = null;
+        if (x.getClass().equals(java.time.LocalTime.class)) {
+            rtn = ((java.time.LocalTime) x).atDate(java.time.LocalDate.of(1899, 12, 30));
+        } else {
+            rtn = x;
+        }
+        return rtn;
+    }
 
     @Override
     public void setObject(int idx, Object x) throws SQLException {
+        x = mapLocalTimeToLocalDateTime(x);
         try {
             addMementoEntry("setObject", new Class[] { Object.class }, idx, x);
             wrapped.setObject(idx, x);
@@ -675,6 +686,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
 
     @Override
     public void setObject(int idx, Object x, int tsqlt) throws SQLException {
+        x = mapLocalTimeToLocalDateTime(x);
         try {
             addMementoEntry("setObject", new Class[] { Object.class, Integer.TYPE }, idx, x, tsqlt);
             wrapped.setObject(idx, x, tsqlt);
@@ -685,6 +697,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
 
     @Override
     public void setObject(int idx, Object x, int tsqlt, int sol) throws SQLException {
+        x = mapLocalTimeToLocalDateTime(x);
         try {
             addMementoEntry("setObject", new Class[] { Object.class, Integer.TYPE, Integer.TYPE }, idx, x, tsqlt, sol);
             wrapped.setObject(idx, x, tsqlt, sol);

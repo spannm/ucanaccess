@@ -15,8 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.triggers;
 
-import java.util.Date;
-
+import java.time.LocalDateTime;
 import org.hsqldb.Trigger;
 import org.hsqldb.types.JavaObjectData;
 
@@ -45,7 +44,7 @@ public class TriggerAppendOnly extends TriggerBase {
             for (Column cl : t.getColumns()) {
                 if (cl.isAppendOnly()) {
                     ColumnImpl verCol = (ColumnImpl) cl.getVersionHistoryColumn();
-                    Date upTime = new Date();
+                    LocalDateTime upTime = LocalDateTime.now();
                     String val = newR[i] == null ? null : newR[i].toString();
                     if (type == Trigger.INSERT_BEFORE_ROW) {
                         newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] { new Version(val, upTime) });

@@ -22,9 +22,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 import com.healthmarketscience.jackcess.Column;
@@ -51,7 +50,6 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.TableBuilder;
 import com.healthmarketscience.jackcess.impl.DatabaseImpl;
 
-import org.hsqldb.HsqlDateTime;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.types.BlobData;
@@ -150,11 +148,9 @@ public class Persist2Jet {
                     if (value instanceof TimestampData) {
                         if (column.getType().equals(DataType.SHORT_DATE_TIME)) {
                             TimestampData ts = (TimestampData) value;
-                            TimeZone zone = TimeZone.getDefault();
-                            GregorianCalendar cal = new GregorianCalendar(zone);
-                            long millis = HsqlDateTime.convertMillisToCalendar(cal, ts.getSeconds() * 1000);
-                            java.sql.Timestamp val = new java.sql.Timestamp(millis);
-                            val.setNanos(ts.getNanos());
+                            LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
+                                    .plusSeconds(ts.getSeconds())
+                                    .plusNanos(ts.getNanos());
                             values[i] = val;
                         }
                     }

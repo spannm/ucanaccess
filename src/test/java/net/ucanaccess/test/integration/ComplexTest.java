@@ -22,8 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Date;
-
+import java.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -85,8 +84,8 @@ public class ComplexTest extends AccessVersion2010Test {
     }
 
     private void complex1() throws Exception {
-        dumpQueryResult("SELECT * FROM Table1");
-        checkQuery("SELECT * FROM Table1");
+        dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
+        checkQuery("SELECT * FROM Table1 ORDER BY id");
         PreparedStatement ps =
                 ucanaccess.prepareStatement(
                         "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
@@ -98,19 +97,19 @@ public class ComplexTest extends AccessVersion2010Test {
         SingleValue[] svs = new SingleValue[] { new SingleValue("ccc16"), new SingleValue("ccc24") };
         ps.setObject(4, svs);
         Attachment[] atcs =
-                new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), new Date(), null),
-                        new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), new Date(), null) };
+                new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
+                        new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null) };
         ps.setObject(5, atcs);
         ps.execute();
-        dumpQueryResult("SELECT * FROM Table1");
-        checkQuery("SELECT * FROM Table1");
+        dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
+        checkQuery("SELECT * FROM Table1 ORDER BY id");
         ps.close();
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE CAT' ");
         ps.execute();
         ps.close();
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [ATTACH-DATA]=? WHERE ID=?");
         Attachment[] atc = new Attachment[] { new Attachment(null, "cccsss.cvs", "cvs",
-                "ddddd ;sssssssssssssssssssddd".getBytes(), new Date(), null) };
+                "ddddd ;sssssssssssssssssssddd".getBytes(), LocalDateTime.now(), null) };
         ps.setObject(1, atc);
         ps.setString(2, "row12");
         ps.execute();
@@ -124,7 +123,7 @@ public class ComplexTest extends AccessVersion2010Test {
         svs = new SingleValue[] {new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee")};
         ps.setObject(1, svs);
         ps.execute();
-        checkQuery("SELECT * FROM TABLE1 order by id");
+        checkQuery("SELECT * FROM TABLE1 ORDER BY id");
         assertEquals(7, getCount("SELECT COUNT(*) FROM TABLE1", true));
         ps.close();
     }
@@ -151,8 +150,8 @@ public class ComplexTest extends AccessVersion2010Test {
             SingleValue[] svs = new SingleValue[] { new SingleValue("16"), new SingleValue("24") };
             ps.setObject(4, svs);
             Attachment[] atcs =
-                    new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), new Date(), null),
-                            new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), new Date(), null) };
+                    new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
+                            new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null) };
             ps.setObject(5, atcs);
             ps.execute();
             ps.close();

@@ -2,6 +2,7 @@ package net.ucanaccess.converters;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ public final class FormatCache {
     private static DecimalFormat zpzz;
     private static DecimalFormat sharp;
     private static DecimalFormat noGrouping;
+    private static NumberFormat  currencyDefault;
 
     private static final Map<String, DecimalFormat> CACHE = new HashMap<String, DecimalFormat>();
 
@@ -53,5 +55,12 @@ public final class FormatCache {
             noGrouping.setGroupingUsed(false);
         }
         return noGrouping;
+    }
+    
+    public static NumberFormat getCurrencyDefault() {
+        if (currencyDefault == null) {
+            currencyDefault = NumberFormat.getCurrencyInstance();
+        }
+        return currencyDefault;
     }
 }

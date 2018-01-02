@@ -27,6 +27,8 @@ import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -819,6 +822,8 @@ public class LoadJet {
         }
 
         private void loadTableData(Table t, boolean systemTable, boolean errorCheck) throws IOException, SQLException {
+            TimeZone prevJackcessTimeZone = t.getDatabase().getTimeZone();
+            t.getDatabase().setTimeZone(TimeZone.getTimeZone("UTC"));
             PreparedStatement ps = null;
             int step = errorCheck ? 1 : DEFAULT_STEP;
             try {
@@ -878,6 +883,7 @@ public class LoadJet {
                     ps.close();
                 }
             }
+            t.getDatabase().setTimeZone(prevJackcessTimeZone);
         }
 
         private void loadTableFKs(String tn, boolean autoref) throws IOException, SQLException {
@@ -1105,8 +1111,7 @@ public class LoadJet {
                 return bd;
             }
             if (value instanceof Date && !(value instanceof Timestamp)) {
-                Timestamp ts = new Timestamp(((Date) value).getTime());
-                return ts;
+                return LocalDateTime.ofInstant(((Date) value).toInstant(), ZoneId.of("UTC"));
             }
             if (value instanceof ComplexValueForeignKey) {
                 try {

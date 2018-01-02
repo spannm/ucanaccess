@@ -38,11 +38,11 @@ import org.junit.runners.Parameterized;
 
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
+import net.ucanaccess.test.util.AccessVersion2007Test;
 import net.ucanaccess.util.HibernateSupport;
 
 @RunWith(Parameterized.class)
-public class AlterTableTest extends AccessVersion2010Test {
+public class AlterTableTest extends AccessVersion2007Test {
 
     public AlterTableTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -106,14 +106,20 @@ public class AlterTableTest extends AccessVersion2010Test {
         st.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN Memo  Memo  ");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
-        checkQuery("SELECT * from [22 amadeimargmail111] ORDER BY c");
         dumpQueryResult("SELECT * from [22 amadeimargmail111] ORDER BY c");
-        st.executeUpdate("Update sample set Description='wRRRw'");
-        st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
-
-        st.execute("Update sample set Description='ww'");
-        checkQuery("SELECT * from Sample");
+        checkQuery("SELECT * from [22 amadeimargmail111] ORDER BY c");
+        
         dumpQueryResult("SELECT * from Sample");
+        checkQuery("SELECT * from Sample");
+        st.executeUpdate("Update sample set Description='wRRRw'");
+        dumpQueryResult("SELECT * from Sample");
+        checkQuery("SELECT * from Sample");
+        st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
+        dumpQueryResult("SELECT * from Sample");
+        checkQuery("SELECT * from Sample");
+        st.execute("Update sample set Description='ww'");
+        dumpQueryResult("SELECT * from Sample");
+        checkQuery("SELECT * from Sample");
 
         getLogger().info("After having added a few columns...");
         dumpQueryResult("SELECT * from UCA_METADATA.Columns");

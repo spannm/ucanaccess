@@ -424,6 +424,10 @@ public class FunctionsTest extends AccessVersionAllTest {
         checkQuery("SELECT Format (11111210.6, '#,##0.00') FROM t234", "11,111,210.60");
         checkQuery("SELECT Format (1111111210.6, 'Scientific') FROM t234", "1.11E+09");
         checkQuery("SELECT Format (0.00000000000000015661112106, 'Scientific') FROM t234", "1.57E-16");
+        Locale prevLocale = Locale.getDefault();
+        Locale.setDefault(Locale.US);
+        checkQuery("SELECT Format(1.239, 'Currency') FROM t234", "$1.24");
+        Locale.setDefault(prevLocale);
     }
 
     @Test

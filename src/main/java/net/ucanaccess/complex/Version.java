@@ -15,29 +15,28 @@ limitations under the License.
 */
 package net.ucanaccess.complex;
 
-import java.util.Date;
-
+import java.time.LocalDateTime;
 import com.healthmarketscience.jackcess.complex.ComplexValue;
 
 public class Version extends ComplexBase {
 
     private static final long serialVersionUID = 1L;
     private String            value;
-    private Date              modifiedDate;
+    private LocalDateTime     modifiedDate;
 
     public Version(com.healthmarketscience.jackcess.complex.Version cv) {
         super(cv);
         this.value = cv.getValue();
-        this.modifiedDate = cv.getModifiedDate();
+        this.modifiedDate = cv.getModifiedLocalDate();
     }
 
-    public Version(ComplexValue.Id id, String tableName, String columnName, String _value, Date _modifiedDate) {
+    public Version(ComplexValue.Id id, String tableName, String columnName, String _value, LocalDateTime _modifiedDate) {
         super(id, tableName, columnName);
         this.value = _value;
         this.modifiedDate = _modifiedDate;
     }
 
-    public Version(String _value, Date _modifiedDate) {
+    public Version(String _value, LocalDateTime _modifiedDate) {
         this(CREATE_ID, null, null, _value, _modifiedDate);
     }
 
@@ -67,7 +66,7 @@ public class Version extends ComplexBase {
         return true;
     }
 
-    public Date getModifiedDate() {
+    public LocalDateTime getModifiedDate() {
         return modifiedDate;
     }
 
@@ -84,7 +83,7 @@ public class Version extends ComplexBase {
         return result;
     }
 
-    public void setModifiedDate(Date _modifiedDate) {
+    public void setModifiedDate(LocalDateTime _modifiedDate) {
         this.modifiedDate = _modifiedDate;
     }
 

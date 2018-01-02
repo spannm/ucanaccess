@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.DateTimeType;
 
 public class DefaultJackcessOpener implements JackcessOpenerInterface {
 
@@ -27,14 +28,16 @@ public class DefaultJackcessOpener implements JackcessOpenerInterface {
     public Database open(File fl, String pwd) throws IOException {
         DatabaseBuilder dbd = new DatabaseBuilder(fl);
         dbd.setAutoSync(false);
+        Database db = null;
         try {
             dbd.setReadOnly(false);
-            return dbd.open();
+            db = dbd.open();
         } catch (IOException e) {
             dbd.setReadOnly(true);
-            return dbd.open();
-
+            db = dbd.open();
         }
+        db.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
+        return db;
     }
 
 }

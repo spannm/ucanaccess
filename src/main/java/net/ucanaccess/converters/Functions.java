@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -565,6 +566,10 @@ public final class Functions {
         }
         if ("general number".equalsIgnoreCase(par)) {
             DecimalFormat formatter = FormatCache.getNoGrouping();
+            return formatter.format(d);
+        }
+        if ("currency".equalsIgnoreCase(par)) {
+            NumberFormat formatter = FormatCache.getCurrencyDefault();
             return formatter.format(d);
         }
         if ("yes/no".equalsIgnoreCase(par)) {

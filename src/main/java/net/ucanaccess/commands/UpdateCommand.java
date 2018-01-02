@@ -17,8 +17,8 @@ package net.ucanaccess.commands;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -155,7 +155,7 @@ public class UpdateCommand extends AbstractCursorCommand {
                     List<com.healthmarketscience.jackcess.complex.Version> oldV = rowFk.getVersions();
                     String vn = v.getValue();
                     String vo = oldV.size() > 0 ? oldV.get(0).getValue() : null;
-                    Date upTime = isRollbacking ? new Date() : v.getModifiedDate();
+                    LocalDateTime upTime = isRollbacking ? LocalDateTime.now() : v.getModifiedDate();
 
                     if ((vn != null && vo == null) || (vo != null && vn == null)
                             || (vo != null && vn != null && !vo.equals(vn))) {

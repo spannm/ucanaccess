@@ -16,9 +16,8 @@ limitations under the License.
 package net.ucanaccess.complex;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
-
 import com.healthmarketscience.jackcess.complex.ComplexValue;
 
 public class Attachment extends ComplexBase {
@@ -27,7 +26,7 @@ public class Attachment extends ComplexBase {
     private String            name;
     private String            type;
     private byte[]            data;
-    private Date              timeStamp;
+    private LocalDateTime     timeStamp;
     private Integer           flags;
 
     public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
@@ -36,12 +35,12 @@ public class Attachment extends ComplexBase {
         this.name = atc.getFileName();
         this.type = atc.getFileType();
         this.data = atc.getFileData();
-        this.timeStamp = atc.getFileTimeStamp();
+        this.timeStamp = atc.getFileLocalTimeStamp();
         this.flags = atc.getFileFlags();
     }
 
     public Attachment(ComplexValue.Id id, String tableName, String columnName, String _url, String _name, String _type,
-            byte[] _data, Date _timeStamp, Integer _flags) {
+            byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
         super(id, tableName, columnName);
         this.url = _url;
         this.name = _name;
@@ -51,7 +50,7 @@ public class Attachment extends ComplexBase {
         this.flags = _flags;
     }
 
-    public Attachment(String _url, String _name, String _type, byte[] _data, Date _timeStamp, Integer _flags) {
+    public Attachment(String _url, String _name, String _type, byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
         this(CREATE_ID, null, null, _url, _name, _type, _data, _timeStamp, _flags);
 
     }
@@ -120,7 +119,7 @@ public class Attachment extends ComplexBase {
         return name;
     }
 
-    public Date getTimeStamp() {
+    public LocalDateTime getTimeStamp() {
         return timeStamp;
     }
 
@@ -157,7 +156,7 @@ public class Attachment extends ComplexBase {
         this.name = _name;
     }
 
-    public void setTimeStamp(Date _timeStamp) {
+    public void setTimeStamp(LocalDateTime _timeStamp) {
         this.timeStamp = _timeStamp;
     }
 
