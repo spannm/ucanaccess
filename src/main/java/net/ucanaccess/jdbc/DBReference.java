@@ -576,7 +576,8 @@ public class DBReference {
             suffixStart = fileName.length();
         }
         String suffix = this.dbFormat != null
-                && (FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat)) ? ".laccdb"
+                && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat)) 
+                        ? ".laccdb"
                         : ".ldb";
         File flLock = new File(folder, fileName.substring(0, suffixStart) + suffix);
         return flLock;

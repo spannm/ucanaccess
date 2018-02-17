@@ -442,10 +442,10 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * does not exist.
      *
      * @param value
-     *            Valid values for this parameter are: "V2000", "V2003", "V2007", or "V2010".
+     *            Valid values for this parameter are: "V2000", "V2003", "V2007", "V2010", or "V2016".
      */
     public void setNewDatabaseVersion(String value) {
-        setProp("newdatabaseversion", value, new ArrayList<Object>(Arrays.asList("V2000", "V2003", "V2007", "V2010")));
+        setProp("newdatabaseversion", value, new ArrayList<Object>(Arrays.asList("V2000", "V2003", "V2007", "V2010", "V2016")));
     }
 
     /**

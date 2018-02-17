@@ -30,6 +30,12 @@ You can contact the author Marco Amadei at amadei.mar@gmail.com
 
 
 Current Release:
+UCanAccess 4.0.4 Release 
+========================
+-Upgrade to Jackcess 2.1.10
+-Support Access_2016 ("version 5") file format
+-Support "Large Number" (BIGINT) columns
+
 UCanAccess 4.0.3 Release 
 ========================
 -Upgrade to Jackcess 2.1.9
