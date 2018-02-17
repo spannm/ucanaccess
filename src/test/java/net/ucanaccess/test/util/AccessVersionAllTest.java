@@ -11,7 +11,8 @@ public abstract class AccessVersionAllTest extends UcanaccessTestBase {
             new Object[] { AccessVersion.V2000 },
             new Object[] { AccessVersion.V2003 },
             new Object[] { AccessVersion.V2007 },
-            new Object[] { AccessVersion.V2010 });
+            new Object[] { AccessVersion.V2010 },
+            new Object[] { AccessVersion.V2016 });
 
     @Parameterized.Parameters(name="{index}: {0}")
     public static Iterable<Object[]> getAllAccessVersions() {
