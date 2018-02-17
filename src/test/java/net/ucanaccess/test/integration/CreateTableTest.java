@@ -35,10 +35,10 @@ import org.junit.runners.Parameterized;
 
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
-public class CreateTableTest extends AccessVersionAllTest {
+public class CreateTableTest extends AccessVersion2010Test {
 
     public CreateTableTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -132,6 +132,7 @@ public class CreateTableTest extends AccessVersionAllTest {
             st = ucanaccess.createStatement();
             st.execute("create table dkey(c counter  , " + "number numeric(23,5)  , " + "  PRIMARY KEY (C,NUMBER))");
             st.execute("create table dunique(c text  , " + "number numeric(23,5)  , " + "  unique (C,NUMBER))");
+            st.close();
             this.ucanaccess.setAutoCommit(false);
             try {
                 st = ucanaccess.createStatement();

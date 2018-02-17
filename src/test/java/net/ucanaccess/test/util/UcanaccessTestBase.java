@@ -79,7 +79,8 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                 new Object[] {FileFormat.V2000},
                 new Object[] {FileFormat.V2003},
                 new Object[] {FileFormat.V2007},
-                new Object[] {FileFormat.V2010});
+                new Object[] {FileFormat.V2010},
+                new Object[] {FileFormat.V2016});
         return fileFormats;
     }
 
