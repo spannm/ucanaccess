@@ -62,6 +62,7 @@ import org.hsqldb.error.ErrorCode;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
+import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
@@ -833,8 +834,8 @@ public class LoadJet {
                     if (ps == null) {
                         ps = sqlInsert(t, row, systemTable);
                     }
-                    for (Object obj : row.values()) {
-                        values.add(value(obj));
+                    for (Map.Entry<String, Object> entry : row.entrySet()) {
+                        values.add(value(entry.getValue(), t, entry.getKey(), row));
                     }
                     execInsert(ps, values);
 
@@ -1092,7 +1093,7 @@ public class LoadJet {
             return conn.prepareStatement(sbI.toString());
         }
 
-        private Object value(Object value) throws SQLException {
+        private Object value(Object value, Table table, String columnName, Row row) throws SQLException {
             if (value == null) {
                 return null;
             }
@@ -1114,6 +1115,13 @@ public class LoadJet {
                     throw new UcanaccessSQLException(e);
                 }
             }
+            if (value instanceof byte[]) {
+                if (BlobKey.hasPrimaryKey(table)) {
+                    BlobKey bk = new BlobKey(table, columnName, row);
+                    return bk.getBytes();
+                }
+            }
+            
             if (value instanceof Byte) {
                 return SQLConverter.asUnsigned((Byte) value);
             }

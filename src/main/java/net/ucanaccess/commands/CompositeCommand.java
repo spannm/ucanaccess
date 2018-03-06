@@ -75,6 +75,7 @@ public class CompositeCommand implements ICommand {
     @Override
     public IFeedbackAction persist() throws SQLException {
         try {
+            CompositeFeedbackAction cfa = new CompositeFeedbackAction();
             Cursor cur = indexSelector.getCursor();
             cur.beforeFirst();
             Set<String> columnNames = composite.get(0).getRowPattern().keySet();
@@ -83,14 +84,14 @@ public class CompositeCommand implements ICommand {
                 while (it.hasNext()) {
                     ICursorCommand comm = it.next();
                     if (comm.currentRowMatches(cur, this.currentRow)) {
-                        comm.persistCurrentRow(cur);
+                        cfa.add(comm.persistCurrentRow(cur));
                         it.remove();
                         rollbackCache.add(comm);
                         break;
                     }
                 }
             }
-            return null;
+            return cfa;
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }

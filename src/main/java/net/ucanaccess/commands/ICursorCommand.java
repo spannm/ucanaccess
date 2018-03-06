@@ -28,5 +28,5 @@ public interface ICursorCommand extends ICommand {
 
     public Map<String, Object> getRowPattern();
 
-    public void persistCurrentRow(Cursor cur) throws IOException, SQLException;
+    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException;
 }

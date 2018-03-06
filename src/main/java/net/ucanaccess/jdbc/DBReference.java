@@ -426,7 +426,7 @@ public class DBReference {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute("SET DATABASE SQL CONCAT NULLS " + this.concatNulls);
             if (this.lobScale == null && this.inMemory) {
-                st.execute("SET FILES LOB SCALE 2");
+                st.execute("SET FILES LOB SCALE 1");
             } else if (this.lobScale != null) {
                 st.execute("SET FILES LOB SCALE " + this.lobScale);
             }
