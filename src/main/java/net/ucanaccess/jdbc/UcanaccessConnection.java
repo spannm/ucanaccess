@@ -15,6 +15,7 @@ limitations under the License.
 */
 package net.ucanaccess.jdbc;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.Blob;
@@ -99,7 +100,8 @@ public class UcanaccessConnection implements Connection {
         ctx.get().setCurrentExecId(id);
     }
 
-    public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session) throws UcanaccessSQLException {
+    public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session)
+            throws UcanaccessSQLException {
         try {
             this.ref = _ref;
             this.refId = _ref.getId();
@@ -229,7 +231,16 @@ public class UcanaccessConnection implements Connection {
     public Blob createBlob() throws SQLException {
         try {
             checkConnection();
-            return new UcanaccessBlob(hsqlDBConnection.createBlob());
+            return new UcanaccessBlob(UcanaccessBlob.createBlob(this), this);
+        } catch (SQLException e) {
+            throw new UcanaccessSQLException(e);
+        }
+    }
+
+    public Blob createBlob(File fl) throws SQLException {
+        try {
+            checkConnection();
+            return new UcanaccessBlob(UcanaccessBlob.createBlob(fl, this), this);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -312,7 +323,11 @@ public class UcanaccessConnection implements Connection {
                 IFeedbackAction ib = command.persist();
                 executed.add(command);
                 if (ib != null) {
-                    ibal.add(ib);
+                    if (command instanceof CompositeCommand) {
+                        ib.doAction(command);
+                    }else{
+                        ibal.add(ib);
+                    }
                 }
 
             }
@@ -320,6 +335,7 @@ public class UcanaccessConnection implements Connection {
                 throw new RuntimeException("PhysicalRollbackTest");
             }
         } catch (Throwable t) {
+            t.printStackTrace();
             this.hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();

@@ -77,8 +77,9 @@ public class DeleteCommand extends AbstractCursorCommand {
     }
 
     @Override
-    public void persistCurrentRow(Cursor cur) throws IOException {
+    public CompositeFeedbackAction persistCurrentRow(Cursor cur) throws IOException {
         cur.deleteCurrentRow();
+        return null;
     }
 
     @Override

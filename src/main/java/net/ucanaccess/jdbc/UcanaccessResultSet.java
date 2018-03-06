@@ -246,6 +246,10 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public InputStream getBinaryStream(int idx) throws SQLException {
         try {
+            Object obj = this.getObject(idx);
+            if (obj instanceof Blob) {
+                return ((Blob) obj).getBinaryStream();
+            }
             return wrapped.getBinaryStream(idx);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -255,6 +259,10 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public InputStream getBinaryStream(String columnLabel) throws SQLException {
         try {
+            Object obj = this.getObject(columnLabel);
+            if (obj instanceof Blob) {
+                return ((Blob) obj).getBinaryStream();
+            }
             return wrapped.getBinaryStream(checkEscaped(columnLabel));
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -266,7 +274,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Blob blb = wrapped.getBlob(idx);
             if (blb != null) {
-                blb = new UcanaccessBlob(blb);
+                blb = new UcanaccessBlob(blb, (UcanaccessConnection) wrappedStatement.getConnection());
             }
             return blb;
         } catch (SQLException e) {
@@ -279,7 +287,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Blob blb = wrapped.getBlob(checkEscaped(columnLabel));
             if (blb != null) {
-                blb = new UcanaccessBlob(blb);
+                blb = new UcanaccessBlob(blb, (UcanaccessConnection) wrappedStatement.getConnection());
             }
             return blb;
         } catch (SQLException e) {
@@ -600,7 +608,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(idx);
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj);
+                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
@@ -621,7 +629,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(idx, arg1);
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj);
+                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
@@ -634,7 +642,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(checkEscaped(columnLabel));
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj);
+                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
