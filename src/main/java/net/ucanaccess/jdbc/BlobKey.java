@@ -38,7 +38,7 @@ public class BlobKey implements Serializable {
     private HashMap<String, Object> key;
     private String                  tableName;
     private String                  columnName;
-    public final static int         MAX_SIZE         = 4096;
+    public static final int         MAX_SIZE         = 4096;
 
     public BlobKey(HashMap<String, Object> _key, String _tableName, String _columnName) {
         super();
@@ -52,11 +52,11 @@ public class BlobKey implements Serializable {
         this.columnName = _columnName;
         if (hasPrimaryKey(_table)) {
             List<? extends Index.Column> cl = _table.getPrimaryKeyIndex().getColumns();
-            HashMap<String, Object> _key = new HashMap<String, Object>();
+            HashMap<String, Object> keyMap = new HashMap<String, Object>();
             for (Index.Column c : cl) {
-                _key.put(c.getName(), _row.get(c.getName()));
+                keyMap.put(c.getName(), _row.get(c.getName()));
             }
-            this.key = _key;
+            this.key = keyMap;
         }
     }
 

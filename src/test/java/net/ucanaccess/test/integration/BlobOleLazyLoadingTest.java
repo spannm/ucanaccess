@@ -48,8 +48,9 @@ public class BlobOleLazyLoadingTest extends AccessVersionAllTest {
     public void testBlobOLE() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
-        File fl = new File("Copied.jpeg");
+        File fl = new File(TEST_DB_TEMP_DIR + "/Copied.jpeg");
         rs.next();
+        @SuppressWarnings("unused")
         Object obj=rs.getObject(1);
         InputStream isDB = rs.getBlob(1).getBinaryStream();
         OutputStream outFile = new FileOutputStream(fl);

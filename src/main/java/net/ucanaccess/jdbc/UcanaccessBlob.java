@@ -71,8 +71,9 @@ public class UcanaccessBlob implements Blob {
         try {
             if (this.usingBlobKey) {
                 OleBlob ole = (OleBlob) this.blob;
-                if (ole.getContent() instanceof OleBlob.EmbeddedContent)
+                if (ole.getContent() instanceof OleBlob.EmbeddedContent) {
                     return ((OleBlob.EmbeddedContent) ole.getContent()).getStream();
+                }
             }
             return blob.getBinaryStream();
         } catch (SQLException e) {
@@ -142,8 +143,7 @@ public class UcanaccessBlob implements Blob {
             return blob.setBinaryStream(pos);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }
     }

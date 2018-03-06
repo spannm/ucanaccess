@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CompositeFeedbackAction implements IFeedbackAction {
-    ArrayList<IFeedbackAction> actions = new ArrayList<IFeedbackAction>();
+    private ArrayList<IFeedbackAction> actions = new ArrayList<IFeedbackAction>();
 
     @Override
     public void doAction(ICommand toChange) throws SQLException {
@@ -30,8 +30,9 @@ public class CompositeFeedbackAction implements IFeedbackAction {
     }
 
     public boolean add(IFeedbackAction ifa) {
-        if (ifa == null)
+        if (ifa == null) {
             return false;
+        }
         return actions.add(ifa);
     }
 

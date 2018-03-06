@@ -34,14 +34,15 @@ import com.healthmarketscience.jackcess.Table;
 
 public class BlobAction implements IFeedbackAction {
     private Table            table;
-    boolean                  containsBlob;
+    private boolean          containsBlob;
     private HashSet<BlobKey> keys = new HashSet<BlobKey>();
 
     public BlobAction(Table _table, Object[] newValues) throws SQLException {
         this.table = _table;
 
-        if (!BlobKey.hasPrimaryKey(_table))
+        if (!BlobKey.hasPrimaryKey(_table)) {
             return;
+        }
         Index pk = _table.getPrimaryKeyIndex();
         HashSet<String> hsKey = new HashSet<String>();
         for (Index.Column icl : pk.getColumns()) {
@@ -49,19 +50,19 @@ public class BlobAction implements IFeedbackAction {
         }
         HashSet<String> hsBlob = new HashSet<String>();
         int i = 0;
-        HashMap<String, Object> _key = new HashMap<String, Object>();
+        HashMap<String, Object> keyMap = new HashMap<String, Object>();
         for (Column cl : _table.getColumns()) {
             if (cl.getType().equals(DataType.OLE) && newValues[i] != null) {
                 containsBlob = true;
                 hsBlob.add(cl.getName());
             }
             if (hsKey.contains(cl.getName())) {
-                _key.put(cl.getName(), newValues[i]);
+                keyMap.put(cl.getName(), newValues[i]);
             }
             ++i;
         }
         for (String cln : hsBlob) {
-            keys.add(new BlobKey(_key, table.getName(), cln));
+            keys.add(new BlobKey(keyMap, table.getName(), cln));
         }
 
     }
