@@ -29,10 +29,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
-public class BlobOleLazyLoadingTest extends AccessVersionAllTest {
+public class BlobOleLazyLoadingTest extends AccessVersion2010Test {
 
     public BlobOleLazyLoadingTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -46,6 +46,10 @@ public class BlobOleLazyLoadingTest extends AccessVersionAllTest {
     // It only works with JRE 1.6 and later (JDBC 3)
     @Test
     public void testBlobOLE() throws SQLException, IOException {
+        final long binaryFileSize = 32718;
+        byte[] initialBlobBytes = getBlobBytes(); 
+        getLogger().info("BLOB size in backing database before retrieval: {} bytes", initialBlobBytes.length);
+        assertTrue(initialBlobBytes.length < binaryFileSize);
         Statement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
         File fl = new File(TEST_DB_TEMP_DIR + "/Copied.jpeg");
@@ -61,8 +65,23 @@ public class BlobOleLazyLoadingTest extends AccessVersionAllTest {
         }
         outFile.flush();
         outFile.close();
-        assertEquals(fl.length(), 32718);
+        assertEquals(fl.length(), binaryFileSize);
         getLogger().info("file was created in {}.", fl.getAbsolutePath());
-
+        fl.delete();
+        byte[] finalBlobBytes = getBlobBytes();
+        getLogger().info("BLOB size in backing database after retrieval: {} bytes", finalBlobBytes.length);
+        if (!initialBlobBytes.equals(finalBlobBytes)) {
+            getLogger().warn("Simply retrieving BLOB changed byte data in backing database. Problem?");
+        }
+    }
+    
+    private byte[] getBlobBytes() throws SQLException {
+        Statement hsqlSt = ucanaccess.getHSQLDBConnection().createStatement();
+        ResultSet hsqlRs = hsqlSt.executeQuery("SELECT OLE FROM OLETABLE ORDER BY ID");
+        hsqlRs.next();
+        byte[] blobBytes = hsqlRs.getBytes(1);
+        hsqlRs.close();
+        hsqlSt.close();
+        return blobBytes;
     }
 }
