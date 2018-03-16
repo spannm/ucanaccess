@@ -368,8 +368,8 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters,
-            Map<String, String> parem, String sql, boolean init) {
+    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem,
+            String sql, boolean init) {
         String psTxt = null;
         try {
             psTxt = convertSQL(sql, _parameters);
@@ -433,7 +433,8 @@ public class ParametricQuery {
             for (String par : _parameters) {
                 String par1 = SQLConverter.preEscapingIdentifier(par.substring(1, par.length() - 1));
                 int index = sql.toUpperCase().indexOf(par.toUpperCase());
-                if (index >= 0 && _ex.getMessage() != null && _ex.getMessage().toUpperCase().endsWith(": " + par1)) {
+                if (index >= 0 && _ex.getMessage() != null && (_ex.getMessage().toUpperCase().endsWith(": " + par1)
+                        || _ex.getMessage().toUpperCase().indexOf(": " + par1 + " IN STATEMENT ") != -1)) {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
                     _psmp.put(par1, index);
                     parem.put(par1, par);
@@ -442,7 +443,6 @@ public class ParametricQuery {
                     getParametersEmpiric(_psmp, _parameters, parem, sql, false);
 
                 } else {
-
                     this.exception = _ex;
                 }
             }

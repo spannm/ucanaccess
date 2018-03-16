@@ -489,7 +489,7 @@ public class Main {
                 records.add(record);
                 for (int col = 1; col <= columnCount; ++col) {
                     Object obj = _resultSet.getObject(col);
-                    if (obj != null && obj.getClass().isArray()) {
+                    if (obj != null && obj.getClass().isArray() && !obj.getClass().getComponentType().isPrimitive()) {
                         obj = Arrays.toString((Object[]) obj);
                     }
 
