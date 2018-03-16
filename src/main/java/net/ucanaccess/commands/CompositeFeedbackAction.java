@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012 Marco Amadei.
+ Copyright (c) 2012 Marco Amadei.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,18 +15,25 @@ limitations under the License.
 */
 package net.ucanaccess.commands;
 
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.ArrayList;
 
-import com.healthmarketscience.jackcess.Cursor;
+public class CompositeFeedbackAction implements IFeedbackAction {
+    private ArrayList<IFeedbackAction> actions = new ArrayList<IFeedbackAction>();
 
-public interface ICursorCommand extends ICommand {
-    public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) throws IOException;
+    @Override
+    public void doAction(ICommand toChange) throws SQLException {
+        for (IFeedbackAction action : actions) {
+            action.doAction(toChange);
+        }
 
-    public IndexSelector getIndexSelector();
+    }
 
-    public Map<String, Object> getRowPattern();
+    public boolean add(IFeedbackAction ifa) {
+        if (ifa == null) {
+            return false;
+        }
+        return actions.add(ifa);
+    }
 
-    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException;
 }
