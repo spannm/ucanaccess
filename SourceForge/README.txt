@@ -32,9 +32,12 @@ You can contact the author Marco Amadei at amadei.mar@gmail.com
 Current Release:
 UCanAccess 4.0.4 Release 
 ========================
--Upgrade to Jackcess 2.1.10
--Support Access_2016 ("version 5") file format
--Support "Large Number" (BIGINT) columns
+-Upgrade to Jackcess 2.1.11
+-Support Access_2016 "version 5" file format
+-Initial support for "Large Number" (BIGINT) columns: CRUD, DDL
+-Fix issue with NOT NULL columns created by UCanAccess DDL not respected by ACE/Jet
+-Fix issue with multiple FK constraints between the same two tables
+-Reduce HSQLDB resource consumption by lazy-loading "OLE Object" (BLOB) fields 
 
 UCanAccess 4.0.3 Release 
 ========================
