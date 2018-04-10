@@ -33,13 +33,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersionAllTest;
 
 @RunWith(Parameterized.class)
 public class BlobOleTest extends AccessVersionAllTest {
 
-    private static final String IMG_FILE_NAME = "elisaArt.JPG";
+    private static final String IMG_FILE_NAME  = "elisaArt.JPG";
+    private static final String PPTX_FILE_NAME = "test.pptx";
 
     public BlobOleTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -61,7 +63,6 @@ public class BlobOleTest extends AccessVersionAllTest {
         PreparedStatement ps = null;
         ResultSet rs = null;
         File fl = new File("CopyElisaArt.JPG");
-
 
         Blob blob = ucanaccess.createBlob();
         OutputStream out = blob.setBinaryStream(1);
@@ -119,5 +120,47 @@ public class BlobOleTest extends AccessVersionAllTest {
         rs.close();
         ps.close();
         fl.delete();
+    }
+
+    // It only works with JRE 1.6 and later (JDBC 3)
+    @Test
+    public void testBlobPackaged() throws SQLException, IOException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        File fl = new File("testCopy.pptx");
+        File fl1 = new File("test.pptx");
+        FileOutputStream out = new FileOutputStream(fl1);
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream(PPTX_FILE_NAME);
+        byte[] ba = new byte[4096];
+        int len;
+        while ((len = is.read(ba)) != -1) {
+            out.write(ba, 0, len);
+        }
+        out.flush();
+        out.close();
+        Blob blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
+        ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
+        ps.setString(1, "TestOle");
+        ps.setBlob(2, blob);
+        ps.execute();
+        Statement st = ucanaccess.createStatement();
+        rs = st.executeQuery("SELECT Pippo FROM T2");
+        rs.next();
+        InputStream isDB = rs.getBinaryStream(1);
+        OutputStream outFile = new FileOutputStream(fl);
+        ByteArrayOutputStream outByte = new ByteArrayOutputStream();
+        ba = new byte[4096];
+        while ((len = isDB.read(ba)) != -1) {
+            outFile.write(ba, 0, len);
+            outByte.write(ba, 0, len);
+        }
+        outFile.flush();
+        outFile.close();
+        getLogger().info("Packaged file was recreated in {}.", fl.getAbsolutePath());
+        outByte.flush();
+        outByte.close();
+        fl1.delete();
+        fl.delete();
+        st.execute("DELETE FROM t2");
     }
 }

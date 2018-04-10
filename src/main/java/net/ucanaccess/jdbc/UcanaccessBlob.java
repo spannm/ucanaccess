@@ -15,16 +15,46 @@ limitations under the License.
 */
 package net.ucanaccess.jdbc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-public class UcanaccessBlob implements Blob {
-    private Blob blob;
+import com.healthmarketscience.jackcess.util.OleBlob;
+import com.healthmarketscience.jackcess.util.OleBlob.Content;
 
-    public UcanaccessBlob(Blob _blob) {
+public class UcanaccessBlob implements Blob {
+    private Blob                 blob;
+    private boolean              usingBlobKey;
+    private UcanaccessConnection conn;
+
+    public UcanaccessBlob(Blob _blob, UcanaccessConnection _conn) throws SQLException {
         this.blob = _blob;
+        this.conn = _conn;
+        if (_blob.length() != 0) {
+            BlobKey bk = BlobKey.getBlobKey(_blob.getBinaryStream());
+            this.usingBlobKey = (bk != null);
+            if (this.usingBlobKey) {
+                this.blob = bk.getOleBlob(this.conn.getDbIO());
+            }
+        }
+    }
+
+    public static Blob createBlob(File fl, UcanaccessConnection _conn) throws SQLException {
+        Blob oleBlob;
+        try {
+            oleBlob = new OleBlob.Builder().setPackagePrettyName(fl.getName()).setSimplePackage(fl).toBlob();
+            return new UcanaccessBlob(oleBlob, _conn);
+        } catch (IOException e) {
+            throw new UcanaccessSQLException(e);
+        }
+    }
+
+    public static Blob createBlob(UcanaccessConnection _conn) throws SQLException {
+        return new UcanaccessBlob(_conn.getHSQLDBConnection().createBlob(), _conn);
     }
 
     @Override
@@ -39,8 +69,16 @@ public class UcanaccessBlob implements Blob {
     @Override
     public InputStream getBinaryStream() throws SQLException {
         try {
+            if (this.usingBlobKey) {
+                OleBlob ole = (OleBlob) this.blob;
+                if (ole.getContent() instanceof OleBlob.EmbeddedContent) {
+                    return ((OleBlob.EmbeddedContent) ole.getContent()).getStream();
+                }
+            }
             return blob.getBinaryStream();
         } catch (SQLException e) {
+            throw new UcanaccessSQLException(e);
+        } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }
     }
@@ -93,8 +131,19 @@ public class UcanaccessBlob implements Blob {
     @Override
     public OutputStream setBinaryStream(long pos) throws SQLException {
         try {
+            if(blob instanceof OleBlob && pos==1){
+                OleBlob ole = (OleBlob) this.blob;
+                Content content=ole.getContent();
+                if (content instanceof OleBlob.EmbeddedContent){
+                    ByteArrayOutputStream baos=new  ByteArrayOutputStream();
+                   ((OleBlob.SimplePackageContent)content).writeTo(baos);
+                   return baos;
+                } 
+            }
             return blob.setBinaryStream(pos);
         } catch (SQLException e) {
+            throw new UcanaccessSQLException(e);
+        } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }
     }
@@ -125,4 +174,5 @@ public class UcanaccessBlob implements Blob {
             throw new UcanaccessSQLException(e);
         }
     }
+
 }

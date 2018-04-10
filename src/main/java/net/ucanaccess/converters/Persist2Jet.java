@@ -212,7 +212,7 @@ public class Persist2Jet {
     }
 
     private ColumnBuilder getColumn(ResultSet rs, int seq, String tableName, Map<String, String> columnMap,
-            String[] types) throws SQLException {
+            String[] types) throws SQLException, IOException {
         String name = rs.getString("COLUMN_NAME");
         String nname = getNormalizedName(name, columnMap);
         ColumnBuilder cb = new ColumnBuilder(nname);
@@ -255,7 +255,10 @@ public class Persist2Jet {
                     && types[seq].equalsIgnoreCase(AccessType.NUMERIC.name())) {
                 dt = DataType.NUMERIC;
             } else {
-                dt = DataType.fromSQLType(rs.getInt("DATA_TYPE"), length);
+                dt = DataType.fromSQLType(
+                        rs.getInt("DATA_TYPE"), 
+                        length,
+                        UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
             }
             cb.setType(dt);
             if (length > 0 && dt.equals(DataType.TEXT)) {
@@ -284,7 +287,7 @@ public class Persist2Jet {
     }
 
     private ColumnBuilder getColumn(String tableName, Map<String, String> columnMap, String[] types)
-            throws SQLException {
+            throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         String columnName = columnMap.keySet().iterator().next();
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC", tableName.toUpperCase(),
@@ -298,7 +301,7 @@ public class Persist2Jet {
     }
 
     private Collection<ColumnBuilder> getColumns(String tableName, Map<String, String> columnMap, String[] types)
-            throws SQLException {
+            throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Map<Integer, ColumnBuilder> ordm = new TreeMap<Integer, ColumnBuilder>();
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC",
@@ -772,27 +775,34 @@ public class Persist2Jet {
                 refTn4Hsqldb.toUpperCase(), null, null, tn4Hsqldb.toUpperCase());
         Metadata mt = new Metadata(conn);
         while (fkrs.next()) {
-            String colName = fkrs.getString("FKCOLUMN_NAME");
-            colName = mt.getColumnName(tn4Hsqldb, colName);
-            String rcolName = fkrs.getString("PKCOLUMN_NAME");
-            rcolName = mt.getColumnName(refTn4Hsqldb, rcolName);
-            rb.addColumns(rcolName, colName);
-            short dr = fkrs.getShort("DELETE_RULE");
-            short ur = fkrs.getShort("UPDATE_RULE");
-            switch (dr) {
-            case DatabaseMetaData.importedKeyCascade:
-                rb.setCascadeDeletes();
-                break;
-            case DatabaseMetaData.importedKeySetNull:
-                rb.setCascadeNullOnDelete();
-                break;
-            default:
-                break;
+            /*
+             * The following check was added for ticket #16.
+             * 
+             * Limitation: If the user wants to create more than one relationship between the same two tables
+             * then all of the relationships must be explicitly named.
+             */
+            if ((relationshipName == null) || (fkrs.getString("FK_NAME").equalsIgnoreCase(tn4Hsqldb + "_" + relationshipName))) {
+                String colName = fkrs.getString("FKCOLUMN_NAME");
+                colName = mt.getColumnName(tn4Hsqldb, colName);
+                String rcolName = fkrs.getString("PKCOLUMN_NAME");
+                rcolName = mt.getColumnName(refTn4Hsqldb, rcolName);
+                rb.addColumns(rcolName, colName);
+                short dr = fkrs.getShort("DELETE_RULE");
+                short ur = fkrs.getShort("UPDATE_RULE");
+                switch (dr) {
+                case DatabaseMetaData.importedKeyCascade:
+                    rb.setCascadeDeletes();
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    rb.setCascadeNullOnDelete();
+                    break;
+                default:
+                    break;
+                }
+                if (ur == DatabaseMetaData.importedKeyCascade) {
+                    rb.setCascadeUpdates();
+                }
             }
-            if (ur == DatabaseMetaData.importedKeyCascade) {
-                rb.setCascadeUpdates();
-            }
-
         }
         rb.toRelationship(db);
 

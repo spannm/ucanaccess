@@ -10,7 +10,8 @@ public enum AccessVersion {
     V2000(FileFormat.V2000),
     V2003(FileFormat.V2003),
     V2007(FileFormat.V2007),
-    V2010(FileFormat.V2010),;
+    V2010(FileFormat.V2010),
+    V2016(FileFormat.V2016);
 
     private final FileFormat fileFormat;
 

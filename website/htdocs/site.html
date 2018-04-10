@@ -124,7 +124,7 @@ a:hover {
 <body style="background-color: #FFFFFD">
   <div id='page-margins'>
     <div>
-      <a class="download" href="http://sourceforge.net/projects/ucanaccess/files/">Download UCanAccess 4.0.3</a>
+      <a class="download" href="http://sourceforge.net/projects/ucanaccess/files/">Download UCanAccess 4.0.4</a>
       <g:plusone size="tall"></g:plusone>
       <a id="donate" href="#donate" class="menubutton" style="position: relative; left: 5em; top: 40px"><img
         id="donate_img" src="donate.png" border="0" width="120" /></a>
@@ -242,12 +242,12 @@ a:hover {
 &lt;dependency&gt;
     &lt;groupId&gt;net.sf.ucanaccess&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
-    &lt;version&gt;4.0.3&lt;/version&gt;
+    &lt;version&gt;4.0.4&lt;/version&gt;
 &lt;/dependency&gt;
             </pre>
             ... and Maven will add the other dependencies for you. If you are manually adding the dependencies to your classpath
-            you will need to add the ucanaccess&#8209;4.0.3.jar file along with <b>all</b> of the jar files in the lib/ folder of
-            UCanAccess&#8209;4.0.3&#8209;bin.zip (details <a href=https://stackoverflow.com/a/21955257/2144390>here</a>).
+            you will need to add the ucanaccess&#8209;4.0.4.jar file along with <b>all</b> of the jar files in the lib/ folder of
+            UCanAccess&#8209;4.0.4&#8209;bin.zip (details <a href=https://stackoverflow.com/a/21955257/2144390>here</a>).
           <p>
             In order to open encrypted files you must use UCanAccess 2.x.x or later with jackcess-encrypt-2.x.x and
             all related dependencies. Again, if you are using Maven, simply add this extra dependency:
@@ -285,6 +285,10 @@ a:hover {
             <tr>
               <td align="right"><b>artifactId:</b></td>
               <td>ucanaccess</td>
+            </tr>
+            <tr>
+              <td align="right"><b>version:</b></td>
+              <td>4.0.4</td>
             </tr>
           </table>
           <p>
@@ -847,6 +851,16 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
               ***** "Change Log" tab *****
         -->
         <div id="change_div">
+
+          <h2>4.0.4 Release</h2>
+          <ul>
+            <li>Upgrade to Jackcess 2.1.11</li>
+            <li>Support Access_2016 "version 5" file format</li>
+            <li>Initial support for "Large Number" (BIGINT) columns: CRUD, DDL
+            <li>Fix issue with NOT NULL columns created by UCanAccess DDL not respected by ACE/Jet</li>
+            <li>Fix issue with multiple FK constraints between the same two tables</li>
+            <li>Reduce HSQLDB resource consumption by lazy-loading "OLE Object" (BLOB) fields</li>
+          </ul>
 
           <h2>4.0.3 Release</h2>
           <ul>

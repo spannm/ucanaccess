@@ -109,11 +109,11 @@ public class UpdateCommand extends AbstractCursorCommand {
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }
-        return null;
+        return new BlobAction(table, modifiedRow);
     }
 
     @Override
-    public void persistCurrentRow(Cursor cur) throws IOException, SQLException {
+    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException {
         if (this.blobColumns != null) {
             for (Column col : this.blobColumns) {
                 Object val = cur.getCurrentRowValue(col);
@@ -123,6 +123,7 @@ public class UpdateCommand extends AbstractCursorCommand {
         }
         updateComplex(cur);
         persist(cur);
+        return new BlobAction(table, modifiedRow);
     }
 
     private void updateComplex(Cursor cur) throws IOException {

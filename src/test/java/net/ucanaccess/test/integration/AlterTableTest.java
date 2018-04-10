@@ -38,11 +38,11 @@ import org.junit.runners.Parameterized;
 
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 import net.ucanaccess.util.HibernateSupport;
 
 @RunWith(Parameterized.class)
-public class AlterTableTest extends AccessVersionAllTest {
+public class AlterTableTest extends AccessVersion2010Test {
 
     public AlterTableTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -281,6 +281,34 @@ public class AlterTableTest extends AccessVersionAllTest {
         // test case: constraint name not specified
         st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");
         st.close();
+    }
+    
+    @Test
+    public void testDoubleRelationship() throws SQLException {
+        // repro code from https://stackoverflow.com/q/49160150/2144390
+        Statement statement = ucanaccess.createStatement();
+        //
+        String tableToBeReferenced = "PersonsTable";
+        String tableWithTheReferences = "RelationShipsTable";
+
+        statement.execute("CREATE TABLE " + tableToBeReferenced + " (ID autoincrement NOT NULL PRIMARY KEY, "
+            + "Name VARCHAR(255) "
+            + ")");
+
+        statement.execute("CREATE TABLE " + tableWithTheReferences + " (ID LONG NOT NULL PRIMARY KEY, "
+            + "RelationShip VARCHAR(255) NOT NULL DEFAULT 'FRIENDS', "
+            + "Person1Id LONG NOT NULL, "
+            + "Person2Id LONG NOT NULL)");
+
+        // reference #1
+        statement.execute("ALTER TABLE " + tableWithTheReferences 
+            + " ADD CONSTRAINT FOREIGN_KEY_1 FOREIGN KEY (Person1Id) REFERENCES "
+            + tableToBeReferenced + "(ID) ON DELETE CASCADE");
+
+        // reference #2
+        statement.execute("ALTER TABLE " + tableWithTheReferences
+            + " ADD CONSTRAINT FOREIGN_KEY_2 FOREIGN KEY (Person2Id) REFERENCES "
+            + tableToBeReferenced + "(ID) ON DELETE CASCADE");
     }
 
     @Test
