@@ -304,8 +304,9 @@ public class Persist2Jet {
             throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Map<Integer, ColumnBuilder> ordm = new TreeMap<Integer, ColumnBuilder>();
+        String tableNamePattern = tableName.toUpperCase(Locale.US).replaceAll("_", "\\\\_");
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC",
-                tableName.toUpperCase(Locale.US), null);
+                tableNamePattern, null);
         while (rs.next()) {
             int seq = rs.getInt("ORDINAL_POSITION") - 1;
             ordm.put(seq, getColumn(rs, seq, tableName, columnMap, types));

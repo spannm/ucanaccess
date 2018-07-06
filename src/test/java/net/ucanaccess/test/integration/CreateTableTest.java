@@ -313,5 +313,14 @@ public class CreateTableTest extends AccessVersion2010Test {
         st.close();
 
     }
+    
+    @Test
+    public void tableNameWithUnderscore() throws SQLException {
+        // Ticket #19
+        Statement st = ucanaccess.createStatement();
+        st.execute("CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)");
+        st.execute("CREATE TABLE t_1 (id LONG PRIMARY KEY)");
+        st.close();
+    }
 
 }
