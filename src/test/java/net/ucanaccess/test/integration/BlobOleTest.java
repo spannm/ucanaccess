@@ -163,4 +163,20 @@ public class BlobOleTest extends AccessVersionAllTest {
         fl.delete();
         st.execute("DELETE FROM t2");
     }
+    
+    @Test
+    public void testTwoColumnPK() throws SQLException {
+        // fix for ticket #23 should prevent this test from throwing an error
+        Statement st = ucanaccess.createStatement();
+        st.execute(
+                  "CREATE TABLE two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
+                + "CONSTRAINT PK_two_col_pk PRIMARY KEY (pk_col1, pk_col2))");
+        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO two_col_pk VALUES (?, ?, ?)");
+        ps.setInt(1, 1);
+        ps.setInt(2, 1);
+        Blob b = ucanaccess.createBlob();
+        b.setBytes(1, new byte[] { 1 });
+        ps.setBlob(3, b);
+        ps.executeUpdate();
+    }
 }

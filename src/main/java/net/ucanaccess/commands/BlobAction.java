@@ -82,6 +82,7 @@ public class BlobAction implements IFeedbackAction {
                 for (Map.Entry<String, Object> me : bkey.getKey().entrySet()) {
                     sb.append(and).append(SQLConverter.escapeIdentifier(me.getKey(), connHsqldb)).append(" = ?");
                     values.add(me.getValue());
+                    and = " AND ";
                 }
                 sql += sb.toString();
                 conn.setFeedbackState(true);
