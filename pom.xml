@@ -55,7 +55,7 @@
         <animalSnifferArtifact>java18</animalSnifferArtifact>
         <animalSnifferArtifactVersion>1.0</animalSnifferArtifactVersion>
         <hsqldbVersion>2.4.1</hsqldbVersion>
-        <jackcessVersion>3.0.0-SNAPSHOT</jackcessVersion>
+        <jackcessVersion>3.0.0</jackcessVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skipTests>false</skipTests>
     </properties>

@@ -1,5 +1,3 @@
-*(This branch is a work-in-progress. It uses a pre-release version of Jackcess 3.x)*
-
 This is the official source code repository for **UCanAccess**, a pure Java JDBC driver for working with
 Microsoft Access database files.
 
