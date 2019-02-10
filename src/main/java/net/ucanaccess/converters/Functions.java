@@ -550,7 +550,10 @@ public final class Functions {
 
     @FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.DOUBLE,
             AccessType.TEXT }, returnType = AccessType.TEXT)
-    public static String format(double d, String par) throws UcanaccessSQLException {
+    public static String format(Double d, String par) throws UcanaccessSQLException {
+        if (d == null) {
+            return "";
+        }
         if ("percent".equalsIgnoreCase(par)) {
             DecimalFormat formatter = FormatCache.getZpzz();
             return (formatter.format(d * 100) + "%");
@@ -590,6 +593,9 @@ public final class Functions {
     @FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.TEXT,
             AccessType.TEXT }, returnType = AccessType.TEXT)
     public static String format(String s, String par) throws UcanaccessSQLException {
+        if (s == null) {
+            return "";
+        }
         return format(s, par, false);
     }
 
@@ -634,6 +640,9 @@ public final class Functions {
     @FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.DATETIME,
             AccessType.TEXT }, returnType = AccessType.TEXT)
     public static String format(Timestamp t, String par) throws UcanaccessSQLException {
+        if (t == null) {
+            return "";
+        }
         RegionalSettings reg = getRegionalSettings();
 
         if ("long date".equalsIgnoreCase(par)) {

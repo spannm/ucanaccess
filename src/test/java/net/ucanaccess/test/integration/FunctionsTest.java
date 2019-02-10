@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,6 +40,13 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Override
     public String getAccessPath() {
         return "testdbs/FunctionsTest" + fileFormat.name() + fileFormat.getFileExtension();
+    }
+    
+    @Before
+    public void beforeTestCase() throws Exception {
+        executeStatements(
+                "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY,text TEXT, date DATETIME, number NUMERIC ); ",
+                "INSERT INTO tblFormat (id) VALUES(1)");
     }
 
     @Test
@@ -414,6 +422,7 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testFormatNumber() throws Exception {
+        checkQuery("SELECT format(number,'percent') FROM tblFormat", "");
         checkQuery("SELECT format(0.981,'percent') FROM t234", "98.10%");
         checkQuery("SELECT format(num,'fixed')  FROM t234", "-1110.55");
         checkQuery("SELECT format(num,'standard')  FROM t234", "-1,110.55");
@@ -441,6 +450,7 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testFormatDate() throws Exception {
+        checkQuery("SELECT format(date,'Short date') FROM tblFormat", "");
         checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Long date') FROM t234", "Friday, May 13, 1994");
 
         checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Short date') FROM t234", "5/13/1994");
@@ -490,6 +500,7 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testFormatString() throws Exception {
+        checkQuery("SELECT format(text,'Long date') FROM tblFormat", "");
         checkQuery("SELECT format('05/13/1994','Long date') FROM t234", "Friday, May 13, 1994");
         checkQuery("SELECT format(0.6,'percent') FROM t234", "60.00%");
         checkQuery("SELECT format('0,6','percent') FROM t234", "600.00%");
