@@ -1576,20 +1576,20 @@ public class UcanaccessResultSet implements ResultSet {
     }
 
     @Override
-    public void updateFloat(int idx, float arg1) throws SQLException {
+    public void updateFloat(int idx, float x) throws SQLException {
         try {
             addIndex(idx);
-            wrapped.updateFloat(idx, arg1);
+            wrapped.updateBigDecimal(idx, new BigDecimal(Float.toString(x)));
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
     }
 
     @Override
-    public void updateFloat(String columnLabel, float arg1) throws SQLException {
+    public void updateFloat(String columnLabel, float x) throws SQLException {
         try {
             addIndex(columnLabel);
-            wrapped.updateFloat(checkEscaped(columnLabel), arg1);
+            wrapped.updateBigDecimal(checkEscaped(columnLabel), new BigDecimal(Float.toString(x)));
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
