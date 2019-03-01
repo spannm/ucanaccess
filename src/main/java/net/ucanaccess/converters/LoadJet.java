@@ -323,8 +323,13 @@ public class LoadJet {
                 if (calcType) {
                     htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + 7 + ")";
                 } else {
-                    Object dps = cl.getProperties().get("DecimalPlaces").getValue();
+                    Object dps = null;
+                    Object dpso = cl.getProperties().get("DecimalPlaces");
+                    if (dpso != null) {
+                        dps = cl.getProperties().get("DecimalPlaces").getValue();
+                    }
                     byte dp = dps == null ? 7 : ((Byte) dps < 0 ? 7 : (Byte) dps);
+
                     htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + dp + ")";
                 }
             } else {
