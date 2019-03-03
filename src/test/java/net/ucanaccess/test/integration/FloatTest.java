@@ -43,13 +43,25 @@ public class FloatTest extends AccessVersion2007Test {
 
     @Test
     public void testCreate() throws SQLException, IOException, ParseException {
+        checkQuery("SELECT  [row] FROM t order by pk");
         PreparedStatement ps = ucanaccess.prepareStatement("insert into t (row) values(?)");
         ps.setFloat(1, 1.4f);
         ps.execute();
+        checkQuery("SELECT  [row] FROM t order by pk");
         ps = ucanaccess.prepareStatement("update t  set [row]=?");
-        ps.setObject(1, 4.9d);
+        ps.setObject(1, 4.9f);
         ps.execute();
-        checkQuery("SELECT * FROM t");
+        checkQuery("SELECT  [row] FROM t order by pk");
+        ps.setDouble(1, 0.0000000000000000000000000000000000000000000000001d);
+        ps.execute();
+        dumpQueryResult("select * from t order by pk");
+        checkQuery("SELECT  [row] FROM t order by pk");
+        ps.setFloat(1, 4.10011001155f);
+        ps.execute();
+        checkQuery("SELECT  [row] FROM t order by pk");
+        checkQuery("SELECT  count(*) FROM t where [row]=4.10011", 2);
+        dumpQueryResult("select * from t order by pk");
+
     }
 
 }

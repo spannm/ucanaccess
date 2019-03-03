@@ -548,7 +548,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public void setFloat(int idx, float f) throws SQLException {
         try {
             addMementoEntry("setFloat", new Class[] { Float.TYPE }, idx, f);
-            wrapped.setFloat(idx, f);
+            wrapped.setBigDecimal(idx, new BigDecimal(Float.toString(f)));
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -676,9 +676,12 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public void setObject(int idx, Object x) throws SQLException {
         x = mapLocalTimeToLocalDateTime(x);
         try {
-            addMementoEntry("setObject", new Class[] { Object.class }, idx, x);
-            wrapped.setObject(idx, x);
-
+            if (x != null && x instanceof Float)
+                this.setFloat(idx, (Float) x);
+            else {
+                addMementoEntry("setObject", new Class[] { Object.class }, idx, x);
+                wrapped.setObject(idx, x);
+            }
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }

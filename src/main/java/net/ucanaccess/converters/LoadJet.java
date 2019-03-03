@@ -322,8 +322,19 @@ public class LoadJet {
                 } else {
                     htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + cl.getScale() + ")";
                 }
-            } else if (dtyp.equals(DataType.FLOAT) && calcType) {
-                htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + 4 + ")";
+            } else if (dtyp.equals(DataType.FLOAT)) {
+                if (calcType) {
+                    htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + 7 + ")";
+                } else {
+                    Object dps = null;
+                    Object dpso = cl.getProperties().get("DecimalPlaces");
+                    if (dpso != null) {
+                        dps = cl.getProperties().get("DecimalPlaces").getValue();
+                    }
+                    byte dp = dps == null ? 7 : ((Byte) dps < 0 ? 7 : (Byte) dps);
+
+                    htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + dp + ")";
+                }
             } else {
                 htype = TypesMap.map2hsqldb(dtyp);
             }
@@ -394,7 +405,7 @@ public class LoadJet {
             if (tn.equalsIgnoreCase("DUAL")) {
                 SQLConverter.setDualUsedAsTableName(true);
             }
-
+            StringBuffer check = new StringBuffer();
             String ntn = SQLConverter.preEscapingIdentifier(tn);
 
             int seq = metadata.newTable(tn, ntn, Metadata.Types.TABLE);
@@ -444,6 +455,10 @@ public class LoadJet {
                 cn = SQLConverter.completeEscaping(cn);
                 cn = SQLConverter.checkLang(cn, conn);
                 sbC.append(comma).append(cn).append(" ").append(htype);
+                if (DataType.FLOAT.equals(cl.getType())) {
+                    check.append(", check (3.4028235E+38>=").append(cn).append(" AND -3.4028235E+38<=").append(cn)
+                            .append(")");
+                }
 
                 PropertyMap pm = cl.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
@@ -452,7 +467,8 @@ public class LoadJet {
                 }
                 comma = ",";
             }
-            sbC.append(")");
+
+            sbC.append(check).append(")");
             exec(sbC.toString(), true);
 
         }
