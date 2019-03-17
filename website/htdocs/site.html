@@ -611,10 +611,19 @@ a:hover {
               version array<br>
             <br> ps.execute();<br> ...<br>
             <br>
-            <br> ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=? ");<br> Attachment[]
-              atc;<br> ps.setObject(1,atc=new Attachment[]{new Attachment(null,"cccsss.cvs","cvs","ddddd
-              ;sssssssssssssssssssddd".getBytes(), new Date(),null) });<br> ps.execute();<br> //you can't use
-              = operator here: use the Equals or the EqualsIgnoreOrder functions instead
+            // insert existing file as an attachment<br> 
+            // &nbsp;&nbsp;(note that the parameter value is an Attachment *array*, even for a single attachment)<br> 
+            String attachmentPath = "C:/Users/Gord/Documents/sample.pdf";<br> 
+            byte[] attachmentData = java.nio.file.Files.readAllBytes(Paths.get(attachmentPath));<br> 
+            ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=?");<br> 
+            Attachment[] attachmentArray = new Attachment[] {<br> 
+            &nbsp;&nbsp;&nbsp;&nbsp;new Attachment(null, "sample.pdf", "pdf", attachmentData, new java.util.Date(), null)<br> 
+            };<br> 
+            ps.setObject(1, attachmentArray);<br> 
+            ps.executeUpdate();<br> 
+            <br>
+            //you can't use
+              = operator here: use the Equals or the EqualsIgnoreOrder functions instead<br>
               ps=conn.prepareStatement("select * from Table1 where Equals(ATTACH_DATA,?);<br> ps.setObject(1,atc);<br>
               ResultSet rs=ps.executeQuery();<br> while(rs.next()){<br>
               &nbsp;&nbsp;System.out.println(rs.getObject("ATTACH_DATA"));<br> //rs.getObject("ATTACH_DATA") will
