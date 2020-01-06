@@ -248,30 +248,23 @@ public class DBReference {
     Connection checkLastModified(Connection conn, Session session) throws Exception {
         // I'm detecting if another process(and not another thread) is writing
 
-        for (int i = 0; i < Thread.activeCount(); i++) {
-            if (lastModified >= filesUpdateTime()) {
-                return conn;
-            } else {
-                Thread.sleep(10);
-            }
-        }
-        if (preventReloading && !checkInside()) {
-            return conn;
-        }
-        this.updateLastModified();
-        this.closeHSQLDB(session);
-        System.gc();
-        this.dbIO.flush();
-        this.dbIO.close();
-        this.dbIO = open(this.dbFile, this.pwd);
-        this.id = id();
-        this.firstConnection = true;
-        LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
-        lj.setSkipIndexes(this.skipIndexes);
-        lj.setSysSchema(this.sysSchema);
-        lj.loadDB();
+		if ((lastModified + 2000 > filesUpdateTime()) || (preventReloading && !checkInside())) {
+			return conn;
+		}
+		this.updateLastModified();
+		this.closeHSQLDB(session);
+		System.gc();
+		this.dbIO.flush();
+		this.dbIO.close();
+		this.dbIO = open(this.dbFile, this.pwd);
+		this.id = id();
+		this.firstConnection = true;
+		LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
+		lj.setSkipIndexes(this.skipIndexes);
+		lj.setSysSchema(this.sysSchema);
+		lj.loadDB();
 
-        return getHSQLDBConnection(session);
+		return getHSQLDBConnection(session);
     }
 
     private boolean checkInside(Database db) throws IOException {
