@@ -570,16 +570,27 @@ public final class SQLConverter {
         return sql;
     }
 
-    private static String replaceWhiteSpacedTables(String sql) {
-        String[] sqls = sql.split("'", -1);
-        StringBuffer sb = new StringBuffer();
-        String cm = "";
-        for (int i = 0; i < sqls.length; ++i) {
-            sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);
-            cm = "'";
-        }
-        return sb.toString();
-    }
+	private static String replaceWhiteSpacedTables(String sql) {
+		String[] sqls = sql.split("'", -1);
+		StringBuffer sb = new StringBuffer();
+		String cm = "";
+		for (int i = 0; i < sqls.length; ++i) {
+			sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTables(sqls[i], "\"") : sqls[i]);
+			cm = "'";
+		}
+		return sb.toString();
+	}
+
+	private static String replaceWhiteSpacedTables(String sql, String character) {
+		String[] sqls = sql.split(character, -1);
+		StringBuffer sb = new StringBuffer();
+		String cm = "";
+		for (int i = 0; i < sqls.length; ++i) {
+			sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);
+			cm = character;
+		}
+		return sb.toString();
+	}
 
     private static String replaceWhiteSpacedTableNames0(String sql) {
         if (WHITE_SPACED_TABLE_NAMES.size() == 0) {

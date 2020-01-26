@@ -18,7 +18,6 @@ package net.ucanaccess.test.integration;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,20 +26,21 @@ import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersionDefaultTest;
 
 @RunWith(Parameterized.class)
-public class Alias2 extends AccessVersionDefaultTest {
+public class AliasNamingTest extends AccessVersionDefaultTest {
 
-	public Alias2(AccessVersion _accessVersion) {
+	public AliasNamingTest(AccessVersion _accessVersion) {
 		super(_accessVersion);
 	}
 
-	@Before
-	public void beforeTestCase() throws Exception {
-		executeStatements("CREATE TABLE `categories abc` (category_id COUNTER,descr memo) ");
+	@Override
+	public String getAccessPath() {
+		return "testdbs/alias2.accdb";
 	}
 
 	@Test
 	public void testRegex2() throws SQLException, IOException {
-		dumpQueryResult("SELECT SUM(category_id) AS `sum(categories abc:category_id)` FROM `categories abc`");
+		executeStatements("SELECT SUM(category_id) AS `SUM(categories abc:category_id)` FROM `categories abc`");
+		dumpQueryResult("SELECT SUM(category_id) AS `SUM(categories abc:category_id)` FROM `categories abc`");
 	}
 
 }
