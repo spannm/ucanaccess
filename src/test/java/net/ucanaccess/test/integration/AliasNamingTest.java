@@ -34,7 +34,7 @@ public class AliasNamingTest extends AccessVersionDefaultTest {
 
 	@Override
 	public String getAccessPath() {
-		return "testdbs/alias2.accdb";
+		return "testdbs/aliasNaming.accdb";
 	}
 
 	@Test
