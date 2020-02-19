@@ -100,12 +100,30 @@ public class Main {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info
         Properties info = new Properties();
+        File fl = null;
+        long size = 0;
+        String passwordEntry = "";
+        String[] commands = null;
         if (args.length > 0) {
-            File pfl = new File(args[0]);
-            if (pfl.exists()) {
-                FileInputStream fis = new FileInputStream(pfl);
-                info.load(fis);
-                lcProperties(info);
+            String file = args[0];
+            if (file.endsWith(".properties")) { 
+                File pfl = new File(args[0]);
+                if (pfl.exists()) {
+                    FileInputStream fis = new FileInputStream(pfl);
+                    info.load(fis);
+                    lcProperties(info);
+                }
+            } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) { 
+                fl = new File(file);
+                size = fl.length();
+                if (args.length > 1) {
+                    int arg = 1;
+                    if (hasPassword(fl)) {
+                       passwordEntry = args[arg++];
+                    } else {
+                       commands = Arrays.copyOfRange(args, arg++, args.length);
+                    }
+                }
             }
         }
 
@@ -117,9 +135,6 @@ public class Main {
             System.out.println("Check your classpath! ");
             System.exit(1);
         }
-        Connection conn = null;
-        File fl = null;
-        long size = 0;
         while (fl == null || !fl.exists()) {
             if (fl != null) {
                 System.out.println("Given file does not exist");
@@ -136,10 +151,10 @@ public class Main {
             fl = new File(path);
             size = fl.length();
         }
+        Connection conn = null;
         try {
-            String passwordEntry = "";
             String noMem = "";
-            if (info.containsKey("jackcessopener") || hasPassword(fl)) {
+            if (passwordEntry.isEmpty() && (info.containsKey("jackcessopener") || hasPassword(fl))) {
                 System.out.print("Please, enter password: ");
                 passwordEntry = ";password=" + input.readLine().trim();
             }
@@ -163,7 +178,7 @@ public class Main {
         }
         Main main = new Main(conn, input);
         main.sayHello(conn.getMetaData().getDriverVersion());
-        main.start();
+        main.start(commands);
     }
 
     public static void setBatchMode(boolean _batchMode) {
@@ -256,10 +271,21 @@ public class Main {
                 + "(e.g. \"c:\\\\temp\\\\newfile.csv\").");
     }
 
-    private void start() {
+    private void start(String[] commands) {
         StringBuilder sb = new StringBuilder();
+        boolean exit = false;
         while (connected) {
-            String userInput = readInput();
+            String userInput;
+            if (commands != null) {
+                userInput = String.join(" ", commands);
+                if (!userInput.endsWith(";")) {
+                   userInput += ";";
+                }
+                commands = null;
+                exit = true;
+            } else {
+                userInput = readInput();
+            }
             if (userInput.equalsIgnoreCase("quit")) {
                 connected = false;
                 break;
@@ -277,6 +303,10 @@ public class Main {
                     }
                 } catch (Exception e) {
                     prompt(e.getMessage());
+                }
+                if (exit) {
+                   connected = false;
+                   break;
                 }
                 sb = new StringBuilder();
                 this.prompt();
