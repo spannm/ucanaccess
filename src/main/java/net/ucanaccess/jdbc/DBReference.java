@@ -165,7 +165,8 @@ public class DBReference {
         memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
-            dbIO = DatabaseBuilder.create(ff, fl);
+        	DatabaseBuilder dbb=new DatabaseBuilder();
+            dbIO = dbb.setAutoSync(false).setFileFormat(ff).setFile(fl).create();
         } else {
             dbIO = _jko.open(fl, _pwd);
             try {
