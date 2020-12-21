@@ -78,7 +78,8 @@ public class NotNullDdlTest extends AccessVersionDefaultTest {
             if (numErrorLines == 0) {
                 fail("The VBScript should have thrown an error, but it did not.");
             } else {
-                if (!sb.toString().contains("The field 'table1.txt_required' cannot contain a Null value")) {
+            	System.out.println(sb.toString());
+                if (!sb.toString().contains("'table1.txt_required'")) {
                     fail("The VBScript threw an unexpected error.");
                 }
             }
