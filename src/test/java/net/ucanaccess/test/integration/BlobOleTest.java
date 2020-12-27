@@ -102,9 +102,16 @@ public class BlobOleTest extends AccessVersionAllTest {
 		ps.setString(1, "TestOleOk");
 		ps.setString(2, "TestOle");
 		ps.executeUpdate();
-		dumpQueryResult("SELECT * FROM T2");
 		checkQuery("SELECT * FROM T2");
 		checkQuery("SELECT * FROM T2", 1, "TestOleOk", outByte.toByteArray());
+		ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE  descr=?");
+		File fl1 = getFile(PPTX_FILE_NAME);
+		blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
+		ps.setBlob(1, blob);
+		ps.setString(2, "TestOleOk");
+		ps.executeUpdate();
+		getLogger().info("PPTX file was created in {}.", this.getFileAccDb());
+		checkQuery("SELECT * FROM T2");
 		ps = ucanaccess.prepareStatement("DELETE FROM  t2  WHERE  descr=?");
 		ps.setString(1, "TestOleOk");
 		ps.executeUpdate();
@@ -125,44 +132,21 @@ public class BlobOleTest extends AccessVersionAllTest {
 	}
 
 	// It only works with JRE 1.6 and later (JDBC 3)
+
 	@Test
 	public void testBlobPackaged() throws SQLException, IOException {
 		PreparedStatement ps = null;
-		ResultSet rs = null;
-		File fl = new File("testCopy.pptx");
-		File fl1 = new File("test.pptx");
-		FileOutputStream out = new FileOutputStream(fl1);
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream(PPTX_FILE_NAME);
-		byte[] ba = new byte[4096];
-		int len;
-		while ((len = is.read(ba)) != -1) {
-			out.write(ba, 0, len);
-		}
-		out.flush();
-		out.close();
+		File fl1 = getFile("test.pptx");
 		Blob blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
 		ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
 		ps.setString(1, "TestOle");
 		ps.setBlob(2, blob);
+		
 		ps.execute();
+		getLogger().info("PPTX file was created in {}.", this.getFileAccDb());
+		checkQuery("SELECT * FROM T2");
 		Statement st = ucanaccess.createStatement();
-		rs = st.executeQuery("SELECT Pippo FROM T2");
-		rs.next();
-		InputStream isDB = rs.getBinaryStream(1);
-		OutputStream outFile = new FileOutputStream(fl);
-		ByteArrayOutputStream outByte = new ByteArrayOutputStream();
-		ba = new byte[4096];
-		while ((len = isDB.read(ba)) != -1) {
-			outFile.write(ba, 0, len);
-			outByte.write(ba, 0, len);
-		}
-		outFile.flush();
-		outFile.close();
-		getLogger().info("Packaged file was recreated in {}.", fl.getAbsolutePath());
-		outByte.flush();
-		outByte.close();
 		fl1.delete();
-		fl.delete();
 		st.execute("DELETE FROM t2");
 	}
 
@@ -179,5 +163,20 @@ public class BlobOleTest extends AccessVersionAllTest {
 		b.setBytes(1, new byte[] { 1 });
 		ps.setBlob(3, b);
 		ps.executeUpdate();
+	}
+
+	private File getFile(String fn) throws IOException {
+		// fix for ticket #23 should prevent this test f
+		File fl1 = new File(fn);
+		FileOutputStream out = new FileOutputStream(fl1);
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream(fn);
+		byte[] ba = new byte[4096];
+		int len;
+		while ((len = is.read(ba)) != -1) {
+			out.write(ba, 0, len);
+		}
+		out.flush();
+		out.close();
+		return fl1;
 	}
 }

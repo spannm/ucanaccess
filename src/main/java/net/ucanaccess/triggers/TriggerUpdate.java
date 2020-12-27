@@ -78,10 +78,19 @@ public class TriggerUpdate extends TriggerBase {
 				SessionInterface si = hsqlConn.getSession();
 				long length = bd.length(si);
 				byte[] bt = (byte[]) ((BlobData) value).getBytes(si, 0, (int) length);
-				values[i] = (bt.length > 0)
-						? BlobKey.getBlobKey(bt).getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO())
-						: bt;
+				if (bt.length == 0) {
+					values[i] = bt;
+				} else {
+					BlobKey bk = BlobKey.getBlobKey(bt);
+					if (bk == null) {
+						values[i] = bt;
+					} else {
+						values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
+					}
+				}
+
 			}
 		}
 	}
+
 }
