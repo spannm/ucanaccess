@@ -78,8 +78,7 @@ public class NotNullDdlTest extends AccessVersionDefaultTest {
             if (numErrorLines == 0) {
                 fail("The VBScript should have thrown an error, but it did not.");
             } else {
-            	System.out.println(sb.toString());
-                if (!sb.toString().contains("table1.txt_required")) {
+            	 if (!sb.toString().contains("table1.txt_required")) {
                     fail("The VBScript threw an unexpected error.");
                 }
             }
