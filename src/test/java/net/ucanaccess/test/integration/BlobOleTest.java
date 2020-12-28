@@ -107,9 +107,10 @@ public class BlobOleTest extends AccessVersionAllTest {
 		ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE  descr=?");
 		File fl1 = getFile(PPTX_FILE_NAME);
 		blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
-		ps.setBlob(1, blob);
+		ps.setObject(1, fl1);
 		ps.setString(2, "TestOleOk");
 		ps.executeUpdate();
+		
 		getLogger().info("PPTX file was created in {}.", this.getFileAccDb());
 		checkQuery("SELECT * FROM T2");
 		ps = ucanaccess.prepareStatement("DELETE FROM  t2  WHERE  descr=?");

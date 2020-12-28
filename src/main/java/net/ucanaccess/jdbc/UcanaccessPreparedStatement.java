@@ -17,6 +17,7 @@ package net.ucanaccess.jdbc;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -671,10 +672,17 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         }
         return rtn;
     }
+    
+    private Object mapToBlob(Object x) throws SQLException {
+         if (x instanceof File) {
+            x=UcanaccessBlob.createBlob((File)x, (UcanaccessConnection)this.getConnection()) ;
+        } 
+        return x;
+    }
 
     @Override
     public void setObject(int idx, Object x) throws SQLException {
-        x = mapLocalTimeToLocalDateTime(x);
+        x =  mapToBlob(mapLocalTimeToLocalDateTime(x));
         try {
             if (x != null && x instanceof Float)
                 this.setFloat(idx, (Float) x);
@@ -689,7 +697,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
 
     @Override
     public void setObject(int idx, Object x, int tsqlt) throws SQLException {
-        x = mapLocalTimeToLocalDateTime(x);
+        x =  mapToBlob(mapLocalTimeToLocalDateTime(x));
         try {
             addMementoEntry("setObject", new Class[] { Object.class, Integer.TYPE }, idx, x, tsqlt);
             wrapped.setObject(idx, x, tsqlt);
@@ -700,7 +708,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
 
     @Override
     public void setObject(int idx, Object x, int tsqlt, int sol) throws SQLException {
-        x = mapLocalTimeToLocalDateTime(x);
+        x =  mapToBlob(mapLocalTimeToLocalDateTime(x));
         try {
             addMementoEntry("setObject", new Class[] { Object.class, Integer.TYPE, Integer.TYPE }, idx, x, tsqlt, sol);
             wrapped.setObject(idx, x, tsqlt, sol);
