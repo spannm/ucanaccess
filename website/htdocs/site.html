@@ -13,7 +13,7 @@ body, li {
 
 h1 {
   font-family: Verdana, Helvetica, Arial, sans-serif;
-  font-size: 21px;
+   font-size: 21px;
 }
 
 h2 {
@@ -124,7 +124,7 @@ a:hover {
 <body style="background-color: #FFFFFD">
   <div id='page-margins'>
     <div>
-      <a class="download" href="http://sourceforge.net/projects/ucanaccess/files/">Download UCanAccess 5.0.0</a>
+      <a class="download" href="http://sourceforge.net/projects/ucanaccess/files/">Download UCanAccess 5.0.1</a>
       <g:plusone size="tall"></g:plusone>
       <a id="donate" href="#donate" class="menubutton" style="position: relative; left: 5em; top: 40px"><img
         id="donate_img" src="donate.png" border="0" width="120" /></a>
@@ -243,12 +243,12 @@ a:hover {
 &lt;dependency&gt;
     &lt;groupId&gt;net.sf.ucanaccess&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
-    &lt;version&gt;5.0.0&lt;/version&gt;
+    &lt;version&gt;5.0.1&lt;/version&gt;
 &lt;/dependency&gt;
             </pre>
             ... and Maven will add the other dependencies for you. If you are manually adding the dependencies to your classpath
-            you will need to add the ucanaccess&#8209;5.0.0.jar file along with <b>all</b> of the jar files in the lib/ folder of
-            UCanAccess&#8209;5.0.0&#8209;bin.zip (details <a href=https://stackoverflow.com/a/21955257/2144390>here</a>).
+            you will need to add the ucanaccess&#8209;5.0.1.jar file along with <b>all</b> of the jar files in the lib/ folder of
+            UCanAccess&#8209;5.0.1&#8209;bin.zip (details <a href=https://stackoverflow.com/a/21955257/2144390>here</a>).
           <p>
             In order to open encrypted files you must use UCanAccess 2.x.x or later with jackcess-encrypt-2.x.x and
             all related dependencies. Again, if you are using Maven, simply add this extra dependency:
@@ -289,7 +289,7 @@ a:hover {
             </tr>
             <tr>
               <td align="right"><b>version:</b></td>
-              <td>5.0.0</td>
+              <td>5.0.1</td>
             </tr>
           </table>
           <p>
@@ -860,7 +860,15 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
         <!--  
               ***** "Change Log" tab *****
         -->
-        <div id="change_div">
+         <div id="change_div">
+		<h2>5.0.1 Release</h2>
+          <ul>
+		<li>fix updates failed in tables with Blob/Ole not null</li>
+		<li>Insert/Update of Blob/Ole objects in this simplified way:  preparedStetement.setObject(1, new File("c:\\&lt;file path&gt;"));</li>
+		
+          </ul>
+		
+		
          <h2>5.0.0 Release</h2>
           <ul>
 		<li>BLOB insert failed for table with multi-column PK</li>
