@@ -10,4 +10,4 @@ else
 	JAVACMD=java
 fi
 
-"$JAVACMD" -cp $CLASSPATH net.ucanaccess.console.Main
+"$JAVACMD"  -cp $CLASSPATH net.ucanaccess.console.Main
