@@ -18,7 +18,7 @@ if exist %LOCAL_HOME_JAVA%\bin\java.exe (
 %LOCAL_JAVA% -version
 @echo.
 
-SET CLASSPATH="%UCANACCESS_HOME%\lib\hsqldb-2.5.0.jar;%UCANACCESS_HOME%\lib\jackcess-3.0.1.jar;%UCANACCESS_HOME%\lib\commons-lang3-3.8.1.jar;%UCANACCESS_HOME%\lib\commons-logging-1.2.jar;%UCANACCESS_HOME%\ucanaccess-5.0.0.jar"
+SET CLASSPATH="%UCANACCESS_HOME%\lib\hsqldb-2.5.0.jar;%UCANACCESS_HOME%\lib\jackcess-3.0.1.jar;%UCANACCESS_HOME%\lib\commons-lang3-3.8.1.jar;%UCANACCESS_HOME%\lib\commons-logging-1.2.jar;%UCANACCESS_HOME%\ucanaccess-5.0.1.jar"
 
 %LOCAL_JAVA% -classpath %CLASSPATH% net.ucanaccess.console.Main
 pause
