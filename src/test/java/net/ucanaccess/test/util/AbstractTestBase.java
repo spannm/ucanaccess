@@ -19,29 +19,13 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTestBase extends Assert {
 
     static {
-        // configure the slf4j-simple static logger binding if available
-        if (isSlf4jSimpleLoggerAvailable()) {
-            configureSlf4jSimpleLogger();
-        }
-    }
-
-    static boolean isSlf4jSimpleLoggerAvailable() {
-        try {
-            Class.forName("org.slf4j.impl.SimpleLogger");
-            return true;
-        } catch (ClassNotFoundException _ex) {
-            return false;
-        }
-    }
-
-    static void configureSlf4jSimpleLogger() {
+        // configure the slf4j-simple static logger binding
         System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
         System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
         System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "yyyy-MM-dd HH:mm:ss.SSS");
         System.setProperty("org.slf4j.simpleLogger.showThreadName", "false");
     }
-
 
     /**
      * The SLF4J logger (https://www.slf4j.org/).

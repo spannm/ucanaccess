@@ -60,6 +60,8 @@
         <hsqldbVersion>2.5.0</hsqldbVersion>
         <jackcessVersion>3.0.1</jackcessVersion>
 
+        <dep.slf4j.version>2.0.7</dep.slf4j.version>
+
         <dep.junit.version>4.13.2</dep.junit.version>
         <dep.mockito.version>5.5.0</dep.mockito.version>
 
@@ -83,13 +85,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>${dep.slf4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
+            <version>${dep.slf4j.version}</version>
             <scope>test</scope>
         </dependency>
 
