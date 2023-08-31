@@ -25,6 +25,7 @@ import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
@@ -153,7 +154,7 @@ public final class Functions {
 
     @FunctionType(functionName = "CCUR", argumentTypes = { AccessType.CURRENCY }, returnType = AccessType.CURRENCY)
     public static BigDecimal ccur(BigDecimal value) throws UcanaccessSQLException {
-        return value.setScale(4, BigDecimal.ROUND_HALF_UP);// .doubleValue();
+        return value.setScale(4, RoundingMode.HALF_UP);
     }
 
     @FunctionType(functionName = "CDATE", argumentTypes = { AccessType.MEMO }, returnType = AccessType.DATETIME)
@@ -867,7 +868,7 @@ public final class Functions {
         if (o == null) {
             return null;
         }
-        return new Integer(o.length());
+        return Integer.valueOf(o.length());
     }
 
     @FunctionType(functionName = "MID", argumentTypes = { AccessType.MEMO,
@@ -1306,7 +1307,7 @@ public final class Functions {
             AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double ipmt(double rate, double per, double nper, double pv, double fv, double type) {
         type = (Math.abs(type) >= 1) ? 1 : 0;
-        double ipmt = fv(rate, new Double(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
+        double ipmt = fv(rate, Double.valueOf(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
         if (type == 1) {
             ipmt = ipmt / (1 + rate);
         }
@@ -1616,7 +1617,7 @@ public final class Functions {
         d = (d - d.intValue()) * 60;
         tr = dateAdd("N", d.intValue(), tr);
         d = (d - d.intValue()) * 60;
-        tr = dateAdd("S", new Double(Math.rint(d + APPROX)).intValue(), tr);
+        tr = dateAdd("S", Double.valueOf(Math.rint(d + APPROX)).intValue(), tr);
         return tr;
     }
 
@@ -1685,15 +1686,15 @@ public final class Functions {
     }
 
     private static int lfloor(double d) {
-        return new Double(Math.floor(d - APPROX)).intValue();
+        return Double.valueOf(Math.floor(d - APPROX)).intValue();
     }
 
     private static int lceil(double d) {
-        return new Double(Math.ceil(d - APPROX)).intValue();
+        return Double.valueOf(Math.ceil(d - APPROX)).intValue();
     }
 
     private static int lrint(double d) {
-        return new Double(Math.rint(d - APPROX)).intValue();
+        return Double.valueOf(Math.rint(d - APPROX)).intValue();
     }
 
     private static String padLeft(int ext, int n) {

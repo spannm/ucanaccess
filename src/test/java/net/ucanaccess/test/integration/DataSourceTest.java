@@ -20,22 +20,16 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import net.ucanaccess.jdbc.UcanaccessDataSource;
 import net.ucanaccess.test.util.AbstractTestBase;
 
 public class DataSourceTest extends AbstractTestBase {
-    @Rule
-    public final ExpectedException except = ExpectedException.none();
-
     @Test
     public void setNewDatabaseVersionBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        except.expect(IllegalArgumentException.class);
-        uds.setNewDatabaseVersion("V200?");
+        assertThrows(IllegalArgumentException.class, () -> uds.setNewDatabaseVersion("V200?"));
     }
 
     @Test
@@ -49,8 +43,7 @@ public class DataSourceTest extends AbstractTestBase {
     @Test
     public void setLobScaleBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        except.expect(IllegalArgumentException.class);
-        uds.setLobScale(3);
+        assertThrows(IllegalArgumentException.class, () -> uds.setLobScale(3));
     }
 
     @Test

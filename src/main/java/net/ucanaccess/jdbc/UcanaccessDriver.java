@@ -17,6 +17,7 @@ package net.ucanaccess.jdbc;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -286,8 +287,8 @@ public final class UcanaccessDriver implements Driver {
     }
 
     private JackcessOpenerInterface newJackcessOpenerInstance(String className)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException {
-        Object newInstance = Class.forName(className).newInstance();
+            throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        Object newInstance = Class.forName(className).getConstructor().newInstance();
         if (!(newInstance instanceof JackcessOpenerInterface)) {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_JACKCESS_OPENER);
         }
