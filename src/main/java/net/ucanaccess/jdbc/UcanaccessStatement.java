@@ -268,7 +268,7 @@ public class UcanaccessStatement implements Statement {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public UcanaccessConnection getConnection() throws SQLException {
         return this.connection;
     }
 
@@ -544,7 +544,7 @@ public class UcanaccessStatement implements Statement {
 
     protected void reset() throws SQLException {
         Statement old = this.wrapped;
-        reset(((UcanaccessConnection) this.getConnection()).getHSQLDBConnection().createStatement(
+        reset(this.getConnection().getHSQLDBConnection().createStatement(
                 wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
         old.close();
     }
