@@ -40,6 +40,8 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -662,21 +664,18 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             throw new UcanaccessSQLException(e);
         }
     }
-    
+
     private Object mapLocalTimeToLocalDateTime(Object x) {
-        Object rtn = null;
-        if (x.getClass().equals(java.time.LocalTime.class)) {
-            rtn = ((java.time.LocalTime) x).atDate(java.time.LocalDate.of(1899, 12, 30));
-        } else {
-            rtn = x;
+        if (x instanceof LocalTime) {
+            return ((LocalTime) x).atDate(LocalDate.of(1899, 12, 30));
         }
-        return rtn;
+        return x;
     }
-    
+
     private Object mapToBlob(Object x) throws SQLException {
          if (x instanceof File) {
-            x=UcanaccessBlob.createBlob((File)x, (UcanaccessConnection)this.getConnection()) ;
-        } 
+            x=UcanaccessBlob.createBlob((File)x, this.getConnection()) ;
+        }
         return x;
     }
 
@@ -684,7 +683,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public void setObject(int idx, Object x) throws SQLException {
         x =  mapToBlob(mapLocalTimeToLocalDateTime(x));
         try {
-            if (x != null && x instanceof Float)
+            if (x instanceof Float)
                 this.setFloat(idx, (Float) x);
             else {
                 addMementoEntry("setObject", new Class[] { Object.class }, idx, x);
