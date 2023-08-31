@@ -91,10 +91,6 @@ public class Main {
         pr.putAll(nb);
     }
 
-    /**
-     * @param args
-     * @throws Exception
-     */
     public static void main(String[] args) throws Exception {
         Logger.setLogPrintWriter(new PrintWriter(System.out));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));

@@ -83,9 +83,9 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     /**
      * Opens the connection to the Access database using the provided username and password.
      *
-     * @param _username
-     * @param _password
-     * @return java.sql.Connection object
+     * @param _username user name
+     * @param _password password
+     * @return database connection
      */
     @Override
     public Connection getConnection(String _username, String _password) throws SQLException {
@@ -290,7 +290,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * <p>
      * For example: C:/folder/database.accdb
      *
-     * @param _accessPath
+     * @param _accessPath path
      */
     public void setAccessPath(String _accessPath) {
         this.accessPath = _accessPath;
@@ -373,22 +373,22 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * Specifies the name of the custom class to be used by Jackcess when opening the Access database. Mainly for use
      * with Jackcess Encrypt to open encrypted databases. See the UCanAccess website for details.
      *
-     * @param value
+     * @param jackcessopener name of custom class
      * @since 0.0.2
      */
-    public void setJackcessOpener(String value) {
-        setProp("jackcessopener", value, null);
+    public void setJackcessOpener(String jackcessopener) {
+        setProp("jackcessopener", jackcessopener, null);
     }
 
     /**
      * Specifies the path where a persistent copy of the HSQLDB backing database files should be stored. Implies
      * memory=false. See the UCanAccess website for details.
      *
-     * @param value
+     * @param keepmirror path
      * @since 2.0.2
      */
-    public void setKeepMirror(String value) {
-        setProp("keepmirror", value, null);
+    public void setKeepMirror(String keepmirror) {
+        setProp("keepmirror", keepmirror, null);
     }
 
     /**
@@ -430,11 +430,11 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * create a persistent copy of the backing database, use {@link #setKeepMirror(String)} instead. See the UCanAccess
      * website for details.
      *
-     * @param value
+     * @param mirrorfolder value
      * @since 2.0.9.3
      */
-    public void setMirrorFolder(String value) {
-        setProp("mirrorfolder", value, null);
+    public void setMirrorFolder(String mirrorfolder) {
+        setProp("mirrorfolder", mirrorfolder, null);
     }
 
     /**
@@ -500,11 +500,11 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * For this connection, temporarily re-directs linked tables in the Access database to point to a different Access
      * database. See the UCanAccess website for details.
      *
-     * @param value
+     * @param remap value
      * @since 2.0.2
      */
-    public void setReMap(String value) {
-        setProp("remap", value, null);
+    public void setReMap(String remap) {
+        setProp("remap", remap, null);
     }
 
     /**
