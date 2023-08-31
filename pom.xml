@@ -1,15 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.sf.ucanaccess</groupId>
-    <artifactId>ucanaccess</artifactId>
-    <version>5.0.1</version>
+
+    <parent>
+        <groupId>baag.fix</groupId>
+        <artifactId>baag-fix-maven-pom</artifactId>
+        <version>5.38</version>
+    </parent>
+    <groupId>baag.camc</groupId>
+    <artifactId>net-sf-ucanaccess-fork</artifactId>
+    <version>5.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>UCanAccess</name>
+    <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
+    <url>http://ucanaccess.sourceforge.net/site.html</url>
+    <inceptionYear>2012</inceptionYear>
     <organization>
         <name>UCanAccess</name>
     </organization>
-    <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
-    <url>http://ucanaccess.sourceforge.net/site.html</url>
+
     <licenses>
         <license>
             <name>Apache 2.0</name>
@@ -18,8 +27,8 @@
     </licenses>
     <developers>
         <developer>
-            <name>Marco Amadei</name>
             <id>marco-amadei</id>
+            <name>Marco Amadei</name>
             <email>amadei.mar@gmail.com</email>
             <roles>
                 <role>Lead developer</role>
@@ -43,136 +52,21 @@
             <timezone>+1</timezone>
         </developer>
     </developers>
-    <inceptionYear>2012</inceptionYear>
-    <scm>
-        <connection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</connection>
-        <developerConnection>scm:git:https://git.code.sf.net/p/ucanaccess/git-code</developerConnection>
-        <url>https://sourceforge.net/p/ucanaccess/git-code/ci/master/tree/</url>
-    </scm>
+
     <properties>
-        <javaVersion>1.8</javaVersion>
+        <javaVersion>11</javaVersion>
+
         <!-- Artifact must match selected Java version in property javaVersion -->
-        <animalSnifferArtifact>java18</animalSnifferArtifact>
-        <animalSnifferArtifactVersion>1.0</animalSnifferArtifactVersion>
         <hsqldbVersion>2.5.0</hsqldbVersion>
         <jackcessVersion>3.0.1</jackcessVersion>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipTests>false</skipTests>
+
+        <dep.junit.version>4.13.2</dep.junit.version>
+        <dep.mockito.version>5.5.0</dep.mockito.version>
+
+        <baag.check.skip-checkstyle>true</baag.check.skip-checkstyle>
+        <baag.check.skip-pmd>true</baag.check.skip-pmd>
+        <baag.check.skip-spotbugs>true</baag.check.skip-spotbugs>
     </properties>
-    <build>
-        <pluginManagement>
-        </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <source>${javaVersion}</source>
-                    <target>${javaVersion}</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.16</version>
-                <configuration>
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>${animalSnifferArtifact}</artifactId>
-                        <version>${animalSnifferArtifactVersion}</version>
-                    </signature>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-java-api</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <skipTests>${skipTests}</skipTests>
-                    <includes>
-                        <include>NONE</include>
-                    </includes>
-                    <trimStackTrace>false</trimStackTrace>
-                    <testFailureIgnore>false</testFailureIgnore>
-                    <forkCount>1</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
-                    <argLine>-Xmx1024m</argLine>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/*Test.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/test/*.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integration-test</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/test/*.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
-                <configuration>
-                    <rules>
-                        <requireMavenVersion>
-                            <version>3.3</version>
-                        </requireMavenVersion>
-                        <requireJavaVersion>
-                            <version>${javaVersion}</version>
-                        </requireJavaVersion>
-                    </rules>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <dependency>
@@ -202,97 +96,66 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${dep.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.12.0</version>
+            <version>${dep.mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>NONE</include>
+                    </includes>
+                    <trimStackTrace>false</trimStackTrace>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                    <argLine>-Xmx1024m</argLine>
+                </configuration>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
-                        <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>unit-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>test</phase>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/test/*.java</exclude>
+                            </excludes>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- Sonatype Release -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
+                    </execution>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
                         <configuration>
-                            <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <releaseProfiles>release</releaseProfiles>
-                            <arguments>-Psonatype-oss-release -Prelease -Dgpg.passphrase=${gpg.passphrase}</arguments>
+                            <includes>
+                                <include>**/test/*.java</include>
+                            </includes>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
 </project>
