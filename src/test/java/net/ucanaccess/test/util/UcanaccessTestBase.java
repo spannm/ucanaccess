@@ -238,7 +238,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 											assertEquals(btodbc[y], bt[y]);
 										}
 									} else if (ob1 instanceof ComplexBase[] && ob2 instanceof ComplexBase[]) {
-										assertTrue(Arrays.equals((ComplexBase[]) ob1, (ComplexBase[]) ob2));
+										assertArrayEquals((ComplexBase[]) ob1, (ComplexBase[]) ob2);
 									} else {
 										if (ob1 instanceof Number && ob2 instanceof Number) {
 											BigDecimal ob1b = new BigDecimal(ob1.toString());
