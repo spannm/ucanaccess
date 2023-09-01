@@ -130,6 +130,7 @@ public class BlobOleTest extends AccessVersionAllTest {
 		rs.close();
 		ps.close();
 		fl.delete();
+		fl1.delete();
 	}
 
 	// It only works with JRE 1.6 and later (JDBC 3)
@@ -137,7 +138,7 @@ public class BlobOleTest extends AccessVersionAllTest {
 	@Test
 	public void testBlobPackaged() throws SQLException, IOException {
 		PreparedStatement ps = null;
-		File fl1 = getFile("test.pptx");
+		File fl1 = getFile(PPTX_FILE_NAME);
 		Blob blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
 		ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
 		ps.setString(1, "TestOle");
