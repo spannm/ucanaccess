@@ -10,14 +10,14 @@
         <relativePath/>
     </parent>
 
-    <groupId>baag.camc</groupId>
-    <artifactId>net-sf-ucanaccess-fork</artifactId>
+    <groupId>com.github.spannm</groupId>
+    <artifactId>ucanaccess</artifactId>
     <version>5.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
     <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
-    <url>http://ucanaccess.sourceforge.net/site.html</url>
+    <url>https://github.com/spannm/${project.artifactId}</url>
     <inceptionYear>2012</inceptionYear>
 
     <organization>
@@ -33,9 +33,9 @@
 
     <developers>
         <developer>
-            <id>sman-81</id>
+            <id>spannm</id>
             <name>Markus Spann</name>
-            <email>sman81@outlook.de</email>
+            <email>spannm@outlook.de</email>
             <timezone>+1</timezone>
         </developer>
 
@@ -43,26 +43,26 @@
             <id>marco-amadei</id>
             <name>Marco Amadei</name>
             <email>amadei.mar@gmail.com</email>
-            <timezone>+1</timezone>
             <roles>
                 <role>developer emeritus</role>
             </roles>
+            <timezone>+1</timezone>
         </developer>
         <developer>
             <name>Gord Thompson</name>
             <email>gordonthompson@users.sf.net</email>
-            <timezone>-7</timezone>
             <roles>
                 <role>developer emeritus</role>
             </roles>
+            <timezone>-7</timezone>
         </developer>
         <developer>
             <name>Brian Park</name>
             <email>btpark@users.sf.net</email>
-            <timezone>-8</timezone>
             <roles>
                 <role>contributor emeritus</role>
             </roles>
+            <timezone>-8</timezone>
         </developer>
     </developers>
 
