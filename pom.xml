@@ -33,26 +33,36 @@
 
     <developers>
         <developer>
+            <id>sman-81</id>
+            <name>Markus Spann</name>
+            <email>sman81@outlook.de</email>
+            <timezone>+1</timezone>
+        </developer>
+
+        <developer>
             <id>marco-amadei</id>
             <name>Marco Amadei</name>
             <email>amadei.mar@gmail.com</email>
             <timezone>+1</timezone>
+            <roles>
+                <role>developer emeritus</role>
+            </roles>
         </developer>
         <developer>
             <name>Gord Thompson</name>
             <email>gordonthompson@users.sf.net</email>
             <timezone>-7</timezone>
+            <roles>
+                <role>developer emeritus</role>
+            </roles>
         </developer>
         <developer>
             <name>Brian Park</name>
             <email>btpark@users.sf.net</email>
             <timezone>-8</timezone>
-        </developer>
-        <developer>
-            <id>sman-81</id>
-            <name>Markus Spann</name>
-            <email>sman81@outlook.de</email>
-            <timezone>+1</timezone>
+            <roles>
+                <role>contributor emeritus</role>
+            </roles>
         </developer>
     </developers>
 
