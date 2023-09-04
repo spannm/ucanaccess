@@ -287,7 +287,7 @@ public final class Functions {
         } else {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
         }
-        return (dt instanceof Timestamp) ? new Timestamp(cl.getTimeInMillis())
+        return dt instanceof Timestamp ? new Timestamp(cl.getTimeInMillis())
                 : new java.sql.Date(cl.getTimeInMillis());
     }
 
@@ -922,9 +922,7 @@ public final class Functions {
 
     @FunctionType(namingConflict = true, functionName = "NOW", argumentTypes = {}, returnType = AccessType.DATETIME)
     public static Timestamp now() {
-        Calendar cl = Calendar.getInstance();
-        cl.set(Calendar.MILLISECOND, 0);
-        return new Timestamp(cl.getTime().getTime());
+        return new Timestamp(System.currentTimeMillis() / 1000 * 1000);
     }
 
     private static Object nz(Object value, Object outher) {
