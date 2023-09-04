@@ -3,18 +3,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>baag.fix</groupId>
-        <artifactId>baag-fix-maven-pom</artifactId>
-        <version>5.38</version>
+        <groupId>org.basepom</groupId>
+        <artifactId>basepom-oss</artifactId>
+        <version>55</version>
+        <!-- null out the relative path, otherwise maven complains that the referenced POM is not in the parent directory -->
+        <relativePath/>
     </parent>
+
     <groupId>baag.camc</groupId>
     <artifactId>net-sf-ucanaccess-fork</artifactId>
     <version>5.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <name>UCanAccess</name>
     <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
     <url>http://ucanaccess.sourceforge.net/site.html</url>
     <inceptionYear>2012</inceptionYear>
+
     <organization>
         <name>UCanAccess</name>
     </organization>
@@ -25,15 +30,12 @@
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <id>marco-amadei</id>
             <name>Marco Amadei</name>
             <email>amadei.mar@gmail.com</email>
-            <roles>
-                <role>Lead developer</role>
-                <role>Committer</role>
-            </roles>
             <timezone>+1</timezone>
         </developer>
         <developer>
@@ -47,8 +49,9 @@
             <timezone>-8</timezone>
         </developer>
         <developer>
+            <id>sman-81</id>
             <name>Markus Spann</name>
-            <email>markussp@users.sf.net</email>
+            <email>sman81@outlook.de</email>
             <timezone>+1</timezone>
         </developer>
     </developers>
@@ -56,30 +59,27 @@
     <properties>
         <javaVersion>11</javaVersion>
 
-        <!-- Artifact must match selected Java version in property javaVersion -->
-        <hsqldbVersion>2.5.0</hsqldbVersion>
-        <jackcessVersion>3.0.1</jackcessVersion>
+        <dep.hsqldb.version>2.5.0</dep.hsqldb.version>
+        <dep.jackcess.version>3.0.1</dep.jackcess.version>
 
         <dep.slf4j.version>2.0.7</dep.slf4j.version>
 
         <dep.junit.version>4.13.2</dep.junit.version>
         <dep.mockito.version>5.5.0</dep.mockito.version>
 
-        <baag.check.skip-checkstyle>true</baag.check.skip-checkstyle>
-        <baag.check.skip-pmd>true</baag.check.skip-pmd>
-        <baag.check.skip-spotbugs>true</baag.check.skip-spotbugs>
+        <basepom.check.skip-extended>true</basepom.check.skip-extended>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>${hsqldbVersion}</version>
+            <version>${dep.hsqldb.version}</version>
         </dependency>
         <dependency>
             <groupId>com.healthmarketscience.jackcess</groupId>
             <artifactId>jackcess</artifactId>
-            <version>${jackcessVersion}</version>
+            <version>${dep.jackcess.version}</version>
         </dependency>
 
         <dependency>
@@ -108,7 +108,24 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
+
+        <defaultGoal>clean verify</defaultGoal>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.ekryd.sortpom</groupId>
+                    <artifactId>sortpom-maven-plugin</artifactId>
+                    <configuration>
+                        <createBackupFile>false</createBackupFile>
+                        <expandEmptyElements>false</expandEmptyElements>
+                        <nrOfIndentSpace>4</nrOfIndentSpace>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
         <plugins>
             <plugin>
