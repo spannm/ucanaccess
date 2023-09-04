@@ -252,7 +252,7 @@ public class Persist2Jet {
                 dt = DataType.NUMERIC;
             } else {
                 dt = DataType.fromSQLType(
-                        rs.getInt("DATA_TYPE"), 
+                        rs.getInt("DATA_TYPE"),
                         length,
                         UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
             }
@@ -774,7 +774,7 @@ public class Persist2Jet {
         while (fkrs.next()) {
             /*
              * The following check was added for ticket #16.
-             * 
+             *
              * Limitation: If the user wants to create more than one relationship between the same two tables
              * then all of the relationships must be explicitly named.
              */

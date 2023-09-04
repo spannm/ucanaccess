@@ -832,7 +832,7 @@ public class LoadJet {
             }
             return false;
         }
-        
+
         private void loadTableData(Table t, boolean systemTable) throws IOException, SQLException {
             loadTableData(t, systemTable, false);
         }
@@ -1142,7 +1142,7 @@ public class LoadJet {
                     return bk.getBytes();
                 }
             }
-            
+
             if (value instanceof Byte) {
                 return SQLConverter.asUnsigned((Byte) value);
             }
@@ -1160,8 +1160,8 @@ public class LoadJet {
             String triggerName = namePrefix + "_" + (tableName);
             // .replaceAll(" ", "_"));
             triggerName = escapeIdentifier(triggerName);
-            exec("CREATE TRIGGER " + triggerName + "  " + when + " ON " + tableName + "   FOR EACH ROW	" + q0
-                    + "   CALL \"" + className + "\" ", true);
+            exec("CREATE TRIGGER " + triggerName + "  " + when + " ON " + tableName + " FOR EACH ROW " + q0
+                    + " CALL \"" + className + "\" ", true);
         }
 
         private void loadTriggerNP(String tableName, String namePrefix, String when, String className)

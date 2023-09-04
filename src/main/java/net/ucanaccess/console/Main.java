@@ -102,14 +102,14 @@ public class Main {
         String[] commands = null;
         if (args.length > 0) {
             String file = args[0];
-            if (file.endsWith(".properties")) { 
+            if (file.endsWith(".properties")) {
                 File pfl = new File(args[0]);
                 if (pfl.exists()) {
                     FileInputStream fis = new FileInputStream(pfl);
                     info.load(fis);
                     lcProperties(info);
                 }
-            } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) { 
+            } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
                 fl = new File(file);
                 size = fl.length();
                 if (args.length > 1) {

@@ -56,7 +56,7 @@ public final class FormatCache {
         }
         return noGrouping;
     }
-    
+
     public static NumberFormat getCurrencyDefault() {
         if (currencyDefault == null) {
             currencyDefault = NumberFormat.getCurrencyInstance();

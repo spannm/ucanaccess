@@ -165,7 +165,7 @@ public class DBReference {
         memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
-        	DatabaseBuilder dbb=new DatabaseBuilder();
+            DatabaseBuilder dbb=new DatabaseBuilder();
             dbIO = dbb.setAutoSync(false).setFileFormat(ff).setFile(fl).create();
         } else {
             dbIO = _jko.open(fl, _pwd);
@@ -249,23 +249,23 @@ public class DBReference {
     Connection checkLastModified(Connection conn, Session session) throws Exception {
         // I'm detecting if another process(and not another thread) is writing
 
-		if ((lastModified + 2000 > filesUpdateTime()) || (preventReloading && !checkInside())) {
-			return conn;
-		}
-		this.updateLastModified();
-		this.closeHSQLDB(session);
-		System.gc();
-		this.dbIO.flush();
-		this.dbIO.close();
-		this.dbIO = open(this.dbFile, this.pwd);
-		this.id = id();
-		this.firstConnection = true;
-		LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
-		lj.setSkipIndexes(this.skipIndexes);
-		lj.setSysSchema(this.sysSchema);
-		lj.loadDB();
+        if ((lastModified + 2000 > filesUpdateTime()) || (preventReloading && !checkInside())) {
+            return conn;
+        }
+        this.updateLastModified();
+        this.closeHSQLDB(session);
+        System.gc();
+        this.dbIO.flush();
+        this.dbIO.close();
+        this.dbIO = open(this.dbFile, this.pwd);
+        this.id = id();
+        this.firstConnection = true;
+        LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
+        lj.setSkipIndexes(this.skipIndexes);
+        lj.setSysSchema(this.sysSchema);
+        lj.loadDB();
 
-		return getHSQLDBConnection(session);
+        return getHSQLDBConnection(session);
     }
 
     private boolean checkInside(Database db) throws IOException {
@@ -573,7 +573,7 @@ public class DBReference {
             suffixStart = fileName.length();
         }
         String suffix = this.dbFormat != null
-                && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat)) 
+                && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
                         ? ".laccdb"
                         : ".ldb";
         File flLock = new File(folder, fileName.substring(0, suffixStart) + suffix);

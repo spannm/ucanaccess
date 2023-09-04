@@ -23,7 +23,7 @@ import java.util.Map;
 import com.healthmarketscience.jackcess.DataType;
 
 public final class TypesMap {
-    public static enum AccessType {
+    public enum AccessType {
         BYTE,
         COUNTER,
         CURRENCY,

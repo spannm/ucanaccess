@@ -67,7 +67,8 @@
         <dep.junit.version>4.13.2</dep.junit.version>
         <dep.mockito.version>5.5.0</dep.mockito.version>
 
-        <basepom.check.skip-extended>true</basepom.check.skip-extended>
+        <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
+        <basepom.check.skip-license>true</basepom.check.skip-license>
     </properties>
 
     <dependencies>
@@ -176,5 +177,24 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>fast</id>
+            <!-- Profile to skip time-consuming steps. -->
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- skip _compiling_ the tests -->
+                <maven.test.skip>true</maven.test.skip>
+                <!-- skip the tests -->
+                <skipTests>true</skipTests>
+
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <basepom.check.skip-extended>true</basepom.check.skip-extended>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

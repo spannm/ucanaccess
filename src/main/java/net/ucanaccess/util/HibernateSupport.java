@@ -24,7 +24,7 @@ package net.ucanaccess.util;
  *
  */
 public final class HibernateSupport {
-    
+
     private HibernateSupport() {
         // this is a utility class, so no instantiation allowed
         throw new UnsupportedOperationException();

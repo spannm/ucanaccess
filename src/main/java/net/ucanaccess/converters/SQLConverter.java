@@ -268,7 +268,7 @@ public final class SQLConverter {
         }
     }
 
-    public static enum DDLType {
+    public enum DDLType {
 
         CREATE_TABLE_AS_SELECT(
                 Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
@@ -312,8 +312,8 @@ public final class SQLConverter {
         private Pattern pattern;
         private String  ddl;
 
-        private DDLType(Pattern _pattern) {
-            this.pattern = _pattern;
+        DDLType(Pattern _pattern) {
+            pattern = _pattern;
         }
 
         public boolean in(DDLType... types) {
@@ -570,27 +570,27 @@ public final class SQLConverter {
         return sql;
     }
 
-	private static String replaceWhiteSpacedTables(String sql) {
-		String[] sqls = sql.split("'", -1);
-		StringBuffer sb = new StringBuffer();
-		String cm = "";
-		for (int i = 0; i < sqls.length; ++i) {
-			sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTables(sqls[i], "\"") : sqls[i]);
-			cm = "'";
-		}
-		return sb.toString();
-	}
+    private static String replaceWhiteSpacedTables(String sql) {
+        String[] sqls = sql.split("'", -1);
+        StringBuffer sb = new StringBuffer();
+        String cm = "";
+        for (int i = 0; i < sqls.length; ++i) {
+            sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTables(sqls[i], "\"") : sqls[i]);
+            cm = "'";
+        }
+        return sb.toString();
+    }
 
-	private static String replaceWhiteSpacedTables(String sql, String character) {
-		String[] sqls = sql.split(character, -1);
-		StringBuffer sb = new StringBuffer();
-		String cm = "";
-		for (int i = 0; i < sqls.length; ++i) {
-			sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);
-			cm = character;
-		}
-		return sb.toString();
-	}
+    private static String replaceWhiteSpacedTables(String sql, String character) {
+        String[] sqls = sql.split(character, -1);
+        StringBuffer sb = new StringBuffer();
+        String cm = "";
+        for (int i = 0; i < sqls.length; ++i) {
+            sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);
+            cm = character;
+        }
+        return sb.toString();
+    }
 
     private static String replaceWhiteSpacedTableNames0(String sql) {
         if (WHITE_SPACED_TABLE_NAMES.size() == 0) {

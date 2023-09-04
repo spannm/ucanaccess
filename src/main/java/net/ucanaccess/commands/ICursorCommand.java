@@ -22,11 +22,11 @@ import java.util.Map;
 import com.healthmarketscience.jackcess.Cursor;
 
 public interface ICursorCommand extends ICommand {
-    public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) throws IOException;
+    boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) throws IOException;
 
-    public IndexSelector getIndexSelector();
+    IndexSelector getIndexSelector();
 
-    public Map<String, Object> getRowPattern();
+    Map<String, Object> getRowPattern();
 
-    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException;
+    IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException;
 }
