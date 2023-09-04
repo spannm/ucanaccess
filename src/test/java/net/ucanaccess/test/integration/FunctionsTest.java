@@ -306,9 +306,12 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testNow() throws Exception {
-        Calendar cl = Calendar.getInstance();
-        cl.set(Calendar.MILLISECOND, 0);
-        checkQuery("select  now() FROM t234", cl.getTime());
+        // ensure enough time left in the current second to avoid test failure
+        while (System.currentTimeMillis() % 1000 > 900) {
+            Thread.sleep(25L);
+        }
+        Date now = new Date(System.currentTimeMillis() / 1000 * 1000);
+        checkQuery("SELECT now() FROM t234", now);
     }
 
     @Test
