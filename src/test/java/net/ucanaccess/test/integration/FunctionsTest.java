@@ -30,7 +30,6 @@ import net.ucanaccess.test.util.AccessVersionAllTest;
 
 @RunWith(Parameterized.class)
 public class FunctionsTest extends AccessVersionAllTest {
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     public FunctionsTest(AccessVersion _accessVersion) {
         super(_accessVersion);
@@ -45,177 +44,181 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Before
     public void beforeTestCase() throws Exception {
         executeStatements(
-                "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY,text TEXT, date DATETIME, number NUMERIC ); ",
+                "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC);",
                 "INSERT INTO tblFormat (id) VALUES(1)");
     }
 
     @Test
     public void testASC() throws Exception {
-        checkQuery("select ASC('A') FROM t234", 65);
-        checkQuery("select ASC('1') FROM t234", 49);
-        checkQuery("select ASC('u') FROM t234", 117);
+        checkQuery("SELECT ASC('A') FROM t234", 65);
+        checkQuery("SELECT ASC('1') FROM t234", 49);
+        checkQuery("SELECT ASC('u') FROM t234", 117);
     }
 
     @Test
     public void testSwitch() throws Exception {
-        checkQuery("select switch('1'='1',1,false,2,true, 1 ) FROM t234");
+        checkQuery("SELECT switch('1'='1', 1, false, 2, true, 1) FROM t234");
     }
 
     @Test
     public void testATN() throws Exception {
-        checkQuery("select atn(3) FROM t234", 1.2490457723982544);
+        checkQuery("SELECT atn(3) FROM t234", 1.2490457723982544);
     }
 
     @Test
     public void testNz() throws Exception {
-        checkQuery("select nz(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t234",
+        checkQuery("SELECT nz(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t234",
                 "lampredotto", "turtelaz", 1.5, 2);
     }
 
     @Test
     public void testCBoolean() throws Exception {
-        checkQuery("select cbool(id), cbool(1=2), cbool('true'), cbool('false'), cbool(0), cbool(-3) FROM t234",
+        checkQuery("SELECT cbool(id), cbool(1=2), cbool('true'), cbool('false'), cbool(0), cbool(-3) FROM t234",
                 new Object[][] { { true, false, true, false, false, true } });
     }
 
     @Test
     public void testCVar() throws Exception {
-        checkQuery("select cvar(8),cvar(8.44) FROM t234", "8", "8.44");
+        checkQuery("SELECT cvar(8),cvar(8.44) FROM t234", "8", "8.44");
     }
 
     @Test
     public void testCstr() throws Exception {
-        checkQuery("select cstr(date0) FROM t234", "11/22/2003 10:42:58 PM");
-        checkQuery("select cstr(false) FROM t234", "false");
-        checkQuery("select cstr(8) FROM t234", "8");
-        checkQuery("select cstr(8.78787878) FROM t234", "8.78787878");
+        checkQuery("SELECT cstr(date0) FROM t234", "11/22/2003 10:42:58 PM");
+        checkQuery("SELECT cstr(false) FROM t234", "false");
+        checkQuery("SELECT cstr(8) FROM t234", "8");
+        checkQuery("SELECT cstr(8.78787878) FROM t234", "8.78787878");
     }
 
     @Test
     public void testCsign() throws Exception {
-        checkQuery("select csign(8.53453543) FROM t234", 8.534535);
+        checkQuery("SELECT csign(8.53453543) FROM t234", 8.534535);
     }
 
     @Test
     public void testCDate() throws Exception {
-        checkQuery("select  Cdate('Apr 6, 2003') FROM t234", SDF.parse("2003-04-06 00:00:00.0"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-        checkQuery("select  Cdate('1582-10-15') FROM t234", SDF.parse("1582-10-15 00:00:00.0"));
+        checkQuery("SELECT Cdate('Apr 6, 2003') FROM t234", sdf.parse("2003-04-06 00:00:00.0"));
+
+        checkQuery("SELECT Cdate('1582-10-15') FROM t234", sdf.parse("1582-10-15 00:00:00.0"));
     }
 
     @Test
     public void testCLong() throws Exception {
-        checkQuery("select  Clong(8.52), Clong(8.49 ),Clong(5.5) FROM t234  ", 9, 8, 6);
+        checkQuery("SELECT Clong(8.52), Clong(8.49), Clong(5.5) FROM t234", 9, 8, 6);
     }
 
     @Test
     public void testCLng() throws Exception {
-        checkQuery("select  Clng(8.52), Clng(8.49 ),Clng(5.5) FROM t234  ", 9, 8, 6);
+        checkQuery("SELECT Clng(8.52), Clng(8.49), Clng(5.5) FROM t234", 9, 8, 6);
     }
 
     @Test
     public void testCDec() throws Exception {
-        checkQuery("select cdec(8.45 * 0.005 * 0.01) FROM t234  ", 0.0004225);
+        checkQuery("SELECT cdec(8.45 * 0.005 * 0.01) FROM t234", 0.0004225);
     }
 
     @Test
     public void testCcur() throws Exception {
-        checkQuery("select  Ccur(123.4567812),  Ccur(123.4547812) FROM t234  ", 123.4568, 123.4548);
+        checkQuery("SELECT Ccur(123.4567812),  Ccur(123.4547812) FROM t234", 123.4568, 123.4548);
 
-        checkQuery("select ccur(0.552222211)*100 FROM t234  ", 55.22);
+        checkQuery("SELECT ccur(0.552222211)*100 FROM t234", 55.22);
     }
 
     @Test
     public void testCint() throws Exception {
-        checkQuery("select  Cint(8.51), Cint(4.5) FROM t234  ", 9, 4);
+        checkQuery("SELECT Cint(8.51), Cint(4.5) FROM t234", 9, 4);
     }
 
     @Test
     public void testChr() throws Exception {
-        checkQuery("select  CHR(65) FROM t234", "A");
+        checkQuery("SELECT CHR(65) FROM t234", "A");
     }
 
     @Test
     public void testCos() throws Exception {
-        checkQuery("select cos(1) FROM t234", 0.5403023058681398);
+        checkQuery("SELECT cos(1) FROM t234", 0.5403023058681398);
     }
 
     @Test
     public void testCurrentUser() throws Exception {
-        checkQuery("select CurrentUser() FROM t234", "ucanaccess");
+        checkQuery("SELECT CurrentUser() FROM t234", "ucanaccess");
     }
 
     @Test
     public void testDateAdd() throws Exception {
-        checkQuery("select dateAdd('YYYY',4 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2007-11-22 22:42:58"));
-        checkQuery("select dateAdd('Q',3 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2004-08-22 22:42:58"));
-        checkQuery("select dateAdd('Y',451 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2005-02-15 22:42:58"));
-        checkQuery("select dateAdd('D',451 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2005-02-15 22:42:58"));
-        checkQuery("select dateAdd('Y',45 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2004-01-06 22:42:58"));
-        checkQuery("select dateAdd('D',45 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2004-01-06 22:42:58"));
-        checkQuery("select dateAdd('Y',4 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-11-26 22:42:58"));
-        checkQuery("select dateAdd('D',4 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-11-26 22:42:58"));
-        checkQuery("select dateAdd('W',43 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2004-01-04 22:42:58"));
-        checkQuery("select dateAdd('W',1 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-11-23 22:42:58"));
-        checkQuery("select dateAdd('WW',43 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2004-09-18 22:42:58"));
-        checkQuery("select dateAdd('H',400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-12-09 14:42:58"));
-        checkQuery("select dateAdd('M',400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2037-03-22 22:42:58"));
-        checkQuery("select dateAdd('S',400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-11-22 22:49:38"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+        checkQuery("SELECT dateAdd('YYYY', 4, #11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2007-11-22 22:42:58"));
+        checkQuery("SELECT dateAdd('Q', 3 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2004-08-22 22:42:58"));
+        checkQuery("SELECT dateAdd('Y', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2005-02-15 22:42:58"));
+        checkQuery("SELECT dateAdd('D', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2005-02-15 22:42:58"));
+        checkQuery("SELECT dateAdd('Y', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2004-01-06 22:42:58"));
+        checkQuery("SELECT dateAdd('D', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2004-01-06 22:42:58"));
+        checkQuery("SELECT dateAdd('Y', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2003-11-26 22:42:58"));
+        checkQuery("SELECT dateAdd('D', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2003-11-26 22:42:58"));
+        checkQuery("SELECT dateAdd('W', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2004-01-04 22:42:58"));
+        checkQuery("SELECT dateAdd('W', 1 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2003-11-23 22:42:58"));
+        checkQuery("SELECT dateAdd('WW', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2004-09-18 22:42:58"));
+        checkQuery("SELECT dateAdd('H', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2003-12-09 14:42:58"));
+        checkQuery("SELECT dateAdd('M', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2037-03-22 22:42:58"));
+        checkQuery("SELECT dateAdd('S', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+                sdf.parse("2003-11-22 22:49:38"));
     }
 
     @Test
     public void testDate() throws Exception {
-        checkQuery("select date() FROM t234");
+        checkQuery("SELECT date() FROM t234");
     }
 
     @Test
     public void testDay() throws Exception {
-        checkQuery("select day(#11/22/2003 10:42:58 PM#) FROM t234", 22);
+        checkQuery("SELECT day(#11/22/2003 10:42:58 PM#) FROM t234", 22);
     }
 
     @Test
     public void testExp() throws Exception {
-        checkQuery("select exp(3.1),exp(0.4) FROM t234", 22.197951281441636, 1.4918246976412703);
+        checkQuery("SELECT exp(3.1),exp(0.4) FROM t234", 22.197951281441636, 1.4918246976412703);
     }
 
     @Test
     public void testHour() throws Exception {
-        checkQuery("select Hour(#10:42:58 pM#),Hour(#10:42:58 AM#),Hour(#11/22/2003 10:42:58 PM#) FROM t234", 22, 10,
+        checkQuery("SELECT Hour(#10:42:58 pM#),Hour(#10:42:58 AM#),Hour(#11/22/2003 10:42:58 PM#) FROM t234", 22, 10,
                 22);
     }
 
     @Test
     public void testIif() throws Exception {
         checkQuery(
-                "select  IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
+                "SELECT IIf(isNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
                 "pl'uto\" \" cccc", "pl'uto\" \" cccc");
 
-        checkQuery("select  IIf(true,false,true) FROM t234", false);
-        checkQuery("select  IIf('pippo'=null,'capra','d''una capra') FROM t234", "d'una capra");
+        checkQuery("SELECT IIf(true,false,true) FROM t234", false);
+        checkQuery("SELECT IIf('pippo'=null,'capra','d''una capra') FROM t234", "d'una capra");
     }
 
     @Test
     public void testInstr() throws Exception {
-        checkQuery("SELECT Instr ( 'Found on the Net', 'the') FROM t234", 10);
-        checkQuery("SELECT Instr ( 'Found on the Net', 'f') FROM t234", 1);
-        checkQuery("SELECT Instr ( 1,'Found on the Net', 'f') FROM t234", 1);
-        checkQuery("SELECT Instr ( 1,'Found on the Net', 'f',1) FROM t234", 1);
-        checkQuery("SELECT Instr ( 1,'Found on the Net', 't',0) FROM t234", 10);
-        checkQuery("SELECT Instr ( 31,'Found on the Net', 'f',0) FROM t234", 0);
+        checkQuery("SELECT Instr( 'Found on the Net', 'the') FROM t234", 10);
+        checkQuery("SELECT Instr( 'Found on the Net', 'f') FROM t234", 1);
+        checkQuery("SELECT Instr( 1,'Found on the Net', 'f') FROM t234", 1);
+        checkQuery("SELECT Instr( 1,'Found on the Net', 'f',1) FROM t234", 1);
+        checkQuery("SELECT Instr( 1,'Found on the Net', 't',0) FROM t234", 10);
+        checkQuery("SELECT Instr( 31,'Found on the Net', 'f',0) FROM t234", 0);
     }
 
     @Test
@@ -258,12 +261,12 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testIsNumber() throws Exception {
-        checkQuery("SELECT isNumeric(33)  FROM t234", true);
+        checkQuery("SELECT isNumeric(33) FROM t234", true);
         checkQuery("SELECT isNumeric('33') FROM t234", true);
         checkQuery("SELECT isNumeric('a') FROM t234", false);
-        checkQuery("SELECT isNumeric('33d')from t234", false);
-        checkQuery("SELECT isNumeric(id)  FROM t234", true);
-        checkQuery("SELECT isNumeric('4,5')  FROM t234", true);
+        checkQuery("SELECT isNumeric('33d') FROM t234", false);
+        checkQuery("SELECT isNumeric(id) FROM t234", true);
+        checkQuery("SELECT isNumeric('4,5') FROM t234", true);
     }
 
     @Test
@@ -319,7 +322,7 @@ public class FunctionsTest extends AccessVersionAllTest {
         Calendar cl = Calendar.getInstance();
         cl.set(Calendar.MILLISECOND, 0);
         cl.set(1899, 11, 30);
-        checkQuery("select  time() FROM t234", cl.getTime());
+        checkQuery("SELECT time() FROM t234", cl.getTime());
     }
 
     @Test
@@ -418,7 +421,9 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testDateSerial() throws Exception {
-        checkQuery("SELECT dateserial(1998,5, 10) FROM t234", SDF.parse("1998-05-10 00:00:00"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+        checkQuery("SELECT dateserial(1998,5, 10) FROM t234", sdf.parse("1998-05-10 00:00:00"));
         checkQuery("SELECT 'It works, I can''t believe it.' FROM t234 WHERE #05/13/1992#=dateserial(1992,05,13)",
                 "It works, I can't believe it.");
     }
@@ -457,32 +462,31 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testFormatDate() throws Exception {
-        checkQuery("SELECT format(date,'Short date') FROM tblFormat", "");
-        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Long date') FROM t234", "Friday, May 13, 1994");
+        checkQuery("SELECT format(date, 'Short date') FROM tblFormat", "");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#, 'Long date') FROM t234", "Friday, May 13, 1994");
 
-        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Short date') FROM t234", "5/13/1994");
-        checkQuery("SELECT format(#05/13/1994 10:42:58 AM#,'Long time') FROM t234", "10:42:58 AM");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#, 'Short date') FROM t234", "5/13/1994");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 AM#, 'Long time') FROM t234", "10:42:58 AM");
 
-        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Short time') FROM t234", "22:42");
-        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'General date') FROM t234", "5/13/1994 10:42:58 PM");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#, 'Short time') FROM t234", "22:42");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#, 'General date') FROM t234", "5/13/1994 10:42:58 PM");
 
-        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#,'Medium date') FROM t234", "13-May-94");
+        checkQuery("SELECT format(#05/13/1994 10:42:58 PM#, 'Medium date') FROM t234", "13-May-94");
 
-        checkQuery("SELECT format(#05/13/1994 10:42:18 PM#,'Medium time') FROM t234", "10:42 PM");
+        checkQuery("SELECT format(#05/13/1994 10:42:18 PM#, 'Medium time') FROM t234", "10:42 PM");
     }
 
     @Test
     public void testSign() throws Exception {
-        checkQuery("SELECT sign (0),sign(-20.4),sign(4)from t234", 0, -1, 1);
-
+        checkQuery("SELECT sign(0), sign(-20.4), sign(4) FROM t234", 0, -1, 1);
     }
 
     @Test
     public void testWeekDayName() throws Exception {
         checkQuery("SELECT weekDayName(3) FROM t234", "Tuesday");
         checkQuery("SELECT weekDayName(3,true) FROM t234", "Tue");
-        checkQuery("select  WeekdayName (3, TRUE, 2) FROM t234", "Wed");
-        dumpQueryResult("select  WeekdayName(Weekday(#2001-1-1#)) FROM t234");
+        checkQuery("SELECT WeekdayName (3, TRUE, 2) FROM t234", "Wed");
+        dumpQueryResult("SELECT WeekdayName(Weekday(#2001-1-1#)) FROM t234");
     }
 
     @Test
@@ -498,11 +502,13 @@ public class FunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testDateValue() throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
         checkQuery("SELECT dateValue(#11/22/2003 10:42:58 PM#) FROM t234",
-                SDF.parse("2003-11-22 00:00:00.0"));
+            sdf.parse("2003-11-22 00:00:00.0"));
         checkQuery("SELECT dateValue(#11/22/2003 21:42:58 AM#) FROM t234",
-                SDF.parse("2003-11-22 00:00:00.0"));
-        checkQuery("SELECT dateValue('6/30/2004') FROM t234", SDF.parse("2004-06-30 00:00:00.0"));
+            sdf.parse("2003-11-22 00:00:00.0"));
+        checkQuery("SELECT dateValue('6/30/2004') FROM t234", sdf.parse("2004-06-30 00:00:00.0"));
     }
 
     @Test
@@ -512,17 +518,17 @@ public class FunctionsTest extends AccessVersionAllTest {
         checkQuery("SELECT format(0.6,'percent') FROM t234", "60.00%");
         checkQuery("SELECT format('0,6','percent') FROM t234", "600.00%");
         // beware of bug http://bugs.java.com/view_bug.do?bug_id=7131459 !
-        checkQuery("SELECT format(48.14251,'.###') FROM t234", "48.143");
+        checkQuery("SELECT format(48.14251, '.###') FROM t234", "48.143");
     }
 
     @Test
     public void testInt() throws Exception {
-        checkQuery("SELECT int(1111112.5), int(-2.5)from t234", 1111112, -3);
+        checkQuery("SELECT int(1111112.5), int(-2.5) FROM t234", 1111112, -3);
     }
 
     @Test
     public void testRnd() throws Exception {
-        dumpQueryResult("SELECT rnd()from t234");
+        dumpQueryResult("SELECT rnd() FROM t234");
     }
 
     @Test
