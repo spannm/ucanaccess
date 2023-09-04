@@ -62,7 +62,7 @@
         <dep.hsqldb.version>2.5.0</dep.hsqldb.version>
         <dep.jackcess.version>3.0.1</dep.jackcess.version>
 
-        <dep.slf4j.version>2.0.7</dep.slf4j.version>
+        <dep.slf4j.version>2.0.9</dep.slf4j.version>
 
         <dep.junit.version>4.13.2</dep.junit.version>
         <dep.mockito.version>5.5.0</dep.mockito.version>
