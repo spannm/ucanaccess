@@ -251,7 +251,7 @@ public class LoadJet {
         private void dumpList(List<String> logs, boolean cr) {
             String comma = "";
             StringBuffer sb = new StringBuffer();
-            String crs = cr ? System.getProperty("line.separator") : "";
+            String crs = cr ? System.lineSeparator() : "";
             for (String log : logs) {
                 sb.append(comma).append(log).append(crs);
                 comma = ", ";

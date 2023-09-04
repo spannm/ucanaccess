@@ -37,7 +37,7 @@ import net.ucanaccess.test.util.AccessVersionAllTest;
 public class CsvDumpTest extends AccessVersionAllTest {
 
     // Support both Linux and Windows.
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private static final String FORMAT = "{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}";
 
