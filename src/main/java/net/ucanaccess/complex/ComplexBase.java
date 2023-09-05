@@ -88,7 +88,7 @@ public abstract class ComplexBase implements Serializable {
         return true;
     }
 
-    public static final Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {
+    public static Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {
         if (fk.getComplexType().equals(ComplexDataType.ATTACHMENT)) {
             List<com.healthmarketscience.jackcess.complex.Attachment> lst = fk.getAttachments();
             Attachment[] lat = new Attachment[lst.size()];

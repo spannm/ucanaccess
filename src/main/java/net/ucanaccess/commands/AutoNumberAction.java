@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AutoNumberAction implements IFeedbackAction {
-    private Map<String, Object> newAutoValues = new HashMap<>();
-    private Map<String, Object> oldAutoValues = new HashMap<>();
-    private Table                   table;
+    private final Map<String, Object> newAutoValues = new HashMap<>();
+    private final Map<String, Object> oldAutoValues = new HashMap<>();
+    private final Table               table;
 
     public AutoNumberAction(Table _table, Object[] memento, Object[] byAccess) throws SQLException {
         this.table = _table;
@@ -54,7 +54,7 @@ public class AutoNumberAction implements IFeedbackAction {
     }
 
     @Override
-    public void doAction(ICommand toChange) throws SQLException {
+    public void doAction(ICommand toChange) {
         if (!this.table.getName().equalsIgnoreCase(toChange.getTableName())) {
             return;
         }

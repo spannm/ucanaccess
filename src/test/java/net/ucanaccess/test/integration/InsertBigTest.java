@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,7 +24,7 @@ public class InsertBigTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testBig() throws SQLException, IOException {
+    public void testBig() throws SQLException {
         Statement st = null;
         st = ucanaccess.createStatement();
         int id = 6666554;

@@ -21,7 +21,10 @@ import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.UnsupportedValue;
 import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.*;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.HibernateSupport;
 import org.hsqldb.SessionInterface;
@@ -36,7 +39,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class Persist2Jet {
-    private static HashMap<String, List<String>> columnNamesCache = new HashMap<>();
+    private static Map<String, List<String>> columnNamesCache = new HashMap<>();
     static {
         DBReference.addOnReloadRefListener(() -> columnNamesCache.clear());
     }
@@ -54,7 +57,7 @@ public class Persist2Jet {
         return escapeIdentifiers(vl, t);
     }
 
-    public Object[] getValues(Map<String, Object> rowPattern, Table t) throws SQLException {
+    public Object[] getValues(Map<String, Object> rowPattern, Table t) {
         Object[] values = new Object[rowPattern.size()];
         int i = 0;
         for (Object obj : rowPattern.values()) {
@@ -70,7 +73,6 @@ public class Persist2Jet {
         Connection conq = conn.getHSQLDBConnection();
         String key = pref + ntn;
         if (!columnNamesCache.containsKey(key)) {
-            List<String> ar = new ArrayList<>();
             ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn, null);
             Map<Integer, String> tm = new TreeMap<>();
             while (rs.next()) {
@@ -79,7 +81,7 @@ public class Persist2Jet {
                 tm.put(i, cbase.toUpperCase());
 
             }
-            ar.addAll(tm.values());
+            List<String> ar = new ArrayList<>(tm.values());
             columnNamesCache.put(key, ar);
         }
         return columnNamesCache.get(key);
@@ -660,7 +662,7 @@ public class Persist2Jet {
 
             }
         }
-        ib.addColumns(asc, cols.toArray(new String[cols.size()])).addToTable(t);
+        ib.addColumns(asc, cols.toArray(new String[0])).addToTable(t);
     }
 
     public void createPrimaryKey(String tableName) throws IOException, SQLException {
@@ -679,7 +681,7 @@ public class Persist2Jet {
             colName = mt.getColumnName(ntn, colName);
             cols.add(colName);
         }
-        ib.addColumns(cols.toArray(new String[cols.size()])).addToTable(t);
+        ib.addColumns(cols.toArray(new String[0])).addToTable(t);
     }
 
     public void createForeignKey(String tableName, String referencedTable) throws IOException, SQLException {
@@ -760,7 +762,7 @@ public class Persist2Jet {
 
     }
 
-    public void dropForeignKey(String relationshipName) throws IOException, SQLException {
+    public void dropForeignKey(String relationshipName) throws IOException {
         relationshipName = escape4Access(relationshipName);
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();

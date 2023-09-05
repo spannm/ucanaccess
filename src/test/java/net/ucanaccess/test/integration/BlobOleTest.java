@@ -1,6 +1,5 @@
 package net.ucanaccess.test.integration;
 
-import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.After;
@@ -79,7 +78,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         checkQuery("SELECT * FROM T2", 1, "TestOleOk", outByte.toByteArray());
         ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE  descr=?");
         File fl1 = getFile(PPTX_FILE_NAME);
-        blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
+        blob = ucanaccess.createBlob(fl1);
         ps.setObject(1, fl1);
         ps.setString(2, "TestOleOk");
         ps.executeUpdate();
@@ -112,7 +111,7 @@ public class BlobOleTest extends AccessVersionAllTest {
     public void testBlobPackaged() throws SQLException, IOException {
         PreparedStatement ps = null;
         File fl1 = getFile(PPTX_FILE_NAME);
-        Blob blob = ((UcanaccessConnection) ucanaccess).createBlob(fl1);
+        Blob blob = ucanaccess.createBlob(fl1);
         ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
         ps.setString(1, "TestOle");
         ps.setBlob(2, blob);

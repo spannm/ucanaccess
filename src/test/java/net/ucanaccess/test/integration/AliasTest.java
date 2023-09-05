@@ -31,7 +31,7 @@ public class AliasTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testBig() throws SQLException, IOException {
+    public void testBig() throws SQLException {
         Statement st = ucanaccess.createStatement();
         int id = 6666554;
         st.execute("INSERT INTO Talias (id,descr)  VALUES( " + id + ",'t')");
@@ -44,7 +44,7 @@ public class AliasTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testAccent() throws SQLException, IOException {
+    public void testAccent() throws SQLException {
         Statement st = ucanaccess.createStatement();
         st.execute("INSERT INTO Talias (id,Actuación)  VALUES(1,'X')");
         ResultSet rs = st.executeQuery("select  [Actuación] as Actuació8_0_0_ from Talias ");

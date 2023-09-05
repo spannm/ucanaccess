@@ -17,7 +17,7 @@ import java.util.List;
 
 public final class IndexSelector {
 
-    private final class ColumnMatcher extends SimpleColumnMatcher {
+    private static final class ColumnMatcher extends SimpleColumnMatcher {
         @Override
         public boolean matches(Table _table, String _columnName, Object _currVal, Object _dbVal) {
 
@@ -69,9 +69,7 @@ public final class IndexSelector {
 
             if (_currVal instanceof ComplexBase[] && _dbVal instanceof ComplexValueForeignKey) {
                 try {
-                    boolean eq =
-                            Arrays.equals((ComplexBase[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal));
-                    return eq;
+                    return Arrays.equals((ComplexBase[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

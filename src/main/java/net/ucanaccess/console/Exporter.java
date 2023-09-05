@@ -128,7 +128,7 @@ public final class Exporter {
      * Prints the Google BigQuery schema of the table given by {@code rs} in JSON format to the {@code out} stream. See
      * https://cloud.google.com/bigquery/bq-command-line-tool for a description of the JSON schema format.
      */
-    public void dumpSchema(ResultSet rs, PrintStream out) throws SQLException, IOException {
+    public void dumpSchema(ResultSet rs, PrintStream out) throws SQLException {
         ResultSetMetaData meta = rs.getMetaData();
         int cols = meta.getColumnCount();
         out.println("[");
@@ -139,7 +139,7 @@ public final class Exporter {
             int nullable = meta.isNullable(i);
 
             out.print(toSchemaRow(name, sqlType, nullable));
-            out.printf((i != cols) ? ",%n" : "%n");
+            out.printf(i != cols ? ",%n" : "%n");
         }
         out.println("]");
     }

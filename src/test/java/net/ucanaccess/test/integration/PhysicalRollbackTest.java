@@ -39,9 +39,9 @@ public class PhysicalRollbackTest extends AccessVersionDefaultTest {
     public void testCommit() throws Exception {
         ucanaccess.setAutoCommit(false);
 
-        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] {boolean.class});
+        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
         mth.setAccessible(true);
-        mth.invoke(ucanaccess, new Object[] {Boolean.TRUE});
+        mth.invoke(ucanaccess, Boolean.TRUE);
         Statement st = ucanaccess.createStatement();
         st.execute("INSERT INTO T4 (id,descr) VALUES( 6666554,  'nel mezzo del cammin di nostra vita')");
         st.execute("INSERT INTO T4 (id,descr) VALUES( 77666554, 'nel mezzo del cammin di nostra vita')");
@@ -62,7 +62,7 @@ public class PhysicalRollbackTest extends AccessVersionDefaultTest {
         ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM T4");
 
-        assertTrue(getCount("SELECT COUNT(*) FROM T4", true) == 0);
+        assertEquals(0, getCount("SELECT COUNT(*) FROM T4", true));
     }
 
 }

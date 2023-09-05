@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class AlterRenameCommand implements ICommand {
-    private String execId;
-    private String oldTableName;
-    private String newTableName;
+    private final String execId;
+    private final String oldTableName;
+    private final String newTableName;
 
     public AlterRenameCommand(String _oldTableName, String _newTableName, String _execId) {
         this.oldTableName = _oldTableName;
@@ -44,7 +44,7 @@ public class AlterRenameCommand implements ICommand {
     }
 
     @Override
-    public IFeedbackAction rollback() throws SQLException {
+    public IFeedbackAction rollback() {
         return null;
     }
 

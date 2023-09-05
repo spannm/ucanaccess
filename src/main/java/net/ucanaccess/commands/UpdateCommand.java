@@ -162,7 +162,7 @@ public class UpdateCommand extends AbstractCursorCommand {
         return urev.persist();
     }
 
-    private void persist(Cursor cur) throws IOException, SQLException {
+    private void persist(Cursor cur) throws IOException {
         Object[] mr = this.modifiedRow;
         if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
             Object[] newRowReorded = new Object[this.modifiedRow.length];

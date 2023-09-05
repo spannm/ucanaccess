@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
@@ -25,8 +24,8 @@ public class Size97Test extends AccessVersion2010Test {
 
     @Test
     public void testSize() throws Exception {
-        Connection conn = getUcanaccessConnection();
-        assertEquals("V1997", ((UcanaccessConnection) conn).getDbIO().getFileFormat().name());
+        UcanaccessConnection conn = getUcanaccessConnection();
+        assertEquals("V1997", conn.getDbIO().getFileFormat().name());
         DatabaseMetaData dbmd = conn.getMetaData();
         ResultSet rs = dbmd.getColumns(null, null, "table1", "field1");
         rs.next();

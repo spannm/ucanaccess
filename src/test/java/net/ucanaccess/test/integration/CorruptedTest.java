@@ -49,6 +49,6 @@ public class CorruptedTest extends AccessVersion2007Test {
                 + "WARNING:Detected Foreign Key constraint breach, table NotNull, record Row[140:3][{ID=4,notnull=t,vvv=t,fk1=2}]: making the table NotNull read-only"
                 + System.lineSeparator()
                 + "WARNING:Detected Unique constraint breach, table UK, record Row[181:1][{ID=2,uk=1}]: making the table UK read-only";
-        assertEquals(new String(err), new String(ERR_CONTENT.toByteArray()).trim());
+        assertEquals(err, ERR_CONTENT.toString().trim());
     }
 }

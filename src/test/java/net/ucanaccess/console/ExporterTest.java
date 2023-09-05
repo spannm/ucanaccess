@@ -47,7 +47,7 @@ public class ExporterTest extends AbstractTestBase {
     }
 
     @Test
-    public void testToSchemaRow() throws Exception {
+    public void testToSchemaRow() {
         assertEquals("{\"name\": \"MyName\", \"type\": \"int64\", \"mode\": \"nullable\"}",
                 Exporter.toSchemaRow("MyName", Types.INTEGER, ResultSetMetaData.columnNullable));
     }

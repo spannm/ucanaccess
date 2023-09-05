@@ -26,6 +26,7 @@ public final class RegionalSettings {
         for (String pattern : dfsp) {
             if (pattern.indexOf(".") > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
                 pointDateSeparator = true;
+                break;
             }
         }
 

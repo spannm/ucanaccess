@@ -255,7 +255,7 @@ public class Main {
 
             // If the current userInput ends with ';', then execute the buffered command.
             if (userInput.endsWith(";")) {
-                String cmd = sb.toString().substring(0, sb.length() - 1).trim();
+                String cmd = sb.substring(0, sb.length() - 1).trim();
                 try {
                     if (cmd.toLowerCase().startsWith("export ")) {
                         executeExport(cmd);
@@ -287,7 +287,7 @@ public class Main {
      * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The
      * {@code -t License} option dumps the {@code License} table using the SQL statement "select * from [License]".
      */
-    private void executeExport(String cmd) throws SQLException, FileNotFoundException, IOException {
+    private void executeExport(String cmd) throws SQLException, IOException {
         List<String> tokens = tokenize(cmd);
 
         Exporter.Builder exporterBuilder = new Exporter.Builder();
@@ -443,14 +443,14 @@ public class Main {
      * @author Markus Spann
      */
     static class TableFormat {
-        static final List<Integer> NUMERIC_JDBC_TYPES =
-                Arrays.asList(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
-                        Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
-        private int              maxColWidth = 50;
+        static final List<Integer>       NUMERIC_JDBC_TYPES =
+            List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
+                Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
+        private int                      maxColWidth        = 50;
         private final List<String>       colNames;
         private final List<Integer>      colWidths;
         private final List<Integer>      colTypes;
-        private final List<List<String>> records     = new ArrayList<>();
+        private final List<List<String>> records            = new ArrayList<>();
 
         TableFormat(ResultSet _resultSet) throws SQLException {
             this(_resultSet, -1);

@@ -8,13 +8,13 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public class AddColumnCommand implements ICommand {
-    private String              execId;
-    private String              tableName;
-    private String[]            types;
-    private String[]            defaults;
-    private Boolean[]           notNulls;
-    private Map<String, String> columnMap;
-    private String              columnName;
+    private final String              execId;
+    private final String              tableName;
+    private final String[]            types;
+    private final String[]            defaults;
+    private final Boolean[]           notNulls;
+    private final Map<String, String> columnMap;
+    private final String              columnName;
 
     public AddColumnCommand(String _tableName, String _columnName, String _execId, Map<String, String> _columnMap,
             String[] _types, String[] _defaults, Boolean[] _notNulls) {
@@ -54,7 +54,7 @@ public class AddColumnCommand implements ICommand {
     }
 
     @Override
-    public IFeedbackAction rollback() throws SQLException {
+    public IFeedbackAction rollback() {
         return null;
     }
 

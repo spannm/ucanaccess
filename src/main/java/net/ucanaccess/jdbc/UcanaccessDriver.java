@@ -33,7 +33,7 @@ public final class UcanaccessDriver implements Driver {
     }
 
     @Override
-    public boolean acceptsURL(String url) throws SQLException {
+    public boolean acceptsURL(String url) {
         return (url.startsWith(URL_PREFIX) && url.length() > URL_PREFIX.length());
     }
 
@@ -214,7 +214,7 @@ public final class UcanaccessDriver implements Driver {
                 return i;
             }
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
         Logger.logWarning(Logger.Messages.LOBSCALE);
@@ -249,7 +249,7 @@ public final class UcanaccessDriver implements Driver {
     }
 
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties arg1) throws SQLException {
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties arg1) {
         return new DriverPropertyInfo[0];
     }
 
@@ -283,7 +283,7 @@ public final class UcanaccessDriver implements Driver {
             String entry = st.nextToken();
             int sep = entry.indexOf("=");
             if (sep > 0 && entry.length() > sep) {
-                pr.put(entry.substring(0, sep).toLowerCase(), entry.substring(sep + 1, entry.length()));
+                pr.put(entry.substring(0, sep).toLowerCase(), entry.substring(sep + 1));
             }
         }
     }

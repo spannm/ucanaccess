@@ -9,7 +9,6 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Locale;
 
 @RunWith(Parameterized.class)
@@ -26,7 +25,7 @@ public class FloatTest extends AccessVersion2007Test {
     }
 
     @Test
-    public void testCreate() throws SQLException, IOException, ParseException {
+    public void testCreate() throws SQLException, IOException {
         checkQuery("SELECT  [row] FROM t order by pk");
         PreparedStatement ps = ucanaccess.prepareStatement("insert into t (row) values(?)");
         ps.setFloat(1, 1.4f);

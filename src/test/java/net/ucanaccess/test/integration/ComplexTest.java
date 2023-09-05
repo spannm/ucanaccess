@@ -11,12 +11,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.time.LocalDateTime;
 
 @RunWith(Parameterized.class)
@@ -38,7 +36,7 @@ public class ComplexTest extends AccessVersion2010Test {
         complex1();
     }
 
-    private void complex0() throws SQLException, IOException, ParseException {
+    private void complex0() throws SQLException {
         PreparedStatement ps = null;
         ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM TABLE1 WHERE contains([MULTI-VALUE-DATA],?)");
         ps.setObject(1, SingleValue.multipleValue("value1", "value2"));
@@ -116,17 +114,17 @@ public class ComplexTest extends AccessVersion2010Test {
     }
 
     @Test
-    public void testComplexRollback() throws SQLException, IOException, ParseException, SecurityException,
-        NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void testComplexRollback() throws SQLException, IOException, SecurityException,
+            IllegalArgumentException {
         PreparedStatement ps = null;
         int i = getCount("SELECT COUNT(*) FROM TABLE1", true);
         try {
 
             ucanaccess.setAutoCommit(false);
 
-            Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] {boolean.class});
+            Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
             mth.setAccessible(true);
-            mth.invoke(ucanaccess, new Object[] {Boolean.TRUE});
+            mth.invoke(ucanaccess, Boolean.TRUE);
             ps = ucanaccess.prepareStatement(
                 "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
                     + "VALUES (?,?,?,?,?)");

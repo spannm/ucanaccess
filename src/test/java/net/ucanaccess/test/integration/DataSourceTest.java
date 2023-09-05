@@ -57,7 +57,7 @@ public class DataSourceTest extends AbstractTestBase {
 
         Boolean irrEffective = uds.getImmediatelyReleaseResources();
         // Note that a property is returned as null if we haven't explicitly set it in the DataSource
-        irrEffective = (irrEffective == null ? false : irrEffective);
+        irrEffective = (irrEffective != null && irrEffective);
         if (irrEffective) {
             assertTrue(fileMdb.delete());
             assertFalse(fileMdb.exists());

@@ -87,7 +87,7 @@ public class DBReference {
                                     && getActiveConnection() == 0) {
                                     try {
                                         dbReference.shutdown(_session);
-                                    } catch (Exception e) {}
+                                    } catch (Exception ignored) {}
                                     System.gc();
                                 }
                             }
@@ -123,7 +123,7 @@ public class DBReference {
     }
 
     public DBReference(File fl, FileFormat ff, JackcessOpenerInterface _jko, final String _pwd)
-        throws IOException, SQLException {
+        throws IOException {
         this.dbFile = fl;
         this.pwd = _pwd;
         this.jko = _jko;
@@ -336,7 +336,7 @@ public class DBReference {
             try (Connection conn = this.getHSQLDBConnection(session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 this.hsqldbShutdown = true;
-            } catch (Exception w) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -349,16 +349,16 @@ public class DBReference {
         return dbIO;
     }
 
-    private void setIgnoreCase(Connection conn) throws SQLException {
+    private void setIgnoreCase(Connection conn) {
         try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 
-        } catch (Exception w) {
+        } catch (Exception ignored) {
 
         }
     }
 
-    private void initHSQLDB(Connection conn) throws SQLException {
+    private void initHSQLDB(Connection conn) {
         try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute("SET DATABASE SQL CONCAT NULLS " + this.concatNulls);
@@ -446,7 +446,7 @@ public class DBReference {
                     this.tempHsql = this.toKeepHsql;
                 } else {
                     File folder = this.mirrorFolder == null ? dbFile.getParentFile() : this.mirrorFolder;
-                    File hbase = new File(folder, "Ucanaccess_" + toString());
+                    File hbase = new File(folder, "Ucanaccess_" + this);
                     hbase.mkdir();
                     this.tempHsql = new File(hbase, this.id);
 
@@ -505,12 +505,10 @@ public class DBReference {
         if (suffixStart < 0) {
             suffixStart = fileName.length();
         }
-        String suffix = this.dbFormat != null
-            && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
+        String suffix = (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
                 ? ".laccdb"
                 : ".ldb";
-        File flLock = new File(folder, fileName.substring(0, suffixStart) + suffix);
-        return flLock;
+        return new File(folder, fileName.substring(0, suffixStart) + suffix);
     }
 
     private void lockMdbFile() throws UcanaccessSQLException {

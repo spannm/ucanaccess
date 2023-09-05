@@ -35,7 +35,7 @@ public class DisableAutoIncrementTest extends AccessVersionDefaultTest {
     }
 
     @Test
-    public void testDisable() throws SQLException, IOException {
+    public void testDisable() throws SQLException {
         Statement st = null;
         boolean exc = false;
         st = ucanaccess.createStatement();

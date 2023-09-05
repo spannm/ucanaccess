@@ -69,7 +69,7 @@ public class UcanaccessSQLException extends SQLException {
             _cause);
     }
 
-    public static final String explainCause(Throwable _cause) {
+    public static String explainCause(Throwable _cause) {
         if (_cause instanceof SQLException) {
             SQLException se = (SQLException) _cause;
             if (se.getErrorCode() == -ErrorCode.X_42562) {

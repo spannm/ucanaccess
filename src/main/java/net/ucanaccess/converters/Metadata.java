@@ -92,7 +92,7 @@ public class Metadata {
         TABLE
     }
 
-    public Metadata(Connection _conn) throws SQLException {
+    public Metadata(Connection _conn) {
         this.conn = _conn;
 
     }
@@ -139,7 +139,7 @@ public class Metadata {
         }
     }
 
-    public void newColumn(String name, String escaped, String originalType, Integer idTable) throws SQLException {
+    public void newColumn(String name, String escaped, String originalType, Integer idTable) {
         if (idTable < 0) {
             return;
         }
@@ -149,7 +149,7 @@ public class Metadata {
             ps.setString(3, originalType);
             ps.setInt(4, idTable);
             ps.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
 
         }
     }

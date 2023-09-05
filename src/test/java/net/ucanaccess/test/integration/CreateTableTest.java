@@ -66,7 +66,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         }
     }
 
-    private void createPs() throws SQLException, IOException {
+    private void createPs() {
         try (PreparedStatement ps = ucanaccess.prepareStatement(" CREATE \nTABLE BBB ( baaaa \nvarchar(2) PRIMARY KEY)")) {
             ps.execute(" CREATE TABLE BBB ( baaaa text PRIMARY KEY,b text)");
             throw new RuntimeException("To block DDL with PreparedStatement");

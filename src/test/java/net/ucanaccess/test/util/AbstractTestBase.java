@@ -58,7 +58,7 @@ public abstract class AbstractTestBase extends Assert {
     }
 
     public static void assertNotEmpty(String _string) {
-        Assert.assertTrue("String is empty.", !(_string == null || _string.length() == 0));
+        Assert.assertFalse("String is empty.", _string == null || _string.length() == 0);
     }
 
     public static void assertContains(String _string, String _contains) {

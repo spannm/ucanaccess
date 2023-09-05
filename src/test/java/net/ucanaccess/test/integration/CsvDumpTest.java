@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -75,7 +76,7 @@ public class CsvDumpTest extends AccessVersionAllTest {
             }
         }
 
-        String actual = baos.toString("UTF-8");
+        String actual = baos.toString(StandardCharsets.UTF_8);
         assertEquals("id;text_field;text_field2;memo_field;byte_field;boolean_field;double_field;"
                 + "currency_field;date_field" + LINE_SEPARATOR + "1;\"embedded delimiter(;)\";"
                 + "\"double-quote(\"\")\";embedded newline( );2;true;9.12345;3.1235;" + "2017-01-01 00:00:00"
@@ -91,7 +92,7 @@ public class CsvDumpTest extends AccessVersionAllTest {
             Exporter exporter = new Exporter.Builder().setDelimiter(";").build();
             exporter.dumpSchema(rs, ps);
         }
-        String actual = baos.toString("UTF-8");
+        String actual = baos.toString(StandardCharsets.UTF_8);
         assertEquals(EXPECTED_SCHEMA, actual);
     }
 }

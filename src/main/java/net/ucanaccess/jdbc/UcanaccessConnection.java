@@ -10,7 +10,6 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.Logger;
-import org.hsqldb.jdbc.JDBCConnection;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,7 +135,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
+    public void clearWarnings() {
         this.warnings = null;
     }
 
@@ -232,34 +231,22 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        try {
-            checkConnection();
-            return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
-        }
+        checkConnection();
+        return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        try {
-            checkConnection();
-            return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
-        }
+        checkConnection();
+        return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        try {
-            checkConnection();
-            return new UcanaccessStatement(
-                    hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
-        }
+        checkConnection();
+        return new UcanaccessStatement(
+                hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
     }
 
     @Override
@@ -338,7 +325,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public boolean getAutoCommit() throws SQLException {
+    public boolean getAutoCommit() {
         return this.autoCommit;
     }
 
@@ -352,12 +339,12 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public Properties getClientInfo() throws SQLException {
+    public Properties getClientInfo() {
         return this.clientInfo;
     }
 
     @Override
-    public String getClientInfo(String name) throws SQLException {
+    public String getClientInfo(String name) {
         return this.clientInfo.getProperty(name);
     }
 
@@ -406,7 +393,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
+    public SQLWarning getWarnings() {
         return this.warnings;
     }
 
@@ -459,7 +446,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public String nativeSQL(String sql) throws SQLException {
+    public String nativeSQL(String sql) {
         return SQLConverter.convertSQL(sql).getSql();
     }
 
@@ -536,7 +523,6 @@ public class UcanaccessConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
             throws SQLException {
-        String oldSql = sql;
         try {
             if (SQLConverter.checkDDL(sql)) {
                 Logger.log(Logger.Messages.STATEMENT_DDL);
@@ -549,7 +535,7 @@ public class UcanaccessConnection implements Connection {
         } catch (SQLException _ex) {
             if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE
                     && resultSetConcurrency == ResultSet.CONCUR_UPDATABLE) {
-                return prepareStatement(oldSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             }
             throw new UcanaccessSQLException(_ex);
         }
@@ -785,11 +771,11 @@ public class UcanaccessConnection implements Connection {
         return this.ref.isShowSchema();
     }
 
-    public void setSchema(String schema) throws SQLException {
+    public void setSchema(String schema) {
 
     }
 
-    public String getSchema() throws SQLException {
+    public String getSchema() {
         return "";
     }
 
@@ -806,16 +792,16 @@ public class UcanaccessConnection implements Connection {
 
     public void abort(Executor executor) throws SQLException {
         try {
-            ((JDBCConnection) hsqlDBConnection).abort(executor);
+            hsqlDBConnection.abort(executor);
         } catch (Exception e) {
             throw new UcanaccessSQLException(e);
         }
     }
 
-    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+    public void setNetworkTimeout(Executor executor, int milliseconds) {
     }
 
-    public int getNetworkTimeout() throws SQLException {
+    public int getNetworkTimeout() {
         return 0;
     }
 

@@ -11,17 +11,14 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class BlobAction implements IFeedbackAction {
-    private Table            table;
-    private boolean          containsBlob;
-    private HashSet<BlobKey> keys = new HashSet<>();
+    private final Table        table;
+    private boolean            containsBlob;
+    private final Set<BlobKey> keys = new HashSet<>();
 
-    public BlobAction(Table _table, Object[] newValues) throws SQLException {
+    public BlobAction(Table _table, Object[] newValues) {
         this.table = _table;
 
         if (!BlobKey.hasPrimaryKey(_table)) {
@@ -34,7 +31,7 @@ public class BlobAction implements IFeedbackAction {
         }
         HashSet<String> hsBlob = new HashSet<>();
         int i = 0;
-        HashMap<String, Object> keyMap = new HashMap<>();
+        Map<String, Object> keyMap = new HashMap<>();
         for (Column cl : _table.getColumns()) {
             if (cl.getType().equals(DataType.OLE) && newValues[i] != null) {
                 containsBlob = true;
@@ -62,7 +59,7 @@ public class BlobAction implements IFeedbackAction {
                         + SQLConverter.escapeIdentifier(bkey.getColumnName(), connHsqldb) + "=? WHERE ";
                 StringBuilder sb = new StringBuilder();
                 String and = "";
-                ArrayList<Object> values = new ArrayList<>();
+                List<Object> values = new ArrayList<>();
                 for (Map.Entry<String, Object> me : bkey.getKey().entrySet()) {
                     sb.append(and).append(SQLConverter.escapeIdentifier(me.getKey(), connHsqldb)).append(" = ?");
                     values.add(me.getValue());

@@ -1,7 +1,6 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
-import org.hsqldb.jdbc.JDBCResultSet;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -241,7 +240,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Blob blb = wrapped.getBlob(idx);
             if (blb != null) {
-                blb = new UcanaccessBlob(blb, (UcanaccessConnection) wrappedStatement.getConnection());
+                blb = new UcanaccessBlob(blb, wrappedStatement.getConnection());
             }
             return blb;
         } catch (SQLException e) {
@@ -254,7 +253,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Blob blb = wrapped.getBlob(checkEscaped(columnLabel));
             if (blb != null) {
-                blb = new UcanaccessBlob(blb, (UcanaccessConnection) wrappedStatement.getConnection());
+                blb = new UcanaccessBlob(blb, wrappedStatement.getConnection());
             }
             return blb;
         } catch (SQLException e) {
@@ -575,7 +574,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(idx);
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
+                return new UcanaccessBlob((Blob) obj, wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
@@ -585,7 +584,7 @@ public class UcanaccessResultSet implements ResultSet {
 
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         try {
-            return ((JDBCResultSet) wrapped).getObject(columnIndex, type);
+            return wrapped.getObject(columnIndex, type);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -596,7 +595,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(idx, arg1);
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
+                return new UcanaccessBlob((Blob) obj, wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
@@ -609,7 +608,7 @@ public class UcanaccessResultSet implements ResultSet {
         try {
             Object obj = wrapped.getObject(checkEscaped(columnLabel));
             if (obj instanceof Blob) {
-                return new UcanaccessBlob((Blob) obj, (UcanaccessConnection) wrappedStatement.getConnection());
+                return new UcanaccessBlob((Blob) obj, wrappedStatement.getConnection());
             }
             return obj;
         } catch (SQLException e) {
@@ -619,7 +618,7 @@ public class UcanaccessResultSet implements ResultSet {
 
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         try {
-            return ((JDBCResultSet) wrapped).getObject(checkEscaped(columnLabel), type);
+            return wrapped.getObject(checkEscaped(columnLabel), type);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -921,7 +920,7 @@ public class UcanaccessResultSet implements ResultSet {
             }
             this.updIndexes.clear();
 
-            ((UcanaccessConnection) this.wrappedStatement.getConnection()).setCurrentStatement(this.wrappedStatement);
+            this.wrappedStatement.getConnection().setCurrentStatement(this.wrappedStatement);
             new InsertResultSet(this).execute();
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);

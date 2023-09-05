@@ -127,7 +127,7 @@ public class LoadJet {
             }
         }
 
-        private void resetDefault() throws SQLException {
+        private void resetDefault() {
             Class<?> clazz = Functions.class;
             Method[] mths = clazz.getDeclaredMethods();
             for (Method mth : mths) {
@@ -147,7 +147,7 @@ public class LoadJet {
 
         }
 
-        private void createFunctions() throws SQLException {
+        private void createFunctions() {
             for (String functionDef : functionsDefinition) {
 
                 try {
@@ -161,7 +161,7 @@ public class LoadJet {
             functionsDefinition.clear();
         }
 
-        private void createSwitch() throws SQLException {
+        private void createSwitch() {
             DataType[] dtypes = new DataType[] {
                 DataType.BINARY, DataType.BOOLEAN, DataType.SHORT_DATE_TIME,
                 DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.MONEY, DataType.NUMERIC,
@@ -193,11 +193,9 @@ public class LoadJet {
         }
 
         private String getAggregate(String type, String fun) {
-            String createLast =
-                    "CREATE AGGREGATE FUNCTION " + fun + "(IN val " + type + ", IN flag BOOLEAN, INOUT register  "
-                            + type + ", INOUT counter INT) " + "  RETURNS  " + type + "  NO SQL  LANGUAGE JAVA "
-                            + "  EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + fun + "'";
-            return createLast;
+            return "CREATE AGGREGATE FUNCTION " + fun + "(IN val " + type + ", IN flag BOOLEAN, INOUT register  "
+                    + type + ", INOUT counter INT) " + "  RETURNS  " + type + "  NO SQL  LANGUAGE JAVA "
+                    + "  EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + fun + "'";
         }
 
         private void loadMappedFunctions() throws SQLException {
@@ -207,7 +205,7 @@ public class LoadJet {
         }
     }
 
-    private final class LogsFlusher {
+    private static final class LogsFlusher {
         private void dumpList(List<String> logs) {
             dumpList(logs, false);
         }
@@ -320,7 +318,8 @@ public class LoadJet {
             }
             String call = fun == null ? "%s" : fun + "(%s,'" + dt.name() + "')";
             String ecl = procedureEscapingIdentifier(cl.getName()).replace("%", "%%");
-            String trg = isCreate
+
+            return isCreate
                     ? "CREATE TRIGGER expr%d before insert ON " + ntn + " REFERENCING NEW  AS newrow  FOR EACH ROW "
                             + " BEGIN  ATOMIC " + " SET newrow." + ecl + " = " + call + "; END "
                     : "CREATE TRIGGER expr%d before update ON " + ntn
@@ -329,8 +328,6 @@ public class LoadJet {
                             + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
                             + Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name()) + cl.getName().replace("%", "%%")
                             + "'" + ";  END IF ; END ";
-
-            return trg;
         }
 
         private boolean isNumeric(DataType dt) {
@@ -488,11 +485,11 @@ public class LoadJet {
             }
         }
 
-        private String defaultValue4SQL(Object defaulT, DataType dt) throws SQLException, IOException {
+        private String defaultValue4SQL(Object defaulT, DataType dt) {
             if (defaulT == null) {
                 return null;
             }
-            String default4SQL = SQLConverter.convertSQL(" " + defaulT.toString()).getSql();
+            String default4SQL = SQLConverter.convertSQL(" " + defaulT).getSql();
             if (default4SQL.trim().startsWith("=")) {
                 default4SQL = default4SQL.trim().substring(1);
             }
@@ -582,13 +579,12 @@ public class LoadJet {
             return i;
         }
 
-        private boolean reorder() throws IOException, SQLException {
+        private boolean reorder() throws IOException {
             int maxIteration = countFKs() + 1;
 
             for (int i = 0; i < maxIteration; i++) {
                 boolean change = false;
-                List<String> loadingOrder0 = new ArrayList<>();
-                loadingOrder0.addAll(this.loadingOrder);
+                List<String> loadingOrder0 = new ArrayList<>(this.loadingOrder);
                 for (String tn : loadingOrder0) {
                     UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn), tn);
                     if (!this.unresolvedTables.contains(tn)) {
@@ -667,7 +663,7 @@ public class LoadJet {
                     + " Columns:" + commaSeparated(idx.getReferencedIndex().getColumns(), false));
         }
 
-        private void loadIndex(Index idx, String tn) throws IOException, SQLException {
+        private void loadIndex(Index idx, String tn) throws SQLException {
             String ntn = escapeIdentifier(tn);
             if (ntn == null) {
                 return;
@@ -1058,7 +1054,7 @@ public class LoadJet {
         }
 
         private PreparedStatement sqlInsert(Table t, Map<String, Object> row, boolean systemTable)
-                throws IOException, SQLException {
+                throws SQLException {
             String tn = t.getName();
             String ntn = schema(escapeIdentifier(tn), systemTable);
             String comma = "";
@@ -1086,8 +1082,7 @@ public class LoadJet {
                 if (value.equals(Float.NaN)) {
                     return value;
                 }
-                BigDecimal bd = new BigDecimal(value.toString());
-                return bd;
+                return new BigDecimal(value.toString());
             }
             if (value instanceof Date && !(value instanceof Timestamp)) {
                 return LocalDateTime.ofInstant(((Date) value).toInstant(), ZoneId.of("UTC"));
@@ -1321,7 +1316,7 @@ public class LoadJet {
             }
         }
 
-        private void loadViews() throws SQLException, IOException {
+        private void loadViews() throws SQLException {
             List<Query> lq = null;
             List<Query> procedures = new ArrayList<>();
             try {
@@ -1555,7 +1550,7 @@ public class LoadJet {
         this.triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
     }
 
-    public Object tryDefault(Object defaulT) throws SQLException {
+    public Object tryDefault(Object defaulT) {
         try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT " + defaulT + " FROM   DUAL ");
             if (rs.next()) {

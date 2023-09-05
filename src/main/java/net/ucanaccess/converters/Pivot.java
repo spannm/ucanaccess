@@ -94,8 +94,7 @@ public class Pivot {
                     String escqn = SQLConverter.completeEscaping(name, false);
 
                     st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
-                    StringBuilder sb = new StringBuilder("CREATE VIEW ").append(escqn).append(" AS ").append(sqlh);
-                    NormalizedSQL nsql = SQLConverter.convertSQL(sb.toString(), true);
+                    NormalizedSQL nsql = SQLConverter.convertSQL("CREATE VIEW " + escqn + " AS " + sqlh, true);
                     Metadata mt = new Metadata(conh);
                     String eqn = SQLConverter.preEscapingIdentifier(name);
                     Integer idTable = mt.getTableId(eqn);
@@ -114,7 +113,7 @@ public class Pivot {
                     if (st != null) {
                         try {
                             st.close();
-                        } catch (SQLException e) {
+                        } catch (SQLException ignored) {
                         }
                     }
                 }

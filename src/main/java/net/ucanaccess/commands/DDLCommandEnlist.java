@@ -274,9 +274,9 @@ public class DDLCommandEnlist {
             defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
         }
 
-        this.types = typeList.toArray(new String[typeList.size()]);
-        this.defaults = defaultList.toArray(new String[defaultList.size()]);
-        this.notNulls = notNullList.toArray(new Boolean[notNullList.size()]);
+        this.types = typeList.toArray(new String[0]);
+        this.defaults = defaultList.toArray(new String[0]);
+        this.notNulls = notNullList.toArray(new Boolean[0]);
     }
 
     // getting AUTOINCREMENT and GUID

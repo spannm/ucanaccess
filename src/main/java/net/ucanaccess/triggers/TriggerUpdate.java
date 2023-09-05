@@ -60,7 +60,7 @@ public class TriggerUpdate extends TriggerBase {
                         .getHSQLDBConnection();
                 SessionInterface si = hsqlConn.getSession();
                 long length = bd.length(si);
-                byte[] bt = (byte[]) ((BlobData) value).getBytes(si, 0, (int) length);
+                byte[] bt = ((BlobData) value).getBytes(si, 0, (int) length);
                 if (bt.length == 0) {
                     values[i] = bt;
                 } else {

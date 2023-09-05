@@ -11,11 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
 import java.util.Locale;
 
 @RunWith(Parameterized.class)
@@ -32,7 +30,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testVUKException() throws SQLException, IOException, ParseException {
+    public void testVUKException() {
         try (Statement st = ucanaccess.createStatement()) {
 
             st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
@@ -46,7 +44,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testGenException() throws SQLException, IOException, ParseException {
+    public void testGenException() throws SQLException {
         Statement st = null;
         try {
             throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
@@ -62,7 +60,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testGException() throws SQLException, IOException, ParseException {
+    public void testGException() throws SQLException {
         Statement st = null;
         try {
             DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao");

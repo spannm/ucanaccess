@@ -81,7 +81,7 @@ public abstract class AbstractExecute {
         if (tableName.startsWith("[") && tableName.endsWith("]")) {
             tableName = tableName.substring(1, tableName.length() - 1);
         }
-        UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
+        UcanaccessConnection conn = this.statement.getConnection();
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
         String rtn = mtd.getTableName(tableName);
         if (rtn == null) {
@@ -93,7 +93,7 @@ public abstract class AbstractExecute {
     }
 
     private int count(String tableName) throws SQLException {
-        UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
+        UcanaccessConnection conn = this.statement.getConnection();
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery("select count(*) from " + tableName)) {
             rs.next();
@@ -102,7 +102,7 @@ public abstract class AbstractExecute {
     }
 
     private SQLException checkDDLException() throws SQLException {
-        UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
+        UcanaccessConnection conn = this.statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
             return new FeatureNotSupportedException(NotSupportedMessage.NOT_SUPPORTED_YET);
@@ -165,7 +165,7 @@ public abstract class AbstractExecute {
                     if (tableName.startsWith("[") && tableName.endsWith("]")) {
                         tableName = tableName.substring(1, tableName.length() - 1);
                     }
-                    UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
+                    UcanaccessConnection conn = this.statement.getConnection();
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
@@ -187,7 +187,7 @@ public abstract class AbstractExecute {
                     if (tableName.startsWith("[") && tableName.endsWith("]")) {
                         tableName = tableName.substring(1, tableName.length() - 1);
                     }
-                    UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
+                    UcanaccessConnection conn = this.statement.getConnection();
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
@@ -216,7 +216,7 @@ public abstract class AbstractExecute {
     }
 
     public Object executeBase() throws SQLException {
-        UcanaccessConnection conn = (UcanaccessConnection) statement.getConnection();
+        UcanaccessConnection conn = statement.getConnection();
         UcanaccessConnection.setCtxConnection(conn);
 
         if (this.commandType.equals(CommandType.BATCH)) {

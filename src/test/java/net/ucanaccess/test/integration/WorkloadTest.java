@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +30,7 @@ public class WorkloadTest extends AccessVersionDefaultTest {
     }
 
     @Test
-    public void testLoadMany() throws SQLException, IOException, InterruptedException {
+    public void testLoadMany() throws SQLException {
         final int nbRecords = 30000;
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();

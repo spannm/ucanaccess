@@ -90,7 +90,7 @@ public class CreateTableCommand implements ICommand {
     }
 
     @Override
-    public IFeedbackAction rollback() throws SQLException {
+    public IFeedbackAction rollback() {
         return null;
     }
 }

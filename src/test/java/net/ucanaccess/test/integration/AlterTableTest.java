@@ -161,7 +161,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         for (Index idx : tb.getIndexes()) {
             if ("健 康".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
-                assertTrue(idx.getColumns().get(0).getName().equals("C"));
+                assertEquals("C", idx.getColumns().get(0).getName());
 
             }
         }
@@ -174,7 +174,7 @@ public class AlterTableTest extends AccessVersion2007Test {
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
-                assertTrue(ar.size() == 3);
+                assertEquals(3, ar.size());
                 assertTrue(ar.contains("b"));
                 assertTrue(ar.contains("d"));
                 assertTrue(ar.contains("e"));
@@ -190,7 +190,7 @@ public class AlterTableTest extends AccessVersion2007Test {
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
-                assertTrue(ar.size() == 1);
+                assertEquals(1, ar.size());
                 assertTrue(ar.contains("field"));
 
             }
@@ -248,7 +248,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         tb = db.getSystemTable("MSysRelationships");
         IndexCursor crsr = CursorBuilder.createCursor(tb.getIndex("szRelationship"));
         Row r = crsr.findRowByEntry("pippo1");
-        assertTrue(r != null);
+        assertNotNull(r);
         // ... and the right name was used in the HSQLDB database
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
         Statement hsqldbStmt = hsqldbConn.createStatement();
@@ -264,7 +264,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
             org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
-        } catch (UcanaccessSQLException ucaSqlEx) {}
+        } catch (UcanaccessSQLException ignored) {}
         // now try again with Hibernate mode active
         HibernateSupport.setActive(true);
         st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
@@ -272,7 +272,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]"); // again
             org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
-        } catch (UcanaccessSQLException ucaSqlEx) {}
+        } catch (UcanaccessSQLException ignored) {}
         HibernateSupport.setActive(null);
 
         // test case: constraint name not specified
@@ -356,7 +356,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.close();
     }
 
-    private void executeErr(String _ddl, String _expectedMessage) throws SQLException {
+    private void executeErr(String _ddl, String _expectedMessage) {
         try (Statement st = ucanaccess.createStatement()) {
             st.execute(_ddl);
         } catch (SQLException _ex) {
@@ -367,7 +367,7 @@ public class AlterTableTest extends AccessVersion2007Test {
     }
 
     @Test
-    public void testSqlErrors() throws SQLException, IOException {
+    public void testSqlErrors() throws SQLException {
         Statement st = ucanaccess.createStatement();
         st.execute(
             "CREATE TABLE tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");

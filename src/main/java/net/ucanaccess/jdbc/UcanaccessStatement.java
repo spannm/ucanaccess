@@ -25,7 +25,7 @@ public class UcanaccessStatement implements Statement {
         this.aliases = _aliases;
     }
 
-    public UcanaccessStatement(Statement _wrapped, UcanaccessConnection _conn) throws SQLException {
+    public UcanaccessStatement(Statement _wrapped, UcanaccessConnection _conn) {
         this.wrapped = _wrapped;
         this.connection = _conn;
     }
@@ -248,7 +248,7 @@ public class UcanaccessStatement implements Statement {
     }
 
     @Override
-    public UcanaccessConnection getConnection() throws SQLException {
+    public UcanaccessConnection getConnection() {
         return this.connection;
     }
 

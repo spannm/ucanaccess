@@ -42,7 +42,7 @@ public class DropTableCommand implements ICommand {
     }
 
     @Override
-    public IFeedbackAction rollback() throws SQLException {
+    public IFeedbackAction rollback() {
         return null;
     }
 }

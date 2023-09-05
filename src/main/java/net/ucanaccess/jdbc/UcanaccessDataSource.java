@@ -8,11 +8,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
@@ -133,12 +131,12 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
+    public int getLoginTimeout() {
         return this.loginTimeout;
     }
 
     @Override
-    public java.io.PrintWriter getLogWriter() throws SQLException {
+    public java.io.PrintWriter getLogWriter() {
         return logWriter;
     }
 
@@ -204,7 +202,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public Reference getReference() throws NamingException {
+    public Reference getReference() {
         String clazz = UcanaccessDataSourceFactory.class.getName();
         Reference ref = new Reference(this.getClass().getName(), clazz, null);
         ref.add(new StringRefAddr("accessPath", this.getAccessPath()));
@@ -266,7 +264,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    public boolean isWrapperFor(Class<?> iface) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -290,7 +288,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * @since 2.0.9
      */
     public void setColumnOrder(String value) {
-        setProp("columnorder", value, new ArrayList<>(Arrays.asList("DATA", "DISPLAY")));
+        setProp("columnorder", value, new ArrayList<>(List.of("DATA", "DISPLAY")));
     }
 
     /**
@@ -386,16 +384,16 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * @since 2.0.9.4
      */
     public void setLobScale(Integer value) {
-        setProp("lobscale", value, new ArrayList<>(Arrays.asList(1, 2, 4, 8, 16, 32)));
+        setProp("lobscale", value, new ArrayList<>(List.of(1, 2, 4, 8, 16, 32)));
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
+    public void setLoginTimeout(int seconds) {
         loginTimeout = seconds;
     }
 
     @Override
-    public void setLogWriter(PrintWriter _logWriter) throws SQLException {
+    public void setLogWriter(PrintWriter _logWriter) {
         Logger.setLogPrintWriter(_logWriter);
     }
 
@@ -430,7 +428,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      *            Valid values for this parameter are: "V2000", "V2003", "V2007", "V2010", or "V2016".
      */
     public void setNewDatabaseVersion(String value) {
-        setProp("newdatabaseversion", value, new ArrayList<>(Arrays.asList("V2000", "V2003", "V2007", "V2010", "V2016")));
+        setProp("newdatabaseversion", value, new ArrayList<>(List.of("V2000", "V2003", "V2007", "V2010", "V2016")));
     }
 
     /**
@@ -530,7 +528,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public <T> T unwrap(Class<T> _iface) throws SQLException {
+    public <T> T unwrap(Class<T> _iface) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

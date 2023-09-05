@@ -10,8 +10,7 @@ import javax.naming.spi.ObjectFactory;
 public class UcanaccessDataSourceFactory implements ObjectFactory {
 
     @Override
-    public Object getObjectInstance(Object uref, Name name, Context nameCtx, Hashtable<?, ?> environment)
-            throws Exception {
+    public Object getObjectInstance(Object uref, Name name, Context nameCtx, Hashtable<?, ?> environment) {
 
         String dataSourceClass = UcanaccessDataSource.class.getName();
         Reference ref = (Reference) uref;

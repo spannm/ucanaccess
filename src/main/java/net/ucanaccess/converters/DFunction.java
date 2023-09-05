@@ -4,7 +4,6 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +19,7 @@ public class DFunction {
             "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"][\\s\n\r]*\\)";
     private static final String       IDENTIFIER               = "(\\W)((?i)_)(\\W)";
     private static final List<String> DFUNCTIONLIST            =
-            Arrays.asList("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
+            List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
 
     private Connection                conn;
     private String                    sql;
@@ -88,7 +87,7 @@ public class DFunction {
                     sql0 = sql0.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun), sb.toString());
                 }
             }
-        } catch (SQLException e) {}
+        } catch (SQLException ignored) {}
         return sql0;
     }
 
@@ -111,7 +110,7 @@ public class DFunction {
             if (st != null) {
                 try {
                     st.close();
-                } catch (SQLException e) {
+                } catch (SQLException ignored) {
                 }
             }
         }

@@ -10,7 +10,6 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Locale;
 
 @RunWith(Parameterized.class)
@@ -34,7 +33,7 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testDCount() throws SQLException, IOException, ParseException {
+    public void testDCount() throws SQLException, IOException {
 
         checkQuery("SELECT id  , DCount('*','t235','1=1') from [t235]", new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT id as [WW \"SS], DCount('descr','t235','1=1')from t235",
@@ -44,46 +43,46 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testDSum() throws SQLException, IOException, ParseException {
+    public void testDSum() throws SQLException, IOException {
         checkQuery("SELECT DSum('id','t235','1=1') ", 13578);
     }
 
     @Test
-    public void testDMax() throws SQLException, IOException, ParseException {
+    public void testDMax() throws SQLException, IOException {
         checkQuery("SELECT  DMax('id','t235') ", 12344);
     }
 
     @Test
-    public void testDMin() throws SQLException, IOException, ParseException {
+    public void testDMin() throws SQLException, IOException {
         checkQuery("SELECT  DMin('id','t235') ", 1234);
     }
 
     @Test
-    public void testDAvg() throws SQLException, IOException, ParseException {
+    public void testDAvg() throws SQLException, IOException {
         checkQuery("SELECT  DAvg('id','t235') ", 6789);
     }
 
     @Test
-    public void testLast() throws SQLException, IOException, ParseException {
+    public void testLast() throws SQLException, IOException {
         checkQuery("SELECT last(descr) from t235", "Show must go up and down");
         checkQuery("SELECT last(NUM) from t235", -113.5540);
         dumpQueryResult("SELECT last(date0) from t235");
     }
 
     @Test
-    public void testFirst() throws SQLException, IOException, ParseException {
+    public void testFirst() throws SQLException, IOException {
         checkQuery("SELECT first(descr) from t235", "Show must go off");
         checkQuery("SELECT first(NUM) from t235", -1110.5540);
         dumpQueryResult("SELECT  first(date0) from t235");
     }
 
     @Test
-    public void testDLast() throws SQLException, IOException, ParseException {
+    public void testDLast() throws SQLException, IOException {
         checkQuery("SELECT DLast('descr','t235') ", "Show must go up and down");
     }
 
     @Test
-    public void testDFirst() throws SQLException, IOException, ParseException {
+    public void testDFirst() throws SQLException, IOException {
         checkQuery("SELECT DFirst('descr','t235') ", "Show must go off");
     }
 

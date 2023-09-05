@@ -47,7 +47,7 @@ public class DropForeignKeyCommand implements ICommand {
     }
 
     @Override
-    public IFeedbackAction rollback() throws SQLException {
+    public IFeedbackAction rollback() {
         return null;
     }
 }

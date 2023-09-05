@@ -229,8 +229,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             preprocess();
             getConnection().setCurrentStatement(this);
             checkLastModified();
-            int y = new ExecuteUpdate(this).execute();
-            return y;
+            return new ExecuteUpdate(this).execute();
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }

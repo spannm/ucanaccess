@@ -78,7 +78,7 @@ public class CrudTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testCrudPSBatch() throws SQLException, IOException {
+    public void testCrudPSBatch() throws SQLException {
         PreparedStatement ps = null;
         try {
 

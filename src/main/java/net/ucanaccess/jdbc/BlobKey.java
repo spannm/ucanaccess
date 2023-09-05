@@ -6,17 +6,17 @@ import com.healthmarketscience.jackcess.util.OleBlob;
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BlobKey implements Serializable {
-    private static final long       serialVersionUID = -8580858159403159903L;
-    public static final int         MAX_SIZE         = 4096;
+    private static final long   serialVersionUID = -8580858159403159903L;
+    public static final int     MAX_SIZE         = 4096;
 
-    private HashMap<String, Object> key;
-    private String                  tableName;
-    private String                  columnName;
+    private Map<String, Object> key;
+    private final String        tableName;
+    private final String        columnName;
 
-    public BlobKey(HashMap<String, Object> _key, String _tableName, String _columnName) {
-        super();
+    public BlobKey(Map<String, Object> _key, String _tableName, String _columnName) {
         this.key = _key;
         this.tableName = _tableName;
         this.columnName = _columnName;
@@ -27,7 +27,7 @@ public class BlobKey implements Serializable {
         this.columnName = _columnName;
         if (hasPrimaryKey(_table)) {
             List<? extends Index.Column> cl = _table.getPrimaryKeyIndex().getColumns();
-            HashMap<String, Object> keyMap = new HashMap<>();
+            Map<String, Object> keyMap = new HashMap<>();
             for (Index.Column c : cl) {
                 keyMap.put(c.getName(), _row.get(c.getName()));
             }
@@ -69,7 +69,6 @@ public class BlobKey implements Serializable {
     }
 
     public static BlobKey getBlobKey(byte[] bt) {
-
         ByteArrayInputStream bais = null;
 
         try {
@@ -93,7 +92,7 @@ public class BlobKey implements Serializable {
 
     }
 
-    public HashMap<String, Object> getKey() {
+    public Map<String, Object> getKey() {
         return key;
     }
 

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public interface ICursorCommand extends ICommand {
-    boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) throws IOException;
+    boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow);
 
     IndexSelector getIndexSelector();
 

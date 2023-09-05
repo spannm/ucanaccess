@@ -627,7 +627,7 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     @Override
     public boolean execute() throws SQLException {
         if (!UcanaccessConnection.hasContext()) {
-            UcanaccessConnection.setCtxConnection((UcanaccessConnection) super.getConnection());
+            UcanaccessConnection.setCtxConnection(super.getConnection());
         }
         return super.execute();
     }
@@ -635,7 +635,7 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     @Override
     public int executeUpdate() throws SQLException {
         if (!UcanaccessConnection.hasContext()) {
-            UcanaccessConnection.setCtxConnection((UcanaccessConnection) super.getConnection());
+            UcanaccessConnection.setCtxConnection(super.getConnection());
         }
         return super.executeUpdate();
     }

@@ -104,7 +104,7 @@ public final class Functions {
         }
         List<Object> lo = Arrays.asList((Object[]) obj1);
         List<Object> arg =
-                obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(new Object[] {obj2});
+                obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(obj2);
         return lo.containsAll(arg);
     }
 
@@ -129,10 +129,9 @@ public final class Functions {
     }
 
     private static boolean cbool(Object obj) {
-        boolean r = (obj instanceof Boolean) ? (Boolean) obj
+        return (obj instanceof Boolean) ? (Boolean) obj
                 : (obj instanceof String) ? Boolean.parseBoolean((String) obj)
-                        : (obj instanceof Number) ? ((Number) obj).doubleValue() != 0 : false;
-        return r;
+                        : obj instanceof Number && ((Number) obj).doubleValue() != 0;
     }
 
     @FunctionType(functionName = "CBOOL", argumentTypes = { AccessType.MEMO }, returnType = AccessType.YESNO)
@@ -141,7 +140,7 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CCUR", argumentTypes = { AccessType.CURRENCY }, returnType = AccessType.CURRENCY)
-    public static BigDecimal ccur(BigDecimal value) throws UcanaccessSQLException {
+    public static BigDecimal ccur(BigDecimal value) {
         return value.setScale(4, RoundingMode.HALF_UP);
     }
 
@@ -151,22 +150,22 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CDBL", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
-    public static Double cdbl(Double value) throws UcanaccessSQLException {
+    public static Double cdbl(Double value) {
         return value;
     }
 
     @FunctionType(functionName = "CDEC", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
-    public static Double cdec(Double value) throws UcanaccessSQLException {
+    public static Double cdec(Double value) {
         return value;
     }
 
     @FunctionType(functionName = "CINT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.INTEGER)
-    public static Short cint(Double value) throws UcanaccessSQLException {
+    public static Short cint(Double value) {
         return new BigDecimal((long) Math.floor(value + 0.499999999999999d)).shortValueExact();
     }
 
     @FunctionType(functionName = "CINT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
-    public static Short cint(boolean value) throws UcanaccessSQLException {
+    public static Short cint(boolean value) {
         return (short) (value ? -1 : 0);
     }
 
@@ -176,12 +175,12 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CLONG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
-    public static Integer clong(Integer value) throws UcanaccessSQLException {
+    public static Integer clong(Integer value) {
         return value;
     }
 
     @FunctionType(functionName = "CLNG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
-    public static Integer clng(Double value) throws UcanaccessSQLException {
+    public static Integer clng(Double value) {
         return (int) Math.floor(value + 0.5d);
     }
 
@@ -197,12 +196,12 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
-    public static Integer clng(Integer value) throws UcanaccessSQLException {
+    public static Integer clng(Integer value) {
         return value;
     }
 
     @FunctionType(functionName = "CLONG", argumentTypes = { AccessType.YESNO }, returnType = AccessType.LONG)
-    public static Integer clong(boolean value) throws UcanaccessSQLException {
+    public static Integer clong(boolean value) {
         return value ? -1 : 0;
     }
 
@@ -218,7 +217,7 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CSTR", argumentTypes = { AccessType.TEXT }, returnType = AccessType.MEMO)
-    public static String cstr(String value) throws UcanaccessSQLException {
+    public static String cstr(String value) {
         return value;
     }
 
@@ -670,32 +669,32 @@ public final class Functions {
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.MEMO,
             AccessType.MEMO }, returnType = AccessType.MEMO)
     public static String iif(Boolean b, String o, String o1) {
-        return (String) iif(b, (Object) o, (Object) o1);
+        return (String) iif(b, o, (Object) o1);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.LONG,
             AccessType.LONG }, returnType = AccessType.LONG)
     public static Integer iif(Boolean b, Integer o, Integer o1) {
-        return (Integer) iif(b, (Object) o, (Object) o1);
+        return (Integer) iif(b, o, (Object) o1);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.DOUBLE,
             AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static Double iif(Boolean b, Double o, Double o1) {
-        return (Double) iif(b, (Object) o, (Object) o1);
+        return (Double) iif(b, o, (Object) o1);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.YESNO,
             AccessType.YESNO }, returnType = AccessType.YESNO)
     public static Boolean iif(Boolean b, Boolean o, Boolean o1) {
 
-        return (Boolean) iif(b, (Object) o, (Object) o1);
+        return (Boolean) iif(b, o, (Object) o1);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.DATETIME,
             AccessType.DATETIME }, returnType = AccessType.DATETIME)
     public static Timestamp iif(Boolean b, Timestamp o, Timestamp o1) {
-        return (Timestamp) iif(b, (Object) o, (Object) o1);
+        return (Timestamp) iif(b, o, (Object) o1);
     }
 
     private static Object iif(Boolean b, Object o, Object o1) {
@@ -827,7 +826,7 @@ public final class Functions {
 
             new BigDecimal(s);
             return true;
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return false;
     }
@@ -940,7 +939,7 @@ public final class Functions {
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.MEMO,
             AccessType.MEMO }, returnType = AccessType.MEMO)
     public static String nz(String value, String outher) {
-        return (String) nz((Object) value, (Object) outher);
+        return (String) nz(value, (Object) outher);
     }
 
     @FunctionType(functionName = "SIGN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.INTEGER)
@@ -950,9 +949,7 @@ public final class Functions {
 
     @FunctionType(functionName = "SPACE", argumentTypes = { AccessType.LONG }, returnType = AccessType.MEMO)
     public static String space(Integer nr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(" ".repeat(Math.max(0, nr)));
-        return sb.toString();
+        return " ".repeat(Math.max(0, nr));
     }
 
     @FunctionType(functionName = "STR", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.TEXT)
@@ -1046,7 +1043,7 @@ public final class Functions {
 
     @FunctionType(functionName = "STRING", argumentTypes = { AccessType.LONG,
             AccessType.MEMO }, returnType = AccessType.MEMO)
-    public static String string(Integer nr, String str) throws UcanaccessSQLException {
+    public static String string(Integer nr, String str) {
         if (str == null) {
             return null;
         }
@@ -1084,18 +1081,14 @@ public final class Functions {
         if (d < 0) {
             if (rnd == null) {
                 rnd = d;
-                return rnd;
-            } else {
-                return rnd;
             }
+            return rnd;
         }
         if (d == 0) {
             if (lastRnd == null) {
                 lastRnd = Math.random();
-                return lastRnd;
-            } else {
-                return lastRnd;
             }
+            return lastRnd;
         }
         return null;
     }
@@ -1103,19 +1096,19 @@ public final class Functions {
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.NUMERIC,
             AccessType.NUMERIC }, returnType = AccessType.NUMERIC)
     public static BigDecimal nz(BigDecimal value, BigDecimal outher) {
-        return (BigDecimal) nz((Object) value, (Object) outher);
+        return (BigDecimal) nz(value, (Object) outher);
     }
 
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.DOUBLE,
             AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static Double nz(Double value, Double outher) {
-        return (Double) nz((Object) value, (Object) outher);
+        return (Double) nz(value, (Object) outher);
     }
 
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.LONG,
             AccessType.LONG }, returnType = AccessType.LONG)
     public static Integer nz(Integer value, Integer outher) {
-        return (Integer) nz((Object) value, (Object) outher);
+        return (Integer) nz(value, (Object) outher);
     }
 
     @FunctionType(functionName = "STRREVERSE", argumentTypes = { AccessType.MEMO }, returnType = AccessType.MEMO)
@@ -1163,12 +1156,12 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "INT", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
-    public static Integer mint(Double value) throws UcanaccessSQLException {
+    public static Integer mint(Double value) {
         return new BigDecimal((long) Math.floor(value)).intValueExact();
     }
 
     @FunctionType(functionName = "INT", argumentTypes = { AccessType.YESNO }, returnType = AccessType.INTEGER)
-    public static Short mint(boolean value) throws UcanaccessSQLException {
+    public static Short mint(boolean value) {
         return (short) (value ? -1 : 0);
     }
 
@@ -1520,7 +1513,7 @@ public final class Functions {
 
     @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.DOUBLE,
             AccessType.MEMO }, returnType = AccessType.MEMO)
-    public static String formulaToText(Double res, String datatype) throws UcanaccessSQLException {
+    public static String formulaToText(Double res, String datatype) {
         if (res == null) {
             return null;
         }
@@ -1533,7 +1526,7 @@ public final class Functions {
 
     @FunctionType(functionName = "formulaToText", argumentTypes = { AccessType.YESNO,
             AccessType.MEMO }, returnType = AccessType.MEMO)
-    public static String formulaToText(Boolean res, String datatype) throws UcanaccessSQLException {
+    public static String formulaToText(Boolean res, String datatype) {
         if (res == null) {
             return null;
         }
@@ -1643,8 +1636,7 @@ public final class Functions {
 
     @FunctionType(functionName = "PARTITION", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE }, returnType = AccessType.MEMO)
-    public static String partition(Double number, double start, double stop, double interval)
-            throws UcanaccessSQLException {
+    public static String partition(Double number, double start, double stop, double interval) {
         if (number == null) {
             return null;
         }

@@ -27,21 +27,20 @@ public final class DBReferenceSingleton {
         return dbRegistry.get(ref.getAbsolutePath());
     }
 
-    public boolean loaded(File fl) throws IOException, SQLException {
+    public boolean loaded(File fl) {
         return dbRegistry.containsKey(fl.getAbsolutePath());
     }
 
     public DBReference loadReference(File fl, FileFormat ff, JackcessOpenerInterface jko, String pwd)
             throws IOException, SQLException {
-        DBReference ref = new DBReference(fl, ff, jko, pwd);
-        return ref;
+        return new DBReference(fl, ff, jko, pwd);
     }
 
     public DBReference put(String path, DBReference dbr) {
         return dbRegistry.put(path, dbr);
     }
 
-    public DBReference remove(String path) throws IOException, SQLException {
+    public DBReference remove(String path) {
         synchronized (UcanaccessDriver.class) {
             return dbRegistry.remove(path);
         }

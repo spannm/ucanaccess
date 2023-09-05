@@ -40,9 +40,9 @@ public class NotNullDdlTest extends AccessVersionDefaultTest {
             pw.println("conn.Close");
             pw.close();
 
-            String cscriptPath = new StringBuffer(System.getenv("SystemRoot"))
-                .append(System.getProperty("sun.arch.data.model").equals("64") ? "\\SYSWOW64" : "\\SYSTEM32")
-                .append("\\CSCRIPT.EXE").toString();
+            String cscriptPath = System.getenv("SystemRoot")
+                + (System.getProperty("sun.arch.data.model").equals("64") ? "\\SYSWOW64" : "\\SYSTEM32")
+                + "\\CSCRIPT.EXE";
 
             String command = "\"" + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + "\"";
             Process p = Runtime.getRuntime().exec(command);

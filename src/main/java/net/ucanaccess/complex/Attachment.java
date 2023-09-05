@@ -84,9 +84,7 @@ public class Attachment extends ComplexBase {
             return false;
         }
         if (url == null) {
-            if (other.url != null) {
-                return false;
-            }
+            return other.url == null;
         } else if (!url.equals(other.url)) {
             return false;
         }

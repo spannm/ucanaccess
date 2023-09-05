@@ -2,12 +2,11 @@ package net.ucanaccess.commands;
 
 import com.healthmarketscience.jackcess.Cursor;
 
-import java.io.IOException;
 import java.util.Map;
 
 public abstract class AbstractCursorCommand implements ICursorCommand {
     @Override
-    public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) throws IOException {
+    public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) {
         Map<String, Object> rowPattern = getRowPattern();
         if (rowPattern.size() != currentRow.size()) {
             return false;

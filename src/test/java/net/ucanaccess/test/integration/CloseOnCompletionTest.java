@@ -1,6 +1,5 @@
 package net.ucanaccess.test.integration;
 
-import net.ucanaccess.jdbc.UcanaccessStatement;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Test;
@@ -21,7 +20,7 @@ public class CloseOnCompletionTest extends AccessVersionAllTest {
 
         PreparedStatement st = null;
         st = ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23)) ");
-        ((UcanaccessStatement) st).closeOnCompletion();
+        st.closeOnCompletion();
 
         st.execute();
         st.close();

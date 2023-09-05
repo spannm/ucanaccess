@@ -9,7 +9,7 @@ public interface ICommand {
         DELETE,
         INSERT,
         UPDATE
-    };
+    }
 
     String getExecId();
 

@@ -83,7 +83,7 @@ public final class SQLConverter {
     private static final Pattern                 ESPRESSION_DIGIT             = Pattern.compile("([\\d]+)(?![\\.\\d])");
     private static final String                  BIG_BANG                     = "1899-12-30";
     private static final Map<String, String>     NO_ROMAN_CHARACTERS = new HashMap<>();
-    private static final List<String>            KEYWORDLIST                  = Arrays.asList("ALL", "AND", "ANY",
+    private static final List<String>            KEYWORDLIST                  = List.of("ALL", "AND", "ANY",
             "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
             "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
             "EXISTS", "EXCEPT", "FOR", "FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN", "INNER",
@@ -92,7 +92,7 @@ public final class SQLConverter {
             "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
             "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
     private static final String              KEYWORD_ALIAS                  = createKeywordAliasRegex();
-    private static final List<String>        PROCEDURE_KEYWORD_LIST         = Arrays.asList("NEW", "ROW");
+    private static final List<String>        PROCEDURE_KEYWORD_LIST         = List.of("NEW", "ROW");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
     private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<>();
     private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<>();
@@ -576,7 +576,7 @@ public final class SQLConverter {
         StringBuilder sb = new StringBuilder("(");
         String or = "";
         for (String bst : WHITE_SPACED_TABLE_NAMES) {
-            sb.append(or).append("(?i)" + Pattern.quote(bst));
+            sb.append(or).append("(?i)").append(Pattern.quote(bst));
             or = "|";
         }
         // workaround o.o. and l.o.
@@ -585,7 +585,7 @@ public final class SQLConverter {
             sql = sql.replaceAll(Pattern.quote(dw), bst);
         }
         sb.append(")");
-        sql = sql.replaceAll("([^A-Za-z0-9\"])" + sb.toString() + "([^A-Za-z0-9\"])", " $1\"$2\"$3");
+        sql = sql.replaceAll("([^A-Za-z0-9\"])" + sb + "([^A-Za-z0-9\"])", " $1\"$2\"$3");
         return sql;
     }
 
@@ -810,8 +810,7 @@ public final class SQLConverter {
 
     }
 
-    public static String convertAddColumn(String tableName, String columnName, String typeDeclaration)
-            throws SQLException {
+    public static String convertAddColumn(String tableName, String columnName, String typeDeclaration) {
         typeDeclaration = convertTypeDeclaration(typeDeclaration);
         typeDeclaration = typeDeclaration.replaceAll(NOT_NULL, "");
         Matcher mtc = DEFAULT_CATCH_0.matcher(typeDeclaration);
@@ -908,7 +907,7 @@ public final class SQLConverter {
         Pattern ptn = ACCESS_LIKE_ESCAPE_PATTERN;
         Matcher mtc = ptn.matcher(likeContent);
         if (mtc.find()) {
-            return convert2RegexMatches(likeContent.substring(0, mtc.start(0))) + mtc.group(0).substring(1, 2)
+            return convert2RegexMatches(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2RegexMatches(likeContent.substring(mtc.end(0)));
         }
         return likeContent.replaceAll("#", "\\\\d").replaceAll("\\*", ".*").replaceAll("_", ".")
@@ -919,7 +918,7 @@ public final class SQLConverter {
         Pattern ptn = ACCESS_LIKE_ESCAPE_PATTERN;
         Matcher mtc = ptn.matcher(likeContent);
         if (mtc.find()) {
-            return convert2LikeCondition(likeContent.substring(0, mtc.start(0))) + mtc.group(0).substring(1, 2)
+            return convert2LikeCondition(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2LikeCondition(likeContent.substring(mtc.end(0)));
         }
         return likeContent.replaceAll("\\*", "%").replaceAll("\\?", "_");
@@ -1170,7 +1169,7 @@ public final class SQLConverter {
 
         for (Matcher mtch = FORMULA_DEPENDENCIES.matcher(s); mtch.find(); mtch = FORMULA_DEPENDENCIES.matcher(s)) {
             ar.add(mtch.group());
-            s = s.substring(mtch.end(), s.length());
+            s = s.substring(mtch.end());
         }
         return ar;
     }

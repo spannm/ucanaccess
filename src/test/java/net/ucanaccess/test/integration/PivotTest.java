@@ -9,7 +9,6 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
 
 @RunWith(Parameterized.class)
 public class PivotTest extends AccessVersionAllTest {
@@ -24,7 +23,7 @@ public class PivotTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testPivot() throws SQLException, IOException, ParseException {
+    public void testPivot() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         dumpQueryResult("SELECT * FROM Table1_trim");
         st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03#   )");

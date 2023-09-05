@@ -25,7 +25,7 @@ public class ParametricQuery {
     private String              signature;
     private StringBuffer        originalParameters = new StringBuffer();
 
-    public ParametricQuery(Connection _hsqldb, QueryImpl _qi) throws SQLException {
+    public ParametricQuery(Connection _hsqldb, QueryImpl _qi) {
         this.hsqldb = _hsqldb;
         if (_qi.getType() == Query.Type.APPEND) {
             this.qi = new AppendQueryTemp((AppendQueryImpl) _qi);
@@ -69,7 +69,7 @@ public class ParametricQuery {
         return parameterList;
     }
 
-    public void createProcedure() throws SQLException {
+    public void createProcedure() {
         this.isProcedure = true;
         String sql = null;
         try {
@@ -111,7 +111,7 @@ public class ParametricQuery {
         }
     }
 
-    public void createSelect() throws SQLException {
+    public void createSelect() {
         String qnn = null;
         String sql = null;
         try {
@@ -202,7 +202,7 @@ public class ParametricQuery {
         return s;
     }
 
-    private boolean exec(String expression) throws SQLException {
+    private boolean exec(String expression) {
         try (Statement st = hsqldb.createStatement()) {
             st.execute(expression);
             return true;
@@ -318,8 +318,7 @@ public class ParametricQuery {
     }
 
     private String convertSQL(String sql) {
-        String h = SQLConverter.convertSQL(sql, true).getSql();
-        return h;
+        return SQLConverter.convertSQL(sql, true).getSql();
     }
 
     private String convertSQL(String sql, List<String> parameters2) {
@@ -364,9 +363,8 @@ public class ParametricQuery {
             this.ps = hsqldb.prepareStatement(psTxt);
 
             ParameterMetaData pmd = ps.getParameterMetaData();
-            List<String> ar = new ArrayList<>();
             _psmp = reorderIndexes(_psmp, parem);
-            ar.addAll(_psmp.keySet());
+            List<String> ar = new ArrayList<>(_psmp.keySet());
             List<Integer> pI = parIndexes(sql);
             StringBuilder parS = new StringBuilder();
             StringBuilder defPar = new StringBuilder();

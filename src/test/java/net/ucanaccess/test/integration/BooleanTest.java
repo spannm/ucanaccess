@@ -10,7 +10,6 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Locale;
 
 @RunWith(Parameterized.class)
@@ -41,7 +40,7 @@ public class BooleanTest extends AccessVersionAllTest {
     }
 
     @Test
-    public void testCreate() throws SQLException, IOException, ParseException {
+    public void testCreate() throws SQLException, IOException {
         dumpQueryResult("SELECT * FROM  tblMain");
         dumpQueryResult("SELECT * FROM  t");
         checkQuery("SELECT * FROM  tblMain");

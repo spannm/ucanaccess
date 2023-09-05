@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 
 @RunWith(Parameterized.class)
@@ -19,7 +18,7 @@ public class FolderTest extends AccessVersionDefaultTest {
     }
 
     @Test
-    public void testFolderContent() throws SQLException, IOException, ClassNotFoundException {
+    public void testFolderContent() throws SQLException, ClassNotFoundException {
         Statement st = null;
         String folderPath = System.getProperty("accessFolder");
         if (folderPath == null) {

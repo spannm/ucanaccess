@@ -17,9 +17,10 @@ package net.ucanaccess.commands;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CompositeFeedbackAction implements IFeedbackAction {
-    private ArrayList<IFeedbackAction> actions = new ArrayList<>();
+    private List<IFeedbackAction> actions = new ArrayList<>();
 
     @Override
     public void doAction(ICommand toChange) throws SQLException {

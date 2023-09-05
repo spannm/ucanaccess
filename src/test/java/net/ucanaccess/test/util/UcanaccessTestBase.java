@@ -29,7 +29,6 @@ import org.junit.runners.Parameterized;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -59,10 +58,12 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> getAllAccessFileFormats() {
-        List<Object[]> fileFormats = Arrays.asList(new Object[] {FileFormat.V2000}, new Object[] {FileFormat.V2003},
-            new Object[] {FileFormat.V2007}, new Object[] {FileFormat.V2010},
+        return List.of(
+            new Object[] {FileFormat.V2000},
+            new Object[] {FileFormat.V2003},
+            new Object[] {FileFormat.V2007},
+            new Object[] {FileFormat.V2010},
             new Object[] {FileFormat.V2016});
-        return fileFormats;
     }
 
     public UcanaccessTestBase(AccessVersion _accessVersion) {
@@ -178,7 +179,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         int mycolmax = mymeta.getColumnCount();
         ResultSetMetaData jometa = _verifyResultSet.getMetaData();
         int jocolmax = jometa.getColumnCount();
-        assertTrue(jocolmax == mycolmax);
+        assertEquals(jocolmax, mycolmax);
         StringBuilder log = new StringBuilder("{");
         int row = 0;
         while (next(_verifyResultSet, _resultSet)) {
@@ -202,8 +203,8 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                     // both null, ok
                     assertNull(ob1);
                 } else if (ob1 == null) {
-                    assertTrue("Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: "
-                        + ob2 + " in [" + _query + "]", ob2 == null);
+                    assertNull("Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: "
+                            + ob2 + " in [" + _query + "]", ob2);
                 } else {
                     if (ob1 instanceof Blob) {
                         byte[] bt = getByteArray((Blob) ob1);
@@ -238,12 +239,12 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos, true);
         new Main(ucanaccess, null).consoleDump(_resultSet, ps);
-        String dumped = new String(baos.toByteArray());
+        String dumped = baos.toString();
         ps.close();
         getLogger().info(dumped);
     }
 
-    public void dumpQueryResult(String _query) throws SQLException, IOException {
+    public void dumpQueryResult(String _query) throws SQLException {
         Statement st = null;
         ResultSet resultSet = null;
         try {
@@ -261,7 +262,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         }
     }
 
-    public void dumpVerify(String expression) throws SQLException, IOException {
+    public void dumpVerify(String expression) throws SQLException {
         Statement st = null;
         ResultSet myRs = null;
         try {
@@ -352,7 +353,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         if (equals) {
             assertEquals(count, myCount);
         } else {
-            assertFalse(count == myCount);
+            assertNotEquals(count, myCount);
         }
         return count;
     }
@@ -459,7 +460,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     /**
      * Execute the specified sql on the given statement logging the root cause of an exception encountered.
      */
-    protected void executeStatement(Statement _statement, String _sql) throws SQLException {
+    protected void executeStatement(Statement _statement, String _sql) {
         try {
             _statement.execute(_sql);
         } catch (SQLException _ex) {
