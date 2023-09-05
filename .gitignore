@@ -1,0 +1,14 @@
+**/.classpath
+**/.project
+**/.settings
+**/bin/
+**/target/
+**/.eclipse-pmd
+**/.pmd
+**/.pmdruleset.xml
+*.iml
+.checkstyle
+.idea/
+.project
+.~lock*
+*.kate-swp
