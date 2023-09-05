@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompositeFeedbackAction implements IFeedbackAction {
-    private List<IFeedbackAction> actions = new ArrayList<>();
+    private final List<IFeedbackAction> actions = new ArrayList<>();
 
     @Override
     public void doAction(ICommand toChange) throws SQLException {

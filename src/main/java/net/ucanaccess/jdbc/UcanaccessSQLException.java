@@ -29,7 +29,7 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     private static final long   serialVersionUID             = -1432048647665807662L;
-    private static final String UCANACCESS_GENERIC_ERROR_STR = String.valueOf(UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+    private static final String UCANACCESS_GENERIC_ERROR_STR = String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
 
     public UcanaccessSQLException() {
     }
@@ -39,11 +39,11 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     public UcanaccessSQLException(ExceptionMessages _reason) {
-        this(Logger.getMessage(_reason.name()), UCANACCESS_GENERIC_ERROR_STR, UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        this(Logger.getMessage(_reason.name()), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(ExceptionMessages _reason, Object... _args) {
-        this(Logger.getMessage(_reason.name(), _args), UCANACCESS_GENERIC_ERROR_STR, UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        this(Logger.getMessage(_reason.name(), _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode) {
@@ -51,21 +51,21 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
     }
 
     public UcanaccessSQLException(String _reason, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR, UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+        super(_reason == null ? null : Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(Throwable _cause) {
         super(explainCause(_cause),
             _cause instanceof SQLException ? ((SQLException) _cause).getSQLState() : UCANACCESS_GENERIC_ERROR_STR,
-            _cause instanceof SQLException ? ((SQLException) _cause).getErrorCode() : UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR,
+            _cause instanceof SQLException ? ((SQLException) _cause).getErrorCode() : IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR,
             _cause);
     }
 
@@ -85,7 +85,7 @@ public class UcanaccessSQLException extends SQLException {
             return message;
         }
         String version = getClass().getPackage().getImplementationVersion();
-        version = (version == null) ? "4.x.x " : version + " ";
+        version = version == null ? "4.x.x " : version + " ";
         version = "UCAExc:::" + version;
         return version + message;
     }

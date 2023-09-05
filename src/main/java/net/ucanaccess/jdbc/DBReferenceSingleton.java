@@ -31,7 +31,7 @@ public final class DBReferenceSingleton {
         return dbRegistry.containsKey(fl.getAbsolutePath());
     }
 
-    public DBReference loadReference(File fl, FileFormat ff, JackcessOpenerInterface jko, String pwd)
+    public DBReference loadReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, String pwd)
             throws IOException, SQLException {
         return new DBReference(fl, ff, jko, pwd);
     }

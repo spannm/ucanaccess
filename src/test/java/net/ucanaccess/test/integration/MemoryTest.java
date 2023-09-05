@@ -50,13 +50,13 @@ public class MemoryTest extends AccessVersionDefaultTest {
 
         Thread.sleep(2000L);
 
-        getLogger().info("Thread.activeCount() diff {}", (Thread.activeCount() - ac));
+        getLogger().info("Thread.activeCount() diff {}", Thread.activeCount() - ac);
         getLogger().info("total memory 2={}", Runtime.getRuntime().totalMemory());
         getLogger().info("free memory 2={}", Runtime.getRuntime().freeMemory());
-        getLogger().info("free memory diff = {}", (Runtime.getRuntime().freeMemory() - occ));
+        getLogger().info("free memory diff = {}", Runtime.getRuntime().freeMemory() - occ);
 
         dumpQueryResult("SELECT * FROM memm limit 10");
-        getLogger().info("Thread.activeCount() diff {}", (Thread.activeCount() - ac));
+        getLogger().info("Thread.activeCount() diff {}", Thread.activeCount() - ac);
 
         st.close();
     }

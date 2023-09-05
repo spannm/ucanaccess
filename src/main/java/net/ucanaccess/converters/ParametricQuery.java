@@ -77,7 +77,7 @@ public class ParametricQuery {
             List<String> l = queryParameters();
             sql = getSQL();
 
-            if (l == null || l.size() == 0) {
+            if (l == null || l.isEmpty()) {
                 parametersEmpiric();
 
             } else {
@@ -119,7 +119,7 @@ public class ParametricQuery {
             qnn = SQLConverter.escapeIdentifier(qi.getName(), hsqldb);
             sql = getSQL();
 
-            if (l == null || l.size() == 0) {
+            if (l == null || l.isEmpty()) {
                 parametersEmpiric();
 
             } else {
@@ -238,7 +238,7 @@ public class ParametricQuery {
         }
         List<String> params = SQLConverter.getParameters(s);
         Map<String, String> parem = new HashMap<>();
-        getParametersEmpiric(hm, params, parem, s, true);
+        getParametersEmpiric(hm, params, parem, s);
     }
 
     public Exception getException() {
@@ -260,8 +260,8 @@ public class ParametricQuery {
                 decl = "[" + decl + "]";
             }
             ar.add(decl);
-            String type0 = type.indexOf("(") > 0 ? type.substring(0, type.indexOf("(")) : type;
-            String typeS = type.indexOf("(") > 0 ? type.substring(type.indexOf("(")) : "";
+            String type0 = type.indexOf('(') > 0 ? type.substring(0, type.indexOf('(')) : type;
+            String typeS = type.indexOf('(') > 0 ? type.substring(type.indexOf('(')) : "";
             Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
 
             type = hm.get(type0.toUpperCase()) + typeS;
@@ -323,7 +323,7 @@ public class ParametricQuery {
 
     private String convertSQL(String sql, List<String> parameters2) {
         for (String s : parameters2) {
-            if (s.indexOf("'") > 0 || s.indexOf("\"") > 0) {
+            if (s.indexOf('\'') > 0 || s.indexOf('"') > 0) {
                 String src = Pattern.quote(s);
                 String target = treatApos(s);
                 sql = sql.replaceAll(src, target);
@@ -335,8 +335,7 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem,
-            String sql, boolean init) {
+    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem, String sql) {
         String psTxt = null;
         try {
             psTxt = convertSQL(sql, _parameters);
@@ -406,7 +405,7 @@ public class ParametricQuery {
                     parem.put(par1, par);
                     String parname = originalParameters.length() == 0 ? par : "," + par;
                     originalParameters.append(parname);
-                    getParametersEmpiric(_psmp, _parameters, parem, sql, false);
+                    getParametersEmpiric(_psmp, _parameters, parem, sql);
 
                 } else {
                     exception = _ex;

@@ -582,6 +582,7 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    @Override
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         try {
             return wrapped.getObject(columnIndex, type);
@@ -616,6 +617,7 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    @Override
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         try {
             return wrapped.getObject(checkEscaped(columnLabel), type);
@@ -868,11 +870,9 @@ public class UcanaccessResultSet implements ResultSet {
                 StringBuilder url = new StringBuilder();
                 if (parts.length > 1) {
                     url.append(parts[1]);
-                    if (parts.length > 2) {
-                        if (parts[2].length() > 0) {
-                            url.append("#");
-                            url.append(parts[2]);
-                        }
+                    if (parts.length > 2 && parts[2].length() > 0) {
+                        url.append("#");
+                        url.append(parts[2]);
                     }
                     return new URL(url.toString());
                 }

@@ -120,7 +120,7 @@ public class UcanaccessConnection implements Connection {
 
     public synchronized boolean add(ICommand c4io) {
         if (c4io.getType().equals(TYPES.UPDATE) || c4io.getType().equals(TYPES.DELETE)) {
-            ICommand last = commands.size() > 0 ? commands.getLast() : null;
+            ICommand last = !commands.isEmpty() ? commands.getLast() : null;
             ICursorCommand c4ioc = (ICursorCommand) c4io;
             if (last != null && !last.getExecId().equals(BATCH_ID) && last.getExecId().equals(c4io.getExecId())
                     && last.getTableName().equals(c4io.getTableName())) {
@@ -155,7 +155,7 @@ public class UcanaccessConnection implements Connection {
         synchronized (getClass()) {
 
             try {
-                if (isReadOnly() && commands.size() > 0) {
+                if (isReadOnly() && !commands.isEmpty()) {
                     rollback();
                     if (ref.isReadOnlyFileFormat()) {
                         throw new UcanaccessSQLException(ExceptionMessages.ACCESS_97);
@@ -165,7 +165,7 @@ public class UcanaccessConnection implements Connection {
 
                 flushIO();
                 hsqlDBConnection.commit();
-                if (commands.size() > 0) {
+                if (!commands.isEmpty()) {
                     ref.updateLastModified();
                 }
 
@@ -684,7 +684,7 @@ public class UcanaccessConnection implements Connection {
     public Savepoint setSavepoint() throws SQLException {
         try {
             Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint());
-            if (commands.size() > 0) {
+            if (!commands.isEmpty()) {
                 // last to commit
                 savepointsMap.put(sp, commands.getLast().getExecId());
             }
@@ -699,7 +699,7 @@ public class UcanaccessConnection implements Connection {
         try {
             Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint(name));
 
-            if (commands.size() > 0) {
+            if (!commands.isEmpty()) {
                 // last to commit
                 savepointsMap.put(sp, commands.getLast().getExecId());
             }
@@ -771,10 +771,12 @@ public class UcanaccessConnection implements Connection {
         return ref.isShowSchema();
     }
 
+    @Override
     public void setSchema(String schema) {
 
     }
 
+    @Override
     public String getSchema() {
         return "";
     }
@@ -790,6 +792,7 @@ public class UcanaccessConnection implements Connection {
         }
     }
 
+    @Override
     public void abort(Executor executor) throws SQLException {
         try {
             hsqlDBConnection.abort(executor);
@@ -798,9 +801,11 @@ public class UcanaccessConnection implements Connection {
         }
     }
 
+    @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) {
     }
 
+    @Override
     public int getNetworkTimeout() {
         return 0;
     }

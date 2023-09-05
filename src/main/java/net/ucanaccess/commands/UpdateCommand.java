@@ -138,11 +138,11 @@ public class UpdateCommand extends AbstractCursorCommand {
                     Version v = vs[0];
                     List<com.healthmarketscience.jackcess.complex.Version> oldV = rowFk.getVersions();
                     String vn = v.getValue();
-                    String vo = oldV.size() > 0 ? oldV.get(0).getValue() : null;
+                    String vo = !oldV.isEmpty() ? oldV.get(0).getValue() : null;
                     LocalDateTime upTime = isRollbacking ? LocalDateTime.now() : v.getModifiedDate();
 
-                    if ((vn != null && vo == null) || (vo != null && vn == null)
-                            || (vo != null && vn != null && !vo.equals(vn))) {
+                    if (vn != null && vo == null || vo != null && vn == null
+                            || vo != null && vn != null && !vo.equals(vn)) {
                         rowFk.addVersion(vn, upTime);
                     }
 

@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 
-    private ResultSetMetaData wrapped;
-    private Metadata          metadata;
+    private ResultSetMetaData         wrapped;
+    private Metadata                  metadata;
 
-    private Map<String, String> aliases;
+    private final Map<String, String> aliases;
 
     public UcanaccessResultSetMetaData(ResultSetMetaData _wrapped, Map<String, String> _aliases,
             UcanaccessResultSet _resultSet) throws SQLException {

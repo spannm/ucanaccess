@@ -14,11 +14,9 @@ public final class AutoNumberManager {
     private static final Map<Column, AtomicInteger> REGISTER = new HashMap<>();
 
     static {
-        DBReference.addOnReloadRefListener(() -> {
-            // Must call AutoNumberManager.clear() for proper thread synchronization.
-            // Do not call register.clear() directly.
-            clear();
-        });
+        // Must call AutoNumberManager.clear() for proper thread synchronization.
+        // Do not call register.clear() directly.
+        DBReference.addOnReloadRefListener(AutoNumberManager::clear);
     }
 
     private AutoNumberManager() {

@@ -43,13 +43,13 @@ public final class IndexSelector {
                 return (Integer) _dbVal == SQLConverter.asUnsigned((Byte) _currVal);
             }
 
-            if ((_dbVal instanceof Float && _currVal instanceof Double)
-                    || (_dbVal instanceof Double && _currVal instanceof Float)) {
+            if (_dbVal instanceof Float && _currVal instanceof Double
+                    || _dbVal instanceof Double && _currVal instanceof Float) {
                 if (new BigDecimal(_dbVal.toString()).compareTo(new BigDecimal(_currVal.toString())) == 0) {
                     return true;
                 }
                 if (_dbVal instanceof Float && _currVal instanceof Double) {
-                    return ((Float) _dbVal).doubleValue() == ((Double) _currVal);
+                    return ((Float) _dbVal).doubleValue() == (Double) _currVal;
                 }
             }
             if (_currVal instanceof byte[] && _dbVal instanceof byte[]) {

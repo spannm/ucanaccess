@@ -202,7 +202,6 @@ public final class SQLConverter {
                     if (ret[0] == -1) {
                         return new int[] {mc.start(), mc.end()};
                     }
-                    continue;
                 } else {
                     if (ret[0] == -1) {
                         ret[0] = mc.start();
@@ -358,7 +357,7 @@ public final class SQLConverter {
         public String getSelect(String s) {
             Matcher m = pattern.matcher(s);
             if (m.find()) {
-                String sub = s.substring(m.start(m.groupCount()), s.lastIndexOf(")"));
+                String sub = s.substring(m.start(m.groupCount()), s.lastIndexOf(')'));
                 return sub;
             }
             return null;
@@ -570,7 +569,7 @@ public final class SQLConverter {
     }
 
     private static String replaceWhiteSpacedTableNames0(String sql) {
-        if (WHITE_SPACED_TABLE_NAMES.size() == 0) {
+        if (WHITE_SPACED_TABLE_NAMES.isEmpty()) {
             return sql;
         }
         StringBuilder sb = new StringBuilder("(");
@@ -590,14 +589,14 @@ public final class SQLConverter {
     }
 
     private static String convertIdentifiers(String sql) {
-        int init = sql.indexOf("[");
+        int init = sql.indexOf('[');
         if (init != -1) {
-            int end = sql.indexOf("]");
+            int end = sql.indexOf(']');
             if (end < init) {
                 return convertResidualSQL(sql);
             }
             String content = sql.substring(init + 1, end);
-            if (content.indexOf(" ") > 0) {
+            if (content.indexOf(' ') > 0) {
                 String tryContent = " " + content + " ";
                 String tryConversion = convertXescaped(tryContent);
                 if (!tryConversion.equalsIgnoreCase(tryContent)) {
@@ -608,7 +607,7 @@ public final class SQLConverter {
 
             content = basicEscapingIdentifier(content).toUpperCase();
             String subs =
-                    !isKeyword && (content.indexOf(" ") > 0 || NO_ALFANUMERIC.matcher(content).find()) ? "\"" : " ";
+                    !isKeyword && (content.indexOf(' ') > 0 || NO_ALFANUMERIC.matcher(content).find()) ? "\"" : " ";
             sql = convertResidualSQL(sql.substring(0, init)) + subs + content + subs
                     + convertIdentifiers(sql.substring(end + 1));
         } else {
@@ -639,7 +638,7 @@ public final class SQLConverter {
                 return sql;
             }
             String prefix =
-                    (mtc.group(0).matches("\\.([0-9])+[Ee]([0-9])+\\s") || mtc.group(0).matches("\\.([0-9])+[Ee][-+]"))
+                    mtc.group(0).matches("\\.([0-9])+[Ee]([0-9])+\\s") || mtc.group(0).matches("\\.([0-9])+[Ee][-+]")
                             ? "" : "Z_";
             String build = mtc.group(1) + prefix + mtc.group(2);
             sql = sql.substring(0, mtc.start()) + build
@@ -667,7 +666,7 @@ public final class SQLConverter {
     }
 
     private static String escape(String sql) {
-        int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
+        int li = Math.max(sql.lastIndexOf('"'), sql.lastIndexOf('\''));
         boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
         String suff = enddq ? "" : sql.substring(li + 1);
         suff = convertPartIdentifiers(suff);
@@ -675,8 +674,9 @@ public final class SQLConverter {
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
         if (fd != null || fs != null) {
-            boolean inid = fs == null || (fd != null && fd[0] < fs[0]);
-            String group, str;
+            boolean inid = fs == null || fd != null && fd[0] < fs[0];
+            String group;
+            String str;
             int[] mcr = inid ? fd : fs;
             group = tsql.substring(mcr[0] + 1, mcr[1] - 1);
             if (inid) {
@@ -714,7 +714,7 @@ public final class SQLConverter {
         if (TableBuilder.isReservedWord(nl)) {
             ESCAPED_IDENTIFIERS.add(nl);
         }
-        if (name.contains("'") || name.indexOf("\"") > 0) {
+        if (name.contains("'") || name.indexOf('"') > 0) {
             APOSTROPHISED_NAMES.add(name);
         }
 
@@ -766,7 +766,7 @@ public final class SQLConverter {
     }
 
     private static String hsqlEscape(String escaped, boolean quote) {
-        if (escaped.indexOf(" ") > 0 || escaped.contains("$")) {
+        if (escaped.indexOf(' ') > 0 || escaped.contains("$")) {
             escaped = quote ? "\"" + escaped + "\"" : "[" + escaped + "]";
         }
         return escaped;
@@ -837,8 +837,8 @@ public final class SQLConverter {
         if (!sql.contains("(")) {
             return sql;
         }
-        String pre = sql.substring(0, sql.indexOf("("));
-        sql = sql.substring(sql.indexOf("("));
+        String pre = sql.substring(0, sql.indexOf('('));
+        sql = sql.substring(sql.indexOf('('));
         for (Map.Entry<String, String> entry : _types2Convert.entrySet()) {
             sql = sql
                     .replaceAll("([,\\(][\\s\n\r]*)" + TYPES_TRANSLATE.replaceAll("_", entry.getKey()),
@@ -926,8 +926,8 @@ public final class SQLConverter {
 
     private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
         Pattern inter = ACCESS_LIKE_CHARINTERVAL_PATTERN;
-        int i = likeContent.replaceAll("\\[#\\]", "").indexOf("#");
-        not = (not == null) ? "" : " NOT ";
+        int i = likeContent.replaceAll("\\[#\\]", "").indexOf('#');
+        not = not == null ? "" : " NOT ";
         if (i >= 0 || inter.matcher(likeContent).find()) {
             return not + "REGEXP_MATCHES(" + conditionField + ",'" + convert2RegexMatches(likeContent) + "')" + closePar
                     + " ";
@@ -982,7 +982,7 @@ public final class SQLConverter {
     }
 
     private static String convertFormula0(String sql) {
-        int li = Math.max(sql.lastIndexOf("\""), sql.lastIndexOf("'"));
+        int li = Math.max(sql.lastIndexOf('\"'), sql.lastIndexOf('\''));
         boolean enddq = sql.endsWith("\"") || sql.endsWith("'");
         String suff = enddq ? "" : sql.substring(li + 1);
         suff = convertDigit(suff);
@@ -990,8 +990,9 @@ public final class SQLConverter {
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
         if (fd != null || fs != null) {
-            boolean inid = fs == null || (fd != null && fd[0] < fs[0]);
-            String group, str;
+            boolean inid = fs == null || fd != null && fd[0] < fs[0];
+            String group;
+            String str;
             int[] mcr = inid ? fd : fs;
             group = tsql.substring(mcr[0], mcr[1]);
             str = tsql.substring(0, mcr[0]);
@@ -1004,11 +1005,11 @@ public final class SQLConverter {
     }
 
     public static String convertPowOperator(String sql) {
-        int i = sql.indexOf("^");
+        int i = sql.indexOf('^');
         if (i < 0) {
             return sql;
         }
-        while ((i = sql.indexOf("^")) >= 0) {
+        while ((i = sql.indexOf('^')) >= 0) {
             int foi = firstOperandIndex(sql, i);
             int loi = i + secondOperandIndex(sql, i) + 1;
             sql = sql.substring(0, foi) + " (power(" + sql.substring(foi, i) + "," + sql.substring(i + 1, loi + 1)
@@ -1131,8 +1132,8 @@ public final class SQLConverter {
     }
 
     public static int asUnsigned(byte a) {
-        int b = ((a & 0xFF));
-        return ((b));
+        int b = a & 0xFF;
+        return b;
     }
 
     public static Set<String> getFormulaDependencies(String formula) {

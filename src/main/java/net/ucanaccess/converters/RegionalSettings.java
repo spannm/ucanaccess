@@ -24,7 +24,7 @@ public final class RegionalSettings {
         locale = _locale;
         String[] dfsp = new String[] {getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(), getShortDatePattern()};
         for (String pattern : dfsp) {
-            if (pattern.indexOf(".") > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
+            if (pattern.indexOf('.') > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
                 pointDateSeparator = true;
                 break;
             }
@@ -117,16 +117,14 @@ public final class RegionalSettings {
     }
 
     void addDateP(String _pattern, boolean _heuristic, boolean _yearOverride) {
-        if (_heuristic) {
-            if (!_pattern.contains("a") && _pattern.indexOf("H") > 0) {
-                String chg = _pattern.replaceAll("H", "h") + " a";
-                addDateP(chg, false, false);
-                addTogglePattern(chg);
-            }
+        if (_heuristic && !_pattern.contains("a") && _pattern.indexOf('H') > 0) {
+            String chg = _pattern.replaceAll("H", "h") + " a";
+            addDateP(chg, false, false);
+            addTogglePattern(chg);
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat(_pattern, locale);
-        ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new java.util.Date(Long.MIN_VALUE));
+        ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new Date(Long.MIN_VALUE));
         sdf.setLenient(false);
 
         if ("true".equalsIgnoreCase(getRS())) {
@@ -140,7 +138,7 @@ public final class RegionalSettings {
 
         if (_heuristic) {
             addTogglePattern(_pattern);
-            if (_pattern.endsWith(" a") && _pattern.indexOf("h") > 0) {
+            if (_pattern.endsWith(" a") && _pattern.indexOf('h') > 0) {
                 String chg = _pattern.substring(0, _pattern.length() - 2).trim().replaceAll("h", "H");
                 addDateP(chg, false, false);
                 addTogglePattern(chg);
@@ -151,18 +149,18 @@ public final class RegionalSettings {
 
     void addTogglePattern(String _p) {
 
-        if (_p.indexOf("/") > 0) {
+        if (_p.indexOf('/') > 0) {
             addDateP(_p.replaceAll("/", "-"), false, false);
             if (isPointDateSeparator()) {
                 addDateP(_p.replaceAll("/", "."), false, false);
             }
-        } else if (_p.indexOf("-") > 0) {
+        } else if (_p.indexOf('-') > 0) {
             addDateP(_p.replaceAll(Pattern.quote("-"), "/"), false, false);
             if (isPointDateSeparator()) {
                 addDateP(_p.replaceAll(Pattern.quote("-"), "."), false, false);
             }
 
-        } else if (_p.indexOf(".") > 0 && !_p.contains("h.") && !_p.contains("H.")) {
+        } else if (_p.indexOf('.') > 0 && !_p.contains("h.") && !_p.contains("H.")) {
             addDateP(_p.replaceAll(Pattern.quote("."), "/"), false, false);
         }
     }

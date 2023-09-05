@@ -136,7 +136,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     @Override
-    public java.io.PrintWriter getLogWriter() {
+    public PrintWriter getLogWriter() {
         return logWriter;
     }
 
@@ -168,6 +168,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
         return getPropAsBoolean("openexclusive");
     }
 
+    @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }

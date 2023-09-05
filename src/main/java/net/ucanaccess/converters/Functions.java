@@ -28,7 +28,7 @@ public final class Functions {
 
     static SimpleDateFormat createSimpleDateFormat(String pt) {
         SimpleDateFormat sdf = new SimpleDateFormat(pt);
-        ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new java.util.Date(Long.MIN_VALUE));
+        ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new Date(Long.MIN_VALUE));
         return sdf;
     }
 
@@ -43,10 +43,7 @@ public final class Functions {
     @FunctionType(functionName = "EQUALS", argumentTypes = { AccessType.COMPLEX,
             AccessType.COMPLEX }, returnType = AccessType.YESNO)
     public static Boolean equals(Object obj1, Object obj2) {
-        if (obj1 == null || obj2 == null) {
-            return false;
-        }
-        if (!obj1.getClass().equals(obj2.getClass())) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {
             return false;
         }
         if (obj1.getClass().isArray()) {
@@ -58,10 +55,7 @@ public final class Functions {
     @FunctionType(functionName = "EQUALSIGNOREORDER", argumentTypes = { AccessType.COMPLEX,
             AccessType.COMPLEX }, returnType = AccessType.YESNO)
     public static Boolean equalsIgnoreOrder(Object obj1, Object obj2) {
-        if (obj1 == null || obj2 == null) {
-            return false;
-        }
-        if (!obj1.getClass().equals(obj2.getClass())) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {
             return false;
         }
         if (obj1.getClass().isArray()) {
@@ -75,10 +69,7 @@ public final class Functions {
     @FunctionType(functionName = "CONTAINS", argumentTypes = { AccessType.COMPLEX,
             AccessType.COMPLEX }, returnType = AccessType.YESNO)
     public static Boolean contains(Object obj1, Object obj2) {
-        if (obj1 == null || obj2 == null) {
-            return false;
-        }
-        if (!obj1.getClass().isArray()) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().isArray()) {
             return false;
         }
         List<Object> lo = Arrays.asList((Object[]) obj1);
@@ -108,8 +99,8 @@ public final class Functions {
     }
 
     private static boolean cbool(Object obj) {
-        return (obj instanceof Boolean) ? (Boolean) obj
-                : (obj instanceof String) ? Boolean.parseBoolean((String) obj)
+        return obj instanceof Boolean ? (Boolean) obj
+                : obj instanceof String ? Boolean.parseBoolean((String) obj)
                         : obj instanceof Number && ((Number) obj).doubleValue() != 0;
     }
 
@@ -149,7 +140,7 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "CLONG", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.LONG)
-    public static Integer clong(Double value) throws UcanaccessSQLException {
+    public static Integer clong(Double value) {
         return clng(value);
     }
 
@@ -312,18 +303,18 @@ public final class Functions {
             result = dateDiff("yyyy", dt1, dt2) * 4 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH)) / 3;
         } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
             result = (int) Math
-                    .rint(((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24)));
+                    .rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24));
         } else if (intv.equalsIgnoreCase("m")) {
-            result = dateDiff("yyyy", dt1, dt2) * 12 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH));
+            result = dateDiff("yyyy", dt1, dt2) * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
         } else if (intv.equalsIgnoreCase("w") || intv.equalsIgnoreCase("ww")) {
             result = (int) Math
-                    .floor(((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7)));
+                    .floor((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7));
         } else if (intv.equalsIgnoreCase("h")) {
             result = (int) Math.round((clMax.getTime().getTime() - clMin.getTime().getTime()) / (1000d * 60 * 60));
         } else if (intv.equalsIgnoreCase("n")) {
-            result = (int) Math.rint(((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60)));
+            result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60));
         } else if (intv.equalsIgnoreCase("s")) {
-            result = (int) Math.rint(((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / 1000));
+            result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / 1000);
         } else {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
         }
@@ -339,7 +330,7 @@ public final class Functions {
     @FunctionType(namingConflict = true, functionName = "DATEPART", argumentTypes = { AccessType.MEMO,
             AccessType.DATETIME, AccessType.LONG }, returnType = AccessType.LONG)
     public static Integer datePart(String intv, Timestamp dt, Integer firstDayOfWeek) throws UcanaccessSQLException {
-        Integer ret = (intv.equalsIgnoreCase("ww")) ? datePart(intv, dt, firstDayOfWeek, 1) : datePart(intv, dt);
+        Integer ret = intv.equalsIgnoreCase("ww") ? datePart(intv, dt, firstDayOfWeek, 1) : datePart(intv, dt);
         if (intv.equalsIgnoreCase("w") && firstDayOfWeek > 1) {
             Calendar cl = Calendar.getInstance();
             cl.setTime(dt);
@@ -452,7 +443,7 @@ public final class Functions {
     @FunctionType(functionName = "TIMESTAMP0", argumentTypes = { AccessType.MEMO }, returnType = AccessType.DATETIME)
     public static Timestamp timestamp0(String dt) {
         GregorianCalendar gc = new GregorianCalendar();
-        gc.setGregorianChange(new java.util.Date(Long.MIN_VALUE));
+        gc.setGregorianChange(new Date(Long.MIN_VALUE));
         Pattern ptdate = Pattern.compile(SQLConverter.DATE_FORMAT + "\\s");
         Pattern pth = Pattern.compile(SQLConverter.HHMMSS_FORMAT);
         Matcher mtc = ptdate.matcher(dt);
@@ -524,7 +515,7 @@ public final class Functions {
         }
         if ("percent".equalsIgnoreCase(par)) {
             DecimalFormat formatter = FormatCache.getZpzz();
-            return (formatter.format(d * 100) + "%");
+            return formatter.format(d * 100) + "%";
         }
         if ("fixed".equalsIgnoreCase(par)) {
             DecimalFormat formatter = FormatCache.getZpzz();
@@ -912,7 +903,7 @@ public final class Functions {
 
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.NUMERIC }, returnType = AccessType.NUMERIC)
     public static BigDecimal nz(BigDecimal value) {
-        return value == null ? new BigDecimal(0) : value;
+        return value == null ? BigDecimal.ZERO : value;
     }
 
     @FunctionType(functionName = "NZ", argumentTypes = { AccessType.MEMO,
@@ -923,7 +914,7 @@ public final class Functions {
 
     @FunctionType(functionName = "SIGN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.INTEGER)
     public static short sign(double n) {
-        return (short) (n == 0 ? 0 : (n > 0 ? 1 : -1));
+        return (short) (n == 0 ? 0 : n > 0 ? 1 : -1);
     }
 
     @FunctionType(functionName = "SPACE", argumentTypes = { AccessType.LONG }, returnType = AccessType.MEMO)
@@ -942,7 +933,7 @@ public final class Functions {
         Calendar cl = Calendar.getInstance();
         cl.setTime(now());
         cl.set(1899, 11, 30);
-        return new java.sql.Timestamp(cl.getTimeInMillis());
+        return new Timestamp(cl.getTimeInMillis());
     }
 
     @FunctionType(functionName = "VAL", argumentTypes = { AccessType.NUMERIC }, returnType = AccessType.DOUBLE)
@@ -955,13 +946,13 @@ public final class Functions {
             return null;
         }
         String val = val1.toString().trim();
-        int lp = val.lastIndexOf(".");
+        int lp = val.lastIndexOf('.');
         char[] ca = val.toCharArray();
         StringBuilder sb = new StringBuilder();
         int minLength = 1;
         for (int i = 0; i < ca.length; i++) {
             char c = ca[i];
-            if (((c == '-') || (c == '+')) && (i == 0)) {
+            if ((c == '-' || c == '+') && i == 0) {
                 ++minLength;
                 sb.append(c);
             } else if (c == ' ') {
@@ -970,7 +961,7 @@ public final class Functions {
                 sb.append(c);
             } else if (c == '.' && i == lp) {
                 sb.append(c);
-                if (i == 0 || (i == 1 && minLength == 2)) {
+                if (i == 0 || i == 1 && minLength == 2) {
                     ++minLength;
                 }
             } else {
@@ -1039,7 +1030,7 @@ public final class Functions {
         Calendar cl = Calendar.getInstance();
         cl.setTime(now());
         cl.set(1899, 11, 30, h, m, s);
-        return new java.sql.Timestamp(cl.getTimeInMillis());
+        return new Timestamp(cl.getTimeInMillis());
     }
 
     @FunctionType(functionName = "RND", argumentTypes = {}, returnType = AccessType.DOUBLE)
@@ -1049,11 +1040,7 @@ public final class Functions {
 
     @FunctionType(functionName = "RND", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static Double rnd(Double d) {
-        if (d == null) {
-            lastRnd = Math.random();
-            return lastRnd;
-        }
-        if (d > 0) {
+        if (d == null || d > 0) {
             lastRnd = Math.random();
             return lastRnd;
         }
@@ -1153,18 +1140,18 @@ public final class Functions {
     @FunctionType(functionName = "DDB", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double ddb(double cost, double salvage, double life, double period, double factor) {
-        if (cost < 0 || ((life == 2d) && (period > 1d))) {
+        if (cost < 0 || life == 2d && period > 1d) {
             return 0;
         }
-        if (life < 2d || ((life == 2d) && (period <= 1d))) {
-            return (cost - salvage);
+        if (life < 2d || life == 2d && period <= 1d) {
+            return cost - salvage;
         }
         if (period <= 1d) {
             return Math.min(cost * factor / life, cost - salvage);
         }
         double retk = Math.max(salvage - cost * Math.pow((life - factor) / life, period), 0);
 
-        return Math.max(((factor * cost) / life) * Math.pow((life - factor) / life, period - 1d) - retk, 0);
+        return Math.max(factor * cost / life * Math.pow((life - factor) / life, period - 1d) - retk, 0);
     }
 
     @FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE, AccessType.LONG,
@@ -1182,10 +1169,10 @@ public final class Functions {
     @FunctionType(functionName = "FV", argumentTypes = { AccessType.DOUBLE, AccessType.LONG, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double fv(double rate, int periods, double payment, double pv, double type) {
-        type = (Math.abs(type) >= 1) ? 1 : 0;
+        type = Math.abs(type) >= 1 ? 1 : 0;
         double fv = pv * Math.pow(1 + rate, periods);
         for (int i = 0; i < periods; i++) {
-            fv += (payment) * Math.pow(1 + rate, i + type);
+            fv += payment * Math.pow(1 + rate, i + type);
         }
         return -fv;
     }
@@ -1205,7 +1192,7 @@ public final class Functions {
     @FunctionType(functionName = "PMT", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double pmt(double rate, double periods, double pv, double fv, double type) {
-        type = (Math.abs(type) >= 1) ? 1 : 0;
+        type = Math.abs(type) >= 1 ? 1 : 0;
 
         if (rate == 0) {
             return -1 * (fv + pv) / periods;
@@ -1232,15 +1219,15 @@ public final class Functions {
     @FunctionType(functionName = "NPER", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double nper(double rate, double pmt, double pv, double fv, double type) {
-        type = (Math.abs(type) >= 1) ? 1 : 0;
+        type = Math.abs(type) >= 1 ? 1 : 0;
         double nper = 0;
         if (rate == 0) {
             nper = -1 * (fv + pv) / pmt;
         } else {
 
             double cr = (type == 1 ? 1 + rate : 1) * pmt / rate;
-            double val1 = ((cr - fv) < 0) ? Math.log(fv - cr) : Math.log(cr - fv);
-            double val2 = ((cr - fv) < 0) ? Math.log(-pv - cr) : Math.log(pv + cr);
+            double val1 = cr - fv < 0 ? Math.log(fv - cr) : Math.log(cr - fv);
+            double val2 = cr - fv < 0 ? Math.log(-pv - cr) : Math.log(pv + cr);
             double val3 = Math.log(1 + rate);
             nper = (val1 - val2) / val3;
         }
@@ -1262,7 +1249,7 @@ public final class Functions {
     @FunctionType(functionName = "IPMT", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double ipmt(double rate, double per, double nper, double pv, double fv, double type) {
-        type = (Math.abs(type) >= 1) ? 1 : 0;
+        type = Math.abs(type) >= 1 ? 1 : 0;
         double ipmt = fv(rate, Double.valueOf(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
         if (type == 1) {
             ipmt = ipmt / (1 + rate);
@@ -1287,13 +1274,13 @@ public final class Functions {
     @FunctionType(functionName = "PV", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
             AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double pv(double rate, double nper, double pmt, double fv, double type) {
-        type = (Math.abs(type) >= 1) ? 1 : 0;
+        type = Math.abs(type) >= 1 ? 1 : 0;
 
         if (rate == 0) {
-            return -1 * ((nper * pmt) + fv);
+            return -1 * (nper * pmt + fv);
         } else {
 
-            return (((1 - Math.pow(1 + rate, nper)) / rate) * (type == 1 ? 1 + rate : 1) * pmt - fv)
+            return ((1 - Math.pow(1 + rate, nper)) / rate * (type == 1 ? 1 + rate : 1) * pmt - fv)
                     / Math.pow(1 + rate, nper);
         }
 
@@ -1352,7 +1339,7 @@ public final class Functions {
     public static double rate(double nper, double pmt, double pv, double fv, double type, double guess) {
         // FROM MS http://office.microsoft.com/en-us/excel-help/rate-HP005209232.aspx
 
-        type = (Math.abs(type) >= 1) ? 1 : 0; // the only change to the implementation Apache POI
+        type = Math.abs(type) >= 1 ? 1 : 0; // the only change to the implementation Apache POI
         final int financialMaxIterations = 20; // Bet accuracy with 128
         final double financialPrecision = 0.0000001; // 1.0e-8
 
@@ -1376,7 +1363,7 @@ public final class Functions {
         i = 0.0;
         x0 = 0.0;
         double x1 = rate;
-        while ((Math.abs(y0 - y1) > financialPrecision) && (i < financialMaxIterations)) {
+        while (Math.abs(y0 - y1) > financialPrecision && i < financialMaxIterations) {
             rate = (y1 * x0 - y0 * x1) / (y1 - y0);
             x0 = x1;
             x1 = rate;
@@ -1560,8 +1547,7 @@ public final class Functions {
         return s.replaceAll("([a-zA-Z0-9])[\\-–—]([a-zA-Z0-9])", "$1$2");
     }
 
-    @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DOUBLE,
-            AccessType.MEMO }, returnType = AccessType.DATETIME)
+    @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.DOUBLE, AccessType.MEMO }, returnType = AccessType.DATETIME)
     public static Timestamp formulaToDate(Double res, String datatype) throws UcanaccessSQLException {
         if (res == null) {
             return null;
@@ -1609,7 +1595,7 @@ public final class Functions {
 
     @FunctionType(namingConflict = true, functionName = "FIX", argumentTypes = {
             AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
-    public static double fix(double d) throws UcanaccessSQLException {
+    public static double fix(double d) {
         return sign(d) * mint(Math.abs(d));
     }
 
@@ -1634,9 +1620,9 @@ public final class Functions {
         }
 
         for (double d = start; d <= stop; d += interval) {
-            if ((number >= d && number < (d + interval))) {
+            if (number >= d && number < d + interval) {
                 return padLeft(lceil(d), h) + ":"
-                        + padLeft(((d + interval) <= stop ? lfloor(d + interval) : lrint(stop)), h);
+                        + padLeft(d + interval <= stop ? lfloor(d + interval) : lrint(stop), h);
 
             }
         }

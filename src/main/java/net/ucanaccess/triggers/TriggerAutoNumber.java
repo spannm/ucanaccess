@@ -10,7 +10,6 @@ import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import org.hsqldb.Trigger;
 import org.hsqldb.types.JavaObjectData;
 
 import java.sql.SQLException;
@@ -44,7 +43,7 @@ public class TriggerAutoNumber extends TriggerBase {
                 } else
 
                 if (cl.isAutoNumber()) {
-                    if (type == Trigger.INSERT_BEFORE_ROW) {
+                    if (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {
 
                         if (t.isAllowAutoNumberInsert()) {
                             if (cl.getAutoNumberGenerator().getType().equals(DataType.LONG) && newR[i] != null) {
@@ -63,7 +62,7 @@ public class TriggerAutoNumber extends TriggerBase {
                                 conn.setGeneratedKey(newR[i]);
                             }
                         }
-                    } else if (type == Trigger.UPDATE_BEFORE_ROW
+                    } else if (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW
                             && cl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {
                         if (!oldR[i].equals(newR[i])) {
                             throw new RuntimeException("Cannot update autoincrement column");
@@ -84,7 +83,7 @@ public class TriggerAutoNumber extends TriggerBase {
     }
 
     private void validateGUID(Object guid) throws SQLException {
-        if (guid != null && guid instanceof String) {
+        if (guid instanceof String) {
             String guidS = (String) guid;
             if (guidS.length() != 38 || !guidS.matches(GUID_PATTERN)) {
                 throw new SQLException("Invalid guid format " + guidS);

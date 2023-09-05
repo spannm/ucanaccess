@@ -83,7 +83,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (right.length() == 0) {
             return sb.append(left).append(" IS NULL ").toString();
         }
-        String exp = right == null ? null : (apos ? "'" + right + "'" : right);
+        String exp = right == null ? null : apos ? "'" + right + "'" : right;
         sb.append(left).append(" ");
         if ("LIKE".equals(op)) {
             if (exp.indexOf('_') < 0 && exp.indexOf('%') < 0) {
@@ -116,7 +116,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 } else if (es.startsWith(CAST_EXPR) || "PUBLIC".equals(es)) {
                     sb.append(es);
                 } else {
-                    String suffix = es.indexOf(".") > 0 ? "" : "r.";
+                    String suffix = es.indexOf('.') > 0 ? "" : "r.";
                     sb.append(suffix).append(es).append(" AS ").append(cn);
                 }
             } else {
@@ -197,6 +197,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         }
     }
 
+    @Override
     public boolean generatedKeyAlwaysReturned() {
         return true;
     }
@@ -219,7 +220,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
             Integer[] scopeArr = new Integer[] {bestRowTemporary, bestRowTransaction, bestRowSession};
 
-            String nullableS = (nullable) ? null : String.valueOf(columnNoNulls);
+            String nullableS = nullable ? null : String.valueOf(columnNoNulls);
             StringBuilder sql =
                 new StringBuilder(select("SYSTEM_BESTROWIDENTIFIER",
                     List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
@@ -291,7 +292,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = connection.isShowSchema() ? "PUBLIC" : null;
             String schem = connection.isShowSchema() ? "PUBLIC" : null;
 
-            StringBuilder select = new StringBuilder("SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,")
+            String s = "SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,";
+            StringBuilder select = new StringBuilder(s)
                 .append(cAlias("TABLE_NAME")).append(",").append(cAlias("COLUMN_NAME")).append(",")
                 .append(nAlias("GRANTOR")).append(",").append(nAlias("GRANTEE")).append(",")
                 .append(nAlias("PRIVILEGE_TYPE PRIVILEGE")).append(",").append(nAlias("IS_GRANTABLE"))
@@ -299,7 +301,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 .append(on(List.of("TABLE_NAME", "COLUMN_NAME"),
                     List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                 .append(and("TABLE_CATALOG", "=", "PUBLIC", " WHERE "))
-                .append(and("TABLE_SCHEMA", "=", "PUBLIC") + and("TABLE_NAME", "=", table))
+                .append(and("TABLE_SCHEMA", "=", "PUBLIC"))
+                .append(and("TABLE_NAME", "=", table))
                 .append(and("COLUMN_NAME", "LIKE", columnNamePattern));
 
             return executeQuery(select.toString());
@@ -553,7 +556,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             table = normalizeName(table);
             String cat = connection.isShowSchema() ? "PUBLIC" : null;
             String schem = connection.isShowSchema() ? "PUBLIC" : null;
-            String nuS = (unique) ? "AND NON_UNIQUE IS FALSE" : "";
+            String nuS = unique ? "AND NON_UNIQUE IS FALSE" : "";
             StringBuilder select = new StringBuilder(
                 select("SYSTEM_INDEXINFO", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
@@ -777,8 +780,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     private boolean invokeWrapper(String catalog, String schema) {
-        return (connection.isShowSchema()
-            && ((catalog != null || schema != null) && (!"PUBLIC".equals(catalog) || !"PUBLIC".equals(schema))));
+        return connection.isShowSchema()
+            && (catalog != null || schema != null) && (!"PUBLIC".equals(catalog) || !"PUBLIC".equals(schema));
     }
 
     @Override
@@ -837,6 +840,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         }
     }
 
+    @Override
     public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
             String columnNamePattern) throws SQLException {
         try {
@@ -1107,7 +1111,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     public static String normalizeName(String name) {
-        if (name == null || name.trim().length() == 0) {
+        if (name == null || name.isBlank()) {
             return name;
         }
         if (name.contains("%")) {

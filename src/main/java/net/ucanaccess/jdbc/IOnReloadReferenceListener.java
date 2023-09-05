@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-public interface OnReloadReferenceListener {
+public interface IOnReloadReferenceListener {
 
     void onReload();
 

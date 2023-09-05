@@ -13,7 +13,7 @@ public class TriggerInsert extends TriggerBase {
         try {
             Table t = getTable(tableName, conn);
             super.convertRowTypes(newR, t);
-            InsertCommand c4j = (t == null) ? new InsertCommand(tableName, conn.getDbIO(), newR, execId)
+            InsertCommand c4j = t == null ? new InsertCommand(tableName, conn.getDbIO(), newR, execId)
                     : new InsertCommand(t, newR, execId);
             conn.add(c4j);
         } catch (Exception e) {

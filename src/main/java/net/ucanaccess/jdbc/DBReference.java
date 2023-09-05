@@ -15,114 +15,44 @@ import java.util.*;
 import java.util.Date;
 
 public class DBReference {
-    private static final String                    CIPHER_SPEC       = "AES";
-    private static List<OnReloadReferenceListener> onReloadListeners = new ArrayList<>();
-    private static String                          version;
-    private File                                   dbFile;
-    private Database                               dbIO;
-    private FileLock                               fileLock          = null;
-    private String                                 id                = id();
-    private boolean                                inMemory          = true;
-    private long                                   lastModified;
-    private boolean                                openExclusive     = false;
-    private MemoryTimer                            memoryTimer;
-    private boolean                                readOnly;
-    private boolean                                readOnlyFileFormat;
-    private boolean                                showSchema;
-    private File                                   tempHsql;
-    private File                                   toKeepHsql;
-    private boolean                                immediatelyReleaseResources;
-    private boolean                                encryptHSQLDB;
-    private String                                 encryptionKey;
-    private String                                 pwd;
-    private JackcessOpenerInterface                jko;
-    private Map<String, String>                    externalResourcesMapping;
-    private boolean                                firstConnection   = true;
-    private FileFormat                             dbFormat;
-    private boolean                                columnOrderDisplay;
-    private boolean                                hsqldbShutdown;
-    private File                                   mirrorFolder;
-    private Set<File>                              links             = new HashSet<>();
-    private boolean                                ignoreCase        = true;
-    private boolean                                mirrorReadOnly;
-    private Integer                                lobScale;
-    private boolean                                skipIndexes;
-    private boolean                                sysSchema;
-    private boolean                                preventReloading;
-    private boolean                                concatNulls;
-    private boolean                                mirrorRecreated;
+    private static final String                     CIPHER_SPEC       = "AES";
+    private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
+    private static String                           version;
+    private File                                    dbFile;
+    private Database                                dbIO;
+    private FileLock                                fileLock          = null;
+    private String                                  id                = id();
+    private boolean                                 inMemory          = true;
+    private long                                    lastModified;
+    private boolean                                 openExclusive     = false;
+    private MemoryTimer                             memoryTimer;
+    private boolean                                 readOnly;
+    private boolean                                 readOnlyFileFormat;
+    private boolean                                 showSchema;
+    private File                                    tempHsql;
+    private File                                    toKeepHsql;
+    private boolean                                 immediatelyReleaseResources;
+    private boolean                                 encryptHSQLDB;
+    private String                                  encryptionKey;
+    private String                                  pwd;
+    private IJackcessOpenerInterface                jko;
+    private Map<String, String>                     externalResourcesMapping;
+    private boolean                                 firstConnection   = true;
+    private FileFormat                              dbFormat;
+    private boolean                                 columnOrderDisplay;
+    private boolean                                 hsqldbShutdown;
+    private File                                    mirrorFolder;
+    private Set<File>                               links             = new HashSet<>();
+    private boolean                                 ignoreCase        = true;
+    private boolean                                 mirrorReadOnly;
+    private Integer                                 lobScale;
+    private boolean                                 skipIndexes;
+    private boolean                                 sysSchema;
+    private boolean                                 preventReloading;
+    private boolean                                 concatNulls;
+    private boolean                                 mirrorRecreated;
 
-    private static class MemoryTimer {
-        private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
-
-        private final DBReference dbReference;
-        private final Timer       timer;
-        private int               activeConnection;
-        private long              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;
-        private long              lastConnectionTime;
-
-        MemoryTimer(DBReference _dbReference) {
-            dbReference = _dbReference;
-            timer = new Timer(getClass().getSimpleName() + '-' + _dbReference.getDbFile().getName(), true);
-        }
-
-        private synchronized void decrementActiveConnection(final Session _session) {
-            activeConnection--;
-            if (dbReference.immediatelyReleaseResources && activeConnection == 0) {
-                try {
-
-                    dbReference.shutdown(_session);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return;
-            }
-            if (dbReference.inMemory && inactivityTimeout > 0) {
-                if (activeConnection == 0) {
-                    TimerTask task = new TimerTask() {
-                        @Override
-                        public void run() {
-                            synchronized (UcanaccessDriver.class) {
-                                if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
-                                    && getActiveConnection() == 0) {
-                                    try {
-                                        dbReference.shutdown(_session);
-                                    } catch (Exception ignored) {}
-                                    System.gc();
-                                }
-                            }
-                        }
-                    };
-                    timer.schedule(task, inactivityTimeout);
-                }
-            }
-        }
-
-        private synchronized int getActiveConnection() {
-            return activeConnection;
-        }
-
-        private long getInactivityTimeout() {
-            return inactivityTimeout;
-        }
-
-        private synchronized long getLastConnectionTime() {
-            return lastConnectionTime;
-        }
-
-        private synchronized void incrementActiveConnection() {
-            activeConnection++;
-            if (dbReference.inMemory && inactivityTimeout > 0) {
-                lastConnectionTime = System.currentTimeMillis();
-            }
-        }
-
-        private void setInactivityTimeout(int _inactivityTimeout) {
-            inactivityTimeout = _inactivityTimeout;
-        }
-    }
-
-    public DBReference(File fl, FileFormat ff, JackcessOpenerInterface _jko, final String _pwd)
+    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd)
         throws IOException {
         dbFile = fl;
         pwd = _pwd;
@@ -146,7 +76,7 @@ public class DBReference {
                     throw new IOException("Cannot resolve db link");
                 }
                 File linkeeFile = new File(linkeeFileName);
-                Map<String, String> emr = DBReference.this.externalResourcesMapping;
+                Map<String, String> emr = externalResourcesMapping;
                 if (!linkeeFile.exists() && emr != null && emr.containsKey(linkeeFileName.toLowerCase())) {
                     linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
                 }
@@ -189,7 +119,7 @@ public class DBReference {
         return false;
     }
 
-    public static boolean addOnReloadRefListener(OnReloadReferenceListener action) {
+    public static boolean addOnReloadRefListener(IOnReloadReferenceListener action) {
         return onReloadListeners.add(action);
     }
 
@@ -212,7 +142,7 @@ public class DBReference {
     Connection checkLastModified(Connection conn, Session session) throws Exception {
         // I'm detecting if another process(and not another thread) is writing
 
-        if ((lastModified + 2000 > filesUpdateTime()) || (preventReloading && !checkInside())) {
+        if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
             return conn;
         }
         updateLastModified();
@@ -336,8 +266,7 @@ public class DBReference {
             try (Connection conn = getHSQLDBConnection(session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
     }
 
@@ -390,7 +319,7 @@ public class DBReference {
             if (ignoreCase && (!keptMirror || mirrorRecreated)) {
                 setIgnoreCase(conn);
             }
-            if (!mirrorReadOnly || (!keptMirror || mirrorRecreated)) {
+            if (!mirrorReadOnly || !keptMirror || mirrorRecreated) {
                 initHSQLDB(conn);
             }
             firstConnection = false;
@@ -472,7 +401,7 @@ public class DBReference {
     }
 
     public long getInactivityTimeout() {
-        return memoryTimer.getInactivityTimeout();
+        return memoryTimer.inactivityTimeout;
     }
 
     private String id() {
@@ -505,9 +434,9 @@ public class DBReference {
         if (suffixStart < 0) {
             suffixStart = fileName.length();
         }
-        String suffix = (FileFormat.V2016.equals(dbFormat) || FileFormat.V2010.equals(dbFormat) || FileFormat.V2007.equals(dbFormat))
-                ? ".laccdb"
-                : ".ldb";
+        String suffix = FileFormat.V2016.equals(dbFormat) || FileFormat.V2010.equals(dbFormat) || FileFormat.V2007.equals(dbFormat)
+            ? ".laccdb"
+            : ".ldb";
         return new File(folder, fileName.substring(0, suffixStart) + suffix);
     }
 
@@ -540,7 +469,7 @@ public class DBReference {
     public void reloadDbIO() throws IOException {
         dbIO.flush();
         dbIO.close();
-        for (OnReloadReferenceListener listener : onReloadListeners) {
+        for (IOnReloadReferenceListener listener : onReloadListeners) {
             listener.onReload();
         }
         dbIO = open(dbFile, pwd);
@@ -566,7 +495,7 @@ public class DBReference {
     void shutdown(Session _session) throws Exception {
         DBReferenceSingleton.getInstance().remove(dbFile.getAbsolutePath());
         if (immediatelyReleaseResources) {
-            for (OnReloadReferenceListener listener : onReloadListeners) {
+            for (IOnReloadReferenceListener listener : onReloadListeners) {
                 listener.onReload();
             }
         }
@@ -661,15 +590,71 @@ public class DBReference {
         concatNulls = _concatNulls;
     }
 
-    //CHECKSTYLE:OFF
-    @Override
-    protected void finalize() throws Throwable {
-        if (memoryTimer != null) {
-            memoryTimer.timer.cancel();
-            memoryTimer = null;
+    private static class MemoryTimer {
+        private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
+
+        private final DBReference dbReference;
+        private final Timer       timer;
+        private int               activeConnection;
+        private long              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;
+        private long              lastConnectionTime;
+
+        MemoryTimer(DBReference _dbReference) {
+            dbReference = _dbReference;
+            timer = new Timer(getClass().getSimpleName() + '-' + _dbReference.getDbFile().getName(), true);
         }
-        super.finalize();
+
+        synchronized void decrementActiveConnection(final Session _session) {
+            activeConnection--;
+            if (dbReference.immediatelyReleaseResources && activeConnection == 0) {
+                try {
+                    dbReference.shutdown(_session);
+                } catch (Exception e) {
+                    Logger.logWarning("Error shutting down db " + dbReference + ": " + e);
+                }
+                timer.cancel();
+
+                return;
+            }
+            if (dbReference.inMemory && inactivityTimeout > 0) {
+                if (activeConnection == 0) {
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            synchronized (UcanaccessDriver.class) {
+                                if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
+                                    && getActiveConnection() == 0) {
+                                    try {
+                                        dbReference.shutdown(_session);
+                                    } catch (Exception ignored) {}
+                                    System.gc();
+                                }
+                            }
+                        }
+                    };
+                    timer.schedule(task, inactivityTimeout);
+                }
+            }
+        }
+
+        private synchronized int getActiveConnection() {
+            return activeConnection;
+        }
+
+        private synchronized long getLastConnectionTime() {
+            return lastConnectionTime;
+        }
+
+        private synchronized void incrementActiveConnection() {
+            activeConnection++;
+            if (dbReference.inMemory && inactivityTimeout > 0) {
+                lastConnectionTime = System.currentTimeMillis();
+            }
+        }
+
+        private void setInactivityTimeout(int _inactivityTimeout) {
+            inactivityTimeout = _inactivityTimeout;
+        }
     }
-    //CHECKSTYLE:ON
 
 }

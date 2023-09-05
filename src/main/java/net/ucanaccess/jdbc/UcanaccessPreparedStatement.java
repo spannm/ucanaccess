@@ -38,9 +38,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     private final class ParameterReset {
-        private String     methodName;
-        private Object[]   args;
-        private Class<?>[] argClasses;
+        private final String     methodName;
+        private final Object[]   args;
+        private final Class<?>[] argClasses;
 
         private ParameterReset(String _methodName, Class<?>[] _argClasses, Object... _args) {
             methodName = _methodName;

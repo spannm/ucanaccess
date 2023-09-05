@@ -34,7 +34,7 @@ public final class UcanaccessDriver implements Driver {
 
     @Override
     public boolean acceptsURL(String url) {
-        return (url.startsWith(URL_PREFIX) && url.length() > URL_PREFIX.length());
+        return url.startsWith(URL_PREFIX) && url.length() > URL_PREFIX.length();
     }
 
     @Override
@@ -43,7 +43,7 @@ public final class UcanaccessDriver implements Driver {
             return null;
         }
         readProperties(_props, _url);
-        String fileMdbPath = _url.indexOf(";") > 0 ? _url.substring(URL_PREFIX.length(), _url.indexOf(";"))
+        String fileMdbPath = _url.indexOf(';') > 0 ? _url.substring(URL_PREFIX.length(), _url.indexOf(';'))
                 : _url.substring(URL_PREFIX.length());
         File mdb = new File(fileMdbPath);
         DBReferenceSingleton as = DBReferenceSingleton.getInstance();
@@ -62,15 +62,15 @@ public final class UcanaccessDriver implements Driver {
                 }
                 boolean useCustomOpener = _props.containsKey("jackcessopener");
 
-                JackcessOpenerInterface jko = useCustomOpener
+                IJackcessOpenerInterface jko = useCustomOpener
                         ? newJackcessOpenerInstance(_props.getProperty("jackcessopener")) : new DefaultJackcessOpener();
                 DBReference dbRef = alreadyLoaded ? as.getReference(mdb)
                         : as.loadReference(mdb, ff, jko, _props.getProperty("password"));
 
                 if (!alreadyLoaded) {
                     if ((useCustomOpener
-                            || (_props.containsKey("encrypt") && Boolean.parseBoolean(_props.getProperty("encrypt"))))
-                            && ((_props.containsKey("memory") && !Boolean.parseBoolean(_props.getProperty("memory")))
+                            || _props.containsKey("encrypt") && Boolean.parseBoolean(_props.getProperty("encrypt")))
+                            && (_props.containsKey("memory") && !Boolean.parseBoolean(_props.getProperty("memory"))
                                     || _props.containsKey("keepmirror"))) {
                         dbRef.setEncryptHSQLDB(true);
                     }
@@ -244,6 +244,7 @@ public final class UcanaccessDriver implements Driver {
         return 0;
     }
 
+    @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
@@ -258,13 +259,13 @@ public final class UcanaccessDriver implements Driver {
         return true;
     }
 
-    private JackcessOpenerInterface newJackcessOpenerInstance(String className)
+    private IJackcessOpenerInterface newJackcessOpenerInstance(String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
         Object newInstance = Class.forName(className).getConstructor().newInstance();
-        if (!(newInstance instanceof JackcessOpenerInterface)) {
+        if (!(newInstance instanceof IJackcessOpenerInterface)) {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_JACKCESS_OPENER);
         }
-        return (JackcessOpenerInterface) newInstance;
+        return (IJackcessOpenerInterface) newInstance;
     }
 
     private void readProperties(Properties pr, String url) {
@@ -281,7 +282,7 @@ public final class UcanaccessDriver implements Driver {
         StringTokenizer st = new StringTokenizer(url, ";");
         while (st.hasMoreTokens()) {
             String entry = st.nextToken();
-            int sep = entry.indexOf("=");
+            int sep = entry.indexOf('=');
             if (sep > 0 && entry.length() > sep) {
                 pr.put(entry.substring(0, sep).toLowerCase(), entry.substring(sep + 1));
             }

@@ -30,7 +30,7 @@ public class DDLCommandEnlist {
         Database db = ac.getDbIO();
         LoadJet lfa = new LoadJet(hsqlConn, db);
         String ntn = tn;
-        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
+        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
             ntn = SQLConverter.escapeIdentifier(tn.substring(1, tn.length() - 1));
         }
 
@@ -74,25 +74,25 @@ public class DDLCommandEnlist {
             enlistCreateTable(sql, ddlType);
             break;
         case DROP_TABLE:
-            enlistDropTable(sql, ddlType);
+            enlistDropTable(ddlType);
             break;
         case ALTER_RENAME:
-            enlistAlterRename(sql, ddlType);
+            enlistAlterRename(ddlType);
             break;
         case ADD_COLUMN:
             enlistAddColumn(sql, ddlType);
             break;
         case CREATE_INDEX:
-            enlistCreateIndex(sql, ddlType);
+            enlistCreateIndex(ddlType);
             break;
         case CREATE_PRIMARY_KEY:
-            enlistCreatePrimaryKey(sql, ddlType);
+            enlistCreatePrimaryKey(ddlType);
             break;
         case CREATE_FOREIGN_KEY:
             enlistCreateForeignKey(sql, ddlType);
             break;
         case DROP_FOREIGN_KEY:
-            enlistDropForeignKey(sql, ddlType);
+            enlistDropForeignKey(ddlType);
             break;
         default:
             break;
@@ -113,7 +113,7 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistDropForeignKey(String sql, DDLType ddlType) throws SQLException {
+    private void enlistDropForeignKey(DDLType ddlType) throws SQLException {
         String relationshipName = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         DropForeignKeyCommand c4io = new DropForeignKeyCommand(execId, relationshipName);
@@ -124,7 +124,7 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistCreatePrimaryKey(String sql, DDLType ddlType) throws SQLException {
+    private void enlistCreatePrimaryKey(DDLType ddlType) throws SQLException {
         String tableName = ddlType.getDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         CreatePrimaryKeyCommand c4io = new CreatePrimaryKeyCommand(tableName, execId);
@@ -135,7 +135,7 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistCreateIndex(String sql, DDLType ddlType) throws SQLException {
+    private void enlistCreateIndex(DDLType ddlType) throws SQLException {
         String indexName = ddlType.getDBObjectName();
         String tableName = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
@@ -169,15 +169,14 @@ public class DDLCommandEnlist {
     }
 
     private void check4OutOfPlacedNotNull(String sql) {
-        if (Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()) {
-            if (notNulls.length > 0 && (notNulls[0] == null || !notNulls[0])) {
-                notNulls[0] = true;
-            }
+        if (Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()
+            && notNulls.length > 0 && (notNulls[0] == null || !notNulls[0])) {
+            notNulls[0] = true;
         }
 
     }
 
-    private void enlistDropTable(String sql, DDLType ddlType) throws SQLException {
+    private void enlistDropTable(DDLType ddlType) throws SQLException {
         String tn = ddlType.getDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
@@ -188,7 +187,7 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistAlterRename(String sql, DDLType ddlType) throws SQLException {
+    private void enlistAlterRename(DDLType ddlType) throws SQLException {
         String oldTn = ddlType.getDBObjectName();
         String newTn = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
@@ -223,14 +222,14 @@ public class DDLCommandEnlist {
         String[] colDecls = tknt.split("[\\s\n\r]+");
         colDecls = checkEscaped("[", "]", colDecls, tknt);
         colDecls = checkEscaped("`", "`", colDecls, tknt);
-        String escaped = (SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase())) ? colDecls[0].toUpperCase()
+        String escaped = SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()) ? colDecls[0].toUpperCase()
                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
         columnMap.put(escaped, colDecls[0]);
 
         boolean reset = false;
         if (tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")) {
             reset = true;
-            tknt = tknt.substring(tknt.indexOf(")") + 1).trim();
+            tknt = tknt.substring(tknt.indexOf(')') + 1).trim();
             colDecls = tknt.split("[\\s\n\r]+");
         }
 
@@ -247,7 +246,7 @@ public class DDLCommandEnlist {
 
         }
 
-        if ((colDecls.length > 2 || (reset & colDecls.length == 2))
+        if ((colDecls.length > 2 || reset & colDecls.length == 2)
                 && "not".equalsIgnoreCase(colDecls[colDecls.length - 2])
                 && "null".equalsIgnoreCase(colDecls[colDecls.length - 1])) {
             notNullList.add(true);
@@ -296,7 +295,7 @@ public class DDLCommandEnlist {
             return value.substring(1, value.length() - 1).replaceAll("\"\"", "\"");
         }
         if (value.startsWith("'") && value.endsWith("'")) {
-            return (value.substring(1, value.length() - 1).replaceAll("''", "'"));
+            return value.substring(1, value.length() - 1).replaceAll("''", "'");
         }
         return value;
     }

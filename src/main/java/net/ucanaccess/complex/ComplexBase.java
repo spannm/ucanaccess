@@ -50,9 +50,9 @@ public abstract class ComplexBase implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((columnName == null) ? 0 : columnName.hashCode());
+        result = prime * result + (columnName == null ? 0 : columnName.hashCode());
         result = prime * result + id;
-        result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+        result = prime * result + (tableName == null ? 0 : tableName.hashCode());
         return result;
     }
 
@@ -61,10 +61,7 @@ public abstract class ComplexBase implements Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ComplexBase other = (ComplexBase) obj;

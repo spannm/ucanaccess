@@ -22,13 +22,13 @@ public class AppendQueryTemp extends AppendQueryImpl {
         List<String> values = getValues();
         if (!values.isEmpty()) {
             List<String> decl = getInsertDeclaration();
-            if (decl.size() > 0) {
+            if (!decl.isEmpty()) {
                 builder.append("(").append(getInsertDeclaration()).append(")");
             }
             builder.append(" VALUES (").append(values).append(')');
         } else {
             List<String> decl = getSelectDeclaration();
-            if (decl.size() > 0) {
+            if (!decl.isEmpty()) {
                 builder.append("(").append(getSelectDeclaration()).append(")");
             }
             toSQLSelectString(builder, true);

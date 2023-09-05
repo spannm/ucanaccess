@@ -17,7 +17,7 @@ public class UcanaccessBlob implements Blob {
         conn = _conn;
         if (_blob.length() != 0) {
             BlobKey bk = BlobKey.getBlobKey(_blob.getBinaryStream());
-            usingBlobKey = (bk != null);
+            usingBlobKey = bk != null;
             if (usingBlobKey) {
                 blob = bk.getOleBlob(conn.getDbIO());
             }

@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
 import net.ucanaccess.jdbc.UcanaccessDriver;
-import net.ucanaccess.jdbc.UcanaccessErrorCodes;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.test.util.AccessVersion;
@@ -67,8 +67,8 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
 
         } catch (SQLException _ex) {
 
-            assertEquals(_ex.getErrorCode(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
-            assertEquals(_ex.getSQLState(), UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
+            assertEquals(_ex.getErrorCode(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+            assertEquals(_ex.getSQLState(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
         } finally {
             if (st != null) {
                 st.close();

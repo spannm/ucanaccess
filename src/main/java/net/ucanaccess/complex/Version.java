@@ -64,8 +64,8 @@ public class Version extends ComplexBase {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((modifiedDate == null) ? 0 : modifiedDate.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + (modifiedDate == null ? 0 : modifiedDate.hashCode());
+        result = prime * result + (value == null ? 0 : value.hashCode());
         return result;
     }
 

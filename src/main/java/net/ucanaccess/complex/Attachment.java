@@ -120,11 +120,11 @@ public class Attachment extends ComplexBase {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + Arrays.hashCode(data);
-        result = prime * result + ((flags == null) ? 0 : flags.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + (flags == null ? 0 : flags.hashCode());
+        result = prime * result + (name == null ? 0 : name.hashCode());
+        result = prime * result + (timeStamp == null ? 0 : timeStamp.hashCode());
+        result = prime * result + (type == null ? 0 : type.hashCode());
+        result = prime * result + (url == null ? 0 : url.hashCode());
         return result;
     }
 

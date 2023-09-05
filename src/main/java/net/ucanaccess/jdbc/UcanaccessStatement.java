@@ -99,6 +99,7 @@ public class UcanaccessStatement implements Statement {
         }
     }
 
+    @Override
     public void closeOnCompletion() throws SQLException {
         try {
             if (wrapped instanceof JDBCStatement) {
@@ -415,6 +416,7 @@ public class UcanaccessStatement implements Statement {
         }
     }
 
+    @Override
     public boolean isCloseOnCompletion() throws SQLException {
         try {
             return ((JDBCStatement) wrapped).isCloseOnCompletion();

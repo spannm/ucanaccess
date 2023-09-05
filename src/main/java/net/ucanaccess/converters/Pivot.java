@@ -38,11 +38,6 @@ public class Pivot {
         conn = _conn;
     }
 
-    public Pivot(String _name, Connection _conn) {
-
-        conn = _conn;
-    }
-
     private void cachePrepare(String name) {
         if (pivotIn != null) {
             PREPARE_MAP.put(name, pivotIn);

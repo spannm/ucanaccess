@@ -52,7 +52,7 @@ public class DFunction {
                     String tn = tableN.startsWith("[") & tableN.endsWith("]") ? unpad(tableN) : tableN;
                     sb.append(init).append(s).append("(").append(mtc.group(1)).append(") FROM ").append(tableN)
                         .append(" AS ").append(alias).append(" WHERE ");
-                    boolean accessConcat = g3.indexOf("&") > 0;
+                    boolean accessConcat = g3.indexOf('&') > 0;
                     boolean sqlConcat = g3.indexOf("||") > 0;
                     if (accessConcat || sqlConcat) {
                         String concat = accessConcat ? "&" : Pattern.quote("||");
@@ -71,8 +71,8 @@ public class DFunction {
                                         continue;
                                     }
                                     String pref = mtcop.group(1);
-                                    if (".".equals(pref) || ("[".equals(pref) && mtcop.start(1) > 0
-                                        && tkn.charAt(mtcop.start(1) - 1) == '.')) {
+                                    if (".".equals(pref) || "[".equals(pref) && mtcop.start(1) > 0
+                                        && tkn.charAt(mtcop.start(1) - 1) == '.') {
                                         continue;
                                     }
                                     tkn = tkn.replaceAll(oppn,
@@ -100,7 +100,7 @@ public class DFunction {
             st = conn.createStatement();
             ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
             String tableN = rsmd.getTableName(1);
-            if (tableN == null || tableN.trim().length() == 0) {
+            if (tableN == null || tableN.isBlank()) {
                 return identifier;
             }
             return tableN;
@@ -135,8 +135,8 @@ public class DFunction {
 
     private static boolean isQuoted(String g3) {
         g3 = g3.trim();
-        return g3.startsWith("'") && g3.endsWith("'") && (g3.substring(1, g3.length() - 1).indexOf('\'') < 0)
-                || g3.startsWith("\"") && g3.endsWith("\"") && (g3.substring(1, g3.length() - 1).indexOf('"') < 0);
+        return g3.startsWith("'") && g3.endsWith("'") && g3.substring(1, g3.length() - 1).indexOf('\'') < 0
+                || g3.startsWith("\"") && g3.endsWith("\"") && g3.substring(1, g3.length() - 1).indexOf('"') < 0;
     }
 
     private static String unpad(String tkn) {

@@ -7,7 +7,7 @@ import com.healthmarketscience.jackcess.DateTimeType;
 import java.io.File;
 import java.io.IOException;
 
-public class DefaultJackcessOpener implements JackcessOpenerInterface {
+public class DefaultJackcessOpener implements IJackcessOpenerInterface {
 
     @Override
     public Database open(File fl, String pwd) throws IOException {

@@ -231,11 +231,12 @@ public class LoadJet {
         private static final int    HSQL_UK_VIOLATION        = -ErrorCode.X_23505;
         private static final String SYSTEM_SCHEMA            = "SYS";
         private static final int    DEFAULT_STEP             = 2000;
-        private List<String>        unresolvedTables         = new ArrayList<>();
-        private List<String>        calculatedFieldsTriggers = new ArrayList<>();
-        private LinkedList<String>  loadingOrder             = new LinkedList<>();
-        private Set<Column>         alreadyIndexed           = new HashSet<>();
-        private Set<String>         readOnlyTables           = new HashSet<>();
+
+        private final List<String>  unresolvedTables         = new ArrayList<>();
+        private final List<String>  calculatedFieldsTriggers = new ArrayList<>();
+        private final List<String>  loadingOrder             = new LinkedList<>();
+        private final Set<Column>   alreadyIndexed           = new HashSet<>();
+        private final Set<String>   readOnlyTables           = new HashSet<>();
 
         private String commaSeparated(List<? extends Index.Column> columns, boolean escape) throws SQLException {
             String comma = "";
@@ -293,7 +294,7 @@ public class LoadJet {
                     if (dpso != null) {
                         dps = cl.getProperties().get("DecimalPlaces").getValue();
                     }
-                    byte dp = dps == null ? 7 : ((Byte) dps < 0 ? 7 : (Byte) dps);
+                    byte dp = dps == null ? 7 : (Byte) dps < 0 ? 7 : (Byte) dps;
 
                     htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + dp + ")";
                 }
@@ -422,7 +423,7 @@ public class LoadJet {
 
                 PropertyMap pm = cl.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-                if (constraints && required != null && required instanceof Boolean && ((Boolean) required)) {
+                if (constraints && required != null && required instanceof Boolean && (Boolean) required) {
                     sbC.append(" NOT NULL ");
                 }
                 comma = ",";
@@ -455,7 +456,7 @@ public class LoadJet {
             if (exprp != null) {
                 Set<String> setu = SQLConverter.getFormulaDependencies(exprp.getValue().toString());
 
-                if (setu.size() > 0) {
+                if (!setu.isEmpty()) {
                     String or = "";
                     StringBuilder cw = new StringBuilder();
                     for (String dep : setu) {
@@ -519,7 +520,7 @@ public class LoadJet {
                 String guidExp = "GenGUID()";
                 if (!guidExp.equals(defaulT)) {
                     boolean defaultIsFunction =
-                            defaulT.toString().trim().endsWith(")") && defaulT.toString().indexOf("(") > 0;
+                            defaulT.toString().trim().endsWith(")") && defaulT.toString().indexOf('(') > 0;
                     if (defaultIsFunction) {
                         metadata.columnDef(cl.getTable().getName(), cl.getName(), defaulT.toString());
                     }
@@ -539,7 +540,7 @@ public class LoadJet {
                             Logger.logParametricWarning(Messages.DEFAULT_VALUES_DELIMETERS, "" + defaulT, cl.getName(),
                                     cl.getTable().getName(), "" + cl.getLengthInUnits());
                         }
-                        arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + (namingCounter++) + " BEFORE INSERT ON " + ntn
+                        arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + namingCounter++ + " BEFORE INSERT ON " + ntn
                                 + "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
                                 + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
 
@@ -772,7 +773,7 @@ public class LoadJet {
 
         private void createTable(Table t, boolean systemTable) throws SQLException, IOException {
             String tn = t.getName();
-            if (tn.indexOf(" ") > 0) {
+            if (tn.indexOf(' ') > 0) {
                 SQLConverter.addWhiteSpacedTableNames(tn);
             }
             String ntn = SQLConverter.escapeIdentifier(tn); // clean
@@ -819,7 +820,7 @@ public class LoadJet {
                     }
                     execInsert(ps, values);
 
-                    if (errorCheck || (i > 0 && i % step == 0) || !it.hasNext()) {
+                    if (errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
                         try {
                             ps.executeBatch();
                         } catch (SQLException e) {
@@ -873,7 +874,7 @@ public class LoadJet {
                     IndexImpl idx = (IndexImpl) idxi;
                     if (idx.isForeignKey() && !idx.getReference().isPrimaryTable()) {
                         boolean isAuto = idx.getTable().getName().equals(idx.getReferencedIndex().getTable().getName());
-                        if ((autoref && isAuto) || (!autoref && !isAuto)) {
+                        if (autoref && isAuto || !autoref && !isAuto) {
                             loadForeignKey(idx, tn);
                         }
                     }
@@ -1115,7 +1116,7 @@ public class LoadJet {
         private void loadTrigger(String tableName, String namePrefix, String when, String className)
                 throws SQLException {
             String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
-            String triggerName = namePrefix + "_" + (tableName);
+            String triggerName = namePrefix + "_" + tableName;
             // .replaceAll(" ", "_"));
             triggerName = escapeIdentifier(triggerName);
             exec("CREATE TRIGGER " + triggerName + "  " + when + " ON " + tableName + " FOR EACH ROW " + q0
@@ -1200,7 +1201,7 @@ public class LoadJet {
             registerQueryColumns(q, seq);
             qnn = SQLConverter.completeEscaping(qnn, false);
             qnn = SQLConverter.checkLang(qnn, conn, false);
-            if (qnn.indexOf(" ") > 0) {
+            if (qnn.indexOf(' ') > 0) {
                 SQLConverter.addWhiteSpacedTableNames(q.getName());
             }
 
@@ -1276,11 +1277,11 @@ public class LoadJet {
                     String select = mtc.group(2);
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
                     String[] splitted = select.split(",", -1);
-                    StringBuilder sb = new StringBuilder(pre + " select ");
+                    StringBuilder sb = new StringBuilder(pre).append(" select ");
                     List<String> lkl = new LinkedList<>();
 
                     for (String s : splitted) {
-                        int j = s.lastIndexOf(".");
+                        int j = s.lastIndexOf('.');
 
                         Pattern aliasPt = Pattern.compile("[\\s\n\r]+(?i)AS[\\s\n\r]+");
                         boolean alias = aliasPt.matcher(s).find();
@@ -1363,7 +1364,7 @@ public class LoadJet {
                 arn.add(q.getName().toLowerCase());
             }
             boolean heavy = false;
-            while (lq.size() > 0) {
+            while (!lq.isEmpty()) {
                 List<Query> arq = new ArrayList<>();
                 for (Query q : lq) {
                     String qtxt = null;
@@ -1387,7 +1388,7 @@ public class LoadJet {
                         arn.remove(q.getName().toLowerCase());
                     }
                 }
-                if (arq.size() == 0) {
+                if (arq.isEmpty()) {
                     if (heavy) {
                         break;
                     } else {
@@ -1400,22 +1401,22 @@ public class LoadJet {
         }
     }
 
-    private Connection      conn;
-    private Database        dbIO;
-    private boolean         err;
-    private FunctionsLoader functionsLoader   = new FunctionsLoader();
-    private List<String>    loadedIndexes     = new ArrayList<>();
-    private List<String>    loadedQueries     = new ArrayList<>();
-    private List<String>    loadedProcedures  = new ArrayList<>();
-    private List<String>    loadedTables      = new ArrayList<>();
-    private LogsFlusher     logsFlusher       = new LogsFlusher();
-    private TablesLoader    tablesLoader      = new TablesLoader();
-    private TriggersLoader  triggersGenerator = new TriggersLoader();
-    private ViewsLoader     viewsLoader       = new ViewsLoader();
-    private boolean         sysSchema;
-    private boolean         ff1997;
-    private boolean         skipIndexes;
-    private Metadata        metadata;
+    private final Connection      conn;
+    private final Database        dbIO;
+    private boolean               err;
+    private final FunctionsLoader functionsLoader   = new FunctionsLoader();
+    private final List<String>    loadedIndexes     = new ArrayList<>();
+    private final List<String>    loadedQueries     = new ArrayList<>();
+    private final List<String>    loadedProcedures  = new ArrayList<>();
+    private final List<String>    loadedTables      = new ArrayList<>();
+    private final LogsFlusher     logsFlusher       = new LogsFlusher();
+    private final TablesLoader    tablesLoader      = new TablesLoader();
+    private final TriggersLoader  triggersGenerator = new TriggersLoader();
+    private final ViewsLoader     viewsLoader       = new ViewsLoader();
+    private boolean               sysSchema;
+    private boolean               ff1997;
+    private boolean               skipIndexes;
+    private final Metadata        metadata;
 
     public LoadJet(Connection _conn, Database _dbIo) throws SQLException {
         conn = _conn;
@@ -1487,7 +1488,7 @@ public class LoadJet {
     }
 
     public SQLWarning getLoadingWarnings() {
-        if (viewsLoader.notLoaded.size() == 0 && tablesLoader.unresolvedTables.size() == 0) {
+        if (viewsLoader.notLoaded.isEmpty() && tablesLoader.unresolvedTables.isEmpty()) {
             return null;
         }
         SQLWarning sqlw = null;

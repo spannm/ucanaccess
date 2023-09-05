@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NormalizedSQL {
-    private String              sql;
-    private Map<String, String> aliases = new HashMap<>();
+    private String                    sql;
+    private final Map<String, String> aliases = new HashMap<>();
 
     public String getSql() {
         return sql;

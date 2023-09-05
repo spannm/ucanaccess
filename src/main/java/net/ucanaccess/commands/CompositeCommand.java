@@ -59,7 +59,7 @@ public class CompositeCommand implements ICommand {
             Cursor cur = indexSelector.getCursor();
             cur.beforeFirst();
             Set<String> columnNames = composite.get(0).getRowPattern().keySet();
-            while (composite.size() > 0 && moveToNextRow(cur, columnNames)) {
+            while (!composite.isEmpty() && moveToNextRow(cur, columnNames)) {
                 Iterator<ICursorCommand> it = composite.iterator();
                 while (it.hasNext()) {
                     ICursorCommand comm = it.next();

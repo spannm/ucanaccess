@@ -53,7 +53,7 @@ public class BlobAction implements IFeedbackAction {
         if (containsBlob) {
             UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
             Connection connHsqldb = conn.getHSQLDBConnection();
-            PreparedStatement ps = null;
+
             for (BlobKey bkey : keys) {
                 String sql = "UPDATE " + SQLConverter.escapeIdentifier(table.getName(), connHsqldb) + " SET "
                         + SQLConverter.escapeIdentifier(bkey.getColumnName(), connHsqldb) + "=? WHERE ";
@@ -68,9 +68,8 @@ public class BlobAction implements IFeedbackAction {
                 sql += sb.toString();
                 conn.setFeedbackState(true);
 
-                try {
-                    conn.setFeedbackState(true);
-                    ps = connHsqldb.prepareStatement(sql);
+                conn.setFeedbackState(true);
+                try (PreparedStatement ps = connHsqldb.prepareStatement(sql);) {
                     ps.setObject(1, bkey.getBytes());
                     int j = 2;
                     for (Object value : values) {
@@ -79,10 +78,6 @@ public class BlobAction implements IFeedbackAction {
                     }
                     ps.executeUpdate();
                     conn.setFeedbackState(false);
-                } finally {
-                    if (ps != null) {
-                        ps.close();
-                    }
                 }
             }
         }

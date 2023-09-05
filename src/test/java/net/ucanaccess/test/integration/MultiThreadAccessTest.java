@@ -38,7 +38,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
         ++intVal;
-        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + (intVal) + ",'" + (intVal) + "Bla bla bla bla:"
+        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + intVal + ",'" + intVal + "Bla bla bla bla:"
                 + Thread.currentThread() + "')");
         conn.commit();
         conn.close();

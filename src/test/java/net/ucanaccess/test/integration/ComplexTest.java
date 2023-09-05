@@ -114,8 +114,8 @@ public class ComplexTest extends AccessVersion2010Test {
     }
 
     @Test
-    public void testComplexRollback() throws SQLException, IOException, SecurityException,
-            IllegalArgumentException {
+    public void testComplexRollback() throws SQLException, IOException, SecurityException, IllegalArgumentException {
+
         PreparedStatement ps = null;
         int i = getCount("SELECT COUNT(*) FROM TABLE1", true);
         try {

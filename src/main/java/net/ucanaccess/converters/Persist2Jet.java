@@ -364,7 +364,7 @@ public class Persist2Jet {
 
     private String escape4Hsqldb(String tn) {
 
-        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
+        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
             tn = tn.substring(1, tn.length() - 1);
             return SQLConverter.preEscapingIdentifier(tn);
         }
@@ -373,7 +373,7 @@ public class Persist2Jet {
 
     private String escape4Access(String tn) {
 
-        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
+        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
             return tn.substring(1, tn.length() - 1);
         }
         return tn;
@@ -381,7 +381,7 @@ public class Persist2Jet {
 
     private String getUcaMetadataTypeName(int colIdx, ColumnBuilder cb, String[] types) {
         String ucaMetadataTypeName = cb.getType().name();
-        if ((types != null) && (colIdx < types.length)) {
+        if (types != null && colIdx < types.length) {
             if (types[colIdx].toUpperCase(Locale.US).equals("HYPERLINK")) {
                 ucaMetadataTypeName = types[colIdx].toUpperCase(Locale.US);
             }
@@ -476,8 +476,8 @@ public class Persist2Jet {
                 while ((row = srsc.getNextRow()) != null) {
                     String szObject = (String) row.get("szObject");
                     String szReferencedObject = (String) row.get("szReferencedObject");
-                    if ((szObject != null && szObject.equalsIgnoreCase(tableName))
-                            || (szReferencedObject != null && szReferencedObject.equalsIgnoreCase(tableName))) {
+                    if (szObject != null && szObject.equalsIgnoreCase(tableName)
+                            || szReferencedObject != null && szReferencedObject.equalsIgnoreCase(tableName)) {
                         srsc.deleteCurrentRow();
                     }
                 }
@@ -720,7 +720,7 @@ public class Persist2Jet {
              * Limitation: If the user wants to create more than one relationship between the same two tables
              * then all of the relationships must be explicitly named.
              */
-            if ((relationshipName == null) || (fkrs.getString("FK_NAME").equalsIgnoreCase(tn4Hsqldb + "_" + relationshipName))) {
+            if (relationshipName == null || fkrs.getString("FK_NAME").equalsIgnoreCase(tn4Hsqldb + "_" + relationshipName)) {
                 String colName = fkrs.getString("FKCOLUMN_NAME");
                 colName = mt.getColumnName(tn4Hsqldb, colName);
                 String rcolName = fkrs.getString("PKCOLUMN_NAME");

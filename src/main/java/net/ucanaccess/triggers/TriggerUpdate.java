@@ -22,8 +22,8 @@ public class TriggerUpdate extends TriggerBase {
         String execId = UcanaccessConnection.getCtxExcId();
         try {
             Table t = getTable(tableName, conn);
-            getBlobs(oldR);
-            getBlobs(newR);
+            fillBlobs(oldR);
+            fillBlobs(newR);
             super.convertRowTypes(oldR, t);
             super.convertRowTypes(newR, t);
             if (valuesChanged(oldR, newR)) {
@@ -51,9 +51,9 @@ public class TriggerUpdate extends TriggerBase {
         return false;
     }
 
-    private void getBlobs(Object[] values) throws UcanaccessSQLException {
-        for (int i = 0; i < values.length; ++i) {
-            Object value = values[i];
+    private void fillBlobs(Object[] _values) throws UcanaccessSQLException {
+        for (int i = 0; i < _values.length; ++i) {
+            Object value = _values[i];
             if (value instanceof BlobData) {
                 BlobData bd = (BlobData) value;
                 JDBCConnection hsqlConn = (JDBCConnection) UcanaccessConnection.getCtxConnection()
@@ -62,13 +62,13 @@ public class TriggerUpdate extends TriggerBase {
                 long length = bd.length(si);
                 byte[] bt = ((BlobData) value).getBytes(si, 0, (int) length);
                 if (bt.length == 0) {
-                    values[i] = bt;
+                    _values[i] = bt;
                 } else {
                     BlobKey bk = BlobKey.getBlobKey(bt);
                     if (bk == null) {
-                        values[i] = bt;
+                        _values[i] = bt;
                     } else {
-                        values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
+                        _values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
                     }
                 }
 

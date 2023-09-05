@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="fix-devel PMD rules"
+<ruleset name="UCanAccess PMD rules"
     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
     <description>
-        The default ruleset used for projects of fix-devel.
+        The default ruleset used for UCanAccess project.
     </description>
 
-    <rule ref="category/java/bestpractices.xml/CheckResultSet" />
+    <!--rule ref="category/java/bestpractices.xml/CheckResultSet" /-->
     <rule ref="category/java/bestpractices.xml/MissingOverride" />
     <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine" />
     <rule ref="category/java/bestpractices.xml/PrimitiveWrapperInstantiation" />
@@ -32,7 +32,7 @@
     <rule ref="category/java/codestyle.xml/ControlStatementBraces" />
     <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
     <rule ref="category/java/codestyle.xml/ExtendsObject" />
-    <rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
+    <!--rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" /-->
     <rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
     <!--rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
         <properties>
@@ -45,8 +45,8 @@
     <rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
     <rule ref="category/java/codestyle.xml/LinguisticNaming">
         <properties>
-            <property name="checkBooleanMethod" value="true" />
-            <property name="checkGetters" value="true" />
+            <!--property name="checkBooleanMethod" value="true" /-->
+            <!--property name="checkGetters" value="true" /-->
             <property name="checkSetters" value="true" />
             <property name="booleanMethodPrefixes" value="is|has|can" />
             <property name="checkFields" value="false" />
@@ -61,7 +61,7 @@
     </rule>
     <rule ref="category/java/codestyle.xml/UnnecessaryCast" />
     <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
-    <!--rule ref="category/java/codestyle.xml/UnnecessaryImport" -->
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
     <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
     <rule ref="category/java/codestyle.xml/UnnecessarySemicolon" />
     <rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
@@ -70,8 +70,8 @@
     <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
 
     <rule ref="category/java/design.xml/AvoidThrowingNewInstanceOfSameException" />
-    <rule ref="category/java/design.xml/CollapsibleIfStatements" />
-    <rule ref="category/java/design.xml/ImmutableField" />
+    <!-- rule ref="category/java/design.xml/CollapsibleIfStatements" /-->
+    <!-- rule ref="category/java/design.xml/ImmutableField" /-->
     <rule ref="category/java/design.xml/SimplifiedTernary" />
     <rule ref="category/java/design.xml/SimplifyBooleanReturns" />
     <rule ref="category/java/design.xml/SimplifyConditional" />
@@ -85,7 +85,7 @@
     <rule ref="category/java/errorprone.xml/CheckSkipResult" />
     <rule ref="category/java/errorprone.xml/ClassCastExceptionWithToArray" />
     <rule ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices" />
-    <rule ref="category/java/errorprone.xml/EmptyCatchBlock" />
+    <!--rule ref="category/java/errorprone.xml/EmptyCatchBlock" /-->
     <rule ref="category/java/errorprone.xml/JumbledIncrementer" />
     <rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
     <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode" />

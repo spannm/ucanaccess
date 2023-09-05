@@ -7,7 +7,6 @@ import net.ucanaccess.complex.Version;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import org.hsqldb.Trigger;
 import org.hsqldb.types.JavaObjectData;
 
 import java.time.LocalDateTime;
@@ -32,11 +31,11 @@ public class TriggerAppendOnly extends TriggerBase {
                     ColumnImpl verCol = (ColumnImpl) cl.getVersionHistoryColumn();
                     LocalDateTime upTime = LocalDateTime.now();
                     String val = newR[i] == null ? null : newR[i].toString();
-                    if (type == Trigger.INSERT_BEFORE_ROW) {
+                    if (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {
                         newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] {new Version(val, upTime)});
-                    } else if (type == Trigger.UPDATE_BEFORE_ROW && (oldR[i] != null || newR[i] != null)) {
-                        if ((oldR[i] == null && newR[i] != null) || (oldR[i] != null && newR[i] == null)
-                            || (!oldR[i].equals(newR[i]))) {
+                    } else if (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW && (oldR[i] != null || newR[i] != null)) {
+                        if (oldR[i] == null && newR[i] != null || oldR[i] != null && newR[i] == null
+                            || !oldR[i].equals(newR[i])) {
                             Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
 
                             Version[] newV = new Version[oldV.length + 1];

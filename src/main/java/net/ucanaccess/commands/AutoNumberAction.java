@@ -19,7 +19,7 @@ public class AutoNumberAction implements IFeedbackAction {
     public AutoNumberAction(Table _table, Object[] memento, Object[] byAccess) throws SQLException {
         table = _table;
         int i = 0;
-        PreparedStatement ps = null;
+
         for (Column cl : _table.getColumns()) {
             if (cl.isAutoNumber()) {
                 UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
@@ -32,24 +32,19 @@ public class AutoNumberAction implements IFeedbackAction {
                 }
                 oldAutoValues.put(cl.getName(), cnOld);
                 newAutoValues.put(cl.getName(), cnNew);
-                try {
-                    conn.setFeedbackState(true);
-                    String stmt = "UPDATE " + SQLConverter.escapeIdentifier(_table.getName(), connHsqldb) + " SET " + cn
-                            + "=? WHERE " + cn + "=?";
-                    ps = connHsqldb.prepareStatement(stmt);
+                conn.setFeedbackState(true);
+                String stmt = "UPDATE " + SQLConverter.escapeIdentifier(_table.getName(), connHsqldb) + " SET " + cn
+                        + "=? WHERE " + cn + "=?";
+                try (PreparedStatement ps = connHsqldb.prepareStatement(stmt)) {
                     ps.setObject(1, cnNew);
                     ps.setObject(2, cnOld);
                     ps.executeUpdate();
 
                     conn.setGeneratedKey(cnNew);
                     conn.setFeedbackState(false);
-                } finally {
-                    if (ps != null) {
-                        ps.close();
-                    }
                 }
             }
-            ++i;
+            i++;
         }
     }
 
