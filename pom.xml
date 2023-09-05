@@ -6,8 +6,6 @@
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
         <version>55</version>
-        <!-- null out the relative path, otherwise maven complains that the referenced POM is not in the parent directory -->
-        <relativePath />
     </parent>
 
     <groupId>com.github.spannm</groupId>
@@ -36,7 +34,6 @@
             <id>spannm</id>
             <name>Markus Spann</name>
             <email>spannm@outlook.de</email>
-            <timezone>+1</timezone>
         </developer>
 
         <developer>
@@ -46,7 +43,6 @@
             <roles>
                 <role>developer emeritus</role>
             </roles>
-            <timezone>+1</timezone>
         </developer>
         <developer>
             <name>Gord Thompson</name>
@@ -54,7 +50,6 @@
             <roles>
                 <role>developer emeritus</role>
             </roles>
-            <timezone>-7</timezone>
         </developer>
         <developer>
             <name>Brian Park</name>
@@ -62,7 +57,6 @@
             <roles>
                 <role>contributor emeritus</role>
             </roles>
-            <timezone>-8</timezone>
         </developer>
     </developers>
 
