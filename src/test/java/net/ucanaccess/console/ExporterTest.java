@@ -1,11 +1,10 @@
 package net.ucanaccess.console;
 
-import java.sql.ResultSetMetaData;
-import java.sql.Types;
-
+import net.ucanaccess.test.util.AbstractTestBase;
 import org.junit.Test;
 
-import net.ucanaccess.test.util.AbstractTestBase;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
 
 /** Unit test for {@link Exporter}. */
 public class ExporterTest extends AbstractTestBase {

@@ -1,11 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import java.io.File;
-import java.io.IOException;
-
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.DateTimeType;
+
+import java.io.File;
+import java.io.IOException;
 
 public class DefaultJackcessOpener implements JackcessOpenerInterface {
 

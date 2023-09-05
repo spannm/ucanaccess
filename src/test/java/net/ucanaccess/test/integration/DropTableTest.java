@@ -1,16 +1,15 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class DropTableTest extends AccessVersionAllTest {
@@ -22,7 +21,7 @@ public class DropTableTest extends AccessVersionAllTest {
     @Before
     public void beforeTestCase() throws Exception {
         executeStatements("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ",
-                "CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+            "CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
     }
 
     public void createSimple(String _tableName, String a, Object[][] ver) throws SQLException, IOException {
@@ -37,12 +36,12 @@ public class DropTableTest extends AccessVersionAllTest {
     public void testDrop() throws SQLException, IOException {
         Statement st = null;
         // ucanaccess.setAutoCommit(false);
-        createSimple("AAAn", "a", new Object[][] { { "33A", 11, "a" }, { "33B", 111, "a" } });
+        createSimple("AAAn", "a", new Object[][] {{"33A", 11, "a"}, {"33B", 111, "a"}});
         st = ucanaccess.createStatement();
         st.executeUpdate("DROP TABLE AAAn");
         // ucanaccess.commit();
         st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-        createSimple("AAAn", "b", new Object[][] { { "33A", 11, "b" }, { "33B", 111, "b" } });
+        createSimple("AAAn", "b", new Object[][] {{"33A", 11, "b"}, {"33B", 111, "b"}});
         dumpQueryResult("SELECT * FROM AAAn");
         ucanaccess.commit();
         st.close();
@@ -52,12 +51,12 @@ public class DropTableTest extends AccessVersionAllTest {
     public void testDropBlank() throws SQLException, IOException {
         Statement st = null;
         // ucanaccess.setAutoCommit(false);
-        createSimple("[AAA n]", "a", new Object[][] { { "33A", 11, "a" }, { "33B", 111, "a" } });
+        createSimple("[AAA n]", "a", new Object[][] {{"33A", 11, "a"}, {"33B", 111, "a"}});
         st = ucanaccess.createStatement();
         st.executeUpdate("DROP TABLE [AAA n]");
         // ucanaccess.commit();
         st.execute("CREATE TABLE [AAA n] ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-        createSimple("[AAA n]", "b", new Object[][] { { "33A", 11, "b" }, { "33B", 111, "b" } });
+        createSimple("[AAA n]", "b", new Object[][] {{"33A", 11, "b"}, {"33B", 111, "b"}});
         dumpQueryResult("SELECT * FROM [AAA n]");
         ucanaccess.commit();
         st.close();

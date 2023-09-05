@@ -1,17 +1,16 @@
 package net.ucanaccess.triggers;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Map;
-
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.UcanaccessTable;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Logger;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Table;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
 
 public abstract class TriggerBase implements org.hsqldb.Trigger {
     public static final Persist2Jet P2A           = new Persist2Jet();

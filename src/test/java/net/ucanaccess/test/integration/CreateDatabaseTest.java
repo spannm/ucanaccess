@@ -1,17 +1,16 @@
 package net.ucanaccess.test.integration;
 
-import java.io.File;
-import java.sql.DriverManager;
-import java.sql.Statement;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.AccessVersionAllTest;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class CreateDatabaseTest extends AccessVersionAllTest {

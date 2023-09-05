@@ -1,11 +1,10 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
 
 @RunWith(Parameterized.class)
 public class ConcatNullsFalseTest extends AccessVersionDefaultTest {
@@ -25,7 +24,7 @@ public class ConcatNullsFalseTest extends AccessVersionDefaultTest {
 
     @Test
     public void testConcat() throws Exception {
-        checkQuery("SELECT 'aa2'& null FROM dual", new Object[][] { { "aa2" } });
+        checkQuery("SELECT 'aa2'& null FROM dual", new Object[][] {{"aa2"}});
     }
 
 }

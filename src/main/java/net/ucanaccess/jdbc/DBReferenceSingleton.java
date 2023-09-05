@@ -1,13 +1,13 @@
 package net.ucanaccess.jdbc;
 
+import com.healthmarketscience.jackcess.Database.FileFormat;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.healthmarketscience.jackcess.Database.FileFormat;
 
 public final class DBReferenceSingleton {
     private static DBReferenceSingleton singletonObject;

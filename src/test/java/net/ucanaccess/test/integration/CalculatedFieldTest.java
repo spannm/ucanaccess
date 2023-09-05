@@ -1,14 +1,13 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class CalculatedFieldTest extends AccessVersion2010Test {
@@ -33,9 +32,7 @@ public class CalculatedFieldTest extends AccessVersion2010Test {
         st.execute("INSERT INTO T (c1) VALUES (null)");
         dumpQueryResult("SELECT * FROM T");
         checkQuery("select c2,c3,c4,c5 from T order by id",
-                new String[][] { { "my", "my", "my", "my" }, { "myc", "myc", "myc", "myc" },
-                        { "myc", "myc", "cat", "cat" }, { "myc", "myc", "tom", "tom" },
-                        { null, null, null, null } });
+            new String[][] {{"my", "my", "my", "my"}, {"myc", "myc", "myc", "myc"}, {"myc", "myc", "cat", "cat"}, {"myc", "myc", "tom", "tom"}, {null, null, null, null}});
 
         st.close();
     }

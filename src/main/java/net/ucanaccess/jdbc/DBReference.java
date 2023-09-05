@@ -1,74 +1,57 @@
 package net.ucanaccess.jdbc;
 
+import com.healthmarketscience.jackcess.*;
+import com.healthmarketscience.jackcess.Database.FileFormat;
+import com.healthmarketscience.jackcess.Table.ColumnOrder;
+import com.healthmarketscience.jackcess.util.LinkResolver;
+import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.util.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
-import com.healthmarketscience.jackcess.DateTimeType;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Table.ColumnOrder;
-import com.healthmarketscience.jackcess.util.LinkResolver;
-
-import net.ucanaccess.converters.LoadJet;
-import net.ucanaccess.util.Logger;
 
 public class DBReference {
-    private static final String                         CIPHER_SPEC       = "AES";
-    private static List<OnReloadReferenceListener>      onReloadListeners = new ArrayList<OnReloadReferenceListener>();
-    private static String                               version;
-    private File                                        dbFile;
-    private Database                                    dbIO;
-    private FileLock                                    fileLock          = null;
-    private String                                      id                = id();
-    private boolean                                     inMemory          = true;
-    private long                                        lastModified;
-    private boolean                                     openExclusive     = false;
-    private MemoryTimer                                 memoryTimer;
-    private boolean                                     readOnly;
-    private boolean                                     readOnlyFileFormat;
-    private boolean                                     showSchema;
-    private File                                        tempHsql;
-    private File                                        toKeepHsql;
-    private boolean                                     immediatelyReleaseResources;
-    private boolean                                     encryptHSQLDB;
-    private String                                      encryptionKey;
-    private String                                      pwd;
-    private JackcessOpenerInterface                     jko;
-    private Map<String, String>                         externalResourcesMapping;
-    private boolean                                     firstConnection   = true;
-    private FileFormat                                  dbFormat;
-    private boolean                                     columnOrderDisplay;
-    private boolean                                     hsqldbShutdown;
-    private File                                        mirrorFolder;
-    private Set<File>                                   links             = new HashSet<File>();
-    private boolean                                     ignoreCase        = true;
-    private boolean                                     mirrorReadOnly;
-    private Integer                                     lobScale;
-    private boolean                                     skipIndexes;
-    private boolean                                     sysSchema;
-    private boolean                                     preventReloading;
-    private boolean                                     concatNulls;
-    private boolean                                     mirrorRecreated;
+    private static final String                    CIPHER_SPEC       = "AES";
+    private static List<OnReloadReferenceListener> onReloadListeners = new ArrayList<OnReloadReferenceListener>();
+    private static String                          version;
+    private File                                   dbFile;
+    private Database                               dbIO;
+    private FileLock                               fileLock          = null;
+    private String                                 id                = id();
+    private boolean                                inMemory          = true;
+    private long                                   lastModified;
+    private boolean                                openExclusive     = false;
+    private MemoryTimer                            memoryTimer;
+    private boolean                                readOnly;
+    private boolean                                readOnlyFileFormat;
+    private boolean                                showSchema;
+    private File                                   tempHsql;
+    private File                                   toKeepHsql;
+    private boolean                                immediatelyReleaseResources;
+    private boolean                                encryptHSQLDB;
+    private String                                 encryptionKey;
+    private String                                 pwd;
+    private JackcessOpenerInterface                jko;
+    private Map<String, String>                    externalResourcesMapping;
+    private boolean                                firstConnection   = true;
+    private FileFormat                             dbFormat;
+    private boolean                                columnOrderDisplay;
+    private boolean                                hsqldbShutdown;
+    private File                                   mirrorFolder;
+    private Set<File>                              links             = new HashSet<File>();
+    private boolean                                ignoreCase        = true;
+    private boolean                                mirrorReadOnly;
+    private Integer                                lobScale;
+    private boolean                                skipIndexes;
+    private boolean                                sysSchema;
+    private boolean                                preventReloading;
+    private boolean                                concatNulls;
+    private boolean                                mirrorRecreated;
 
     private static class MemoryTimer {
         private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
@@ -76,7 +59,7 @@ public class DBReference {
         private final DBReference dbReference;
         private final Timer       timer;
         private int               activeConnection;
-        private long              inactivityTimeout = INACTIVITY_TIMEOUT_DEFAULT;
+        private long              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;
         private long              lastConnectionTime;
 
         MemoryTimer(DBReference _dbReference) {
@@ -102,11 +85,10 @@ public class DBReference {
                         public void run() {
                             synchronized (UcanaccessDriver.class) {
                                 if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
-                                        && getActiveConnection() == 0) {
+                                    && getActiveConnection() == 0) {
                                     try {
                                         dbReference.shutdown(_session);
-                                    } catch (Exception e) {
-                                    }
+                                    } catch (Exception e) {}
                                     System.gc();
                                 }
                             }
@@ -142,7 +124,7 @@ public class DBReference {
     }
 
     public DBReference(File fl, FileFormat ff, JackcessOpenerInterface _jko, final String _pwd)
-            throws IOException, SQLException {
+        throws IOException, SQLException {
         this.dbFile = fl;
         this.pwd = _pwd;
         this.jko = _jko;
@@ -150,7 +132,7 @@ public class DBReference {
         memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
-            DatabaseBuilder dbb=new DatabaseBuilder();
+            DatabaseBuilder dbb = new DatabaseBuilder();
             dbIO = dbb.setAutoSync(false).setFileFormat(ff).setFile(fl).create();
         } else {
             dbIO = _jko.open(fl, _pwd);
@@ -303,9 +285,8 @@ public class DBReference {
         }
         File folder = this.toKeepHsql.getParentFile();
         String name = this.toKeepHsql.getName();
-        return new File[] { new File(folder, name + ".data"), new File(folder, name + ".script"),
-                new File(folder, name + ".properties"), new File(folder, name + ".log"),
-                new File(folder, name + ".lck"), new File(folder, name + ".lobs") };
+        return new File[] {new File(folder, name + ".data"), new File(folder, name + ".script"), new File(folder, name + ".properties"), new File(folder, name + ".log"), new File(folder,
+            name + ".lck"), new File(folder, name + ".lobs")};
     }
 
     private long getLastUpdateHSQLDB() {
@@ -366,8 +347,7 @@ public class DBReference {
                 st = conn.createStatement();
                 st.execute("SHUTDOWN");
                 this.hsqldbShutdown = true;
-            } catch (Exception w) {
-            } finally {
+            } catch (Exception w) {} finally {
                 if (st != null) {
                     st.close();
                 }
@@ -430,7 +410,7 @@ public class DBReference {
         }
 
         Connection conn = DriverManager.getConnection(this.getHsqlUrl(session),
-                session.getUser() == null ? "Admin" : session.getUser(), session.getPassword());
+            session.getUser() == null ? "Admin" : session.getUser(), session.getPassword());
         if (version == null) {
             version = conn.getMetaData().getDriverVersion();
         }
@@ -558,9 +538,9 @@ public class DBReference {
             suffixStart = fileName.length();
         }
         String suffix = this.dbFormat != null
-                && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
-                        ? ".laccdb"
-                        : ".ldb";
+            && (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
+                ? ".laccdb"
+                : ".ldb";
         File flLock = new File(folder, fileName.substring(0, suffixStart) + suffix);
         return flLock;
     }
@@ -715,6 +695,7 @@ public class DBReference {
         this.concatNulls = _concatNulls;
     }
 
+    //CHECKSTYLE:OFF
     @Override
     protected void finalize() throws Throwable {
         if (memoryTimer != null) {
@@ -723,5 +704,6 @@ public class DBReference {
         }
         super.finalize();
     }
+    //CHECKSTYLE:ON
 
 }

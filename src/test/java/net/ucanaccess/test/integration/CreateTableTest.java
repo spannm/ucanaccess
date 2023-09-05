@@ -15,6 +15,18 @@ limitations under the License.
  */
 package net.ucanaccess.test.integration;
 
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.Index.Column;
+import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2010Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,20 +34,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Index.Column;
-import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.Table;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
 public class CreateTableTest extends AccessVersion2010Test {
@@ -52,7 +50,7 @@ public class CreateTableTest extends AccessVersion2010Test {
     private void createAsSelect() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa,a,c FROM AAA) WITH DATA");
-        Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
+        Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
         checkQuery("SELECT * FROM AAA_bis order by baaaa", ver);
         st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa,AAA_BIS.baaaa as xxx FROM AAA,AAA_BIS) WITH DATA");
         dumpQueryResult("SELECT * FROM AAA_quadris order by baaaa");
@@ -65,7 +63,7 @@ public class CreateTableTest extends AccessVersion2010Test {
             st = ucanaccess.createStatement();
             st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH no DATA ");
             st.execute("INSERT INTO AAA_TRIS SELECT * from AAA_bis");
-            Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
+            Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
             checkQuery("SELECT * FROM AAA_tris order by baaaa", ver);
         } finally {
             if (st != null) {
@@ -93,7 +91,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         Statement st = ucanaccess.createStatement();
         st.execute("INSERT INTO AAA(baaaa,c)   VALUES ('33A','G'     )");
         st.execute("INSERT INTO AAA(baaaa,a,c) VALUES ('33B',111,'G' )");
-        Object[][] ver = { { "33A", 3, "G" }, { "33B", 111, "G" } };
+        Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
         checkQuery("SELECT baaaa,a,c FROM AAA ORDER BY baaaa", ver);
         st.close();
     }
@@ -166,8 +164,8 @@ public class CreateTableTest extends AccessVersion2010Test {
         try {
             st = ucanaccess.createStatement();
             st.execute("create table tbl(c counter  primary key , " + "number numeric(23,5) default -4.6 not null , "
-                    + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"
-                    + "txt3 text)");
+                + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"
+                + "txt3 text)");
         } finally {
             st.close();
         }
@@ -178,7 +176,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         try {
             st = ucanaccess.createStatement();
             st.execute("create table nnb(c counter  primary key , " + "number decimal (23,5) default -4.6 not null , "
-                    + "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ," + "txt3 text not null)");
+                + "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ," + "txt3 text not null)");
 
             checkNotNull("nnb", "number", true);
             checkNotNull("nnb", "txt1", true);
@@ -202,8 +200,8 @@ public class CreateTableTest extends AccessVersion2010Test {
     @Test
     public void testCreate() throws Exception {
         executeStatements(
-                "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
-                        + "d DATETIME default now(), e text default 'l''aria')");
+            "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
+                + "d DATETIME default now(), e text default 'l''aria')");
 
         createSimple();
         createPs();
@@ -221,16 +219,16 @@ public class CreateTableTest extends AccessVersion2010Test {
     public void testNaming() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         st.execute(
-                " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+            " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
         st.execute(
-                " CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
+            " CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
         st.execute(
-                " CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+            " CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
         st.execute(" drop table  [ggg kk]");
         st.execute(
-                " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
+            " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
         st.execute(
-                " CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
+            " CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
         st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
         st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
         st.close();
@@ -243,7 +241,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");
         st.execute(
-                " CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y) REFERENCES Parent (x)  )");
+            " CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y) REFERENCES Parent (x)  )");
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("Babe");
         Table tbr = db.getTable("Parent");
@@ -255,7 +253,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         assertTrue(ar.contains("y"));
         st.execute(" CREATE TABLE [1 Parent]( [x 0] long , y long, PRIMARY KEY([x 0],y))");
         st.execute(
-                " CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y)  )");
+            " CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y)  )");
 
         st.close();
     }
@@ -284,13 +282,12 @@ public class CreateTableTest extends AccessVersion2010Test {
     @Test
     public void testCreateHyperlink() throws SQLException {
         Statement st = ucanaccess.createStatement();
-        ResultSet rs = null;
         st.execute("CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)");
         st.execute("INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')");
         st.execute("INSERT INTO urlTest (id, website) VALUES (2, 'example.com#http://example.com#')");
         st.execute("INSERT INTO urlTest (id, website) VALUES (3, 'the works#http://burger#with_bacon#and_cheese')");
         st.execute("INSERT INTO urlTest (id, website) VALUES (4, 'http://bad_link_no_hash_characters')");
-        rs = ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website");
+        ResultSet rs = ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website");
         rs.next();
         assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
         rs = st.executeQuery("SELECT website FROM urlTest ORDER BY id");
@@ -313,7 +310,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         st.close();
 
     }
-    
+
     @Test
     public void tableNameWithUnderscore() throws SQLException {
         // Ticket #19

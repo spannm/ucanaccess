@@ -1,21 +1,14 @@
 package net.ucanaccess.converters;
 
+import com.healthmarketscience.jackcess.*;
+import com.healthmarketscience.jackcess.impl.TableImpl;
+import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
+import com.healthmarketscience.jackcess.util.ErrorHandler;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.impl.TableImpl;
-import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
-import com.healthmarketscience.jackcess.util.ErrorHandler;
 
 public class UcanaccessTable implements Table {
     private Table  wrapped;

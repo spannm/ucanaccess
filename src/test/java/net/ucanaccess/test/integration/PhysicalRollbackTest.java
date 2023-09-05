@@ -1,17 +1,16 @@
 package net.ucanaccess.test.integration;
 
-import java.lang.reflect.Method;
-import java.sql.Statement;
-
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.lang.reflect.Method;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class PhysicalRollbackTest extends AccessVersionDefaultTest {
@@ -40,9 +39,9 @@ public class PhysicalRollbackTest extends AccessVersionDefaultTest {
     public void testCommit() throws Exception {
         ucanaccess.setAutoCommit(false);
 
-        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] { boolean.class });
+        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] {boolean.class});
         mth.setAccessible(true);
-        mth.invoke(ucanaccess, new Object[] { Boolean.TRUE });
+        mth.invoke(ucanaccess, new Object[] {Boolean.TRUE});
         Statement st = ucanaccess.createStatement();
         st.execute("INSERT INTO T4 (id,descr) VALUES( 6666554,  'nel mezzo del cammin di nostra vita')");
         st.execute("INSERT INTO T4 (id,descr) VALUES( 77666554, 'nel mezzo del cammin di nostra vita')");

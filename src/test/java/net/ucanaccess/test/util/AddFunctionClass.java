@@ -1,9 +1,9 @@
 package net.ucanaccess.test.util;
 
-import java.sql.Timestamp;
-
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
+
+import java.sql.Timestamp;
 
 public final class AddFunctionClass {
 

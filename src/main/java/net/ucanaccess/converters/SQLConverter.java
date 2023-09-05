@@ -1,25 +1,17 @@
 package net.ucanaccess.converters;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.healthmarketscience.jackcess.TableBuilder;
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
-import com.healthmarketscience.jackcess.TableBuilder;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class SQLConverter {
     private static final Pattern QUOTE_S_PATTERN        = Pattern.compile("(')+");
@@ -58,10 +50,10 @@ public final class SQLConverter {
     private static final String   UNDERSCORE_IDENTIFIERS     = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
     private static final String   XESCAPED                   = "(\\W)((?i)X)((?i)_)(\\W)";
     private static final String[] DEFAULT_CATCH              =
-            new String[] { "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\'(?:[^']*(?:'')*)*\')([\\s\n\r\\)\\,])",
+            new String[] {"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\'(?:[^']*(?:'')*)*\')([\\s\n\r\\)\\,])",
                     "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
                     "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
-                    "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])" };
+                    "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])"};
     private static final Pattern  DEFAULT_CATCH_0            = Pattern.compile("([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)");
     public static final String    NOT_NULL                   = "[\\s\n\r](?i)NOT[\\s\n\r](?i)NULL";
 
@@ -195,20 +187,20 @@ public final class SQLConverter {
         return KEYWORDLIST.contains(s.toUpperCase());
     }
 
-    private static int[] getQuoteGroup(String s) {
-        if (s.indexOf("''") < 0) {
-            Matcher mtc = QUOTE_M_PATTERN.matcher(s);
-            return mtc.find() ? new int[] { mtc.start(), mtc.end() } : null;
+    private static int[] getQuoteGroup(String _s) {
+        if (_s.indexOf("''") < 0) {
+            Matcher mtc = QUOTE_M_PATTERN.matcher(_s);
+            return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
-            int[] ret = new int[] { -1, -1 };
+            int[] ret = new int[] {-1, -1};
             Pattern pt = QUOTE_S_PATTERN;
-            Matcher mc = pt.matcher(s);
+            Matcher mc = pt.matcher(_s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
                 if ((end - start) % 2 == 0) {
                     if (ret[0] == -1) {
-                        return new int[] { mc.start(), mc.end() };
+                        return new int[] {mc.start(), mc.end()};
                     }
                     continue;
                 } else {
@@ -224,20 +216,20 @@ public final class SQLConverter {
         }
     }
 
-    private static int[] getDoubleQuoteGroup(String s) {
-        if (s.indexOf("\"\"") < 0) {
-            Matcher mtc = DOUBLE_QUOTE_M_PATTERN.matcher(s);
-            return mtc.find() ? new int[] { mtc.start(), mtc.end() } : null;
+    private static int[] getDoubleQuoteGroup(String _s) {
+        if (_s.indexOf("\"\"") < 0) {
+            Matcher mtc = DOUBLE_QUOTE_M_PATTERN.matcher(_s);
+            return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
-            int[] ret = new int[] { -1, -1 };
+            int[] ret = new int[] {-1, -1};
             Pattern pt = DOUBLE_QUOTE_S_PATTERN;
-            Matcher mc = pt.matcher(s);
+            Matcher mc = pt.matcher(_s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
                 if ((end - start) % 2 == 0) {
                     if (ret[0] == -1) {
-                        return new int[] { mc.start(), mc.end() };
+                        return new int[] {mc.start(), mc.end()};
                     }
                     continue;
                 } else {
@@ -627,7 +619,7 @@ public final class SQLConverter {
 
     private static String convertResidualSQL(String sql) {
         sql = convertSQLTokens(sql);
-        if (sql.equals("!")) {
+        if ("!".equals(sql)) {
             return ".";
         }
         return replaceExclamationPoints(
@@ -739,7 +731,7 @@ public final class SQLConverter {
         if (escaped.length() > 0 && escaped.charAt(0) == '_') {
             escaped = "Z" + escaped;
         }
-        if (dualUsedAsTableName && escaped.equalsIgnoreCase("DUAL")) {
+        if (dualUsedAsTableName && "DUAL".equalsIgnoreCase(escaped)) {
             escaped = "DUAL_13031971";
         }
 
@@ -832,7 +824,7 @@ public final class SQLConverter {
     }
 
     private static String convertTypeDeclaration(String typeDecl) {
-        typeDecl = " " + typeDecl + " ";// padding for a generic RE use
+        typeDecl = " " + typeDecl + " "; // padding for a generic RE use
         for (Map.Entry<String, String> entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {
             typeDecl = typeDecl.replaceAll("([\\s\n\r]+)((?i)" + entry.getKey() + ")([\\s\n\r\\(]+)",
                     "$1" + entry.getValue() + "$3");

@@ -15,7 +15,7 @@ public enum AccessVersion {
 
     private final FileFormat fileFormat;
 
-    private AccessVersion(FileFormat _fileFormat) {
+    AccessVersion(FileFormat _fileFormat) {
         fileFormat = _fileFormat;
     }
 

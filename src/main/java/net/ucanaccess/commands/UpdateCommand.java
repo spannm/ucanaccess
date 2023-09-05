@@ -1,24 +1,23 @@
 package net.ucanaccess.commands;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import net.ucanaccess.complex.Attachment;
-import net.ucanaccess.complex.SingleValue;
-import net.ucanaccess.complex.Version;
-import net.ucanaccess.converters.Persist2Jet;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.complex.Version;
+import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class UpdateCommand extends AbstractCursorCommand {
     private List<Column>           blobColumns;

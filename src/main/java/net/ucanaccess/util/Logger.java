@@ -44,39 +44,39 @@ public final class Logger {
         return logPrintWriter;
     }
 
-    public static String getMessage(String cod) {
-        return messageBundle.getString(cod);
+    public static String getMessage(String _cod) {
+        return messageBundle.getString(_cod);
     }
 
-    public static String getMessage(String cod, Object... pars) {
-        return String.format(messageBundle.getString(cod), pars);
+    public static String getMessage(String _cod, Object... _pars) {
+        return String.format(messageBundle.getString(_cod), _pars);
     }
 
-    public static void log(Object obj) {
+    public static void log(Object _obj) {
         if (logPrintWriter != null) {
-            logPrintWriter.println(obj);
+            logPrintWriter.println(_obj);
             logPrintWriter.flush();
         }
     }
 
-    public static void logMessage(Messages cod) {
-        log(messageBundle.getString(cod.name()));
+    public static void logMessage(Messages _cod) {
+        log(messageBundle.getString(_cod.name()));
     }
 
-    public static String getLogMessage(Messages cod) {
-        return messageBundle.getString(cod.name());
+    public static String getLogMessage(Messages _cod) {
+        return messageBundle.getString(_cod.name());
     }
 
-    public static void logWarning(String warning) {
-        System.err.println("WARNING:" + warning);
+    public static void logWarning(String _warning) {
+        System.err.println("WARNING:" + _warning);
     }
 
-    public static void logWarning(Messages cod) {
-        logWarning(messageBundle.getString(cod.name()));
+    public static void logWarning(Messages _cod) {
+        logWarning(messageBundle.getString(_cod.name()));
     }
 
-    public static void logParametricWarning(Messages cod, String... par) {
-        logWarning(String.format(messageBundle.getString(cod.name()), (Object[]) par));
+    public static void logParametricWarning(Messages _cod, String... _par) {
+        logWarning(String.format(messageBundle.getString(_cod.name()), (Object[]) _par));
     }
 
     public static void setLogPrintWriter(PrintWriter _logPrintWriter) {

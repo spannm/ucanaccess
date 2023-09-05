@@ -15,58 +15,25 @@ limitations under the License.
  */
 package net.ucanaccess.converters;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.ColumnBuilder;
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.IndexBuilder;
-import com.healthmarketscience.jackcess.IndexCursor;
-import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.RelationshipBuilder;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.TableBuilder;
+import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.impl.DatabaseImpl;
-
+import net.ucanaccess.commands.InsertCommand;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.complex.UnsupportedValue;
+import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.jdbc.*;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.HibernateSupport;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.types.BlobData;
 import org.hsqldb.types.JavaObjectData;
 import org.hsqldb.types.TimestampData;
 
-import net.ucanaccess.commands.InsertCommand;
-import net.ucanaccess.complex.ComplexBase;
-import net.ucanaccess.complex.UnsupportedValue;
-import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.OnReloadReferenceListener;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import net.ucanaccess.util.HibernateSupport;
+import java.io.IOException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class Persist2Jet {
     private static HashMap<String, List<String>> columnNamesCache = new HashMap<String, List<String>>();
@@ -374,7 +341,7 @@ public class Persist2Jet {
             String indexName = idxrs.getString("INDEX_NAME");
             boolean unique = !idxrs.getBoolean("NON_UNIQUE");
             String ad = idxrs.getString("ASC_OR_DESC");
-            boolean asc = ad == null || ad.equals("A");
+            boolean asc = ad == null || "A".equals(ad);
             if (!hi.containsKey(indexName)) {
                 IndexBuilder ib = new IndexBuilder(indexName);
                 if (unique) {
@@ -444,8 +411,9 @@ public class Persist2Jet {
 
     public void createTable(String tableName, Map<String, String> columnMap, String[] types, String[] defaults,
             Boolean[] notNulls) throws IOException, SQLException {
+
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        Database db = conn.getDbIO();
+        final Database db = conn.getDbIO();
         String tn = escape4Access(tableName);
         String ntn = escape4Hsqldb(tableName);
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
@@ -700,7 +668,7 @@ public class Persist2Jet {
                 Metadata mt = new Metadata(conn);
                 colName = mt.getColumnName(ntn, colName);
                 String ad = idxrs.getString("ASC_OR_DESC");
-                asc = ad == null || ad.equals("A");
+                asc = ad == null || "A".equals(ad);
                 cols.add(colName);
 
             }

@@ -1,16 +1,11 @@
 package net.ucanaccess.commands;
 
+import com.healthmarketscience.jackcess.Cursor;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.healthmarketscience.jackcess.Cursor;
-
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import java.util.*;
 
 public class CompositeCommand implements ICommand {
     private List<ICursorCommand> composite     = new ArrayList<ICursorCommand>();

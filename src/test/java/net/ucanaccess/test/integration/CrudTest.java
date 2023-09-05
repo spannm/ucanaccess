@@ -1,18 +1,17 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class CrudTest extends AccessVersionAllTest {
@@ -53,8 +52,8 @@ public class CrudTest extends AccessVersionAllTest {
 
         st.execute("delete from t1");
         ps = ucanaccess.prepareStatement("INSERT INTO T1 (id,descr)  VALUES( ?,?)");
-        int id = 6666554;
-        int id1 = 5556664;
+        final int id = 6666554;
+        final int id1 = 5556664;
         ps.setInt(1, id);
         ps.setString(2, "Prep1");
         ps.execute();
@@ -93,7 +92,7 @@ public class CrudTest extends AccessVersionAllTest {
             ps.setString(2, "Prep2");
             ps.addBatch();
             ps.executeBatch();
-            Object[][] ver = { { 1234, "Prep1" }, { 12345, "Prep2" } };
+            Object[][] ver = {{1234, "Prep1"}, {12345, "Prep2"}};
             checkQuery("SELECT *  FROM T1", ver);
             boolean ret = getCount("SELECT COUNT(*) FROM T1 where id in (1234,12345)") == 2;
             ps.clearBatch();
@@ -123,12 +122,12 @@ public class CrudTest extends AccessVersionAllTest {
             st.execute("delete from t1");
             st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id + ",'tre canarini volano su e cadono')");
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT *  FROM T1", ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             rs = ps.executeQuery();
             rs.next();
             rs.updateString(2, "show must go off");
             rs.updateRow();
-            Object[][] ver = { { 6666554, "show must go off" } };
+            Object[][] ver = {{6666554, "show must go off"}};
             checkQuery("SELECT *  FROM T1", ver);
             st.execute("delete from t1");
         } finally {
@@ -181,7 +180,7 @@ public class CrudTest extends AccessVersionAllTest {
             st.execute("delete from t1");
             st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id + ",'tre canarini volano su e cadono')");
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T1", ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             rs = ps.executeQuery();
             rs.moveToInsertRow();
             rs.updateInt(1, 4);
@@ -189,7 +188,7 @@ public class CrudTest extends AccessVersionAllTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            Object[][] ver = { { 4, "Growing old in rural pleaces" }, { 6666554, "tre canarini volano su e cadono" } };
+            Object[][] ver = {{4, "Growing old in rural pleaces"}, {6666554, "tre canarini volano su e cadono"}};
             checkQuery("SELECT * FROM T1 order by id", ver);
             st.execute("delete from t1");
         } finally {
@@ -205,14 +204,13 @@ public class CrudTest extends AccessVersionAllTest {
 
     @Test
     public void testInsertRSNoAllSet() throws SQLException, IOException {
-
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE T2 (id AUTOINCREMENT,descr TEXT) ");
         st.execute("delete from t2");
 
         PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T2", ResultSet.TYPE_FORWARD_ONLY,
-                ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
         rs.moveToInsertRow();
         rs.updateInt(1, 0);
@@ -244,7 +242,7 @@ public class CrudTest extends AccessVersionAllTest {
             st.execute("CREATE TABLE T21 (id autoincrement,descr TEXT) ");
 
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T21", ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             rs = ps.executeQuery();
             rs.moveToInsertRow();
 
@@ -252,7 +250,7 @@ public class CrudTest extends AccessVersionAllTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            Object[][] ver = { { 1, "Growing old without emotions" } };
+            Object[][] ver = {{1, "Growing old without emotions"}};
             checkQuery("SELECT * FROM T21 order by id", ver);
             st.execute("delete from t21");
         } finally {

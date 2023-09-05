@@ -7,7 +7,7 @@
         <artifactId>basepom-oss</artifactId>
         <version>55</version>
         <!-- null out the relative path, otherwise maven complains that the referenced POM is not in the parent directory -->
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.github.spannm</groupId>
@@ -77,6 +77,7 @@
         <dep.junit.version>4.13.2</dep.junit.version>
         <dep.mockito.version>5.5.0</dep.mockito.version>
 
+        <basepom.check.skip-pmd>true</basepom.check.skip-pmd>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
     </properties>
@@ -126,6 +127,24 @@
 
         <pluginManagement>
             <plugins>
+
+                <plugin>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <configuration>
+                        <configLocation>src/test/resources/team/checkstyle-rules.xml</configLocation>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <configuration>
+                        <rulesets>
+                            <ruleset>src/test/resources/team/pmd-rules.xml</ruleset>
+                        </rulesets>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>com.github.ekryd.sortpom</groupId>
                     <artifactId>sortpom-maven-plugin</artifactId>
@@ -135,6 +154,7 @@
                         <nrOfIndentSpace>4</nrOfIndentSpace>
                     </configuration>
                 </plugin>
+
             </plugins>
         </pluginManagement>
 

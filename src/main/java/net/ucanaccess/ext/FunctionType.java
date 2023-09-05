@@ -1,11 +1,11 @@
 package net.ucanaccess.ext;
 
+import net.ucanaccess.converters.TypesMap.AccessType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import net.ucanaccess.converters.TypesMap.AccessType;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

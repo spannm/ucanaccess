@@ -1,14 +1,13 @@
 package net.ucanaccess.triggers;
 
+import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.OnReloadReferenceListener;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
-
-import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.OnReloadReferenceListener;
 
 public final class AutoNumberManager {
     // Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance

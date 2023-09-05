@@ -1,16 +1,15 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.ParseException;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
 
 @RunWith(Parameterized.class)
 public class PivotTest extends AccessVersionAllTest {

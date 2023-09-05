@@ -15,6 +15,17 @@ limitations under the License.
  */
 package net.ucanaccess.test.integration;
 
+import com.healthmarketscience.jackcess.*;
+import com.healthmarketscience.jackcess.Index.Column;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2007Test;
+import net.ucanaccess.util.HibernateSupport;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -22,24 +33,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Index.Column;
-import com.healthmarketscience.jackcess.IndexCursor;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
-import net.ucanaccess.util.HibernateSupport;
 
 @RunWith(Parameterized.class)
 public class AlterTableTest extends AccessVersion2007Test {
@@ -56,7 +49,7 @@ public class AlterTableTest extends AccessVersion2007Test {
     @Before
     public void beforeTestCase() throws Exception {
         executeStatements("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4))",
-                "CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ");
+            "CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ");
     }
 
     @Test
@@ -108,7 +101,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
         dumpQueryResult("SELECT * from [22 amadeimargmail111] ORDER BY c");
         checkQuery("SELECT * from [22 amadeimargmail111] ORDER BY c");
-        
+
         dumpQueryResult("SELECT * from Sample");
         checkQuery("SELECT * from Sample");
         st.executeUpdate("Update sample set Description='wRRRw'");
@@ -240,7 +233,7 @@ public class AlterTableTest extends AccessVersion2007Test {
 
         // test case: constraint name specified
         st.execute(
-                "ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
+            "ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("AAA n");
         Table tbr = db.getTable("22 amadeimargmail111");
@@ -260,8 +253,8 @@ public class AlterTableTest extends AccessVersion2007Test {
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
         Statement hsqldbStmt = hsqldbConn.createStatement();
         ResultSet hsqldbRs =
-                hsqldbStmt.executeQuery("SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS "
-                        + "WHERE CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_NAME='AAA N'");
+            hsqldbStmt.executeQuery("SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS "
+                + "WHERE CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_NAME='AAA N'");
         hsqldbRs.next();
         assertEquals("AAA N_PIPPO1", hsqldbRs.getString(1));
         //
@@ -271,8 +264,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
             org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
-        } catch (UcanaccessSQLException ucaSqlEx) {
-        }
+        } catch (UcanaccessSQLException ucaSqlEx) {}
         // now try again with Hibernate mode active
         HibernateSupport.setActive(true);
         st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
@@ -280,15 +272,14 @@ public class AlterTableTest extends AccessVersion2007Test {
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]"); // again
             org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
-        } catch (UcanaccessSQLException ucaSqlEx) {
-        }
+        } catch (UcanaccessSQLException ucaSqlEx) {}
         HibernateSupport.setActive(null);
 
         // test case: constraint name not specified
         st.execute("ALTER TABLE Son add foreign key (integer, txt) references Father(id,txt) ON delete cascade");
         st.close();
     }
-    
+
     @Test
     public void testDoubleRelationship() throws SQLException {
         // repro code from https://stackoverflow.com/q/49160150/2144390
@@ -307,7 +298,7 @@ public class AlterTableTest extends AccessVersion2007Test {
             + "Person2Id LONG NOT NULL)");
 
         // reference #1
-        statement.execute("ALTER TABLE " + tableWithTheReferences 
+        statement.execute("ALTER TABLE " + tableWithTheReferences
             + " ADD CONSTRAINT FOREIGN_KEY_1 FOREIGN KEY (Person1Id) REFERENCES "
             + tableToBeReferenced + "(ID) ON DELETE CASCADE");
 
@@ -330,7 +321,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.execute("create TABLE tx1  (n1 long, [n 2] text)");
         st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
         st.execute(
-                "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
+            "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         checkQuery("SELECT count(*) from tx", 1);
@@ -341,11 +332,11 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.execute("DROP TABLE tx1  ");
 
         st.execute(
-                "CREATE TABLE tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+            "CREATE TABLE tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
         st.execute("create TABLE tx1  (n1 long, [n 2] text)");
         st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
         st.execute(
-                "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
+            "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         checkQuery("SELECT count(*) from tx", 1);
@@ -383,19 +374,19 @@ public class AlterTableTest extends AccessVersion2007Test {
     public void testSqlErrors() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         st.execute(
-                "CREATE TABLE tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
+            "CREATE TABLE tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
         st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ", "unexpected token: PRIMARY");
         executeErr("ALTER TABLE tx2 add column [my best friend]  ", "unexpected end of statement");
         executeErr(
-                "ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade",
-                "type not found or user lacks privilege: FOREIGN");
+            "ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade",
+            "type not found or user lacks privilege: FOREIGN");
         executeErr("DROP TABLE tx2 cascade", "Feature not supported yet.");
         executeErr("ALTER TABLE tx2 add constraint primary key (id)", "unexpected token: PRIMARY");
         executeErr("ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported yet.");
         executeErr("ALTER TABLE tx2 drop COLUMN [my best friend]", "Feature not supported yet.");
         executeErr("ALTER TABLE tx2 add COLUMN [1 my best friend]lonG not null",
-                "x2 already contains one or more records(1 records)");
+            "x2 already contains one or more records(1 records)");
         st.close();
     }
 

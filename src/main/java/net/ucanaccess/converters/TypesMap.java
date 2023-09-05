@@ -1,11 +1,11 @@
 package net.ucanaccess.converters;
 
+import com.healthmarketscience.jackcess.DataType;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.healthmarketscience.jackcess.DataType;
 
 public final class TypesMap {
     public enum AccessType {

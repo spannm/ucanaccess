@@ -1,11 +1,9 @@
 package net.ucanaccess.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-
+import com.healthmarketscience.jackcess.*;
+import com.healthmarketscience.jackcess.Table.ColumnOrder;
+import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.SingleValue;
@@ -16,14 +14,11 @@ import net.ucanaccess.jdbc.DBReferenceSingleton;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.triggers.AutoNumberManager;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.ConstraintViolationException;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Table.ColumnOrder;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 public class InsertCommand implements ICommand {
     private Database dbIO;

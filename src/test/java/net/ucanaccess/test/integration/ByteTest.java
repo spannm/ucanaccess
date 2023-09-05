@@ -1,18 +1,17 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.Locale;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.Locale;
 
 @RunWith(Parameterized.class)
 public class ByteTest extends AccessVersionAllTest {

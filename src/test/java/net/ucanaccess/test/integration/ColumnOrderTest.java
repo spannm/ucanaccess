@@ -1,15 +1,14 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 
 @RunWith(Parameterized.class)
 public class ColumnOrderTest extends AccessVersionDefaultTest {

@@ -1,12 +1,5 @@
 package net.ucanaccess.jdbc;
 
-import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Locale;
-
 import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
@@ -14,6 +7,13 @@ import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.FeatureNotSupportedException.NotSupportedMessage;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.HibernateSupport;
+
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Locale;
 
 public abstract class AbstractExecute {
     protected enum CommandType {
@@ -76,18 +76,18 @@ public abstract class AbstractExecute {
         this.commandType = CommandType.WITH_COLUMNS_NAME;
     }
 
-    private Object enableDiasable(DDLType ddlType) throws SQLException, IOException {
-        String tn = ddlType.getDBObjectName();
-        if (tn.startsWith("[") && tn.endsWith("]")) {
-            tn = tn.substring(1, tn.length() - 1);
+    private Object enableDiasable(DDLType _ddlType) throws SQLException, IOException {
+        String tableName = _ddlType.getDBObjectName();
+        if (tableName.startsWith("[") && tableName.endsWith("]")) {
+            tableName = tableName.substring(1, tableName.length() - 1);
         }
         UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
-        String rtn = mtd.getTableName(tn);
+        String rtn = mtd.getTableName(tableName);
         if (rtn == null) {
-            throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tn);
+            throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
         }
-        boolean inable = ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
+        boolean inable = _ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
         conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!inable);
         return (this instanceof Execute) ? false : 0;
     }
@@ -185,7 +185,7 @@ public abstract class AbstractExecute {
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
-                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tableName);
+                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
                     }
                     ddlExpr = sql0.replaceFirst("(?i)\\s+ADD\\s+CONSTRAINT\\s+.*\\s+FOREIGN\\s+KEY\\s+",
                             " ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US)
@@ -207,7 +207,7 @@ public abstract class AbstractExecute {
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
-                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOESNT_EXIST, tableName);
+                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
                     }
                     ddlExpr = sql0.replaceFirst("(?i)\\s+DROP\\s+CONSTRAINT\\s+.*",
                             " DROP CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\"");

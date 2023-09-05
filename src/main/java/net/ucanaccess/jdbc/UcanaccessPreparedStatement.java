@@ -1,38 +1,18 @@
 package net.ucanaccess.jdbc;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import net.ucanaccess.converters.SQLConverter;
+
+import java.io.*;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.NClob;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.Ref;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.RowId;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import net.ucanaccess.converters.SQLConverter;
 
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
 
@@ -48,7 +28,6 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         wrapped = hidden;
         if (hidden == null) {
             super.wrapped = connection.createStatement();
-
         }
     }
 
@@ -56,7 +35,6 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         super(null, _connection);
         sql = _sql;
         super.wrapped = _connection.createStatement();
-
     }
 
     private final class ParameterReset {

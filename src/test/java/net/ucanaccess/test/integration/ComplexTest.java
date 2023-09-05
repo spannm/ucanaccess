@@ -1,5 +1,15 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2010Test;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,17 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import net.ucanaccess.complex.Attachment;
-import net.ucanaccess.complex.SingleValue;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
 
 @RunWith(Parameterized.class)
 public class ComplexTest extends AccessVersion2010Test {
@@ -75,18 +74,18 @@ public class ComplexTest extends AccessVersion2010Test {
         dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
         checkQuery("SELECT * FROM Table1 ORDER BY id");
         PreparedStatement ps =
-                ucanaccess.prepareStatement(
-                        "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
-                                + "VALUES (?,?,?,?,?)");
+            ucanaccess.prepareStatement(
+                "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
+                    + "VALUES (?,?,?,?,?)");
 
         ps.setString(1, "row12");
         ps.setString(2, "ciao");
         ps.setString(3, "to version");
-        SingleValue[] svs = new SingleValue[] { new SingleValue("ccc16"), new SingleValue("ccc24") };
+        SingleValue[] svs = new SingleValue[] {new SingleValue("ccc16"), new SingleValue("ccc24")};
         ps.setObject(4, svs);
         Attachment[] atcs =
-                new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
-                        new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null) };
+            new Attachment[] {new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null), new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(),
+                LocalDateTime.now(), null)};
         ps.setObject(5, atcs);
         ps.execute();
         dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
@@ -96,8 +95,8 @@ public class ComplexTest extends AccessVersion2010Test {
         ps.execute();
         ps.close();
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [ATTACH-DATA]=? WHERE ID=?");
-        Attachment[] atc = new Attachment[] { new Attachment(null, "cccsss.cvs", "cvs",
-                "ddddd ;sssssssssssssssssssddd".getBytes(), LocalDateTime.now(), null) };
+        Attachment[] atc = new Attachment[] {new Attachment(null, "cccsss.cvs", "cvs",
+            "ddddd ;sssssssssssssssssssddd".getBytes(), LocalDateTime.now(), null)};
         ps.setObject(1, atc);
         ps.setString(2, "row12");
         ps.execute();
@@ -118,33 +117,33 @@ public class ComplexTest extends AccessVersion2010Test {
 
     @Test
     public void testComplexRollback() throws SQLException, IOException, ParseException, SecurityException,
-            NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         PreparedStatement ps = null;
         int i = getCount("SELECT COUNT(*) FROM TABLE1", true);
         try {
 
             ucanaccess.setAutoCommit(false);
 
-            Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] { boolean.class });
+            Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", new Class[] {boolean.class});
             mth.setAccessible(true);
-            mth.invoke(ucanaccess, new Object[] { Boolean.TRUE });
+            mth.invoke(ucanaccess, new Object[] {Boolean.TRUE});
             ps = ucanaccess.prepareStatement(
-                    "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
-                            + "VALUES (?,?,?,?,?)");
+                "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
+                    + "VALUES (?,?,?,?,?)");
 
             ps.setString(1, "row123");
             ps.setString(2, "ciao");
             ps.setString(3, "to version");
-            SingleValue[] svs = new SingleValue[] { new SingleValue("16"), new SingleValue("24") };
+            SingleValue[] svs = new SingleValue[] {new SingleValue("16"), new SingleValue("24")};
             ps.setObject(4, svs);
             Attachment[] atcs =
-                    new Attachment[] { new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
-                            new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null) };
+                new Attachment[] {new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null), new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(),
+                    LocalDateTime.now(), null)};
             ps.setObject(5, atcs);
             ps.execute();
             ps.close();
             ps = ucanaccess
-                    .prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12' ");
+                .prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12' ");
             ps.execute();
             ps.close();
             dumpQueryResult("SELECT * FROM TABLE1");

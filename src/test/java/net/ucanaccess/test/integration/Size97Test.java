@@ -1,16 +1,15 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2010Test;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 
 @RunWith(Parameterized.class)
 public class Size97Test extends AccessVersion2010Test {

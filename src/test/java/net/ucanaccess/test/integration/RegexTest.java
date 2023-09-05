@@ -1,17 +1,16 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class RegexTest extends AccessVersionDefaultTest {
@@ -39,8 +38,8 @@ public class RegexTest extends AccessVersionDefaultTest {
             s += "C";
         }
 
-        String[] in = new String[] { "", "\"\"'tCC", s, s + "'", s + "\"", s + "\"''t", "\"'\"t" + s,
-                "ss\"1234567890wwwwwwwwww1", "ssss'DDDD", s + "\"\"\"" + s };
+        String[] in = new String[] {"", "\"\"'tCC", s, s + "'", s + "\"", s + "\"''t",
+            "\"'\"t" + s, "ss\"1234567890wwwwwwwwww1", "ssss'DDDD", s + "\"\"\"" + s};
         for (String c : in) {
             executeStatement(c);
         }

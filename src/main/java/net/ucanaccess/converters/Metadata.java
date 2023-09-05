@@ -1,16 +1,11 @@
 package net.ucanaccess.converters;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Metadata {
 
-    private Connection          conn;
     private static final String SCHEMA = "CREATE SCHEMA UCA_METADATA AUTHORIZATION DBA";
 
     private static final String TABLES  =
@@ -24,23 +19,26 @@ public class Metadata {
 
     public static final String      SYSTEM_SUBQUERY = "SYSTEM_SUBQUERY";
     private static final Object[][] PROP_DATA       = new Object[][] {
-            { "newdatabaseversion", 8, null, "see ucanaccess website" },
-            { "jackcessopener", 500, null, "see ucanaccess web site" },
-            { "password", 500, null, "see ucanaccess web site" }, { "memory", 10, "true", "see ucanaccess web site" },
-            { "lobscale", 2, "2", "see ucanaccess web site" }, { "keepmirror", 500, "2", "see ucanaccess web site" },
-            { "showschema", 10, "false", "see ucanaccess web site" },
-            { "inactivitytimeout", 10, "2", "see ucanaccess web site" },
-            { "singleconnection", 10, "false", "see ucanaccess web site" },
-            { "immediatelyreleaseresources", 10, "false", "see ucanaccess web site" },
-            { "lockmdb", 10, "false", "see ucanaccess web site" },
-            { "openexclusive", 500, "false", "see ucanaccess web site" },
-            { "remap", 500, null, "see ucanaccess web site" }, { "columnorder", 10, "data", "see ucanaccess web site" },
-            { "mirrorfolder", 500, null, "see ucanaccess web site" },
-            { "ignorecase", 10, "true", "see ucanaccess web site" },
-            { "sysschema", 10, "false", "see ucanaccess web site" },
-            { "skipindexes", 10, "false", "see ucanaccess web site" },
-            { "preventreloading", 10, "false", "see ucanaccess web site" },
-            { "concatnulls", 10, "false", "see ucanaccess web site" }
+            {"newdatabaseversion", 8, null, "see ucanaccess website"},
+            {"jackcessopener", 500, null, "see ucanaccess web site"},
+            {"password", 500, null, "see ucanaccess web site"},
+            {"memory", 10, "true", "see ucanaccess web site"},
+            {"lobscale", 2, "2", "see ucanaccess web site"},
+            {"keepmirror", 500, "2", "see ucanaccess web site"},
+            {"showschema", 10, "false", "see ucanaccess web site"},
+            {"inactivitytimeout", 10, "2", "see ucanaccess web site"},
+            {"singleconnection", 10, "false", "see ucanaccess web site"},
+            {"immediatelyreleaseresources", 10, "false", "see ucanaccess web site"},
+            {"lockmdb", 10, "false", "see ucanaccess web site"},
+            {"openexclusive", 500, "false", "see ucanaccess web site"},
+            {"remap", 500, null, "see ucanaccess web site"},
+            {"columnorder", 10, "data", "see ucanaccess web site"},
+            {"mirrorfolder", 500, null, "see ucanaccess web site"},
+            {"ignorecase", 10, "true", "see ucanaccess web site"},
+            {"sysschema", 10, "false", "see ucanaccess web site"},
+            {"skipindexes", 10, "false", "see ucanaccess web site"},
+            {"preventreloading", 10, "false", "see ucanaccess web site"},
+            {"concatnulls", 10, "false", "see ucanaccess web site"}
 
     };
 
@@ -86,6 +84,8 @@ public class Metadata {
                     + "ON(t.TABLE_ID=c.TABLE_ID ) WHERE t.ESCAPED_TABLE_NAME=nvl(?,t.ESCAPED_TABLE_NAME) ";
     private static final String RENAME         =
             "UPDATE UCA_METADATA.TABLES SET TABLE_NAME=?,ESCAPED_TABLE_NAME=? WHERE TABLE_NAME=?";
+
+    private Connection          conn;
 
     public enum Types {
         VIEW,

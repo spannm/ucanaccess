@@ -1,11 +1,11 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.converters.SQLConverter;
+
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-
-import net.ucanaccess.converters.Metadata;
-import net.ucanaccess.converters.SQLConverter;
 
 public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 

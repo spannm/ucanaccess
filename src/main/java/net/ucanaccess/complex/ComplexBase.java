@@ -1,23 +1,23 @@
 package net.ucanaccess.complex;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.List;
-
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-
 import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.complex.ComplexValue;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.complex.ComplexColumnInfoImpl;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
 
 public abstract class ComplexBase implements Serializable {
     private static final long           serialVersionUID = 1L;
+    public static final ComplexValue.Id CREATE_ID        = ComplexColumnInfoImpl.INVALID_ID;
+
     private int                         id;
     private String                      tableName;
     private String                      columnName;
-    public static final ComplexValue.Id CREATE_ID        = ComplexColumnInfoImpl.INVALID_ID;
 
     public ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
         this.id = _id.get();
@@ -27,7 +27,7 @@ public abstract class ComplexBase implements Serializable {
 
     public ComplexBase(ComplexValue cv) {
         this(cv.getId(), cv.getComplexValueForeignKey().getColumn().getTable().getName(),
-                cv.getComplexValueForeignKey().getColumn().getName());
+            cv.getComplexValueForeignKey().getColumn().getName());
     }
 
     public String getTableName() {

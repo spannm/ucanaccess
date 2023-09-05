@@ -1,17 +1,12 @@
 package net.ucanaccess.jdbc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.Map;
-
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import org.hsqldb.jdbc.JDBCPreparedStatement;
 import org.hsqldb.jdbc.JDBCStatement;
 
-import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import java.sql.*;
+import java.util.Map;
 
 public class UcanaccessStatement implements Statement {
     private UcanaccessConnection connection;
@@ -534,13 +529,13 @@ public class UcanaccessStatement implements Statement {
         old.close();
     }
 
-    protected void reset(Statement st) throws SQLException {
-        int maxr = this.wrapped.getMaxRows();
-        int maxf = this.wrapped.getMaxFieldSize();
-        int direction = this.wrapped.getFetchDirection();
-        int fs = this.wrapped.getFetchSize();
-        int qt = this.wrapped.getQueryTimeout();
-        this.wrapped = st;
+    protected void reset(Statement _st) throws SQLException {
+        final int maxr = this.wrapped.getMaxRows();
+        final int maxf = this.wrapped.getMaxFieldSize();
+        final int direction = this.wrapped.getFetchDirection();
+        final int fs = this.wrapped.getFetchSize();
+        final int qt = this.wrapped.getQueryTimeout();
+        this.wrapped = _st;
         this.wrapped.setMaxRows(maxr);
         this.wrapped.setMaxFieldSize(maxf);
         this.wrapped.setFetchDirection(direction);

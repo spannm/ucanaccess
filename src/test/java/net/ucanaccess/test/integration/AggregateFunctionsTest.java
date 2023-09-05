@@ -1,18 +1,17 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.Locale;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.Locale;
 
 @RunWith(Parameterized.class)
 public class AggregateFunctionsTest extends AccessVersionAllTest {
@@ -25,8 +24,8 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
     @Before
     public void beforeTestCase() throws Exception {
         executeStatements("CREATE TABLE t235 (id INTEGER,descr text(400), num numeric(12,3), date0 datetime) ",
-                "INSERT INTO t235 (id,descr,num,date0)  VALUES( 1234,'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)",
-                "INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
+            "INSERT INTO t235 (id,descr,num,date0)  VALUES( 1234,'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)",
+            "INSERT INTO t235 (id,descr,num,date0)  VALUES( 12344,'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
     }
 
     @After
@@ -37,9 +36,9 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
     @Test
     public void testDCount() throws SQLException, IOException, ParseException {
 
-        checkQuery("SELECT id  , DCount('*','t235','1=1') from [t235]", new Object[][] { { 1234, 2 }, { 12344, 2 } });
+        checkQuery("SELECT id  , DCount('*','t235','1=1') from [t235]", new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT id as [WW \"SS], DCount('descr','t235','1=1')from t235",
-                new Object[][] { { 1234, 2 }, { 12344, 2 } });
+            new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT  DCount('*','t235','1=1') ", 2);
 
     }

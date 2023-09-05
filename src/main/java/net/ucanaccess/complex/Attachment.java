@@ -1,9 +1,10 @@
 package net.ucanaccess.complex;
 
+import com.healthmarketscience.jackcess.complex.ComplexValue;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import com.healthmarketscience.jackcess.complex.ComplexValue;
 
 public class Attachment extends ComplexBase {
     private static final long serialVersionUID = 1L;

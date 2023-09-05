@@ -1,18 +1,12 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.sql.*;
 
 @RunWith(Parameterized.class)
 public class MetaDataTest extends AccessVersionAllTest {
@@ -31,18 +25,19 @@ public class MetaDataTest extends AccessVersionAllTest {
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
         st.execute(
-                "create table [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
+            "create table [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
         st.execute("insert into [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
         st.execute("update [健康] set   [Sometime I wonder who I am ]='d'");
         checkQuery("SELECT * FROM 健康 ");
         getLogger().info("crazy names in create table...");
         dumpQueryResult("SELECT * FROM [健康]");
         st.execute(
-                "create table [123456 nn%&/健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] aUtoIncrement PRIMARY KEY, [Sometime I wonder who I am ] text, [Πλήθος Αντιγράφων] CURRENCY,[ជំរាបសួរ] CURRENCY,[ЗДОРОВЫЙ] CURRENCY,[健康] CURRENCY,[健康な] CURRENCY,[किआओ ] CURRENCY default 12.88, [11q3 ¹²³¼½¾ß€] text(2), unique ([किआओ ] ,[健康な]) )");
+            "create table [123456 nn%&/健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] aUtoIncrement PRIMARY KEY, [Sometime I wonder who I am ] text, "
+            + "[Πλήθος Αντιγράφων] CURRENCY,[ជំរាបសួរ] CURRENCY,[ЗДОРОВЫЙ] CURRENCY,[健康] CURRENCY,[健康な] CURRENCY,[किआओ ] CURRENCY default 12.88, [11q3 ¹²³¼½¾ß€] text(2), unique ([किआओ ] ,[健康な]) )");
         st.execute(
-                "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
+            "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
         PreparedStatement ps = ucanaccess.prepareStatement("SELECT *  FROM [123456 nn%&/健康]",
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
         rs.moveToInsertRow();
 
@@ -54,12 +49,12 @@ public class MetaDataTest extends AccessVersionAllTest {
 
         try {
             st.execute(
-                    "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)");
+                "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)");
         } catch (Exception e) {
             getLogger().info("ok,  unique constraint gotten");
         }
         st.execute(
-                "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) VALUES('I''m a wonderful forty',11,11,14.01,13)");
+            "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) VALUES('I''m a wonderful forty',11,11,14.01,13)");
         try {
             st.execute("update [123456 nn%&/健康] set [健康な]=13,  [किआओ ]=14");
         } catch (Exception e) {
@@ -90,15 +85,15 @@ public class MetaDataTest extends AccessVersionAllTest {
         assertFalse(rsmd.isCurrency(7));
         DatabaseMetaData dbmd = this.ucanaccess.getMetaData();
 
-        ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);// noroman tableName
+        ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);
         getLogger().info("Noroman characters...");
         dumpQueryResult(rs);
-        rs = dbmd.getColumns(null, null, "NOROMAn", null);// noroman tableName
+        rs = dbmd.getColumns(null, null, "NOROMAn", null);
         dumpQueryResult(rs);
-        rs = dbmd.getColumns(null, null, "%ROMAn", null);// noroman tableName
+        rs = dbmd.getColumns(null, null, "%ROMAn", null);
         dumpQueryResult(rs);
         getLogger().info("getColumns...");
-        rs = dbmd.getColumns(null, null, "Πλήθ%", null);// noroman tableName
+        rs = dbmd.getColumns(null, null, "Πλήθ%", null);
         dumpQueryResult(rs);
         rs = dbmd.getColumns(null, null, "%健康", null);
         dumpQueryResult(rs);
@@ -106,7 +101,7 @@ public class MetaDataTest extends AccessVersionAllTest {
         rs = dbmd.getColumns(null, null, "TAbELLA1", "%e");
         dumpQueryResult(rs);
         getLogger().info("getColumnPrivileges...");
-        rs = dbmd.getColumnPrivileges(null, null, "NOROMAn", null);// noroman tableName
+        rs = dbmd.getColumnPrivileges(null, null, "NOROMAn", null);
         dumpQueryResult(rs);
         // rs=dbmd.getColumnPrivileges(null, null, null, null);
         getLogger().info("getExportedKeys...");
@@ -134,10 +129,10 @@ public class MetaDataTest extends AccessVersionAllTest {
         rs = dbmd.getTablePrivileges(null, null, "??###");
         dumpQueryResult(rs);
         getLogger().info("getTables...");
-        rs = dbmd.getTables(null, null, "??###", new String[] { "TABLE" });
+        rs = dbmd.getTables(null, null, "??###", new String[] {"TABLE"});
         dumpQueryResult(rs);
 
-        rs = dbmd.getTables(null, null, null, new String[] { "VIEW" });
+        rs = dbmd.getTables(null, null, null, new String[] {"VIEW"});
         dumpQueryResult(rs);
         getLogger().info(".getBestRowIdentifier...");
         rs = dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true);

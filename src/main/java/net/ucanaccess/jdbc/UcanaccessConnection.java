@@ -1,36 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Executor;
-
 import com.healthmarketscience.jackcess.Database;
-
-import org.hsqldb.jdbc.JDBCConnection;
-
 import net.ucanaccess.commands.CompositeCommand;
 import net.ucanaccess.commands.ICommand;
 import net.ucanaccess.commands.ICommand.TYPES;
@@ -40,6 +10,13 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.Logger;
+import org.hsqldb.jdbc.JDBCConnection;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.Executor;
 
 public class UcanaccessConnection implements Connection {
     private static ThreadLocal<Context> ctx           = new ThreadLocal<Context>();
@@ -310,7 +287,7 @@ public class UcanaccessConnection implements Connection {
                 if (ib != null) {
                     if (command instanceof CompositeCommand) {
                         ib.doAction(command);
-                    }else{
+                    } else {
                         ibal.add(ib);
                     }
                 }

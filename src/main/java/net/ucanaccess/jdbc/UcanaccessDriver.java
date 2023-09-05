@@ -1,30 +1,23 @@
 package net.ucanaccess.jdbc;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLWarning;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.StringTokenizer;
-
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.util.ErrorHandler;
-
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.Logger;
 import net.ucanaccess.util.Logger.Messages;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 public final class UcanaccessDriver implements Driver {
     public static final String URL_PREFIX = "jdbc:ucanaccess://";

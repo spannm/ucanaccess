@@ -1,14 +1,13 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.PreparedStatement;
-
+import net.ucanaccess.jdbc.UcanaccessStatement;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.jdbc.UcanaccessStatement;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.sql.PreparedStatement;
 
 @RunWith(Parameterized.class)
 public class CloseOnCompletionTest extends AccessVersionAllTest {

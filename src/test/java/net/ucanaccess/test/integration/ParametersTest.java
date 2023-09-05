@@ -1,18 +1,17 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2007Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalTime;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
 public class ParametersTest extends AccessVersion2007Test {
@@ -23,7 +22,7 @@ public class ParametersTest extends AccessVersion2007Test {
 
     @Override
     public String getAccessPath() {
-        return "testdbs/Parameters.accdb";  // Access 2007
+        return "testdbs/Parameters.accdb"; // Access 2007
     }
 
     @Test
@@ -80,20 +79,20 @@ public class ParametersTest extends AccessVersion2007Test {
         cs.executeUpdate();
         dumpQueryResult("SELECT * FROM [table 1]");
     }
-    
+
     @Test
     public void testLocalTimeParameters() throws SQLException {
         final LocalTime desiredTime = LocalTime.of(12, 0, 1);
         final String expectedText = "one second past noon";
-        
+
         ResultSet rs = null;
-        
+
         PreparedStatement ps = ucanaccess.prepareStatement("SELECT Description FROM TimeValues WHERE TimeValue=?");
         ps.setObject(1, desiredTime);
         rs = ps.executeQuery();
         rs.next();
         assertEquals(expectedText, rs.getString("Description"));
-        
+
         CallableStatement cs = ucanaccess.prepareCall("{CALL SelectTimeValueUsingParameter(?)}");
         cs.setObject(1, desiredTime);
         rs = cs.executeQuery();

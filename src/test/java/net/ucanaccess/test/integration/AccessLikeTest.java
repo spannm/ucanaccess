@@ -1,15 +1,14 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class AccessLikeTest extends AccessVersionDefaultTest {
@@ -51,13 +50,13 @@ public class AccessLikeTest extends AccessVersionDefaultTest {
         st.execute("INSERT INTO T21 (descr)  VALUES( '132B')");
         st.execute("INSERT INTO T21 (descr)  VALUES( '138')");
         st.execute("INSERT INTO T21 (descr)  VALUES( '138#')");
-        Object[][] ver = { { "a*a" }, { "A*a" } };
+        Object[][] ver = {{"a*a"}, {"A*a"}};
         checkQuery("SELECT descr FROM T21 where descr like 'a[*]a' order by ID", ver);
-        ver = new Object[][] { { "aa" }, { "aBa" }, { "aBBBa" }, { "a*a" }, { "A*a" } };
+        ver = new Object[][] {{"aa"}, {"aBa"}, {"aBBBa"}, {"a*a"}, {"A*a"}};
 
         checkQuery("SELECT descr FROM T21 where descr like \"a*a\"  AND '1'='1' and (descr) like \"a*a\" ORDER BY ID",
-                ver);
-        ver = new Object[][] { { 2, "aa" }, { 3, "aBa" }, { 4, "aBBBa" }, { 7, "a*a" }, { 8, "A*a" } };
+            ver);
+        ver = new Object[][] {{2, "aa"}, {3, "aBa"}, {4, "aBBBa"}, {7, "a*a"}, {8, "A*a"}};
         checkQuery("SELECT * FROM T21 where descr like 'a%a'", ver);
 
         checkQuery("SELECT descr FROM T21 where descr like 'P[A-F]###'", "PB123");
@@ -90,7 +89,7 @@ public class AccessLikeTest extends AccessVersionDefaultTest {
         st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111C')");
         st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111')");
         checkQuery("SELECT DESCR FROM Tx21 WHERE descr NOT LIKE \"t#####\" ORDER BY ID",
-                new Object[][] { { "t1111C" }, { "t1111" } });
+            new Object[][] {{"t1111C"}, {"t1111"}});
 
         st.close();
 

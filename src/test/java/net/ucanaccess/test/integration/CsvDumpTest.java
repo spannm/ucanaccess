@@ -1,19 +1,18 @@
 package net.ucanaccess.test.integration;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
+import net.ucanaccess.console.Exporter;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.console.Exporter;
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * Integration test for {@link net.ucanaccess.console.Exporter}.

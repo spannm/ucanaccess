@@ -1,33 +1,16 @@
 package net.ucanaccess.console;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.sql.Types;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
+import net.ucanaccess.util.Logger;
+
+import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
-
-import net.ucanaccess.util.Logger;
 
 public class Main {
     private static final String EXPORT_USAGE = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
@@ -315,7 +298,6 @@ public class Main {
         String schemaFileName = null;
 
         // Process the command line flags.
-        // TODO: Consider using a 3rd party command line argument parser.
         int i = 1; // skip the first token which will always be "export"
         for (; i < tokens.size(); i++) {
             String arg = tokens.get(i);

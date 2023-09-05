@@ -2,10 +2,10 @@ package net.ucanaccess.converters;
 
 import static com.healthmarketscience.jackcess.impl.query.QueryFormat.NEWLINE;
 
+import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
 
 public class AppendQueryTemp extends AppendQueryImpl {
 

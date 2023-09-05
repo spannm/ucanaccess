@@ -1,10 +1,10 @@
 package net.ucanaccess.commands;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 public class DropTableCommand implements ICommand {
     private String execId;

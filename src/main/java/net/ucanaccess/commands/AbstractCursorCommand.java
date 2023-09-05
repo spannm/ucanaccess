@@ -1,9 +1,9 @@
 package net.ucanaccess.commands;
 
+import com.healthmarketscience.jackcess.Cursor;
+
 import java.io.IOException;
 import java.util.Map;
-
-import com.healthmarketscience.jackcess.Cursor;
 
 public abstract class AbstractCursorCommand implements ICursorCommand {
     @Override

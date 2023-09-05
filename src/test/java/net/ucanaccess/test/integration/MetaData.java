@@ -15,18 +15,17 @@ limitations under the License.
  */
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class MetaData extends AccessVersionDefaultTest {
@@ -68,12 +67,12 @@ public class MetaData extends AccessVersionDefaultTest {
     public void testDrop() throws SQLException, IOException {
         Statement st = null;
         ucanaccess.setAutoCommit(false);
-        createSimple("a", new Object[][] { { "33A", 11, "a" }, { "33B", 111, "a" } });
+        createSimple("a", new Object[][] {{"33A", 11, "a"}, {"33B", 111, "a"}});
         st = ucanaccess.createStatement();
         st.executeUpdate("DROP TABLE AAAn");
 
         st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-        createSimple("b", new Object[][] { { "33A", 11, "b" }, { "33B", 111, "b" } });
+        createSimple("b", new Object[][] {{"33A", 11, "b"}, {"33B", 111, "b"}});
 
         ucanaccess.commit();
         st.close();

@@ -1,9 +1,8 @@
 package net.ucanaccess.triggers;
 
+import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.commands.DeleteCommand;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-
-import com.healthmarketscience.jackcess.Table;
 
 public class TriggerDelete extends TriggerBase {
     @Override

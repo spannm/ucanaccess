@@ -30,11 +30,11 @@ public final class Exporter {
     private static final String DEFAULT_CSV_DELIMITER = ";";
 
     // See http://unicode.org/faq/utf_bom.html#bom2
-    private static final byte[] UTF8_BYTE_ORDER_MARK = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+    private static final byte[] UTF8_BYTE_ORDER_MARK  = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
 
-    private final String  delimiter;
-    private final boolean includeBom;
-    private final boolean preserveNewlines;
+    private final String        delimiter;
+    private final boolean       includeBom;
+    private final boolean       preserveNewlines;
 
     /** Builder for {@link Exporter}. */
     public static class Builder {
@@ -154,10 +154,6 @@ public final class Exporter {
      * </ul>
      * This supports only a small subset of various CSV transformations such as those given in
      * https://www.csvreader.com/csv_format.php.
-     *
-     * <p>
-     * TODO: Consider using a 3rd party formatter like {@code org.apache.commons.csv.CSVFormat} if we don't mind adding
-     * another dependency.
      */
     static String toCsv(String s, String delimiter, boolean preserveNewlines) {
         boolean needsTextQualifier = false;

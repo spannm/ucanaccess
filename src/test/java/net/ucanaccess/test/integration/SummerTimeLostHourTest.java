@@ -1,5 +1,17 @@
 package net.ucanaccess.test.integration;
 
+import com.healthmarketscience.jackcess.CursorBuilder;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2007Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -8,20 +20,6 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
 
 @RunWith(Parameterized.class)
 public class SummerTimeLostHourTest extends AccessVersion2007Test {
@@ -55,7 +53,7 @@ public class SummerTimeLostHourTest extends AccessVersion2007Test {
     @Test
     public void testForLostHour() throws SQLException, IOException {
         /*
-         * ensure that #2017-03-26 02:00:00# doesn't "magically" 
+         * ensure that #2017-03-26 02:00:00# doesn't "magically"
          *      become #2017-03-26 01:00:00# when written to HSQLDB
          */
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
@@ -69,13 +67,12 @@ public class SummerTimeLostHourTest extends AccessVersion2007Test {
          */
         Statement ucaStmt = ucanaccess.createStatement();
         ucaStmt.executeUpdate("UPDATE Table1 SET txtField='updated' WHERE id=1");
-        //
+
         LocalDateTime expectedBackFromAccess = LocalDateTime.of(2017, 3, 26, 2, 0);
         Database db = ucanaccess.getDbIO();
         Table tbl = db.getTable("Table1");
         Row r = CursorBuilder.findRowByPrimaryKey(tbl, 1);
         assertEquals(expectedBackFromAccess, r.get("dtmField"));
-        //
     }
 
 }

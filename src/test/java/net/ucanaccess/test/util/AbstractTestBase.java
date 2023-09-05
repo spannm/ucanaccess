@@ -1,7 +1,5 @@
 package net.ucanaccess.test.util;
 
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +7,8 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Base class for JUnit test cases. Extends {@link Assert} in order to make all assert* methods available, while adding
@@ -32,12 +32,12 @@ public abstract class AbstractTestBase extends Assert {
      */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Rule
+    public final TestName testMethodName = new TestName();
+
     public final Logger getLogger() {
         return logger;
     }
-
-    @Rule
-    public final TestName testMethodName = new TestName();
 
     public String getTestMethodName() {
         return getClass().getSimpleName() + '.' + testMethodName.getMethodName() + "()";

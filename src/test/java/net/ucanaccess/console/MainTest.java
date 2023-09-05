@@ -1,11 +1,10 @@
 package net.ucanaccess.console;
 
-import java.io.IOException;
-import java.util.List;
-
+import net.ucanaccess.test.util.AbstractTestBase;
 import org.junit.Test;
 
-import net.ucanaccess.test.util.AbstractTestBase;
+import java.io.IOException;
+import java.util.List;
 
 public class MainTest extends AbstractTestBase {
 

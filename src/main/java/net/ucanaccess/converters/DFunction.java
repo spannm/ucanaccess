@@ -1,22 +1,15 @@
 package net.ucanaccess.converters;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.ucanaccess.jdbc.UcanaccessConnection;
-
 public class DFunction {
-    private Connection                conn;
-    private String                    sql;
     private static final Pattern      FROM_PATTERN             = Pattern.compile("\\w*(?i)FROM\\w*");
     private static final String       SELECT_FROM              = "(?i)SELECT(.*\\W)(?i)FROM(.*)";
     private static final String       DFUNCTIONS_WHERE         =
@@ -28,6 +21,9 @@ public class DFunction {
     private static final String       IDENTIFIER               = "(\\W)((?i)_)(\\W)";
     private static final List<String> DFUNCTIONLIST            =
             Arrays.asList("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
+
+    private Connection                conn;
+    private String                    sql;
 
     public DFunction(Connection _conn, String _sql) {
         this.conn = _conn;
@@ -43,9 +39,9 @@ public class DFunction {
             for (String s : DFUNCTIONLIST) {
 
                 String fun = "D" + s;
-                s = s.equalsIgnoreCase("lookup") ? " " : s;
+                s = "lookup".equalsIgnoreCase(s) ? " " : s;
                 sql0 = sql0.replaceAll(DFUNCTIONS_WHERE.replaceFirst("_", fun),
-                        init + s + "($1) FROM $2 WHERE $3     " + end);
+                    init + s + "($1) FROM $2 WHERE $3     " + end);
                 sql0 = sql0.replaceAll(DFUNCTIONS_NO_WHERE.replaceFirst("_", fun), init + s + "($1) FROM $2    " + end);
                 Pattern dfd = Pattern.compile(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun));
                 for (Matcher mtc = dfd.matcher(sql0); mtc.find(); mtc = dfd.matcher(sql0)) {
@@ -53,10 +49,10 @@ public class DFunction {
                     String g3 = mtc.group(3);
                     String tableN = mtc.group(2).trim();
                     String alias = tableN.startsWith("[") & tableN.endsWith("]") ? "[" + unpad(tableN) + "_DALIAS]"
-                            : tableN + "_DALIAS";
+                        : tableN + "_DALIAS";
                     String tn = tableN.startsWith("[") & tableN.endsWith("]") ? unpad(tableN) : tableN;
                     sb.append(init).append(s).append("(").append(mtc.group(1)).append(") FROM ").append(tableN)
-                            .append(" AS ").append(alias).append(" WHERE ");
+                        .append(" AS ").append(alias).append(" WHERE ");
                     boolean accessConcat = g3.indexOf("&") > 0;
                     boolean sqlConcat = g3.indexOf("||") > 0;
                     if (accessConcat || sqlConcat) {
@@ -76,13 +72,13 @@ public class DFunction {
                                         continue;
                                     }
                                     String pref = mtcop.group(1);
-                                    if (pref.equals(".") || (pref.equals("[") && mtcop.start(1) > 0
-                                            && tkn.charAt(mtcop.start(1) - 1) == '.')) {
+                                    if (".".equals(pref) || ("[".equals(pref) && mtcop.start(1) > 0
+                                        && tkn.charAt(mtcop.start(1) - 1) == '.')) {
                                         continue;
                                     }
                                     tkn = tkn.replaceAll(oppn,
-                                            pref.equals("[") ? resolveAmbiguosTableName(cln) + ".$1$2$3"
-                                                    : "$1" + resolveAmbiguosTableName(cln) + ".$2$3");
+                                        "[".equals(pref) ? resolveAmbiguosTableName(cln) + ".$1$2$3"
+                                            : "$1" + resolveAmbiguosTableName(cln) + ".$2$3");
                                 }
                                 sb.append(tkn);
                             }
@@ -92,8 +88,7 @@ public class DFunction {
                     sql0 = sql0.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun), sb.toString());
                 }
             }
-        } catch (SQLException e) {
-        }
+        } catch (SQLException e) {}
         return sql0;
     }
 

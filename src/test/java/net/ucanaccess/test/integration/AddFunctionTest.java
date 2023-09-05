@@ -1,15 +1,14 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.Statement;
-import java.util.Locale;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.AddFunctionClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import net.ucanaccess.test.util.AddFunctionClass;
+import java.sql.Statement;
+import java.util.Locale;
 
 @RunWith(Parameterized.class)
 public class AddFunctionTest extends AccessVersionAllTest {

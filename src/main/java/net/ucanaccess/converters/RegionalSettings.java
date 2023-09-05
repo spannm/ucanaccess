@@ -2,15 +2,7 @@ package net.ucanaccess.converters;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public final class RegionalSettings {
@@ -30,8 +22,7 @@ public final class RegionalSettings {
     RegionalSettings(Locale _locale) {
         dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat", _locale);
         locale = _locale;
-        String[] dfsp = new String[] { getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(),
-                getShortDatePattern() };
+        String[] dfsp = new String[] {getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(), getShortDatePattern()};
         for (String pattern : dfsp) {
             if (pattern.indexOf(".") > 0 && pattern.indexOf("h.") < 0 && pattern.indexOf("H.") < 0) {
                 pointDateSeparator = true;
@@ -140,7 +131,7 @@ public final class RegionalSettings {
         if ("true".equalsIgnoreCase(getRS())) {
 
             DateFormatSymbols df = new DateFormatSymbols();
-            df.setAmPmStrings(new String[] { "AM", "PM" });
+            df.setAmPmStrings(new String[] {"AM", "PM"});
             sdf.setDateFormatSymbols(df);
         }
 

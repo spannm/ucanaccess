@@ -1,17 +1,16 @@
 package net.ucanaccess.test.integration;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 @RunWith(Parameterized.class)
 public class FunctionsTest extends AccessVersionAllTest {
@@ -25,12 +24,12 @@ public class FunctionsTest extends AccessVersionAllTest {
     public String getAccessPath() {
         return "testdbs/FunctionsTest" + fileFormat.name() + fileFormat.getFileExtension();
     }
-    
+
     @Before
     public void beforeTestCase() throws Exception {
         executeStatements(
-                "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC);",
-                "INSERT INTO tblFormat (id) VALUES(1)");
+            "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC);",
+            "INSERT INTO tblFormat (id) VALUES(1)");
     }
 
     @Test
@@ -53,13 +52,13 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testNz() throws Exception {
         checkQuery("SELECT nz(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t234",
-                "lampredotto", "turtelaz", 1.5, 2);
+            "lampredotto", "turtelaz", 1.5, 2);
     }
 
     @Test
     public void testCBoolean() throws Exception {
         checkQuery("SELECT cbool(id), cbool(1=2), cbool('true'), cbool('false'), cbool(0), cbool(-3) FROM t234",
-                new Object[][] { { true, false, true, false, false, true } });
+            new Object[][] {{true, false, true, false, false, true}});
     }
 
     @Test
@@ -136,33 +135,33 @@ public class FunctionsTest extends AccessVersionAllTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
         checkQuery("SELECT dateAdd('YYYY', 4, #11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2007-11-22 22:42:58"));
+            sdf.parse("2007-11-22 22:42:58"));
         checkQuery("SELECT dateAdd('Q', 3 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2004-08-22 22:42:58"));
+            sdf.parse("2004-08-22 22:42:58"));
         checkQuery("SELECT dateAdd('Y', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2005-02-15 22:42:58"));
+            sdf.parse("2005-02-15 22:42:58"));
         checkQuery("SELECT dateAdd('D', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2005-02-15 22:42:58"));
+            sdf.parse("2005-02-15 22:42:58"));
         checkQuery("SELECT dateAdd('Y', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2004-01-06 22:42:58"));
+            sdf.parse("2004-01-06 22:42:58"));
         checkQuery("SELECT dateAdd('D', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2004-01-06 22:42:58"));
+            sdf.parse("2004-01-06 22:42:58"));
         checkQuery("SELECT dateAdd('Y', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2003-11-26 22:42:58"));
+            sdf.parse("2003-11-26 22:42:58"));
         checkQuery("SELECT dateAdd('D', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2003-11-26 22:42:58"));
+            sdf.parse("2003-11-26 22:42:58"));
         checkQuery("SELECT dateAdd('W', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2004-01-04 22:42:58"));
+            sdf.parse("2004-01-04 22:42:58"));
         checkQuery("SELECT dateAdd('W', 1 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2003-11-23 22:42:58"));
+            sdf.parse("2003-11-23 22:42:58"));
         checkQuery("SELECT dateAdd('WW', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2004-09-18 22:42:58"));
+            sdf.parse("2004-09-18 22:42:58"));
         checkQuery("SELECT dateAdd('H', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2003-12-09 14:42:58"));
+            sdf.parse("2003-12-09 14:42:58"));
         checkQuery("SELECT dateAdd('M', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2037-03-22 22:42:58"));
+            sdf.parse("2037-03-22 22:42:58"));
         checkQuery("SELECT dateAdd('S', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
-                sdf.parse("2003-11-22 22:49:38"));
+            sdf.parse("2003-11-22 22:49:38"));
     }
 
     @Test
@@ -183,14 +182,14 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testHour() throws Exception {
         checkQuery("SELECT Hour(#10:42:58 pM#),Hour(#10:42:58 AM#),Hour(#11/22/2003 10:42:58 PM#) FROM t234", 22, 10,
-                22);
+            22);
     }
 
     @Test
     public void testIif() throws Exception {
         checkQuery(
-                "SELECT IIf(isNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
-                "pl'uto\" \" cccc", "pl'uto\" \" cccc");
+            "SELECT IIf(isNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
+            "pl'uto\" \" cccc", "pl'uto\" \" cccc");
 
         checkQuery("SELECT IIf(true,false,true) FROM t234", false);
         checkQuery("SELECT IIf('pippo'=null,'capra','d''una capra') FROM t234", "d'una capra");
@@ -277,14 +276,14 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testMid() throws Exception {
         checkQuery(
-                "SELECT Mid ('Found on the Net', 2, 4), Mid ('Found on the Net', 1, 555),Mid(null, 1, 555) FROM t234",
-                "ound", "Found on the Net", null);
+            "SELECT Mid ('Found on the Net', 2, 4), Mid ('Found on the Net', 1, 555),Mid(null, 1, 555) FROM t234",
+            "ound", "Found on the Net", null);
     }
 
     @Test
     public void testMinute() throws Exception {
         checkQuery("SELECT Minute(#10:42:58 pM#),Minute(#10:42:58 AM#),Minute(#11/22/2003 10:42:58 PM#) FROM t234", 42,
-                42, 42);
+            42, 42);
     }
 
     @Test
@@ -328,7 +327,7 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testSecond() throws Exception {
         checkQuery("SELECT Second(#10:42:58 pM#),Second(#10:42:58 AM#),Second(#11/22/2003 10:42:58 PM#) FROM t234", 58,
-                58, 58);
+            58, 58);
     }
 
     @Test
@@ -354,8 +353,8 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testVal() throws Exception {
         checkQuery(
-                "SELECT val('0.'), Val('hhh'),val('.a'),val('.') ,val('.44'), Val('1222.3hhh'),Val('12 22.3hhh'),VAL('-'),VAL('-2,3') FROM t234",
-                0.0, 0.0, 0.0, 0.0, 0.44, 1222.3, 1222.3, 0.0, -2.0);
+            "SELECT val('0.'), Val('hhh'),val('.a'),val('.') ,val('.44'), Val('1222.3hhh'),Val('12 22.3hhh'),VAL('-'),VAL('-2,3') FROM t234",
+            0.0, 0.0, 0.0, 0.0, 0.44, 1222.3, 1222.3, 0.0, -2.0);
     }
 
     @Test
@@ -410,7 +409,7 @@ public class FunctionsTest extends AccessVersionAllTest {
 
         checkQuery("SELECT dateserial(1998,5, 10) FROM t234", sdf.parse("1998-05-10 00:00:00"));
         checkQuery("SELECT 'It works, I can''t believe it.' FROM t234 WHERE #05/13/1992#=dateserial(1992,05,13)",
-                "It works, I can't believe it.");
+            "It works, I can't believe it.");
     }
 
     @Test
@@ -544,9 +543,9 @@ public class FunctionsTest extends AccessVersionAllTest {
     @Test
     public void testFinancial() throws Exception {
         checkQuery(
-                "SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), IPmt(0.5,4,8,10*1,10000,0.5), PV(0,4,-10000,1000,-1.55),PPmt(0.5,3,7,100000,15000.1),SLN(10000,110000,9),SYD(10000,200,12,4),Pmt(0.08,30,5000,-15000,0.1) FROM t234",
-                20000.0, 2234.68083152805, -7.721791247488574, 477.63917525773195, 39000.0, -8042.7461874696455,
-                -11111.111111111111, 1130.7692307692307, -311.72566612727735);
+            "SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), IPmt(0.5,4,8,10*1,10000,0.5), PV(0,4,-10000,1000,-1.55),PPmt(0.5,3,7,100000,15000.1),SLN(10000,110000,9),SYD(10000,200,12,4),Pmt(0.08,30,5000,-15000,0.1) FROM t234",
+            20000.0, 2234.68083152805, -7.721791247488574, 477.63917525773195, 39000.0, -8042.7461874696455,
+            -11111.111111111111, 1130.7692307692307, -311.72566612727735);
         checkQuery("SELECT Rate(3,200,-610,0,-20,0.1) FROM t234", -0.01630483472667564);
     }
 }

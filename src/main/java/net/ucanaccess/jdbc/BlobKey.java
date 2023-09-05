@@ -1,29 +1,19 @@
 package net.ucanaccess.jdbc;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import com.healthmarketscience.jackcess.*;
+import com.healthmarketscience.jackcess.util.OleBlob;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.util.OleBlob;
-
 public class BlobKey implements Serializable {
-    private static final long serialVersionUID = -8580858159403159903L;
+    private static final long       serialVersionUID = -8580858159403159903L;
+    public static final int         MAX_SIZE         = 4096;
+
     private HashMap<String, Object> key;
-    private String tableName;
-    private String columnName;
-    public static final int MAX_SIZE = 4096;
+    private String                  tableName;
+    private String                  columnName;
 
     public BlobKey(HashMap<String, Object> _key, String _tableName, String _columnName) {
         super();

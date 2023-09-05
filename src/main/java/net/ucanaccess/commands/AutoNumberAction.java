@@ -1,16 +1,15 @@
 package net.ucanaccess.commands;
 
+import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Table;
 
 public class AutoNumberAction implements IFeedbackAction {
     private Map<String, Object> newAutoValues = new HashMap<String, Object>();

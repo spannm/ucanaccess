@@ -23,33 +23,21 @@ package net.ucanaccess.converters;
 
 import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.text.DateFormatSymbols;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Currency;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.healthmarketscience.jackcess.DataType;
-
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Functions {
     private static Double       rnd;
@@ -116,7 +104,7 @@ public final class Functions {
         }
         List<Object> lo = Arrays.asList((Object[]) obj1);
         List<Object> arg =
-                obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(new Object[] { obj2 });
+                obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(new Object[] {obj2});
         return lo.containsAll(arg);
     }
 
@@ -266,23 +254,23 @@ public final class Functions {
         }
         Calendar cl = Calendar.getInstance();
         cl.setTime(dt);
-        if (intv.equalsIgnoreCase("yyyy")) {
+        if ("yyyy".equalsIgnoreCase(intv)) {
             cl.add(Calendar.YEAR, vl);
-        } else if (intv.equalsIgnoreCase("q")) {
+        } else if ("q".equalsIgnoreCase(intv)) {
             cl.add(Calendar.MONTH, vl * 3);
-        } else if (intv.equalsIgnoreCase("y") || intv.equalsIgnoreCase("d")) {
+        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
             cl.add(Calendar.DAY_OF_YEAR, vl);
-        } else if (intv.equalsIgnoreCase("m")) {
+        } else if ("m".equalsIgnoreCase(intv)) {
             cl.add(Calendar.MONTH, vl);
-        } else if (intv.equalsIgnoreCase("w")) {
+        } else if ("w".equalsIgnoreCase(intv)) {
             cl.add(Calendar.DAY_OF_WEEK, vl);
-        } else if (intv.equalsIgnoreCase("ww")) {
+        } else if ("ww".equalsIgnoreCase(intv)) {
             cl.add(Calendar.WEEK_OF_YEAR, vl);
-        } else if (intv.equalsIgnoreCase("h")) {
+        } else if ("h".equalsIgnoreCase(intv)) {
             cl.add(Calendar.HOUR, vl);
-        } else if (intv.equalsIgnoreCase("n")) {
+        } else if ("n".equalsIgnoreCase(intv)) {
             cl.add(Calendar.MINUTE, vl);
-        } else if (intv.equalsIgnoreCase("s")) {
+        } else if ("s".equalsIgnoreCase(intv)) {
             cl.add(Calendar.SECOND, vl);
         } else {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
@@ -344,7 +332,7 @@ public final class Functions {
             result = clMax.get(Calendar.YEAR) - clMin.get(Calendar.YEAR);
         } else if (intv.equalsIgnoreCase("q")) {
             result = dateDiff("yyyy", dt1, dt2) * 4 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH)) / 3;
-        } else if (intv.equalsIgnoreCase("y") || intv.equalsIgnoreCase("d")) {
+        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
             result = (int) Math
                     .rint(((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24)));
         } else if (intv.equalsIgnoreCase("m")) {
@@ -831,7 +819,7 @@ public final class Functions {
                 return isNumeric(s.substring(1));
             }
 
-            if (sep.equals(".")) {
+            if (".".equals(sep)) {
                 s = s.replaceAll(gs, "");
             } else {
                 s = s.replaceAll("\\.", "").replaceAll(sep, ".");
@@ -1395,10 +1383,15 @@ public final class Functions {
         // FROM MS http://office.microsoft.com/en-us/excel-help/rate-HP005209232.aspx
 
         type = (Math.abs(type) >= 1) ? 1 : 0; // the only change to the implementation Apache POI
-        final int financialMaxIterations = 20;// Bet accuracy with 128
-        final double financialPrecision = 0.0000001;// 1.0e-8
+        final int financialMaxIterations = 20; // Bet accuracy with 128
+        final double financialPrecision = 0.0000001; // 1.0e-8
 
-        double y, y0, y1, x0, x1 = 0, f = 0, i = 0;
+        double y = 0;
+        double y0 = 0;
+        double y1 = 0;
+        double x0 = 0;
+        double f = 0;
+        double i = 0;
         double rate = guess;
         if (Math.abs(rate) < financialPrecision) {
             y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
@@ -1412,7 +1405,7 @@ public final class Functions {
         // find root by Newton secant method
         i = 0.0;
         x0 = 0.0;
-        x1 = rate;
+        double x1 = rate;
         while ((Math.abs(y0 - y1) > financialPrecision) && (i < financialMaxIterations)) {
             rate = (y1 * x0 - y0 * x1) / (y1 - y0);
             x0 = x1;
@@ -1512,11 +1505,9 @@ public final class Functions {
     public static Boolean formulaToBoolean(String res, String datatype) {
         if (res == null) {
             return null;
-        }
-        if (res.equals("-1")) {
+        } else if ("-1".equals(res)) {
             return true;
-        }
-        if (res.equals("0")) {
+        } else if ("0".equals(res)) {
             return false;
         }
         return null;

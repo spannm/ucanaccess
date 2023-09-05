@@ -1,14 +1,13 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.jdbc.UcanaccessDataSource;
+import net.ucanaccess.test.util.AbstractTestBase;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.junit.Test;
-
-import net.ucanaccess.jdbc.UcanaccessDataSource;
-import net.ucanaccess.test.util.AbstractTestBase;
 
 public class DataSourceTest extends AbstractTestBase {
     @Test

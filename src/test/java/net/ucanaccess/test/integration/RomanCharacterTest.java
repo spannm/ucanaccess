@@ -1,13 +1,12 @@
 package net.ucanaccess.test.integration;
 
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionDefaultTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class RomanCharacterTest extends AccessVersionDefaultTest {

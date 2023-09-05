@@ -15,19 +15,7 @@ limitations under the License.
  */
 package net.ucanaccess.commands;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import com.healthmarketscience.jackcess.Database;
-
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
@@ -35,6 +23,13 @@ import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class DDLCommandEnlist {
     private String[]            types;

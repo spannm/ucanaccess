@@ -4,14 +4,12 @@ import static org.mockito.Mockito.when;
 
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
-
+import net.ucanaccess.test.util.AbstractTestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import net.ucanaccess.test.util.AbstractTestBase;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AutoNumberManagerTest extends AbstractTestBase {

@@ -1,23 +1,12 @@
 package net.ucanaccess.converters;
 
-import java.sql.Connection;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
 import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
 import com.healthmarketscience.jackcess.impl.query.QueryImpl;
 import com.healthmarketscience.jackcess.query.Query;
+
+import java.sql.*;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class ParametricQuery {
     private Connection          hsqldb;
@@ -282,7 +271,7 @@ public class ParametricQuery {
             Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
 
             type = hm.get(type0.toUpperCase()) + typeS;
-            if (type.equalsIgnoreCase("VARCHAR")) {
+            if ("VARCHAR".equalsIgnoreCase(type)) {
                 type += "(255)";
             }
 

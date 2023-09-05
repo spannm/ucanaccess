@@ -1,41 +1,8 @@
 package net.ucanaccess.converters;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.PropertyMap.Property;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
@@ -44,9 +11,6 @@ import com.healthmarketscience.jackcess.impl.IndexImpl;
 import com.healthmarketscience.jackcess.impl.query.QueryFormat;
 import com.healthmarketscience.jackcess.impl.query.QueryImpl;
 import com.healthmarketscience.jackcess.query.Query;
-
-import org.hsqldb.error.ErrorCode;
-
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
@@ -55,6 +19,19 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Logger;
 import net.ucanaccess.util.Logger.Messages;
+import org.hsqldb.error.ErrorCode;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoadJet {
     private static int namingCounter = 0;
@@ -185,9 +162,11 @@ public class LoadJet {
         }
 
         private void createSwitch() throws SQLException {
-            DataType[] dtypes = new DataType[] { DataType.BINARY, DataType.BOOLEAN, DataType.SHORT_DATE_TIME,
-                    DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.MONEY, DataType.NUMERIC,
-                    DataType.COMPLEX_TYPE, DataType.MEMO };
+            DataType[] dtypes = new DataType[] {
+                DataType.BINARY, DataType.BOOLEAN, DataType.SHORT_DATE_TIME,
+                DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.MONEY, DataType.NUMERIC,
+                DataType.COMPLEX_TYPE, DataType.MEMO};
+
             for (DataType dtype : dtypes) {
                 String type = " " + TypesMap.map2hsqldb(dtype) + " ";
 
@@ -420,7 +399,6 @@ public class LoadJet {
 
                 }
 
-                String htype = getHsqldbColumnType(cl);
                 String cn = SQLConverter.preEscapingIdentifier(cl.getName());
                 String ctype = cl.getType().name();
                 if (cl.isAutoNumber()) {
@@ -439,7 +417,7 @@ public class LoadJet {
                 }
                 cn = SQLConverter.completeEscaping(cn);
                 cn = SQLConverter.checkLang(cn, conn);
-                sbC.append(comma).append(cn).append(" ").append(htype);
+                sbC.append(comma).append(cn).append(" ").append(getHsqldbColumnType(cl));
                 if (DataType.FLOAT.equals(cl.getType())) {
                     check.append(", check (3.4028235E+38>=").append(cn).append(" AND -3.4028235E+38<=").append(cn)
                             .append(")");
@@ -801,7 +779,7 @@ public class LoadJet {
             if (tn.indexOf(" ") > 0) {
                 SQLConverter.addWhiteSpacedTableNames(tn);
             }
-            String ntn = SQLConverter.escapeIdentifier(tn);// clean
+            String ntn = SQLConverter.escapeIdentifier(tn); // clean
             if (ntn == null) {
                 return;
             }
@@ -1280,7 +1258,7 @@ public class LoadJet {
                     }
                 }
 
-                String cause = UcanaccessSQLException.explaneCause(e);
+                String cause = UcanaccessSQLException.explainCause(e);
 
                 this.notLoaded.put(q.getName(), ": " + cause);
 

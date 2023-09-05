@@ -1,37 +1,32 @@
 package net.ucanaccess.converters;
 
+import net.ucanaccess.jdbc.NormalizedSQL;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.util.Logger;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.ucanaccess.jdbc.NormalizedSQL;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.util.Logger;
-
 public class Pivot {
+    private static final Pattern                   PIVOT            =
+    Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
+    private static final Pattern                   PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
+    private static final Pattern                   PIVOT_AGGR       =
+    Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
+    private static final Pattern                   PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
+    private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
     private String                                 transform;
     private String                                 select;
     private String                                 from;
     private String                                 expression;
     private String                                 pivot;
     private List<String>                           pivotIn;
-    private static final Pattern                   PIVOT            =
-            Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
-    private static final Pattern                   PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
-    private static final Pattern                   PIVOT_AGGR       =
-            Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
-    private static final Pattern                   PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
-    private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
     private String                                 aggregateFun;
     private Connection                             conn;
     private boolean                                pivotInCondition = true;

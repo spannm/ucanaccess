@@ -1,21 +1,20 @@
 package net.ucanaccess.triggers;
 
-import java.sql.SQLException;
-import java.util.UUID;
-
-import org.hsqldb.Trigger;
-import org.hsqldb.types.JavaObjectData;
-
-import net.ucanaccess.complex.Attachment;
-import net.ucanaccess.complex.SingleValue;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.util.Logger;
-
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import org.hsqldb.Trigger;
+import org.hsqldb.types.JavaObjectData;
+
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class TriggerAutoNumber extends TriggerBase {
     private static final String GUID_PATTERN =
@@ -31,7 +30,7 @@ public class TriggerAutoNumber extends TriggerBase {
         try {
             Table t = getTable(tableName, conn);
             if (t == null) {
-                throw new RuntimeException(Logger.getMessage("TABLE_DOESNT_EXIST") + " :" + tableName);
+                throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
             }
             int i = 0;
             for (Column cli : t.getColumns()) {

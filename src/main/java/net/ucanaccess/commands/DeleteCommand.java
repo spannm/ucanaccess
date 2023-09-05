@@ -1,14 +1,13 @@
 package net.ucanaccess.commands;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Map;
-
+import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.Table;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
 
 public class DeleteCommand extends AbstractCursorCommand {
     private String              execId;

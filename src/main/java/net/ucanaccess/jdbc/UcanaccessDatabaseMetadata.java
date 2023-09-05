@@ -19,22 +19,15 @@ The  Hsqldb  project is licensed under a BSD based license.
 */
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import org.hsqldb.jdbc.JDBCDatabaseMetaData;
+
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.RowIdLifetime;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import org.hsqldb.jdbc.JDBCDatabaseMetaData;
-
-import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private static final String  SELECT_BASE  = "SELECT * FROM INFORMATION_SCHEMA.";
@@ -140,9 +133,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
                 if (es == null) {
                     sb.append(CAST_EXPR + cn);
-                } else if (es.equals("PUBLIC")) {
+                } else if ("PUBLIC".equals(es)) {
                     sb.append("'PUBLIC' AS " + cn);
-                } else if (es.startsWith(CAST_EXPR) || es.equals("PUBLIC")) {
+                } else if (es.startsWith(CAST_EXPR) || "PUBLIC".equals(es)) {
                     sb.append(es);
                 } else {
                     String suffix = es.indexOf(".") > 0 ? "" : "r.";
@@ -248,7 +241,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
         try {
 
-            Integer[] scopeArr = new Integer[] { bestRowTemporary, bestRowTransaction, bestRowSession };
+            Integer[] scopeArr = new Integer[] {bestRowTemporary, bestRowTransaction, bestRowSession};
 
             String nullableS = (nullable) ? null : String.valueOf(columnNoNulls);
             StringBuffer sql =

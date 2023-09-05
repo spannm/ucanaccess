@@ -1,58 +1,46 @@
 package net.ucanaccess.commands;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import net.ucanaccess.complex.ComplexBase;
-import net.ucanaccess.converters.SQLConverter;
-
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.CursorBuilder;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.util.SimpleColumnMatcher;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.converters.SQLConverter;
 
-public class IndexSelector {
-    private class ColumnMatcher extends SimpleColumnMatcher {
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+public final class IndexSelector {
+
+    private final class ColumnMatcher extends SimpleColumnMatcher {
         @Override
         public boolean matches(Table _table, String _columnName, Object _currVal, Object _dbVal) {
 
             if (_currVal == null && _dbVal == null) {
                 return true;
-            }
-            if (_currVal == null || _dbVal == null) {
+            } else if (_currVal == null || _dbVal == null) {
                 return false;
-            }
-            if (_currVal instanceof Date && _dbVal instanceof Date) {
+            } else if (_currVal instanceof Date && _dbVal instanceof Date) {
                 return ((Date) _currVal).compareTo((Date) _dbVal) == 0;
-            }
-            if (_currVal instanceof BigDecimal && _dbVal instanceof BigDecimal) {
+            } else if (_currVal instanceof BigDecimal && _dbVal instanceof BigDecimal) {
                 return ((BigDecimal) _currVal).compareTo((BigDecimal) _dbVal) == 0;
-            }
-            if (_dbVal instanceof BigDecimal && _currVal instanceof Number) {
+            } else if (_dbVal instanceof BigDecimal && _currVal instanceof Number) {
                 return ((BigDecimal) _dbVal).compareTo(new BigDecimal(_currVal.toString())) == 0;
-            }
-
-            if (_currVal instanceof BigDecimal && _dbVal instanceof Number) {
+            } else if (_currVal instanceof BigDecimal && _dbVal instanceof Number) {
                 return ((BigDecimal) _currVal).compareTo(new BigDecimal(_dbVal.toString())) == 0;
-            }
-
-            if (_currVal instanceof Integer && _dbVal instanceof Short) {
+            } else if (_currVal instanceof Integer && _dbVal instanceof Short) {
                 return ((Integer) _currVal).intValue() == ((Short) _dbVal).intValue();
-            }
-            if (_dbVal instanceof Integer && _currVal instanceof Short) {
+            } else if (_dbVal instanceof Integer && _currVal instanceof Short) {
                 return ((Integer) _dbVal).intValue() == ((Short) _currVal).intValue();
-            }
-            if (_currVal instanceof Integer && _dbVal instanceof Byte) {
+            } else if (_currVal instanceof Integer && _dbVal instanceof Byte) {
                 return ((Integer) _currVal).intValue() == SQLConverter.asUnsigned((Byte) _dbVal);
-            }
-            if (_dbVal instanceof Integer && _currVal instanceof Byte) {
+            } else if (_dbVal instanceof Integer && _currVal instanceof Byte) {
                 return ((Integer) _dbVal).intValue() == SQLConverter.asUnsigned((Byte) _currVal);
-
             }
 
             if ((_dbVal instanceof Float && _currVal instanceof Double)

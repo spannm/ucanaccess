@@ -1,15 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Blob;
-import java.sql.SQLException;
-
 import com.healthmarketscience.jackcess.util.OleBlob;
 import com.healthmarketscience.jackcess.util.OleBlob.Content;
+
+import java.io.*;
+import java.sql.Blob;
+import java.sql.SQLException;
 
 public class UcanaccessBlob implements Blob {
     private Blob blob;

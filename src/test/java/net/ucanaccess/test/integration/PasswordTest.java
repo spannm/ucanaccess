@@ -1,14 +1,13 @@
 package net.ucanaccess.test.integration;
 
-import java.io.File;
-import java.sql.Connection;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.File;
+import java.sql.Connection;
 
 @RunWith(Parameterized.class)
 public class PasswordTest extends AccessVersionAllTest {

@@ -1,16 +1,15 @@
 package net.ucanaccess.test.integration;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersion2007Test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 @RunWith(Parameterized.class)
 public class CorruptedTest extends AccessVersion2007Test {

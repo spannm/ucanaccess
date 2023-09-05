@@ -1,17 +1,15 @@
 package net.ucanaccess.triggers;
 
-import java.util.Map;
-
-import org.hsqldb.SessionInterface;
-import org.hsqldb.jdbc.JDBCConnection;
-import org.hsqldb.types.BlobData;
-
+import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.commands.UpdateCommand;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import org.hsqldb.SessionInterface;
+import org.hsqldb.jdbc.JDBCConnection;
+import org.hsqldb.types.BlobData;
 
-import com.healthmarketscience.jackcess.Table;
+import java.util.Map;
 
 public class TriggerUpdate extends TriggerBase {
     @Override

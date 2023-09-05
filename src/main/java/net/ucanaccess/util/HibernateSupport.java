@@ -10,15 +10,15 @@ package net.ucanaccess.util;
  */
 public final class HibernateSupport {
 
+    private static final String UCA_HIBERNATE_ISACTIVE_PROPERTY =
+        "net.ucanaccess.hibernate.dialect.UCanAccessDialect.isActive";
+
+    private static Boolean active = null;
+
     private HibernateSupport() {
         // this is a utility class, so no instantiation allowed
         throw new UnsupportedOperationException();
     }
-
-    private static final String UCA_HIBERNATE_ISACTIVE_PROPERTY =
-            "net.ucanaccess.hibernate.dialect.UCanAccessDialect.isActive";
-
-    private static Boolean active = null;
 
     /**
      * Checks the Java system property set by the constructor of the UCanAccessDialect class, indicating that we are

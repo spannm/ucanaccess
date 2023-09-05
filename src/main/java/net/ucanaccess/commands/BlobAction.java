@@ -1,5 +1,13 @@
 package net.ucanaccess.commands;
 
+import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.DataType;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.BlobKey;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -7,15 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.BlobKey;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Table;
 
 public class BlobAction implements IFeedbackAction {
     private Table            table;

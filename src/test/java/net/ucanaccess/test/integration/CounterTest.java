@@ -1,17 +1,16 @@
 package net.ucanaccess.test.integration;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import net.ucanaccess.test.util.AccessVersion;
+import net.ucanaccess.test.util.AccessVersionAllTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 @RunWith(Parameterized.class)
 public class CounterTest extends AccessVersionAllTest {
@@ -54,9 +53,8 @@ public class CounterTest extends AccessVersionAllTest {
         st.execute("INSERT INTO " + tableName + " (Z,B,C,D) VALUES (-1,'A',NULL,NULL)"); // arbitrary negative value
         st.execute("ENABLE AUTOINCREMENT ON " + tableName);
         st.execute("INSERT INTO " + tableName + " (B,C,D) VALUES ('I',NULL,NULL)"); // 9
-        Object[][] ver = { { -1, "A", null, null }, { 3, "C", null, null }, { 4, "D", null, null },
-                { 5, "E", null, null }, { 6, "F", null, null }, { 7, "G", null, null }, { 8, "H", null, null },
-                { 9, "I", null, null } };
+        Object[][] ver =
+            {{-1, "A", null, null}, {3, "C", null, null}, {4, "D", null, null}, {5, "E", null, null}, {6, "F", null, null}, {7, "G", null, null}, {8, "H", null, null}, {9, "I", null, null}};
         dumpQueryResult("SELECT * FROM " + tableName);
         checkQuery("SELECT * FROM " + tableName + " order by Z", ver);
 

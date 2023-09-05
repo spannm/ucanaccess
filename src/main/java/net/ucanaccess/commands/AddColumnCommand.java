@@ -1,11 +1,11 @@
 package net.ucanaccess.commands;
 
+import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
-
-import net.ucanaccess.converters.Persist2Jet;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
 
 public class AddColumnCommand implements ICommand {
     private String              execId;
