@@ -11,12 +11,12 @@ public class UnsupportedValue extends ComplexBase {
 
     public UnsupportedValue(com.healthmarketscience.jackcess.complex.UnsupportedValue cv) {
         super(cv);
-        this.values = cv.getValues();
+        values = cv.getValues();
     }
 
     public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> _values) {
         super(id, tableName, columnName);
-        this.values = _values;
+        values = _values;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UnsupportedValue extends ComplexBase {
     }
 
     public void setValues(Map<String, Object> _values) {
-        this.values = _values;
+        values = _values;
     }
 
 }

@@ -98,7 +98,7 @@ public class CreateTableTest extends AccessVersion2010Test {
             st.execute("create table dkey(c counter  , " + "number numeric(23,5)  , " + "  PRIMARY KEY (C,NUMBER))");
             st.execute("create table dunique(c text  , " + "number numeric(23,5)  , " + "  unique (C,NUMBER))");
             st.close();
-            this.ucanaccess.setAutoCommit(false);
+            ucanaccess.setAutoCommit(false);
             try {
                 st = ucanaccess.createStatement();
                 st.execute("insert into  dunique values('ddl forces commit',2.3)");

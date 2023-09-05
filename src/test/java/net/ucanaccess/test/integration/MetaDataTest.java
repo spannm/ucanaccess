@@ -83,7 +83,7 @@ public class MetaDataTest extends AccessVersionAllTest {
         assertTrue(rsmd.isAutoIncrement(1));
         assertTrue(rsmd.isCurrency(6));
         assertFalse(rsmd.isCurrency(7));
-        DatabaseMetaData dbmd = this.ucanaccess.getMetaData();
+        DatabaseMetaData dbmd = ucanaccess.getMetaData();
 
         ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);
         getLogger().info("Noroman characters...");

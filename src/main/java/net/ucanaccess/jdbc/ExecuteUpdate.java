@@ -34,7 +34,7 @@ public class ExecuteUpdate extends AbstractExecute {
     }
 
     public int[] executeBatch() throws SQLException {
-        this.commandType = CommandType.BATCH;
+        commandType = CommandType.BATCH;
         return (int[]) executeBase();
     }
 

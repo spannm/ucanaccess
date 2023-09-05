@@ -44,19 +44,19 @@ public final class Exporter {
 
         /** Sets the CSV column delimiter. */
         public Builder setDelimiter(String _delimiter) {
-            this.delimiter = _delimiter;
+            delimiter = _delimiter;
             return this;
         }
 
         /** Includes the Byte Order Mark. Needed by Excel to read UTF-8. */
         public Builder includeBom(boolean _includeBom) {
-            this.includeBom = _includeBom;
+            includeBom = _includeBom;
             return this;
         }
 
         /** Preserves embedded linefeed (\r) and carriage return (\n) characters. */
         public Builder preserveNewlines(boolean preverseNewlines) {
-            this.preserveNewlines = preverseNewlines;
+            preserveNewlines = preverseNewlines;
             return this;
         }
 
@@ -66,9 +66,9 @@ public final class Exporter {
     }
 
     private Exporter(String _delimter, boolean _includeBom, boolean _preserveNewlines) {
-        this.delimiter = _delimter;
-        this.includeBom = _includeBom;
-        this.preserveNewlines = _preserveNewlines;
+        delimiter = _delimter;
+        includeBom = _includeBom;
+        preserveNewlines = _preserveNewlines;
     }
 
     /**

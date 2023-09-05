@@ -20,9 +20,9 @@ public abstract class ComplexBase implements Serializable {
     private String                      columnName;
 
     public ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
-        this.id = _id.get();
-        this.tableName = _tableName;
-        this.columnName = _columnName;
+        id = _id.get();
+        tableName = _tableName;
+        columnName = _columnName;
     }
 
     public ComplexBase(ComplexValue cv) {
@@ -35,7 +35,7 @@ public abstract class ComplexBase implements Serializable {
     }
 
     public void setTableName(String _tableName) {
-        this.tableName = _tableName;
+        tableName = _tableName;
     }
 
     public String getColumnName() {
@@ -43,7 +43,7 @@ public abstract class ComplexBase implements Serializable {
     }
 
     public void setColumnName(String _columnName) {
-        this.columnName = _columnName;
+        columnName = _columnName;
     }
 
     @Override

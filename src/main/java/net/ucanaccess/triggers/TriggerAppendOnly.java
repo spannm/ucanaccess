@@ -22,7 +22,7 @@ public class TriggerAppendOnly extends TriggerBase {
             return;
         }
         try {
-            Table t = this.getTable(tableName, conn);
+            Table t = getTable(tableName, conn);
             if (t == null) {
                 throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
             }

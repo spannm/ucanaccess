@@ -24,6 +24,6 @@ public abstract class AbstractCursorCommand implements ICursorCommand {
     public abstract Map<String, Object> getRowPattern();
 
     public void replaceAutoincrement(Map<String, Object> map) {
-        this.getRowPattern().putAll(map);
+        getRowPattern().putAll(map);
     }
 }

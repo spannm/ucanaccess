@@ -28,18 +28,18 @@ public class InsertCommand implements ICommand {
     private String   tableName;
 
     public InsertCommand(String _tableName, Database _dbIo, Object[] _newRow, String _execId) {
-        this.tableName = _tableName;
-        this.dbIO = _dbIo;
-        this.newRow = _newRow;
-        this.execId = _execId;
+        tableName = _tableName;
+        dbIO = _dbIo;
+        newRow = _newRow;
+        execId = _execId;
 
     }
 
     public InsertCommand(Table _table, Object[] _newRow, String _execId) {
-        this.table = _table;
-        this.tableName = _table.getName();
-        this.newRow = _newRow;
-        this.execId = _execId;
+        table = _table;
+        tableName = _table.getName();
+        newRow = _newRow;
+        execId = _execId;
     }
 
     @Override
@@ -95,8 +95,8 @@ public class InsertCommand implements ICommand {
             DBReferenceSingleton dbsin = DBReferenceSingleton.getInstance();
             DBReference ref = dbsin.getReference(fl);
             ref.reloadDbIO();
-            this.dbIO = ref.getDbIO();
-            _table = this.dbIO.getTable(this.tableName);
+            dbIO = ref.getDbIO();
+            _table = dbIO.getTable(tableName);
             _table.addRow(newRow);
         }
     }
@@ -106,7 +106,7 @@ public class InsertCommand implements ICommand {
         try {
             AutoNumberAction ana = null;
             if (table == null) {
-                table = this.dbIO.getTable(this.tableName);
+                table = dbIO.getTable(tableName);
             }
             Object[] memento = mementoRow();
             initComplex();
@@ -162,7 +162,7 @@ public class InsertCommand implements ICommand {
                 }
                 ++j;
             }
-            BlobAction ba = new BlobAction(this.table, this.newRow);
+            BlobAction ba = new BlobAction(table, newRow);
             ba.doAction(this);
             return ana;
         } catch (IOException e) {
@@ -173,9 +173,9 @@ public class InsertCommand implements ICommand {
 
     @Override
     public IFeedbackAction rollback() throws SQLException {
-        if (this.table != null) {
-            DeleteCommand dc = new DeleteCommand(this.table, new Persist2Jet().getRowPattern(this.newRow, this.table),
-                    this.execId);
+        if (table != null) {
+            DeleteCommand dc = new DeleteCommand(table, new Persist2Jet().getRowPattern(newRow, table),
+                    execId);
             return dc.persist();
         } else {
             // a drop table cleans all

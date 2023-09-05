@@ -25,8 +25,8 @@ public class DFunction {
     private String                    sql;
 
     public DFunction(Connection _conn, String _sql) {
-        this.conn = _conn;
-        this.sql = _sql;
+        conn = _conn;
+        sql = _sql;
     }
 
     private String convertDFunctions() {
@@ -95,7 +95,7 @@ public class DFunction {
         Statement st = null;
         try {
             String f4t = SQLConverter.convertSQL(
-                    this.sql.replaceAll("[\r\n]", " ").replaceFirst(SELECT_FROM, "SELECT " + identifier + " FROM $2 "))
+                    sql.replaceAll("[\r\n]", " ").replaceFirst(SELECT_FROM, "SELECT " + identifier + " FROM $2 "))
                     .getSql();
             st = conn.createStatement();
             ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();

@@ -35,17 +35,17 @@ public class Pivot {
     private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<>();
 
     public Pivot(Connection _conn) {
-        this.conn = _conn;
+        conn = _conn;
     }
 
     public Pivot(String _name, Connection _conn) {
 
-        this.conn = _conn;
+        conn = _conn;
     }
 
     private void cachePrepare(String name) {
-        if (this.pivotIn != null) {
-            PREPARE_MAP.put(name, this.pivotIn);
+        if (pivotIn != null) {
+            PREPARE_MAP.put(name, pivotIn);
         }
     }
 
@@ -56,13 +56,13 @@ public class Pivot {
 
     private void getPrepareFromCache(String name) {
         if (PREPARE_MAP.containsKey(name)) {
-            this.pivotIn = PREPARE_MAP.get(name);
+            pivotIn = PREPARE_MAP.get(name);
         }
     }
 
     public void registerPivot(String name) {
-        if (!this.pivotInCondition) {
-            PIVOT_MAP.put(name, this.originalQuery);
+        if (!pivotInCondition) {
+            PIVOT_MAP.put(name, originalQuery);
         }
     }
 
@@ -122,7 +122,7 @@ public class Pivot {
     }
 
     public boolean parsePivot(String _originalQuery) {
-        this.originalQuery = _originalQuery;
+        originalQuery = _originalQuery;
         _originalQuery = _originalQuery.replaceAll("\n", " ").replaceAll("\r", " ")
                 .replaceAll("(?i)(\\[PIVOT\\])", "XPIVOT").trim();
         if (_originalQuery.endsWith(";")) {
@@ -133,29 +133,29 @@ public class Pivot {
             return false;
         }
         if (mtc.matches()) {
-            this.transform = mtc.group(1);
-            Matcher aggr = PIVOT_AGGR.matcher(this.transform);
+            transform = mtc.group(1);
+            Matcher aggr = PIVOT_AGGR.matcher(transform);
             if (aggr.find()) {
                 if (aggr.groupCount() < 2) {
                     return false;
                 }
-                this.aggregateFun = aggr.group(1);
-                this.expression = aggr.group(2);
+                aggregateFun = aggr.group(1);
+                expression = aggr.group(2);
             } else {
                 return false;
             }
-            this.select = mtc.group(2);
-            this.from = mtc.group(3);
+            select = mtc.group(2);
+            from = mtc.group(3);
             String pe = mtc.group(4);
             Matcher mtcExpr = PIVOT_EXPR.matcher(pe);
             if (mtcExpr.find()) {
                 if (mtcExpr.groupCount() < 2) {
                     return false;
                 }
-                this.pivot = mtcExpr.group(1);
-                this.pivotIn = Arrays.asList(mtcExpr.group(2).split(","));
+                pivot = mtcExpr.group(1);
+                pivotIn = Arrays.asList(mtcExpr.group(2).split(","));
             } else {
-                this.pivot = pe;
+                pivot = pe;
             }
             return true;
         } else {
@@ -164,22 +164,22 @@ public class Pivot {
     }
 
     private void appendCaseWhen(StringBuffer sb, String condition, String cn) {
-        sb.append(this.aggregateFun).append("(CASE WHEN ").append(condition).append(" THEN ").append(this.expression)
+        sb.append(aggregateFun).append("(CASE WHEN ").append(condition).append(" THEN ").append(expression)
                 .append(" END) AS ").append(cn);
     }
 
     public String verifySQL() {
         StringBuilder sb = new StringBuilder();
-        String[] fromS = this.from.split(PIVOT_GROUP_BY);
-        sb.append("SELECT DISTINCT ").append(this.pivot).append(" AS PIVOT ");
-        sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(this.pivot).append(",").append(fromS[1]);
+        String[] fromS = from.split(PIVOT_GROUP_BY);
+        sb.append("SELECT DISTINCT ").append(pivot).append(" AS PIVOT ");
+        sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivot).append(",").append(fromS[1]);
         return SQLConverter.convertSQL(sb.toString()).getSql();
     }
 
     public boolean prepare() {
         try {
-            if (this.pivotInCondition) {
-                this.pivotIn = new ArrayList<>();
+            if (pivotInCondition) {
+                pivotIn = new ArrayList<>();
             }
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(verifySQL());
@@ -187,7 +187,7 @@ public class Pivot {
             while (rs.next()) {
                 String frm = format(rs.getObject("PIVOT"));
                 if (frm != null) {
-                    this.pivotIn.add(frm);
+                    pivotIn.add(frm);
                 }
                 i++;
                 if (i > 1000) {
@@ -232,24 +232,24 @@ public class Pivot {
     }
 
     public String toSQL(String name) {
-        if (this.pivotIn == null) {
+        if (pivotIn == null) {
             if (name != null && PREPARE_MAP.containsKey(name)) {
-                this.getPrepareFromCache(name);
+                getPrepareFromCache(name);
             } else if (prepare()) {
-                this.cachePrepare(name);
+                cachePrepare(name);
             } else {
                 return null;
             }
-            this.pivotInCondition = false;
+            pivotInCondition = false;
         }
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT ");
-        sb.append(this.select);
-        for (String s : this.pivotIn) {
+        sb.append(select);
+        for (String s : pivotIn) {
             sb.append(",");
-            appendCaseWhen(sb, this.pivot + "=" + s, replaceQuotation(s));
+            appendCaseWhen(sb, pivot + "=" + s, replaceQuotation(s));
         }
-        sb.append(" FROM ").append(this.from);
+        sb.append(" FROM ").append(from);
 
         return sb.toString();
     }

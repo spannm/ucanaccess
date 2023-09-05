@@ -17,7 +17,7 @@ public class AutoNumberAction implements IFeedbackAction {
     private final Table               table;
 
     public AutoNumberAction(Table _table, Object[] memento, Object[] byAccess) throws SQLException {
-        this.table = _table;
+        table = _table;
         int i = 0;
         PreparedStatement ps = null;
         for (Column cl : _table.getColumns()) {
@@ -55,7 +55,7 @@ public class AutoNumberAction implements IFeedbackAction {
 
     @Override
     public void doAction(ICommand toChange) {
-        if (!this.table.getName().equalsIgnoreCase(toChange.getTableName())) {
+        if (!table.getName().equalsIgnoreCase(toChange.getTableName())) {
             return;
         }
         switch (toChange.getType()) {

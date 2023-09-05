@@ -16,17 +16,17 @@ public class CreateTableCommand implements ICommand {
     private Map<String, String> columnMap;
 
     public CreateTableCommand(String _tableName, String _execId) {
-        this.tableName = _tableName;
-        this.execId = _execId;
+        tableName = _tableName;
+        execId = _execId;
     }
 
     public CreateTableCommand(String tn, String execId2, Map<String, String> _columnMap, String[] _types,
             String[] _defaults, Boolean[] _notNulls) {
         this(tn, execId2);
-        this.types = _types;
-        this.defaults = _defaults;
-        this.notNulls = _notNulls;
-        this.columnMap = _columnMap;
+        types = _types;
+        defaults = _defaults;
+        notNulls = _notNulls;
+        columnMap = _columnMap;
     }
 
     public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap2) {

@@ -564,9 +564,9 @@ public class LoadJet {
 
         private int countFKs() throws IOException {
             int i = 0;
-            for (String tn : this.loadingOrder) {
+            for (String tn : loadingOrder) {
                 UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn), tn);
-                if (!this.unresolvedTables.contains(tn)) {
+                if (!unresolvedTables.contains(tn)) {
                     for (Index idxi : table.getIndexes()) {
                         // riw
                         IndexImpl idx = (IndexImpl) idxi;
@@ -584,10 +584,10 @@ public class LoadJet {
 
             for (int i = 0; i < maxIteration; i++) {
                 boolean change = false;
-                List<String> loadingOrder0 = new ArrayList<>(this.loadingOrder);
+                List<String> loadingOrder0 = new ArrayList<>(loadingOrder);
                 for (String tn : loadingOrder0) {
                     UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn), tn);
-                    if (!this.unresolvedTables.contains(tn)) {
+                    if (!unresolvedTables.contains(tn)) {
                         for (Index idxi : table.getIndexes()) {
                             // riw
                             IndexImpl idx = (IndexImpl) idxi;
@@ -610,11 +610,11 @@ public class LoadJet {
             IndexImpl idx = (IndexImpl) idxi;
             String ctn = idx.getTable().getName();
             String rtn = idx.getReferencedIndex().getTable().getName();
-            int ict = this.loadingOrder.indexOf(ctn);
-            int irt = this.loadingOrder.indexOf(rtn);
+            int ict = loadingOrder.indexOf(ctn);
+            int irt = loadingOrder.indexOf(rtn);
             if (ict < irt) {
-                this.loadingOrder.remove(ctn);
-                this.loadingOrder.add(irt, ctn);
+                loadingOrder.remove(ctn);
+                loadingOrder.add(irt, ctn);
                 return false;
             }
             return true;
@@ -625,7 +625,7 @@ public class LoadJet {
             String rtn = idx.getReferencedIndex().getTable().getName();
             List<IndexData.ColumnDescriptor> cls = idx.getColumns();
             if (cls.size() == 1) {
-                this.alreadyIndexed.add(cls.get(0).getColumn());
+                alreadyIndexed.add(cls.get(0).getColumn());
             }
             String ntn = escapeIdentifier(ctn);
             if (ntn == null) {
@@ -674,7 +674,7 @@ public class LoadJet {
             boolean pk = idx.isPrimaryKey();
             if (!uk && !pk && idx.getColumns().size() == 1) {
                 Column cl = idx.getColumns().get(0).getColumn();
-                if (this.alreadyIndexed.contains(cl)) {
+                if (alreadyIndexed.contains(cl)) {
                     return;
                 }
             }
@@ -736,7 +736,7 @@ public class LoadJet {
 
         private void makeTableReadOnly(Table t, boolean systemTable) throws SQLException {
             String tn = t.getName();
-            this.readOnlyTables.add(t.getName());
+            readOnlyTables.add(t.getName());
             String ntn = schema(escapeIdentifier(tn), systemTable);
             exec("SET TABLE " + ntn + " READONLY TRUE ", false);
             loadedTables.add(tn + " READONLY");
@@ -862,7 +862,7 @@ public class LoadJet {
         }
 
         private void loadTableFKs(String tn, boolean autoref) throws IOException, SQLException {
-            if (this.readOnlyTables.contains(tn)) {
+            if (readOnlyTables.contains(tn)) {
                 return;
             }
             Table t = dbIO.getTable(tn);
@@ -929,19 +929,19 @@ public class LoadJet {
                     t = new UcanaccessTable(t2, tn);
                 } catch (Exception e) {
                     Logger.logWarning(e.getMessage());
-                    this.unresolvedTables.add(tn);
+                    unresolvedTables.add(tn);
                 }
                 if (t2 != null && t != null && !tn.startsWith("~")) {
                     createTable(t);
-                    this.loadingOrder.add(t.getName());
+                    loadingOrder.add(t.getName());
                 }
             }
         }
 
         private void createIndexesUK() throws SQLException, IOException {
             for (String tn : dbIO.getTableNames()) {
-                if (!this.unresolvedTables.contains(tn)) {
-                    this.loadTableIndexesUK(tn);
+                if (!unresolvedTables.contains(tn)) {
+                    loadTableIndexesUK(tn);
                     conn.commit();
                 }
             }
@@ -949,8 +949,8 @@ public class LoadJet {
 
         private void createIndexesNotUK() throws SQLException, IOException {
             for (String tn : dbIO.getTableNames()) {
-                if (!this.unresolvedTables.contains(tn)) {
-                    this.loadTableIndexesNotUK(tn);
+                if (!unresolvedTables.contains(tn)) {
+                    loadTableIndexesNotUK(tn);
                     conn.commit();
                 }
             }
@@ -958,8 +958,8 @@ public class LoadJet {
 
         private void createFKs() throws SQLException, IOException {
             for (String tn : dbIO.getTableNames()) {
-                if (!this.unresolvedTables.contains(tn)) {
-                    this.loadTableFKs(tn, false);
+                if (!unresolvedTables.contains(tn)) {
+                    loadTableFKs(tn, false);
                     conn.commit();
                 }
             }
@@ -968,9 +968,9 @@ public class LoadJet {
 
         private void createAutoFKs() throws SQLException, IOException {
             for (String tn : dbIO.getTableNames()) {
-                if (!this.unresolvedTables.contains(tn)) {
+                if (!unresolvedTables.contains(tn)) {
                     try {
-                        this.loadTableFKs(tn, true);
+                        loadTableFKs(tn, true);
                     } catch (SQLException e) {
                         UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn), tn);
                         makeTableReadOnly(t, false);
@@ -982,10 +982,10 @@ public class LoadJet {
         }
 
         private void loadTablesData() throws SQLException, IOException {
-            for (String tn : this.loadingOrder) {
-                if (!this.unresolvedTables.contains(tn)) {
+            for (String tn : loadingOrder) {
+                if (!unresolvedTables.contains(tn)) {
                     UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn), tn);
-                    this.loadTableData(t, false);
+                    loadTableData(t, false);
                     conn.commit();
 
                 }
@@ -994,8 +994,8 @@ public class LoadJet {
 
         private void createTriggers() throws IOException, SQLException {
 
-            for (String tn : this.loadingOrder) {
-                if (!this.unresolvedTables.contains(tn) && !this.readOnlyTables.contains(tn)) {
+            for (String tn : loadingOrder) {
+                if (!unresolvedTables.contains(tn) && !readOnlyTables.contains(tn)) {
                     UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn), tn);
                     createSyncrTriggers(t);
                 }
@@ -1211,7 +1211,7 @@ public class LoadJet {
                 pivot = new Pivot(conn);
 
                 if (!pivot.parsePivot(querySQL) || (querySQL = pivot.toSQL(q.getName())) == null) {
-                    this.notLoaded.put(q.getName(), "cannot load this query");
+                    notLoaded.put(q.getName(), "cannot load this query");
 
                     return false;
                 }
@@ -1228,7 +1228,7 @@ public class LoadJet {
                 }
                 exec(v, false);
                 loadedQueries.add(q.getName());
-                this.notLoaded.remove(q.getName());
+                notLoaded.remove(q.getName());
                 if (pivot != null) {
                     pivot.registerPivot(SQLConverter.preEscapingIdentifier(q.getName()));
                 }
@@ -1245,7 +1245,7 @@ public class LoadJet {
                             pq.createSelect();
                             if (pq.loaded()) {
                                 loadedQueries.add(q.getName());
-                                this.notLoaded.remove(q.getName());
+                                notLoaded.remove(q.getName());
                                 return true;
                             }
 
@@ -1255,7 +1255,7 @@ public class LoadJet {
 
                 String cause = UcanaccessSQLException.explainCause(e);
 
-                this.notLoaded.put(q.getName(), ": " + cause);
+                notLoaded.put(q.getName(), ": " + cause);
 
                 if (!err) {
                     Logger.log("Error occured at the first loading attempt of " + q.getName());
@@ -1333,7 +1333,7 @@ public class LoadJet {
                 }
                 queryPorting(lq);
             } catch (Exception e) {
-                this.notLoaded.put("", "");
+                notLoaded.put("", "");
             }
             loadProcedures(procedures);
 
@@ -1349,7 +1349,7 @@ public class LoadJet {
 
                     } else {
                         String msg = pq.getException() == null ? "" : pq.getException().getMessage();
-                        this.notLoadedProcedure.put(q.getName(), msg);
+                        notLoadedProcedure.put(q.getName(), msg);
 
                     }
 
@@ -1418,22 +1418,22 @@ public class LoadJet {
     private Metadata        metadata;
 
     public LoadJet(Connection _conn, Database _dbIo) throws SQLException {
-        this.conn = _conn;
-        this.dbIO = _dbIo;
+        conn = _conn;
+        dbIO = _dbIo;
         try {
-            this.ff1997 = FileFormat.V1997.equals(this.dbIO.getFileFormat());
+            ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
         } catch (Exception ignore) {
             // Logger.logWarning(e.getMessage());
         }
-        this.metadata = new Metadata(_conn);
+        metadata = new Metadata(_conn);
     }
 
     public void loadDefaultValues(Table t) throws SQLException, IOException {
-        this.tablesLoader.setDefaultValues(t);
+        tablesLoader.setDefaultValues(t);
     }
 
     public void loadDefaultValues(Column cl) throws SQLException, IOException {
-        this.tablesLoader.setDefaultValue(cl);
+        tablesLoader.setDefaultValue(cl);
     }
 
     public String defaultValue4SQL(Column cl) throws SQLException, IOException {
@@ -1442,7 +1442,7 @@ public class LoadJet {
         if (defaulT == null) {
             return null;
         }
-        return this.tablesLoader.defaultValue4SQL(defaulT, cl.getType());
+        return tablesLoader.defaultValue4SQL(defaulT, cl.getType());
     }
 
     private static boolean hasAutoNumberColumn(Table t) {
@@ -1457,7 +1457,7 @@ public class LoadJet {
     }
 
     public void addFunctions(Class<?> clazz) throws SQLException {
-        this.functionsLoader.addFunctions(clazz, false);
+        functionsLoader.addFunctions(clazz, false);
     }
 
     private void exec(String expression, boolean logging) throws SQLException {
@@ -1487,12 +1487,12 @@ public class LoadJet {
     }
 
     public SQLWarning getLoadingWarnings() {
-        if (this.viewsLoader.notLoaded.size() == 0 && this.tablesLoader.unresolvedTables.size() == 0) {
+        if (viewsLoader.notLoaded.size() == 0 && tablesLoader.unresolvedTables.size() == 0) {
             return null;
         }
         SQLWarning sqlw = null;
-        for (String s : this.viewsLoader.notLoaded.keySet()) {
-            String message = s.length() > 0 ? "Cannot load view " + s + " " + this.viewsLoader.notLoaded.get(s)
+        for (String s : viewsLoader.notLoaded.keySet()) {
+            String message = s.length() > 0 ? "Cannot load view " + s + " " + viewsLoader.notLoaded.get(s)
                     : "Cannot load views ";
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
@@ -1500,9 +1500,9 @@ public class LoadJet {
                 sqlw.setNextWarning(new SQLWarning(message));
             }
         }
-        for (String s : this.viewsLoader.notLoadedProcedure.keySet()) {
+        for (String s : viewsLoader.notLoadedProcedure.keySet()) {
             String message =
-                    s.length() > 0 ? "Cannot load procedure " + s + " " + this.viewsLoader.notLoadedProcedure.get(s)
+                    s.length() > 0 ? "Cannot load procedure " + s + " " + viewsLoader.notLoadedProcedure.get(s)
                             : "Cannot load procedures ";
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
@@ -1510,7 +1510,7 @@ public class LoadJet {
                 sqlw.setNextWarning(new SQLWarning(message));
             }
         }
-        for (String s : this.tablesLoader.unresolvedTables) {
+        for (String s : tablesLoader.unresolvedTables) {
             String message = "Cannot resolve table " + s;
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
@@ -1522,32 +1522,32 @@ public class LoadJet {
     }
 
     public void resetFunctionsDefault() throws SQLException {
-        this.functionsLoader.resetDefault();
+        functionsLoader.resetDefault();
     }
 
     public void loadDB() throws SQLException, IOException {
         try {
-            this.functionsLoader.loadMappedFunctions();
-            this.tablesLoader.loadTables();
-            this.viewsLoader.loadViews();
+            functionsLoader.loadMappedFunctions();
+            tablesLoader.loadTables();
+            viewsLoader.loadViews();
             conn.commit();
             SQLConverter.cleanEscaped();
         } finally {
             Logger.log("Loaded Tables:");
-            logsFlusher.dumpList(this.loadedTables);
+            logsFlusher.dumpList(loadedTables);
             Logger.log("Loaded Queries:");
-            logsFlusher.dumpList(this.loadedQueries);
+            logsFlusher.dumpList(loadedQueries);
             Logger.log("Loaded Procedures:");
-            logsFlusher.dumpList(this.loadedProcedures);
+            logsFlusher.dumpList(loadedProcedures);
             Logger.log("Loaded Indexes:");
-            logsFlusher.dumpList(this.loadedIndexes, true);
+            logsFlusher.dumpList(loadedIndexes, true);
             conn.close();
         }
     }
 
     public void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAppendOnly)
             throws SQLException {
-        this.triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
+        triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
     }
 
     public Object tryDefault(Object defaulT) {
@@ -1563,12 +1563,12 @@ public class LoadJet {
     }
 
     public void setSysSchema(boolean _sysSchema) {
-        this.sysSchema = _sysSchema;
+        sysSchema = _sysSchema;
 
     }
 
     public void setSkipIndexes(boolean _skipIndexes) {
-        this.skipIndexes = _skipIndexes;
+        skipIndexes = _skipIndexes;
 
     }
 

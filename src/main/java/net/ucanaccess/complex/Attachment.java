@@ -17,23 +17,23 @@ public class Attachment extends ComplexBase {
 
     public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
         super(atc);
-        this.url = atc.getFileUrl();
-        this.name = atc.getFileName();
-        this.type = atc.getFileType();
-        this.data = atc.getFileData();
-        this.timeStamp = atc.getFileLocalTimeStamp();
-        this.flags = atc.getFileFlags();
+        url = atc.getFileUrl();
+        name = atc.getFileName();
+        type = atc.getFileType();
+        data = atc.getFileData();
+        timeStamp = atc.getFileLocalTimeStamp();
+        flags = atc.getFileFlags();
     }
 
     public Attachment(ComplexValue.Id id, String tableName, String columnName, String _url, String _name, String _type,
             byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
         super(id, tableName, columnName);
-        this.url = _url;
-        this.name = _name;
-        this.type = _type;
-        this.data = _data;
-        this.timeStamp = _timeStamp;
-        this.flags = _flags;
+        url = _url;
+        name = _name;
+        type = _type;
+        data = _data;
+        timeStamp = _timeStamp;
+        flags = _flags;
     }
 
     public Attachment(String _url, String _name, String _type, byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
@@ -129,27 +129,27 @@ public class Attachment extends ComplexBase {
     }
 
     public void setData(byte[] _data) {
-        this.data = _data;
+        data = _data;
     }
 
     public void setFlags(Integer _flags) {
-        this.flags = _flags;
+        flags = _flags;
     }
 
     public void setName(String _name) {
-        this.name = _name;
+        name = _name;
     }
 
     public void setTimeStamp(LocalDateTime _timeStamp) {
-        this.timeStamp = _timeStamp;
+        timeStamp = _timeStamp;
     }
 
     public void setType(String _type) {
-        this.type = _type;
+        type = _type;
     }
 
     public void setUrl(String _url) {
-        this.url = _url;
+        url = _url;
     }
 
     @Override

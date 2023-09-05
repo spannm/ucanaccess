@@ -38,7 +38,7 @@ public class DDLCommandEnlist {
         CreateTableCommand c4io;
         if (ddlType.equals(DDLType.CREATE_TABLE)) {
             parseTypesFromCreateStatement(sql);
-            c4io = new CreateTableCommand(tn, execId, this.columnMap, this.types, this.defaults, this.notNulls);
+            c4io = new CreateTableCommand(tn, execId, columnMap, types, defaults, notNulls);
         } else {
             try {
                 Statement st = ac.createStatement();
@@ -47,14 +47,14 @@ public class DDLCommandEnlist {
                 Metadata mt = new Metadata(ac.getHSQLDBConnection());
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                     if (rsmd.getColumnName(i).equals(rsmd.getColumnLabel(i))) {
-                        this.columnMap.put(mt.getEscapedColumnName(rsmd.getTableName(i), rsmd.getColumnName(i)),
+                        columnMap.put(mt.getEscapedColumnName(rsmd.getTableName(i), rsmd.getColumnName(i)),
                                 rsmd.getColumnLabel(i));
                     } else {
-                        this.columnMap.put(SQLConverter.preEscapingIdentifier(rsmd.getColumnLabel(i)),
+                        columnMap.put(SQLConverter.preEscapingIdentifier(rsmd.getColumnLabel(i)),
                                 rsmd.getColumnLabel(i));
                     }
                 }
-                c4io = new CreateTableCommand(tn, execId, this.columnMap);
+                c4io = new CreateTableCommand(tn, execId, columnMap);
             } catch (Exception ignore) {
                 c4io = new CreateTableCommand(tn, execId);
             }
@@ -154,14 +154,14 @@ public class DDLCommandEnlist {
         String execId = UcanaccessConnection.getCtxExcId();
         List<String> typeList = new ArrayList<>();
         List<String> defaultList = new ArrayList<>();
-        this.columnMap = new HashMap<>();
+        columnMap = new HashMap<>();
         List<Boolean> notNullList = new ArrayList<>();
         String tknt = columnName + columnDefinition;
-        this.parseColumnTypes(typeList, defaultList, notNullList, tknt);
+        parseColumnTypes(typeList, defaultList, notNullList, tknt);
         check4OutOfPlacedNotNull(sql);
         UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
-        AddColumnCommand c4io = new AddColumnCommand(tableName, columnName, execId, this.columnMap, this.types,
-                this.defaults, this.notNulls);
+        AddColumnCommand c4io = new AddColumnCommand(tableName, columnName, execId, columnMap, types,
+                defaults, notNulls);
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
             ac.commit();
@@ -170,8 +170,8 @@ public class DDLCommandEnlist {
 
     private void check4OutOfPlacedNotNull(String sql) {
         if (Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()) {
-            if (this.notNulls.length > 0 && (this.notNulls[0] == null || !this.notNulls[0])) {
-                this.notNulls[0] = true;
+            if (notNulls.length > 0 && (notNulls[0] == null || !notNulls[0])) {
+                notNulls[0] = true;
             }
         }
 
@@ -259,9 +259,9 @@ public class DDLCommandEnlist {
             defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
         }
 
-        this.types = typeList.toArray(new String[0]);
-        this.defaults = defaultList.toArray(new String[0]);
-        this.notNulls = notNullList.toArray(new Boolean[0]);
+        types = typeList.toArray(new String[0]);
+        defaults = defaultList.toArray(new String[0]);
+        notNulls = notNullList.toArray(new Boolean[0]);
     }
 
     // getting AUTOINCREMENT and GUID
@@ -279,7 +279,7 @@ public class DDLCommandEnlist {
 
         List<String> typeList = new ArrayList<>();
         List<String> defaultList = new ArrayList<>();
-        this.columnMap = new HashMap<>();
+        columnMap = new HashMap<>();
         List<Boolean> notNullList = new ArrayList<>();
         for (String token : tokens) {
             String tknt = token.trim();

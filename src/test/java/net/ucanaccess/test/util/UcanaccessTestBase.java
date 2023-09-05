@@ -132,7 +132,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                 } else {
                     if (actualObj instanceof Blob) {
 
-                        byte[] bt = this.getByteArray((Blob) actualObj);
+                        byte[] bt = getByteArray((Blob) actualObj);
                         byte[] btMtx = (byte[]) expectedObj;
                         for (int y = 0; y < btMtx.length; y++) {
                             assertEquals(btMtx[y], bt[y]);
@@ -322,7 +322,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public int getCount(String sql) throws SQLException, IOException {
-        return this.getCount(sql, true);
+        return getCount(sql, true);
     }
 
     public int getCount(String sql, boolean equals) throws SQLException, IOException {
@@ -344,7 +344,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public String getName() {
-        return getClass().getSimpleName() + " ver " + this.fileFormat;
+        return getClass().getSimpleName() + " ver " + fileFormat;
     }
 
     protected String getPassword() {
@@ -364,22 +364,22 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
             _dbPath = getAccessTempPath();
         }
         String url = _urlPrefix + _dbPath;
-        if (this.ignoreCase != null) {
-            url += ";ignoreCase=" + this.ignoreCase;
+        if (ignoreCase != null) {
+            url += ";ignoreCase=" + ignoreCase;
         }
-        if (this.inactivityTimeout != -1) {
-            url += ";inactivityTimeout=" + this.inactivityTimeout;
+        if (inactivityTimeout != -1) {
+            url += ";inactivityTimeout=" + inactivityTimeout;
         } else {
             url += ";immediatelyreleaseresources=true";
         }
-        if (this.columnOrder != null) {
-            url += ";columnOrder=" + this.columnOrder;
+        if (columnOrder != null) {
+            url += ";columnOrder=" + columnOrder;
         }
-        if (this.showSchema != null) {
-            url += ";showSchema=" + this.showSchema;
+        if (showSchema != null) {
+            url += ";showSchema=" + showSchema;
         }
         url += append2JdbcURL;
-        return (UcanaccessConnection) DriverManager.getConnection(url, this.user, this.password);
+        return (UcanaccessConnection) DriverManager.getConnection(url, user, password);
     }
 
     protected void appendToJdbcURL(String s) {
@@ -414,19 +414,19 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public void setInactivityTimeout(long _inactivityTimeout) {
-        this.inactivityTimeout = _inactivityTimeout;
+        inactivityTimeout = _inactivityTimeout;
     }
 
     protected void setPassword(String _password) {
-        this.password = _password;
+        password = _password;
     }
 
     protected void setColumnOrder(String _columnOrder) {
-        this.columnOrder = _columnOrder;
+        columnOrder = _columnOrder;
     }
 
     public void setIgnoreCase(boolean _ignoreCase) {
-        this.ignoreCase = _ignoreCase;
+        ignoreCase = _ignoreCase;
 
     }
 

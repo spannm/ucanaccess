@@ -12,7 +12,7 @@ public class NormalizedSQL {
     }
 
     public void setSql(String _sql) {
-        this.sql = _sql;
+        sql = _sql;
     }
 
     public Map<String, String> getAliases() {

@@ -84,32 +84,32 @@ public final class IndexSelector {
     private Table   table;
 
     public IndexSelector(Table _table) {
-        this.table = _table;
+        table = _table;
     }
 
     public Index getBestIndex() {
-        if (this.bestIndex == null) {
+        if (bestIndex == null) {
             List<? extends Index> li = table.getIndexes();
             for (Index idx : li) {
                 if (idx.isPrimaryKey()) {
-                    this.bestIndex = idx;
-                    this.primaryCursor = true;
+                    bestIndex = idx;
+                    primaryCursor = true;
                     break;
                 }
             }
-            if (this.bestIndex == null) {
+            if (bestIndex == null) {
                 for (Index idx : li) {
                     if (idx.isUnique()) {
-                        this.bestIndex = idx;
+                        bestIndex = idx;
                         break;
                     }
                 }
             }
-            if (this.bestIndex == null && li.size() == 1) {
-                this.bestIndex = li.get(0);
+            if (bestIndex == null && li.size() == 1) {
+                bestIndex = li.get(0);
             }
         }
-        return this.bestIndex;
+        return bestIndex;
     }
 
     public Cursor getCursor() throws IOException {

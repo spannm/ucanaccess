@@ -64,12 +64,12 @@ public class UcanaccessConnection implements Connection {
     public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session)
             throws UcanaccessSQLException {
         try {
-            this.ref = _ref;
-            this.refId = _ref.getId();
+            ref = _ref;
+            refId = _ref.getId();
             _ref.incrementActiveConnection();
-            this.session = _session;
-            this.hsqlDBConnection = _ref.getHSQLDBConnection(_session);
-            this.clientInfo = _clientInfo;
+            session = _session;
+            hsqlDBConnection = _ref.getHSQLDBConnection(_session);
+            clientInfo = _clientInfo;
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -87,11 +87,11 @@ public class UcanaccessConnection implements Connection {
     }
 
     void setCurrentStatement(UcanaccessStatement _currentStatement) {
-        this.currentStatement = _currentStatement;
+        currentStatement = _currentStatement;
     }
 
     public void setGeneratedKey(Object key) {
-        this.lastGeneratedKey = key;
+        lastGeneratedKey = key;
         if (currentStatement != null) {
             currentStatement.setGeneratedKey(key);
         }
@@ -104,17 +104,17 @@ public class UcanaccessConnection implements Connection {
     // test only!!!!
     @SuppressWarnings("unused")
     private void setTestRollback(boolean _testRollback) {
-        this.testRollback = _testRollback;
+        testRollback = _testRollback;
     }
 
     public void addFunctions(Class<?> clazz) throws SQLException {
-        LoadJet lfa = new LoadJet(this.ref.getHSQLDBConnection(session), ref.getDbIO());
+        LoadJet lfa = new LoadJet(ref.getHSQLDBConnection(session), ref.getDbIO());
         lfa.addFunctions(clazz);
     }
 
     public void reloadDbIO() throws IOException {
         synchronized (UcanaccessConnection.class) {
-            this.ref.reloadDbIO();
+            ref.reloadDbIO();
         }
     }
 
@@ -136,14 +136,14 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void clearWarnings() {
-        this.warnings = null;
+        warnings = null;
     }
 
     @Override
     public void close() throws SQLException {
         try {
             hsqlDBConnection.close();
-            ref.decrementActiveConnection(this.session);
+            ref.decrementActiveConnection(session);
 
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -152,28 +152,28 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void commit() throws SQLException {
-        synchronized (this.getClass()) {
+        synchronized (getClass()) {
 
             try {
-                if (this.isReadOnly() && this.commands.size() > 0) {
-                    this.rollback();
-                    if (this.ref.isReadOnlyFileFormat()) {
+                if (isReadOnly() && commands.size() > 0) {
+                    rollback();
+                    if (ref.isReadOnlyFileFormat()) {
                         throw new UcanaccessSQLException(ExceptionMessages.ACCESS_97);
                     }
                     throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS);
                 }
 
-                this.flushIO();
+                flushIO();
                 hsqlDBConnection.commit();
                 if (commands.size() > 0) {
-                    this.ref.updateLastModified();
+                    ref.updateLastModified();
                 }
 
             } catch (SQLException e) {
                 throw new UcanaccessSQLException(e);
             } finally {
                 finalizeEnlistedResources();
-                this.checkModified = true;
+                checkModified = true;
             }
         }
     }
@@ -208,8 +208,8 @@ public class UcanaccessConnection implements Connection {
     }
 
     private void checkConnection() throws UcanaccessSQLException {
-        if (this.autoCommit || this.isCheckModified()) {
-            this.checkLastModified();
+        if (autoCommit || isCheckModified()) {
+            checkLastModified();
         }
 
     }
@@ -285,7 +285,7 @@ public class UcanaccessConnection implements Connection {
             }
         } catch (Throwable t) {
             t.printStackTrace();
-            this.hsqlDBConnection.rollback();
+            hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
             while (it.hasNext()) {
@@ -299,17 +299,17 @@ public class UcanaccessConnection implements Connection {
                     ibal.add(ib);
                 }
             }
-            this.ref.updateLastModified();
+            ref.updateLastModified();
             try {
-                this.ref.getDbIO().flush();
-                this.unloadDB();
+                ref.getDbIO().flush();
+                unloadDB();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             throw new UcanaccessSQLException(t);
         }
         try {
-            this.ref.getDbIO().flush();
+            ref.getDbIO().flush();
 
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
@@ -319,14 +319,14 @@ public class UcanaccessConnection implements Connection {
 
     private void finalizeEnlistedResources() {
         commands.clear();
-        this.savepointsMap.clear();
+        savepointsMap.clear();
         setCtxConnection(null);
         setCtxExecId(null);
     }
 
     @Override
     public boolean getAutoCommit() {
-        return this.autoCommit;
+        return autoCommit;
     }
 
     @Override
@@ -340,16 +340,16 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public Properties getClientInfo() {
-        return this.clientInfo;
+        return clientInfo;
     }
 
     @Override
     public String getClientInfo(String name) {
-        return this.clientInfo.getProperty(name);
+        return clientInfo.getProperty(name);
     }
 
     public Database getDbIO() {
-        return this.ref.getDbIO();
+        return ref.getDbIO();
     }
 
     @Override
@@ -394,18 +394,18 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public SQLWarning getWarnings() {
-        return this.warnings;
+        return warnings;
     }
 
     public void setWarnings(SQLWarning _warnings) {
-        this.warnings = _warnings;
+        warnings = _warnings;
     }
 
     public void addWarnings(SQLWarning _warnings) {
-        if (this.warnings == null) {
+        if (warnings == null) {
             setWarnings(_warnings);
         } else {
-            this.warnings.setNextWarning(_warnings);
+            warnings.setNextWarning(_warnings);
         }
     }
 
@@ -592,7 +592,7 @@ public class UcanaccessConnection implements Connection {
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
         try {
             hsqlDBConnection.releaseSavepoint(((UcanaccessSavepoint) savepoint).getWrapped());
-            this.savepointsMap.remove(savepoint);
+            savepointsMap.remove(savepoint);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -608,7 +608,7 @@ public class UcanaccessConnection implements Connection {
             throw new UcanaccessSQLException(e);
         } finally {
             finalizeEnlistedResources();
-            this.checkModified = true;
+            checkModified = true;
         }
     }
 
@@ -617,7 +617,7 @@ public class UcanaccessConnection implements Connection {
         try {
 
             hsqlDBConnection.rollback(((UcanaccessSavepoint) savepoint).getWrapped());
-            String lastId = this.savepointsMap.get(savepoint);
+            String lastId = savepointsMap.get(savepoint);
             boolean remove = false;
             Iterator<ICommand> it = commands.iterator();
             while (it.hasNext()) {
@@ -627,7 +627,7 @@ public class UcanaccessConnection implements Connection {
                 }
                 remove = remove || c4io.getExecId().equals(lastId);
             }
-            this.checkModified = true;
+            checkModified = true;
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -636,15 +636,15 @@ public class UcanaccessConnection implements Connection {
     @Override
     public void setAutoCommit(boolean _autoCommit) throws SQLException {
         if (!_autoCommit) {
-            this.checkLastModified();
+            checkLastModified();
         } else {
-            this.checkModified = false;
+            checkModified = false;
         }
-        this.autoCommit = _autoCommit;
+        autoCommit = _autoCommit;
     }
 
     public void setFeedbackState(boolean _feedbackState) {
-        this.feedbackState = _feedbackState;
+        feedbackState = _feedbackState;
     }
 
     @Override
@@ -684,9 +684,9 @@ public class UcanaccessConnection implements Connection {
     public Savepoint setSavepoint() throws SQLException {
         try {
             Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint());
-            if (this.commands.size() > 0) {
+            if (commands.size() > 0) {
                 // last to commit
-                this.savepointsMap.put(sp, this.commands.getLast().getExecId());
+                savepointsMap.put(sp, commands.getLast().getExecId());
             }
             return sp;
         } catch (SQLException e) {
@@ -699,9 +699,9 @@ public class UcanaccessConnection implements Connection {
         try {
             Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint(name));
 
-            if (this.commands.size() > 0) {
+            if (commands.size() > 0) {
                 // last to commit
-                this.savepointsMap.put(sp, this.commands.getLast().getExecId());
+                savepointsMap.put(sp, commands.getLast().getExecId());
             }
             return sp;
         } catch (SQLException e) {
@@ -738,20 +738,20 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public String toString() {
-        return super.toString() + "[" + this.ref.getDbFile() + "]";
+        return super.toString() + "[" + ref.getDbFile() + "]";
     }
 
     void checkLastModified() throws UcanaccessSQLException {
         try {
 
-            this.checkModified = false;
-            if (!this.refId.equals(ref.getId())) {
-                this.hsqlDBConnection = ref.getHSQLDBConnection(session);
+            checkModified = false;
+            if (!refId.equals(ref.getId())) {
+                hsqlDBConnection = ref.getHSQLDBConnection(session);
             }
             synchronized (UcanaccessDriver.class) {
-                this.hsqlDBConnection = this.ref.checkLastModified(this.hsqlDBConnection, session);
+                hsqlDBConnection = ref.checkLastModified(hsqlDBConnection, session);
             }
-            this.refId = ref.getId();
+            refId = ref.getId();
 
         } catch (Exception e) {
             throw new UcanaccessSQLException(e);
@@ -764,11 +764,11 @@ public class UcanaccessConnection implements Connection {
     }
 
     public void setUrl(String _url) {
-        this.url = _url;
+        url = _url;
     }
 
     public boolean isShowSchema() {
-        return this.ref.isShowSchema();
+        return ref.isShowSchema();
     }
 
     public void setSchema(String schema) {
@@ -782,7 +782,7 @@ public class UcanaccessConnection implements Connection {
     public void unloadDB() throws UcanaccessSQLException {
         try {
             synchronized (UcanaccessDriver.class) {
-                this.ref.shutdown(session);
+                ref.shutdown(session);
             }
 
         } catch (Exception e) {

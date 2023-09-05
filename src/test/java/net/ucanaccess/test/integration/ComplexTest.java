@@ -156,7 +156,7 @@ public class ComplexTest extends AccessVersion2010Test {
             }
         }
 
-        this.ucanaccess = getUcanaccessConnection();
+        ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM TABLE1");
         checkQuery("SELECT * FROM TABLE1  WHERE ID='row12' order by id");
         assertEquals(i, getCount("SELECT COUNT(*) FROM TABLE1", true));

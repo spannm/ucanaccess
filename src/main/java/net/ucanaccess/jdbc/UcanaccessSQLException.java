@@ -84,7 +84,7 @@ public class UcanaccessSQLException extends SQLException {
         if (message != null && message.startsWith("UCAExc:")) {
             return message;
         }
-        String version = this.getClass().getPackage().getImplementationVersion();
+        String version = getClass().getPackage().getImplementationVersion();
         version = (version == null) ? "4.x.x " : version + " ";
         version = "UCAExc:::" + version;
         return version + message;

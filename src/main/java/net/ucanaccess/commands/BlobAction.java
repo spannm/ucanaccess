@@ -19,7 +19,7 @@ public class BlobAction implements IFeedbackAction {
     private final Set<BlobKey> keys = new HashSet<>();
 
     public BlobAction(Table _table, Object[] newValues) {
-        this.table = _table;
+        table = _table;
 
         if (!BlobKey.hasPrimaryKey(_table)) {
             return;

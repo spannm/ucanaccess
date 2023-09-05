@@ -132,7 +132,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     @Override
     public int getLoginTimeout() {
-        return this.loginTimeout;
+        return loginTimeout;
     }
 
     @Override
@@ -204,29 +204,29 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     @Override
     public Reference getReference() {
         String clazz = UcanaccessDataSourceFactory.class.getName();
-        Reference ref = new Reference(this.getClass().getName(), clazz, null);
-        ref.add(new StringRefAddr("accessPath", this.getAccessPath()));
+        Reference ref = new Reference(getClass().getName(), clazz, null);
+        ref.add(new StringRefAddr("accessPath", getAccessPath()));
         ref.add(new StringRefAddr("user", getUser()));
         ref.add(new StringRefAddr("password", password));
 
-        ref.add(new StringRefAddr("columnorder", this.getPropAsString("columnorder")));
-        ref.add(new StringRefAddr("concatnulls", this.getPropAsString("concatnulls")));
-        ref.add(new StringRefAddr("encrypt", this.getPropAsString("encrypt")));
-        ref.add(new StringRefAddr("ignorecase", this.getPropAsString("ignorecase")));
-        ref.add(new StringRefAddr("immediatelyreleaseresources", this.getPropAsString("immediatelyreleaseresources")));
-        ref.add(new StringRefAddr("inactivitytimeout", this.getPropAsString("inactivitytimeout")));
-        ref.add(new StringRefAddr("jackcessopener", this.getPropAsString("jackcessopener")));
-        ref.add(new StringRefAddr("keepmirror", this.getPropAsString("keepmirror")));
-        ref.add(new StringRefAddr("lobscale", this.getPropAsString("lobscale")));
-        ref.add(new StringRefAddr("memory", this.getPropAsString("memory")));
-        ref.add(new StringRefAddr("mirrorfolder", this.getPropAsString("mirrorfolder")));
-        ref.add(new StringRefAddr("newdatabaseversion", this.getPropAsString("newdatabaseversion")));
-        ref.add(new StringRefAddr("openexclusive", this.getPropAsString("openexclusive")));
-        ref.add(new StringRefAddr("preventreloading", this.getPropAsString("preventreloading")));
-        ref.add(new StringRefAddr("remap", this.getPropAsString("remap")));
-        ref.add(new StringRefAddr("showschema", this.getPropAsString("showschema")));
-        ref.add(new StringRefAddr("skipindexes", this.getPropAsString("skipindexes")));
-        ref.add(new StringRefAddr("sysschema", this.getPropAsString("sysschema")));
+        ref.add(new StringRefAddr("columnorder", getPropAsString("columnorder")));
+        ref.add(new StringRefAddr("concatnulls", getPropAsString("concatnulls")));
+        ref.add(new StringRefAddr("encrypt", getPropAsString("encrypt")));
+        ref.add(new StringRefAddr("ignorecase", getPropAsString("ignorecase")));
+        ref.add(new StringRefAddr("immediatelyreleaseresources", getPropAsString("immediatelyreleaseresources")));
+        ref.add(new StringRefAddr("inactivitytimeout", getPropAsString("inactivitytimeout")));
+        ref.add(new StringRefAddr("jackcessopener", getPropAsString("jackcessopener")));
+        ref.add(new StringRefAddr("keepmirror", getPropAsString("keepmirror")));
+        ref.add(new StringRefAddr("lobscale", getPropAsString("lobscale")));
+        ref.add(new StringRefAddr("memory", getPropAsString("memory")));
+        ref.add(new StringRefAddr("mirrorfolder", getPropAsString("mirrorfolder")));
+        ref.add(new StringRefAddr("newdatabaseversion", getPropAsString("newdatabaseversion")));
+        ref.add(new StringRefAddr("openexclusive", getPropAsString("openexclusive")));
+        ref.add(new StringRefAddr("preventreloading", getPropAsString("preventreloading")));
+        ref.add(new StringRefAddr("remap", getPropAsString("remap")));
+        ref.add(new StringRefAddr("showschema", getPropAsString("showschema")));
+        ref.add(new StringRefAddr("skipindexes", getPropAsString("skipindexes")));
+        ref.add(new StringRefAddr("sysschema", getPropAsString("sysschema")));
 
         return ref;
     }
@@ -276,7 +276,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * @param _accessPath path
      */
     public void setAccessPath(String _accessPath) {
-        this.accessPath = _accessPath;
+        accessPath = _accessPath;
     }
 
     /**
@@ -443,7 +443,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     public void setPassword(String _password) {
-        this.password = _password;
+        password = _password;
     }
 
     /**
@@ -524,7 +524,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     public void setUser(String _user) {
-        this.user = _user;
+        user = _user;
     }
 
     @Override

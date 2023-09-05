@@ -118,16 +118,16 @@ public class DBReference {
         }
 
         private void setInactivityTimeout(int _inactivityTimeout) {
-            this.inactivityTimeout = _inactivityTimeout;
+            inactivityTimeout = _inactivityTimeout;
         }
     }
 
     public DBReference(File fl, FileFormat ff, JackcessOpenerInterface _jko, final String _pwd)
         throws IOException {
-        this.dbFile = fl;
-        this.pwd = _pwd;
-        this.jko = _jko;
-        this.lastModified = System.currentTimeMillis();
+        dbFile = fl;
+        pwd = _pwd;
+        jko = _jko;
+        lastModified = System.currentTimeMillis();
         memoryTimer = new MemoryTimer(this);
         Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
@@ -136,12 +136,12 @@ public class DBReference {
         } else {
             dbIO = _jko.open(fl, _pwd);
             try {
-                this.readOnlyFileFormat = this.dbIO.getFileFormat().equals(FileFormat.V1997);
-                this.dbFormat = dbIO.getFileFormat();
+                readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
+                dbFormat = dbIO.getFileFormat();
             } catch (Exception ignore) {
 
             }
-            this.dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
+            dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
                 if (linkeeFileName == null) {
                     throw new IOException("Cannot resolve db link");
                 }
@@ -167,19 +167,19 @@ public class DBReference {
     public Database open(File _dbfl, String _pwd) throws IOException {
         Logger.turnOffJackcessLog();
         Database ret = jko.open(_dbfl, _pwd);
-        if (this.columnOrderDisplay) {
+        if (columnOrderDisplay) {
             ret.setColumnOrder(ColumnOrder.DISPLAY);
         }
         return ret;
     }
 
     boolean loadedFromKeptMirror(Session session) throws UcanaccessSQLException {
-        if (this.toKeepHsql != null && this.toKeepHsql.exists()) {
-            if (this.getLastUpdateHSQLDB() >= this.dbFile.lastModified()) {
+        if (toKeepHsql != null && toKeepHsql.exists()) {
+            if (getLastUpdateHSQLDB() >= dbFile.lastModified()) {
                 return true;
             } else {
                 try {
-                    this.closeHSQLDB(session, true);
+                    closeHSQLDB(session, true);
                 } catch (Exception e) {
                     throw new UcanaccessSQLException(e);
                 }
@@ -202,8 +202,8 @@ public class DBReference {
     }
 
     private long filesUpdateTime() {
-        long lm = this.dbFile.lastModified();
-        for (File fl : this.links) {
+        long lm = dbFile.lastModified();
+        for (File fl : links) {
             lm = Math.max(lm, fl.lastModified());
         }
         return lm;
@@ -215,17 +215,17 @@ public class DBReference {
         if ((lastModified + 2000 > filesUpdateTime()) || (preventReloading && !checkInside())) {
             return conn;
         }
-        this.updateLastModified();
-        this.closeHSQLDB(session);
+        updateLastModified();
+        closeHSQLDB(session);
         System.gc();
-        this.dbIO.flush();
-        this.dbIO.close();
-        this.dbIO = open(this.dbFile, this.pwd);
-        this.id = id();
-        this.firstConnection = true;
+        dbIO.flush();
+        dbIO.close();
+        dbIO = open(dbFile, pwd);
+        id = id();
+        firstConnection = true;
         LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
-        lj.setSkipIndexes(this.skipIndexes);
-        lj.setSysSchema(this.sysSchema);
+        lj.setSkipIndexes(skipIndexes);
+        lj.setSysSchema(sysSchema);
         lj.loadDB();
 
         return getHSQLDBConnection(session);
@@ -256,11 +256,11 @@ public class DBReference {
 
     private boolean checkInside() throws IOException {
 
-        boolean reload = checkInside(this.dbIO);
+        boolean reload = checkInside(dbIO);
         if (reload) {
             return true;
         }
-        for (File fl : this.links) {
+        for (File fl : links) {
             Database db = DatabaseBuilder.open(fl);
             reload = checkInside(db);
             db.close();
@@ -273,24 +273,24 @@ public class DBReference {
     }
 
     private File[] getHSQLDBFiles() {
-        if (this.toKeepHsql == null) {
+        if (toKeepHsql == null) {
             return new File[] {};
         }
-        File folder = this.toKeepHsql.getParentFile();
-        String name = this.toKeepHsql.getName();
+        File folder = toKeepHsql.getParentFile();
+        String name = toKeepHsql.getName();
         return new File[] {new File(folder, name + ".data"), new File(folder, name + ".script"), new File(folder, name + ".properties"), new File(folder, name + ".log"), new File(folder,
             name + ".lck"), new File(folder, name + ".lobs")};
     }
 
     private long getLastUpdateHSQLDB() {
         long lu = 0;
-        for (File hsqlF : this.getHSQLDBFiles()) {
+        for (File hsqlF : getHSQLDBFiles()) {
             if (hsqlF.exists() && hsqlF.lastModified() > lu) {
                 lu = hsqlF.lastModified();
             }
         }
-        if (this.toKeepHsql != null && this.toKeepHsql.exists() && this.toKeepHsql.lastModified() > lu) {
-            lu = this.toKeepHsql.lastModified();
+        if (toKeepHsql != null && toKeepHsql.exists() && toKeepHsql.lastModified() > lu) {
+            lu = toKeepHsql.lastModified();
         }
         return lu;
     }
@@ -301,9 +301,9 @@ public class DBReference {
 
     private void closeHSQLDB(Session session, boolean firstConnectionKeeptMirror) throws Exception {
         finalizeHSQLDB(session);
-        if (!this.inMemory) {
-            if (this.toKeepHsql == null) {
-                File folder = this.mirrorFolder == null ? dbFile.getParentFile() : this.mirrorFolder;
+        if (!inMemory) {
+            if (toKeepHsql == null) {
+                File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
                 File hbase = new File(folder, "Ucanaccess_" + this);
                 if (hbase.exists()) {
                     for (File hsqlF : hbase.listFiles()) {
@@ -311,15 +311,15 @@ public class DBReference {
                     }
                 }
                 hbase.delete();
-            } else if (!this.immediatelyReleaseResources || firstConnectionKeeptMirror) {
-                this.toKeepHsql.delete();
-                this.toKeepHsql.createNewFile();
-                for (File hsqlf : this.getHSQLDBFiles()) {
+            } else if (!immediatelyReleaseResources || firstConnectionKeeptMirror) {
+                toKeepHsql.delete();
+                toKeepHsql.createNewFile();
+                for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
                         hsqlf.delete();
                     }
                 }
-                this.mirrorRecreated = true;
+                mirrorRecreated = true;
 
             }
         }
@@ -331,11 +331,11 @@ public class DBReference {
     }
 
     private void finalizeHSQLDB(Session session) throws Exception {
-        if (!this.hsqldbShutdown) {
-            this.releaseLock();
-            try (Connection conn = this.getHSQLDBConnection(session); Statement st = conn.createStatement()) {
+        if (!hsqldbShutdown) {
+            releaseLock();
+            try (Connection conn = getHSQLDBConnection(session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
-                this.hsqldbShutdown = true;
+                hsqldbShutdown = true;
             } catch (Exception ignored) {
             }
         }
@@ -361,11 +361,11 @@ public class DBReference {
     private void initHSQLDB(Connection conn) {
         try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
-            st.execute("SET DATABASE SQL CONCAT NULLS " + this.concatNulls);
-            if (this.lobScale == null && this.inMemory) {
+            st.execute("SET DATABASE SQL CONCAT NULLS " + concatNulls);
+            if (lobScale == null && inMemory) {
                 st.execute("SET FILES LOB SCALE 1");
-            } else if (this.lobScale != null) {
-                st.execute("SET FILES LOB SCALE " + this.lobScale);
+            } else if (lobScale != null) {
+                st.execute("SET FILES LOB SCALE " + lobScale);
             }
 
         } catch (Exception w) {
@@ -376,27 +376,27 @@ public class DBReference {
     public Connection getHSQLDBConnection(Session session) throws SQLException {
 
         boolean keptMirror = false;
-        if (this.firstConnection && this.toKeepHsql != null && this.toKeepHsql.exists()) {
+        if (firstConnection && toKeepHsql != null && toKeepHsql.exists()) {
             keptMirror = true;
         }
 
-        Connection conn = DriverManager.getConnection(this.getHsqlUrl(session),
+        Connection conn = DriverManager.getConnection(getHsqlUrl(session),
             session.getUser() == null ? "Admin" : session.getUser(), session.getPassword());
         if (version == null) {
             version = conn.getMetaData().getDriverVersion();
         }
 
-        if (this.firstConnection) {
-            if (this.ignoreCase && (!keptMirror || mirrorRecreated)) {
+        if (firstConnection) {
+            if (ignoreCase && (!keptMirror || mirrorRecreated)) {
                 setIgnoreCase(conn);
             }
-            if (!this.mirrorReadOnly || (!keptMirror || mirrorRecreated)) {
+            if (!mirrorReadOnly || (!keptMirror || mirrorRecreated)) {
                 initHSQLDB(conn);
             }
-            this.firstConnection = false;
-            this.mirrorRecreated = false;
+            firstConnection = false;
+            mirrorRecreated = false;
         }
-        this.hsqldbShutdown = false;
+        hsqldbShutdown = false;
         conn.setAutoCommit(false);
         return conn;
     }
@@ -408,15 +408,15 @@ public class DBReference {
     private String key(String _pwd) throws SQLException {
         Connection conn = null;
         try {
-            if (this.encryptionKey == null) {
+            if (encryptionKey == null) {
                 String url = "jdbc:hsqldb:mem:" + id + "_tmp";
                 conn = DriverManager.getConnection(url);
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('" + CIPHER_SPEC + "', null) ");
                 rs.next();
-                this.encryptionKey = rs.getString(1);
+                encryptionKey = rs.getString(1);
             }
-            return this.encryptionKey;
+            return encryptionKey;
         } finally {
             if (conn != null) {
                 conn.close();
@@ -427,30 +427,30 @@ public class DBReference {
 
     private String getHsqlUrl(final Session session) throws SQLException {
         try {
-            if (this.openExclusive && this.fileLock == null) {
+            if (openExclusive && fileLock == null) {
                 lockMdbFile();
             }
             String enc = "";
             String log = "";
-            if (this.encryptHSQLDB) {
+            if (encryptHSQLDB) {
                 enc = ";crypt_key=" + key("AES") + ";crypt_type=aes;crypt_lobs=true";
             }
-            if (!this.inMemory && this.toKeepHsql == null) {
+            if (!inMemory && toKeepHsql == null) {
                 log = ";hsqldb.log_data=FALSE";
             }
-            if (!this.inMemory && tempHsql == null) {
-                if (this.toKeepHsql != null) {
-                    if (!this.toKeepHsql.exists()) {
-                        this.toKeepHsql.createNewFile();
+            if (!inMemory && tempHsql == null) {
+                if (toKeepHsql != null) {
+                    if (!toKeepHsql.exists()) {
+                        toKeepHsql.createNewFile();
                     }
-                    this.tempHsql = this.toKeepHsql;
+                    tempHsql = toKeepHsql;
                 } else {
-                    File folder = this.mirrorFolder == null ? dbFile.getParentFile() : this.mirrorFolder;
+                    File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
                     File hbase = new File(folder, "Ucanaccess_" + this);
                     hbase.mkdir();
-                    this.tempHsql = new File(hbase, this.id);
+                    tempHsql = new File(hbase, id);
 
-                    this.tempHsql.createNewFile();
+                    tempHsql.createNewFile();
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
@@ -464,8 +464,8 @@ public class DBReference {
                     }
                 }));
             }
-            String mro = this.mirrorReadOnly ? ";readonly=true" : "";
-            return "jdbc:hsqldb:" + (this.inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
+            String mro = mirrorReadOnly ? ";readonly=true" : "";
+            return "jdbc:hsqldb:" + (inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }
@@ -487,7 +487,7 @@ public class DBReference {
         if (readOnly) {
             lockMdbFile();
         }
-        return this.readOnlyFileFormat || readOnly;
+        return readOnlyFileFormat || readOnly;
     }
 
     boolean isReadOnlyFileFormat() {
@@ -505,7 +505,7 @@ public class DBReference {
         if (suffixStart < 0) {
             suffixStart = fileName.length();
         }
-        String suffix = (FileFormat.V2016.equals(this.dbFormat) || FileFormat.V2010.equals(this.dbFormat) || FileFormat.V2007.equals(this.dbFormat))
+        String suffix = (FileFormat.V2016.equals(dbFormat) || FileFormat.V2010.equals(dbFormat) || FileFormat.V2007.equals(dbFormat))
                 ? ".laccdb"
                 : ".ldb";
         return new File(folder, fileName.substring(0, suffixStart) + suffix);
@@ -521,10 +521,10 @@ public class DBReference {
             final RandomAccessFile raf = new RandomAccessFile(flLock, "rw");
             FileLock tryLock = raf.getChannel().tryLock();
             if (tryLock == null) {
-                this.readOnly = true;
+                readOnly = true;
             } else {
-                this.fileLock = tryLock;
-                this.readOnly = false;
+                fileLock = tryLock;
+                readOnly = false;
             }
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
@@ -532,18 +532,18 @@ public class DBReference {
     }
 
     public void releaseLock() throws IOException {
-        if (this.fileLock != null) {
-            this.fileLock.release();
+        if (fileLock != null) {
+            fileLock.release();
         }
     }
 
     public void reloadDbIO() throws IOException {
-        this.dbIO.flush();
-        this.dbIO.close();
+        dbIO.flush();
+        dbIO.close();
         for (OnReloadReferenceListener listener : onReloadListeners) {
             listener.onReload();
         }
-        this.dbIO = open(dbFile, this.pwd);
+        dbIO = open(dbFile, pwd);
 
     }
 
@@ -552,45 +552,45 @@ public class DBReference {
     }
 
     public void setInMemory(boolean _inMemory) {
-        this.inMemory = _inMemory;
+        inMemory = _inMemory;
     }
 
     public void setOpenExclusive(boolean _openExclusive) {
-        this.openExclusive = _openExclusive;
+        openExclusive = _openExclusive;
     }
 
     public void setShowSchema(boolean _showSchema) {
-        this.showSchema = _showSchema;
+        showSchema = _showSchema;
     }
 
     void shutdown(Session _session) throws Exception {
-        DBReferenceSingleton.getInstance().remove(this.dbFile.getAbsolutePath());
-        if (this.immediatelyReleaseResources) {
+        DBReferenceSingleton.getInstance().remove(dbFile.getAbsolutePath());
+        if (immediatelyReleaseResources) {
             for (OnReloadReferenceListener listener : onReloadListeners) {
                 listener.onReload();
             }
         }
-        this.memoryTimer.timer.cancel();
-        this.dbIO.flush();
-        this.dbIO.close();
-        this.closeHSQLDB(_session);
+        memoryTimer.timer.cancel();
+        dbIO.flush();
+        dbIO.close();
+        closeHSQLDB(_session);
 
     }
 
     public void updateLastModified() {
-        this.lastModified = this.filesUpdateTime();
+        lastModified = filesUpdateTime();
     }
 
     public void setImmediatelyReleaseResources(boolean _immediatelyReleaseResources) {
-        this.immediatelyReleaseResources = _immediatelyReleaseResources;
+        immediatelyReleaseResources = _immediatelyReleaseResources;
     }
 
     public void setEncryptHSQLDB(boolean _encryptHSQLDB) {
-        this.encryptHSQLDB = _encryptHSQLDB;
+        encryptHSQLDB = _encryptHSQLDB;
     }
 
     public void setExternalResourcesMapping(Map<String, String> _externalResourcesMapping) {
-        this.externalResourcesMapping = _externalResourcesMapping;
+        externalResourcesMapping = _externalResourcesMapping;
     }
 
     public File getToKeepHsql() {
@@ -598,7 +598,7 @@ public class DBReference {
     }
 
     public void setToKeepHsql(File _toKeepHsql) {
-        this.toKeepHsql = _toKeepHsql;
+        toKeepHsql = _toKeepHsql;
     }
 
     public boolean isEncryptHSQLDB() {
@@ -606,8 +606,8 @@ public class DBReference {
     }
 
     public void setColumnOrderDisplay() {
-        this.columnOrderDisplay = true;
-        if (this.dbIO != null) {
+        columnOrderDisplay = true;
+        if (dbIO != null) {
             dbIO.setColumnOrder(ColumnOrder.DISPLAY);
         }
     }
@@ -617,7 +617,7 @@ public class DBReference {
     }
 
     public void setMirrorFolder(File _mirrorFolder) {
-        this.mirrorFolder = _mirrorFolder;
+        mirrorFolder = _mirrorFolder;
 
     }
 
@@ -626,23 +626,23 @@ public class DBReference {
     }
 
     public void setIgnoreCase(boolean _ignoreCase) {
-        this.ignoreCase = _ignoreCase;
+        ignoreCase = _ignoreCase;
     }
 
     public void setMirrorReadOnly(boolean _mirrorReadOnly) {
-        this.mirrorReadOnly = _mirrorReadOnly;
+        mirrorReadOnly = _mirrorReadOnly;
     }
 
     public void setLobScale(Integer _lobScale) {
-        this.lobScale = _lobScale;
+        lobScale = _lobScale;
     }
 
     public void setSkipIndexes(boolean _skipIndexes) {
-        this.skipIndexes = _skipIndexes;
+        skipIndexes = _skipIndexes;
     }
 
     public void setSysSchema(boolean _sysSchema) {
-        this.sysSchema = _sysSchema;
+        sysSchema = _sysSchema;
     }
 
     public boolean isPreventReloading() {
@@ -650,7 +650,7 @@ public class DBReference {
     }
 
     public void setPreventReloading(boolean _preventReloading) {
-        this.preventReloading = _preventReloading;
+        preventReloading = _preventReloading;
     }
 
     public boolean isConcatNulls() {
@@ -658,7 +658,7 @@ public class DBReference {
     }
 
     public void setConcatNulls(boolean _concatNulls) {
-        this.concatNulls = _concatNulls;
+        concatNulls = _concatNulls;
     }
 
     //CHECKSTYLE:OFF

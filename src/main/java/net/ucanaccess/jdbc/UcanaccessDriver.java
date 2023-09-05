@@ -39,7 +39,7 @@ public final class UcanaccessDriver implements Driver {
 
     @Override
     public Connection connect(String _url, Properties _props) throws SQLException {
-        if (!this.acceptsURL(_url)) {
+        if (!acceptsURL(_url)) {
             return null;
         }
         readProperties(_props, _url);

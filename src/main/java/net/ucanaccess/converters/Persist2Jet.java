@@ -426,7 +426,7 @@ public class Persist2Jet {
         createForeignKeys(tableName);
         try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT * FROM " + tableName);
-            List<String> clns = this.getColumnNamesCreate(tn);
+            List<String> clns = getColumnNamesCreate(tn);
             while (rs.next()) {
                 Object[] record = new Object[clns.size()];
                 int i = 0;
@@ -441,7 +441,7 @@ public class Persist2Jet {
     public void dropTable(String tableName) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
-        tableName = this.escape4Access(tableName);
+        tableName = escape4Access(tableName);
         Table t = db.getTable(tableName);
 
         if (t == null) {
@@ -491,8 +491,8 @@ public class Persist2Jet {
     public void renameTable(String oldTableName, String newTableName) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
-        oldTableName = this.escape4Access(oldTableName);
-        String tn = this.escape4Access(newTableName);
+        oldTableName = escape4Access(oldTableName);
+        String tn = escape4Access(newTableName);
         String ntn = escape4Hsqldb(newTableName);
         Table t = db.getTable(oldTableName);
 
@@ -548,7 +548,7 @@ public class Persist2Jet {
         String tn = escape4Access(tableName);
         String ntn = escape4Hsqldb(tableName);
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
-        ColumnBuilder cb = this.getColumn(ntn, columnMap, types);
+        ColumnBuilder cb = getColumn(ntn, columnMap, types);
         Table t = db.getTable(tn);
         Column cl = cb.addToTable(t);
         int idTable = mtd.getTableId(ntn.toUpperCase());

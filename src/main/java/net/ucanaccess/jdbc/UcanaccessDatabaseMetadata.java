@@ -19,8 +19,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private DatabaseMetaData     wrapped;
 
     public UcanaccessDatabaseMetadata(DatabaseMetaData _wrapped, UcanaccessConnection _connection) {
-        this.wrapped = _wrapped;
-        this.connection = _connection;
+        wrapped = _wrapped;
+        connection = _connection;
     }
 
     private String from(String left, String right) {
@@ -129,7 +129,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     private ResultSet executeQuery(String sql) throws SQLException {
-        this.connection.checkLastModified();
+        connection.checkLastModified();
         Statement st = connection.getHSQLDBConnection().createStatement();
         return st.executeQuery(sql);
     }
@@ -240,7 +240,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
-        if (this.connection.isShowSchema()) {
+        if (connection.isShowSchema()) {
             try {
                 return wrapped.getCatalogs();
             } catch (SQLException e) {
@@ -286,10 +286,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             columnNamePattern = normalizeName(columnNamePattern);
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
-                return this.wrapped.getColumnPrivileges(catalog, schema, table, columnNamePattern);
+                return wrapped.getColumnPrivileges(catalog, schema, table, columnNamePattern);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
 
             StringBuilder select = new StringBuilder("SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,")
                 .append(cAlias("TABLE_NAME")).append(",").append(cAlias("COLUMN_NAME")).append(",")
@@ -314,15 +314,15 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             columnNamePattern = normalizeName(columnNamePattern);
             tableNamePattern = normalizeName(tableNamePattern);
             if (invokeWrapper(catalog, schemaPattern)) {
-                return this.wrapped.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+                return wrapped.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
 
             StringBuilder select = new StringBuilder(select("SYSTEM_COLUMNS",
                 List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"),
                 Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF", "IS_AUTOINCREMENT",
-                    "IS_GENERATEDCOLUMN"))).append(",").append(this.cAlias("ORIGINAL_TYPE"))
+                    "IS_GENERATEDCOLUMN"))).append(",").append(cAlias("ORIGINAL_TYPE"))
                         .append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
                         .append(on(List.of("TABLE_NAME", "COLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(and("TABLE_CAT", "=", "PUBLIC", " WHERE "))
@@ -338,7 +338,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public Connection getConnection() {
-        return this.connection;
+        return connection;
     }
 
     @Override
@@ -353,12 +353,12 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             parentTable = normalizeName(parentTable);
             foreignTable = normalizeName(foreignTable);
-            if (this.invokeWrapper(parentCatalog, parentSchema)) {
+            if (invokeWrapper(parentCatalog, parentSchema)) {
                 return wrapped.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog,
                     foreignSchema, foreignTable);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                     "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
@@ -410,7 +410,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     @Override
     public String getDatabaseProductVersion() {
         try {
-            return this.connection.getDbIO().getFileFormat().toString();
+            return connection.getDbIO().getFileFormat().toString();
         } catch (IOException e) {
             return "";
         }
@@ -443,7 +443,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     @Override
     public String getDriverVersion() {
         try {
-            String version = this.getClass().getPackage().getImplementationVersion();
+            String version = getClass().getPackage().getImplementationVersion();
             return version == null ? "3.x.x" : version;
         } catch (Exception e) {
             return "2.x.x";
@@ -458,10 +458,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
-                return this.wrapped.getExportedKeys(catalog, schema, table);
+                return wrapped.getExportedKeys(catalog, schema, table);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                     "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
@@ -521,11 +521,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
-                return this.wrapped.getImportedKeys(catalog, schema, table);
+                return wrapped.getImportedKeys(catalog, schema, table);
             }
 
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("FKTABLE_CAT", "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME", "PKTABLE_CAT",
                     "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME"),
@@ -551,8 +551,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
             }
             table = normalizeName(table);
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
             String nuS = (unique) ? "AND NON_UNIQUE IS FALSE" : "";
             StringBuilder select = new StringBuilder(
                 select("SYSTEM_INDEXINFO", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
@@ -777,7 +777,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     private boolean invokeWrapper(String catalog, String schema) {
-        return (this.connection.isShowSchema()
+        return (connection.isShowSchema()
             && ((catalog != null || schema != null) && (!"PUBLIC".equals(catalog) || !"PUBLIC".equals(schema))));
     }
 
@@ -789,10 +789,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
-                return this.wrapped.getPrimaryKeys(catalog, schema, table);
+                return wrapped.getPrimaryKeys(catalog, schema, table);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
             StringBuilder select = new StringBuilder(
                 select("SYSTEM_PRIMARYKEYS", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
@@ -863,7 +863,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public ResultSet getSchemas() throws SQLException {
-        if (this.connection.isShowSchema()) {
+        if (connection.isShowSchema()) {
             try {
                 return wrapped.getSchemas();
             } catch (SQLException e) {
@@ -875,7 +875,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        if (this.connection.isShowSchema()) {
+        if (connection.isShowSchema()) {
             try {
                 return wrapped.getSchemas(catalog, schemaPattern);
             } catch (SQLException e) {
@@ -980,10 +980,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             tableNamePattern = normalizeName(tableNamePattern);
 
             if (invokeWrapper(catalog, schemaPattern)) {
-                return this.wrapped.getTables(catalog, schemaPattern, tableNamePattern, types);
+                return wrapped.getTables(catalog, schemaPattern, tableNamePattern, types);
             }
-            String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
-            String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
+            String cat = connection.isShowSchema() ? "PUBLIC" : null;
+            String schem = connection.isShowSchema() ? "PUBLIC" : null;
 
             StringBuilder select =
                 new StringBuilder(select("SYSTEM_TABLES", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"),

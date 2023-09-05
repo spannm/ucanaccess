@@ -12,8 +12,8 @@ public class DropForeignKeyCommand implements ICommand {
     private String relationshipName;
 
     public DropForeignKeyCommand(String _execId, String _relationshipName) {
-        this.execId = _execId;
-        this.relationshipName = _relationshipName;
+        execId = _execId;
+        relationshipName = _relationshipName;
     }
 
     public String getRelationshipName() {
@@ -39,7 +39,7 @@ public class DropForeignKeyCommand implements ICommand {
     public IFeedbackAction persist() throws SQLException {
         try {
             Persist2Jet p2a = new Persist2Jet();
-            p2a.dropForeignKey(this.relationshipName);
+            p2a.dropForeignKey(relationshipName);
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }

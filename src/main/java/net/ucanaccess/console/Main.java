@@ -25,8 +25,8 @@ public class Main {
     private String         lastSqlQuery;
 
     public Main(Connection _conn, BufferedReader _input) {
-        this.conn = _conn;
-        this.input = _input;
+        conn = _conn;
+        input = _input;
 
     }
 
@@ -162,7 +162,7 @@ public class Main {
                 ResultSet rs = st.getResultSet();
                 if (rs != null) {
                     consoleDump(rs, System.out);
-                    this.lastSqlQuery = sql;
+                    lastSqlQuery = sql;
                 } else {
                     System.out.println("Ok!");
                 }
@@ -268,7 +268,7 @@ public class Main {
                    break;
                 }
                 sb = new StringBuilder();
-                this.prompt();
+                prompt();
             }
         }
         System.out.println("Cheers! Thank you for using the UCanAccess JDBC Driver.");

@@ -16,10 +16,10 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 
     public UcanaccessResultSetMetaData(ResultSetMetaData _wrapped, Map<String, String> _aliases,
             UcanaccessResultSet _resultSet) throws SQLException {
-        this.wrapped = _wrapped;
+        wrapped = _wrapped;
 
-        this.metadata = new Metadata(_resultSet.getStatement().getConnection());
-        this.aliases = _aliases;
+        metadata = new Metadata(_resultSet.getStatement().getConnection());
+        aliases = _aliases;
     }
 
     @Override
@@ -45,14 +45,14 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
     @Override
     public String getColumnLabel(int column) throws SQLException {
         String name = SQLConverter.preEscapingIdentifier(wrapped.getColumnLabel(column));
-        return this.aliases.containsKey(name) ? this.aliases.get(name) : getColumnName(column);
+        return aliases.containsKey(name) ? aliases.get(name) : getColumnName(column);
     }
 
     @Override
     public String getColumnName(int column) throws SQLException {
         String columnName = SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
         String tableName = SQLConverter.preEscapingIdentifier(wrapped.getTableName(column));
-        String cn = this.metadata.getColumnName(tableName, columnName);
+        String cn = metadata.getColumnName(tableName, columnName);
         return cn == null ? columnName : cn;
 
     }
@@ -89,14 +89,14 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
         if (Metadata.SYSTEM_SUBQUERY.equals(tableName)) {
             return tableName;
         }
-        return this.metadata.getTableName(tableName);
+        return metadata.getTableName(tableName);
     }
 
     @Override
     public boolean isAutoIncrement(int column) throws SQLException {
         String columnName = SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
         String tableName = SQLConverter.preEscapingIdentifier(wrapped.getTableName(column));
-        return this.metadata.isAutoIncrement(tableName, columnName);
+        return metadata.isAutoIncrement(tableName, columnName);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
     public boolean isCurrency(int column) throws SQLException {
         String columnName = SQLConverter.preEscapingIdentifier(wrapped.getColumnName(column));
         String tableName = SQLConverter.preEscapingIdentifier(wrapped.getTableName(column));
-        return this.metadata.isCurrency(tableName, columnName);
+        return metadata.isCurrency(tableName, columnName);
     }
 
     @Override

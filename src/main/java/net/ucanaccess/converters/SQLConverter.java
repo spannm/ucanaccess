@@ -295,7 +295,7 @@ public final class SQLConverter {
 
         public boolean in(DDLType... types) {
             for (DDLType type : types) {
-                if (this.equals(type)) {
+                if (equals(type)) {
                     return true;
                 }
             }
@@ -324,7 +324,7 @@ public final class SQLConverter {
         }
 
         public String getDBObjectName() {
-            Matcher m = pattern.matcher(this.ddl);
+            Matcher m = pattern.matcher(ddl);
             if (m.find()) {
                 return m.group(1);
             }
@@ -332,7 +332,7 @@ public final class SQLConverter {
         }
 
         public String getSecondDBObjectName() {
-            Matcher m = pattern.matcher(this.ddl);
+            Matcher m = pattern.matcher(ddl);
             if (m.find()) {
                 return m.group(1 + NAME_PATTERN_STEP);
             }
@@ -340,7 +340,7 @@ public final class SQLConverter {
         }
 
         public String getThirdDBObjectName() {
-            Matcher m = pattern.matcher(this.ddl);
+            Matcher m = pattern.matcher(ddl);
             if (m.find()) {
                 return m.group(1 + 2 * NAME_PATTERN_STEP);
             }
@@ -348,7 +348,7 @@ public final class SQLConverter {
         }
 
         public String getColumnDefinition() {
-            Matcher m = pattern.matcher(this.ddl);
+            Matcher m = pattern.matcher(ddl);
             if (m.find()) {
                 return m.group(2 * NAME_PATTERN_STEP + 1);
             }

@@ -17,21 +17,21 @@ public class BlobKey implements Serializable {
     private final String        columnName;
 
     public BlobKey(Map<String, Object> _key, String _tableName, String _columnName) {
-        this.key = _key;
-        this.tableName = _tableName;
-        this.columnName = _columnName;
+        key = _key;
+        tableName = _tableName;
+        columnName = _columnName;
     }
 
     public BlobKey(Table _table, String _columnName, Row _row) {
-        this.tableName = _table.getName();
-        this.columnName = _columnName;
+        tableName = _table.getName();
+        columnName = _columnName;
         if (hasPrimaryKey(_table)) {
             List<? extends Index.Column> cl = _table.getPrimaryKeyIndex().getColumns();
             Map<String, Object> keyMap = new HashMap<>();
             for (Index.Column c : cl) {
                 keyMap.put(c.getName(), _row.get(c.getName()));
             }
-            this.key = keyMap;
+            key = keyMap;
         }
     }
 

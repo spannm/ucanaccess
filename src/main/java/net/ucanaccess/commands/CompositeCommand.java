@@ -18,9 +18,9 @@ public class CompositeCommand implements ICommand {
     }
 
     public boolean add(ICursorCommand c4io) {
-        if (this.indexSelector == null) {
-            this.indexSelector = c4io.getIndexSelector();
-            this.execId = c4io.getExecId();
+        if (indexSelector == null) {
+            indexSelector = c4io.getIndexSelector();
+            execId = c4io.getExecId();
         }
         return composite.add(c4io);
     }
@@ -31,7 +31,7 @@ public class CompositeCommand implements ICommand {
 
     @Override
     public String getExecId() {
-        return this.execId;
+        return execId;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CompositeCommand implements ICommand {
     public boolean moveToNextRow(Cursor cur, Set<String> columnNames) throws IOException {
         boolean hasNext = cur.moveToNextRow();
         if (hasNext) {
-            this.currentRow = cur.getCurrentRow(columnNames);
+            currentRow = cur.getCurrentRow(columnNames);
         }
         return hasNext;
     }
@@ -63,7 +63,7 @@ public class CompositeCommand implements ICommand {
                 Iterator<ICursorCommand> it = composite.iterator();
                 while (it.hasNext()) {
                     ICursorCommand comm = it.next();
-                    if (comm.currentRowMatches(cur, this.currentRow)) {
+                    if (comm.currentRowMatches(cur, currentRow)) {
                         cfa.add(comm.persistCurrentRow(cur));
                         it.remove();
                         rollbackCache.add(comm);
@@ -79,7 +79,7 @@ public class CompositeCommand implements ICommand {
 
     @Override
     public IFeedbackAction rollback() throws SQLException {
-        for (ICursorCommand ic : this.rollbackCache) {
+        for (ICursorCommand ic : rollbackCache) {
             ic.rollback();
         }
         return null;

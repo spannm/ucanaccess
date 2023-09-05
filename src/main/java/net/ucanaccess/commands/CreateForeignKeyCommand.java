@@ -14,10 +14,10 @@ public class CreateForeignKeyCommand implements ICommand {
     private String relationshipName;
 
     public CreateForeignKeyCommand(String _tableName, String _referencedTable, String _execId, String _relationshipName) {
-        this.tableName = _tableName;
-        this.referencedTable = _referencedTable;
-        this.execId = _execId;
-        this.relationshipName = _relationshipName;
+        tableName = _tableName;
+        referencedTable = _referencedTable;
+        execId = _execId;
+        relationshipName = _relationshipName;
     }
 
     public String getRelationshipName() {
@@ -43,7 +43,7 @@ public class CreateForeignKeyCommand implements ICommand {
     public IFeedbackAction persist() throws SQLException {
         try {
             Persist2Jet p2a = new Persist2Jet();
-            p2a.createForeignKey(this.tableName, this.referencedTable, this.relationshipName);
+            p2a.createForeignKey(tableName, referencedTable, relationshipName);
         } catch (IOException e) {
             throw new UcanaccessSQLException(e);
         }

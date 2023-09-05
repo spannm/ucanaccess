@@ -12,14 +12,14 @@ public class Version extends ComplexBase {
 
     public Version(com.healthmarketscience.jackcess.complex.Version cv) {
         super(cv);
-        this.value = cv.getValue();
-        this.modifiedDate = cv.getModifiedLocalDate();
+        value = cv.getValue();
+        modifiedDate = cv.getModifiedLocalDate();
     }
 
     public Version(ComplexValue.Id id, String tableName, String columnName, String _value, LocalDateTime _modifiedDate) {
         super(id, tableName, columnName);
-        this.value = _value;
-        this.modifiedDate = _modifiedDate;
+        value = _value;
+        modifiedDate = _modifiedDate;
     }
 
     public Version(String _value, LocalDateTime _modifiedDate) {
@@ -70,11 +70,11 @@ public class Version extends ComplexBase {
     }
 
     public void setModifiedDate(LocalDateTime _modifiedDate) {
-        this.modifiedDate = _modifiedDate;
+        modifiedDate = _modifiedDate;
     }
 
     public void setValue(String _value) {
-        this.value = _value;
+        value = _value;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class BlobOleTest extends AccessVersionAllTest {
 
         Blob blob = ucanaccess.createBlob();
         OutputStream out = blob.setBinaryStream(1);
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(IMG_FILE_NAME);
+        InputStream is = getClass().getClassLoader().getResourceAsStream(IMG_FILE_NAME);
         byte[] ba = new byte[4096];
         int len;
         while ((len = is.read(ba)) != -1) {
@@ -83,7 +83,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         ps.setString(2, "TestOleOk");
         ps.executeUpdate();
 
-        getLogger().info("PPTX file was created in {}.", this.getFileAccDb());
+        getLogger().info("PPTX file was created in {}.", getFileAccDb());
         checkQuery("SELECT * FROM T2");
         ps = ucanaccess.prepareStatement("DELETE FROM  t2  WHERE  descr=?");
         ps.setString(1, "TestOleOk");
@@ -117,7 +117,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         ps.setBlob(2, blob);
 
         ps.execute();
-        getLogger().info("PPTX file was created in {}.", this.getFileAccDb());
+        getLogger().info("PPTX file was created in {}.", getFileAccDb());
         checkQuery("SELECT * FROM T2");
         Statement st = ucanaccess.createStatement();
         fl1.delete();
@@ -143,7 +143,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         // fix for ticket #23 should prevent this test f
         File fl1 = new File(fn);
         FileOutputStream out = new FileOutputStream(fl1);
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(fn);
+        InputStream is = getClass().getClassLoader().getResourceAsStream(fn);
         byte[] ba = new byte[4096];
         int len;
         while ((len = is.read(ba)) != -1) {

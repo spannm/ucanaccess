@@ -26,11 +26,11 @@ public class ParametricQuery {
     private StringBuffer        originalParameters = new StringBuffer();
 
     public ParametricQuery(Connection _hsqldb, QueryImpl _qi) {
-        this.hsqldb = _hsqldb;
+        hsqldb = _hsqldb;
         if (_qi.getType() == Query.Type.APPEND) {
-            this.qi = new AppendQueryTemp((AppendQueryImpl) _qi);
+            qi = new AppendQueryTemp((AppendQueryImpl) _qi);
         } else {
-            this.qi = _qi;
+            qi = _qi;
         }
     }
 
@@ -39,18 +39,18 @@ public class ParametricQuery {
     }
 
     public void setIssueWithParameterName(boolean _issueWithParameterName) {
-        this.issueWithParameterName = _issueWithParameterName;
+        issueWithParameterName = _issueWithParameterName;
     }
 
     private List<String> queryParameters() {
         List<String> l = qi.getParameters();
-        if (this.aposMap != null) {
+        if (aposMap != null) {
             return parameterList;
         }
-        this.aposMap = new HashMap<>();
+        aposMap = new HashMap<>();
         int i = 0;
-        this.parameterList = new ArrayList<>();
-        this.parameterList.addAll(l);
+        parameterList = new ArrayList<>();
+        parameterList.addAll(l);
         for (String par : parameterList) {
             if (par.contains("'") || par.contains("\"")) {
                 int index = Math.max(Math.max(par.lastIndexOf(' '), par.lastIndexOf('\n')), par.lastIndexOf('\r'));
@@ -60,7 +60,7 @@ public class ParametricQuery {
                     decl = decl.substring(1, decl.length() - 1);
                 }
                 String h = treatApos(decl);
-                this.aposMap.put(h, decl);
+                aposMap.put(h, decl);
 
                 parameterList.set(i, treatApos(par));
             }
@@ -70,7 +70,7 @@ public class ParametricQuery {
     }
 
     public void createProcedure() {
-        this.isProcedure = true;
+        isProcedure = true;
         String sql = null;
         try {
 
@@ -89,7 +89,7 @@ public class ParametricQuery {
             }
 
             if (conversionOk) {
-                this.exception = null;
+                exception = null;
 
             } else {
                 return;
@@ -99,15 +99,15 @@ public class ParametricQuery {
                 inside = inside + ";";
             }
             String procedureName = SQLConverter.escapeIdentifier(qi.getName(), hsqldb);
-            String procedure = "CREATE PROCEDURE " + procedureName + "(" + this.parameters + ") MODIFIES SQL DATA \n"
+            String procedure = "CREATE PROCEDURE " + procedureName + "(" + parameters + ") MODIFIES SQL DATA \n"
                     + " BEGIN ATOMIC " + inside + "\n END";
 
             if (exec(procedure)) {
-                this.signature = qi.getName() + "(" + this.originalParameters + ")";
-                this.loaded = true;
+                signature = qi.getName() + "(" + originalParameters + ")";
+                loaded = true;
             }
         } catch (Exception _ex) {
-            this.exception = _ex;
+            exception = _ex;
         }
     }
 
@@ -130,7 +130,7 @@ public class ParametricQuery {
                 }
             }
             if (conversionOk) {
-                this.exception = null;
+                exception = null;
 
             } else {
                 return;
@@ -141,26 +141,26 @@ public class ParametricQuery {
                 inside = inside.substring(0, inside.length() - 1);
             }
             String funName = qnn;
-            String function = "CREATE FUNCTION " + funName + "(" + this.parameters + ") RETURNS " + "TABLE ("
+            String function = "CREATE FUNCTION " + funName + "(" + parameters + ") RETURNS " + "TABLE ("
                     + getTableDefinition() + ") READS SQL DATA \n" + " RETURN (TABLE(" + inside + "));";
             if (!exec(function)) {
                 return;
             }
             String createView = "CREATE VIEW " + qnn + " AS SELECT * FROM TABLE(" + funName + "("
-                    + this.defaultParameterValues + "))";
+                    + defaultParameterValues + "))";
 
             if (!exec(createView)) {
                 return;
             }
-            this.loaded = true;
+            loaded = true;
         } catch (Exception _ex) {
-            this.exception = _ex;
+            exception = _ex;
         }
     }
 
     private String convertApos(String sql) {
-        if (this.aposMap != null) {
-            for (Map.Entry<String, String> me : this.aposMap.entrySet()) {
+        if (aposMap != null) {
+            for (Map.Entry<String, String> me : aposMap.entrySet()) {
                 sql = sql.replaceAll("(?i)" + Pattern.quote("[" + me.getValue() + "]"), "[" + me.getKey() + "]");
             }
         }
@@ -207,16 +207,16 @@ public class ParametricQuery {
             st.execute(expression);
             return true;
         } catch (SQLException _ex) {
-            this.exception = _ex;
+            exception = _ex;
             return false;
         }
     }
 
     private String getSQL() {
-        if (this.sqlContent == null) {
-            this.sqlContent = transalteFormFields(this.qi.toSQLString());
+        if (sqlContent == null) {
+            sqlContent = transalteFormFields(qi.toSQLString());
         }
-        return this.sqlContent;
+        return sqlContent;
     }
 
     private static String transalteFormFields(String sqlString) {
@@ -230,7 +230,7 @@ public class ParametricQuery {
     }
 
     private void parametersEmpiric(boolean partialParDecl) {
-        this.aposMap = new HashMap<>();
+        aposMap = new HashMap<>();
         Map<String, Integer> hm = new LinkedHashMap<>();
         String s = getSQL();
         if (partialParDecl) {
@@ -281,27 +281,27 @@ public class ParametricQuery {
         }
 
         try {
-            this.ps = hsqldb.prepareStatement(convertSQL(sql));
-            if (!this.isProcedure) {
+            ps = hsqldb.prepareStatement(convertSQL(sql));
+            if (!isProcedure) {
                 ParameterMetaData pmd = ps.getParameterMetaData();
                 StringBuilder defPar = new StringBuilder();
                 comma = "";
 
                 for (int i = 1; i <= pmd.getParameterCount(); i++) {
-                    if (!this.isProcedure) {
-                        this.ps.setNull(i, pmd.getParameterType(i));
+                    if (!isProcedure) {
+                        ps.setNull(i, pmd.getParameterType(i));
                     }
                     defPar.append(comma).append("NULL");
                     comma = ",";
                 }
-                this.defaultParameterValues = defPar.toString();
+                defaultParameterValues = defPar.toString();
             }
-            this.originalParameters = args;
-            this.parameters = SQLConverter.convertSQL(args.toString()).getSql();
+            originalParameters = args;
+            parameters = SQLConverter.convertSQL(args.toString()).getSql();
 
-            this.conversionOk = true;
+            conversionOk = true;
         } catch (SQLException _ex) {
-            this.exception = _ex;
+            exception = _ex;
         }
 
     }
@@ -327,7 +327,7 @@ public class ParametricQuery {
                 String src = Pattern.quote(s);
                 String target = treatApos(s);
                 sql = sql.replaceAll(src, target);
-                this.aposMap.put(target.substring(1, target.length() - 1), s.substring(1, s.length() - 1));
+                aposMap.put(target.substring(1, target.length() - 1), s.substring(1, s.length() - 1));
             }
         }
         return convertSQL(sql);
@@ -349,18 +349,18 @@ public class ParametricQuery {
                 for (String modf : _parameters) {
                     if (convertSQL(modf).equals(s)) {
                         h = treatApos(modf);
-                        if (!this.aposMap.containsKey(h)) {
+                        if (!aposMap.containsKey(h)) {
                             _parameters.set(_parameters.indexOf(modf), h);
                             psTxt = psTxt.replaceAll("(?i)" + Pattern.quote(s), convertSQL(h));
                             sql = sql.replaceAll("(?i)" + Pattern.quote(modf), h);
                             h = h.substring(1, h.length() - 1);
-                            this.aposMap.put(h, modf.substring(1, modf.length() - 1));
+                            aposMap.put(h, modf.substring(1, modf.length() - 1));
                         }
                     }
                 }
             }
 
-            this.ps = hsqldb.prepareStatement(psTxt);
+            ps = hsqldb.prepareStatement(psTxt);
 
             ParameterMetaData pmd = ps.getParameterMetaData();
             _psmp = reorderIndexes(_psmp, parem);
@@ -371,8 +371,8 @@ public class ParametricQuery {
             int j = 0;
             String comma = "";
             for (int i = 1; i <= pmd.getParameterCount(); i++) {
-                if (!this.isProcedure) {
-                    this.ps.setNull(i, pmd.getParameterType(i));
+                if (!isProcedure) {
+                    ps.setNull(i, pmd.getParameterType(i));
                 }
 
                 if (j > ar.size() - 1) {
@@ -390,9 +390,9 @@ public class ParametricQuery {
                 }
 
             }
-            this.parameters = parS.toString();
-            this.defaultParameterValues = defPar.toString();
-            this.conversionOk = true;
+            parameters = parS.toString();
+            defaultParameterValues = defPar.toString();
+            conversionOk = true;
 
         } catch (SQLException _ex) {
 
@@ -404,16 +404,16 @@ public class ParametricQuery {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
                     _psmp.put(par1, index);
                     parem.put(par1, par);
-                    String parname = this.originalParameters.length() == 0 ? par : "," + par;
-                    this.originalParameters.append(parname);
+                    String parname = originalParameters.length() == 0 ? par : "," + par;
+                    originalParameters.append(parname);
                     getParametersEmpiric(_psmp, _parameters, parem, sql, false);
 
                 } else {
-                    this.exception = _ex;
+                    exception = _ex;
                 }
             }
-            if (this.exception == null) {
-                this.exception = _ex;
+            if (exception == null) {
+                exception = _ex;
 
             }
 
@@ -457,18 +457,18 @@ public class ParametricQuery {
                 sb.append(comma).append(parem.get(key));
                 comma = ",";
             }
-            this.originalParameters = sb;
+            originalParameters = sb;
         }
 
         return rlhm;
     }
 
     public boolean loaded() {
-        return this.loaded;
+        return loaded;
     }
 
     public String getSignature() {
-        return this.signature;
+        return signature;
     }
 
 }

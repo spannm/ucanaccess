@@ -7,7 +7,7 @@ public class UcanaccessSavepoint implements Savepoint {
     private Savepoint wrapped;
 
     public UcanaccessSavepoint(Savepoint _wrapped) {
-        this.wrapped = _wrapped;
+        wrapped = _wrapped;
     }
 
     @Override

@@ -16,10 +16,10 @@ public class DeleteCommand extends AbstractCursorCommand {
     private Table               table;
 
     public DeleteCommand(Table _table, Map<String, Object> _rowPattern, String _execId) {
-        this.indexSelector = new IndexSelector(_table);
-        this.rowPattern = _rowPattern;
-        this.execId = _execId;
-        this.table = _table;
+        indexSelector = new IndexSelector(_table);
+        rowPattern = _rowPattern;
+        execId = _execId;
+        table = _table;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class DeleteCommand extends AbstractCursorCommand {
     @Override
     public IFeedbackAction rollback() throws SQLException {
         InsertCommand ic =
-                new InsertCommand(this.table, new Persist2Jet().getValues(this.rowPattern, this.table), this.execId);
+                new InsertCommand(table, new Persist2Jet().getValues(rowPattern, table), execId);
         return ic.persist();
 
     }

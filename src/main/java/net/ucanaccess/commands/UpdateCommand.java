@@ -30,13 +30,13 @@ public class UpdateCommand extends AbstractCursorCommand {
     private boolean                isRollbacking;
 
     public UpdateCommand(Table _table, Map<String, Object> _map, Object[] _modifiedRow, String _execId) {
-        this.tableColumns = _table.getColumns();
-        this.indexSelector = new IndexSelector(_table);
-        this.rowPattern = _map;
-        this.modifiedRow = _modifiedRow;
-        this.execId = _execId;
+        tableColumns = _table.getColumns();
+        indexSelector = new IndexSelector(_table);
+        rowPattern = _map;
+        modifiedRow = _modifiedRow;
+        execId = _execId;
         checkBlob(_modifiedRow);
-        this.table = _table;
+        table = _table;
     }
 
     private void checkBlob(Object[] newRow2) {
@@ -67,7 +67,7 @@ public class UpdateCommand extends AbstractCursorCommand {
 
     @Override
     public String getTableName() {
-        return this.table.getName();
+        return table.getName();
     }
 
     @Override
@@ -80,8 +80,8 @@ public class UpdateCommand extends AbstractCursorCommand {
         try {
             Cursor cur = indexSelector.getCursor();
             if (cur.findNextRow(rowPattern)) {
-                if (this.blobColumns != null) {
-                    for (Column col : this.blobColumns) {
+                if (blobColumns != null) {
+                    for (Column col : blobColumns) {
                         Object val = cur.getCurrentRowValue(col);
                         modifiedRow[tableColumns.indexOf(col)] = val;
                     }
@@ -98,8 +98,8 @@ public class UpdateCommand extends AbstractCursorCommand {
 
     @Override
     public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException {
-        if (this.blobColumns != null) {
-            for (Column col : this.blobColumns) {
+        if (blobColumns != null) {
+            for (Column col : blobColumns) {
                 Object val = cur.getCurrentRowValue(col);
                 modifiedRow[tableColumns.indexOf(col)] = val;
 
@@ -113,7 +113,7 @@ public class UpdateCommand extends AbstractCursorCommand {
     private void updateComplex(Cursor cur) throws IOException {
         int j = 0;
 
-        for (Column cl : this.tableColumns) {
+        for (Column cl : tableColumns) {
             if (cl.getType() == DataType.COMPLEX_TYPE) {
                 ComplexValueForeignKey rowFk = (ComplexValueForeignKey) cl.getRowValue(cur.getCurrentRow());
 
@@ -156,19 +156,19 @@ public class UpdateCommand extends AbstractCursorCommand {
     public IFeedbackAction rollback() throws SQLException {
         Persist2Jet p2a = new Persist2Jet();
 
-        UpdateCommand urev = new UpdateCommand(this.table, p2a.getRowPattern(this.modifiedRow, this.table),
-                p2a.getValues(this.getRowPattern(), this.table), this.execId);
+        UpdateCommand urev = new UpdateCommand(table, p2a.getRowPattern(modifiedRow, table),
+                p2a.getValues(getRowPattern(), table), execId);
         urev.isRollbacking = true;
         return urev.persist();
     }
 
     private void persist(Cursor cur) throws IOException {
-        Object[] mr = this.modifiedRow;
+        Object[] mr = modifiedRow;
         if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
-            Object[] newRowReorded = new Object[this.modifiedRow.length];
+            Object[] newRowReorded = new Object[modifiedRow.length];
             int j = 0;
             for (Column cli : table.getColumns()) {
-                newRowReorded[cli.getColumnIndex()] = this.modifiedRow[j];
+                newRowReorded[cli.getColumnIndex()] = modifiedRow[j];
                 j++;
             }
             mr = newRowReorded;

@@ -13,13 +13,13 @@ public class UcanaccessBlob implements Blob {
     private UcanaccessConnection conn;
 
     public UcanaccessBlob(Blob _blob, UcanaccessConnection _conn) throws SQLException {
-        this.blob = _blob;
-        this.conn = _conn;
+        blob = _blob;
+        conn = _conn;
         if (_blob.length() != 0) {
             BlobKey bk = BlobKey.getBlobKey(_blob.getBinaryStream());
-            this.usingBlobKey = (bk != null);
-            if (this.usingBlobKey) {
-                this.blob = bk.getOleBlob(this.conn.getDbIO());
+            usingBlobKey = (bk != null);
+            if (usingBlobKey) {
+                blob = bk.getOleBlob(conn.getDbIO());
             }
         }
     }
@@ -50,8 +50,8 @@ public class UcanaccessBlob implements Blob {
     @Override
     public InputStream getBinaryStream() throws SQLException {
         try {
-            if (this.usingBlobKey) {
-                OleBlob ole = (OleBlob) this.blob;
+            if (usingBlobKey) {
+                OleBlob ole = (OleBlob) blob;
                 if (ole.getContent() instanceof OleBlob.EmbeddedContent) {
                     return ((OleBlob.EmbeddedContent) ole.getContent()).getStream();
                 }
@@ -111,7 +111,7 @@ public class UcanaccessBlob implements Blob {
     public OutputStream setBinaryStream(long pos) throws SQLException {
         try {
             if (blob instanceof OleBlob && pos == 1) {
-                OleBlob ole = (OleBlob) this.blob;
+                OleBlob ole = (OleBlob) blob;
                 Content content = ole.getContent();
                 if (content instanceof OleBlob.EmbeddedContent) {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();

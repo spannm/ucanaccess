@@ -9,12 +9,12 @@ public class SingleValue extends ComplexBase {
 
     public SingleValue(com.healthmarketscience.jackcess.complex.SingleValue cv) {
         super(cv);
-        this.value = cv.get();
+        value = cv.get();
     }
 
     public SingleValue(ComplexValue.Id id, String tableName, String columnName, String _value) {
         super(id, tableName, columnName);
-        this.value = _value;
+        value = _value;
     }
 
     public SingleValue(String _value) {
@@ -54,7 +54,7 @@ public class SingleValue extends ComplexBase {
     }
 
     public void setValue(Object _value) {
-        this.value = _value;
+        value = _value;
     }
 
     @Override

@@ -93,7 +93,7 @@ public class Metadata {
     }
 
     public Metadata(Connection _conn) {
-        this.conn = _conn;
+        conn = _conn;
 
     }
 

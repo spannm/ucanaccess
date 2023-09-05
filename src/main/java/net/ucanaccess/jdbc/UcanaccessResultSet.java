@@ -17,28 +17,28 @@ public class UcanaccessResultSet implements ResultSet {
     private Set<Integer>        updIndexes = new HashSet<>();
 
     public UcanaccessResultSet(ResultSet _wrapped, UcanaccessStatement _statement) {
-        this.wrapped = _wrapped;
-        this.wrappedStatement = _statement;
+        wrapped = _wrapped;
+        wrappedStatement = _statement;
     }
 
     private String checkEscaped(String label) throws SQLException {
         if (label == null) {
             return null;
         }
-        if (this.metadata == null) {
+        if (metadata == null) {
             loadMetadata();
         }
         String lu = label.toUpperCase();
-        if (this.metadata.contains(lu)) {
+        if (metadata.contains(lu)) {
             return lu;
         }
         String escaped = SQLConverter.preEscapingIdentifier(label);
         String slabel = label.substring(1).toUpperCase();
-        if (SQLConverter.isXescaped(slabel) && this.metadata.contains(slabel)) {
+        if (SQLConverter.isXescaped(slabel) && metadata.contains(slabel)) {
             return slabel;
         }
 
-        if (this.metadata.contains(escaped.toUpperCase())) {
+        if (metadata.contains(escaped.toUpperCase())) {
             return escaped;
         }
 
@@ -46,10 +46,10 @@ public class UcanaccessResultSet implements ResultSet {
     }
 
     private void loadMetadata() throws SQLException {
-        this.metadata = new HashSet<>();
-        ResultSetMetaData rsmd = this.wrapped.getMetaData();
+        metadata = new HashSet<>();
+        ResultSetMetaData rsmd = wrapped.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            this.metadata.add(rsmd.getColumnLabel(i).toUpperCase());
+            metadata.add(rsmd.getColumnLabel(i).toUpperCase());
         }
 
     }
@@ -212,7 +212,7 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public InputStream getBinaryStream(int idx) throws SQLException {
         try {
-            Object obj = this.getObject(idx);
+            Object obj = getObject(idx);
             if (obj instanceof Blob) {
                 return ((Blob) obj).getBinaryStream();
             }
@@ -225,7 +225,7 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public InputStream getBinaryStream(String columnLabel) throws SQLException {
         try {
-            Object obj = this.getObject(columnLabel);
+            Object obj = getObject(columnLabel);
             if (obj instanceof Blob) {
                 return ((Blob) obj).getBinaryStream();
             }
@@ -508,7 +508,7 @@ public class UcanaccessResultSet implements ResultSet {
     public ResultSetMetaData getMetaData() throws SQLException {
         try {
             Map<String, String> hm =
-                    this.wrappedStatement == null ? new HashMap<>() : this.wrappedStatement.getAliases();
+                    wrappedStatement == null ? new HashMap<>() : wrappedStatement.getAliases();
             return new UcanaccessResultSetMetaData(wrapped.getMetaData(), hm, this);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -913,14 +913,14 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public void insertRow() throws SQLException {
         try {
-            for (int i = 1; i <= this.getMetaData().getColumnCount(); i++) {
-                if (!this.updIndexes.contains(i)) {
-                    this.updateNull(i);
+            for (int i = 1; i <= getMetaData().getColumnCount(); i++) {
+                if (!updIndexes.contains(i)) {
+                    updateNull(i);
                 }
             }
-            this.updIndexes.clear();
+            updIndexes.clear();
 
-            this.wrappedStatement.getConnection().setCurrentStatement(this.wrappedStatement);
+            wrappedStatement.getConnection().setCurrentStatement(wrappedStatement);
             new InsertResultSet(this).execute();
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -1099,11 +1099,11 @@ public class UcanaccessResultSet implements ResultSet {
     }
 
     private void addIndex(int idx) {
-        this.updIndexes.add(idx);
+        updIndexes.add(idx);
     }
 
     private void addIndex(String columnLabel) throws SQLException {
-        addIndex(this.findColumn(columnLabel));
+        addIndex(findColumn(columnLabel));
     }
 
     @Override
@@ -1805,7 +1805,7 @@ public class UcanaccessResultSet implements ResultSet {
     @Override
     public void updateRow() throws SQLException {
         try {
-            this.updIndexes.clear();
+            updIndexes.clear();
             new UpdateResultSet(this).execute();
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
