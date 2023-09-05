@@ -157,8 +157,7 @@ public class Main {
     }
 
     private void executeStatement(String sql) throws SQLException {
-        Statement st = conn.createStatement();
-        try {
+        try (Statement st = conn.createStatement()) {
             if (st.execute(sql)) {
                 ResultSet rs = st.getResultSet();
                 if (rs != null) {
@@ -171,8 +170,6 @@ public class Main {
                 int num = st.getUpdateCount();
                 prompt(num == 0 ? "No rows affected" : num + " row(s) affected");
             }
-        } finally {
-            st.close();
         }
     }
 
@@ -381,8 +378,7 @@ public class Main {
      */
     private void exportCsvAndSchema(String sqlQuery, String csvFileName, String schemaFileName, Exporter exporter)
             throws SQLException, IOException {
-        Statement statement = conn.createStatement();
-        try {
+        try (Statement statement = conn.createStatement()) {
             ResultSet rs = statement.executeQuery(sqlQuery);
 
             // output the csvFile
@@ -408,8 +404,6 @@ public class Main {
                 }
                 prompt("Created schema file: " + schemaFile.getAbsolutePath());
             }
-        } finally {
-            statement.close();
         }
     }
 
@@ -430,7 +424,7 @@ public class Main {
         st.quoteChar('"');
         st.quoteChar('\'');
 
-        List<String> tokens = new ArrayList<String>();
+        List<String> tokens = new ArrayList<>();
         while (true) {
             int ttype = st.nextToken();
             if (ttype == StreamTokenizer.TT_EOF) {
@@ -456,7 +450,7 @@ public class Main {
         private final List<String>       colNames;
         private final List<Integer>      colWidths;
         private final List<Integer>      colTypes;
-        private final List<List<String>> records     = new ArrayList<List<String>>();
+        private final List<List<String>> records     = new ArrayList<>();
 
         TableFormat(ResultSet _resultSet) throws SQLException {
             this(_resultSet, -1);
@@ -466,9 +460,9 @@ public class Main {
             ResultSetMetaData meta = _resultSet.getMetaData();
             int columnCount = meta.getColumnCount();
 
-            colNames = new ArrayList<String>(columnCount);
-            colWidths = new ArrayList<Integer>(columnCount);
-            colTypes = new ArrayList<Integer>(columnCount);
+            colNames = new ArrayList<>(columnCount);
+            colWidths = new ArrayList<>(columnCount);
+            colTypes = new ArrayList<>(columnCount);
             for (int col = 1; col <= columnCount; ++col) {
                 String colLabel = meta.getColumnLabel(col);
                 colNames.add(colLabel);
@@ -478,7 +472,7 @@ public class Main {
 
             records.add(colNames); // header record
             while (_resultSet.next() && (_maxRows < 0 || _maxRows < records.size())) {
-                List<String> record = new ArrayList<String>();
+                List<String> record = new ArrayList<>();
                 records.add(record);
                 for (int col = 1; col <= columnCount; ++col) {
                     Object obj = _resultSet.getObject(col);
@@ -523,7 +517,7 @@ public class Main {
         }
 
         String joinWithLen(CharSequence _delim, List<? extends String> _elems) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < _elems.size(); i++) {
                 int width = colWidths.get(i);
                 int type = colTypes.get(i);

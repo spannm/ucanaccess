@@ -58,32 +58,20 @@ public class CreateTableTest extends AccessVersion2010Test {
     }
 
     private void createAsSelect2() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH no DATA ");
             st.execute("INSERT INTO AAA_TRIS SELECT * from AAA_bis");
             Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
             checkQuery("SELECT * FROM AAA_tris order by baaaa", ver);
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
     private void createPs() throws SQLException, IOException {
-        PreparedStatement ps = null;
-        try {
-            ps = ucanaccess.prepareStatement(" CREATE \nTABLE BBB ( baaaa \nvarchar(2) PRIMARY KEY)");
+        try (PreparedStatement ps = ucanaccess.prepareStatement(" CREATE \nTABLE BBB ( baaaa \nvarchar(2) PRIMARY KEY)")) {
             ps.execute(" CREATE TABLE BBB ( baaaa text PRIMARY KEY,b text)");
             throw new RuntimeException("To block DDL with PreparedStatement");
         } catch (SQLException ex) {
             getLogger().info("ok");
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
@@ -97,9 +85,7 @@ public class CreateTableTest extends AccessVersion2010Test {
     }
 
     public void defaults() throws Exception {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT D, E FROM AAA");
             while (rs.next()) {
                 assertNotNull(rs.getObject(1));
@@ -117,10 +103,6 @@ public class CreateTableTest extends AccessVersion2010Test {
             assertEquals(true, pm.getValue(PropertyMap.REQUIRED_PROP));
             pm = tb.getColumn("BLANK").getProperties();
             assertEquals(" ", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
@@ -160,23 +142,17 @@ public class CreateTableTest extends AccessVersion2010Test {
     }
 
     public void setTableProperties() throws SQLException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute("create table tbl(c counter  primary key , " + "number numeric(23,5) default -4.6 not null , "
-                + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"
-                + "txt3 text)");
-        } finally {
-            st.close();
+                    + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"
+                    + "txt3 text)");
         }
     }
 
     private void notNullBug() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute("create table nnb(c counter  primary key , " + "number decimal (23,5) default -4.6 not null , "
-                + "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ," + "txt3 text not null)");
+                    + "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ," + "txt3 text not null)");
 
             checkNotNull("nnb", "number", true);
             checkNotNull("nnb", "txt1", true);
@@ -184,8 +160,6 @@ public class CreateTableTest extends AccessVersion2010Test {
             checkNotNull("nnb", "dt", true);
             checkNotNull("nnb", "txt2", false);
             checkNotNull("nnb", "txt3", true);
-        } finally {
-            st.close();
         }
     }
 
@@ -246,7 +220,7 @@ public class CreateTableTest extends AccessVersion2010Test {
         Table tb = db.getTable("Babe");
         Table tbr = db.getTable("Parent");
         Index idx = tb.getForeignKeyIndex(tbr);
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }

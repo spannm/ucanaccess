@@ -99,7 +99,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             }
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int dim = l >= 0 ? (int) l : 4096;
         char[] cb = new char[dim];
         int rd;

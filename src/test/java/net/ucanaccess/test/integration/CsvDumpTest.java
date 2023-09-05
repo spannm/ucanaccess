@@ -87,20 +87,9 @@ public class CsvDumpTest extends AccessVersionAllTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
 
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            st = ucanaccess.createStatement();
-            rs = st.executeQuery("SELECT * FROM csvtable");
+        try (Statement st = ucanaccess.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
             Exporter exporter = new Exporter.Builder().setDelimiter(";").build();
             exporter.dumpSchema(rs, ps);
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
         }
         String actual = baos.toString("UTF-8");
         assertEquals(EXPECTED_SCHEMA, actual);

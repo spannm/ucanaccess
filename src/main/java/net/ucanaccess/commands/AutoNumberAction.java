@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AutoNumberAction implements IFeedbackAction {
-    private Map<String, Object> newAutoValues = new HashMap<String, Object>();
-    private Map<String, Object> oldAutoValues = new HashMap<String, Object>();
+    private Map<String, Object> newAutoValues = new HashMap<>();
+    private Map<String, Object> oldAutoValues = new HashMap<>();
     private Table                   table;
 
     public AutoNumberAction(Table _table, Object[] memento, Object[] byAccess) throws SQLException {

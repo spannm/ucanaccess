@@ -62,7 +62,7 @@ public class AppendQueryTemp extends AppendQueryImpl {
     }
 
     private List<Row> getDeclaration(List<Row> valueRows) {
-        List<Row> ardc = new ArrayList<Row>();
+        List<Row> ardc = new ArrayList<>();
         for (Row row : valueRows) {
             if (row.name2 != null) {
                 ardc.add(row);

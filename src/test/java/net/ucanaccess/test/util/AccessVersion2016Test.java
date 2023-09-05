@@ -13,7 +13,7 @@ public abstract class AccessVersion2016Test extends UcanaccessTestBase {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> getAccessVersion2016() {
-        List<Object[]> list = new ArrayList<Object[]>();
+        List<Object[]> list = new ArrayList<>();
         list.add(new Object[] {AccessVersion.V2016});
         return list;
     }

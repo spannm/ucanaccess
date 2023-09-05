@@ -3,7 +3,6 @@ package net.ucanaccess.jdbc;
 import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
-import com.healthmarketscience.jackcess.util.LinkResolver;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.util.Logger;
 
@@ -17,7 +16,7 @@ import java.util.Date;
 
 public class DBReference {
     private static final String                    CIPHER_SPEC       = "AES";
-    private static List<OnReloadReferenceListener> onReloadListeners = new ArrayList<OnReloadReferenceListener>();
+    private static List<OnReloadReferenceListener> onReloadListeners = new ArrayList<>();
     private static String                          version;
     private File                                   dbFile;
     private Database                               dbIO;
@@ -43,7 +42,7 @@ public class DBReference {
     private boolean                                columnOrderDisplay;
     private boolean                                hsqldbShutdown;
     private File                                   mirrorFolder;
-    private Set<File>                              links             = new HashSet<File>();
+    private Set<File>                              links             = new HashSet<>();
     private boolean                                ignoreCase        = true;
     private boolean                                mirrorReadOnly;
     private Integer                                lobScale;
@@ -142,26 +141,23 @@ public class DBReference {
             } catch (Exception ignore) {
 
             }
-            this.dbIO.setLinkResolver(new LinkResolver() {
-                @Override
-                public Database resolveLinkedDatabase(Database linkerDb, String linkeeFileName) throws IOException {
-                    if (linkeeFileName == null) {
-                        throw new IOException("Cannot resolve db link");
-                    }
-                    File linkeeFile = new File(linkeeFileName);
-                    Map<String, String> emr = DBReference.this.externalResourcesMapping;
-                    if (!linkeeFile.exists() && emr != null && emr.containsKey(linkeeFileName.toLowerCase())) {
-                        linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
-                    }
-                    if (!linkeeFile.exists()) {
-                        Logger.logWarning("External file " + linkeeFile.getAbsolutePath() + " does not exist");
-                    } else {
-                        links.add(linkeeFile);
-                    }
-                    Database ldb = open(linkeeFile, _pwd);
-                    ldb.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
-                    return ldb;
+            this.dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
+                if (linkeeFileName == null) {
+                    throw new IOException("Cannot resolve db link");
                 }
+                File linkeeFile = new File(linkeeFileName);
+                Map<String, String> emr = DBReference.this.externalResourcesMapping;
+                if (!linkeeFile.exists() && emr != null && emr.containsKey(linkeeFileName.toLowerCase())) {
+                    linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
+                }
+                if (!linkeeFile.exists()) {
+                    Logger.logWarning("External file " + linkeeFile.getAbsolutePath() + " does not exist");
+                } else {
+                    links.add(linkeeFile);
+                }
+                Database ldb = open(linkeeFile, _pwd);
+                ldb.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
+                return ldb;
             });
             dbIO.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
             dbIO.setEnforceForeignKeys(false);
@@ -237,11 +233,8 @@ public class DBReference {
 
     private boolean checkInside(Database db) throws IOException {
         Table t = db.getSystemTable("MSysObjects");
-        Iterator<Row> it = t.iterator();
 
-        while (it.hasNext()) {
-            Row row = it.next();
-
+        for (Row row : t) {
             Object dobj = row.get("DateUpdate");
             Object tobj = row.get("Type");
 
@@ -340,20 +333,10 @@ public class DBReference {
     private void finalizeHSQLDB(Session session) throws Exception {
         if (!this.hsqldbShutdown) {
             this.releaseLock();
-            Connection conn = null;
-            Statement st = null;
-            try {
-                conn = this.getHSQLDBConnection(session);
-                st = conn.createStatement();
+            try (Connection conn = this.getHSQLDBConnection(session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 this.hsqldbShutdown = true;
-            } catch (Exception w) {} finally {
-                if (st != null) {
-                    st.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
+            } catch (Exception w) {
             }
         }
     }
@@ -367,24 +350,16 @@ public class DBReference {
     }
 
     private void setIgnoreCase(Connection conn) throws SQLException {
-        Statement st = null;
-        try {
-            st = conn.createStatement();
+        try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 
         } catch (Exception w) {
 
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
     private void initHSQLDB(Connection conn) throws SQLException {
-        Statement st = null;
-        try {
-            st = conn.createStatement();
+        try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute("SET DATABASE SQL CONCAT NULLS " + this.concatNulls);
             if (this.lobScale == null && this.inMemory) {
@@ -395,10 +370,6 @@ public class DBReference {
 
         } catch (Exception w) {
             w.printStackTrace();
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
@@ -481,18 +452,15 @@ public class DBReference {
 
                     this.tempHsql.createNewFile();
                 }
-                Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (toKeepHsql == null) {
-                                closeHSQLDB(session);
-                            } else {
-                                finalizeHSQLDB(session);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        if (toKeepHsql == null) {
+                            closeHSQLDB(session);
+                        } else {
+                            finalizeHSQLDB(session);
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }));
             }

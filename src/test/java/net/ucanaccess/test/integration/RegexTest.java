@@ -57,9 +57,7 @@ public class RegexTest extends AccessVersionDefaultTest {
     }
 
     private void executeStatement(String s) throws SQLException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute(getStatement(s.replaceAll("'", "''"), "'"));
 
             st.execute(getStatement(s.replaceAll("\"", "\"\""), "\""));
@@ -69,10 +67,6 @@ public class RegexTest extends AccessVersionDefaultTest {
             System.err
                     .println("converted sql: " + ucanaccess.nativeSQL(getStatement(s.replaceAll("\"", "\"\""), "\"")));
             throw sqle;
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 

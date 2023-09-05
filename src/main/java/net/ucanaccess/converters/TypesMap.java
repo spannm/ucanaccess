@@ -29,9 +29,9 @@ public final class TypesMap {
         HYPERLINK
     }
 
-    private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     = new LinkedHashMap<String, String>();
-    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new HashMap<AccessType, DataType>();
-    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new HashMap<DataType, String>();
+    private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     = new LinkedHashMap<>();
+    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new HashMap<>();
+    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new HashMap<>();
 
     static {
         ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.BYTE.name(), "SMALLINT");

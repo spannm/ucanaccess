@@ -94,37 +94,21 @@ public abstract class AbstractExecute {
 
     private int count(String tableName) throws SQLException {
         UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            st = conn.createStatement();
-            rs = st.executeQuery("select count(*) from " + tableName);
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery("select count(*) from " + tableName)) {
             rs.next();
             return rs.getInt(1);
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
     private SQLException checkDDLException() throws SQLException {
         UcanaccessConnection conn = (UcanaccessConnection) this.statement.getConnection();
-        PreparedStatement ps = null;
-        try {
+        try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
-            ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql());
+            return new FeatureNotSupportedException(NotSupportedMessage.NOT_SUPPORTED_YET);
         } catch (SQLException ex) {
             return ex;
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
-        return new FeatureNotSupportedException(NotSupportedMessage.NOT_SUPPORTED_YET);
     }
 
     private Object addDDLCommand() throws SQLException {

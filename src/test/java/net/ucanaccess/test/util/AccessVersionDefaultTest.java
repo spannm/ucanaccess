@@ -13,7 +13,7 @@ public abstract class AccessVersionDefaultTest extends UcanaccessTestBase {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> getDefaultAccessVersion() {
-        List<Object[]> list = new ArrayList<Object[]>();
+        List<Object[]> list = new ArrayList<>();
         list.add(new Object[] {DEFAULT_ACCESS_VERSION});
         return list;
     }

@@ -33,9 +33,7 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
 
     @Test
     public void testVUKException() throws SQLException, IOException, ParseException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
 
             st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
             st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
@@ -44,10 +42,6 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
 
             assertEquals(_ex.getErrorCode(), -ErrorCode.X_23505);
             assertEquals(_ex.getSQLState(), "23505");
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 

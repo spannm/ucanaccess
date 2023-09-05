@@ -1,8 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.util.ErrorHandler;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
@@ -148,16 +146,12 @@ public final class UcanaccessDriver implements Driver {
                         dbRef.setIgnoreCase(Boolean.parseBoolean(_props.getProperty("ignorecase")));
                     }
 
-                    dbRef.getDbIO().setErrorHandler(new ErrorHandler() {
-                        @Override
-                        public Object handleRowError(Column cl, byte[] bt, Location location, Exception ex)
-                                throws IOException {
-                            if (cl.getType().isTextual()) {
-                                Logger.logParametricWarning(Messages.INVALID_CHARACTER_SEQUENCE,
-                                        cl.getTable().getName(), cl.getName(), new String(bt));
-                            }
-                            throw new IOException(ex.getMessage());
+                    dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
+                        if (cl.getType().isTextual()) {
+                            Logger.logParametricWarning(Messages.INVALID_CHARACTER_SEQUENCE,
+                                    cl.getTable().getName(), cl.getName(), new String(bt));
                         }
+                        throw new IOException(ex.getMessage());
                     });
                 }
                 String pwd = dbRef.getDbIO().getDatabasePassword();
@@ -228,11 +222,11 @@ public final class UcanaccessDriver implements Driver {
     }
 
     private Map<String, String> toMap(String property) {
-        Map<String, String> hm = new HashMap<String, String>();
+        Map<String, String> hm = new HashMap<>();
         StringTokenizer st = new StringTokenizer(property, "&");
         while (st.hasMoreTokens()) {
             String entry = st.nextToken();
-            if (entry.indexOf("|") < 0) {
+            if (!entry.contains("|")) {
                 continue;
             }
             hm.put(entry.substring(0, entry.indexOf('|')).toLowerCase(), entry.substring(entry.indexOf('|') + 1));

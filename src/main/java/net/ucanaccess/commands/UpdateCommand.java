@@ -43,7 +43,7 @@ public class UpdateCommand extends AbstractCursorCommand {
         for (int i = 0; i < newRow2.length; i++) {
             if (newRow2[i] instanceof org.hsqldb.types.BlobData) {
                 if (blobColumns == null) {
-                    blobColumns = new ArrayList<Column>();
+                    blobColumns = new ArrayList<>();
                 }
                 blobColumns.add(tableColumns.get(i));
             }

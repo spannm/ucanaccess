@@ -50,16 +50,10 @@ public class MetaData extends AccessVersionDefaultTest {
     }
 
     public void createSimple(String a, Object[][] ver) throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
             st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
             checkQuery("SELECT * FROM AAAn", ver);
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 

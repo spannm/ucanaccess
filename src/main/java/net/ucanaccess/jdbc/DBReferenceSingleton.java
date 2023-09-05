@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class DBReferenceSingleton {
     private static DBReferenceSingleton singletonObject;
-    private Map<String, DBReference>    dbRegistry = Collections.synchronizedMap(new HashMap<String, DBReference>());
+    private Map<String, DBReference>    dbRegistry = Collections.synchronizedMap(new HashMap<>());
 
     private DBReferenceSingleton() {
     }

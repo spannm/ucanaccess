@@ -37,7 +37,7 @@ public class LoadJet {
     private static int namingCounter = 0;
 
     private final class FunctionsLoader {
-        private Set<String> functionsDefinition = new HashSet<String>();
+        private Set<String> functionsDefinition = new HashSet<>();
 
         private void addAggregates() {
             functionsDefinition.add(getAggregate("LONGVARCHAR", "last"));
@@ -66,7 +66,7 @@ public class LoadJet {
         }
 
         private void addFunction(String functionName, String methodName, String returnType, String... parTypes) {
-            StringBuffer funDef = new StringBuffer();
+            StringBuilder funDef = new StringBuilder();
             if (DBReference.is2xx()) {
                 funDef.append("CREATE FUNCTION ").append(functionName).append("(");
                 String comma = "";
@@ -101,14 +101,14 @@ public class LoadJet {
                         AccessType[] acts = ft.argumentTypes();
                         AccessType ret = ft.returnType();
                         String retTypeName = ret.name();
-                        String returnType = tmap.containsKey(retTypeName) ? tmap.get(retTypeName) : retTypeName;
+                        String returnType = tmap.getOrDefault(retTypeName, retTypeName);
                         if (AccessType.TEXT.equals(ret)) {
                             returnType += "(255)";
                         }
                         String[] args = new String[acts.length];
                         for (int i = 0; i < args.length; i++) {
                             String typeName = acts[i].name();
-                            args[i] = tmap.containsKey(typeName) ? tmap.get(typeName) : typeName;
+                            args[i] = tmap.getOrDefault(typeName, typeName);
                             if (AccessType.TEXT.equals(acts[i])) {
                                 args[i] += "(255)";
                             }
@@ -171,8 +171,8 @@ public class LoadJet {
                 String type = " " + TypesMap.map2hsqldb(dtype) + " ";
 
                 for (int i = 1; i < 10; i++) {
-                    StringBuffer header = new StringBuffer("CREATE FUNCTION SWITCH(  ");
-                    StringBuffer body = new StringBuffer("(CASE ");
+                    StringBuilder header = new StringBuilder("CREATE FUNCTION SWITCH(  ");
+                    StringBuilder body = new StringBuilder("(CASE ");
                     String comma = "";
                     for (int j = 0; j < i; j++) {
                         body.append("  WHEN B").append(j).append(" THEN V").append(j);
@@ -214,7 +214,7 @@ public class LoadJet {
 
         private void dumpList(List<String> logs, boolean cr) {
             String comma = "";
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             String crs = cr ? System.lineSeparator() : "";
             for (String log : logs) {
                 sb.append(comma).append(log).append(crs);
@@ -233,15 +233,15 @@ public class LoadJet {
         private static final int    HSQL_UK_VIOLATION        = -ErrorCode.X_23505;
         private static final String SYSTEM_SCHEMA            = "SYS";
         private static final int    DEFAULT_STEP             = 2000;
-        private List<String>        unresolvedTables         = new ArrayList<String>();
-        private List<String>        calculatedFieldsTriggers = new ArrayList<String>();
-        private LinkedList<String>  loadingOrder             = new LinkedList<String>();
-        private Set<Column>         alreadyIndexed           = new HashSet<Column>();
-        private Set<String>         readOnlyTables           = new HashSet<String>();
+        private List<String>        unresolvedTables         = new ArrayList<>();
+        private List<String>        calculatedFieldsTriggers = new ArrayList<>();
+        private LinkedList<String>  loadingOrder             = new LinkedList<>();
+        private Set<Column>         alreadyIndexed           = new HashSet<>();
+        private Set<String>         readOnlyTables           = new HashSet<>();
 
         private String commaSeparated(List<? extends Index.Column> columns, boolean escape) throws SQLException {
             String comma = "";
-            StringBuffer sb = new StringBuffer(" (");
+            StringBuilder sb = new StringBuilder(" (");
             for (Index.Column cd : columns) {
                 String cl = escape ? escapeIdentifier(cd.getColumn().getName()) : cd.getColumn().getName();
                 sb.append(comma).append(cl);
@@ -369,7 +369,7 @@ public class LoadJet {
             if (tn.equalsIgnoreCase("DUAL")) {
                 SQLConverter.setDualUsedAsTableName(true);
             }
-            StringBuffer check = new StringBuffer();
+            StringBuilder check = new StringBuilder();
             String ntn = SQLConverter.preEscapingIdentifier(tn);
 
             int seq = metadata.newTable(tn, ntn, Metadata.Types.TABLE);
@@ -377,7 +377,7 @@ public class LoadJet {
             ntn = SQLConverter.checkLang(ntn, conn);
             ntn = schema(ntn, systemTable);
 
-            StringBuffer sbC = new StringBuffer("CREATE  CACHED TABLE ").append(ntn).append("(");
+            StringBuilder sbC = new StringBuilder("CREATE  CACHED TABLE ").append(ntn).append("(");
 
             List<? extends Column> lc = t.getColumns();
             String comma = "";
@@ -460,7 +460,7 @@ public class LoadJet {
 
                 if (setu.size() > 0) {
                     String or = "";
-                    StringBuffer cw = new StringBuffer();
+                    StringBuilder cw = new StringBuilder();
                     for (String dep : setu) {
                         dep = escapeIdentifier(dep);
                         cw.append(or).append("oldrow.").append(dep).append("<>").append("newrow.").append(dep);
@@ -481,7 +481,7 @@ public class LoadJet {
         private void setDefaultValue(Column cl) throws SQLException, IOException {
             String tn = cl.getTable().getName();
             String ntn = escapeIdentifier(tn);
-            List<String> arTrigger = new ArrayList<String>();
+            List<String> arTrigger = new ArrayList<>();
             setDefaultValue(cl, ntn, arTrigger);
             for (String trigger : arTrigger) {
                 exec(trigger, true);
@@ -556,7 +556,7 @@ public class LoadJet {
             String tn = t.getName();
             String ntn = escapeIdentifier(tn);
             List<? extends Column> lc = t.getColumns();
-            List<String> arTrigger = new ArrayList<String>();
+            List<String> arTrigger = new ArrayList<>();
             for (Column cl : lc) {
                 setDefaultValue(cl, ntn, arTrigger);
             }
@@ -587,7 +587,7 @@ public class LoadJet {
 
             for (int i = 0; i < maxIteration; i++) {
                 boolean change = false;
-                List<String> loadingOrder0 = new ArrayList<String>();
+                List<String> loadingOrder0 = new ArrayList<>();
                 loadingOrder0.addAll(this.loadingOrder);
                 for (String tn : loadingOrder0) {
                     UcanaccessTable table = new UcanaccessTable(dbIO.getTable(tn), tn);
@@ -639,7 +639,7 @@ public class LoadJet {
             String colsIdx = commaSeparated(cls, true);
             String colsIdxRef = commaSeparated(idx.getReferencedIndex().getColumns(), true);
 
-            StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
+            StringBuilder ci = new StringBuilder("ALTER TABLE ").append(ntn);
             ci.append(" ADD CONSTRAINT ").append(nin);
             String nrt = escapeIdentifier(rtn);
 
@@ -690,7 +690,7 @@ public class LoadJet {
                 }
             }
 
-            StringBuffer ci = new StringBuffer("ALTER TABLE ").append(ntn);
+            StringBuilder ci = new StringBuilder("ALTER TABLE ").append(ntn);
             String colsIdx = commaSeparated(idx.getColumns(), true);
             if (pk) {
                 ci.append(" ADD PRIMARY KEY ").append(colsIdx);
@@ -699,7 +699,7 @@ public class LoadJet {
                 ci.append(" UNIQUE ").append(colsIdx);
 
             } else {
-                ci = new StringBuffer("CREATE INDEX ").append(nin).append(" ON ").append(ntn).append(colsIdx);
+                ci = new StringBuilder("CREATE INDEX ").append(nin).append(" ON ").append(ntn).append(colsIdx);
             }
             try {
                 exec(ci.toString(), true);
@@ -811,7 +811,7 @@ public class LoadJet {
 
                 while (it.hasNext()) {
                     Row row = it.next();
-                    List<Object> values = new ArrayList<Object>();
+                    List<Object> values = new ArrayList<>();
                     if (row == null) {
                         continue;
                     }
@@ -1062,8 +1062,8 @@ public class LoadJet {
             String tn = t.getName();
             String ntn = schema(escapeIdentifier(tn), systemTable);
             String comma = "";
-            StringBuffer sbI = new StringBuffer(" INSERT INTO ").append(ntn).append(" (");
-            StringBuffer sbE = new StringBuffer(" VALUES( ");
+            StringBuilder sbI = new StringBuilder(" INSERT INTO ").append(ntn).append(" (");
+            StringBuilder sbE = new StringBuilder(" VALUES( ");
             Set<String> se = row.keySet();
             comma = "";
             for (String cn : se) {
@@ -1149,8 +1149,8 @@ public class LoadJet {
     }
 
     private final class ViewsLoader {
-        private Map<String, String> notLoaded             = new HashMap<String, String>();
-        private Map<String, String> notLoadedProcedure    = new HashMap<String, String>();
+        private Map<String, String> notLoaded             = new HashMap<>();
+        private Map<String, String> notLoadedProcedure    = new HashMap<>();
         private static final int    OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
         private static final int    OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
         private static final int    UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
@@ -1223,7 +1223,7 @@ public class LoadJet {
 
             }
             querySQL = new DFunction(conn, querySQL).toSQL();
-            StringBuffer sb = new StringBuffer("CREATE VIEW ").append(qnn).append(" AS ").append(querySQL);
+            StringBuilder sb = new StringBuilder("CREATE VIEW ").append(qnn).append(" AS ").append(querySQL);
             String v = null;
             try {
                 v = SQLConverter.convertSQL(sb.toString(), true).getSql();
@@ -1281,8 +1281,8 @@ public class LoadJet {
                     String select = mtc.group(2);
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
                     String[] splitted = select.split(",", -1);
-                    StringBuffer sb = new StringBuffer(pre + " select ");
-                    List<String> lkl = new LinkedList<String>();
+                    StringBuilder sb = new StringBuilder(pre + " select ");
+                    List<String> lkl = new LinkedList<>();
 
                     for (String s : splitted) {
                         int j = s.lastIndexOf(".");
@@ -1323,7 +1323,7 @@ public class LoadJet {
 
         private void loadViews() throws SQLException, IOException {
             List<Query> lq = null;
-            List<Query> procedures = new ArrayList<Query>();
+            List<Query> procedures = new ArrayList<>();
             try {
                 lq = dbIO.getQueries();
                 Iterator<Query> it = lq.iterator();
@@ -1363,13 +1363,13 @@ public class LoadJet {
         }
 
         private void queryPorting(List<Query> lq) throws SQLException {
-            List<String> arn = new ArrayList<String>();
+            List<String> arn = new ArrayList<>();
             for (Query q : lq) {
                 arn.add(q.getName().toLowerCase());
             }
             boolean heavy = false;
             while (lq.size() > 0) {
-                List<Query> arq = new ArrayList<Query>();
+                List<Query> arq = new ArrayList<>();
                 for (Query q : lq) {
                     String qtxt = null;
                     boolean qryGot = true;
@@ -1381,7 +1381,7 @@ public class LoadJet {
                     boolean foundDep = false;
                     if (qryGot && !heavy) {
                         for (String name : arn) {
-                            if (qtxt.indexOf(name) != -1) {
+                            if (qtxt.contains(name)) {
                                 foundDep = true;
                                 break;
                             }
@@ -1409,10 +1409,10 @@ public class LoadJet {
     private Database        dbIO;
     private boolean         err;
     private FunctionsLoader functionsLoader   = new FunctionsLoader();
-    private List<String>    loadedIndexes     = new ArrayList<String>();
-    private List<String>    loadedQueries     = new ArrayList<String>();
-    private List<String>    loadedProcedures  = new ArrayList<String>();
-    private List<String>    loadedTables      = new ArrayList<String>();
+    private List<String>    loadedIndexes     = new ArrayList<>();
+    private List<String>    loadedQueries     = new ArrayList<>();
+    private List<String>    loadedProcedures  = new ArrayList<>();
+    private List<String>    loadedTables      = new ArrayList<>();
     private LogsFlusher     logsFlusher       = new LogsFlusher();
     private TablesLoader    tablesLoader      = new TablesLoader();
     private TriggersLoader  triggersGenerator = new TriggersLoader();
@@ -1466,10 +1466,8 @@ public class LoadJet {
     }
 
     private void exec(String expression, boolean logging) throws SQLException {
-        Statement st = null;
-        try {
+        try (Statement st = conn.createStatement()) {
 
-            st = conn.createStatement();
             st.executeUpdate(expression);
         } catch (SQLException e) {
             if (logging && e.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
@@ -1477,10 +1475,6 @@ public class LoadJet {
             }
 
             throw e;
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
@@ -1562,9 +1556,7 @@ public class LoadJet {
     }
 
     public Object tryDefault(Object defaulT) throws SQLException {
-        Statement st = null;
-        try {
-            st = conn.createStatement();
+        try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT " + defaulT + " FROM   DUAL ");
             if (rs.next()) {
                 return rs.getObject(1);
@@ -1572,10 +1564,6 @@ public class LoadJet {
             return null;
         } catch (Exception e) {
             return null;
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 

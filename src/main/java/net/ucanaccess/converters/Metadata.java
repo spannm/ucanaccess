@@ -98,9 +98,7 @@ public class Metadata {
     }
 
     public void createMetadata() throws SQLException {
-        Statement st = null;
-        try {
-            st = conn.createStatement();
+        try (Statement st = conn.createStatement()) {
             st.execute(SCHEMA);
             st.execute(PROP);
             st.execute(TABLES);
@@ -108,18 +106,12 @@ public class Metadata {
             st.execute(FK);
             st.execute(COLUMNS_VIEW);
             loadProp();
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
     public void loadProp() throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(
-                    "INSERT INTO UCA_METADATA.PROP( NAME , MAX_LEN , DEFAULT_VALUE , DESCRIPTION) VALUES(?,?,?,?)");
+        try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO UCA_METADATA.PROP( NAME , MAX_LEN , DEFAULT_VALUE , DESCRIPTION) VALUES(?,?,?,?)")) {
             for (Object[] ob : PROP_DATA) {
                 ps.setObject(1, ob[0]);
                 ps.setObject(2, ob[1]);
@@ -128,18 +120,12 @@ public class Metadata {
                 ps.execute();
             }
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
 
     }
 
     public Integer newTable(String name, String escaped, Types type) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(TABLE_RECORD, Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement ps = conn.prepareStatement(TABLE_RECORD, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, name);
             ps.setString(2, escaped);
             ps.setString(3, type.name());
@@ -150,10 +136,6 @@ public class Metadata {
             return rs.getInt(1);
         } catch (SQLException e) {
             return getTableId(escaped);
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
@@ -161,9 +143,7 @@ public class Metadata {
         if (idTable < 0) {
             return;
         }
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(COLUMN_RECORD);
+        try (PreparedStatement ps = conn.prepareStatement(COLUMN_RECORD)) {
             ps.setString(1, name);
             ps.setString(2, escaped);
             ps.setString(3, originalType);
@@ -171,10 +151,6 @@ public class Metadata {
             ps.executeUpdate();
         } catch (SQLException e) {
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
@@ -186,7 +162,7 @@ public class Metadata {
             ps = conn.prepareStatement(SELECT_COLUMNS);
             ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
-            List<String> result = new ArrayList<String>();
+            List<String> result = new ArrayList<>();
             while (rs.next()) {
                 result.add(rs.getString("COLUMN_NAME"));
             }
@@ -248,9 +224,7 @@ public class Metadata {
     }
 
     public String getEscapedTableName(String tableName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(SELECT_TABLE_ESCAPED);
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_TABLE_ESCAPED)) {
             ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -258,18 +232,12 @@ public class Metadata {
             } else {
                 return null;
             }
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public boolean isAutoIncrement(String tableName, String columnName) throws SQLException {
-        PreparedStatement ps = null;
         tableName = SYSTEM_SUBQUERY.equals(tableName) ? null : tableName;
-        try {
-            ps = conn.prepareStatement(SELECT_COLUMN);
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_COLUMN)) {
             ps.setString(1, tableName);
             ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
@@ -279,18 +247,12 @@ public class Metadata {
                 return false;
             }
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public boolean isCurrency(String tableName, String columnName) throws SQLException {
-        PreparedStatement ps = null;
         tableName = SYSTEM_SUBQUERY.equals(tableName) ? null : tableName;
-        try {
-            ps = conn.prepareStatement(SELECT_COLUMN);
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_COLUMN)) {
             ps.setString(1, tableName);
             ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
@@ -300,17 +262,11 @@ public class Metadata {
                 return false;
             }
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public Integer getTableId(String escapedName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(SELECT_TABLE_METADATA);
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_TABLE_METADATA)) {
             ps.setString(1, escapedName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -319,17 +275,11 @@ public class Metadata {
                 return -1;
             }
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public String getTableName(String escapedName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(SELECT_TABLE_METADATA);
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_TABLE_METADATA)) {
             ps.setString(1, escapedName);
 
             ResultSet rs = ps.executeQuery();
@@ -339,71 +289,43 @@ public class Metadata {
                 return null;
             }
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public void dropTable(String tableName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(DROP_TABLE);
+        try (PreparedStatement ps = conn.prepareStatement(DROP_TABLE)) {
             ps.setString(1, tableName);
             ps.execute();
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public void columnDef(String tableName, String columnName, String def) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(UPDATE_COLUMN_DEF);
+        try (PreparedStatement ps = conn.prepareStatement(UPDATE_COLUMN_DEF)) {
             ps.setString(1, def);
             ps.setString(2, columnName);
             ps.setString(3, tableName);
             ps.execute();
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public void calculatedField(String tableName, String columnName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(UPDATE_IS_GENERATEDCOLUMN);
+        try (PreparedStatement ps = conn.prepareStatement(UPDATE_IS_GENERATEDCOLUMN)) {
             ps.setString(1, columnName);
             ps.setString(2, tableName);
             ps.execute();
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
     }
 
     public void rename(String oldTableName, String newTableName, String newEscapedTableName) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(RENAME);
+        try (PreparedStatement ps = conn.prepareStatement(RENAME)) {
             ps.setString(1, newTableName);
             ps.setString(2, newEscapedTableName);
             ps.setString(3, oldTableName);
             ps.executeUpdate();
 
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
 
     }

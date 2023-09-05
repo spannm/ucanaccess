@@ -35,7 +35,7 @@ public class DDLCommandEnlist {
     private String[]            types;
     private String[]            defaults;
     private Boolean[]           notNulls;
-    private Map<String, String> columnMap = new HashMap<String, String>();
+    private Map<String, String> columnMap = new HashMap<>();
 
     private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
         String tn = ddlType.getDBObjectName();
@@ -167,10 +167,10 @@ public class DDLCommandEnlist {
         String columnName = ddlType.getSecondDBObjectName();
         String columnDefinition = ddlType.getColumnDefinition();
         String execId = UcanaccessConnection.getCtxExcId();
-        List<String> typeList = new ArrayList<String>();
-        List<String> defaultList = new ArrayList<String>();
-        this.columnMap = new HashMap<String, String>();
-        List<Boolean> notNullList = new ArrayList<Boolean>();
+        List<String> typeList = new ArrayList<>();
+        List<String> defaultList = new ArrayList<>();
+        this.columnMap = new HashMap<>();
+        List<Boolean> notNullList = new ArrayList<>();
         String tknt = columnName + columnDefinition;
         this.parseColumnTypes(typeList, defaultList, notNullList, tknt);
         check4OutOfPlacedNotNull(sql);
@@ -292,12 +292,12 @@ public class DDLCommandEnlist {
         String decl = sql.substring(startDecl + 1, endDecl);
         String[] tokens = decl.split(",");
 
-        List<String> typeList = new ArrayList<String>();
-        List<String> defaultList = new ArrayList<String>();
-        this.columnMap = new HashMap<String, String>();
-        List<Boolean> notNullList = new ArrayList<Boolean>();
-        for (int j = 0; j < tokens.length; ++j) {
-            String tknt = tokens[j].trim();
+        List<String> typeList = new ArrayList<>();
+        List<String> defaultList = new ArrayList<>();
+        this.columnMap = new HashMap<>();
+        List<Boolean> notNullList = new ArrayList<>();
+        for (String token : tokens) {
+            String tknt = token.trim();
             parseColumnTypes(typeList, defaultList, notNullList, tknt);
 
         }

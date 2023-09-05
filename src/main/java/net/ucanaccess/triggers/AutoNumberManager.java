@@ -3,7 +3,6 @@ package net.ucanaccess.triggers;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.OnReloadReferenceListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,16 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class AutoNumberManager {
     // Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance
     // becomes an issue. Never use an Integer here because Integer is an immutable object.
-    private static final Map<Column, AtomicInteger> REGISTER = new HashMap<Column, AtomicInteger>();
+    private static final Map<Column, AtomicInteger> REGISTER = new HashMap<>();
 
     static {
-        DBReference.addOnReloadRefListener(new OnReloadReferenceListener() {
-            @Override
-            public void onReload() {
-                // Must call AutoNumberManager.clear() for proper thread synchronization.
-                // Do not call register.clear() directly.
-                clear();
-            }
+        DBReference.addOnReloadRefListener(() -> {
+            // Must call AutoNumberManager.clear() for proper thread synchronization.
+            // Do not call register.clear() directly.
+            clear();
         });
     }
 

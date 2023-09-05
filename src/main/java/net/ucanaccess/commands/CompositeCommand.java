@@ -8,11 +8,11 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class CompositeCommand implements ICommand {
-    private List<ICursorCommand> composite     = new ArrayList<ICursorCommand>();
+    private List<ICursorCommand> composite     = new ArrayList<>();
     private Map<String, Object>  currentRow;
     private String               execId;
     private IndexSelector        indexSelector;
-    private List<ICursorCommand> rollbackCache = new ArrayList<ICursorCommand>();
+    private List<ICursorCommand> rollbackCache = new ArrayList<>();
 
     public CompositeCommand() {
     }

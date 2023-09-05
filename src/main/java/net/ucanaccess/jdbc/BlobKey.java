@@ -27,7 +27,7 @@ public class BlobKey implements Serializable {
         this.columnName = _columnName;
         if (hasPrimaryKey(_table)) {
             List<? extends Index.Column> cl = _table.getPrimaryKeyIndex().getColumns();
-            HashMap<String, Object> keyMap = new HashMap<String, Object>();
+            HashMap<String, Object> keyMap = new HashMap<>();
             for (Index.Column c : cl) {
                 keyMap.put(c.getName(), _row.get(c.getName()));
             }
@@ -77,9 +77,7 @@ public class BlobKey implements Serializable {
             ObjectInputStream ois = new ObjectInputStream(bais);
             Object obj = ois.readObject();
             return obj instanceof BlobKey ? (BlobKey) obj : null;
-        } catch (IOException e) {
-            return null;
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             return null;
         }
     }

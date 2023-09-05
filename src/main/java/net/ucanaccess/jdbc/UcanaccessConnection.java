@@ -19,11 +19,11 @@ import java.util.*;
 import java.util.concurrent.Executor;
 
 public class UcanaccessConnection implements Connection {
-    private static ThreadLocal<Context> ctx           = new ThreadLocal<Context>();
+    private static ThreadLocal<Context> ctx           = new ThreadLocal<>();
     private boolean                     feedbackState;
-    private LinkedList<ICommand>        commands      = new LinkedList<ICommand>();
+    private LinkedList<ICommand>        commands      = new LinkedList<>();
     private Connection                  hsqlDBConnection;
-    private Map<Savepoint, String>      savepointsMap = new HashMap<Savepoint, String>();
+    private Map<Savepoint, String>      savepointsMap = new HashMap<>();
     private DBReference                 ref;
     private boolean                     checkModified = false;
     private boolean                     autoCommit    = true;
@@ -273,8 +273,8 @@ public class UcanaccessConnection implements Connection {
     }
 
     private void flushIO() throws SQLException {
-        List<IFeedbackAction> ibal = new ArrayList<IFeedbackAction>();
-        LinkedList<ICommand> executed = new LinkedList<ICommand>();
+        List<IFeedbackAction> ibal = new ArrayList<>();
+        LinkedList<ICommand> executed = new LinkedList<>();
 
         try {
 

@@ -147,7 +147,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         for (Index idx : tb.getIndexes()) {
             if ("èèè 23".equals(idx.getName()) && idx.isUnique()) {
                 found = true;
-                List<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -170,7 +170,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         for (Index idx : tb.getIndexes()) {
             if ("%健 康".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
-                List<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -186,7 +186,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         for (Index idx : tb.getIndexes()) {
             if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
-                List<String> ar = new ArrayList<String>();
+                List<String> ar = new ArrayList<>();
                 for (Column cl : idx.getColumns()) {
                     ar.add(cl.getName());
                 }
@@ -208,7 +208,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("AAA n");
         Index idx = tb.getPrimaryKeyIndex();
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }
@@ -238,7 +238,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         Table tb = db.getTable("AAA n");
         Table tbr = db.getTable("22 amadeimargmail111");
         Index idx = tb.getForeignKeyIndex(tbr);
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
         for (Column cl : idx.getColumns()) {
             ar.add(cl.getName());
         }
@@ -357,15 +357,11 @@ public class AlterTableTest extends AccessVersion2007Test {
     }
 
     private void executeErr(String _ddl, String _expectedMessage) throws SQLException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute(_ddl);
         } catch (SQLException _ex) {
             assertTrue(_ex.getMessage().endsWith(_expectedMessage));
             return;
-        } finally {
-            st.close();
         }
         fail("Should have encountered error: " + _expectedMessage);
     }

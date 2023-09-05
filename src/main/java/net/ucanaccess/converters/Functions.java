@@ -130,7 +130,7 @@ public final class Functions {
 
     private static boolean cbool(Object obj) {
         boolean r = (obj instanceof Boolean) ? (Boolean) obj
-                : (obj instanceof String) ? Boolean.valueOf((String) obj)
+                : (obj instanceof String) ? Boolean.parseBoolean((String) obj)
                         : (obj instanceof Number) ? ((Number) obj).doubleValue() != 0 : false;
         return r;
     }
@@ -856,7 +856,7 @@ public final class Functions {
         if (o == null) {
             return null;
         }
-        return Integer.valueOf(o.length());
+        return o.length();
     }
 
     @FunctionType(functionName = "MID", argumentTypes = { AccessType.MEMO,
@@ -950,10 +950,8 @@ public final class Functions {
 
     @FunctionType(functionName = "SPACE", argumentTypes = { AccessType.LONG }, returnType = AccessType.MEMO)
     public static String space(Integer nr) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < nr; ++i) {
-            sb.append(' ');
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(" ".repeat(Math.max(0, nr)));
         return sb.toString();
     }
 
@@ -983,7 +981,7 @@ public final class Functions {
         String val = val1.toString().trim();
         int lp = val.lastIndexOf(".");
         char[] ca = val.toCharArray();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int minLength = 1;
         for (int i = 0; i < ca.length; i++) {
             char c = ca[i];
@@ -1438,7 +1436,7 @@ public final class Functions {
         if (res == null) {
             return null;
         }
-        return res.booleanValue() ? -1d : 0d;
+        return res ? -1d : 0d;
     }
 
     @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.MEMO,

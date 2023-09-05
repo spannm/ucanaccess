@@ -64,7 +64,7 @@ public abstract class AbstractTestBase extends Assert {
     public static void assertContains(String _string, String _contains) {
         if (_contains != null) {
             Assert.assertTrue("String does not contain [" + _contains + "]: " + _string,
-                    !(_string == null || _string.length() == 0) && _string.indexOf(_contains) >= 0);
+                    !(_string == null || _string.length() == 0) && _string.contains(_contains));
         }
     }
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class NormalizedSQL {
     private String              sql;
-    private Map<String, String> aliases = new HashMap<String, String>();
+    private Map<String, String> aliases = new HashMap<>();
 
     public String getSql() {
         return sql;

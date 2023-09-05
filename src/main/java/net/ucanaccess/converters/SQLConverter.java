@@ -82,7 +82,7 @@ public final class SQLConverter {
     private static final String                  PARAMETERS                   = "(?i)PARAMETERS([^;]*);";
     private static final Pattern                 ESPRESSION_DIGIT             = Pattern.compile("([\\d]+)(?![\\.\\d])");
     private static final String                  BIG_BANG                     = "1899-12-30";
-    private static final Map<String, String>     NO_ROMAN_CHARACTERS = new HashMap<String, String>();
+    private static final Map<String, String>     NO_ROMAN_CHARACTERS = new HashMap<>();
     private static final List<String>            KEYWORDLIST                  = Arrays.asList("ALL", "AND", "ANY",
             "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
             "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
@@ -93,12 +93,12 @@ public final class SQLConverter {
             "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
     private static final String              KEYWORD_ALIAS                  = createKeywordAliasRegex();
     private static final List<String>        PROCEDURE_KEYWORD_LIST         = Arrays.asList("NEW", "ROW");
-    private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<String>();
-    private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<String>();
-    private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<String>();
-    private static final Map<String, String> IDENTIFIERS_CONTAINING_KEYWORD = new HashMap<String, String>();
-    private static final Set<String>         APOSTROPHISED_NAMES            = new HashSet<String>();
-    private static final Set<String>         WORKAROUND_FUNCTIONS           = new HashSet<String>();
+    private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
+    private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<>();
+    private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<>();
+    private static final Map<String, String> IDENTIFIERS_CONTAINING_KEYWORD = new HashMap<>();
+    private static final Set<String>         APOSTROPHISED_NAMES            = new HashSet<>();
+    private static final Set<String>         WORKAROUND_FUNCTIONS           = new HashSet<>();
 
     private static boolean supportsAccessLike  = true;
     private static boolean dualUsedAsTableName = false;
@@ -126,9 +126,9 @@ public final class SQLConverter {
     }
 
     private static String createKeywordAliasRegex() {
-        List<String> keywordList = new ArrayList<String>(KEYWORDLIST);
+        List<String> keywordList = new ArrayList<>(KEYWORDLIST);
         keywordList.remove("SELECT");
-        StringBuffer keywords = new StringBuffer();
+        StringBuilder keywords = new StringBuilder();
         String sep = "";
         for (String s : keywordList) {
             keywords.append(sep).append(s);
@@ -156,7 +156,7 @@ public final class SQLConverter {
                     if (sqlc[0] == '[') {
                         continue;
                     }
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     for (char c : sqlc) {
                         if (c == ' ' || c == '\n' || c == '\r' || c == ',') {
                             String key = SQLConverter.preEscapingIdentifier(sb.toString());
@@ -188,7 +188,7 @@ public final class SQLConverter {
     }
 
     private static int[] getQuoteGroup(String _s) {
-        if (_s.indexOf("''") < 0) {
+        if (!_s.contains("''")) {
             Matcher mtc = QUOTE_M_PATTERN.matcher(_s);
             return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
@@ -217,7 +217,7 @@ public final class SQLConverter {
     }
 
     private static int[] getDoubleQuoteGroup(String _s) {
-        if (_s.indexOf("\"\"") < 0) {
+        if (!_s.contains("\"\"")) {
             Matcher mtc = DOUBLE_QUOTE_M_PATTERN.matcher(_s);
             return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
@@ -317,7 +317,7 @@ public final class SQLConverter {
         }
 
         private static String elab(String s) {
-            if (s.indexOf("[") < 0 | s.indexOf("]") < 0) {
+            if (!s.contains("[") | !s.contains("]")) {
                 return s;
             }
             return s.replaceAll("\\[([^\\]]*)\\]", " $0 ");
@@ -471,7 +471,7 @@ public final class SQLConverter {
             }
             sql = sql.substring(0, mtc.start()) + "(" + g2 + ")" + sql.substring(mtc.end());
         }
-        Set<String> hs = new HashSet<String>();
+        Set<String> hs = new HashSet<>();
         String sqle = sql;
         String sqlN = "";
         for (Matcher mtc = QUOTED_ALIAS.matcher(sqle); mtc.find(); mtc = QUOTED_ALIAS.matcher(sqle)) {
@@ -549,7 +549,7 @@ public final class SQLConverter {
 
     private static String replaceWhiteSpacedTables(String sql) {
         String[] sqls = sql.split("'", -1);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String cm = "";
         for (int i = 0; i < sqls.length; ++i) {
             sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTables(sqls[i], "\"") : sqls[i]);
@@ -560,7 +560,7 @@ public final class SQLConverter {
 
     private static String replaceWhiteSpacedTables(String sql, String character) {
         String[] sqls = sql.split(character, -1);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String cm = "";
         for (int i = 0; i < sqls.length; ++i) {
             sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);
@@ -573,7 +573,7 @@ public final class SQLConverter {
         if (WHITE_SPACED_TABLE_NAMES.size() == 0) {
             return sql;
         }
-        StringBuffer sb = new StringBuffer("(");
+        StringBuilder sb = new StringBuilder("(");
         String or = "";
         for (String bst : WHITE_SPACED_TABLE_NAMES) {
             sb.append(or).append("(?i)" + Pattern.quote(bst));
@@ -714,7 +714,7 @@ public final class SQLConverter {
         if (TableBuilder.isReservedWord(nl)) {
             ESCAPED_IDENTIFIERS.add(nl);
         }
-        if (name.indexOf("'") >= 0 || name.indexOf("\"") > 0) {
+        if (name.contains("'") || name.indexOf("\"") > 0) {
             APOSTROPHISED_NAMES.add(name);
         }
 
@@ -766,7 +766,7 @@ public final class SQLConverter {
     }
 
     private static String hsqlEscape(String escaped, boolean quote) {
-        if (escaped.indexOf(" ") > 0 || escaped.indexOf("$") >= 0) {
+        if (escaped.indexOf(" ") > 0 || escaped.contains("$")) {
             escaped = quote ? "\"" + escaped + "\"" : "[" + escaped + "]";
         }
         return escaped;
@@ -835,7 +835,7 @@ public final class SQLConverter {
     private static String convertCreateTable(String sql, Map<String, String> _types2Convert) throws SQLException {
         // padding for detecting the right exception
         sql += " ";
-        if (sql.indexOf("(") < 0) {
+        if (!sql.contains("(")) {
             return sql;
         }
         String pre = sql.substring(0, sql.indexOf("("));
@@ -866,7 +866,7 @@ public final class SQLConverter {
     }
 
     private static String clearDefaultsCreateStatement(String sql) throws SQLException {
-        if (sql.toUpperCase().indexOf("DEFAULT") < 0) {
+        if (!sql.toUpperCase().contains("DEFAULT")) {
             return sql;
         }
         int startDecl = sql.indexOf('(');
@@ -1138,7 +1138,7 @@ public final class SQLConverter {
 
     public static Set<String> getFormulaDependencies(String formula) {
         Matcher mtc = FORMULA_DEPENDENCIES.matcher(formula);
-        Set<String> fd = new HashSet<String>();
+        Set<String> fd = new HashSet<>();
         while (mtc.find()) {
             fd.add(escapeIdentifier(mtc.group(1)));
         }
@@ -1166,7 +1166,7 @@ public final class SQLConverter {
     }
 
     public static List<String> getParameters(String s) {
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
 
         for (Matcher mtch = FORMULA_DEPENDENCIES.matcher(s); mtch.find(); mtch = FORMULA_DEPENDENCIES.matcher(s)) {
             ar.add(mtch.group());

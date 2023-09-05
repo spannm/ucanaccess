@@ -78,20 +78,15 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         int nt = 50;
         Thread[] threads = new Thread[nt];
         for (int i = 0; i < nt; i++) {
-            threads[i] = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        crud();
-                        crudPS();
-                        crudUpdatableRS();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            threads[i] = new Thread(() -> {
+                try {
+                    crud();
+                    crudPS();
+                    crudUpdatableRS();
+                } catch (SQLException | IOException e) {
+                    e.printStackTrace();
                 }
-            };
+            });
             threads[i].start();
         }
         for (Thread t : threads) {

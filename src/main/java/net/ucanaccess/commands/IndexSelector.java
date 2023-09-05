@@ -34,13 +34,13 @@ public final class IndexSelector {
             } else if (_currVal instanceof BigDecimal && _dbVal instanceof Number) {
                 return ((BigDecimal) _currVal).compareTo(new BigDecimal(_dbVal.toString())) == 0;
             } else if (_currVal instanceof Integer && _dbVal instanceof Short) {
-                return ((Integer) _currVal).intValue() == ((Short) _dbVal).intValue();
+                return (Integer) _currVal == ((Short) _dbVal).intValue();
             } else if (_dbVal instanceof Integer && _currVal instanceof Short) {
-                return ((Integer) _dbVal).intValue() == ((Short) _currVal).intValue();
+                return (Integer) _dbVal == ((Short) _currVal).intValue();
             } else if (_currVal instanceof Integer && _dbVal instanceof Byte) {
-                return ((Integer) _currVal).intValue() == SQLConverter.asUnsigned((Byte) _dbVal);
+                return (Integer) _currVal == SQLConverter.asUnsigned((Byte) _dbVal);
             } else if (_dbVal instanceof Integer && _currVal instanceof Byte) {
-                return ((Integer) _dbVal).intValue() == SQLConverter.asUnsigned((Byte) _currVal);
+                return (Integer) _dbVal == SQLConverter.asUnsigned((Byte) _currVal);
             }
 
             if ((_dbVal instanceof Float && _currVal instanceof Double)

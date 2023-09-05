@@ -86,19 +86,8 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public void checkQuery(String _query, Object[][] _expected) throws SQLException, IOException {
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            st = ucanaccess.createStatement();
-            rs = st.executeQuery(_query);
+        try (Statement st = ucanaccess.createStatement(); ResultSet rs = st.executeQuery(_query)) {
             diff(rs, _expected, _query);
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
@@ -190,7 +179,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         ResultSetMetaData jometa = _verifyResultSet.getMetaData();
         int jocolmax = jometa.getColumnCount();
         assertTrue(jocolmax == mycolmax);
-        StringBuffer log = new StringBuffer("{");
+        StringBuilder log = new StringBuilder("{");
         int row = 0;
         while (next(_verifyResultSet, _resultSet)) {
             row++;

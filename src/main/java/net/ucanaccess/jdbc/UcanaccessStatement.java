@@ -276,7 +276,7 @@ public class UcanaccessStatement implements Statement {
             checkLastModified();
             Connection conn = this.connection.getHSQLDBConnection();
             Statement st = conn.createStatement();
-            StringBuffer sql = new StringBuffer();
+            StringBuilder sql = new StringBuilder();
 
             if (this.generatedKey != null) {
                 sql.append(" SELECT ")

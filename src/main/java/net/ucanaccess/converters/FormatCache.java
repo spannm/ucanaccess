@@ -13,7 +13,7 @@ public final class FormatCache {
     private static DecimalFormat noGrouping;
     private static NumberFormat  currencyDefault;
 
-    private static final Map<String, DecimalFormat> CACHE = new HashMap<String, DecimalFormat>();
+    private static final Map<String, DecimalFormat> CACHE = new HashMap<>();
 
     private FormatCache() {
     }

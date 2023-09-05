@@ -7,13 +7,13 @@ import java.util.regex.Pattern;
 
 public final class RegionalSettings {
 
-    static final Map<Locale, RegionalSettings> REG_MAP = new HashMap<Locale, RegionalSettings>();
+    static final Map<Locale, RegionalSettings> REG_MAP = new HashMap<>();
 
     private final ResourceBundle                 dateBundle;
     private final Locale                         locale;
     private boolean                              pointDateSeparator;
-    private final Map<SimpleDateFormat, Boolean> dateFormats = new LinkedHashMap<SimpleDateFormat, Boolean>();
-    private final List<String>                   dateFormatPatterns = new ArrayList<String>();
+    private final Map<SimpleDateFormat, Boolean> dateFormats = new LinkedHashMap<>();
+    private final List<String>                   dateFormatPatterns = new ArrayList<>();
 
     RegionalSettings() {
         this(Locale.getDefault());
@@ -24,7 +24,7 @@ public final class RegionalSettings {
         locale = _locale;
         String[] dfsp = new String[] {getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(), getShortDatePattern()};
         for (String pattern : dfsp) {
-            if (pattern.indexOf(".") > 0 && pattern.indexOf("h.") < 0 && pattern.indexOf("H.") < 0) {
+            if (pattern.indexOf(".") > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
                 pointDateSeparator = true;
             }
         }
@@ -117,7 +117,7 @@ public final class RegionalSettings {
 
     void addDateP(String _pattern, boolean _heuristic, boolean _yearOverride) {
         if (_heuristic) {
-            if (_pattern.indexOf("a") < 0 && _pattern.indexOf("H") > 0) {
+            if (!_pattern.contains("a") && _pattern.indexOf("H") > 0) {
                 String chg = _pattern.replaceAll("H", "h") + " a";
                 addDateP(chg, false, false);
                 addTogglePattern(chg);
@@ -161,7 +161,7 @@ public final class RegionalSettings {
                 addDateP(_p.replaceAll(Pattern.quote("-"), "."), false, false);
             }
 
-        } else if (_p.indexOf(".") > 0 && _p.indexOf("h.") < 0 && _p.indexOf("H.") < 0) {
+        } else if (_p.indexOf(".") > 0 && !_p.contains("h.") && !_p.contains("H.")) {
             addDateP(_p.replaceAll(Pattern.quote("."), "/"), false, false);
         }
     }

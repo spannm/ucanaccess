@@ -31,8 +31,8 @@ public class Pivot {
     private Connection                             conn;
     private boolean                                pivotInCondition = true;
     private String                                 originalQuery;
-    private static final Map<String, String>       PIVOT_MAP        = new HashMap<String, String>();
-    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<String, List<String>>();
+    private static final Map<String, String>       PIVOT_MAP        = new HashMap<>();
+    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<>();
 
     public Pivot(Connection _conn) {
         this.conn = _conn;
@@ -94,7 +94,7 @@ public class Pivot {
                     String escqn = SQLConverter.completeEscaping(name, false);
 
                     st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
-                    StringBuffer sb = new StringBuffer("CREATE VIEW ").append(escqn).append(" AS ").append(sqlh);
+                    StringBuilder sb = new StringBuilder("CREATE VIEW ").append(escqn).append(" AS ").append(sqlh);
                     NormalizedSQL nsql = SQLConverter.convertSQL(sb.toString(), true);
                     Metadata mt = new Metadata(conh);
                     String eqn = SQLConverter.preEscapingIdentifier(name);
@@ -170,7 +170,7 @@ public class Pivot {
     }
 
     public String verifySQL() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String[] fromS = this.from.split(PIVOT_GROUP_BY);
         sb.append("SELECT DISTINCT ").append(this.pivot).append(" AS PIVOT ");
         sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(this.pivot).append(",").append(fromS[1]);
@@ -180,7 +180,7 @@ public class Pivot {
     public boolean prepare() {
         try {
             if (this.pivotInCondition) {
-                this.pivotIn = new ArrayList<String>();
+                this.pivotIn = new ArrayList<>();
             }
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(verifySQL());

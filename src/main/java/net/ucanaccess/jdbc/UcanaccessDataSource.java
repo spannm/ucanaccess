@@ -290,7 +290,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * @since 2.0.9
      */
     public void setColumnOrder(String value) {
-        setProp("columnorder", value, new ArrayList<Object>(Arrays.asList("DATA", "DISPLAY")));
+        setProp("columnorder", value, new ArrayList<>(Arrays.asList("DATA", "DISPLAY")));
     }
 
     /**
@@ -386,7 +386,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      * @since 2.0.9.4
      */
     public void setLobScale(Integer value) {
-        setProp("lobscale", value, new ArrayList<Object>(Arrays.asList(1, 2, 4, 8, 16, 32)));
+        setProp("lobscale", value, new ArrayList<>(Arrays.asList(1, 2, 4, 8, 16, 32)));
     }
 
     @Override
@@ -430,7 +430,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
      *            Valid values for this parameter are: "V2000", "V2003", "V2007", "V2010", or "V2016".
      */
     public void setNewDatabaseVersion(String value) {
-        setProp("newdatabaseversion", value, new ArrayList<Object>(Arrays.asList("V2000", "V2003", "V2007", "V2010", "V2016")));
+        setProp("newdatabaseversion", value, new ArrayList<>(Arrays.asList("V2000", "V2003", "V2007", "V2010", "V2016")));
     }
 
     /**

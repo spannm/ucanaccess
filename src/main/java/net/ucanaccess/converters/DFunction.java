@@ -45,7 +45,7 @@ public class DFunction {
                 sql0 = sql0.replaceAll(DFUNCTIONS_NO_WHERE.replaceFirst("_", fun), init + s + "($1) FROM $2    " + end);
                 Pattern dfd = Pattern.compile(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun));
                 for (Matcher mtc = dfd.matcher(sql0); mtc.find(); mtc = dfd.matcher(sql0)) {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     String g3 = mtc.group(3);
                     String tableN = mtc.group(2).trim();
                     String alias = tableN.startsWith("[") & tableN.endsWith("]") ? "[" + unpad(tableN) + "_DALIAS]"
@@ -118,7 +118,7 @@ public class DFunction {
     }
 
     private List<String> getColumnNames(String tableName) throws SQLException {
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
         if (conn == null) {
             UcanaccessConnection conu = UcanaccessConnection.getCtxConnection();
             if (conu == null) {

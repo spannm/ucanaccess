@@ -47,12 +47,12 @@ public class ParametricQuery {
         if (this.aposMap != null) {
             return parameterList;
         }
-        this.aposMap = new HashMap<String, String>();
+        this.aposMap = new HashMap<>();
         int i = 0;
-        this.parameterList = new ArrayList<String>();
+        this.parameterList = new ArrayList<>();
         this.parameterList.addAll(l);
         for (String par : parameterList) {
-            if (par.indexOf("'") >= 0 || par.indexOf("\"") >= 0) {
+            if (par.contains("'") || par.contains("\"")) {
                 int index = Math.max(Math.max(par.lastIndexOf(' '), par.lastIndexOf('\n')), par.lastIndexOf('\r'));
 
                 String decl = par.substring(0, index).trim();
@@ -171,7 +171,7 @@ public class ParametricQuery {
     private String getTableDefinition() throws SQLException {
         ResultSet rs = ps.executeQuery();
         ResultSetMetaData rsmd = rs.getMetaData();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String comma = "";
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             String type = completeTypeName(rsmd.getColumnTypeName(i), rsmd.getPrecision(i), rsmd.getScale(i), false);
@@ -203,18 +203,12 @@ public class ParametricQuery {
     }
 
     private boolean exec(String expression) throws SQLException {
-        Statement st = null;
-        try {
-            st = hsqldb.createStatement();
+        try (Statement st = hsqldb.createStatement()) {
             st.execute(expression);
             return true;
         } catch (SQLException _ex) {
             this.exception = _ex;
             return false;
-        } finally {
-            if (st != null) {
-                st.close();
-            }
         }
     }
 
@@ -236,14 +230,14 @@ public class ParametricQuery {
     }
 
     private void parametersEmpiric(boolean partialParDecl) {
-        this.aposMap = new HashMap<String, String>();
-        Map<String, Integer> hm = new LinkedHashMap<String, Integer>();
+        this.aposMap = new HashMap<>();
+        Map<String, Integer> hm = new LinkedHashMap<>();
         String s = getSQL();
         if (partialParDecl) {
             s = SQLConverter.removeParameters(s);
         }
         List<String> params = SQLConverter.getParameters(s);
-        Map<String, String> parem = new HashMap<String, String>();
+        Map<String, String> parem = new HashMap<>();
         getParametersEmpiric(hm, params, parem, s, true);
     }
 
@@ -255,7 +249,7 @@ public class ParametricQuery {
         List<String> ls = queryParameters();
         StringBuffer args = new StringBuffer();
         String comma = "";
-        List<String> ar = new ArrayList<String>();
+        List<String> ar = new ArrayList<>();
         for (String par : ls) {
             par = par.trim();
             int index = Math.max(Math.max(par.lastIndexOf(' '), par.lastIndexOf('\n')), par.lastIndexOf('\r'));
@@ -290,7 +284,7 @@ public class ParametricQuery {
             this.ps = hsqldb.prepareStatement(convertSQL(sql));
             if (!this.isProcedure) {
                 ParameterMetaData pmd = ps.getParameterMetaData();
-                StringBuffer defPar = new StringBuffer();
+                StringBuilder defPar = new StringBuilder();
                 comma = "";
 
                 for (int i = 1; i <= pmd.getParameterCount(); i++) {
@@ -313,7 +307,7 @@ public class ParametricQuery {
     }
 
     private List<Integer> parIndexes(String s) {
-        List<Integer> ar = new ArrayList<Integer>();
+        List<Integer> ar = new ArrayList<>();
         char character = '?';
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == character) {
@@ -370,12 +364,12 @@ public class ParametricQuery {
             this.ps = hsqldb.prepareStatement(psTxt);
 
             ParameterMetaData pmd = ps.getParameterMetaData();
-            List<String> ar = new ArrayList<String>();
+            List<String> ar = new ArrayList<>();
             _psmp = reorderIndexes(_psmp, parem);
             ar.addAll(_psmp.keySet());
             List<Integer> pI = parIndexes(sql);
-            StringBuffer parS = new StringBuffer();
-            StringBuffer defPar = new StringBuffer();
+            StringBuilder parS = new StringBuilder();
+            StringBuilder defPar = new StringBuilder();
             int j = 0;
             String comma = "";
             for (int i = 1; i <= pmd.getParameterCount(); i++) {
@@ -408,7 +402,7 @@ public class ParametricQuery {
                 String par1 = SQLConverter.preEscapingIdentifier(par.substring(1, par.length() - 1));
                 int index = sql.toUpperCase().indexOf(par.toUpperCase());
                 if (index >= 0 && _ex.getMessage() != null && (_ex.getMessage().toUpperCase().endsWith(": " + par1)
-                        || _ex.getMessage().toUpperCase().indexOf(": " + par1 + " IN STATEMENT ") != -1)) {
+                        || _ex.getMessage().toUpperCase().contains(": " + par1 + " IN STATEMENT "))) {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
                     _psmp.put(par1, index);
                     parem.put(par1, par);
@@ -430,10 +424,10 @@ public class ParametricQuery {
     }
 
     private Map<String, Integer> reorderIndexes(Map<String, Integer> psmp, Map<String, String> parem) {
-        Map<Integer, String> tm = new TreeMap<Integer, String>();
+        Map<Integer, String> tm = new TreeMap<>();
         Integer[] nI = new Integer[psmp.size()];
         String[] sI = new String[psmp.size()];
-        Map<String, Integer> dI = new HashMap<String, Integer>();
+        Map<String, Integer> dI = new HashMap<>();
         int j = 0;
         for (Map.Entry<String, Integer> me : psmp.entrySet()) {
             tm.put(me.getValue(), me.getKey());
@@ -454,7 +448,7 @@ public class ParametricQuery {
             }
         }
 
-        Map<String, Integer> rlhm = new LinkedHashMap<String, Integer>();
+        Map<String, Integer> rlhm = new LinkedHashMap<>();
         for (Map.Entry<Integer, String> me : tm.entrySet()) {
             rlhm.put(me.getValue(), me.getKey() + dI.get(me.getValue()));
         }

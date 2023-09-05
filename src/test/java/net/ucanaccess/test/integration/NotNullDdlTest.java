@@ -49,7 +49,7 @@ public class NotNullDdlTest extends AccessVersionDefaultTest {
             p.waitFor();
             BufferedReader rdr =
                 new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            StringBuffer sb = new StringBuffer(); // to capture error line(s)
+            StringBuilder sb = new StringBuilder(); // to capture error line(s)
             int numErrorLines = 0;
             String line = rdr.readLine();
             while (line != null) {

@@ -57,9 +57,7 @@ public class UcanaccessBlob implements Blob {
                 }
             }
             return blob.getBinaryStream();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
-        } catch (IOException e) {
+        } catch (SQLException | IOException e) {
             throw new UcanaccessSQLException(e);
         }
     }
@@ -122,9 +120,7 @@ public class UcanaccessBlob implements Blob {
                 }
             }
             return blob.setBinaryStream(pos);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
-        } catch (IOException e) {
+        } catch (SQLException | IOException e) {
             throw new UcanaccessSQLException(e);
         }
     }

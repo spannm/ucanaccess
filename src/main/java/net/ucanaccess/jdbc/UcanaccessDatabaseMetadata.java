@@ -43,7 +43,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     private String from(String left, String right) {
-        StringBuffer sb = new StringBuffer(" FROM ").append("INFORMATION_SCHEMA.").append(left).append(" l INNER JOIN ")
+        StringBuilder sb = new StringBuilder(" FROM ").append("INFORMATION_SCHEMA.").append(left).append(" l INNER JOIN ")
                 .append("UCA_METADATA.").append(right).append(" r ");
         return sb.toString();
     }
@@ -52,10 +52,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (options == null || options.length == 0) {
             return "";
         }
-        StringBuffer sb = new StringBuffer(" AND ").append(prefix).append(field).append(" IN ").append("(");
+        StringBuilder sb = new StringBuilder(" AND ").append(prefix).append(field).append(" IN ").append("(");
         String comma = "";
-        for (int i = 0; i < options.length; i++) {
-            Object norm = options[i];
+        for (Object norm : options) {
             String val = norm instanceof String ? "'" + norm.toString().toUpperCase() + "'" : norm.toString();
             sb.append(comma).append(val);
             comma = ",";
@@ -73,7 +72,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     private String on(List<String> left, List<String> right) {
-        StringBuffer sb = new StringBuffer(" ON(");
+        StringBuilder sb = new StringBuilder(" ON(");
         Iterator<String> il = left.iterator();
         Iterator<String> ir = right.iterator();
         String and = "";
@@ -101,7 +100,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (right == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer(and);
+        StringBuilder sb = new StringBuilder(and);
         if (right.length() == 0) {
             return sb.append(left).append(" IS NULL ").toString();
         }
@@ -123,7 +122,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private String select(String htableName, List<String> exclude, List<String> replace) throws SQLException {
         ResultSetMetaData rsmd = executeQuery(SELECT_BASE + htableName + " WHERE 1=0").getMetaData();
         String comma = "";
-        StringBuffer sb = new StringBuffer("SELECT ");
+        StringBuilder sb = new StringBuilder("SELECT ");
 
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             String cn = rsmd.getColumnName(i);
@@ -244,9 +243,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             Integer[] scopeArr = new Integer[] {bestRowTemporary, bestRowTransaction, bestRowSession};
 
             String nullableS = (nullable) ? null : String.valueOf(columnNoNulls);
-            StringBuffer sql =
+            StringBuilder sql =
 
-                    new StringBuffer(select("SYSTEM_BESTROWIDENTIFIER",
+                    new StringBuilder(select("SYSTEM_BESTROWIDENTIFIER",
 
                             Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
                             Arrays.asList(null, null, "TABLE_NAME", "COLUMN_NAME")))
@@ -321,7 +320,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
 
-            StringBuffer select = new StringBuffer("SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,")
+            StringBuilder select = new StringBuilder("SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,")
                     .append(cAlias("TABLE_NAME")).append(",").append(cAlias("COLUMN_NAME")).append(",")
                     .append(nAlias("GRANTOR")).append(",").append(nAlias("GRANTEE")).append(",")
                     .append(nAlias("PRIVILEGE_TYPE PRIVILEGE")).append(",").append(nAlias("IS_GRANTABLE"))
@@ -350,7 +349,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
 
-            StringBuffer select = new StringBuffer(select("SYSTEM_COLUMNS",
+            StringBuilder select = new StringBuilder(select("SYSTEM_COLUMNS",
                     Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF",
                             "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF", "IS_AUTOINCREMENT",
@@ -393,7 +392,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
-            StringBuffer select = new StringBuffer(select("SYSTEM_CROSSREFERENCE",
+            StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                     Arrays.asList("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                             "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME",
@@ -497,7 +496,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
-            StringBuffer select = new StringBuffer(select("SYSTEM_CROSSREFERENCE",
+            StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                     Arrays.asList("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                             "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME",
@@ -565,7 +564,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
-            StringBuffer select = new StringBuffer(select("SYSTEM_CROSSREFERENCE",
+            StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                     Arrays.asList("FKTABLE_CAT", "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME", "PKTABLE_CAT",
                             "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME"),
                     Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME",
@@ -595,7 +594,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
             String nuS = (unique) ? "AND NON_UNIQUE IS FALSE" : "";
-            StringBuffer select = new StringBuffer(
+            StringBuilder select = new StringBuilder(
                     select("SYSTEM_INDEXINFO", Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
                             Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
                                     .append(from("SYSTEM_INDEXINFO", "COLUMNS_VIEW"))
@@ -836,7 +835,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             }
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
-            StringBuffer select = new StringBuffer(
+            StringBuilder select = new StringBuilder(
                     select("SYSTEM_PRIMARYKEYS", Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
                             Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
                                     .append(from("SYSTEM_PRIMARYKEYS", "COLUMNS_VIEW"))
@@ -1002,7 +1001,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             throws SQLException {
         try {
             tableNamePattern = normalizeName(tableNamePattern);
-            StringBuffer select = new StringBuffer(
+            StringBuilder select = new StringBuilder(
                     select("TABLE_PRIVILEGES", Arrays.asList("TABLE_CATALOG", "TABLE_SCHEMA", "TABLE_NAME"),
                             Arrays.asList(CAST_EXPR + " TABLE_CAT ", CAST_EXPR + " TABLE_SCHEM", "TABLE_NAME")))
                                     .append(from("TABLE_PRIVILEGES", "TABLES"))
@@ -1030,8 +1029,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = this.connection.isShowSchema() ? "PUBLIC" : null;
             String schem = this.connection.isShowSchema() ? "PUBLIC" : null;
 
-            StringBuffer select =
-                    new StringBuffer(select("SYSTEM_TABLES", Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"),
+            StringBuilder select =
+                    new StringBuilder(select("SYSTEM_TABLES", Arrays.asList("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"),
                             Arrays.asList(cat, schem, "TABLE_NAME"))).append(from("SYSTEM_TABLES", "TABLES"))
 
                                     .append(on(Arrays.asList("TABLE_NAME"), Arrays.asList("ESCAPED_TABLE_NAME")))
@@ -1155,7 +1154,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (name == null || name.trim().length() == 0) {
             return name;
         }
-        if (name.indexOf("%") >= 0) {
+        if (name.contains("%")) {
             return name.toUpperCase();
         } else {
             if (name.startsWith("\"") && name.endsWith("\"")) {

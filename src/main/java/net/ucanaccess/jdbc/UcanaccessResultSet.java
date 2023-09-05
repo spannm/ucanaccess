@@ -15,7 +15,7 @@ public class UcanaccessResultSet implements ResultSet {
     private ResultSet           wrapped;
     private UcanaccessStatement wrappedStatement;
     private Set<String>         metadata;
-    private Set<Integer>        updIndexes = new HashSet<Integer>();
+    private Set<Integer>        updIndexes = new HashSet<>();
 
     public UcanaccessResultSet(ResultSet _wrapped, UcanaccessStatement _statement) {
         this.wrapped = _wrapped;
@@ -47,7 +47,7 @@ public class UcanaccessResultSet implements ResultSet {
     }
 
     private void loadMetadata() throws SQLException {
-        this.metadata = new HashSet<String>();
+        this.metadata = new HashSet<>();
         ResultSetMetaData rsmd = this.wrapped.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             this.metadata.add(rsmd.getColumnLabel(i).toUpperCase());
@@ -509,7 +509,7 @@ public class UcanaccessResultSet implements ResultSet {
     public ResultSetMetaData getMetaData() throws SQLException {
         try {
             Map<String, String> hm =
-                    this.wrappedStatement == null ? new HashMap<String, String>() : this.wrappedStatement.getAliases();
+                    this.wrappedStatement == null ? new HashMap<>() : this.wrappedStatement.getAliases();
             return new UcanaccessResultSetMetaData(wrapped.getMetaData(), hm, this);
         } catch (SQLException e) {
             throw new UcanaccessSQLException(e);
@@ -866,7 +866,7 @@ public class UcanaccessResultSet implements ResultSet {
             if (obj instanceof String) {
                 String s = (String) obj;
                 String[] parts = s.split("#");
-                StringBuffer url = new StringBuffer();
+                StringBuilder url = new StringBuilder();
                 if (parts.length > 1) {
                     url.append(parts[1]);
                     if (parts.length > 2) {
