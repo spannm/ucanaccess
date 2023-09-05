@@ -201,8 +201,6 @@ public class Main {
 
     private void sayHello(String version) {
         prompt("");
-        System.out.printf("Copyright (c) %d Marco Amadei%n",
-                java.util.Calendar.getInstance().get(java.util.Calendar.YEAR));
         System.out.println("UCanAccess version " + version);
         System.out.println("You are connected!! ");
 
