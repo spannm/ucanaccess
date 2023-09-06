@@ -53,7 +53,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         ps.execute();
         ps = conn.prepareStatement("UPDATE " + tableName + " SET descr='" + Thread.currentThread() + "'");
         ps.executeUpdate();
-        ps = conn.prepareStatement("DELETE FROM  " + tableName + "  WHERE  descr='" + Thread.currentThread() + "'");
+        ps = conn.prepareStatement("DELETE FROM " + tableName + " WHERE  descr='" + Thread.currentThread() + "'");
         conn.commit();
         conn.close();
     }

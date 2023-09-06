@@ -31,7 +31,7 @@ public class CalculatedFieldTest extends AccessVersion2010Test {
         st.execute("INSERT INTO T (c1) VALUES ('mycattom')");
         st.execute("INSERT INTO T (c1) VALUES (null)");
         dumpQueryResult("SELECT * FROM T");
-        checkQuery("select c2,c3,c4,c5 from T order by id",
+        checkQuery("SELECT c2,c3,c4,c5 FROM T ORDER BY id",
             new String[][] {{"my", "my", "my", "my"}, {"myc", "myc", "myc", "myc"}, {"myc", "myc", "cat", "cat"}, {"myc", "myc", "tom", "tom"}, {null, null, null, null}});
 
         st.close();

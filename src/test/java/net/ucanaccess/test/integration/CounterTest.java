@@ -56,7 +56,7 @@ public class CounterTest extends AccessVersionAllTest {
         Object[][] ver =
             {{-1, "A", null, null}, {3, "C", null, null}, {4, "D", null, null}, {5, "E", null, null}, {6, "F", null, null}, {7, "G", null, null}, {8, "H", null, null}, {9, "I", null, null}};
         dumpQueryResult("SELECT * FROM " + tableName);
-        checkQuery("SELECT * FROM " + tableName + " order by Z", ver);
+        checkQuery("SELECT * FROM " + tableName + " ORDER BY Z", ver);
 
         st.close();
     }

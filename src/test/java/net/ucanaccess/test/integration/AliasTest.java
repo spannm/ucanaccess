@@ -34,11 +34,11 @@ public class AliasTest extends AccessVersionAllTest {
     public void testBig() throws SQLException {
         Statement st = ucanaccess.createStatement();
         int id = 6666554;
-        st.execute("INSERT INTO Talias (id,descr)  VALUES( " + id + ",'t')");
-        ResultSet rs = st.executeQuery("select descr as [cipol%'&la]  from Talias where descr<>'ciao'&'bye'&'pippo'");
+        st.execute("INSERT INTO Talias (id,descr) VALUES( " + id + ",'t')");
+        ResultSet rs = st.executeQuery("SELECT descr AS [cipol%'&la] FROM Talias where descr<>'ciao'&'bye'&'pippo'");
         rs.next();
-        getLogger().info("columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
-        getLogger().info("getObject: {}", rs.getObject("cipol%'&la"));
+        getLogger().debug("metaData columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
+        getLogger().debug("getObject: {}", rs.getObject("cipol%'&la"));
 
         st.close();
     }
@@ -46,11 +46,11 @@ public class AliasTest extends AccessVersionAllTest {
     @Test
     public void testAccent() throws SQLException {
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO Talias (id,Actuación)  VALUES(1,'X')");
-        ResultSet rs = st.executeQuery("select  [Actuación] as Actuació8_0_0_ from Talias ");
+        st.execute("INSERT INTO Talias (id,Actuación) VALUES(1,'X')");
+        ResultSet rs = st.executeQuery("SELECT [Actuación] AS Actuació8_0_0_ FROM Talias ");
         rs.next();
-        getLogger().info("columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
-        getLogger().info("getObject: {}", rs.getObject("Actuació8_0_0_"));
+        getLogger().debug("metaData columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
+        getLogger().debug("getObject: {}", rs.getObject("Actuació8_0_0_"));
         st.close();
     }
 
@@ -58,7 +58,7 @@ public class AliasTest extends AccessVersionAllTest {
     public void testAsin() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE xxxx (asin text, ff text)");
-        dumpQueryResult("SELECT asin, ff from xxxx");
+        dumpQueryResult("SELECT asin, ff FROM xxxx");
         st.close();
     }
 

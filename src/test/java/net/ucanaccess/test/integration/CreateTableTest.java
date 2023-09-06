@@ -36,18 +36,18 @@ public class CreateTableTest extends AccessVersion2010Test {
         Statement st = ucanaccess.createStatement();
         st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa,a,c FROM AAA) WITH DATA");
         Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-        checkQuery("SELECT * FROM AAA_bis order by baaaa", ver);
+        checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa", ver);
         st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa,AAA_BIS.baaaa as xxx FROM AAA,AAA_BIS) WITH DATA");
-        dumpQueryResult("SELECT * FROM AAA_quadris order by baaaa");
+        dumpQueryResult("SELECT * FROM AAA_quadris ORDER BY baaaa");
         st.close();
     }
 
     private void createAsSelect2() throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH no DATA ");
-            st.execute("INSERT INTO AAA_TRIS SELECT * from AAA_bis");
+            st.execute("INSERT INTO AAA_TRIS SELECT * FROM AAA_bis");
             Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-            checkQuery("SELECT * FROM AAA_tris order by baaaa", ver);
+            checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa", ver);
         }
     }
 
@@ -101,11 +101,11 @@ public class CreateTableTest extends AccessVersion2010Test {
             ucanaccess.setAutoCommit(false);
             try {
                 st = ucanaccess.createStatement();
-                st.execute("insert into  dunique values('ddl forces commit',2.3)");
+                st.execute("INSERT INTO dunique values('ddl forces commit',2.3)");
                 st.close();
                 st = ucanaccess.createStatement();
                 st.execute("create table dtrx(c text  , " + "number numeric(23,5) , " + "  unique (C,NUMBER))");
-                st.execute("insert into  dtrx values('I''ll be forgotten sob sob ',55555.3)");
+                st.execute("INSERT INTO dtrx values('I''ll be forgotten sob sob ',55555.3)");
                 st.close();
                 st = ucanaccess.createStatement();
                 st.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number)");
@@ -114,8 +114,8 @@ public class CreateTableTest extends AccessVersion2010Test {
                 ucanaccess.rollback();
             }
             st = ucanaccess.createStatement();
-            st.execute("insert into  dtrx values('Hi all',444.3)");
-            st.execute("insert into  dtrx values('Hi all',4454.3)");
+            st.execute("INSERT INTO dtrx values('Hi all',444.3)");
+            st.execute("INSERT INTO dtrx values('Hi all',4454.3)");
             dumpQueryResult("SELECT * FROM dtrx");
             dumpQueryResult("SELECT * FROM dunique");
             ucanaccess.commit();
@@ -188,7 +188,7 @@ public class CreateTableTest extends AccessVersion2010Test {
             " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
         st.execute(
             " CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-        st.execute(" insert into kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
+        st.execute(" INSERT INTO kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
         st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
         st.close();
 

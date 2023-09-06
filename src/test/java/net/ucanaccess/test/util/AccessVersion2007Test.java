@@ -2,20 +2,17 @@ package net.ucanaccess.test.util;
 
 import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AccessVersion2007Test extends UcanaccessTestBase {
 
-    public AccessVersion2007Test(AccessVersion _fileFormat) {
-        super(_fileFormat.getFileFormat());
+    public AccessVersion2007Test(AccessVersion _accessVersion) {
+        super(_accessVersion.getFileFormat());
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> getAccessVersion2007() {
-        List<Object[]> list = new ArrayList<>();
-        list.add(new Object[] {AccessVersion.V2007});
-        return list;
+    public static List<AccessVersion> getAccessVersion2007() {
+        return List.of(AccessVersion.V2007);
     }
 
 }

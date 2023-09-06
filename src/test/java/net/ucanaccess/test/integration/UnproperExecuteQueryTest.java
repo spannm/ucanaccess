@@ -25,7 +25,7 @@ public class UnproperExecuteQueryTest extends AccessVersionAllTest {
     public void testExecute() throws Exception {
         execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
         execute("UPDATE NOROMAN SET [ENd]='BLeah'");
-        execute("delete from NOROMAN");
+        execute("DELETE FROM NOROMAN");
     }
 
     private void execute(String s) throws SQLException {

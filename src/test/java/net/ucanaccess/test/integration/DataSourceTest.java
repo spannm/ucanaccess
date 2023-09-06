@@ -52,7 +52,7 @@ public class DataSourceTest extends AbstractTestBase {
 
         Connection conn = uds.getConnection();
         assertTrue(fileMdb.exists());
-        getLogger().info("DataSource connection successfully created the file: {}", uds.getAccessPath());
+        getLogger().info("DataSource connection successfully created file {}", uds.getAccessPath());
         conn.close();
 
         Boolean irrEffective = uds.getImmediatelyReleaseResources();
@@ -62,7 +62,7 @@ public class DataSourceTest extends AbstractTestBase {
             assertTrue(fileMdb.delete());
             assertFalse(fileMdb.exists());
         } else {
-            getLogger().info("(Test database remains on disk.)");
+            getLogger().info("(Test database remains on disk)");
         }
     }
 }

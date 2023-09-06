@@ -358,7 +358,7 @@ public class Main {
         // executing the 'lastSqlQuery'.
         String sqlQuery;
         if (table != null && !table.isEmpty()) {
-            sqlQuery = "select * from [" + table + "]";
+            sqlQuery = "SELECT * FROM [" + table + "]";
         } else if (lastSqlQuery != null) {
             sqlQuery = lastSqlQuery;
         } else {

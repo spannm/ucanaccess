@@ -26,7 +26,7 @@ public class ColumnOrderTest extends AccessVersionDefaultTest {
     public void testColumnOrder1() throws Exception {
         setColumnOrder("display");
         Connection uca = getUcanaccessConnection();
-        PreparedStatement ps = uca.prepareStatement("insert into t1 values (?,?,?)");
+        PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?,?,?)");
         ps.setInt(3, 3);
         ps.setDate(2, new Date(System.currentTimeMillis()));
         ps.setString(1, "This is the display order");

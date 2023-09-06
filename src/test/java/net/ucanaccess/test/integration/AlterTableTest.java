@@ -39,22 +39,20 @@ public class AlterTableTest extends AccessVersion2007Test {
 
     @Test
     public void testRename() throws SQLException, IOException {
-        Statement st;
-
-        st = ucanaccess.createStatement();
-        st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
-        boolean b = false;
-        try {
-            st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]");
-        } catch (SQLException e) {
-            b = true;
+        try (Statement st = ucanaccess.createStatement()) {
+            st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
+            boolean b = false;
+            try {
+                st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]");
+            } catch (SQLException e) {
+                b = true;
+            }
+            assertTrue(b);
+            checkQuery("SELECT * FROM [1GIà GIà]");
+            dumpQueryResult("SELECT * FROM [1GIà GIà]");
+            getLogger().debug("After having renamed a few tables ...");
+            dumpQueryResult("SELECT * FROM UCA_METADATA.TABLES");
         }
-        assertTrue(b);
-        checkQuery("SELECT * from [1GIà GIà]");
-        dumpQueryResult("SELECT * from [1GIà GIà]");
-        getLogger().info("After having renamed a few tables ...");
-        dumpQueryResult("SELECT * from UCA_METADATA.TABLES");
-        st.close();
     }
 
     @Test
@@ -62,12 +60,12 @@ public class AlterTableTest extends AccessVersion2007Test {
         Statement st = null;
         st = ucanaccess.createStatement();
         st.execute("ALTER TABLE AAAn RENAME TO [GIà GIà]");
-        st.execute("Insert into [GIà GIà] (baaaa) values('chi')");
-        checkQuery("SELECT * from [GIà GIà] ORDER BY c");
-        dumpQueryResult("SELECT * from [GIà GIà] ORDER BY c");
+        st.execute("INSERT INTO [GIà GIà] (baaaa) values('chi')");
+        checkQuery("SELECT * FROM [GIà GIà] ORDER BY c");
+        dumpQueryResult("SELECT * FROM [GIà GIà] ORDER BY c");
         st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
-        checkQuery("SELECT * from [22 amadeimargmail111] ORDER BY c");
-        dumpQueryResult("SELECT * from [22 amadeimargmail111] ORDER BY c");
+        checkQuery("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
+        dumpQueryResult("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
@@ -81,26 +79,26 @@ public class AlterTableTest extends AccessVersion2007Test {
         assertTrue(b);
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci2]  YESNO  ");
-        st.execute("Insert into [22 amadeimargmail111] (baaaa) values('cha')");
+        st.execute("INSERT INTO [22 amadeimargmail111] (baaaa) values('cha')");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN Memo  Memo  ");
         st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
-        dumpQueryResult("SELECT * from [22 amadeimargmail111] ORDER BY c");
-        checkQuery("SELECT * from [22 amadeimargmail111] ORDER BY c");
+        dumpQueryResult("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
+        checkQuery("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
 
-        dumpQueryResult("SELECT * from Sample");
-        checkQuery("SELECT * from Sample");
+        dumpQueryResult("SELECT * FROM Sample");
+        checkQuery("SELECT * FROM Sample");
         st.executeUpdate("Update sample set Description='wRRRw'");
-        dumpQueryResult("SELECT * from Sample");
-        checkQuery("SELECT * from Sample");
+        dumpQueryResult("SELECT * FROM Sample");
+        checkQuery("SELECT * FROM Sample");
         st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
-        dumpQueryResult("SELECT * from Sample");
-        checkQuery("SELECT * from Sample");
+        dumpQueryResult("SELECT * FROM Sample");
+        checkQuery("SELECT * FROM Sample");
         st.execute("Update sample set Description='ww'");
-        dumpQueryResult("SELECT * from Sample");
-        checkQuery("SELECT * from Sample");
+        dumpQueryResult("SELECT * FROM Sample");
+        checkQuery("SELECT * FROM Sample");
 
         getLogger().info("After having added a few columns...");
-        dumpQueryResult("SELECT * from UCA_METADATA.Columns");
+        dumpQueryResult("SELECT * FROM UCA_METADATA.Columns");
 
         createFK();
 
@@ -309,10 +307,10 @@ public class AlterTableTest extends AccessVersion2007Test {
             "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-        checkQuery("SELECT count(*) from tx", 1);
-        st.execute("delete from tx1");
-        checkQuery("SELECT count(*) from tx");
-        checkQuery("SELECT count(*) from tx", 0);
+        checkQuery("SELECT COUNT(*) FROM tx", 1);
+        st.execute("DELETE FROM tx1");
+        checkQuery("SELECT COUNT(*) FROM tx");
+        checkQuery("SELECT COUNT(*) FROM tx", 0);
         st.execute("DROP TABLE tx ");
         st.execute("DROP TABLE tx1  ");
 
@@ -324,10 +322,10 @@ public class AlterTableTest extends AccessVersion2007Test {
             "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
-        checkQuery("SELECT count(*) from tx", 1);
-        st.execute("delete from tx1");
-        checkQuery("SELECT count(*) from tx", 1);
-        checkQuery("SELECT * from tx", 1, null, 2.0, null, "what's this?");
+        checkQuery("SELECT COUNT(*) FROM tx", 1);
+        st.execute("DELETE FROM tx1");
+        checkQuery("SELECT COUNT(*) FROM tx", 1);
+        checkQuery("SELECT * FROM tx", 1, null, 2.0, null, "what's this?");
         st.execute("CREATE  UNIQUE  INDEX IDX111 ON tx ([my best friend])");
 
         boolean b = false;

@@ -47,8 +47,7 @@ public class BlobOleLazyLoadingTest extends AccessVersion2010Test {
         outFile.flush();
         outFile.close();
         assertEquals(fl.length(), binaryFileSize);
-        getLogger().info("file was created in {}.", fl.getAbsolutePath());
-        getLogger().info("file size {}.", fl.length());
+        getLogger().info("File was created in {}, size: {} bytes", fl.getAbsolutePath(), fl.length());
         fl.delete();
         byte[] finalBlobBytes = getBlobBytes();
         getLogger().info("BLOB size in backing database after retrieval: {} bytes", finalBlobBytes.length);

@@ -24,7 +24,7 @@ public class AddFunctionTest extends AccessVersionAllTest {
          * `-Duser.language=tr` (for Turkish) can be used for an individual test but does does not seem to affect an
          * entire suite
          */
-        getLogger().info("Locale language is: {}", Locale.getDefault().getLanguage());
+        getLogger().info("Locale language is {}", Locale.getDefault().getLanguage());
         Thread.sleep(1500);
 
         Statement st = ucanaccess.createStatement();

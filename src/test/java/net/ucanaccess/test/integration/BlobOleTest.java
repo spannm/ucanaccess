@@ -64,7 +64,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         }
         outFile.flush();
         outFile.close();
-        getLogger().info("Image file was created in {}.", fl.getAbsolutePath());
+        getLogger().info("Image file was created in {}", fl.getAbsolutePath());
         outByte.flush();
         outByte.close();
         checkQuery("SELECT * FROM T2", new Object[][] {{1, "TestOle", outByte.toByteArray()}});
@@ -76,16 +76,16 @@ public class BlobOleTest extends AccessVersionAllTest {
         ps.executeUpdate();
         checkQuery("SELECT * FROM T2");
         checkQuery("SELECT * FROM T2", 1, "TestOleOk", outByte.toByteArray());
-        ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE  descr=?");
+        ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE descr=?");
         File fl1 = getFile(PPTX_FILE_NAME);
         blob = ucanaccess.createBlob(fl1);
         ps.setObject(1, fl1);
         ps.setString(2, "TestOleOk");
         ps.executeUpdate();
 
-        getLogger().info("PPTX file was created in {}.", getFileAccDb());
+        getLogger().info("PPTX file was created in {}", getFileAccDb());
         checkQuery("SELECT * FROM T2");
-        ps = ucanaccess.prepareStatement("DELETE FROM  t2  WHERE  descr=?");
+        ps = ucanaccess.prepareStatement("DELETE FROM t2 WHERE descr=?");
         ps.setString(1, "TestOleOk");
         ps.executeUpdate();
 
@@ -117,7 +117,7 @@ public class BlobOleTest extends AccessVersionAllTest {
         ps.setBlob(2, blob);
 
         ps.execute();
-        getLogger().info("PPTX file was created in {}.", getFileAccDb());
+        getLogger().info("PPTX file was created in {}", getFileAccDb());
         checkQuery("SELECT * FROM T2");
         Statement st = ucanaccess.createStatement();
         fl1.delete();

@@ -26,7 +26,7 @@ public class MetaDataParameterizedTest extends AccessVersionAllTest {
         Statement st = conn.createStatement();
         st.execute(
             "create table [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
-        st.execute("insert into [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
+        st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
         st.execute("update [健康] set   [Sometime I wonder who I am ]='d'");
         checkQuery("SELECT * FROM 健康 ");
         getLogger().info("crazy names in create table...");
@@ -64,7 +64,7 @@ public class MetaDataParameterizedTest extends AccessVersionAllTest {
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
 
         st.execute("update noroman set [किआओ]='1vv'");
-        checkQuery("SELECT * FROM noroman order by [किआओ]");
+        checkQuery("SELECT * FROM noroman ORDER BY [किआओ]");
     }
 
     @Test

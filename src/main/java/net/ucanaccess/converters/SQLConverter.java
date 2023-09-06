@@ -784,7 +784,7 @@ public final class SQLConverter {
                 name0 = name.replaceAll(Pattern.quote("["), "\"").replaceAll(Pattern.quote("]"), "\"");
             }
             st = conn.createStatement();
-            st.execute("SELECT 1 AS " + name0 + " from dual");
+            st.execute("SELECT 1 AS " + name0 + " FROM dual");
             return name;
         } catch (SQLException e) {
             return quote ? "\"" + name + "\"" : "[" + name + "]";

@@ -24,7 +24,7 @@ public class AccessLikeTest extends AccessVersionDefaultTest {
 
     @Test
     public void testLike() throws SQLException, IOException {
-        checkQuery("SELECT * FROM query1 order by campo2", "dd1");
+        checkQuery("SELECT * FROM query1 ORDER BY campo2", "dd1");
     }
 
     @Test
@@ -51,7 +51,7 @@ public class AccessLikeTest extends AccessVersionDefaultTest {
         st.execute("INSERT INTO T21 (descr)  VALUES( '138')");
         st.execute("INSERT INTO T21 (descr)  VALUES( '138#')");
         Object[][] ver = {{"a*a"}, {"A*a"}};
-        checkQuery("SELECT descr FROM T21 where descr like 'a[*]a' order by ID", ver);
+        checkQuery("SELECT descr FROM T21 where descr like 'a[*]a' ORDER BY ID", ver);
         ver = new Object[][] {{"aa"}, {"aBa"}, {"aBBBa"}, {"a*a"}, {"A*a"}};
 
         checkQuery("SELECT descr FROM T21 where descr like \"a*a\"  AND '1'='1' and (descr) like \"a*a\" ORDER BY ID",

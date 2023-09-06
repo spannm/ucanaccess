@@ -146,10 +146,10 @@ public class ComplexTest extends AccessVersion2010Test {
             ps.close();
             dumpQueryResult("SELECT * FROM TABLE1");
             ucanaccess.commit();
-            checkQuery("SELECT * FROM TABLE1 order by id");
+            checkQuery("SELECT * FROM TABLE1 ORDER BY id");
 
-        } catch (Throwable e) {
-            getLogger().info("Encountered exception: " + e.getMessage());
+        } catch (Throwable _ex) {
+            getLogger().warn("Encountered exception: {}: ", _ex.getMessage(), _ex);
         } finally {
             if (ps != null) {
                 ps.close();
@@ -158,7 +158,7 @@ public class ComplexTest extends AccessVersion2010Test {
 
         ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM TABLE1");
-        checkQuery("SELECT * FROM TABLE1  WHERE ID='row12' order by id");
+        checkQuery("SELECT * FROM TABLE1  WHERE ID='row12' ORDER BY id");
         assertEquals(i, getCount("SELECT COUNT(*) FROM TABLE1", true));
     }
 }

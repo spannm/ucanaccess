@@ -38,7 +38,7 @@ public class CrudTest extends AccessVersionAllTest {
         st.executeUpdate("UPDATE T1 SET id=" + id1 + " WHERE  id=" + id);
         ret = getCount("SELECT COUNT(*) FROM T1 where id=" + id1) == 1;
         assertTrue("Failed Update", ret);
-        st.executeUpdate("DELETE FROM  T1  WHERE  id=" + id1);
+        st.executeUpdate("DELETE FROM T1  WHERE  id=" + id1);
         ret = getCount("SELECT COUNT(*) FROM T1 where id=" + id1) == 0;
         assertTrue("Failed Delete", ret);
         st.close();
@@ -50,8 +50,8 @@ public class CrudTest extends AccessVersionAllTest {
         Statement st = null;
         st = ucanaccess.createStatement();
 
-        st.execute("delete from t1");
-        ps = ucanaccess.prepareStatement("INSERT INTO T1 (id,descr)  VALUES( ?,?)");
+        st.execute("DELETE FROM t1");
+        ps = ucanaccess.prepareStatement("INSERT INTO T1 (id,descr) VALUES( ?,?)");
         final int id = 6666554;
         final int id1 = 5556664;
         ps.setInt(1, id);
@@ -61,17 +61,17 @@ public class CrudTest extends AccessVersionAllTest {
         boolean ret = getCount("SELECT COUNT(*) FROM T1") == 1;
         assertTrue("Failed Insert", ret);
         ps.close();
-        ps = ucanaccess.prepareStatement("UPDATE T1 SET id=? WHERE  id=?");
+        ps = ucanaccess.prepareStatement("UPDATE T1 SET id=? WHERE id=?");
         ps.setInt(1, id1);
         ps.setInt(2, id);
         ps.executeUpdate();
         ret = getCount("SELECT COUNT(*) FROM T1 where id=" + id1) == 1;
         assertTrue("Failed Update", ret);
         ps.close();
-        ps = ucanaccess.prepareStatement("DELETE * FROM  t1  WHERE  id=?");
+        ps = ucanaccess.prepareStatement("DELETE * FROM  t1 WHERE id=?");
         ps.setInt(1, id1);
         ps.executeUpdate();
-        ret = getCount("SELECT COUNT(*) FROM T1 where id=" + id1) == 0;
+        ret = getCount("SELECT COUNT(*) FROM T1 WHERE id=" + id1) == 0;
         assertTrue("Failed Delete", ret);
         ps.close();
         st.close();
@@ -98,7 +98,7 @@ public class CrudTest extends AccessVersionAllTest {
             ps.clearBatch();
             assertTrue("Failed Insert", ret);
             ps.close();
-            ps = ucanaccess.prepareStatement("DELETE FROM  t1 ");
+            ps = ucanaccess.prepareStatement("DELETE FROM t1 ");
             ps.addBatch();
             ps.executeBatch();
             ret = getCount("SELECT COUNT(*) FROM T1 ") == 0;
@@ -119,7 +119,7 @@ public class CrudTest extends AccessVersionAllTest {
         try {
             st = ucanaccess.createStatement();
             int id = 6666554;
-            st.execute("delete from t1");
+            st.execute("DELETE FROM t1");
             st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id + ",'tre canarini volano su e cadono')");
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT *  FROM T1", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -128,8 +128,8 @@ public class CrudTest extends AccessVersionAllTest {
             rs.updateString(2, "show must go off");
             rs.updateRow();
             Object[][] ver = {{6666554, "show must go off"}};
-            checkQuery("SELECT *  FROM T1", ver);
-            st.execute("delete from t1");
+            checkQuery("SELECT * FROM T1", ver);
+            st.execute("DELETE FROM t1");
         } finally {
             if (rs != null) {
                 rs.close();
@@ -149,7 +149,7 @@ public class CrudTest extends AccessVersionAllTest {
             ucanaccess.setAutoCommit(false);
             st = ucanaccess.createStatement();
             int id = 6666554;
-            st.execute("delete from t1");
+            st.execute("DELETE FROM t1");
             st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id + ",'tre canarini volano su e cadono')");
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT *  FROM T1", ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -177,7 +177,7 @@ public class CrudTest extends AccessVersionAllTest {
             ucanaccess.setAutoCommit(false);
             st = ucanaccess.createStatement();
             int id = 6666554;
-            st.execute("delete from t1");
+            st.execute("DELETE FROM t1");
             st.execute("INSERT INTO T1 (id,descr)  VALUES( " + id + ",'tre canarini volano su e cadono')");
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T1", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -189,8 +189,8 @@ public class CrudTest extends AccessVersionAllTest {
             rs.insertRow();
             ps.getConnection().commit();
             Object[][] ver = {{4, "Growing old in rural pleaces"}, {6666554, "tre canarini volano su e cadono"}};
-            checkQuery("SELECT * FROM T1 order by id", ver);
-            st.execute("delete from t1");
+            checkQuery("SELECT * FROM T1 ORDER BY id", ver);
+            st.execute("DELETE FROM t1");
         } finally {
             if (rs != null) {
                 rs.close();
@@ -207,7 +207,7 @@ public class CrudTest extends AccessVersionAllTest {
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE T2 (id AUTOINCREMENT,descr TEXT) ");
-        st.execute("delete from t2");
+        st.execute("DELETE FROM t2");
 
         PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T2", ResultSet.TYPE_FORWARD_ONLY,
             ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -221,12 +221,12 @@ public class CrudTest extends AccessVersionAllTest {
         rs.next();
         ps.getConnection().commit();
 
-        checkQuery("SELECT * FROM T2 order by id", 1, "Growing old in rural places");
+        checkQuery("SELECT * FROM T2 ORDER BY id", 1, "Growing old in rural places");
         Statement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ResultSet rs1 = stat.executeQuery("SELECT * FROM T2 order by id");
+        ResultSet rs1 = stat.executeQuery("SELECT * FROM T2 ORDER BY id");
         rs1.last();
 
-        st.execute("delete from t1");
+        st.execute("DELETE FROM t1");
 
         rs.close();
         st.close();
@@ -251,8 +251,8 @@ public class CrudTest extends AccessVersionAllTest {
             rs.insertRow();
             ps.getConnection().commit();
             Object[][] ver = {{1, "Growing old without emotions"}};
-            checkQuery("SELECT * FROM T21 order by id", ver);
-            st.execute("delete from t21");
+            checkQuery("SELECT * FROM T21 ORDER BY id", ver);
+            st.execute("DELETE FROM t21");
         } finally {
             if (rs != null) {
                 rs.close();

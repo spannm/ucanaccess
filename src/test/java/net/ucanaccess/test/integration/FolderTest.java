@@ -38,7 +38,7 @@ public class FolderTest extends AccessVersionDefaultTest {
                 }
 
             } catch (Exception _ex) {
-                getLogger().info("error {}", fl.getAbsolutePath());
+                getLogger().warn("error {}: ", fl.getAbsolutePath(), _ex);
             } finally {
                 if (st != null) {
                     st.close();

@@ -9,13 +9,11 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runners.Parameterized;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Date;
-import java.util.List;
 
 public abstract class UcanaccessTestBase extends AbstractTestBase {
 
@@ -41,30 +39,12 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     private String                 append2JdbcURL    = "";
     private Boolean                showSchema;
 
-    @Parameterized.Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> getAllAccessFileFormats() {
-        return List.of(
-            new Object[] {FileFormat.V2000},
-            new Object[] {FileFormat.V2003},
-            new Object[] {FileFormat.V2007},
-            new Object[] {FileFormat.V2010},
-            new Object[] {FileFormat.V2016});
-    }
-
     public UcanaccessTestBase(AccessVersion _accessVersion) {
         this(_accessVersion.getFileFormat());
     }
 
-    UcanaccessTestBase(FileFormat _fileFormat) {
+    protected UcanaccessTestBase(FileFormat _fileFormat) {
         fileFormat = _fileFormat;
-    }
-
-    protected void setShowSchema(Boolean _showSchema) {
-        showSchema = _showSchema;
-    }
-
-    protected Boolean getShowSchema() {
-        return showSchema;
     }
 
     protected final File getFileAccDb() {
@@ -72,32 +52,25 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public void checkQuery(String _query, Object[][] _expected) throws SQLException, IOException {
-        try (Statement st = ucanaccess.createStatement(); ResultSet rs = st.executeQuery(_query)) {
+        try (Statement st = ucanaccess.createStatement();
+            ResultSet rs = st.executeQuery(_query)) {
             diff(rs, _expected, _query);
         }
     }
 
     public void checkQuery(String _query) throws SQLException, IOException {
         Statement st1 = null;
-        ResultSet firstResultSet = null;
         Statement st2 = null;
-        ResultSet verifyResultSet = null;
         try {
             initVerifyConnection();
             st1 = ucanaccess.createStatement();
-            firstResultSet = st1.executeQuery(_query);
+            ResultSet firstRs = st1.executeQuery(_query);
             st2 = verifyConnection.createStatement();
-            verifyResultSet = st2.executeQuery(_query);
-            diffResultSets(firstResultSet, verifyResultSet, _query);
+            ResultSet verifyRs = st2.executeQuery(_query);
+            diffResultSets(firstRs, verifyRs, _query);
         } finally {
-            if (firstResultSet != null) {
-                firstResultSet.close();
-            }
             if (st1 != null) {
                 st1.close();
-            }
-            if (verifyResultSet != null) {
-                verifyResultSet.close();
             }
             if (st2 != null) {
                 st2.close();
@@ -113,10 +86,9 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         checkQuery(_query, new Object[][] {_expected});
     }
 
-    private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression)
-        throws SQLException, IOException {
-        ResultSetMetaData mymeta = _resultSet.getMetaData();
-        int mycolmax = mymeta.getColumnCount();
+    private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression) throws SQLException, IOException {
+        ResultSetMetaData rsMetaData = _resultSet.getMetaData();
+        int mycolmax = rsMetaData.getColumnCount();
         if (_expectedResults.length > 0) {
             assertEquals(mycolmax, _expectedResults[0].length);
         }
@@ -158,12 +130,11 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         assertEquals("matrix with different length was expected ", _expectedResults.length, j);
     }
 
-    public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query)
-        throws SQLException, IOException {
-        ResultSetMetaData mymeta = _resultSet.getMetaData();
-        int mycolmax = mymeta.getColumnCount();
-        ResultSetMetaData jometa = _verifyResultSet.getMetaData();
-        int jocolmax = jometa.getColumnCount();
+    public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException, IOException {
+        ResultSetMetaData msMetaData = _resultSet.getMetaData();
+        int mycolmax = msMetaData.getColumnCount();
+        ResultSetMetaData verifyRsMetaData = _verifyResultSet.getMetaData();
+        int jocolmax = verifyRsMetaData.getColumnCount();
         assertEquals(jocolmax, mycolmax);
         StringBuilder log = new StringBuilder("{");
         int row = 0;
@@ -222,46 +193,23 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 
     public void dumpQueryResult(ResultSet _resultSet) throws SQLException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos, true);
-        new Main(ucanaccess, null).consoleDump(_resultSet, ps);
-        String dumped = baos.toString();
-        ps.close();
-        getLogger().info(dumped);
-    }
-
-    public void dumpQueryResult(String _query) throws SQLException {
-        Statement st = null;
-        ResultSet resultSet = null;
-        try {
-            Connection conn = ucanaccess;
-            st = conn.createStatement();
-            resultSet = st.executeQuery(_query);
-            dumpQueryResult(resultSet);
-        } finally {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-            if (st != null) {
-                st.close();
-            }
+        try (PrintStream ps = new PrintStream(baos, true)) {
+            new Main(ucanaccess, null).consoleDump(_resultSet, ps);
+            getLogger().info(baos.toString());
         }
     }
 
-    public void dumpVerify(String expression) throws SQLException {
-        Statement st = null;
-        ResultSet myRs = null;
-        try {
-            Connection conn = verifyConnection;
-            st = conn.createStatement();
-            myRs = st.executeQuery(expression);
-            dumpQueryResult(myRs);
-        } finally {
-            if (myRs != null) {
-                myRs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
+    public void dumpQueryResult(String _query) throws SQLException {
+        try (Statement st = ucanaccess.createStatement()) {
+            ResultSet resultSet = st.executeQuery(_query);
+            dumpQueryResult(resultSet);
+        }
+    }
+
+    protected final void dumpVerify(String _expression) throws SQLException {
+        try (Statement st = verifyConnection.createStatement()) {
+            ResultSet rs = st.executeQuery(_expression);
+            dumpQueryResult(rs);
         }
     }
 
@@ -270,14 +218,13 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
      *
      * @return valid classpath reference to a test database
      */
-    public String getAccessPath() {
+    protected String getAccessPath() {
         return null;
     }
 
-    public String getAccessTempPath() throws IOException {
+    protected final String getAccessTempPath() throws IOException {
         if (getAccessPath() == null) {
-            fileAccDb = File.createTempFile(getClass().getSimpleName() + "-", fileFormat.getFileExtension(),
-                TEST_DB_TEMP_DIR);
+            fileAccDb = File.createTempFile(getClass().getSimpleName() + "-", fileFormat.getFileExtension(), TEST_DB_TEMP_DIR);
             createNewDatabase(fileFormat, fileAccDb);
         } else {
             fileAccDb = copyResourceToTempFile(getAccessPath());
@@ -294,10 +241,10 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     void createNewDatabase(FileFormat _fileFormat, File _dbFile) throws IOException {
-        Database db = DatabaseBuilder.create(_fileFormat, _dbFile);
-        db.flush();
-        db.close();
-        getLogger().info("Access file version {} created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+        try (Database db = DatabaseBuilder.create(_fileFormat, _dbFile)) {
+            db.flush();
+            getLogger().info("Access file version {} created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+        }
     }
 
     protected File copyResourceToTempFile(String _resourcePath) throws IOException {
@@ -321,21 +268,21 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         return tempFile;
     }
 
-    public int getCount(String sql) throws SQLException, IOException {
-        return getCount(sql, true);
+    public int getCount(String _sql) throws SQLException, IOException {
+        return getCount(_sql, true);
     }
 
-    public int getCount(String sql, boolean equals) throws SQLException, IOException {
+    public int getCount(String _sql, boolean _equals) throws SQLException, IOException {
         initVerifyConnection();
         Statement st = verifyConnection.createStatement();
-        ResultSet joRs = st.executeQuery(sql);
+        ResultSet joRs = st.executeQuery(_sql);
         joRs.next();
         int count = joRs.getInt(1);
         st = ucanaccess.createStatement();
-        ResultSet myRs = st.executeQuery(sql);
+        ResultSet myRs = st.executeQuery(_sql);
         myRs.next();
         int myCount = myRs.getInt(1);
-        if (equals) {
+        if (_equals) {
             assertEquals(count, myCount);
         } else {
             assertNotEquals(count, myCount);
@@ -359,7 +306,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         return getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, _dbPath);
     }
 
-    UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException, IOException {
+    private UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException, IOException {
         if (_dbPath == null) {
             _dbPath = getAccessTempPath();
         }
@@ -427,19 +374,18 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 
     public void setIgnoreCase(boolean _ignoreCase) {
         ignoreCase = _ignoreCase;
-
     }
 
-    protected void dropTable(String _tableName) throws SQLException {
+    protected final void dropTable(String _tableName) throws SQLException {
         executeStatements("DROP TABLE " + _tableName);
     }
 
-    protected void executeStatements(String... _sqls) throws SQLException {
-        Statement st = ucanaccess.createStatement();
-        for (String sql : _sqls) {
-            st.execute(sql);
+    protected final void executeStatements(String... _sqls) throws SQLException {
+        try (Statement st = ucanaccess.createStatement()) {
+            for (String sql : _sqls) {
+                st.execute(sql);
+            }
         }
-        st.close();
     }
 
     /**

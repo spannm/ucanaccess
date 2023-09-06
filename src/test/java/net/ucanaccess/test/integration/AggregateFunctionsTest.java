@@ -35,7 +35,7 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
     @Test
     public void testDCount() throws SQLException, IOException {
 
-        checkQuery("SELECT id  , DCount('*','t235','1=1') from [t235]", new Object[][] {{1234, 2}, {12344, 2}});
+        checkQuery("SELECT id, DCount('*','t235','1=1') FROM [t235]", new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT id as [WW \"SS], DCount('descr','t235','1=1')from t235",
             new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT  DCount('*','t235','1=1') ", 2);
@@ -64,16 +64,16 @@ public class AggregateFunctionsTest extends AccessVersionAllTest {
 
     @Test
     public void testLast() throws SQLException, IOException {
-        checkQuery("SELECT last(descr) from t235", "Show must go up and down");
-        checkQuery("SELECT last(NUM) from t235", -113.5540);
-        dumpQueryResult("SELECT last(date0) from t235");
+        checkQuery("SELECT last(descr) FROM t235", "Show must go up and down");
+        checkQuery("SELECT last(NUM) FROM t235", -113.5540);
+        dumpQueryResult("SELECT last(date0) FROM t235");
     }
 
     @Test
     public void testFirst() throws SQLException, IOException {
-        checkQuery("SELECT first(descr) from t235", "Show must go off");
-        checkQuery("SELECT first(NUM) from t235", -1110.5540);
-        dumpQueryResult("SELECT  first(date0) from t235");
+        checkQuery("SELECT first(descr) FROM t235", "Show must go off");
+        checkQuery("SELECT first(NUM) FROM t235", -1110.5540);
+        dumpQueryResult("SELECT  first(date0) FROM t235");
     }
 
     @Test

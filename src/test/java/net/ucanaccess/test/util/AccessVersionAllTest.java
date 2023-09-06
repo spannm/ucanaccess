@@ -6,20 +6,18 @@ import java.util.List;
 
 public abstract class AccessVersionAllTest extends UcanaccessTestBase {
 
-    private static final List<Object[]> VERSIONS = List.of(
-        new Object[] {AccessVersion.V2000},
-        new Object[] {AccessVersion.V2003},
-        new Object[] {AccessVersion.V2007},
-        new Object[] {AccessVersion.V2010},
-        new Object[] {AccessVersion.V2016});
-
-    public AccessVersionAllTest(AccessVersion _fileFormat) {
-        super(_fileFormat.getFileFormat());
+    public AccessVersionAllTest(AccessVersion _accessVersion) {
+        super(_accessVersion.getFileFormat());
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> getAllAccessVersions() {
-        return VERSIONS;
+    public static List<AccessVersion> getAllAccessVersions() {
+        return List.of(
+            AccessVersion.V2000,
+            AccessVersion.V2003,
+            AccessVersion.V2007,
+            AccessVersion.V2010,
+            AccessVersion.V2016);
     }
 
 }
