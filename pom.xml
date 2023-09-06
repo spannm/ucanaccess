@@ -61,7 +61,8 @@
     </developers>
 
     <properties>
-        <javaVersion>11</javaVersion>
+        <project.build.systemJdk>11</project.build.systemJdk>
+        <project.build.targetJdk>11</project.build.targetJdk>
 
         <dep.hsqldb.version>2.5.0</dep.hsqldb.version>
         <dep.jackcess.version>3.0.1</dep.jackcess.version>
