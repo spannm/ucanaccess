@@ -105,7 +105,7 @@ public abstract class AbstractExecute {
         }
     }
 
-    private SQLException checkDDLException() throws SQLException {
+    private SQLException checkDDLException() {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick

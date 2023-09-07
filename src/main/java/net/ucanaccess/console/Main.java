@@ -294,49 +294,56 @@ public class Main {
 
         // Process the command line flags.
         int i = 1; // skip the first token which will always be "export"
+        label:
         for (; i < tokens.size(); i++) {
             String arg = tokens.get(i);
             if (!arg.startsWith("-")) {
                 break;
             }
-            if ("-d".equals(arg)) {
-                ++i;
-                if (i >= tokens.size()) {
-                    prompt("Missing parameter for -d flag");
+            switch (arg) {
+                case "-d":
+                    ++i;
+                    if (i >= tokens.size()) {
+                        prompt("Missing parameter for -d flag");
+                        prompt(EXPORT_PROMPT);
+                        return;
+                    }
+                    exporterBuilder.setDelimiter(tokens.get(i));
+                    break;
+                case "-t":
+                    ++i;
+                    if (i >= tokens.size()) {
+                        prompt("Missing parameter for -t flag");
+                        prompt(EXPORT_PROMPT);
+                        return;
+                    }
+                    table = tokens.get(i);
+                    break;
+                case "--bom":
+                    exporterBuilder.includeBom(true);
+                    break;
+                case "--newlines":
+                    exporterBuilder.preserveNewlines(true);
+                    break;
+                case "--big_query_schema":
+                    ++i;
+                    if (i >= tokens.size()) {
+                        prompt("Missing parameter for --big_query_schema flag");
+                        prompt(EXPORT_PROMPT);
+                        return;
+                    }
+                    schemaFileName = tokens.get(i);
+                    break;
+                case "--help":
+                    printExportHelp();
+                    return;
+                case "--":
+                    ++i;
+                    break label;
+                default:
+                    prompt("Unknown flag " + arg);
                     prompt(EXPORT_PROMPT);
                     return;
-                }
-                exporterBuilder.setDelimiter(tokens.get(i));
-            } else if ("-t".equals(arg)) {
-                ++i;
-                if (i >= tokens.size()) {
-                    prompt("Missing parameter for -t flag");
-                    prompt(EXPORT_PROMPT);
-                    return;
-                }
-                table = tokens.get(i);
-            } else if ("--bom".equals(arg)) {
-                exporterBuilder.includeBom(true);
-            } else if ("--newlines".equals(arg)) {
-                exporterBuilder.preserveNewlines(true);
-            } else if ("--big_query_schema".equals(arg)) {
-                ++i;
-                if (i >= tokens.size()) {
-                    prompt("Missing parameter for --big_query_schema flag");
-                    prompt(EXPORT_PROMPT);
-                    return;
-                }
-                schemaFileName = tokens.get(i);
-            } else if ("--help".equals(arg)) {
-                printExportHelp();
-                return;
-            } else if ("--".equals(arg)) {
-                ++i;
-                break;
-            } else {
-                prompt("Unknown flag " + arg);
-                prompt(EXPORT_PROMPT);
-                return;
             }
 
         }

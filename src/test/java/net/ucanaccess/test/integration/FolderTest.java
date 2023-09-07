@@ -2,23 +2,19 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.sql.*;
 
-@RunWith(Parameterized.class)
-public class FolderTest extends AccessVersionDefaultTest {
+class FolderTest extends UcanaccessTestBase {
 
-    public FolderTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Test
-    public void testFolderContent() throws SQLException, ClassNotFoundException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testFolderContent(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
+        init(_accessVersion);
         Statement st = null;
         String folderPath = System.getProperty("accessFolder");
         if (folderPath == null) {

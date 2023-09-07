@@ -1,39 +1,36 @@
 package net.ucanaccess.triggers;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
 import net.ucanaccess.test.util.AbstractTestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AutoNumberManagerTest extends AbstractTestBase {
 
-    @Mock
     private ColumnImpl          column;
-    @Mock
     private AutoNumberGenerator autoNumberGenerator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        column = mock(ColumnImpl.class);
+        autoNumberGenerator = mock(AutoNumberGenerator.class);
         when(column.getAutoNumberGenerator()).thenReturn(autoNumberGenerator);
         when(autoNumberGenerator.getLast()).thenReturn(1);
     }
 
     @Test
-    public void testGetNext() {
+    void testGetNext() {
         assertEquals(2, AutoNumberManager.getNext(column));
         assertEquals(3, AutoNumberManager.getNext(column));
         assertEquals(4, AutoNumberManager.getNext(column));
     }
 
     @Test
-    public void testReset() {
+    void testReset() {
         assertEquals(2, AutoNumberManager.getNext(column));
         assertEquals(3, AutoNumberManager.getNext(column));
         AutoNumberManager.reset(column, 0);
@@ -41,7 +38,7 @@ public class AutoNumberManagerTest extends AbstractTestBase {
     }
 
     @Test
-    public void testBump() {
+    void testBump() {
         assertEquals(2, AutoNumberManager.getNext(column));
         assertEquals(3, AutoNumberManager.getNext(column));
         AutoNumberManager.bump(column, 0);
@@ -51,7 +48,7 @@ public class AutoNumberManagerTest extends AbstractTestBase {
     }
 
     @Test
-    public void testClear() {
+    void testClear() {
         assertEquals(2, AutoNumberManager.getNext(column));
         assertEquals(3, AutoNumberManager.getNext(column));
         AutoNumberManager.clear();

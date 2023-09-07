@@ -1,40 +1,34 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class MetaDataTest extends AccessVersionDefaultTest {
+class MetaDataTest extends UcanaccessTestBase {
 
-    public MetaDataTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    @Override
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "noroman.mdb";
     }
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/noroman.mdb";
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("AAAn");
     }
 
-    public void createSimple(String a, Object[][] ver) throws SQLException, IOException {
+    void createSimple(String a, Object[][] ver) throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
             st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
@@ -42,8 +36,10 @@ public class MetaDataTest extends AccessVersionDefaultTest {
         }
     }
 
-    @Test
-    public void testDrop() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testDrop(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         ucanaccess.setAutoCommit(false);
         createSimple("a", new Object[][] {{"33A", 11, "a"}, {"33B", 111, "a"}});

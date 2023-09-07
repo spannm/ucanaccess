@@ -1,36 +1,32 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(Parameterized.class)
-public class WorkloadTest extends AccessVersionDefaultTest {
+class WorkloadTest extends UcanaccessTestBase {
 
-    public WorkloadTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE AAAB ( id COUNTER PRIMARY KEY,A LONG , C TEXT,D TEXT) ");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("AAAB");
     }
 
-    @Test
-    public void testLoadMany() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testLoadMany(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         final int nbRecords = 30000;
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();

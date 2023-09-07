@@ -1,12 +1,10 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -14,26 +12,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class GeneratedKeysTest extends AccessVersionAllTest {
+class GeneratedKeysTest extends UcanaccessTestBase {
     private String tableName = "T_Key";
 
-    public GeneratedKeysTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE " + tableName + " ( Z COUNTER PRIMARY KEY, B char(4) )");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable(tableName);
     }
 
-    @Test
-    public void testGeneratedKeys() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
 
         PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)");
         ps.setString(1, "");
@@ -42,6 +38,7 @@ public class GeneratedKeysTest extends AccessVersionAllTest {
         rs.next();
         assertEquals(1, rs.getInt(1));
         ps.close();
+
         ps = ucanaccess.prepareStatement("Select @@identity ");
         rs = ps.executeQuery();
         rs.next();

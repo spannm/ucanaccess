@@ -1,10 +1,10 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -13,20 +13,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalTime;
 
-@RunWith(Parameterized.class)
-public class ParametersTest extends AccessVersion2007Test {
-
-    public ParametersTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class ParametersTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/Parameters.accdb"; // Access 2007
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "Parameters.accdb"; // Access 2007
     }
 
-    @Test
-    public void testParameters() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testParameters(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+
         dumpQueryResult("SELECT * FROM tq");
         dumpQueryResult("SELECT * FROM z");
         dumpQueryResult("SELECT * FROM [queryWithParameters]");
@@ -80,8 +78,11 @@ public class ParametersTest extends AccessVersion2007Test {
         dumpQueryResult("SELECT * FROM [table 1]");
     }
 
-    @Test
-    public void testLocalTimeParameters() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testLocalTimeParameters(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
+
         final LocalTime desiredTime = LocalTime.of(12, 0, 1);
         final String expectedText = "one second past noon";
 

@@ -1,10 +1,9 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,17 +11,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class NotNullDdlTest extends AccessVersionDefaultTest {
+class NotNullDdlTest extends UcanaccessTestBase {
 
-    public NotNullDdlTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Test
-    public void confirmNotNullColumnUsingJet() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void confirmNotNullColumnUsingJet(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         // future-proofing in case default file version changes
-        assertEquals(fileFormat.name(), "V2003");
+        assertEquals(getFileFormat().name(), "V2003");
 
         if (System.getProperty("os.name").startsWith("Windows")) {
             String mdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();

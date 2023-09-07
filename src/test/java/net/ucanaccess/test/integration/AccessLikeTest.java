@@ -1,93 +1,92 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class AccessLikeTest extends AccessVersionDefaultTest {
-
-    public AccessLikeTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class AccessLikeTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/likeTest.mdb"; // Access 2000
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "likeTest.mdb"; // Access 2000
     }
 
-    @Test
-    public void testLike() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testLike(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         checkQuery("SELECT * FROM query1 ORDER BY campo2", "dd1");
     }
 
-    @Test
-    public void testLikeExternal() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testLikeExternal(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         String tableName = "T21";
         Statement st;
 
         st = ucanaccess.createStatement();
-        st.executeUpdate("CREATE TABLE " + tableName + " (id counter primary key, descr memo)");
+        st.executeUpdate("CREATE TABLE " + tableName + " (id COUNTER PRIMARY KEY, descr MEMO)");
         st.close();
         st = ucanaccess.createStatement();
 
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'dsdsds')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'aa')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'aBa')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'aBBBa')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'PB123')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'PZ123')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'a*a')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'A*a')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( 'ss#sss')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( '*')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( '132B')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( '138')");
-        st.execute("INSERT INTO T21 (descr)  VALUES( '138#')");
+        st.execute("INSERT INTO T21 (descr) VALUES('dsdsds')");
+        st.execute("INSERT INTO T21 (descr) VALUES('aa')");
+        st.execute("INSERT INTO T21 (descr) VALUES('aBa')");
+        st.execute("INSERT INTO T21 (descr) VALUES('aBBBa')");
+        st.execute("INSERT INTO T21 (descr) VALUES('PB123')");
+        st.execute("INSERT INTO T21 (descr) VALUES('PZ123')");
+        st.execute("INSERT INTO T21 (descr) VALUES('a*a')");
+        st.execute("INSERT INTO T21 (descr) VALUES('A*a')");
+        st.execute("INSERT INTO T21 (descr) VALUES('ss#sss')");
+        st.execute("INSERT INTO T21 (descr) VALUES('*')");
+        st.execute("INSERT INTO T21 (descr) VALUES('132B')");
+        st.execute("INSERT INTO T21 (descr) VALUES('138')");
+        st.execute("INSERT INTO T21 (descr) VALUES('138#')");
         Object[][] ver = {{"a*a"}, {"A*a"}};
-        checkQuery("SELECT descr FROM T21 where descr like 'a[*]a' ORDER BY ID", ver);
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE 'a[*]a' ORDER BY ID", ver);
         ver = new Object[][] {{"aa"}, {"aBa"}, {"aBBBa"}, {"a*a"}, {"A*a"}};
 
-        checkQuery("SELECT descr FROM T21 where descr like \"a*a\"  AND '1'='1' and (descr) like \"a*a\" ORDER BY ID",
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE \"a*a\"  AND '1'='1' AND (descr) like \"a*a\" ORDER BY ID",
             ver);
         ver = new Object[][] {{2, "aa"}, {3, "aBa"}, {4, "aBBBa"}, {7, "a*a"}, {8, "A*a"}};
-        checkQuery("SELECT * FROM T21 where descr like 'a%a'", ver);
+        checkQuery("SELECT * FROM T21 WHERE descr LIKE 'a%a'", ver);
 
-        checkQuery("SELECT descr FROM T21 where descr like 'P[A-F]###'", "PB123");
-        checkQuery("SELECT descr FROM T21 where (T21.descr\n) \nlike 'P[!A-F]###' AND '1'='1'", "PZ123");
-        checkQuery("SELECT * FROM T21 where descr='aba'", 3, "aBa");
-        checkQuery("SELECT descr FROM T21 where descr like '13[1-4][A-F]'", "132B");
-        checkQuery("SELECT descr FROM T21 where descr like '13[!1-4]'", "138");
-        checkQuery("SELECT descr FROM T21 where descr like '%s[#]%'", "ss#sss");
-        checkQuery("SELECT descr FROM T21 where descr like '###'", "138");
-        checkQuery("SELECT descr FROM T21 where descr like '###[#]'", "138#");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE 'P[A-F]###'", "PB123");
+        checkQuery("SELECT descr FROM T21 WHERE (T21.descr\n) \nLIKE 'P[!A-F]###' AND '1'='1'", "PZ123");
+        checkQuery("SELECT * FROM T21 WHERE descr='aba'", 3, "aBa");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '13[1-4][A-F]'", "132B");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '13[!1-4]'", "138");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '%s[#]%'", "ss#sss");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '###'", "138");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '###[#]'", "138#");
 
-        checkQuery("SELECT descr FROM T21 where descr like '###[#]'", "138#");
-        checkQuery("SELECT descr FROM T21 where (( descr like '###[#]'))", "138#");
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE '###[#]'", "138#");
+        checkQuery("SELECT descr FROM T21 WHERE ((descr LIKE '###[#]'))", "138#");
         st.close();
 
         dropTable(tableName);
     }
 
-    @Test
-    public void testNotLikeExternal() throws SQLException, IOException {
-        String tableName = "Tx21";
-        Statement st;
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testNotLikeExternal(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
 
-        st = ucanaccess.createStatement();
+        String tableName = "Tx21";
+        Statement st = ucanaccess.createStatement();
         st.executeUpdate("CREATE TABLE " + tableName + " (id counter primary key, descr memo)");
         st.close();
 
         st = ucanaccess.createStatement();
-        st.execute("INSERT INTO Tx21 (descr)  VALUES( 't11114')");
-        st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111C')");
-        st.execute("INSERT INTO Tx21 (descr)  VALUES( 't1111')");
+        st.execute("INSERT INTO Tx21 (descr) VALUES('t11114')");
+        st.execute("INSERT INTO Tx21 (descr) VALUES('t1111C')");
+        st.execute("INSERT INTO Tx21 (descr) VALUES('t1111')");
         checkQuery("SELECT DESCR FROM Tx21 WHERE descr NOT LIKE \"t#####\" ORDER BY ID",
             new Object[][] {{"t1111C"}, {"t1111"}});
 

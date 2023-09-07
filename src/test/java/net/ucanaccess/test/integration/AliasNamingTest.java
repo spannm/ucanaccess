@@ -1,28 +1,23 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
-@RunWith(Parameterized.class)
-public class AliasNamingTest extends AccessVersionDefaultTest {
-
-    public AliasNamingTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class AliasNamingTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/aliasNaming.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "aliasNaming.accdb";
     }
 
-    @Test
-    public void testRegex2() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testRegex2(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         executeStatements("SELECT SUM(category_id) AS `SUM(categories abc:category_id)` FROM `categories abc`");
         dumpQueryResult("SELECT SUM(category_id) AS `SUM(categories abc:category_id)` FROM `categories abc`");
     }

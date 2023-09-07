@@ -4,12 +4,11 @@ import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Index.Column;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
+import net.ucanaccess.test.util.UcanaccessTestBase;
 import net.ucanaccess.util.HibernateSupport;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -19,26 +18,26 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(Parameterized.class)
-public class AlterTableTest extends AccessVersion2007Test {
+class AlterTableTest extends UcanaccessTestBase {
 
-    public AlterTableTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    @Override
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "badDB.accdb";
     }
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/badDB.accdb";
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
+        executeStatements("CREATE TABLE AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))",
+            "CREATE TABLE [AAA n] (baaaa TEXT(3), A INTEGER, C TEXT(4), b YESNO, "
+            + "d DATETIME DEFAULT NOW(), e NUMERIC(8,3), [f f] TEXT ) ");
     }
 
-    @Before
-    public void beforeTestCase() throws Exception {
-        executeStatements("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4))",
-            "CREATE TABLE [AAA n] ( baaaa TEXT(3) ,A INTEGER , C TEXT(4), b yesNo, d datetime default now(), e numeric(8,3),[f f]TEXT ) ");
-    }
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testRename(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
 
-    @Test
-    public void testRename() throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
             boolean b = false;
@@ -55,10 +54,11 @@ public class AlterTableTest extends AccessVersion2007Test {
         }
     }
 
-    @Test
-    public void testAddColumn() throws SQLException, IOException {
-        Statement st = null;
-        st = ucanaccess.createStatement();
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testAddColumn(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+        Statement st = ucanaccess.createStatement();
         st.execute("ALTER TABLE AAAn RENAME TO [GIà GIà]");
         st.execute("INSERT INTO [GIà GIà] (baaaa) values('chi')");
         checkQuery("SELECT * FROM [GIà GIà] ORDER BY c");
@@ -107,13 +107,13 @@ public class AlterTableTest extends AccessVersion2007Test {
         rs.next();
         assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
         st.close();
-
     }
 
-    @Test
-    public void testCreateIndex() throws SQLException, IOException {
-        Statement st = null;
-        st = ucanaccess.createStatement();
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testCreateIndex(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+        Statement st = ucanaccess.createStatement();
         st.execute("CREATE unique INDEX [èèè 23] on [AAA n]  (a ASC,c ASC )");
         boolean b = false;
         try {
@@ -183,8 +183,10 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.close();
     }
 
-    @Test
-    public void testCreatePK() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testCreatePK(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = ucanaccess.createStatement();
 
         st.execute("ALTER TABLE [AAA n] add  Primary key (baaaa,a)");
@@ -246,7 +248,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         HibernateSupport.setActive(false);
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]");
-            org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+            fail("UcanaccessSQLException should have been thrown");
         } catch (UcanaccessSQLException ignored) {}
         // now try again with Hibernate mode active
         HibernateSupport.setActive(true);
@@ -254,7 +256,7 @@ public class AlterTableTest extends AccessVersion2007Test {
         // and verify that it actually got dropped
         try {
             st.execute("ALTER TABLE [AAA n] DROP CONSTRAINT [pippo1]"); // again
-            org.junit.Assert.fail("UcanaccessSQLException should have been thrown");
+            fail("UcanaccessSQLException should have been thrown");
         } catch (UcanaccessSQLException ignored) {}
         HibernateSupport.setActive(null);
 
@@ -263,8 +265,10 @@ public class AlterTableTest extends AccessVersion2007Test {
         st.close();
     }
 
-    @Test
-    public void testDoubleRelationship() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testDoubleRelationship(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         // repro code from https://stackoverflow.com/q/49160150/2144390
         Statement statement = ucanaccess.createStatement();
         //
@@ -291,10 +295,11 @@ public class AlterTableTest extends AccessVersion2007Test {
             + tableToBeReferenced + "(ID) ON DELETE CASCADE");
     }
 
-    @Test
-    public void testMiscellaneous() throws SQLException, IOException {
-        Statement st = null;
-        st = ucanaccess.createStatement();
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testMiscellaneous(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+        Statement st = ucanaccess.createStatement();
         st.execute("ALTER TABLE tx add constraint pk primary key ([i d]) ");
         st.execute("ALTER TABLE tx add column [my best friend] long ");
         st.execute("ALTER TABLE tx add column [my worst friend] single ");
@@ -349,8 +354,10 @@ public class AlterTableTest extends AccessVersion2007Test {
         fail("Should have encountered error: " + _expectedMessage);
     }
 
-    @Test
-    public void testSqlErrors() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testSqlErrors(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         Statement st = ucanaccess.createStatement();
         st.execute(
             "CREATE TABLE tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");

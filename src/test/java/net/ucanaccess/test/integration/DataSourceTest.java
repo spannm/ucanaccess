@@ -2,7 +2,7 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessDataSource;
 import net.ucanaccess.test.util.AbstractTestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,14 +10,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DataSourceTest extends AbstractTestBase {
+
     @Test
-    public void setNewDatabaseVersionBad() {
+    void setNewDatabaseVersionBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         assertThrows(IllegalArgumentException.class, () -> uds.setNewDatabaseVersion("V200?"));
     }
 
     @Test
-    public void setNewDatabaseVersionGood() {
+    void setNewDatabaseVersionGood() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         String ver = "V2003";
         uds.setNewDatabaseVersion(ver);
@@ -25,13 +26,13 @@ public class DataSourceTest extends AbstractTestBase {
     }
 
     @Test
-    public void setLobScaleBad() {
+    void setLobScaleBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         assertThrows(IllegalArgumentException.class, () -> uds.setLobScale(3));
     }
 
     @Test
-    public void setLobScaleGood() {
+    void setLobScaleGood() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         Integer val = 4;
         uds.setLobScale(val);
@@ -39,7 +40,7 @@ public class DataSourceTest extends AbstractTestBase {
     }
 
     @Test
-    public void createNewDatabase() throws SQLException, IOException {
+    void createNewDatabase() throws SQLException, IOException {
         File fileMdb;
         fileMdb = File.createTempFile("ucaDataSourceTest", ".mdb");
         fileMdb.delete(); // delete the 0-byte file created above

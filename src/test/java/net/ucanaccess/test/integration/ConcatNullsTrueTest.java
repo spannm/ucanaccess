@@ -1,16 +1,13 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-public class ConcatNullsTrueTest extends AccessVersionDefaultTest {
+class ConcatNullsTrueTest extends UcanaccessTestBase {
 
-    public ConcatNullsTrueTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    ConcatNullsTrueTest() {
         // By default, any null value will cause the function to return null.
         // If the property is set false, then NULL values are replaced with empty strings.
         // see: http://hsqldb.org/doc/guide/builtinfunctions-chapt.html
@@ -18,12 +15,14 @@ public class ConcatNullsTrueTest extends AccessVersionDefaultTest {
     }
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/badDB.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "badDB.accdb";
     }
 
-    @Test
-    public void testConcat() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testConcat(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         checkQuery("SELECT 'aa2'& null FROM dual", new Object[][] {{null}});
     }
 

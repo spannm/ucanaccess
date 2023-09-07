@@ -1,28 +1,24 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class UnproperExecuteQueryTest extends AccessVersionAllTest {
-
-    public UnproperExecuteQueryTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class UnproperExecuteQueryTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/noroman.mdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "noroman.mdb";
     }
 
-    @Test
-    public void testExecute() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testExecute(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
         execute("UPDATE NOROMAN SET [ENd]='BLeah'");
         execute("DELETE FROM NOROMAN");
@@ -33,9 +29,8 @@ public class UnproperExecuteQueryTest extends AccessVersionAllTest {
         try {
             st.executeQuery(s);
             fail("Should not get here");
-        } catch (Exception e) {
-            // e.printStackTrace();
-            getLogger().info(e.getMessage());
+        } catch (Exception _ex) {
+            getLogger().info(_ex.getMessage());
         }
         st.execute(s);
     }

@@ -1,37 +1,33 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class TransactionTest extends AccessVersionAllTest {
+class TransactionTest extends UcanaccessTestBase {
 
-    public TransactionTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE T4 (id LONG,descr text(200)) ");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("T4");
     }
 
-    @Test
-    public void testCommit() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCommit(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
         int i = getCount("SELECT COUNT(*) FROM T4", true);
@@ -42,8 +38,10 @@ public class TransactionTest extends AccessVersionAllTest {
         st.close();
     }
 
-    @Test
-    public void testSavepoint() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testSavepoint(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
@@ -58,8 +56,10 @@ public class TransactionTest extends AccessVersionAllTest {
         st.close();
     }
 
-    @Test
-    public void testSavepoint2() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testSavepoint2(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();

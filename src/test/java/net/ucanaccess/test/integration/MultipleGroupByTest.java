@@ -1,24 +1,19 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@RunWith(Parameterized.class)
-public class MultipleGroupByTest extends AccessVersionAllTest {
+class MultipleGroupByTest extends UcanaccessTestBase {
 
-    public MultipleGroupByTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Test
-    public void testMultiple() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testMultiple(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         Connection conn = getUcanaccessConnection();
         String wCreateTable = "CREATE TABLE TXXX (F1 VARCHAR, F2 VARCHAR, F3 VARCHAR, F4 VARCHAR, VAL NUMBER)";
         conn.createStatement().executeUpdate(wCreateTable);

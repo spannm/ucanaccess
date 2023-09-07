@@ -1,11 +1,9 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -13,20 +11,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class CrudTest extends AccessVersionAllTest {
+class CrudTest extends UcanaccessTestBase {
 
-    public CrudTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE T1 (id LONG,descr TEXT) ");
     }
 
-    @Test
-    public void testCrud() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCrud(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = ucanaccess.createStatement();
         int id = 6666554;
         int id1 = 5556664;
@@ -44,8 +40,10 @@ public class CrudTest extends AccessVersionAllTest {
         st.close();
     }
 
-    @Test
-    public void testCrudPS() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCrudPS(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         PreparedStatement ps = null;
         Statement st = null;
         st = ucanaccess.createStatement();
@@ -77,8 +75,10 @@ public class CrudTest extends AccessVersionAllTest {
         st.close();
     }
 
-    @Test
-    public void testCrudPSBatch() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCrudPSBatch(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         PreparedStatement ps = null;
         try {
 
@@ -112,8 +112,10 @@ public class CrudTest extends AccessVersionAllTest {
         }
     }
 
-    @Test
-    public void testUpdatableRS() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testUpdatableRS(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         ResultSet rs = null;
         try {
@@ -141,8 +143,10 @@ public class CrudTest extends AccessVersionAllTest {
         }
     }
 
-    @Test
-    public void testDeleteRS() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testDeleteRS(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         ResultSet rs = null;
         try {
@@ -169,8 +173,10 @@ public class CrudTest extends AccessVersionAllTest {
 
     }
 
-    @Test
-    public void testInsertRS() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testInsertRS(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         ResultSet rs = null;
         try {
@@ -202,8 +208,10 @@ public class CrudTest extends AccessVersionAllTest {
         }
     }
 
-    @Test
-    public void testInsertRSNoAllSet() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testInsertRSNoAllSet(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE T2 (id AUTOINCREMENT,descr TEXT) ");
@@ -232,8 +240,10 @@ public class CrudTest extends AccessVersionAllTest {
         st.close();
     }
 
-    @Test
-    public void testPartialInsertRS() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testPartialInsertRS(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         ResultSet rs = null;
         try {

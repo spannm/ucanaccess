@@ -1,7 +1,7 @@
 package net.ucanaccess.console;
 
 import net.ucanaccess.test.util.AbstractTestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
@@ -10,7 +10,7 @@ import java.sql.Types;
 public class ExporterTest extends AbstractTestBase {
 
     @Test
-    public void testToCsvReplacingNewlines() {
+    void testToCsvReplacingNewlines() {
         boolean preserveNewlines = false;
         assertEquals("\"a,b\"", Exporter.toCsv("a,b", ",", preserveNewlines));
         assertEquals("\"a,,b\"", Exporter.toCsv("a,,b", ",", preserveNewlines));
@@ -21,13 +21,13 @@ public class ExporterTest extends AbstractTestBase {
     }
 
     @Test
-    public void testToCsvPreservingNewlines() {
+    void testToCsvPreservingNewlines() {
         boolean preserveNewlines = true;
         assertEquals("\"a\r\nb\"", Exporter.toCsv("a\r\nb", ",", preserveNewlines));
     }
 
     @Test
-    public void testToBigQueryType() {
+    void testToBigQueryType() {
         assertEquals("int64", Exporter.toBigQueryType(Types.INTEGER));
         assertEquals("float64", Exporter.toBigQueryType(Types.DECIMAL));
         assertEquals("timestamp", Exporter.toBigQueryType(Types.TIMESTAMP));
@@ -39,7 +39,7 @@ public class ExporterTest extends AbstractTestBase {
     }
 
     @Test
-    public void testToBigQueryNullable() {
+    void testToBigQueryNullable() {
         assertEquals("required", Exporter.toBigQueryNullable(0));
         assertEquals("nullable", Exporter.toBigQueryNullable(1));
         assertEquals("nullable", Exporter.toBigQueryNullable(2));
@@ -47,8 +47,8 @@ public class ExporterTest extends AbstractTestBase {
     }
 
     @Test
-    public void testToSchemaRow() {
+    void testToSchemaRow() {
         assertEquals("{\"name\": \"MyName\", \"type\": \"int64\", \"mode\": \"nullable\"}",
-                Exporter.toSchemaRow("MyName", Types.INTEGER, ResultSetMetaData.columnNullable));
+            Exporter.toSchemaRow("MyName", Types.INTEGER, ResultSetMetaData.columnNullable));
     }
 }

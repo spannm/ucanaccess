@@ -1,7 +1,7 @@
 package net.ucanaccess.console;
 
 import net.ucanaccess.test.util.AbstractTestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 public class MainTest extends AbstractTestBase {
 
     @Test
-    public void testTokenize() throws IOException {
+    void testTokenize() throws IOException {
         // normal space as token delimiter
         List<String> tokens = Main.tokenize("export -t License License.csv");
         assertListEquals(tokens, "export", "-t", "License", "License.csv");

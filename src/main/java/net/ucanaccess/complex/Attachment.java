@@ -85,10 +85,8 @@ public class Attachment extends ComplexBase {
         }
         if (url == null) {
             return other.url == null;
-        } else if (!url.equals(other.url)) {
-            return false;
         }
-        return true;
+        return url.equals(other.url);
     }
 
     public byte[] getData() {

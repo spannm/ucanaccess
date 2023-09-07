@@ -5,32 +5,31 @@ import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
+import net.ucanaccess.test.util.UcanaccessTestBase;
 import org.hsqldb.error.ErrorCode;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
 
-@RunWith(Parameterized.class)
-public class ExceptionCodeTest extends AccessVersionAllTest {
+class ExceptionCodeTest extends UcanaccessTestBase {
 
-    public ExceptionCodeTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    ExceptionCodeTest() {
         Locale.setDefault(Locale.US);
     }
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/bool.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "bool.accdb";
     }
 
-    @Test
-    public void testVUKException() {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testVUKException(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         try (Statement st = ucanaccess.createStatement()) {
 
             st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
@@ -43,37 +42,20 @@ public class ExceptionCodeTest extends AccessVersionAllTest {
         }
     }
 
-    @Test
-    public void testGenException() throws SQLException {
-        Statement st = null;
-        try {
-            throw new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
-
-        } catch (SQLException _ex) {
-            assertEquals(_ex.getErrorCode(), 11111);
-            assertEquals(_ex.getSQLState(), "ko");
-        } finally {
-            if (st != null) {
-                st.close();
-            }
-        }
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testGenException(AccessVersion _accessVersion) {
+        UcanaccessSQLException ex = new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
+        assertEquals(ex.getErrorCode(), 11111);
+        assertEquals(ex.getSQLState(), "ko");
     }
 
-    @Test
-    public void testGException() throws SQLException {
-        Statement st = null;
-        try {
-            DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao");
-
-        } catch (SQLException _ex) {
-
-            assertEquals(_ex.getErrorCode(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
-            assertEquals(_ex.getSQLState(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
-        } finally {
-            if (st != null) {
-                st.close();
-            }
-        }
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testGException(AccessVersion _accessVersion) {
+        SQLException ex = assertThrows(SQLException.class, () -> DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao"));
+        assertEquals(ex.getErrorCode(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
+        assertEquals(ex.getSQLState(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
     }
 
 }

@@ -1,36 +1,32 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class RegexTest extends AccessVersionDefaultTest {
+class RegexTest extends UcanaccessTestBase {
 
-    public RegexTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE reg (id COUNTER,descr memo) ");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("reg");
     }
 
-    @Test
-    public void testRegex() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testRegex(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = null;
         st = ucanaccess.createStatement();
         String s = "";

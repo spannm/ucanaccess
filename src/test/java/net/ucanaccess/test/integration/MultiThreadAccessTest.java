@@ -1,50 +1,44 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.*;
 
-@RunWith(Parameterized.class)
-public class MultiThreadAccessTest extends AccessVersionDefaultTest {
+class MultiThreadAccessTest extends UcanaccessTestBase {
     private static int intVal;
 
     private String       dbPath;
     private final String tableName = "T1";
 
-    public MultiThreadAccessTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         dbPath = getFileAccDb().getAbsolutePath();
         executeStatements("CREATE TABLE " + tableName + " (id COUNTER primary key, descr MEMO)");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable(tableName);
     }
 
-    public void crud() throws SQLException, IOException {
+    void crud() throws SQLException {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
-        ++intVal;
+        intVal++;
         st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + intVal + ",'" + intVal + "Bla bla bla bla:"
                 + Thread.currentThread() + "')");
         conn.commit();
         conn.close();
     }
 
-    public void crudPS() throws SQLException, IOException {
+    void crudPS() throws SQLException {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr)  VALUES(?, ?)");
@@ -58,7 +52,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         conn.close();
     }
 
-    public void crudUpdatableRS() throws SQLException, IOException {
+    void crudUpdatableRS() throws SQLException {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
@@ -73,8 +67,10 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
         conn.close();
     }
 
-    @Test
-    public void testMultiThread() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testMultiThread(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         int nt = 50;
         Thread[] threads = new Thread[nt];
         for (int i = 0; i < nt; i++) {
@@ -83,7 +79,7 @@ public class MultiThreadAccessTest extends AccessVersionDefaultTest {
                     crud();
                     crudPS();
                     crudUpdatableRS();
-                } catch (SQLException | IOException e) {
+                } catch (SQLException e) {
                     e.printStackTrace();
                 }
             });

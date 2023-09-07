@@ -7,8 +7,7 @@ import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -17,34 +16,58 @@ import java.util.Date;
 
 public abstract class UcanaccessTestBase extends AbstractTestBase {
 
-    protected static final AccessVersion DEFAULT_ACCESS_VERSION = AccessVersion.V2003;
-    protected static final File          TEST_DB_TEMP_DIR       = new File(System.getProperty("java.io.tmpdir"), "ucanaccess-test");
+    protected static final String TEST_DB_DIR = "testdbs/";
+    protected static final File   TEST_DB_TEMP_DIR;
 
     static {
+        TEST_DB_TEMP_DIR = new File(System.getProperty("java.io.tmpdir"), "ucanaccess-test");
         TEST_DB_TEMP_DIR.mkdirs();
         Main.setBatchMode(true);
     }
 
     private File                   fileAccDb;
     private String                 password          = "";
+    private AccessVersion          accessVersion;
     // CHECKSTYLE:OFF
-    protected FileFormat           fileFormat;
     protected UcanaccessConnection ucanaccess;
     // CHECKSTYLE:ON
     private String                 user              = "ucanaccess";
     private Connection             verifyConnection;
     private Boolean                ignoreCase;
+
     private long                   inactivityTimeout = -1;
     private String                 columnOrder;
     private String                 append2JdbcURL    = "";
     private Boolean                showSchema;
 
-    public UcanaccessTestBase(AccessVersion _accessVersion) {
-        this(_accessVersion.getFileFormat());
+    protected UcanaccessTestBase() {
     }
 
-    protected UcanaccessTestBase(FileFormat _fileFormat) {
-        fileFormat = _fileFormat;
+    @Deprecated
+    protected UcanaccessTestBase(AccessVersion _accessVersion) {
+        accessVersion = _accessVersion;
+    }
+
+    protected final void setAccessVersion(AccessVersion _accessVersion) {
+        accessVersion = _accessVersion;
+    }
+
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        accessVersion = _accessVersion;
+        try {
+            Class.forName(UcanaccessDriver.class.getName());
+        } catch (ClassNotFoundException _ex) {
+            throw new RuntimeException(_ex);
+        }
+        ucanaccess = getUcanaccessConnection();
+    }
+
+    protected final AccessVersion getAccessVersion() {
+        return accessVersion;
+    }
+
+    protected final FileFormat getFileFormat() {
+        return accessVersion.getFileFormat();
     }
 
     protected final File getFileAccDb() {
@@ -120,14 +143,13 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                             actualObj = ((Date) actualObj).getTime();
                             expectedObj = ((Date) expectedObj).getTime();
                         }
-                        assertEquals("Expected ob2 and ob1 to be equal in [" + _expression + "]", expectedObj,
-                            actualObj);
+                        assertEquals(expectedObj, actualObj, "Expected ob2 and ob1 to be equal in [" + _expression + "]");
                     }
                 }
             }
             j++;
         }
-        assertEquals("matrix with different length was expected ", _expectedResults.length, j);
+        assertEquals(_expectedResults.length, j, "Matrix with different length was expected");
     }
 
     public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException, IOException {
@@ -159,8 +181,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
                     // both null, ok
                     assertNull(ob1);
                 } else if (ob1 == null) {
-                    assertNull("Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: "
-                            + ob2 + " in [" + _query + "]", ob2);
+                    assertNull(ob2, "Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + ob2 + " in [" + _query + "]");
                 } else {
                     if (ob1 instanceof Blob) {
                         byte[] bt = getByteArray((Blob) ob1);
@@ -222,16 +243,16 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         return null;
     }
 
-    protected final String getAccessTempPath() throws IOException {
+    protected final String getAccessTempPath() {
         if (getAccessPath() == null) {
-            fileAccDb = File.createTempFile(getClass().getSimpleName() + "-", fileFormat.getFileExtension(), TEST_DB_TEMP_DIR);
-            createNewDatabase(fileFormat, fileAccDb);
+            fileAccDb = createTempFile(getClass().getSimpleName() + "-");
+            createNewDatabase(getFileFormat(), fileAccDb);
         } else {
             fileAccDb = copyResourceToTempFile(getAccessPath());
             if (fileAccDb == null) {
                 fileAccDb = new File(TEST_DB_TEMP_DIR, getAccessPath());
                 if (!fileAccDb.exists()) {
-                    createNewDatabase(fileFormat, fileAccDb);
+                    createNewDatabase(getFileFormat(), fileAccDb);
                     fileAccDb.deleteOnExit();
                 }
             }
@@ -240,32 +261,47 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         return fileAccDb.getAbsolutePath();
     }
 
-    void createNewDatabase(FileFormat _fileFormat, File _dbFile) throws IOException {
-        try (Database db = DatabaseBuilder.create(_fileFormat, _dbFile)) {
-            db.flush();
-            getLogger().info("Access file version {} created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+    File createTempFile(String _prefix) {
+        try {
+            return File.createTempFile(_prefix, getFileFormat().getFileExtension(), TEST_DB_TEMP_DIR);
+        } catch (IOException _ex) {
+            throw new UncheckedIOException(_ex);
         }
     }
 
-    protected File copyResourceToTempFile(String _resourcePath) throws IOException {
+    void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
+        try (Database db = DatabaseBuilder.create(_fileFormat, _dbFile)) {
+            db.flush();
+            getLogger().info("Access file version {} created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+        } catch (IOException _ex) {
+            throw new UncheckedIOException(_ex);
+        }
+    }
+
+    protected File copyResourceToTempFile(String _resourcePath) {
         File resourceFile = new File(_resourcePath);
         InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath);
         if (is == null) {
+            getLogger().warn("Resource {} not found in classpath", _resourcePath);
             return null;
         }
-        byte[] buffer = new byte[4096];
-        File tempFile = File.createTempFile(resourceFile.getName().replace(".", "_"), fileFormat.getFileExtension(),
-            TEST_DB_TEMP_DIR);
-        getLogger().info("Copying resource file: {} to: {}", _resourcePath, tempFile.getAbsolutePath());
-        FileOutputStream fos = new FileOutputStream(tempFile);
-        int bread;
-        while ((bread = is.read(buffer)) != -1) {
-            fos.write(buffer, 0, bread);
+
+        try {
+            byte[] buffer = new byte[4096];
+            File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
+            getLogger().info("Copying resource file {} to {}", _resourcePath, tempFile.getAbsolutePath());
+            FileOutputStream fos = new FileOutputStream(tempFile);
+            int bread;
+            while ((bread = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, bread);
+            }
+            fos.flush();
+            fos.close();
+            is.close();
+            return tempFile;
+        } catch (IOException _ex) {
+            throw new UncheckedIOException(_ex);
         }
-        fos.flush();
-        fos.close();
-        is.close();
-        return tempFile;
     }
 
     public int getCount(String _sql) throws SQLException, IOException {
@@ -291,22 +327,22 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public String getName() {
-        return getClass().getSimpleName() + " ver " + fileFormat;
+        return getClass().getSimpleName() + " ver " + getFileFormat();
     }
 
     protected String getPassword() {
         return password;
     }
 
-    protected UcanaccessConnection getUcanaccessConnection() throws SQLException, IOException {
+    protected UcanaccessConnection getUcanaccessConnection() throws SQLException {
         return getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, getAccessTempPath());
     }
 
-    protected UcanaccessConnection getUcanaccessConnection(String _dbPath) throws SQLException, IOException {
+    protected UcanaccessConnection getUcanaccessConnection(String _dbPath) throws SQLException {
         return getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, _dbPath);
     }
 
-    private UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException, IOException {
+    private UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException {
         if (_dbPath == null) {
             _dbPath = getAccessTempPath();
         }
@@ -335,8 +371,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
 
     protected void initVerifyConnection() throws SQLException, IOException {
         InputStream is = new FileInputStream(fileAccDb);
-        File tempVerifyFile = File.createTempFile(fileAccDb.getName().replace(".", "_") + "_verify",
-            fileFormat.getFileExtension(), TEST_DB_TEMP_DIR);
+        File tempVerifyFile = createTempFile(fileAccDb.getName().replace(".", "_") + "_verify");
         FileOutputStream fos = new FileOutputStream(tempVerifyFile);
 
         byte[] buffer = new byte[4096];
@@ -399,14 +434,8 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         }
     }
 
-    @Before
-    public final void beforeTestCaseBase() throws Exception {
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        ucanaccess = getUcanaccessConnection();
-    }
-
-    @After
-    public final void afterTestCaseBase() throws Exception {
+    @AfterEach
+    protected final void afterTestCaseBase() throws Exception {
         if (ucanaccess != null && !ucanaccess.isClosed()) {
             try {
                 ucanaccess.close();

@@ -1,31 +1,27 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class DisableAutoIncrementTest extends AccessVersionDefaultTest {
+class DisableAutoIncrementTest extends UcanaccessTestBase {
 
-    public DisableAutoIncrementTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE CT (id COUNTER PRIMARY KEY ,descr TEXT) ",
                 "CREATE TABLE [C T] (id COUNTER PRIMARY KEY ,descr TEXT) ");
     }
 
-    @Test
-    public void testGuid() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testGuid(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE CT1 (id guid PRIMARY KEY ,descr TEXT) ");
         st.execute("INSERT INTO CT1 (descr) VALUES ('CIAO')");
@@ -34,11 +30,12 @@ public class DisableAutoIncrementTest extends AccessVersionDefaultTest {
         st.close();
     }
 
-    @Test
-    public void testDisable() throws SQLException {
-        Statement st = null;
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testDisable(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         boolean exc = false;
-        st = ucanaccess.createStatement();
+        Statement st = ucanaccess.createStatement();
         st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
         st.execute("DISABLE AUTOINCREMENT ON CT ");
         try {

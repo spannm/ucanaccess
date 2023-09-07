@@ -69,7 +69,7 @@ public class BlobAction implements IFeedbackAction {
                 conn.setFeedbackState(true);
 
                 conn.setFeedbackState(true);
-                try (PreparedStatement ps = connHsqldb.prepareStatement(sql);) {
+                try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, bkey.getBytes());
                     int j = 2;
                     for (Object value : values) {

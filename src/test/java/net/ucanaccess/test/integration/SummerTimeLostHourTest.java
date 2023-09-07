@@ -5,12 +5,12 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -21,37 +21,35 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.TimeZone;
 
-@RunWith(Parameterized.class)
-public class SummerTimeLostHourTest extends AccessVersion2007Test {
+class SummerTimeLostHourTest extends UcanaccessTestBase {
 
     private static Locale   prevLocale;
     private static TimeZone prevTimeZone;
 
-    @BeforeClass
-    public static void goToRome() {
+    @BeforeAll
+    static void goToRome() {
         prevLocale = Locale.getDefault();
         prevTimeZone = TimeZone.getDefault();
         Locale.setDefault(Locale.ITALY);
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome"));
     }
 
-    @AfterClass
-    public static void returnHomeFromRome() {
+    @AfterAll
+    static void returnHomeFromRome() {
         Locale.setDefault(prevLocale);
         TimeZone.setDefault(prevTimeZone);
     }
 
-    public SummerTimeLostHourTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
     @Override
-    public String getAccessPath() {
-        return "testdbs/SummerTimeLostHour.accdb"; // Access 2007
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "SummerTimeLostHour.accdb"; // Access 2007
     }
 
-    @Test
-    public void testForLostHour() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testForLostHour(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+
         /*
          * ensure that #2017-03-26 02:00:00# doesn't "magically"
          *      become #2017-03-26 01:00:00# when written to HSQLDB

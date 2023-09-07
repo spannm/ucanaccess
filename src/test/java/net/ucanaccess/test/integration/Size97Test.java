@@ -2,28 +2,26 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
-@RunWith(Parameterized.class)
-public class Size97Test extends AccessVersion2010Test {
-
-    public Size97Test(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class Size97Test extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/size97.mdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "size97.mdb";
     }
 
-    @Test
-    public void testSize() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testSize(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
+
         UcanaccessConnection conn = getUcanaccessConnection();
         assertEquals("V1997", conn.getDbIO().getFileFormat().name());
         DatabaseMetaData dbmd = conn.getMetaData();

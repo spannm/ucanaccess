@@ -7,10 +7,10 @@ import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -20,16 +20,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(Parameterized.class)
-public class CreateTableTest extends AccessVersion2010Test {
-
-    public CreateTableTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class CreateTableTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/badDB.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "badDB.accdb";
     }
 
     private void createAsSelect() throws SQLException, IOException {
@@ -156,8 +151,11 @@ public class CreateTableTest extends AccessVersion2010Test {
 
     }
 
-    @Test
-    public void testCreate() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testCreate(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
+
         executeStatements(
             "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
                 + "d DATETIME default now(), e text default 'l''aria')");
@@ -174,8 +172,11 @@ public class CreateTableTest extends AccessVersion2010Test {
         dropTable("AAA");
     }
 
-    @Test
-    public void testNaming() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testNaming(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
+
         Statement st = ucanaccess.createStatement();
         st.execute(
             " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
@@ -195,8 +196,11 @@ public class CreateTableTest extends AccessVersion2010Test {
         dumpQueryResult("SELECT * FROM counter");
     }
 
-    @Test
-    public void testCreateWithFK() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testCreateWithFK(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");
         st.execute(
@@ -217,8 +221,11 @@ public class CreateTableTest extends AccessVersion2010Test {
         st.close();
     }
 
-    @Test
-    public void testPs() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testPs(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
+
         PreparedStatement ps = ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
         ps.execute();
         ps = ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0);
@@ -227,19 +234,24 @@ public class CreateTableTest extends AccessVersion2010Test {
         ps.execute();
         ps = ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0);
         ps.execute();
-
     }
 
-    @Test
-    public void testPsHyphen() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testPsHyphen(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
+
         String ddl = "CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))";
         // #9 hyphen in DDL column name confuses PreparedStatement
         PreparedStatement prepStmt = ucanaccess.prepareStatement(ddl);
         prepStmt.executeUpdate();
     }
 
-    @Test
-    public void testCreateHyperlink() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testCreateHyperlink(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
+
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)");
         st.execute("INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')");
@@ -270,9 +282,12 @@ public class CreateTableTest extends AccessVersion2010Test {
 
     }
 
-    @Test
-    public void tableNameWithUnderscore() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void tableNameWithUnderscore(AccessVersion _accessVersion) throws SQLException {
         // Ticket #19
+        init(_accessVersion);
+
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)");
         st.execute("CREATE TABLE t_1 (id LONG PRIMARY KEY)");

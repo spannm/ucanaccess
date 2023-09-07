@@ -4,11 +4,11 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -17,21 +17,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-@RunWith(Parameterized.class)
-public class ComplexTest extends AccessVersion2010Test {
-
-    public ComplexTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class ComplexTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/2010.accdb"; // Access 2010
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "2010.accdb"; // Access 2010
     }
 
-    @Test
-    @Ignore("TODO: Fails with Java 11 under Ubuntu")
-    public void testComplex() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @Disabled("TODO: Fails with Java 11 under Ubuntu")
+    void testComplex(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
+
         complex0();
         complex1();
     }
@@ -113,8 +111,10 @@ public class ComplexTest extends AccessVersion2010Test {
         ps.close();
     }
 
-    @Test
-    public void testComplexRollback() throws SQLException, IOException, SecurityException, IllegalArgumentException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    void testComplexRollback(AccessVersion _accessVersion) throws SQLException, IOException, SecurityException, IllegalArgumentException {
+        init(_accessVersion);
 
         PreparedStatement ps = null;
         int i = getCount("SELECT COUNT(*) FROM TABLE1", true);

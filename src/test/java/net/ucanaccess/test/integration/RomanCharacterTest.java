@@ -1,27 +1,23 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class RomanCharacterTest extends AccessVersionDefaultTest {
-
-    public RomanCharacterTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class RomanCharacterTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/noroman.mdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "noroman.mdb";
     }
 
-    @Test
-    public void testNoRomanCharactersInColumnName() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         dumpQueryResult("SELECT * FROM NOROMAN");
         getLogger().info("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß");
         try (Statement st = ucanaccess.createStatement()) {

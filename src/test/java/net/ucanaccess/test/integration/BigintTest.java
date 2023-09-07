@@ -2,25 +2,23 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2016Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class BigintTest extends AccessVersion2016Test {
+class BigintTest extends UcanaccessTestBase {
 
-    public BigintTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2016"})
+    void testBigintInsert(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
 
-    @Test
-    public void testBigintInsert() throws Exception {
         String accdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE table1 (entry TEXT(50) PRIMARY KEY, x BIGINT)");
@@ -30,6 +28,7 @@ public class BigintTest extends AccessVersion2016Test {
         st.close();
         ucanaccess.close();
         String connUrl = UcanaccessDriver.URL_PREFIX + accdbPath + ";immediatelyReleaseResources=true";
+
         Connection cnxn = DriverManager.getConnection(connUrl);
         st = cnxn.createStatement();
         ResultSet rs = st.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'");

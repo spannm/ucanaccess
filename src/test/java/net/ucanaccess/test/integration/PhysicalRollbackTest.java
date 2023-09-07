@@ -2,41 +2,38 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionDefaultTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class PhysicalRollbackTest extends AccessVersionDefaultTest {
+class PhysicalRollbackTest extends UcanaccessTestBase {
 
-    public PhysicalRollbackTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    @Override
+    protected String getAccessPath() {
+        // this db does not exist!
+        return getClass().getSimpleName() + getFileFormat().getFileExtension();
     }
 
     @Override
-    public String getAccessPath() {
-        // this db does not exist!
-        return getClass().getSimpleName() + fileFormat.getFileExtension();
-    }
-
-    @Before
-    public void beforeTestCase() throws Exception {
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
         executeStatements("CREATE TABLE T4 (id LONG, descr VARCHAR(400))");
     }
 
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("T4");
     }
 
-    @Test
-    public void testCommit() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
+    void testCommit(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         ucanaccess.setAutoCommit(false);
 
         Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);

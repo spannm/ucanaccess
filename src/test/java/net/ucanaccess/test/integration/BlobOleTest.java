@@ -1,39 +1,35 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.*;
 import java.sql.*;
 
-@RunWith(Parameterized.class)
-public class BlobOleTest extends AccessVersionAllTest {
+class BlobOleTest extends UcanaccessTestBase {
 
     private static final String IMG_FILE_NAME  = "elisaArt.JPG";
     private static final String PPTX_FILE_NAME = "test.pptx";
 
-    public BlobOleTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    @Override
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
+        executeStatements("CREATE TABLE T2 (id COUNTER PRIMARY KEY, descr TEXT(400), pippo OLE)");
     }
 
-    @Before
-    public void beforeTestCase() throws Exception {
-        executeStatements("CREATE TABLE T2 (id COUNTER primary key, descr TEXT(400), pippo OLE)");
-    }
-
-    @After
-    public void afterTestCase() throws Exception {
+    @AfterEach
+    void afterEachTest() throws SQLException {
         dropTable("T2");
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
-    @Test
-    public void testBlobOLE() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         final File fl = new File("CopyElisaArt.JPG");
 
         Blob blob = ucanaccess.createBlob();
@@ -107,8 +103,10 @@ public class BlobOleTest extends AccessVersionAllTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
 
-    @Test
-    public void testBlobPackaged() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         PreparedStatement ps = null;
         File fl1 = getFile(PPTX_FILE_NAME);
         Blob blob = ucanaccess.createBlob(fl1);
@@ -124,8 +122,10 @@ public class BlobOleTest extends AccessVersionAllTest {
         st.execute("DELETE FROM t2");
     }
 
-    @Test
-    public void testTwoColumnPK() throws SQLException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testTwoColumnPK(AccessVersion _accessVersion) throws SQLException {
+        init(_accessVersion);
         // fix for ticket #23 should prevent this test from throwing an error
         Statement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
@@ -153,4 +153,5 @@ public class BlobOleTest extends AccessVersionAllTest {
         out.close();
         return fl1;
     }
+
 }

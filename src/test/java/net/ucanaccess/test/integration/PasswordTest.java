@@ -1,24 +1,20 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
 import java.sql.Connection;
 
-@RunWith(Parameterized.class)
-public class PasswordTest extends AccessVersionAllTest {
+class PasswordTest extends UcanaccessTestBase {
 
-    public PasswordTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
-
-    @Test
-    public void testPassword() throws Exception {
-        File dbFile = copyResourceToTempFile("testdbs/pwd.mdb");
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testPassword(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
+        File dbFile = copyResourceToTempFile(TEST_DB_DIR + "pwd.mdb");
         Connection ucanaccessConnection = null;
         try {
             ucanaccessConnection = getUcanaccessConnection(dbFile.getAbsolutePath());

@@ -1,27 +1,23 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.*;
 
-@RunWith(Parameterized.class)
-public class MetaDataParameterizedTest extends AccessVersionAllTest {
-
-    public MetaDataParameterizedTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class MetaDataParameterizedTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/badDB.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "badDB.accdb";
     }
 
-    @Test
-    public void testCreateBadMetadata() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCreateBadMetadata(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
         st.execute(
@@ -67,15 +63,19 @@ public class MetaDataParameterizedTest extends AccessVersionAllTest {
         checkQuery("SELECT * FROM noroman ORDER BY [किआओ]");
     }
 
-    @Test
-    public void testRightCaseQuery() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
         assertEquals(st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1), "Ciao");
     }
 
-    @Test
-    public void testBadMetadata() throws Exception {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testBadMetadata(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
         dumpQueryResult("SELECT * FROM NOROMAN");
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();

@@ -1,31 +1,32 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2007Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Locale;
 
-@RunWith(Parameterized.class)
-public class FloatTest extends AccessVersion2007Test {
+class FloatTest extends UcanaccessTestBase {
 
-    public FloatTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
+    FloatTest() {
         Locale.setDefault(Locale.US);
     }
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/float.accdb"; // Access 2007
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "float.accdb"; // Access 2007
     }
 
-    @Test
-    public void testCreate() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    void testCreate(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+
         checkQuery("SELECT [row] FROM t ORDER BY pk");
         PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t (row) values(?)");
         ps.setFloat(1, 1.4f);
@@ -44,7 +45,6 @@ public class FloatTest extends AccessVersion2007Test {
         checkQuery("SELECT [row] FROM t ORDER BY pk");
         checkQuery("SELECT COUNT(*) FROM t WHERE [row]=4.10011", 2);
         dumpQueryResult("SELECT * FROM t ORDER BY pk");
-
     }
 
 }

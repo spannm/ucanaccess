@@ -1,30 +1,24 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.PreparedStatement;
 
-@RunWith(Parameterized.class)
-public class CloseOnCompletionTest extends AccessVersionAllTest {
+class CloseOnCompletionTest extends UcanaccessTestBase {
 
-    public CloseOnCompletionTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testCloseOnCompletion(AccessVersion _accessVersion) throws Exception {
+        init(_accessVersion);
 
-    @Test
-    public void testCloseOnCompletion() throws Exception {
+        try (PreparedStatement st = ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23))")) {
+            st.closeOnCompletion();
 
-        PreparedStatement st = null;
-        st = ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23)) ");
-        st.closeOnCompletion();
-
-        st.execute();
-        st.close();
-
+            st.execute();
+        }
     }
 
 }

@@ -423,7 +423,7 @@ public class LoadJet {
 
                 PropertyMap pm = cl.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-                if (constraints && required != null && required instanceof Boolean && (Boolean) required) {
+                if (constraints && required instanceof Boolean && (Boolean) required) {
                     sbC.append(" NOT NULL ");
                 }
                 comma = ",";

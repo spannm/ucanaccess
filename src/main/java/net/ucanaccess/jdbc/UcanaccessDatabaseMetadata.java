@@ -113,7 +113,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     sb.append(CAST_EXPR).append(cn);
                 } else if ("PUBLIC".equals(es)) {
                     sb.append("'PUBLIC' AS ").append(cn);
-                } else if (es.startsWith(CAST_EXPR) || "PUBLIC".equals(es)) {
+                } else if (es.startsWith(CAST_EXPR)) {
                     sb.append(es);
                 } else {
                     String suffix = es.indexOf('.') > 0 ? "" : "r.";

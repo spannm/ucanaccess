@@ -1,10 +1,10 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersion2010Test;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.*;
 import java.sql.ResultSet;
@@ -12,21 +12,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
-@RunWith(Parameterized.class)
-public class BlobOleLazyLoadingTest extends AccessVersion2010Test {
-
-    public BlobOleLazyLoadingTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class BlobOleLazyLoadingTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/LazyLoading.accdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "LazyLoading.accdb";
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
-    @Test
-    public void testBlobOLE() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    public void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
+
         final long binaryFileSize = 32718;
         byte[] initialBlobBytes = getBlobBytes();
         getLogger().info("BLOB size in backing database before retrieval: {} bytes", initialBlobBytes.length);
@@ -65,4 +63,5 @@ public class BlobOleLazyLoadingTest extends AccessVersion2010Test {
         hsqlSt.close();
         return blobBytes;
     }
+
 }

@@ -1,29 +1,25 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AccessVersionAllTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import net.ucanaccess.test.util.UcanaccessTestBase;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class PivotTest extends AccessVersionAllTest {
-
-    public PivotTest(AccessVersion _accessVersion) {
-        super(_accessVersion);
-    }
+class PivotTest extends UcanaccessTestBase {
 
     @Override
-    public String getAccessPath() {
-        return "testdbs/pivot.mdb";
+    protected String getAccessPath() {
+        return TEST_DB_DIR + "pivot.mdb";
     }
 
-    @Test
-    public void testPivot() throws SQLException, IOException {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = AccessVersion.class)
+    void testPivot(AccessVersion _accessVersion) throws SQLException, IOException {
+        init(_accessVersion);
         Statement st = ucanaccess.createStatement();
         dumpQueryResult("SELECT * FROM Table1_trim");
         st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03#   )");
