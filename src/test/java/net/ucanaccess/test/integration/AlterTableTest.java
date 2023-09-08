@@ -63,27 +63,27 @@ class AlterTableTest extends UcanaccessTestBase {
         st.execute("INSERT INTO [GIà GIà] (baaaa) values('chi')");
         checkQuery("SELECT * FROM [GIà GIà] ORDER BY c");
         dumpQueryResult("SELECT * FROM [GIà GIà] ORDER BY c");
-        st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 amadeimargmail111]");
-        checkQuery("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
-        dumpQueryResult("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [健康] decimal (23,5) ");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
+        st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 alterTableTest123]");
+        checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
+        dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [健康] decimal (23,5) ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
         boolean b = false;
         try {
-            st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
+            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN defaultwwwdefault numeric (23,6) not null");
         } catch (UcanaccessSQLException e) {
             b = true;
             System.err.println(e.getMessage());
         }
         assertTrue(b);
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN [ci ci2]  YESNO  ");
-        st.execute("INSERT INTO [22 amadeimargmail111] (baaaa) values('cha')");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN Memo  Memo  ");
-        st.execute("ALTER TABLE [22 amadeimargmail111] ADD COLUMN ole  OLE  ");
-        dumpQueryResult("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
-        checkQuery("SELECT * FROM [22 amadeimargmail111] ORDER BY c");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci2]  YESNO  ");
+        st.execute("INSERT INTO [22 alterTableTest123] (baaaa) values('cha')");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN Memo  Memo  ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN ole  OLE  ");
+        dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
+        checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
 
         dumpQueryResult("SELECT * FROM Sample");
         checkQuery("SELECT * FROM Sample");
@@ -97,7 +97,6 @@ class AlterTableTest extends UcanaccessTestBase {
         dumpQueryResult("SELECT * FROM Sample");
         checkQuery("SELECT * FROM Sample");
 
-        getLogger().info("After having added a few columns...");
         dumpQueryResult("SELECT * FROM UCA_METADATA.Columns");
 
         createFK();
@@ -218,10 +217,10 @@ class AlterTableTest extends UcanaccessTestBase {
 
         // test case: constraint name specified
         st.execute(
-            "ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 amadeimargmail111] (baaaa) ON delete cascade");
+            "ALTER TABLE [AAA n] add constraint [pippo1] foreign key (c) references [22 alterTableTest123] (baaaa) ON delete cascade");
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("AAA n");
-        Table tbr = db.getTable("22 amadeimargmail111");
+        Table tbr = db.getTable("22 alterTableTest123");
         Index idx = tb.getForeignKeyIndex(tbr);
         List<String> ar = new ArrayList<>();
         for (Column cl : idx.getColumns()) {
