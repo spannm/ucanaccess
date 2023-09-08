@@ -202,7 +202,7 @@
    limitations under the License.
    ____
 
-For integration of HSQLDB 
+For integration of HSQLDB
 
 /* Copyright (c) 2001-2011, The HSQL Development Group
  * All rights reserved.
@@ -233,4 +233,3 @@ For integration of HSQLDB
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
