@@ -101,23 +101,25 @@ public final class Exporter {
         decimalFormat.setDecimalFormatSymbols(dfs);
         decimalFormat.setGroupingUsed(false);
 
-        // Print the result set rows.
+        // print the resultset rows
         while (rs.next()) {
             comma = "";
             for (int i = 1; i <= cols; ++i) {
                 Object o = rs.getObject(i);
+                String str;
                 if (o == null) {
-                    // TODO: Distinguish between a null string and an empty string.
-                    o = "";
+                    str = "(null)";
                 } else if (o.getClass().isArray()) {
-                    o = Arrays.toString((Object[]) o);
+                    str = Arrays.toString((Object[]) o);
                 } else if (o instanceof Date) {
-                    o = dateFormat.format((Date) o);
+                    str = dateFormat.format((Date) o);
                 } else if (o instanceof BigDecimal) {
-                    o = decimalFormat.format(o);
+                    str = decimalFormat.format(o);
+                } else {
+                    str = o.toString();
                 }
                 out.print(comma);
-                out.print(toCsv(o.toString(), delimiter, preserveNewlines));
+                out.print(toCsv(str, delimiter, preserveNewlines));
                 comma = delimiter;
             }
             out.println();
@@ -145,7 +147,7 @@ public final class Exporter {
     }
 
     /**
-     * Returns the CSV representation of the string {@code s}.
+     * Returns the CSV representation of the string {@code _str}.
      * <ul>
      * <li>double-quote characters (") are doubled (""), and then enclosed in double-quotes
      * <li>if the string contains the delimiter character, wrap the string in double-quotes
@@ -155,39 +157,38 @@ public final class Exporter {
      * This supports only a small subset of various CSV transformations such as those given in
      * https://www.csvreader.com/csv_format.php.
      */
-    static String toCsv(String s, String delimiter, boolean preserveNewlines) {
+    static String toCsv(String _str, String _delimiter, boolean _preserveNewlines) {
         boolean needsTextQualifier = false;
 
         // A double-quote is replaced with 2 double-quotes.
-        if (s.contains("\"")) {
-            s = s.replace("\"", "\"\"");
+        if (_str.contains("\"")) {
+            _str = _str.replace("\"", "\"\"");
             needsTextQualifier = true;
         }
 
         // If the string contains the delimiter, then we must wrap it in quotes.
-        if (s.contains(delimiter)) {
+        if (_str.contains(_delimiter)) {
             needsTextQualifier = true;
         }
 
         // Preserve or replace newlines.
-        if (preserveNewlines) {
+        if (_preserveNewlines) {
             needsTextQualifier = true;
         } else {
-            s = s.replace("\n", " ").replace("\r", " ");
+            _str = _str.replace("\n", " ").replace("\r", " ");
         }
 
         if (needsTextQualifier) {
-            return "\"" + s + "\"";
+            return "\"" + _str + "\"";
         } else {
-            return s;
+            return _str;
         }
     }
 
     /** Returns one row of the BigQuery JSON schema file. */
     static String toSchemaRow(String name, int sqlType, int nullable) {
         return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}", name, toBigQueryType(sqlType),
-                toBigQueryNullable(nullable));
-        // TODO: Do we need to escape special characters?
+            toBigQueryNullable(nullable));
     }
 
     /**

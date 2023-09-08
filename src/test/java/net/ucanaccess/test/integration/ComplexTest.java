@@ -71,7 +71,7 @@ class ComplexTest extends UcanaccessTestBase {
         checkQuery("SELECT * FROM Table1 ORDER BY id");
         PreparedStatement ps =
             ucanaccess.prepareStatement(
-                "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
+                "INSERT INTO TABLE1(ID, [MEMO-DATA], [APPEND-MEMO-DATA], [MULTI-VALUE-DATA], [ATTACH-DATA]) "
                     + "VALUES (?,?,?,?,?)");
 
         ps.setString(1, "row12");
@@ -79,9 +79,10 @@ class ComplexTest extends UcanaccessTestBase {
         ps.setString(3, "to version");
         SingleValue[] svs = new SingleValue[] {new SingleValue("ccc16"), new SingleValue("ccc24")};
         ps.setObject(4, svs);
-        Attachment[] atcs =
-            new Attachment[] {new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null), new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(),
-                LocalDateTime.now(), null)};
+        LocalDateTime now = LocalDateTime.now();
+        Attachment[] atcs = new Attachment[] {
+            new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), now, null),
+            new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), now, null)};
         ps.setObject(5, atcs);
         ps.execute();
         dumpQueryResult("SELECT * FROM Table1 ORDER BY id");

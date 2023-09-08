@@ -170,7 +170,6 @@ public class UcanaccessTable implements Table {
     }
 
     public RowState createRowState() {
-        // TODO Auto-generated method stub
         return ((TableImpl) wrapped).createRowState();
     }
 

@@ -183,7 +183,6 @@ public class ParametricQuery {
     }
 
     private String completeTypeName(String type, int i, int j, boolean useDefault) {
-        // TODO riww
         if ("VARCHAR".equals(type)) {
             type += "(" + i + ")";
         }

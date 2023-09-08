@@ -82,22 +82,15 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     public void checkQuery(String _query) throws SQLException, IOException {
-        Statement st1 = null;
-        Statement st2 = null;
-        try {
-            initVerifyConnection();
-            st1 = ucanaccess.createStatement();
+        initVerifyConnection();
+        try (Statement st1 = ucanaccess.createStatement();
+             Statement st2 = verifyConnection.createStatement()) {
+            
             ResultSet firstRs = st1.executeQuery(_query);
-            st2 = verifyConnection.createStatement();
             ResultSet verifyRs = st2.executeQuery(_query);
+
             diffResultSets(firstRs, verifyRs, _query);
         } finally {
-            if (st1 != null) {
-                st1.close();
-            }
-            if (st2 != null) {
-                st2.close();
-            }
             if (verifyConnection != null) {
                 verifyConnection.close();
                 verifyConnection = null;
@@ -382,8 +375,10 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         fos.flush();
         fos.close();
         is.close();
-        if (verifyConnection != null && !verifyConnection.isClosed()) {
+
+        if (verifyConnection != null) {
             verifyConnection.close();
+            verifyConnection = null;
         }
         verifyConnection = getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, tempVerifyFile.getAbsolutePath());
     }
