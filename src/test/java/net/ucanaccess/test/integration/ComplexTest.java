@@ -21,7 +21,7 @@ class ComplexTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "2010.accdb"; // Access 2010
+        return TEST_DB_DIR + "complex.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

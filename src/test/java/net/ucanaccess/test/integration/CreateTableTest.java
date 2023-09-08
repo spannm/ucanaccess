@@ -24,7 +24,7 @@ class CreateTableTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "badDB.accdb";
+        return TEST_DB_DIR + "badDb.accdb";
     }
 
     private void createAsSelect() throws SQLException, IOException {

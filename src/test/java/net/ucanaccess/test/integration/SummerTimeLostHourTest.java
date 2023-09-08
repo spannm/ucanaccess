@@ -42,7 +42,7 @@ class SummerTimeLostHourTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "SummerTimeLostHour.accdb"; // Access 2007
+        return TEST_DB_DIR + "summerTimeLostHour.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

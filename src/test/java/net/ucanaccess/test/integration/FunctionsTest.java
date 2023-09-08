@@ -19,7 +19,7 @@ class FunctionsTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "FunctionsTest" + getFileFormat().name() + getFileFormat().getFileExtension();
+        return TEST_DB_DIR + "functions" + getFileFormat().name() + getFileFormat().getFileExtension();
     }
 
     @Override

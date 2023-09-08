@@ -23,7 +23,7 @@ class ExceptionCodeTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "bool.accdb";
+        return TEST_DB_DIR + "boolean.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

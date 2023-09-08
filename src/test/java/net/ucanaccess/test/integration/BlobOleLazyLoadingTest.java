@@ -16,7 +16,7 @@ class BlobOleLazyLoadingTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "LazyLoading.accdb";
+        return TEST_DB_DIR + "blobOleLazyLoading.accdb";
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)

@@ -16,7 +16,7 @@ class ConcatNullsTrueTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "badDB.accdb";
+        return TEST_DB_DIR + "badDb.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

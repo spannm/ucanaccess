@@ -17,7 +17,7 @@ class ParametersTest extends UcanaccessTestBase {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "Parameters.accdb"; // Access 2007
+        return TEST_DB_DIR + "parameters.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
