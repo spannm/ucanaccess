@@ -1,5 +1,6 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessTestBase;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,14 +23,30 @@ class CalculatedFieldTest extends UcanaccessTestBase {
         init(_accessVersion);
 
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO T (c1) VALUES ('my')");
-            st.execute("INSERT INTO T (c1) VALUES ('myc')");
-            st.execute("INSERT INTO T (c1) VALUES ('mycat')");
-            st.execute("INSERT INTO T (c1) VALUES ('mycattom')");
-            st.execute("INSERT INTO T (c1) VALUES (null)");
-            dumpQueryResult("SELECT * FROM T");
-            checkQuery("SELECT c2, c3, c4, c5 FROM T ORDER BY id",
-                new String[][] {{"my", "my", "my", "my"}, {"myc", "myc", "myc", "myc"}, {"myc", "myc", "cat", "cat"}, {"myc", "myc", "tom", "tom"}, {null, null, null, null}});
+            // definition of calculated columns:
+            // clcd1: LEFT([input];3)
+            // clcd2: LEFT$([input];3)
+            // clcd3: RIGHT([input];3)
+            // clcd4: RIGHT$([input];3)
+            
+            st.execute("INSERT INTO clcdFlds (input) VALUES ('my')");
+            st.execute("INSERT INTO clcdFlds (input) VALUES ('myc')");
+            st.execute("INSERT INTO clcdFlds (input) VALUES ('mycat')");
+            st.execute("INSERT INTO clcdFlds (input) VALUES ('mycattom')");
+            st.execute("INSERT INTO clcdFlds (input) VALUES ('')");
+
+            dumpQueryResult("SELECT * FROM clcdFlds");
+
+            checkQuery("SELECT input, clcd1, clcd2, clcd3, clcd4 FROM clcdFlds ORDER BY id",
+                new String[][] {{"my", "my", "my", "my", "my"},
+                                {"myc", "myc", "myc", "myc", "myc"},
+                                {"mycat", "myc", "myc", "cat", "cat"},
+                                {"mycattom", "myc", "myc", "tom", "tom"},
+                                {"", "", "", "", ""}});
+
+            // inserting NULL into a calculated column containing a STRING formula is not permitted
+            UcanaccessSQLException ex = assertThrows(UcanaccessSQLException.class, () -> st.execute("INSERT INTO clcdFlds (input) VALUES (null)"));
+            assertContains(ex.getMessage(), "Value[NULL] 'null' cannot be converted to STRING");
         }
     }
 
@@ -39,8 +56,9 @@ class CalculatedFieldTest extends UcanaccessTestBase {
         init(_accessVersion);
 
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO Product (wholesale, retail) VALUES (4, 5)");
-            ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM Product WHERE [ID]=3");
+            // definition of calculated column [%markup]: ([retail]/[wholesale]-1)*100
+            st.execute("INSERT INTO products (wholesale, retail) VALUES (4, 5)");
+            ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM products WHERE [id]=3");
             rs.next();
             assertEquals(25.0, rs.getDouble("%markup"), 0.000001d);
         }

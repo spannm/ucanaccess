@@ -65,7 +65,7 @@
         <project.build.targetJdk>11</project.build.targetJdk>
 
         <dep.hsqldb.version>2.5.0</dep.hsqldb.version>
-        <dep.jackcess.version>3.0.1</dep.jackcess.version>
+        <dep.jackcess.version>4.0.5</dep.jackcess.version>
 
         <dep.slf4j.version>2.0.9</dep.slf4j.version>
 

@@ -6,6 +6,7 @@ import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
 import com.healthmarketscience.jackcess.util.ErrorHandler;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +172,16 @@ public class UcanaccessTable implements Table {
 
     public RowState createRowState() {
         return ((TableImpl) wrapped).createRowState();
+    }
+
+    @Override
+    public LocalDateTime getCreatedDate() throws IOException {
+        return wrapped.getCreatedDate();
+    }
+
+    @Override
+    public LocalDateTime getUpdatedDate() throws IOException {
+        return wrapped.getUpdatedDate();
     }
 
 }
