@@ -4,6 +4,7 @@ import net.ucanaccess.util.Logger;
 import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class UcanaccessSQLException extends SQLException {
 
@@ -27,6 +28,8 @@ public class UcanaccessSQLException extends SQLException {
         TABLE_DOES_NOT_EXIST,
         DEFAULT_NEEDED
     }
+
+    static final String         MSG_PREFIX                   = "UCAExc:";
 
     private static final long   serialVersionUID             = -1432048647665807662L;
     private static final String UCANACCESS_GENERIC_ERROR_STR = String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
@@ -80,24 +83,25 @@ public class UcanaccessSQLException extends SQLException {
         return _cause.getMessage();
     }
 
-    private String versionMessage(String message) {
-        if (message != null && message.startsWith("UCAExc:")) {
-            return message;
+    String addVersionInfo(String _message) {
+        if (_message != null && _message.startsWith(MSG_PREFIX)) {
+            return _message;
         }
-        String version = getClass().getPackage().getImplementationVersion();
-        version = version == null ? "4.x.x " : version + " ";
-        version = "UCAExc:::" + version;
-        return version + message;
+        return MSG_PREFIX
+            + "::"
+            + Optional.ofNullable(getClass().getPackage().getImplementationVersion()).orElse("5.1.0")
+            + " "
+            + (_message == null || _message.isBlank() ? "(n/a)" : _message.trim());
     }
 
     @Override
     public String getLocalizedMessage() {
-        return versionMessage(super.getLocalizedMessage());
+        return addVersionInfo(super.getLocalizedMessage());
     }
 
     @Override
     public String getMessage() {
-        return versionMessage(super.getMessage());
+        return addVersionInfo(super.getMessage());
     }
 
 }
