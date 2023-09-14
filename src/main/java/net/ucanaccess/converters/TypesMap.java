@@ -2,10 +2,7 @@ package net.ucanaccess.converters;
 
 import com.healthmarketscience.jackcess.DataType;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class TypesMap {
     public enum AccessType {
@@ -30,8 +27,8 @@ public final class TypesMap {
     }
 
     private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     = new LinkedHashMap<>();
-    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new HashMap<>();
-    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new HashMap<>();
+    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new EnumMap<>(AccessType.class);
+    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new EnumMap<>(DataType.class);
 
     static {
         ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.BYTE.name(), "SMALLINT");

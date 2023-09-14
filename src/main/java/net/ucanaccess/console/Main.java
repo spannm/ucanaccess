@@ -388,24 +388,18 @@ public class Main {
 
             // output the csvFile
             File csvFile = new File(csvFileName);
-            PrintStream out = new PrintStream(csvFile);
-            try {
+            try (PrintStream out = new PrintStream(csvFile)) {
                 exporter.dumpCsv(rs, out);
                 out.flush();
-            } finally {
-                out.close();
             }
             prompt("Created CSV file: " + csvFile.getAbsolutePath());
 
             // output the schema file if requested
             if (schemaFileName != null) {
                 File schemaFile = new File(schemaFileName);
-                out = new PrintStream(schemaFile);
-                try {
+                try (PrintStream out = new PrintStream(csvFile)) {
                     exporter.dumpSchema(rs, out);
                     out.flush();
-                } finally {
-                    out.close();
                 }
                 prompt("Created schema file: " + schemaFile.getAbsolutePath());
             }

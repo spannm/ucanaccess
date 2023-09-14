@@ -19,13 +19,13 @@ public abstract class ComplexBase implements Serializable {
     private String                      tableName;
     private String                      columnName;
 
-    public ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
+    protected ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
         id = _id.get();
         tableName = _tableName;
         columnName = _columnName;
     }
 
-    public ComplexBase(ComplexValue cv) {
+    protected ComplexBase(ComplexValue cv) {
         this(cv.getId(), cv.getComplexValueForeignKey().getColumn().getTable().getName(),
             cv.getComplexValueForeignKey().getColumn().getName());
     }

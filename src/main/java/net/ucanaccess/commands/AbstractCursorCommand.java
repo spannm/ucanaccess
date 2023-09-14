@@ -20,9 +20,6 @@ public abstract class AbstractCursorCommand implements ICursorCommand {
         return true;
     }
 
-    @Override
-    public abstract Map<String, Object> getRowPattern();
-
     public void replaceAutoincrement(Map<String, Object> map) {
         getRowPattern().putAll(map);
     }

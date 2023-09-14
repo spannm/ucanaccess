@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 
-/** Unit test for {@link Exporter}. */
-public class ExporterTest extends AbstractTestBase {
+class ExporterTest extends AbstractTestBase {
 
     @Test
     void testToCsvReplacingNewlines() {

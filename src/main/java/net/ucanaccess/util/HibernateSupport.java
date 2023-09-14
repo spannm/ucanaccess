@@ -26,9 +26,9 @@ public final class HibernateSupport {
      *
      * @return whether the property was found and its value was "true"
      */
-    public static Boolean isActive() {
+    public static boolean isActive() {
         if (active == null) {
-            active = System.getProperty(UCA_HIBERNATE_ISACTIVE_PROPERTY, "false").equals("true");
+            active = System.getProperty(UCA_HIBERNATE_ISACTIVE_PROPERTY, "false").equalsIgnoreCase("true");
         }
         return active;
     }

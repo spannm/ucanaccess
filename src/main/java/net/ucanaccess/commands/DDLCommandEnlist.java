@@ -40,8 +40,7 @@ public class DDLCommandEnlist {
             parseTypesFromCreateStatement(sql);
             c4io = new CreateTableCommand(tn, execId, columnMap, types, defaults, notNulls);
         } else {
-            try {
-                Statement st = ac.createStatement();
+            try (Statement st = ac.createStatement()) {
                 ResultSet rs = st.executeQuery(ddlType.getSelect(sql));
                 ResultSetMetaData rsmd = rs.getMetaData();
                 Metadata mt = new Metadata(ac.getHSQLDBConnection());
@@ -246,7 +245,7 @@ public class DDLCommandEnlist {
 
         }
 
-        if ((colDecls.length > 2 || reset & colDecls.length == 2)
+        if ((colDecls.length > 2 || reset && colDecls.length == 2)
                 && "not".equalsIgnoreCase(colDecls[colDecls.length - 2])
                 && "null".equalsIgnoreCase(colDecls[colDecls.length - 1])) {
             notNullList.add(true);
@@ -292,10 +291,10 @@ public class DDLCommandEnlist {
             return null;
         }
         if (value.startsWith("\"") && value.endsWith("\"")) {
-            return value.substring(1, value.length() - 1).replaceAll("\"\"", "\"");
+            return value.substring(1, value.length() - 1).replace("\"\"", "\"");
         }
         if (value.startsWith("'") && value.endsWith("'")) {
-            return value.substring(1, value.length() - 1).replaceAll("''", "'");
+            return value.substring(1, value.length() - 1).replace("''", "'");
         }
         return value;
     }

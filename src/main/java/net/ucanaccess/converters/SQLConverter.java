@@ -316,7 +316,7 @@ public final class SQLConverter {
         }
 
         private static String elab(String s) {
-            if (!s.contains("[") | !s.contains("]")) {
+            if (!s.contains("[") || !s.contains("]")) {
                 return s;
             }
             return s.replaceAll("\\[([^\\]]*)\\]", " $0 ");
@@ -738,14 +738,11 @@ public final class SQLConverter {
         return escaped.toUpperCase(Locale.US);
     }
 
-    private static String escapeKeywordIdentifier(String escaped, boolean quote) {
-        if (escaped == null) {
-            return null;
+    private static String escapeKeywordIdentifier(String _escaped, boolean _quote) {
+        if (_escaped != null && KEYWORDLIST.contains(_escaped.toUpperCase())) {
+            return _quote ? "\"" + _escaped + "\"" : "[" + _escaped + "]";
         }
-        if (KEYWORDLIST.contains(escaped.toUpperCase())) {
-            escaped = quote ? "\"" + escaped + "\"" : "[" + escaped + "]";
-        }
-        return escaped;
+        return _escaped;
     }
 
     public static String basicEscapingIdentifier(String name) {
@@ -766,7 +763,7 @@ public final class SQLConverter {
     }
 
     private static String hsqlEscape(String escaped, boolean quote) {
-        if (escaped.indexOf(' ') > 0 || escaped.contains("$")) {
+        if (escaped != null && (escaped.indexOf(' ') > 0 || escaped.contains("$"))) {
             escaped = quote ? "\"" + escaped + "\"" : "[" + escaped + "]";
         }
         return escaped;

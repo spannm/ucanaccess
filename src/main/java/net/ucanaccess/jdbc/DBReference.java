@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -109,7 +110,7 @@ public class DBReference {
                 return true;
             } else {
                 try {
-                    closeHSQLDB(session, true);
+                    closeHsqlDb(session, true);
                 } catch (Exception e) {
                     throw new UcanaccessSQLException(e);
                 }
@@ -226,27 +227,27 @@ public class DBReference {
     }
 
     private void closeHSQLDB(Session session) throws Exception {
-        closeHSQLDB(session, false);
+        closeHsqlDb(session, false);
     }
 
-    private void closeHSQLDB(Session session, boolean firstConnectionKeeptMirror) throws Exception {
-        finalizeHSQLDB(session);
+    private void closeHsqlDb(Session _session, boolean _firstConnectionKeeptMirror) throws Exception {
+        finalizeHsqlDb(_session);
         if (!inMemory) {
             if (toKeepHsql == null) {
                 File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
                 File hbase = new File(folder, "Ucanaccess_" + this);
                 if (hbase.exists()) {
                     for (File hsqlF : hbase.listFiles()) {
-                        hsqlF.delete();
+                        Files.delete(hsqlF.toPath());
                     }
                 }
-                hbase.delete();
-            } else if (!immediatelyReleaseResources || firstConnectionKeeptMirror) {
-                toKeepHsql.delete();
+                Files.delete(hbase.toPath());
+            } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
+                Files.delete(toKeepHsql.toPath());
                 toKeepHsql.createNewFile();
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
-                        hsqlf.delete();
+                        Files.delete(hsqlf.toPath());
                     }
                 }
                 mirrorRecreated = true;
@@ -260,13 +261,15 @@ public class DBReference {
         memoryTimer.decrementActiveConnection(session);
     }
 
-    private void finalizeHSQLDB(Session session) throws Exception {
+    private void finalizeHsqlDb(Session _session) throws Exception {
         if (!hsqldbShutdown) {
             releaseLock();
-            try (Connection conn = getHSQLDBConnection(session); Statement st = conn.createStatement()) {
+            try (Connection conn = getHSQLDBConnection(_session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // ignored
+            }
         }
     }
 
@@ -386,7 +389,7 @@ public class DBReference {
                         if (toKeepHsql == null) {
                             closeHSQLDB(session);
                         } else {
-                            finalizeHSQLDB(session);
+                            finalizeHsqlDb(session);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -616,24 +619,24 @@ public class DBReference {
 
                 return;
             }
-            if (dbReference.inMemory && inactivityTimeout > 0) {
-                if (activeConnection == 0) {
-                    TimerTask task = new TimerTask() {
-                        @Override
-                        public void run() {
-                            synchronized (UcanaccessDriver.class) {
-                                if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
-                                    && getActiveConnection() == 0) {
-                                    try {
-                                        dbReference.shutdown(_session);
-                                    } catch (Exception ignored) {}
-                                    System.gc();
+            if (dbReference.inMemory && inactivityTimeout > 0 && activeConnection == 0) {
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (UcanaccessDriver.class) {
+                            if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
+                                && getActiveConnection() == 0) {
+                                try {
+                                    dbReference.shutdown(_session);
+                                } catch (Exception ignored) {
+                                    // ignored
                                 }
+                                System.gc();
                             }
                         }
-                    };
-                    timer.schedule(task, inactivityTimeout);
-                }
+                    }
+                };
+                timer.schedule(task, inactivityTimeout);
             }
         }
 

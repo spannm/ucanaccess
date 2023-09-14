@@ -14,9 +14,6 @@ public class CompositeCommand implements ICommand {
     private IndexSelector        indexSelector;
     private List<ICursorCommand> rollbackCache = new ArrayList<>();
 
-    public CompositeCommand() {
-    }
-
     public boolean add(ICursorCommand c4io) {
         if (indexSelector == null) {
             indexSelector = c4io.getIndexSelector();

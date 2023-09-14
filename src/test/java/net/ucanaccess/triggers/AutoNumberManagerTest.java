@@ -9,13 +9,13 @@ import net.ucanaccess.test.util.AbstractTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class AutoNumberManagerTest extends AbstractTestBase {
+class AutoNumberManagerTest extends AbstractTestBase {
 
     private ColumnImpl          column;
     private AutoNumberGenerator autoNumberGenerator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         column = mock(ColumnImpl.class);
         autoNumberGenerator = mock(AutoNumberGenerator.class);
         when(column.getAutoNumberGenerator()).thenReturn(autoNumberGenerator);

@@ -64,7 +64,7 @@ class CreateTableTest extends UcanaccessTestBase {
         st.close();
     }
 
-    public void defaults() throws Exception {
+    void defaults() throws Exception {
         try (Statement st = ucanaccess.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT D, E FROM AAA");
             while (rs.next()) {
@@ -86,7 +86,7 @@ class CreateTableTest extends UcanaccessTestBase {
         }
     }
 
-    public void setDPK() throws SQLException, IOException {
+    void setDPK() throws SQLException, IOException {
         Statement st = null;
         try {
             st = ucanaccess.createStatement();
@@ -121,7 +121,7 @@ class CreateTableTest extends UcanaccessTestBase {
         }
     }
 
-    public void setTableProperties() throws SQLException {
+    void setTableProperties() throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
             st.execute("create table tbl(c counter  primary key , " + "number numeric(23,5) default -4.6 not null , "
                     + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"

@@ -1562,7 +1562,7 @@ public final class Functions {
         d = (d - d.intValue()) * 60;
         tr = dateAdd("N", d.intValue(), tr);
         d = (d - d.intValue()) * 60;
-        tr = dateAdd("S", Double.valueOf(Math.rint(d + APPROX)).intValue(), tr);
+        tr = dateAdd("S", (int) Math.rint(d + APPROX), tr);
         return tr;
     }
 
@@ -1596,7 +1596,7 @@ public final class Functions {
     @FunctionType(namingConflict = true, functionName = "FIX", argumentTypes = {
             AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double fix(double d) {
-        return sign(d) * mint(Math.abs(d));
+        return sign(d) * (double) mint(Math.abs(d));
     }
 
     @FunctionType(functionName = "PARTITION", argumentTypes = { AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE,
@@ -1638,7 +1638,7 @@ public final class Functions {
     }
 
     private static int lrint(double d) {
-        return Double.valueOf(Math.rint(d - APPROX)).intValue();
+        return (int) Math.rint(d - APPROX);
     }
 
     private static String padLeft(int ext, int n) {

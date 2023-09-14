@@ -22,7 +22,7 @@ class BlobOleLazyLoadingTest extends UcanaccessTestBase {
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
-    public void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
         final long binaryFileSize = 32718;

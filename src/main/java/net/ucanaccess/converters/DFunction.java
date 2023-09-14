@@ -47,9 +47,9 @@ public class DFunction {
                     StringBuilder sb = new StringBuilder();
                     String g3 = mtc.group(3);
                     String tableN = mtc.group(2).trim();
-                    String alias = tableN.startsWith("[") & tableN.endsWith("]") ? "[" + unpad(tableN) + "_DALIAS]"
+                    String alias = tableN.startsWith("[") && tableN.endsWith("]") ? "[" + unpad(tableN) + "_DALIAS]"
                         : tableN + "_DALIAS";
-                    String tn = tableN.startsWith("[") & tableN.endsWith("]") ? unpad(tableN) : tableN;
+                    String tn = tableN.startsWith("[") && tableN.endsWith("]") ? unpad(tableN) : tableN;
                     sb.append(init).append(s).append("(").append(mtc.group(1)).append(") FROM ").append(tableN)
                         .append(" AS ").append(alias).append(" WHERE ");
                     boolean accessConcat = g3.indexOf('&') > 0;

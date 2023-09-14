@@ -92,14 +92,12 @@ public class Persist2Jet {
                 Column column = it.next();
 
                 if (value != null) {
-                    if (value instanceof TimestampData) {
-                        if (column.getType().equals(DataType.SHORT_DATE_TIME)) {
-                            TimestampData ts = (TimestampData) value;
-                            LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
-                                    .plusSeconds(ts.getSeconds())
-                                    .plusNanos(ts.getNanos());
-                            values[i] = val;
-                        }
+                    if (value instanceof TimestampData && column.getType().equals(DataType.SHORT_DATE_TIME)) {
+                        TimestampData ts = (TimestampData) value;
+                        LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
+                                .plusSeconds(ts.getSeconds())
+                                .plusNanos(ts.getNanos());
+                        values[i] = val;
                     }
                     if (value instanceof BlobData) {
                         BlobData bd = (BlobData) value;

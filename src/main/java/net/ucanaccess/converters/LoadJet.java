@@ -1095,11 +1095,9 @@ public class LoadJet {
                     throw new UcanaccessSQLException(e);
                 }
             }
-            if (value instanceof byte[]) {
-                if (BlobKey.hasPrimaryKey(table)) {
-                    BlobKey bk = new BlobKey(table, columnName, row);
-                    return bk.getBytes();
-                }
+            if (value instanceof byte[] && BlobKey.hasPrimaryKey(table)) {
+                BlobKey bk = new BlobKey(table, columnName, row);
+                return bk.getBytes();
             }
 
             if (value instanceof Byte) {

@@ -48,7 +48,7 @@ public abstract class AbstractExecute {
         commandType = CommandType.UPDATABLE_RESULTSET;
     }
 
-    public AbstractExecute(UcanaccessStatement _statement) {
+    protected AbstractExecute(UcanaccessStatement _statement) {
         statement = _statement;
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractExecute {
         }
     }
 
-    private Object addDDLCommand() throws SQLException {
+    private Object addDdlCommand() throws SQLException {
         Object ret;
         try {
             DDLType ddlType = SQLConverter.getDDLType(sql);
@@ -123,24 +123,20 @@ public abstract class AbstractExecute {
                 throw checkDDLException();
             }
 
-            if (DDLType.DROP_FOREIGN_KEY.equals(ddlType)) {
-                if (!HibernateSupport.isActive()) {
-                    throw new UnsupportedOperationException(
-                        "DROP CONSTRAINT is only supported for Hibernate hbm2ddl.auto \"create\"");
-                }
+            if (DDLType.DROP_FOREIGN_KEY.equals(ddlType) && !HibernateSupport.isActive()) {
+                throw new UnsupportedOperationException(
+                    "DROP CONSTRAINT is only supported for Hibernate hbm2ddl.auto \"create\"");
             }
 
-            if (DDLType.ADD_COLUMN.equals(ddlType)) {
-
-                if (SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())) {
-                    String cn = ddlType.getSecondDBObjectName();
-                    String tn = ddlType.getDBObjectName();
-                    int count = count(ddlType.getDBObjectName());
-                    if (count > 0) {
-                        throw new UcanaccessSQLException(ExceptionMessages.DEFAULT_NEEDED, cn, tn, count);
-                    }
-
+            if (DDLType.ADD_COLUMN.equals(ddlType)
+                && SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())) {
+                String cn = ddlType.getSecondDBObjectName();
+                String tn = ddlType.getDBObjectName();
+                int count = count(ddlType.getDBObjectName());
+                if (count > 0) {
+                    throw new UcanaccessSQLException(ExceptionMessages.DEFAULT_NEEDED, cn, tn, count);
                 }
+
             }
 
             String sql0 = ddlType.equals(DDLType.ADD_COLUMN)
@@ -231,7 +227,7 @@ public abstract class AbstractExecute {
         Object retv;
 
         if (checkDDL()) {
-            retv = addDDLCommand();
+            retv = addDdlCommand();
         } else {
             try {
                 retv = executeWrapped();

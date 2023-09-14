@@ -21,7 +21,7 @@ class BatchTest extends UcanaccessTestBase {
     }
 
     @AfterEach
-    public void afterEachTest() throws SQLException {
+    void afterEachTest() throws SQLException {
         dropTable("Tb");
     }
 

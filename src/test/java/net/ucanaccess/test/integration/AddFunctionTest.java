@@ -13,7 +13,7 @@ class AddFunctionTest extends UcanaccessTestBase {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    public void testAddFunction(AccessVersion _accessVersion) throws Exception {
+    void testAddFunction(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
         /*

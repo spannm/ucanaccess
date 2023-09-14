@@ -46,16 +46,16 @@ class ExceptionCodeTest extends UcanaccessTestBase {
     @EnumSource(value = AccessVersion.class)
     void testGenException(AccessVersion _accessVersion) {
         UcanaccessSQLException ex = new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
-        assertEquals(ex.getErrorCode(), 11111);
-        assertEquals(ex.getSQLState(), "ko");
+        assertEquals(11111, ex.getErrorCode());
+        assertEquals("ko", ex.getSQLState());
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testGException(AccessVersion _accessVersion) {
         SQLException ex = assertThrows(SQLException.class, () -> DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao"));
-        assertEquals(ex.getErrorCode(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);
-        assertEquals(ex.getSQLState(), IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "");
+        assertEquals(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, ex.getErrorCode());
+        assertEquals(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "", ex.getSQLState());
     }
 
 }

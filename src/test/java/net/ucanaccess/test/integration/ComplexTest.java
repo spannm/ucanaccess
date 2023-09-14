@@ -102,7 +102,7 @@ class ComplexTest extends UcanaccessTestBase {
         ps.setObject(1, atc);
         ResultSet rs = ps.executeQuery();
         rs.next();
-        assertEquals(rs.getInt(1), 1);
+        assertEquals(1, rs.getInt(1));
         ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [MULTi-VALUE-DATA]=? ");
         svs = new SingleValue[] {new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee")};
         ps.setObject(1, svs);
