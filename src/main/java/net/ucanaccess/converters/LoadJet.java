@@ -818,7 +818,7 @@ public class LoadJet {
                     for (Map.Entry<String, Object> entry : row.entrySet()) {
                         values.add(value(entry.getValue(), t, entry.getKey(), row));
                     }
-                    execInsert(ps, values);
+                    tablesLoader.execInsert(ps, values);
 
                     if (errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
                         try {
@@ -1104,6 +1104,15 @@ public class LoadJet {
                 return SQLConverter.asUnsigned((Byte) value);
             }
             return value;
+        }
+
+        private void execInsert(PreparedStatement st, List<Object> values) throws SQLException {
+            int i = 1;
+            for (Object value : values) {
+                st.setObject(i++, value);
+            }
+            // st.execute();
+            st.addBatch();
         }
 
     }
@@ -1416,7 +1425,7 @@ public class LoadJet {
     private boolean               skipIndexes;
     private final Metadata        metadata;
 
-    public LoadJet(Connection _conn, Database _dbIo) throws SQLException {
+    public LoadJet(Connection _conn, Database _dbIo) {
         conn = _conn;
         dbIO = _dbIo;
         try {
@@ -1470,15 +1479,6 @@ public class LoadJet {
 
             throw e;
         }
-    }
-
-    private void execInsert(PreparedStatement st, List<Object> values) throws SQLException {
-        int i = 1;
-        for (Object value : values) {
-            st.setObject(i++, value);
-        }
-        // st.execute();
-        st.addBatch();
     }
 
     private String escapeIdentifier(String tn) throws SQLException {

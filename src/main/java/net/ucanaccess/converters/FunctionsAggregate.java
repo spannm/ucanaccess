@@ -8,17 +8,17 @@ public final class FunctionsAggregate {
     private FunctionsAggregate() {
     }
 
-    public static Object first(Object in, Boolean flag, Object[] register, Integer[] counter) {
-        if (flag) {
-            return register[0];
+    public static Object first(Object _in, Boolean _flag, Object[] _register, Integer[] _counter) {
+        if (_flag) {
+            return _register[0];
         }
-        if (register[0] == null) {
-            register[0] = in;
+        if (_register[0] == null) {
+            _register[0] = _in;
         }
-        if (counter[0] == null) {
-            counter[0] = 0;
+        if (_counter[0] == null) {
+            _counter[0] = 0;
         }
-        counter[0] = counter[0] + 1;
+        _counter[0] = _counter[0] + 1;
 
         return null;
     }

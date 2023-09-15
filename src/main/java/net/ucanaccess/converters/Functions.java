@@ -587,14 +587,14 @@ public final class Functions {
         String ret = sdf.format(t);
         if (!reg.getRS().equalsIgnoreCase("true")) {
             if (!reg.getAM().equals("AM")) {
-                ret = ret.replaceAll("AM", reg.getAM());
+                ret = ret.replace("AM", reg.getAM());
             }
             if (!reg.getPM().equals("PM")) {
-                ret = ret.replaceAll("PM", reg.getPM());
+                ret = ret.replace("PM", reg.getPM());
             }
         } else {
-            ret = ret.replaceAll(reg.getPM(), "PM");
-            ret = ret.replaceAll(reg.getAM(), "AM");
+            ret = ret.replace(reg.getPM(), "PM");
+            ret = ret.replace(reg.getAM(), "AM");
         }
         return ret;
 
@@ -632,8 +632,11 @@ public final class Functions {
         if ("q".equalsIgnoreCase(par)) {
             return String.valueOf(datePart(par, t));
         }
-        return createSimpleDateFormat(par.replaceAll("m", "M").replaceAll("n", "m")
-                .replaceAll("(?i)AM/PM|A/P|AMPM", "a").replaceAll("dddd", "EEEE")).format(t);
+        return createSimpleDateFormat(par
+            .replace("m", "M")
+            .replace("n", "m")
+            .replace("(?i)AM/PM|A/P|AMPM", "a")
+            .replace("dddd", "EEEE")).format(t);
     }
 
     @FunctionType(functionName = "IIF", argumentTypes = { AccessType.YESNO, AccessType.MEMO,
@@ -791,7 +794,7 @@ public final class Functions {
             if (".".equals(sep)) {
                 s = s.replaceAll(gs, "");
             } else {
-                s = s.replaceAll("\\.", "").replaceAll(sep, ".");
+                s = s.replaceAll("\\.", "").replace(sep, ".");
             }
 
             new BigDecimal(s);
@@ -1250,7 +1253,7 @@ public final class Functions {
             AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE }, returnType = AccessType.DOUBLE)
     public static double ipmt(double rate, double per, double nper, double pv, double fv, double type) {
         type = Math.abs(type) >= 1 ? 1 : 0;
-        double ipmt = fv(rate, Double.valueOf(per).intValue() - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
+        double ipmt = fv(rate, (int) per - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;
         if (type == 1) {
             ipmt = ipmt / (1 + rate);
         }
@@ -1629,16 +1632,16 @@ public final class Functions {
         return "";
     }
 
-    private static int lfloor(double d) {
-        return Double.valueOf(Math.floor(d - APPROX)).intValue();
+    private static int lfloor(double _d) {
+        return (int) Math.floor(_d - APPROX);
     }
 
-    private static int lceil(double d) {
-        return Double.valueOf(Math.ceil(d - APPROX)).intValue();
+    private static int lceil(double _d) {
+        return (int) Math.ceil(_d - APPROX);
     }
 
-    private static int lrint(double d) {
-        return (int) Math.rint(d - APPROX);
+    private static int lrint(double _d) {
+        return (int) Math.rint(_d - APPROX);
     }
 
     private static String padLeft(int ext, int n) {

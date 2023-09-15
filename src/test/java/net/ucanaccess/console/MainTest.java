@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
-public class MainTest extends AbstractTestBase {
+class MainTest extends AbstractTestBase {
 
     @Test
     void testTokenize() throws IOException {

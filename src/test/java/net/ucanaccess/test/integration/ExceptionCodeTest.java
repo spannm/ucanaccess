@@ -32,13 +32,13 @@ class ExceptionCodeTest extends UcanaccessTestBase {
         init(_accessVersion);
         try (Statement st = ucanaccess.createStatement()) {
 
-            st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
-            st.execute("INSERT INTO T(pk,b) VALUES( 'pippo',true)");
+            st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
+            st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
 
         } catch (SQLException _ex) {
 
-            assertEquals(_ex.getErrorCode(), -ErrorCode.X_23505);
-            assertEquals(_ex.getSQLState(), "23505");
+            assertEquals(-ErrorCode.X_23505, _ex.getErrorCode());
+            assertEquals("23505", _ex.getSQLState());
         }
     }
 

@@ -105,7 +105,7 @@ public abstract class AbstractExecute {
         }
     }
 
-    private SQLException checkDDLException() {
+    private SQLException checkDdlException() {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
@@ -120,7 +120,7 @@ public abstract class AbstractExecute {
         try {
             DDLType ddlType = SQLConverter.getDDLType(sql);
             if (ddlType == null) {
-                throw checkDDLException();
+                throw checkDdlException();
             }
 
             if (DDLType.DROP_FOREIGN_KEY.equals(ddlType) && !HibernateSupport.isActive()) {

@@ -44,9 +44,9 @@ public class BlobKey implements Serializable {
         return false;
     }
 
-    public OleBlob getOleBlob(Database db) throws UcanaccessSQLException {
+    public OleBlob getOleBlob(Database _db) throws UcanaccessSQLException {
         try {
-            Table t = db.getTable(tableName);
+            Table t = _db.getTable(tableName);
             Cursor c = CursorBuilder.createPrimaryKeyCursor(t);
             return c.findFirstRow(key) ? c.getCurrentRow().getBlob(columnName) : null;
         } catch (IOException e) {
@@ -68,11 +68,11 @@ public class BlobKey implements Serializable {
 
     }
 
-    public static BlobKey getBlobKey(byte[] bt) {
+    public static BlobKey getBlobKey(byte[] _bytes) {
         ByteArrayInputStream bais = null;
 
         try {
-            bais = new ByteArrayInputStream(bt);
+            bais = new ByteArrayInputStream(_bytes);
             ObjectInputStream ois = new ObjectInputStream(bais);
             Object obj = ois.readObject();
             return obj instanceof BlobKey ? (BlobKey) obj : null;
@@ -81,10 +81,10 @@ public class BlobKey implements Serializable {
         }
     }
 
-    public static BlobKey getBlobKey(InputStream is) {
+    public static BlobKey getBlobKey(InputStream _is) {
         byte[] bt = new byte[MAX_SIZE];
         try {
-            is.read(bt);
+            _is.read(bt);
             return getBlobKey(bt);
         } catch (IOException e) {
             return null;

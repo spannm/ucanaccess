@@ -10,14 +10,15 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class GeneratedKeysTest1 extends UcanaccessTestBase {
-    private String tableName = "T_Key1";
+class GeneratedKeys1Test extends UcanaccessTestBase {
+    private String tableName = "T_Key";
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE " + tableName + " ( Z GUID PRIMARY KEY, B char(4) )");
+        executeStatements("CREATE TABLE " + tableName + " ( Z COUNTER PRIMARY KEY, B char(4) )");
     }
 
     @AfterEach
@@ -35,13 +36,20 @@ public class GeneratedKeysTest1 extends UcanaccessTestBase {
         ps.execute();
         ResultSet rs = ps.getGeneratedKeys();
         rs.next();
-        PreparedStatement ps1 = ucanaccess.prepareStatement("Select @@identity ");
-        ResultSet rs1 = ps1.executeQuery();
-        rs1.next();
-        assertEquals(rs1.getString(1), rs.getString(1));
+        assertEquals(1, rs.getInt(1));
         ps.close();
 
-        checkQuery("SELECT * FROM " + tableName);
+        ps = ucanaccess.prepareStatement("Select @@identity ");
+        rs = ps.executeQuery();
+        rs.next();
+        assertEquals(1, rs.getInt(1));
+        Statement st = ucanaccess.createStatement();
+        st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
+
+        checkQuery("Select @@identity ", 2);
+        rs = st.getGeneratedKeys();
+        rs.next();
+        assertEquals(2, rs.getInt(1));
 
     }
 }

@@ -16,8 +16,7 @@ class CloseOnCompletionTest extends UcanaccessTestBase {
 
         try (PreparedStatement st = ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23))")) {
             st.closeOnCompletion();
-
-            st.execute();
+            assertDoesNotThrow(() -> st.execute());
         }
     }
 

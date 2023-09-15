@@ -69,7 +69,7 @@ public class DBReference {
             try {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
-            } catch (Exception ignore) {
+            } catch (Exception ignored) {
 
             }
             dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
@@ -148,7 +148,6 @@ public class DBReference {
         }
         updateLastModified();
         closeHSQLDB(session);
-        System.gc();
         dbIO.flush();
         dbIO.close();
         dbIO = open(dbFile, pwd);
@@ -261,7 +260,7 @@ public class DBReference {
         memoryTimer.decrementActiveConnection(session);
     }
 
-    private void finalizeHsqlDb(Session _session) throws Exception {
+    private void finalizeHsqlDb(Session _session) throws IOException {
         if (!hsqldbShutdown) {
             releaseLock();
             try (Connection conn = getHSQLDBConnection(_session); Statement st = conn.createStatement()) {
@@ -269,6 +268,7 @@ public class DBReference {
                 hsqldbShutdown = true;
             } catch (Exception ignored) {
                 // ignored
+                return;
             }
         }
     }
@@ -612,8 +612,8 @@ public class DBReference {
             if (dbReference.immediatelyReleaseResources && activeConnection == 0) {
                 try {
                     dbReference.shutdown(_session);
-                } catch (Exception e) {
-                    Logger.logWarning("Error shutting down db " + dbReference + ": " + e);
+                } catch (Exception _ex) {
+                    Logger.logWarning("Error shutting down db " + dbReference + ": " + _ex);
                 }
                 timer.cancel();
 
@@ -631,7 +631,6 @@ public class DBReference {
                                 } catch (Exception ignored) {
                                     // ignored
                                 }
-                                System.gc();
                             }
                         }
                     }

@@ -126,31 +126,35 @@ class BlobOleTest extends UcanaccessTestBase {
     @EnumSource(value = AccessVersion.class)
     void testTwoColumnPK(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
+
         // fix for ticket #23 should prevent this test from throwing an error
-        Statement st = ucanaccess.createStatement();
-        st.execute("CREATE TABLE two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
-            + "CONSTRAINT PK_two_col_pk PRIMARY KEY (pk_col1, pk_col2))");
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO two_col_pk VALUES (?, ?, ?)");
-        ps.setInt(1, 1);
-        ps.setInt(2, 1);
-        Blob b = ucanaccess.createBlob();
-        b.setBytes(1, new byte[] {1});
-        ps.setBlob(3, b);
-        ps.executeUpdate();
+        try (Statement st = ucanaccess.createStatement()) {
+            assertDoesNotThrow(() -> st.execute("CREATE TABLE two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
+                + "CONSTRAINT PK_two_col_pk PRIMARY KEY (pk_col1, pk_col2))"));
+        }
+
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO two_col_pk VALUES (?, ?, ?)")) {
+            ps.setInt(1, 1);
+            ps.setInt(2, 1);
+            Blob b = ucanaccess.createBlob();
+            b.setBytes(1, new byte[] {1});
+            ps.setBlob(3, b);
+            ps.executeUpdate();
+        }
     }
 
-    private File getFile(String fn) throws IOException {
+    private File getFile(String _fn) throws IOException {
         // fix for ticket #23 should prevent this test f
-        File fl1 = new File(fn);
-        FileOutputStream out = new FileOutputStream(fl1);
-        InputStream is = getClass().getClassLoader().getResourceAsStream(fn);
-        byte[] ba = new byte[4096];
-        int len;
-        while ((len = is.read(ba)) != -1) {
-            out.write(ba, 0, len);
+        File fl1 = new File(_fn);
+        try (FileOutputStream out = new FileOutputStream(fl1);
+            InputStream is = getClass().getClassLoader().getResourceAsStream(_fn)) {
+            byte[] ba = new byte[4096];
+            int len;
+            while ((len = is.read(ba)) != -1) {
+                out.write(ba, 0, len);
+            }
+            out.flush();
         }
-        out.flush();
-        out.close();
         return fl1;
     }
 

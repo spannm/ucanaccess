@@ -13,15 +13,18 @@ class FolderTest extends UcanaccessTestBase {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
-    void testFolderContent(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
+    void testFolderContent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        Statement st = null;
+
         String folderPath = System.getProperty("accessFolder");
         if (folderPath == null) {
             return;
         }
+        Statement st = null;
+
+        assertDoesNotThrow(() -> Class.forName("net.ucanaccess.jdbc.UcanaccessDriver"));
+
         File folder = new File(folderPath);
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         for (File fl : folder.listFiles()) {
             try {
                 String url = UcanaccessDriver.URL_PREFIX + fl.getAbsolutePath();
