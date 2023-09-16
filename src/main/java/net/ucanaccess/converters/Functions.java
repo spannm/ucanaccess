@@ -794,14 +794,15 @@ public final class Functions {
             if (".".equals(sep)) {
                 s = s.replaceAll(gs, "");
             } else {
-                s = s.replaceAll("\\.", "").replace(sep, ".");
+                s = s.replaceAll("\\.", "")
+                     .replace(sep, ".");
             }
 
             new BigDecimal(s);
             return true;
         } catch (Exception ignored) {
+            return false;
         }
-        return false;
     }
 
     @FunctionType(functionName = "LEFT", namingConflict = true, argumentTypes = { AccessType.MEMO,

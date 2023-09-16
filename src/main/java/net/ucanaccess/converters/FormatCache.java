@@ -19,12 +19,11 @@ public final class FormatCache {
     }
 
     public static synchronized DecimalFormat getDecimalFormat(String _pattern) {
-        if (!CACHE.containsKey(_pattern)) {
-            DecimalFormat dc = new DecimalFormat(_pattern);
+        return CACHE.computeIfAbsent(_pattern, p -> {
+            DecimalFormat dc = new DecimalFormat(p);
             dc.setRoundingMode(RoundingMode.HALF_UP);
-            CACHE.put(_pattern, dc);
-        }
-        return CACHE.get(_pattern);
+            return dc;
+        });
     }
 
     public static DecimalFormat getNoArgs() {

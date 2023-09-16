@@ -338,23 +338,16 @@ public class DBReference {
     }
 
     private String key(String _pwd) throws SQLException {
-        Connection conn = null;
-        try {
-            if (encryptionKey == null) {
-                String url = "jdbc:hsqldb:mem:" + id + "_tmp";
-                conn = DriverManager.getConnection(url);
+        if (encryptionKey == null) {
+            String url = "jdbc:hsqldb:mem:" + id + "_tmp";
+            try (Connection conn = DriverManager.getConnection(url);
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('" + CIPHER_SPEC + "', null) ");
+                ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('" + CIPHER_SPEC + "', null) ")) {
                 rs.next();
                 encryptionKey = rs.getString(1);
             }
-            return encryptionKey;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-
         }
+        return encryptionKey;
     }
 
     private String getHsqlUrl(final Session session) throws SQLException {
