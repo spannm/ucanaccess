@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-class PivotTest extends UcanaccessTestBase {
+class PivotTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {

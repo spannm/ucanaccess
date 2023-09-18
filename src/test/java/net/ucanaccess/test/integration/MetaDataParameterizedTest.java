@@ -1,13 +1,13 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.*;
 
-class MetaDataParameterizedTest extends UcanaccessTestBase {
+class MetaDataParameterizedTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
@@ -134,7 +134,7 @@ class MetaDataParameterizedTest extends UcanaccessTestBase {
 
         rs = dbmd.getTables(null, null, null, new String[] {"VIEW"});
         dumpQueryResult(rs);
-        getLogger().info(".getBestRowIdentifier...");
+        getLogger().info("getBestRowIdentifier...");
         rs = dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true);
         dumpQueryResult(rs);
         rs = dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowSession, true);

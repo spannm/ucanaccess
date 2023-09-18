@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.*;
 import java.sql.*;
 
-class BlobOleTest extends UcanaccessTestBase {
+class BlobOleTest extends UcanaccessBaseTest {
 
     private static final String IMG_FILE_NAME  = "elisaArt.JPG";
     private static final String PPTX_FILE_NAME = "test.pptx";

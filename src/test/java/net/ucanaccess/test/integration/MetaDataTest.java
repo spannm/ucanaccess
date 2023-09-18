@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-class MetaDataTest extends UcanaccessTestBase {
+class MetaDataTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {

@@ -1,13 +1,13 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.Statement;
 
-class WeirdObjectNamesTest extends UcanaccessTestBase {
+class WeirdObjectNamesTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {

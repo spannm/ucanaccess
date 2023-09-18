@@ -2,14 +2,14 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.sql.*;
 
-class ExternalResourcesTest extends UcanaccessTestBase {
+class ExternalResourcesTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")

@@ -1,10 +1,10 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.util.AbstractTestBase;
+import net.ucanaccess.test.util.AbstractBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class UcanaccessSQLExceptionTest  extends AbstractTestBase {
+class UcanaccessSQLExceptionTest  extends AbstractBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0} => {1}")
     @CsvSource(delimiter = ';', value = {

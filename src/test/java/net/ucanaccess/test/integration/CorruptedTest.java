@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.SQLException;
 
-class CorruptedTest extends UcanaccessTestBase {
+class CorruptedTest extends UcanaccessBaseTest {
 
     private static final ByteArrayOutputStream ERR_CONTENT = new ByteArrayOutputStream();
 

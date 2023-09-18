@@ -1,11 +1,11 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class ConcatNullsFalseTest extends UcanaccessTestBase {
+class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
     ConcatNullsFalseTest() {
         appendToJdbcURL(";concatnulls=false");

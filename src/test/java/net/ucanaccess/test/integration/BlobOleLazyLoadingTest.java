@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
-class BlobOleLazyLoadingTest extends UcanaccessTestBase {
+class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
@@ -31,7 +31,7 @@ class BlobOleLazyLoadingTest extends UcanaccessTestBase {
         assertTrue(initialBlobBytes.length < binaryFileSize);
         Statement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
-        File fl = new File(TEST_DB_TEMP_DIR + "/Copied.jpeg");
+        File fl = createTempFileName("Copied", ".jpeg");
         rs.next();
         @SuppressWarnings("unused")
         Object obj = rs.getObject(1);

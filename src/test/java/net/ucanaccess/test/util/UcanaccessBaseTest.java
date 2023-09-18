@@ -11,17 +11,20 @@ import org.junit.jupiter.api.AfterEach;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class UcanaccessTestBase extends AbstractTestBase {
+public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
-    protected static final String TEST_DB_DIR = "testdbs/";
-    protected static final File   TEST_DB_TEMP_DIR;
+    protected static final String TEST_DB_DIR   = "testdbs/";
+    private static final File     TEST_TEMP_DIR = createTempDir("ucanaccess-test");
 
     static {
-        TEST_DB_TEMP_DIR = new File(System.getProperty("java.io.tmpdir"), "ucanaccess-test");
-        TEST_DB_TEMP_DIR.mkdirs();
         Main.setBatchMode(true);
     }
 
@@ -40,12 +43,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     private String                 append2JdbcURL    = "";
     private Boolean                showSchema;
 
-    protected UcanaccessTestBase() {
-    }
-
-    @Deprecated
-    protected UcanaccessTestBase(AccessVersion _accessVersion) {
-        accessVersion = _accessVersion;
+    protected UcanaccessBaseTest() {
     }
 
     protected final void setAccessVersion(AccessVersion _accessVersion) {
@@ -209,7 +207,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(baos, true)) {
             new Main(ucanaccess, null).consoleDump(_resultSet, ps);
-            getLogger().info(baos.toString());
+            getLogger().info("dumpQueryResult: {}", baos);
         }
     }
 
@@ -237,13 +235,14 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     }
 
     protected final String getAccessTempPath() {
-        if (getAccessPath() == null) {
-            fileAccDb = createTempFile(getClass().getSimpleName() + "-");
+        String accessPath = getAccessPath();
+        if (accessPath == null) {
+            fileAccDb = createTempFile(getClass().getSimpleName() + '-');
             createNewDatabase(getFileFormat(), fileAccDb);
         } else {
-            fileAccDb = copyResourceToTempFile(getAccessPath());
+            fileAccDb = copyResourceToTempFile(accessPath);
             if (fileAccDb == null) {
-                fileAccDb = new File(TEST_DB_TEMP_DIR, getAccessPath());
+                fileAccDb = new File(TEST_TEMP_DIR, accessPath);
                 if (!fileAccDb.exists()) {
                     createNewDatabase(getFileFormat(), fileAccDb);
                     fileAccDb.deleteOnExit();
@@ -254,9 +253,62 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
         return fileAccDb.getAbsolutePath();
     }
 
-    File createTempFile(String _prefix) {
+    /**
+     * Unique string based on current date/time to be used in names of temporary files.
+     */
+    private static final class TempFileNameString {
+        private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        private static final AtomicInteger     COUNTER   = new AtomicInteger(1);
+        private final String                   name;
+
+        private TempFileNameString() {
+            name = LocalDateTime.now().format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    /**
+     * Creates a unique temporary file name using the given prefix and suffix, but does not create the file.
+     * @param _prefix file name prefix
+     * @param _suffix file name suffix
+     * @return temporary file object
+     */
+    protected File createTempFileName(String _prefix, String _suffix) {
+        String name = Optional.ofNullable(_prefix).orElse("");
+        if (!name.isBlank() && !name.endsWith("-")) {
+            name += "-";
+        }
+        name += new TempFileNameString() + _suffix;
+        return new File(TEST_TEMP_DIR, name);
+    }
+
+    /**
+     * Creates a unique temporary file name using the given prefix, but does not create the file.
+     * @param _prefix file name prefix
+     * @return temporary file object
+     */
+    protected File createTempFileName(String _prefix) {
+        return createTempFileName(_prefix, getFileFormat().getFileExtension());
+    }
+
+    /**
+     * Creates a unique temporary file using the given prefix.<p>
+     * The file is marked for deletion on JVM exit.
+     *
+     * @param _prefix file name prefix
+     * @return temporary file object
+     */
+    protected File createTempFile(String _prefix) {
+        File f = createTempFileName(_prefix);
+
         try {
-            return File.createTempFile(_prefix, getFileFormat().getFileExtension(), TEST_DB_TEMP_DIR);
+            Files.createFile(f.toPath());
+            f.deleteOnExit();
+            return f;
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
         }
@@ -265,7 +317,7 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
     void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
         try (Database db = DatabaseBuilder.create(_fileFormat, _dbFile)) {
             db.flush();
-            getLogger().info("Access file version {} created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+            getLogger().info("Access {} file created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
         }
@@ -278,11 +330,12 @@ public abstract class UcanaccessTestBase extends AbstractTestBase {
             getLogger().warn("Resource {} not found in classpath", _resourcePath);
             return null;
         }
+        
+        byte[] buffer = new byte[4096];
+        File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
+        getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
 
         try {
-            byte[] buffer = new byte[4096];
-            File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
-            getLogger().info("Copying resource file {} to {}", _resourcePath, tempFile.getAbsolutePath());
             FileOutputStream fos = new FileOutputStream(tempFile);
             int bread;
             while ((bread = is.read(buffer)) != -1) {

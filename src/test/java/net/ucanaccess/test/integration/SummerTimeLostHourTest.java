@@ -5,7 +5,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.TimeZone;
 
-class SummerTimeLostHourTest extends UcanaccessTestBase {
+class SummerTimeLostHourTest extends UcanaccessBaseTest {
 
     private static Locale   prevLocale;
     private static TimeZone prevTimeZone;

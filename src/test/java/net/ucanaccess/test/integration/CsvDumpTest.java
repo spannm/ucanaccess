@@ -2,7 +2,7 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.console.Exporter;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -17,7 +17,7 @@ import java.sql.Statement;
 /**
  * Integration test for {@link net.ucanaccess.console.Exporter}.
  */
-class CsvDumpTest extends UcanaccessTestBase {
+class CsvDumpTest extends UcanaccessBaseTest {
 
     // Support both Linux and Windows.
     private static final String LINE_SEPARATOR  = System.lineSeparator();

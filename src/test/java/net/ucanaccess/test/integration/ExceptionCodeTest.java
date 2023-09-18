@@ -5,7 +5,7 @@ import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.hsqldb.error.ErrorCode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
 
-class ExceptionCodeTest extends UcanaccessTestBase {
+class ExceptionCodeTest extends UcanaccessBaseTest {
 
     ExceptionCodeTest() {
         Locale.setDefault(Locale.US);

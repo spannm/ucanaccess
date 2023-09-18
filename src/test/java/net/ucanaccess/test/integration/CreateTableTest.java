@@ -7,7 +7,7 @@ import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -20,7 +20,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-class CreateTableTest extends UcanaccessTestBase {
+class CreateTableTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {

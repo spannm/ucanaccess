@@ -1,12 +1,12 @@
 package net.ucanaccess.console;
 
-import net.ucanaccess.test.util.AbstractTestBase;
+import net.ucanaccess.test.util.AbstractBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-class MainTest extends AbstractTestBase {
+class MainTest extends AbstractBaseTest {
 
     @Test
     void testTokenize() throws IOException {

@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessDataSource;
-import net.ucanaccess.test.util.AbstractTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-class DataSourceTest extends AbstractTestBase {
+class DataSourceTest extends UcanaccessBaseTest {
 
     @Test
     void setNewDatabaseVersionBad() {
@@ -41,9 +41,7 @@ class DataSourceTest extends AbstractTestBase {
 
     @Test
     void createNewDatabase() throws SQLException, IOException {
-        File fileMdb;
-        fileMdb = File.createTempFile("ucaDataSourceTest", ".mdb");
-        fileMdb.delete(); // delete the 0-byte file created above
+        File fileMdb = createTempFileName("ucaDataSourceTest", ".mdb");
         assertFalse(fileMdb.exists());
 
         UcanaccessDataSource uds = new UcanaccessDataSource();

@@ -2,7 +2,7 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-class PhysicalRollbackTest extends UcanaccessTestBase {
+class PhysicalRollbackTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
@@ -40,11 +40,11 @@ class PhysicalRollbackTest extends UcanaccessTestBase {
         mth.setAccessible(true);
         mth.invoke(ucanaccess, Boolean.TRUE);
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO T4 (id,descr) VALUES( 6666554,  'nel mezzo del cammin di nostra vita')");
-        st.execute("INSERT INTO T4 (id,descr) VALUES( 77666554, 'nel mezzo del cammin di nostra vita')");
-        st.execute("UPDATE T4 SET ID=0 where id=77666554");
+        st.execute("INSERT INTO T4 (id, descr) VALUES(6666554,  'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id, descr) VALUES(77666554, 'nel mezzo del cammin di nostra vita')");
+        st.execute("UPDATE T4 SET ID=0 WHERE id=77666554");
 
-        st.execute("INSERT INTO T4 (id,descr) VALUES( 4,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id, descr) VALUES(4, 'nel mezzo del cammin di nostra vita')");
 
         st.execute("DELETE FROM T4 WHERE id=4");
         Exception ex = null;

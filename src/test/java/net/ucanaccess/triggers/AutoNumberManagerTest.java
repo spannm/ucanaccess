@@ -5,11 +5,11 @@ import static org.mockito.Mockito.when;
 
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
-import net.ucanaccess.test.util.AbstractTestBase;
+import net.ucanaccess.test.util.AbstractBaseTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class AutoNumberManagerTest extends AbstractTestBase {
+class AutoNumberManagerTest extends AbstractBaseTest {
 
     private ColumnImpl          column;
     private AutoNumberGenerator autoNumberGenerator;

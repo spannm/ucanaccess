@@ -7,37 +7,44 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Base class for JUnit test cases. Extends {@link Assertions} in order to make all assert* methods available,
- * while adding additional custom assert methods.
+ * Base class for JUnit test cases.<p>
+ *
+ * Logs entry and exit to/from all test methods.<br>
+ * This class extends JUnit assertions to avoid the need for static imports in subclasses.
  *
  * @author Markus Spann
  */
-public abstract class AbstractTestBase extends Assertions {
+public abstract class AbstractBaseTest extends Assertions {
 
     static {
         // configure the slf4j-simple static logger binding
         String prefix = "org.slf4j.simpleLogger.";
         System.setProperty(prefix + "logFile", "System.out");
         System.setProperty(prefix + "defaultLogLevel", "info");
+        System.setProperty(prefix + "showShortLogName", "true");
         System.setProperty(prefix + "showDateTime", "true");
         System.setProperty(prefix + "dateTimeFormat", "yyyy-MM-dd HH:mm:ss.SSS");
         System.setProperty(prefix + "showThreadName", "false");
     }
 
-    /**
-     * The SLF4J logger (https://www.slf4j.org/).
-     */
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    /** The slf4j logger. */
+    private Logger logger;
 
     /** Holds information about the current test. */
     private TestInfo     lastTestInfo;
 
-    public final Logger getLogger() {
+    protected final Logger getLogger() {
+        if (null == logger) {
+            logger = LoggerFactory.getLogger(getClass());
+        }
         return logger;
     }
 
@@ -74,6 +81,37 @@ public abstract class AbstractTestBase extends Assertions {
         } else {
             getLogger().info(">>>>>>>>>> {} Test: {} ({}) <<<<<<<<<<", _prefix, _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
         }
+    }
+
+    /**
+     * Creates a subdirectory of the system's temp file directory.
+     * @param _dir subdirectory name
+     * @return temp directory
+     * @throws UncheckedIOException If the subdirectory could not be created
+     */
+    protected static File createTempDir(String _dir) {
+        File tempDir = new File(getTempDir());
+        if (null != _dir) {
+            tempDir = new File(tempDir, _dir);
+        }
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
+            throw new UncheckedIOException(new IOException("Could not create directory " + tempDir));
+        }
+        return tempDir;
+    }
+
+    /**
+     * Returns the system's temporary directory i.e. the content of the {@code java.io.tmpdir} system property.<br>
+     * Ensures the directory name ends in the system-dependent default name-separator character.
+     *
+     * @return system's temporary directory name
+     */
+    protected static String getTempDir() {
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        if (!tmpDir.endsWith(File.separator)) {
+            tmpDir += File.separatorChar;
+        }
+        return tmpDir;
     }
 
     public static void assertEmpty(String _string) {

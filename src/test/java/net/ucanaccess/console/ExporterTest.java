@@ -1,12 +1,12 @@
 package net.ucanaccess.console;
 
-import net.ucanaccess.test.util.AbstractTestBase;
+import net.ucanaccess.test.util.AbstractBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 
-class ExporterTest extends AbstractTestBase {
+class ExporterTest extends AbstractBaseTest {
 
     @Test
     void testToCsvReplacingNewlines() {

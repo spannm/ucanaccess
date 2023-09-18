@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.Statement;
 
-class NotNullDdlTest extends UcanaccessTestBase {
+class NotNullDdlTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
@@ -27,7 +27,7 @@ class NotNullDdlTest extends UcanaccessTestBase {
             st.execute("CREATE TABLE table1 (id LONG PRIMARY KEY, txt_required TEXT(50) NOT NULL)");
             ucanaccess.close();
 
-            File vbsFile = File.createTempFile("NotNullDdlTest", ".vbs", TEST_DB_TEMP_DIR);
+            File vbsFile = createTempFileName("NotNullDdlTest", ".vbs");
             vbsFile.deleteOnExit();
             PrintWriter pw = new PrintWriter(vbsFile);
             pw.println("Set conn = CreateObject(\"ADODB.Connection\")");

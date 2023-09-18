@@ -4,7 +4,7 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -17,7 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-class ComplexTest extends UcanaccessTestBase {
+class ComplexTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {

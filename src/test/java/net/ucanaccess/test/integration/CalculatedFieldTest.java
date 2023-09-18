@@ -2,7 +2,7 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.UcanaccessTestBase;
+import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-class CalculatedFieldTest extends UcanaccessTestBase {
+class CalculatedFieldTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
