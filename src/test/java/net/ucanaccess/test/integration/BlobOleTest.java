@@ -7,98 +7,92 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
 
 class BlobOleTest extends UcanaccessBaseTest {
 
-    private static final String IMG_FILE_NAME  = "elisaArt.JPG";
-    private static final String PPTX_FILE_NAME = "test.pptx";
+    private static final String IMG_FILE_NAME  = "BlobOleTest/elisaArt.jpeg";
+    private static final String PPTX_FILE_NAME = "BlobOleTest/test.pptx";
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE T2 (id COUNTER PRIMARY KEY, descr TEXT(400), pippo OLE)");
+        executeStatements("CREATE TABLE t_ole_test (id COUNTER PRIMARY KEY, c_descr TEXT(400), c_ole OLE)");
     }
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("T2");
+        dropTable("t_ole_test");
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testBlobOle(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        final File fl = new File("CopyElisaArt.JPG");
-
+        File imgFileTemp = createTempFile(IMG_FILE_NAME);
+        
         Blob blob = ucanaccess.createBlob();
-        OutputStream out = blob.setBinaryStream(1);
-        InputStream is = getClass().getClassLoader().getResourceAsStream(IMG_FILE_NAME);
-        byte[] ba = new byte[4096];
-        int len;
-        while ((len = is.read(ba)) != -1) {
-            out.write(ba, 0, len);
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(IMG_FILE_NAME);
+            OutputStream out = blob.setBinaryStream(1)) {
+            is.transferTo(out);
         }
-        out.flush();
-        out.close();
 
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
-        ps.setString(1, "TestOle");
-        ps.setBlob(2, blob);
-        ps.execute();
+        String descr = "TestOle";
+        try (PreparedStatement ps1 = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES(?, ?)")) {
+            ps1.setString(1, descr);
+            ps1.setBlob(2, blob);
+            ps1.execute();
+        }
+
         Statement st = ucanaccess.createStatement();
-        ResultSet rs = st.executeQuery("SELECT Pippo FROM T2");
-        rs.next();
-        InputStream isDB = rs.getBinaryStream(1);
-        OutputStream outFile = new FileOutputStream(fl);
-        ByteArrayOutputStream outByte = new ByteArrayOutputStream();
-        ba = new byte[4096];
-        while ((len = isDB.read(ba)) != -1) {
-            outFile.write(ba, 0, len);
-            outByte.write(ba, 0, len);
+        ResultSet rs1 = st.executeQuery("SELECT c_ole FROM t_ole_test");
+        rs1.next();
+
+        try (InputStream isFromDb = rs1.getBinaryStream(1)) {
+            
+            Files.copy(isFromDb, imgFileTemp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
+            
+            byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
+
+            checkQuery("SELECT * FROM t_ole_test", new Object[][] {{1, descr, fileBytes}});
+
+            PreparedStatement ps2 = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
+            ps2.setString(1, descr + "_OK");
+            ps2.setString(2, descr);
+            ps2.executeUpdate();
+            checkQuery("SELECT * FROM t_ole_test");
+            checkQuery("SELECT * FROM t_ole_test", 1, descr + "_OK", fileBytes);
         }
-        outFile.flush();
-        outFile.close();
-        getLogger().info("Image file was created in {}", fl.getAbsolutePath());
-        outByte.flush();
-        outByte.close();
-        checkQuery("SELECT * FROM T2", new Object[][] {{1, "TestOle", outByte.toByteArray()}});
-        ps.close();
 
-        ps = ucanaccess.prepareStatement("UPDATE T2 SET descr=? WHERE  descr=?");
-        ps.setString(1, "TestOleOk");
-        ps.setString(2, "TestOle");
-        ps.executeUpdate();
-        checkQuery("SELECT * FROM T2");
-        checkQuery("SELECT * FROM T2", 1, "TestOleOk", outByte.toByteArray());
-        ps = ucanaccess.prepareStatement("UPDATE T2 SET pippo=? WHERE descr=?");
-        File fl1 = getFile(PPTX_FILE_NAME);
-        blob = ucanaccess.createBlob(fl1);
-        ps.setObject(1, fl1);
-        ps.setString(2, "TestOleOk");
-        ps.executeUpdate();
+        try (PreparedStatement ps3 = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
+            File fl1 = copyFileFromClasspath(PPTX_FILE_NAME);
+            blob = ucanaccess.createBlob(fl1);
+            ps3.setObject(1, fl1);
+            ps3.setString(2, descr + "_OK");
+            ps3.executeUpdate();
+            fl1.delete();
+            getLogger().info("PPTX file was created in {}", getFileAccDb());
+            checkQuery("SELECT * FROM t_ole_test");
+        }
 
-        getLogger().info("PPTX file was created in {}", getFileAccDb());
-        checkQuery("SELECT * FROM T2");
-        ps = ucanaccess.prepareStatement("DELETE FROM t2 WHERE descr=?");
-        ps.setString(1, "TestOleOk");
-        ps.executeUpdate();
+        try (PreparedStatement ps4 = ucanaccess.prepareStatement("DELETE FROM t_ole_test WHERE c_descr=?")) {
+            ps4.setString(1, descr + "_OK");
+            ps4.executeUpdate();
+        }
 
-        ps.close();
-
-        ps = ucanaccess.prepareStatement("INSERT INTO t2 (descr) VALUES (?)");
-        ps.setString(1, "OLE column is null");
-        ps.executeUpdate();
-        rs = st.executeQuery("SELECT pippo FROM t2 WHERE descr='OLE column is null'");
-        rs.next();
-        assertNull(rs.getBinaryStream(1));
-        assertNull(rs.getBlob(1));
-
-        rs.close();
-        ps.close();
-        fl.delete();
-        fl1.delete();
+        try (PreparedStatement ps5 = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr) VALUES (?)")) {
+            ps5.setString(1, "value of OLE column is null");
+            ps5.executeUpdate();
+            try (ResultSet rs2 = st.executeQuery("SELECT c_ole FROM t_ole_test WHERE c_descr = 'value of OLE column is null'")) {
+                rs2.next();
+                assertNull(rs2.getBinaryStream(1));
+                assertNull(rs2.getBlob(1));
+            }
+        }
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
@@ -108,32 +102,32 @@ class BlobOleTest extends UcanaccessBaseTest {
     void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
         PreparedStatement ps = null;
-        File fl1 = getFile(PPTX_FILE_NAME);
+        File fl1 = copyFileFromClasspath(PPTX_FILE_NAME);
         Blob blob = ucanaccess.createBlob(fl1);
-        ps = ucanaccess.prepareStatement("INSERT INTO T2 (descr,pippo)  VALUES( ?,?)");
+        ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole)  VALUES( ?,?)");
         ps.setString(1, "TestOle");
         ps.setBlob(2, blob);
 
         ps.execute();
         getLogger().info("PPTX file was created in {}", getFileAccDb());
-        checkQuery("SELECT * FROM T2");
+        checkQuery("SELECT * FROM t_ole_test");
         Statement st = ucanaccess.createStatement();
         fl1.delete();
-        st.execute("DELETE FROM t2");
+        st.execute("DELETE FROM t_ole_test");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testTwoColumnPK(AccessVersion _accessVersion) throws SQLException {
+    void testTwoColumnPk(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         // fix for ticket #23 should prevent this test from throwing an error
         try (Statement st = ucanaccess.createStatement()) {
-            assertDoesNotThrow(() -> st.execute("CREATE TABLE two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
-                + "CONSTRAINT PK_two_col_pk PRIMARY KEY (pk_col1, pk_col2))"));
+            assertDoesNotThrow(() -> st.execute("CREATE TABLE t_two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
+                + "CONSTRAINT pk_t_two_col_pk PRIMARY KEY (pk_col1, pk_col2))"));
         }
 
-        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO two_col_pk VALUES (?, ?, ?)")) {
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_two_col_pk VALUES (?, ?, ?)")) {
             ps.setInt(1, 1);
             ps.setInt(2, 1);
             Blob b = ucanaccess.createBlob();
@@ -143,19 +137,16 @@ class BlobOleTest extends UcanaccessBaseTest {
         }
     }
 
-    private File getFile(String _fn) throws IOException {
-        // fix for ticket #23 should prevent this test f
-        File fl1 = new File(_fn);
-        try (FileOutputStream out = new FileOutputStream(fl1);
-            InputStream is = getClass().getClassLoader().getResourceAsStream(_fn)) {
-            byte[] ba = new byte[4096];
-            int len;
-            while ((len = is.read(ba)) != -1) {
-                out.write(ba, 0, len);
-            }
-            out.flush();
+    private File copyFileFromClasspath(String _fn) throws IOException {
+        int idxLastDot = _fn.lastIndexOf('.');
+        String prefix = idxLastDot < 0 ? _fn : _fn.substring(0, idxLastDot);
+        String suffix = idxLastDot < 0 ? ".tmp" : _fn.substring(idxLastDot).toLowerCase();
+        File tmpFile = createTempFileName(prefix, suffix);
+        tmpFile.deleteOnExit();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(_fn)) {
+            Files.copy(is, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
-        return fl1;
+        return tmpFile;
     }
 
 }

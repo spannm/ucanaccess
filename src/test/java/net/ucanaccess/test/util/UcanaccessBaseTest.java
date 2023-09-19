@@ -277,8 +277,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      * @param _suffix file name suffix
      * @return temporary file object
      */
-    protected File createTempFileName(String _prefix, String _suffix) {
-        String name = Optional.ofNullable(_prefix).orElse("");
+    protected static File createTempFileName(String _prefix, String _suffix) {
+        String name = Optional.ofNullable(_prefix).map(p -> p.replace(File.separatorChar, '_')).orElse("");
         if (!name.isBlank() && !name.endsWith("-")) {
             name += "-";
         }
