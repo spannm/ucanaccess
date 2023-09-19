@@ -43,8 +43,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             String command = "\"" + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + "\"";
             Process p = Runtime.getRuntime().exec(command);
             p.waitFor();
-            BufferedReader rdr =
-                new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            BufferedReader rdr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             StringBuilder sb = new StringBuilder(); // to capture error line(s)
             int numErrorLines = 0;
             String line = rdr.readLine();

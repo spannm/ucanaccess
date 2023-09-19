@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -325,25 +326,15 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected File copyResourceToTempFile(String _resourcePath) {
         File resourceFile = new File(_resourcePath);
-        InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath);
-        if (is == null) {
-            getLogger().warn("Resource {} not found in classpath", _resourcePath);
-            return null;
-        }
-        
-        byte[] buffer = new byte[4096];
-        File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
-        getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
 
-        try {
-            FileOutputStream fos = new FileOutputStream(tempFile);
-            int bread;
-            while ((bread = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, bread);
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath)) {
+            if (is == null) {
+                getLogger().warn("Resource {} not found in classpath", _resourcePath);
+                return null;
             }
-            fos.flush();
-            fos.close();
-            is.close();
+            File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
+            getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
+            Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return tempFile;
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
@@ -416,18 +407,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected void initVerifyConnection() throws SQLException, IOException {
-        InputStream is = new FileInputStream(fileAccDb);
         File tempVerifyFile = createTempFile(fileAccDb.getName().replace(".", "_") + "_verify");
-        FileOutputStream fos = new FileOutputStream(tempVerifyFile);
-
-        byte[] buffer = new byte[4096];
-        int bread;
-        while ((bread = is.read(buffer)) != -1) {
-            fos.write(buffer, 0, bread);
-        }
-        fos.flush();
-        fos.close();
-        is.close();
+        Files.copy(fileAccDb.toPath(), tempVerifyFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         if (verifyConnection != null) {
             verifyConnection.close();
@@ -501,15 +482,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    private byte[] getByteArray(Blob blob) throws SQLException, IOException {
-        InputStream bs = blob.getBinaryStream();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] bt = new byte[4096];
-        int len;
-        while ((len = bs.read(bt)) != -1) {
-            bos.write(bt, 0, len);
+    private byte[] getByteArray(Blob _blob) throws SQLException, IOException {
+        try (InputStream bs = _blob.getBinaryStream()) {
+            return bs.readAllBytes();
         }
-        bt = bos.toByteArray();
-        return bt;
     }
 }
