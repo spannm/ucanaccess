@@ -198,8 +198,8 @@ public class DDLCommandEnlist {
         }
     }
 
-    private String[] checkEscaped(String ll, String rl, String[] colDecls, String tknt) {
-        if (colDecls[0].startsWith(ll) && tknt.substring(1).indexOf(rl) > 0) {
+    private String[] checkEscaped(String _ll, String rl, String[] colDecls, String tknt) {
+        if (colDecls[0].startsWith(_ll) && tknt.indexOf(rl, 1) > 0) {
             for (int k = 0; k < colDecls.length; k++) {
                 if (colDecls[k].endsWith(rl)) {
                     String[] colDecls0 = new String[colDecls.length - k];

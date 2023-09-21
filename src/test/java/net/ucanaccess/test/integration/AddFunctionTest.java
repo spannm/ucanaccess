@@ -22,19 +22,20 @@ class AddFunctionTest extends UcanaccessBaseTest {
          * entire suite
          */
         getLogger().info("Locale language is {}", Locale.getDefault().getLanguage());
-        Thread.sleep(1500);
 
-        Statement st = ucanaccess.createStatement();
-        st.executeUpdate("CREATE TABLE gooo (id INTEGER) ");
-        st.close();
-        st = ucanaccess.createStatement();
-        st.execute("INSERT INTO gooo (id )  VALUES(1)");
+        try (Statement st = ucanaccess.createStatement()) {
+            st.executeUpdate("CREATE TABLE t_add_function (id INTEGER) ");
+        }
+
+        try (Statement st = ucanaccess.createStatement()) {
+            st.execute("INSERT INTO t_add_function (id) VALUES(1)");
+        }
+
         ucanaccess.addFunctions(AddFunctionClass.class);
-        dumpQueryResult("SELECT pluto('hello',' world ',  NOW()) FROM gooo");
-        checkQuery("SELECT CONCAT('Hello World, ','Ucanaccess') FROM gooo", "Hello World, Ucanaccess");
-        // uc.addFunctions(AddFunctionClass.class);
+        dumpQueryResult("SELECT pluto('hello',' world ',  NOW()) FROM t_add_function");
+        checkQuery("SELECT CONCAT('Hello World, ','Ucanaccess') FROM t_add_function", "Hello World, Ucanaccess");
 
-        dropTable("gooo");
+        dropTable("t_add_function");
     }
 
 }

@@ -70,7 +70,6 @@ public class DBReference {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
             } catch (Exception ignored) {
-
             }
             dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
                 if (linkeeFileName == null) {
@@ -267,8 +266,6 @@ public class DBReference {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
             } catch (Exception ignored) {
-                // ignored
-                return;
             }
         }
     }
