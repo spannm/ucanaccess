@@ -1,13 +1,17 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.log.LoggerResourceMessage;
 
+/**
+ * @deprecated Implement missing features or throw general Ucanacess exception.
+ */
+@Deprecated(forRemoval = true)
 public class FeatureNotSupportedException extends java.sql.SQLFeatureNotSupportedException {
 
-    public enum NotSupportedMessage {
+    public enum NotSupportedMessage implements LoggerResourceMessage {
         NOT_SUPPORTED,
         NOT_SUPPORTED_YET
-
     }
 
     private static final long serialVersionUID = -6457220326288384415L;
@@ -18,7 +22,7 @@ public class FeatureNotSupportedException extends java.sql.SQLFeatureNotSupporte
     }
 
     public FeatureNotSupportedException(NotSupportedMessage _msg) {
-        super(Logger.getMessage(_msg.name()));
+        super(Logger.getMessage(_msg));
 
     }
 
