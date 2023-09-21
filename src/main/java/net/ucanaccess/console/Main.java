@@ -2,7 +2,7 @@ package net.ucanaccess.console;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
 
 import java.io.*;
 import java.sql.*;

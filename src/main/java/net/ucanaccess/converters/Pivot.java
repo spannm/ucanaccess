@@ -2,7 +2,7 @@ package net.ucanaccess.converters;
 
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -4,8 +4,8 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import net.ucanaccess.util.Logger;
-import net.ucanaccess.util.Logger.Messages;
+import net.ucanaccess.log.Logger;
+import net.ucanaccess.log.LoggerMessageEnum;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public final class UcanaccessDriver implements Driver {
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
 
         } catch (ClassNotFoundException e) {
-            Logger.logMessage(Messages.HSQLDB_DRIVER_NOT_FOUND);
+            Logger.logWarning(LoggerMessageEnum.HSQLDB_DRIVER_NOT_FOUND);
             throw new RuntimeException(e.getMessage());
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
@@ -87,7 +87,7 @@ public final class UcanaccessDriver implements Driver {
                     if (_props.containsKey("keepmirror")) {
                         dbRef.setInMemory(false);
                         if (dbRef.isEncryptHSQLDB()) {
-                            Logger.logWarning(Messages.KEEP_MIRROR_AND_OTHERS);
+                            Logger.logWarning(LoggerMessageEnum.KEEP_MIRROR_AND_OTHERS);
                         } else {
                             File dbMirror =
                                     new File(_props.getProperty("keepmirror") + mdb.getName().toUpperCase().hashCode());
@@ -148,7 +148,7 @@ public final class UcanaccessDriver implements Driver {
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
-                            Logger.logParametricWarning(Messages.INVALID_CHARACTER_SEQUENCE,
+                            Logger.logWarning(LoggerMessageEnum.INVALID_CHARACTER_SEQUENCE,
                                     cl.getTable().getName(), cl.getName(), new String(bt));
                         }
                         throw new IOException(ex.getMessage());
@@ -217,7 +217,7 @@ public final class UcanaccessDriver implements Driver {
         } catch (Exception ignored) {
 
         }
-        Logger.logWarning(Logger.Messages.LOBSCALE);
+        Logger.logWarning(LoggerMessageEnum.LOBSCALE);
         return null;
     }
 

@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
 
 import java.io.File;
 import java.io.IOException;

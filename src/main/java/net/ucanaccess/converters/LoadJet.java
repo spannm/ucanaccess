@@ -17,8 +17,8 @@ import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.util.Logger;
-import net.ucanaccess.util.Logger.Messages;
+import net.ucanaccess.log.Logger;
+import net.ucanaccess.log.LoggerMessageEnum;
 import org.hsqldb.error.ErrorCode;
 
 import java.io.IOException;
@@ -154,7 +154,7 @@ public class LoadJet {
                     exec(functionDef, true);
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    Logger.logParametricWarning(Messages.FUNCTION_ALREADY_ADDED, functionDef);
+                    Logger.logWarning(LoggerMessageEnum.FUNCTION_ALREADY_ADDED, functionDef);
                 }
             }
 
@@ -185,7 +185,7 @@ public class LoadJet {
                     try {
                         exec(header.toString(), true);
                     } catch (SQLException e) {
-                        Logger.logParametricWarning(Messages.FUNCTION_ALREADY_ADDED, header.toString());
+                        Logger.logWarning(LoggerMessageEnum.FUNCTION_ALREADY_ADDED, header.toString());
                     }
                 }
             }
@@ -327,7 +327,7 @@ public class LoadJet {
                             + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW " + " BEGIN  ATOMIC IF %s THEN "
                             + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
                             + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
-                            + Logger.getMessage(Messages.TRIGGER_UPDATE_CF_ERR.name()) + cl.getName().replace("%", "%%")
+                            + Logger.getMessage(LoggerMessageEnum.TRIGGER_UPDATE_CF_ERR) + cl.getName().replace("%", "%%")
                             + "'" + ";  END IF ; END ";
         }
 
@@ -381,7 +381,7 @@ public class LoadJet {
             String comma = "";
             for (Column cl : lc) {
                 if ("USER".equalsIgnoreCase(cl.getName())) {
-                    Logger.logParametricWarning(Messages.USER_AS_COLUMNNAME, t.getName());
+                    Logger.logWarning(LoggerMessageEnum.USER_AS_COLUMNNAME, t.getName());
                 }
                 String expr = getExpression(cl);
                 if (expr != null && constraints) {
@@ -528,7 +528,7 @@ public class LoadJet {
                     boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                     if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        Logger.logParametricWarning(Messages.UNKNOWN_EXPRESSION, "" + defaulT, cl.getName(),
+                        Logger.logWarning(LoggerMessageEnum.UNKNOWN_EXPRESSION, "" + defaulT, cl.getName(),
                                 cl.getTable().getName());
                     } else {
                         if (defFound != null && !defaultIsFunction) {
@@ -537,7 +537,7 @@ public class LoadJet {
                         if (cl.getType() == DataType.TEXT && defaulT.toString().startsWith("'")
                                 && defaulT.toString().endsWith("'")
                                 && defaulT.toString().length() > cl.getLengthInUnits()) {
-                            Logger.logParametricWarning(Messages.DEFAULT_VALUES_DELIMETERS, "" + defaulT, cl.getName(),
+                            Logger.logWarning(LoggerMessageEnum.DEFAULT_VALUES_DELIMETERS, "" + defaulT, cl.getName(),
                                     cl.getTable().getName(), "" + cl.getLengthInUnits());
                         }
                         arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + namingCounter++ + " BEFORE INSERT ON " + ntn
@@ -759,7 +759,7 @@ public class LoadJet {
             default:
                 break;
             }
-            Logger.logParametricWarning(Messages.CONSTRAINT, type, t.getName(), record.toString(), t.getName());
+            Logger.logWarning(LoggerMessageEnum.CONSTRAINT, type, t.getName(), record.toString(), t.getName());
 
             dropTable(t, systemTable);
             createSyncrTable(t, systemTable, false);
@@ -850,7 +850,7 @@ public class LoadJet {
 
                 }
                 if (i != t.getRowCount() && step != 1) {
-                    Logger.logParametricWarning(Messages.ROW_COUNT, t.getName(), String.valueOf(t.getRowCount()),
+                    Logger.logWarning(LoggerMessageEnum.ROW_COUNT, t.getName(), String.valueOf(t.getRowCount()),
                             String.valueOf(i));
 
                 }

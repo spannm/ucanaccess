@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
 
 public class FeatureNotSupportedException extends java.sql.SQLFeatureNotSupportedException {
 
@@ -17,8 +17,8 @@ public class FeatureNotSupportedException extends java.sql.SQLFeatureNotSupporte
 
     }
 
-    public FeatureNotSupportedException(NotSupportedMessage message) {
-        super(Logger.getMessage(message.name()));
+    public FeatureNotSupportedException(NotSupportedMessage _msg) {
+        super(Logger.getMessage(_msg.name()));
 
     }
 

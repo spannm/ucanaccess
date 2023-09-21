@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -17,7 +17,6 @@ import javax.naming.StringRefAddr;
 import javax.sql.DataSource;
 
 public class UcanaccessDataSource implements Serializable, Referenceable, DataSource {
-    // private static final long serialVersionUID = 8574198937631043152L; // prior to v3.0.6
     private static final long serialVersionUID = -5622403376078548785L;
 
     private String                accessPath;

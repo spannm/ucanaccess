@@ -1,14 +1,18 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.util.Logger;
+import net.ucanaccess.log.Logger;
+import net.ucanaccess.log.LoggerResourceMessage;
 import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * The sql exception specific to {@code Ucanaccess}.
+ */
 public class UcanaccessSQLException extends SQLException {
 
-    public enum ExceptionMessages {
+    public enum ExceptionMessages implements LoggerResourceMessage {
         CONCURRENT_PROCESS_ACCESS,
         INVALID_CREATE_STATEMENT,
         INVALID_INTERVAL_VALUE,
@@ -38,15 +42,15 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, _vendorCode, _cause);
+        super(_reason, _sqlState, _vendorCode, _cause);
     }
 
     public UcanaccessSQLException(ExceptionMessages _reason) {
-        this(Logger.getMessage(_reason.name()), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        this(Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(ExceptionMessages _reason, Object... _args) {
-        this(Logger.getMessage(_reason.name(), _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        this(Logger.getMessage(_reason, _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode) {
@@ -77,7 +81,7 @@ public class UcanaccessSQLException extends SQLException {
             SQLException se = (SQLException) _cause;
             if (se.getErrorCode() == -ErrorCode.X_42562) {
                 return _cause.getMessage() + " "
-                    + Logger.getMessage(ExceptionMessages.INVALID_TYPES_IN_COMBINATION.name());
+                    + Logger.getMessage(ExceptionMessages.INVALID_TYPES_IN_COMBINATION);
             }
         }
         return _cause.getMessage();
