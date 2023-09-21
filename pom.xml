@@ -76,6 +76,9 @@
         <basepom.check.skip-pmd>true</basepom.check.skip-pmd>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
+
+        <basepom.javadoc.skip>false</basepom.javadoc.skip>
+        <basepom.javadoc.show>protected</basepom.javadoc.show>
     </properties>
 
     <dependencyManagement>
