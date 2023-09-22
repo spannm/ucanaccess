@@ -20,36 +20,35 @@ class MetaDataTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
+        executeStatements("CREATE TABLE t_metadata ( baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
     }
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("AAAn");
+        dropTable("t_metadata");
     }
 
     void createSimple(String a, Object[][] ver) throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "' )");
-            st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "' )");
-            checkQuery("SELECT * FROM AAAn", ver);
+            st.execute("INSERT INTO t_metadata VALUES ('33A', 11, '" + a + "' )");
+            st.execute("INSERT INTO t_metadata VALUES ('33B', 111, '" + a + "' )");
         }
+        checkQuery("SELECT * FROM t_metadata", ver);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
     void testDrop(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        Statement st = null;
         ucanaccess.setAutoCommit(false);
         createSimple("a", new Object[][] {{"33A", 11, "a"}, {"33B", 111, "a"}});
-        st = ucanaccess.createStatement();
-        st.executeUpdate("DROP TABLE AAAn");
+        try (Statement st = ucanaccess.createStatement()) {
+            st.executeUpdate("DROP TABLE t_metadata");
 
-        st.execute("CREATE TABLE AAAn ( baaaa TEXT(3) PRIMARY KEY,A INTEGER , C TEXT(4)) ");
-        createSimple("b", new Object[][] {{"33A", 11, "b"}, {"33B", 111, "b"}});
+            st.execute("CREATE TABLE t_metadata (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
+            createSimple("b", new Object[][] {{"33A", 11, "b"}, {"33B", 111, "b"}});
 
-        ucanaccess.commit();
-        st.close();
+            ucanaccess.commit();
+        }
     }
 }

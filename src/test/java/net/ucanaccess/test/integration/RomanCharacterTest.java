@@ -18,13 +18,12 @@ class RomanCharacterTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
     void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        dumpQueryResult("SELECT * FROM NOROMAN");
-        getLogger().info("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß");
+        dumpQueryResult("SELECT * FROM t_noroman");
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
-            st.execute("UPDATE NOROMAN SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
+            st.execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
+            st.execute("UPDATE t_noroman SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
         }
-        checkQuery("SELECT * FROM NOROMAN");
+        checkQuery("SELECT * FROM t_noroman");
     }
 
 }

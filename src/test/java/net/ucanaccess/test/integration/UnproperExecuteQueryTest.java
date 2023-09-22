@@ -1,5 +1,8 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,19 +22,18 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES( 'the end','yeeep')");
-        execute("UPDATE NOROMAN SET [ENd]='BLeah'");
-        execute("DELETE FROM NOROMAN");
+        execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
+        execute("UPDATE t_noroman SET [ENd]='BLeah'");
+        execute("DELETE FROM t_noroman");
     }
 
-    private void execute(String s) throws SQLException {
-        Statement st = ucanaccess.createStatement();
-        try {
-            st.executeQuery(s);
-            fail("Should not get here");
-        } catch (Exception _ex) {
-            getLogger().info(_ex.getMessage());
+    private void execute(String _sql) throws SQLException {
+        try (Statement st = ucanaccess.createStatement()) {
+            assertThatThrownBy(() -> st.executeQuery(_sql))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageMatching("UCAExc:::[0-9\\.]+ General error");
+
+            assertDoesNotThrow(() -> st.execute(_sql));
         }
-        st.execute(s);
     }
 }
