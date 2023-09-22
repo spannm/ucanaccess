@@ -362,22 +362,33 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testNow(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        // ensure enough time left in the current second to avoid test failure
-        while (System.currentTimeMillis() % 1000 > 900) {
-            Thread.sleep(25L);
-        }
+        sleepUntilStartOfNewSecond();
         Date now = new Date(System.currentTimeMillis() / 1000 * 1000);
-        checkQuery("SELECT now() FROM t234", now);
+        checkQuery("SELECT Now() FROM t234", now);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testTime(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
+        sleepUntilStartOfNewSecond();
         Calendar cl = Calendar.getInstance();
         cl.set(Calendar.MILLISECOND, 0);
         cl.set(1899, 11, 30);
-        checkQuery("SELECT time() FROM t234", cl.getTime());
+        checkQuery("SELECT Time() FROM t234", cl.getTime());
+    }
+
+    /**
+     * Ensure enough time left in the current second to avoid failure of time-sensitive tests
+     */
+    private static void sleepUntilStartOfNewSecond() {
+        while (System.currentTimeMillis() % 1000 > 900) {
+            try {
+                Thread.sleep(25L);
+            } catch (InterruptedException _ex) {
+                return;
+            }
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -391,7 +402,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testRight(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Right ('Tech on the Net', 3),Right(null,12) FROM t234", "Net", null);
+        checkQuery("SELECT Right('Tech on the Net', 3), Right(null,12) FROM t234", "Net", null);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
