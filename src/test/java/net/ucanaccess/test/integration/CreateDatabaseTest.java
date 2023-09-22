@@ -34,8 +34,8 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
         }
 
         try (Statement st = ucanaccessConnection.createStatement()) {
-            st.execute("INSERT INTO AAA(baaaa, c) VALUES ('33A','G'   )");
-            st.execute("INSERT INTO AAA VALUES ('33B',111,'G'   )");
+            st.execute("INSERT INTO AAA(baaaa, c) VALUES ('33A','G' )");
+            st.execute("INSERT INTO AAA VALUES ('33B',111,'G' )");
         }
         dumpQueryResult("SELECT * FROM AAA");
     }

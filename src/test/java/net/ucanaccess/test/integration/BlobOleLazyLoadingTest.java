@@ -6,9 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,7 +39,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
         @SuppressWarnings("unused")
         Object obj = rs.getObject(1);
         try (InputStream isFromDb = rs.getBlob(1).getBinaryStream()) {
-            Files.copy(isFromDb, fl.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(isFromDb, fl.toPath());
         }
         assertEquals(fl.length(), binaryFileSize);
         getLogger().info("File was created in {}, size: {} bytes", fl.getAbsolutePath(), fl.length());

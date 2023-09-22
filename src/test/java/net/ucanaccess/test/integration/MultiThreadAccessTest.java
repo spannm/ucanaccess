@@ -12,7 +12,7 @@ import java.sql.*;
 class MultiThreadAccessTest extends UcanaccessBaseTest {
     private static int intVal;
 
-    private String       dbPath;
+    private String dbPath;
     private final String tableName = "T1";
 
     @Override
@@ -32,7 +32,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
         intVal++;
-        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES( " + intVal + ",'" + intVal + "Bla bla bla bla:"
+        st.execute("INSERT INTO " + tableName + " (id,descr) VALUES( " + intVal + ",'" + intVal + "Bla bla bla bla:"
                 + Thread.currentThread() + "')");
         conn.commit();
         conn.close();
@@ -41,13 +41,13 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     void crudPS() throws SQLException {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
-        PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr)  VALUES(?, ?)");
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr) VALUES(?, ?)");
         ps.setInt(1, ++intVal);
         ps.setString(2, "ciao");
         ps.execute();
         ps = conn.prepareStatement("UPDATE " + tableName + " SET descr='" + Thread.currentThread() + "'");
         ps.executeUpdate();
-        ps = conn.prepareStatement("DELETE FROM " + tableName + " WHERE  descr='" + Thread.currentThread() + "'");
+        ps = conn.prepareStatement("DELETE FROM " + tableName + " WHERE descr='" + Thread.currentThread() + "'");
         conn.commit();
         conn.close();
     }
@@ -56,8 +56,8 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         Connection conn = getUcanaccessConnection(dbPath);
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
-        st.execute("INSERT INTO " + tableName + " (id,descr)  VALUES(" + (++intVal) + "  ,'" + Thread.currentThread() + "')");
-        PreparedStatement ps = conn.prepareStatement("SELECT *  FROM " + tableName + "", ResultSet.TYPE_FORWARD_ONLY,
+        st.execute("INSERT INTO " + tableName + " (id,descr) VALUES(" + (++intVal) + " ,'" + Thread.currentThread() + "')");
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM " + tableName + "", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
         rs.next();

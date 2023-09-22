@@ -62,7 +62,7 @@ class RegexTest extends UcanaccessBaseTest {
     }
 
     private String getStatement(String _s, String _dlm) {
-        return "INSERT INTO reg (descr)  VALUES(  " + _dlm + _s + _dlm + ")";
+        return "INSERT INTO reg (descr) VALUES( " + _dlm + _s + _dlm + ")";
     }
 
 }

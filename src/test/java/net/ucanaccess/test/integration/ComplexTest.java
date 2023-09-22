@@ -127,7 +127,7 @@ class ComplexTest extends UcanaccessBaseTest {
             mth.setAccessible(true);
             mth.invoke(ucanaccess, Boolean.TRUE);
             ps = ucanaccess.prepareStatement(
-                "INSERT INTO TABLE1(ID  , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
+                "INSERT INTO TABLE1(ID , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
                     + "VALUES (?,?,?,?,?)");
 
             ps.setString(1, "row123");
@@ -159,7 +159,7 @@ class ComplexTest extends UcanaccessBaseTest {
 
         ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM TABLE1");
-        checkQuery("SELECT * FROM TABLE1  WHERE ID='row12' ORDER BY id");
+        checkQuery("SELECT * FROM TABLE1 WHERE ID='row12' ORDER BY id");
         assertEquals(i, getCount("SELECT COUNT(*) FROM TABLE1", true));
     }
 }

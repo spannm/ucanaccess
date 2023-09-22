@@ -66,7 +66,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 alterTableTest123]");
         checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
         dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
-        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci]  TEXT(100) NOT NULL DEFAULT 'PIPPO'  ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci] TEXT(100) NOT NULL DEFAULT 'PIPPO' ");
         st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [健康] decimal (23,5) ");
         st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) default 13.031955 not null");
         boolean b = false;
@@ -77,11 +77,11 @@ class AlterTableTest extends UcanaccessBaseTest {
             System.err.println(e.getMessage());
         }
         assertTrue(b);
-        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci1]  DATETIME NOT NULL DEFAULT now() ");
-        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci2]  YESNO  ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci1] DATETIME NOT NULL DEFAULT now() ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci2] YESNO ");
         st.execute("INSERT INTO [22 alterTableTest123] (baaaa) values('cha')");
-        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN Memo  Memo  ");
-        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN ole  OLE  ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN Memo Memo ");
+        st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN ole OLE ");
         dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
         checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
 
@@ -90,7 +90,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         st.executeUpdate("Update sample set Description='wRRRw'");
         dumpQueryResult("SELECT * FROM Sample");
         checkQuery("SELECT * FROM Sample");
-        st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now()  ");
+        st.execute("ALTER TABLE Sample ADD COLUMN dt datetime default now() ");
         dumpQueryResult("SELECT * FROM Sample");
         checkQuery("SELECT * FROM Sample");
         st.execute("Update sample set Description='ww'");
@@ -113,11 +113,11 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testCreateIndex(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
         Statement st = ucanaccess.createStatement();
-        st.execute("CREATE unique INDEX [èèè 23] on [AAA n]  (a ASC,c ASC )");
+        st.execute("CREATE unique INDEX [èèè 23] on [AAA n] (a ASC,c ASC )");
         boolean b = false;
         try {
-            st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
-            st.execute("INSERT INT0 [AAA n]  (a,C ) values (24,'su')");
+            st.execute("INSERT INT0 [AAA n] (a,C ) values (24,'su')");
+            st.execute("INSERT INT0 [AAA n] (a,C ) values (24,'su')");
         } catch (Exception e) {
             b = true;
         }
@@ -139,7 +139,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         }
         assertTrue(found);
         found = false;
-        st.execute("CREATE  INDEX [健 康] on [AAA n]  (c DESC )");
+        st.execute("CREATE INDEX [健 康] on [AAA n] (c DESC )");
         for (Index idx : tb.getIndexes()) {
             if ("健 康".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
@@ -148,7 +148,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             }
         }
 
-        st.execute("CREATE  INDEX [%健 康] on [AAA n]  (b,d,e )");
+        st.execute("CREATE INDEX [%健 康] on [AAA n] (b,d,e )");
         for (Index idx : tb.getIndexes()) {
             if ("%健 康".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
@@ -164,7 +164,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             }
         }
 
-        st.execute("CREATE  INDEX ciao on Sample  (description)");
+        st.execute("CREATE INDEX ciao on Sample (description)");
         for (Index idx : tb.getIndexes()) {
             if ("ciao".equals(idx.getName()) && !idx.isUnique()) {
                 found = true;
@@ -188,7 +188,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
         Statement st = ucanaccess.createStatement();
 
-        st.execute("ALTER TABLE [AAA n] add  Primary key (baaaa,a)");
+        st.execute("ALTER TABLE [AAA n] add Primary key (baaaa,a)");
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("AAA n");
         Index idx = tb.getPrimaryKeyIndex();
@@ -199,7 +199,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         assertTrue(ar.contains("A"));
         assertTrue(ar.contains("baaaa"));
 
-        st.execute("ALTER TABLE Sample add  Primary key (RegionId)");
+        st.execute("ALTER TABLE Sample add Primary key (RegionId)");
         tb = db.getTable("Sample");
         idx = tb.getPrimaryKeyIndex();
         ar.clear();
@@ -302,13 +302,13 @@ class AlterTableTest extends UcanaccessBaseTest {
         st.execute("ALTER TABLE tx add constraint pk primary key ([i d]) ");
         st.execute("ALTER TABLE tx add column [my best friend] long ");
         st.execute("ALTER TABLE tx add column [my worst friend] single ");
-        st.execute("ALTER TABLE tx add column  [Is Pippo] TEXT(100) ");
-        st.execute("ALTER TABLE tx add column  [Is not Pippo]TEXT default \"what's this?\"");
+        st.execute("ALTER TABLE tx add column [Is Pippo] TEXT(100) ");
+        st.execute("ALTER TABLE tx add column [Is not Pippo]TEXT default \"what's this?\"");
 
-        st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+        st.execute("create TABLE tx1 (n1 long, [n 2] text)");
         st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
         st.execute(
-            "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
+            "ALTER TABLE tx add foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         checkQuery("SELECT COUNT(*) FROM tx", 1);
@@ -316,21 +316,21 @@ class AlterTableTest extends UcanaccessBaseTest {
         checkQuery("SELECT COUNT(*) FROM tx");
         checkQuery("SELECT COUNT(*) FROM tx", 0);
         st.execute("DROP TABLE tx ");
-        st.execute("DROP TABLE tx1  ");
+        st.execute("DROP TABLE tx1 ");
 
         st.execute(
             "CREATE TABLE tx (id counter primary key, [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
-        st.execute("create TABLE tx1  (n1 long, [n 2] text)");
+        st.execute("create TABLE tx1 (n1 long, [n 2] text)");
         st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
         st.execute(
-            "ALTER TABLE tx add  foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
+            "ALTER TABLE tx add foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete set null");
         st.execute("INSERT INTO tx1 values(1,\"ciao\")");
         st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         checkQuery("SELECT COUNT(*) FROM tx", 1);
         st.execute("DELETE FROM tx1");
         checkQuery("SELECT COUNT(*) FROM tx", 1);
         checkQuery("SELECT * FROM tx", 1, null, 2.0, null, "what's this?");
-        st.execute("CREATE  UNIQUE  INDEX IDX111 ON tx ([my best friend])");
+        st.execute("CREATE UNIQUE INDEX IDX111 ON tx ([my best friend])");
 
         boolean b = false;
         try {
@@ -362,7 +362,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             "CREATE TABLE tx2 (id counter , [my best friend]long , [my worst friend] single,[Is Pippo] TEXT(100) ,[Is not Pippo]TEXT default \"what's this?\" )");
         st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) values(1,2,\"ciao\")");
         executeErr("ALTER TABLE tx2 add constraint primary key ([i d]) ", "unexpected token: PRIMARY");
-        executeErr("ALTER TABLE tx2 add column [my best friend]  ", "unexpected end of statement");
+        executeErr("ALTER TABLE tx2 add column [my best friend] ", "unexpected end of statement");
         executeErr(
             "ALTER TABLE tx2 add constraint foreign key ([my best friend],[Is Pippo])references tx1(n1, [n 2])ON delete cascade",
             "type not found or user lacks privilege: FOREIGN");

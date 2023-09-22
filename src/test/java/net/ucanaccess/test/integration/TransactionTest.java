@@ -31,7 +31,7 @@ class TransactionTest extends UcanaccessBaseTest {
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
         int i = getCount("SELECT COUNT(*) FROM T4", true);
-        st.execute("INSERT INTO T4 (id,descr)  VALUES( 6666554,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id,descr) VALUES( 6666554,'nel mezzo del cammin di nostra vita')");
         assertEquals(i, getCount("SELECT COUNT(*) FROM T4", false));
         ucanaccess.commit();
         assertEquals(i + 1, getCount("SELECT COUNT(*) FROM T4", true));
@@ -45,10 +45,10 @@ class TransactionTest extends UcanaccessBaseTest {
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO T4 (id,descr)  VALUES( 1,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id,descr) VALUES( 1,'nel mezzo del cammin di nostra vita')");
         Savepoint sp = ucanaccess.setSavepoint();
         assertEquals(count, getCount("SELECT COUNT(*) FROM T4", false));
-        st.execute("INSERT INTO T4 (id,descr)  VALUES( 2,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id,descr) VALUES( 2,'nel mezzo del cammin di nostra vita')");
         ucanaccess.rollback(sp);
         ucanaccess.commit();
         assertEquals(count + 1, getCount("SELECT COUNT(*) FROM T4"));
@@ -63,10 +63,10 @@ class TransactionTest extends UcanaccessBaseTest {
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO T4 (id,descr)  VALUES( 1,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id,descr) VALUES( 1,'nel mezzo del cammin di nostra vita')");
         Savepoint sp = ucanaccess.setSavepoint("Gord svp");
         assertEquals(count, getCount("SELECT COUNT(*) FROM T4", false));
-        st.execute("INSERT INTO T4 (id,descr)  VALUES( 2,'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id,descr) VALUES( 2,'nel mezzo del cammin di nostra vita')");
         ucanaccess.rollback(sp);
         ucanaccess.commit();
         assertEquals(count + 1, getCount("SELECT COUNT(*) FROM T4"));

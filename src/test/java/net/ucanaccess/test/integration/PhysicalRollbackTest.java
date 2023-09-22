@@ -40,7 +40,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
         mth.setAccessible(true);
         mth.invoke(ucanaccess, Boolean.TRUE);
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO T4 (id, descr) VALUES(6666554,  'nel mezzo del cammin di nostra vita')");
+        st.execute("INSERT INTO T4 (id, descr) VALUES(6666554, 'nel mezzo del cammin di nostra vita')");
         st.execute("INSERT INTO T4 (id, descr) VALUES(77666554, 'nel mezzo del cammin di nostra vita')");
         st.execute("UPDATE T4 SET ID=0 WHERE id=77666554");
 

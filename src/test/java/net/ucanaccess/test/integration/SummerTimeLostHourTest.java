@@ -23,7 +23,7 @@ import java.util.TimeZone;
 
 class SummerTimeLostHourTest extends UcanaccessBaseTest {
 
-    private static Locale   prevLocale;
+    private static Locale prevLocale;
     private static TimeZone prevTimeZone;
 
     @BeforeAll
@@ -52,7 +52,7 @@ class SummerTimeLostHourTest extends UcanaccessBaseTest {
 
         /*
          * ensure that #2017-03-26 02:00:00# doesn't "magically"
-         *      become #2017-03-26 01:00:00# when written to HSQLDB
+         * become #2017-03-26 01:00:00# when written to HSQLDB
          */
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
         Statement hsqldbStmt = hsqldbConn.createStatement();

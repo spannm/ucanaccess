@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterEach;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,26 +22,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected static final String TEST_DB_DIR   = "testdbs/";
-    private static final File     TEST_TEMP_DIR = createTempDir("ucanaccess-test");
+    private static final File TEST_TEMP_DIR = createTempDir("ucanaccess-test");
 
     static {
         Main.setBatchMode(true);
     }
 
-    private File                   fileAccDb;
-    private String                 password          = "";
-    private AccessVersion          accessVersion;
+    private File fileAccDb;
+    private String password          = "";
+    private AccessVersion accessVersion;
     // CHECKSTYLE:OFF
     protected UcanaccessConnection ucanaccess;
     // CHECKSTYLE:ON
-    private String                 user              = "ucanaccess";
-    private Connection             verifyConnection;
-    private Boolean                ignoreCase;
+    private String user              = "ucanaccess";
+    private Connection verifyConnection;
+    private Boolean ignoreCase;
 
-    private long                   inactivityTimeout = -1;
-    private String                 columnOrder;
-    private String                 append2JdbcURL    = "";
-    private Boolean                showSchema;
+    private long inactivityTimeout = -1;
+    private String columnOrder;
+    private String append2JdbcURL    = "";
+    private Boolean showSchema;
 
     protected UcanaccessBaseTest() {
     }
@@ -73,7 +72,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return fileAccDb;
     }
 
-    public void checkQuery(String _query, Object[][] _expected) throws SQLException, IOException {
+    public void checkQuery(String _query, Object[][] _expected) throws SQLException {
         try (Statement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery(_query)) {
             diff(rs, _expected, _query);
@@ -101,7 +100,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         checkQuery(_query, new Object[][] {_expected});
     }
 
-    private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression) throws SQLException, IOException {
+    private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression) throws SQLException {
         ResultSetMetaData rsMetaData = _resultSet.getMetaData();
         int mycolmax = rsMetaData.getColumnCount();
         if (_expectedResults.length > 0) {
@@ -110,8 +109,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         int j = 0;
         while (_resultSet.next()) {
             for (int i = 0; i < mycolmax; ++i) {
-                assertTrue("Matrix with different length was expected: " + _expectedResults.length + " not" + j,
-                    j < _expectedResults.length);
+                assertTrue(j < _expectedResults.length, "Matrix with different length was expected: " + _expectedResults.length + " not" + j);
                 Object actualObj = _resultSet.getObject(i + 1);
                 Object expectedObj = _expectedResults[j][i];
                 if (expectedObj == null) {
@@ -259,8 +257,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      */
     private static final class TempFileNameString {
         private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        private static final AtomicInteger     COUNTER   = new AtomicInteger(1);
-        private final String                   name;
+        private static final AtomicInteger COUNTER   = new AtomicInteger(1);
+        private final String name;
 
         private TempFileNameString() {
             name = LocalDateTime.now().format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
@@ -334,18 +332,18 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
             File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
             getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
-            Files.copy(is, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(is, tempFile.toPath());
             return tempFile;
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
         }
     }
 
-    public int getCount(String _sql) throws SQLException, IOException {
+    public int getCount(String _sql) throws SQLException {
         return getCount(_sql, true);
     }
 
-    public int getCount(String _sql, boolean _equals) throws SQLException, IOException {
+    public int getCount(String _sql, boolean _equals) throws SQLException {
         initVerifyConnection();
         Statement st = verifyConnection.createStatement();
         ResultSet joRs = st.executeQuery(_sql);
@@ -406,9 +404,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         append2JdbcURL += s;
     }
 
-    protected void initVerifyConnection() throws SQLException, IOException {
+    protected void initVerifyConnection() throws SQLException {
         File tempVerifyFile = createTempFile(fileAccDb.getName().replace(".", "_") + "_verify");
-        Files.copy(fileAccDb.toPath(), tempVerifyFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        copyFile(fileAccDb.toPath(), tempVerifyFile.toPath());
 
         if (verifyConnection != null) {
             verifyConnection.close();
@@ -464,27 +462,33 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     @AfterEach
-    protected final void afterTestCaseBase() throws Exception {
-        if (ucanaccess != null && !ucanaccess.isClosed()) {
+    protected final void afterTestCaseBase() {
+        if (ucanaccess != null) {
             try {
-                ucanaccess.close();
-            } catch (Exception _ex) {
+                if (!ucanaccess.isClosed()) {
+                    ucanaccess.close();
+                }
+            } catch (SQLException _ex) {
                 getLogger().warn("Database {} already closed: {}", fileAccDb, _ex);
             }
         }
 
-        if (verifyConnection != null && !verifyConnection.isClosed()) {
+        if (verifyConnection != null) {
             try {
-                verifyConnection.close();
-            } catch (Exception _ex) {
+                if (!verifyConnection.isClosed()) {
+                    verifyConnection.close();
+                }
+            } catch (SQLException _ex) {
                 getLogger().warn("Verify connection {} already closed: {}", verifyConnection, _ex);
             }
         }
     }
 
-    private byte[] getByteArray(Blob _blob) throws SQLException, IOException {
+    private byte[] getByteArray(Blob _blob) throws SQLException {
         try (InputStream bs = _blob.getBinaryStream()) {
             return bs.readAllBytes();
+        } catch (IOException _ex) {
+            throw new UncheckedIOException("Failed to get byte array", _ex);
         }
     }
 }

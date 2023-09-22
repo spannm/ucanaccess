@@ -26,7 +26,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements(
-            "CREATE TABLE tblFormat (ID int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC);",
+            "CREATE TABLE tblFormat (id int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC);",
             "INSERT INTO tblFormat (id) VALUES(1)");
     }
 
@@ -43,21 +43,21 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testSwitch(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT switch('1'='1', 1, false, 2, true, 1) FROM t234");
+        checkQuery("SELECT SWITCH('1'='1', 1, false, 2, true, 1) FROM t234");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testATN(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT atn(3) FROM t234", 1.2490457723982544);
+        checkQuery("SELECT ATN(3) FROM t234", 1.2490457723982544);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testNz(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT nz(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t234",
+        checkQuery("SELECT NZ(null,'lampredotto'),nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t234",
             "lampredotto", "turtelaz", 1.5, 2);
     }
 
@@ -65,7 +65,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testCBoolean(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT cbool(id), cbool(1=2), cbool('true'), cbool('false'), cbool(0), cbool(-3) FROM t234",
+        checkQuery("SELECT CBOOL(id), CBOOL(1=2), CBOOL('true'), CBOOL('false'), CBOOL(0), CBOOL(-3) FROM t234",
             new Object[][] {{true, false, true, false, false, true}});
     }
 
@@ -73,24 +73,24 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testCVar(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT cvar(8),cvar(8.44) FROM t234", "8", "8.44");
+        checkQuery("SELECT CVAR(8), CVAR(8.44) FROM t234", "8", "8.44");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCstr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT cstr(date0) FROM t234", "11/22/2003 10:42:58 PM");
-        checkQuery("SELECT cstr(false) FROM t234", "false");
-        checkQuery("SELECT cstr(8) FROM t234", "8");
-        checkQuery("SELECT cstr(8.78787878) FROM t234", "8.78787878");
+        checkQuery("SELECT CSTR(date0) FROM t234", "11/22/2003 10:42:58 PM");
+        checkQuery("SELECT CSTR(false) FROM t234", "false");
+        checkQuery("SELECT CSTR(8) FROM t234", "8");
+        checkQuery("SELECT CSTR(8.78787878) FROM t234", "8.78787878");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCsign(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT csign(8.53453543) FROM t234", 8.534535);
+        checkQuery("SELECT CSIGN(8.53453543) FROM t234", 8.534535);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -99,46 +99,46 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-        checkQuery("SELECT Cdate('Apr 6, 2003') FROM t234", sdf.parse("2003-04-06 00:00:00.0"));
+        checkQuery("SELECT CDATE('Apr 6, 2003') FROM t234", sdf.parse("2003-04-06 00:00:00.0"));
 
-        checkQuery("SELECT Cdate('1582-10-15') FROM t234", sdf.parse("1582-10-15 00:00:00.0"));
+        checkQuery("SELECT CDATE('1582-10-15') FROM t234", sdf.parse("1582-10-15 00:00:00.0"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCLong(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Clong(8.52), Clong(8.49), Clong(5.5) FROM t234", 9, 8, 6);
+        checkQuery("SELECT CLONG(8.52), CLONG(8.49), CLONG(5.5) FROM t234", 9, 8, 6);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCLng(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Clng(8.52), Clng(8.49), Clng(5.5) FROM t234", 9, 8, 6);
+        checkQuery("SELECT CLNG(8.52), CLNG(8.49), CLNG(5.5) FROM t234", 9, 8, 6);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCDec(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT cdec(8.45 * 0.005 * 0.01) FROM t234", 0.0004225);
+        checkQuery("SELECT CDEC(8.45 * 0.005 * 0.01) FROM t234", 0.0004225);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCcur(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Ccur(123.4567812),  Ccur(123.4547812) FROM t234", 123.4568, 123.4548);
+        checkQuery("SELECT CCUR(123.4567812), CCUR(123.4547812) FROM t234", 123.4568, 123.4548);
 
-        checkQuery("SELECT ccur(0.552222211)*100 FROM t234", 55.22);
+        checkQuery("SELECT CCUR(0.552222211) * 100 FROM t234", 55.22);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCint(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Cint(8.51), Cint(4.5) FROM t234", 9, 4);
+        checkQuery("SELECT CINT(8.51), CINT(4.5) FROM t234", 9, 4);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -152,7 +152,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testCos(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT cos(1) FROM t234", 0.5403023058681398);
+        checkQuery("SELECT COS(1) FROM t234", 0.5403023058681398);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -168,33 +168,33 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-        checkQuery("SELECT dateAdd('YYYY', 4, #11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('YYYY', 4, #11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2007-11-22 22:42:58"));
-        checkQuery("SELECT dateAdd('Q', 3 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('Q', 3 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2004-08-22 22:42:58"));
-        checkQuery("SELECT dateAdd('Y', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('Y', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2005-02-15 22:42:58"));
-        checkQuery("SELECT dateAdd('D', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('D', 451 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2005-02-15 22:42:58"));
-        checkQuery("SELECT dateAdd('Y', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('Y', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2004-01-06 22:42:58"));
-        checkQuery("SELECT dateAdd('D', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('D', 45 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2004-01-06 22:42:58"));
-        checkQuery("SELECT dateAdd('Y', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('Y', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2003-11-26 22:42:58"));
-        checkQuery("SELECT dateAdd('D', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('D', 4 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2003-11-26 22:42:58"));
-        checkQuery("SELECT dateAdd('W', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('W', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2004-01-04 22:42:58"));
-        checkQuery("SELECT dateAdd('W', 1 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('W', 1 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2003-11-23 22:42:58"));
-        checkQuery("SELECT dateAdd('WW', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('WW', 43 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2004-09-18 22:42:58"));
-        checkQuery("SELECT dateAdd('H', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('H', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2003-12-09 14:42:58"));
-        checkQuery("SELECT dateAdd('M', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('M', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2037-03-22 22:42:58"));
-        checkQuery("SELECT dateAdd('S', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
+        checkQuery("SELECT DateAdd('S', 400 ,#11/22/2003 10:42:58 PM#) FROM t234",
             sdf.parse("2003-11-22 22:49:38"));
     }
 
@@ -202,28 +202,28 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT date() FROM t234");
+        checkQuery("SELECT Date() FROM t234");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testDay(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT day(#11/22/2003 10:42:58 PM#) FROM t234", 22);
+        checkQuery("SELECT Day(#11/22/2003 10:42:58 PM#) FROM t234", 22);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testExp(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT exp(3.1),exp(0.4) FROM t234", 22.197951281441636, 1.4918246976412703);
+        checkQuery("SELECT Exp(3.1), exp(0.4) FROM t234", 22.197951281441636, 1.4918246976412703);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testHour(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Hour(#10:42:58 pM#),Hour(#10:42:58 AM#),Hour(#11/22/2003 10:42:58 PM#) FROM t234", 22, 10,
+        checkQuery("SELECT Hour(#10:42:58 pM#), Hour(#10:42:58 AM#), Hour(#11/22/2003 10:42:58 PM#) FROM t234", 22, 10,
             22);
     }
 
@@ -232,51 +232,51 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testIif(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery(
-            "SELECT IIf(isNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'),IIf(isNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
+            "SELECT IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'), IIf(IsNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t234",
             "pl'uto\" \" cccc", "pl'uto\" \" cccc");
 
-        checkQuery("SELECT IIf(true,false,true) FROM t234", false);
-        checkQuery("SELECT IIf('pippo'=null,'capra','d''una capra') FROM t234", "d'una capra");
+        checkQuery("SELECT IIf(true, false, true) FROM t234", false);
+        checkQuery("SELECT IIf('pippo'=null, 'capra', 'd''una capra') FROM t234", "d'una capra");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testInstr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Instr( 'Found on the Net', 'the') FROM t234", 10);
-        checkQuery("SELECT Instr( 'Found on the Net', 'f') FROM t234", 1);
-        checkQuery("SELECT Instr( 1,'Found on the Net', 'f') FROM t234", 1);
-        checkQuery("SELECT Instr( 1,'Found on the Net', 'f',1) FROM t234", 1);
-        checkQuery("SELECT Instr( 1,'Found on the Net', 't',0) FROM t234", 10);
-        checkQuery("SELECT Instr( 31,'Found on the Net', 'f',0) FROM t234", 0);
+        checkQuery("SELECT InStr('Found on the Net', 'the') FROM t234", 10);
+        checkQuery("SELECT InStr('Found on the Net', 'f') FROM t234", 1);
+        checkQuery("SELECT InStr(1, 'Found on the Net', 'f') FROM t234", 1);
+        checkQuery("SELECT InStr(1, 'Found on the Net', 'f',1) FROM t234", 1);
+        checkQuery("SELECT InStr(1, 'Found on the Net', 't',0) FROM t234", 10);
+        checkQuery("SELECT InStr(31, 'Found on the Net', 'f',0) FROM t234", 0);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testInstrrev(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT InstrRev ('alphabet', 'a') FROM t234", 5);
-        checkQuery("SELECT InstrRev ('alphabet', 'a',-1) FROM t234", 5);
-        checkQuery("SELECT InstrRev ('alphabet', 'a',1) FROM t234", 1);
+        checkQuery("SELECT InstrRev('alphabet', 'a') FROM t234", 5);
+        checkQuery("SELECT InstrRev('alphabet', 'a',-1) FROM t234", 5);
+        checkQuery("SELECT InstrRev('alphabet', 'a',1) FROM t234", 1);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testIsDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT isDate(#1/2/2003 10:42:58 PM#) FROM t234", true);
-        checkQuery("SELECT isDate(#11/22/2003 10:42:58 PM#) FROM t234", true);
-        checkQuery("SELECT isDate('11/22/2003 10:42:58 PM') FROM t234", true);
-        checkQuery("SELECT isDate('january 3,2015') FROM t234", true);
+        checkQuery("SELECT IsDate(#1/2/2003 10:42:58 PM#) FROM t234", true);
+        checkQuery("SELECT IsDate(#11/22/2003 10:42:58 PM#) FROM t234", true);
+        checkQuery("SELECT IsDate('11/22/2003 10:42:58 PM') FROM t234", true);
+        checkQuery("SELECT IsDate('january 3,2015') FROM t234", true);
         // fails in JDK8: checkQuery("SELECT isDate('janr 3,2015') FROM t234", false);
-        checkQuery("SELECT isDate('03 3,2015') FROM t234", true);
-        checkQuery("SELECT isDate('3 3,2015') FROM t234", true);
+        checkQuery("SELECT IsDate('03 3,2015') FROM t234", true);
+        checkQuery("SELECT IsDate('3 3,2015') FROM t234", true);
         // fails in JDK8: checkQuery("SELECT isDate('Fri Feb 10 00:25:09 CET 2012') FROM t234", false);
-        checkQuery("SELECT isDate('Fri Feb 10 2012') FROM t234", false);
-        checkQuery("SELECT isDate('Fri Feb 10 00:25:09 2012') FROM t234", false);
+        checkQuery("SELECT IsDate('Fri Feb 10 2012') FROM t234", false);
+        checkQuery("SELECT IsDate('Fri Feb 10 00:25:09 2012') FROM t234", false);
         // fails in JDK8: checkQuery("SELECT isDate('Fri Feb 10 00:25:09') FROM t234", false);
         // fails in JDK8: checkQuery("SELECT isDate('jan 35,2015') FROM t234", false);
-        checkQuery("SELECT isDate('Feb 20 01:25:09 PM') FROM t234", true);
+        checkQuery("SELECT IsDate('Feb 20 01:25:09 PM') FROM t234", true);
         // fails in JDK8: checkQuery("SELECT isDate('Feb 10 00:25:09') FROM t234", true);
         // fails in JDK8: checkQuery("SELECT isDate('02 10 00:25:09') FROM t234", true);
         // fails in JDK8: checkQuery("SELECT isDate('Feb 35 00:25:09') FROM t234", true);
@@ -299,12 +299,12 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testIsNumber(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT isNumeric(33) FROM t234", true);
-        checkQuery("SELECT isNumeric('33') FROM t234", true);
-        checkQuery("SELECT isNumeric('a') FROM t234", false);
-        checkQuery("SELECT isNumeric('33d') FROM t234", false);
-        checkQuery("SELECT isNumeric(id) FROM t234", true);
-        checkQuery("SELECT isNumeric('4,5') FROM t234", true);
+        checkQuery("SELECT IsNumeric(33) FROM t234", true);
+        checkQuery("SELECT IsNumeric('33') FROM t234", true);
+        checkQuery("SELECT IsNumeric('a') FROM t234", false);
+        checkQuery("SELECT IsNumeric('33d') FROM t234", false);
+        checkQuery("SELECT IsNumeric(id) FROM t234", true);
+        checkQuery("SELECT IsNumeric('4,5') FROM t234", true);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -515,9 +515,9 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
         checkQuery("SELECT Format(number,'percent') FROM tblFormat", "");
         checkQuery("SELECT Format(0.981,'percent') FROM t234", "98.10%");
-        checkQuery("SELECT Format(num,'fixed')  FROM t234", "-1110.55");
-        checkQuery("SELECT Format(num,'standard')  FROM t234", "-1,110.55");
-        checkQuery("SELECT Format(num,'general number')  FROM t234", "-1110.554");
+        checkQuery("SELECT Format(num,'fixed') FROM t234", "-1110.55");
+        checkQuery("SELECT Format(num,'standard') FROM t234", "-1,110.55");
+        checkQuery("SELECT Format(num,'general number') FROM t234", "-1110.554");
         checkQuery("SELECT Format(num,'on/off') FROM t234", "On");
         checkQuery("SELECT Format(num,'true/false') FROM t234", "True");
         checkQuery("SELECT Format(num,'yes/no') FROM t234", "Yes");

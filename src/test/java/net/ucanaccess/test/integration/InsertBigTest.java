@@ -31,7 +31,7 @@ class InsertBigTest extends UcanaccessBaseTest {
         }
         String s = sb.toString();
         assertTrue(s.length() >= 65536);
-        st.execute("INSERT INTO Tbig (id,descr)  VALUES( " + id + ",'" + s + "')");
+        st.execute("INSERT INTO Tbig (id,descr) VALUES( " + id + ",'" + s + "')");
         ResultSet rs = st.executeQuery("SELECT descr FROM Tbig WHERE id=" + id);
         rs.next();
         String retrieved = rs.getString(1);

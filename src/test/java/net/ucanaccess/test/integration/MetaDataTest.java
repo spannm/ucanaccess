@@ -30,8 +30,8 @@ class MetaDataTest extends UcanaccessBaseTest {
 
     void createSimple(String a, Object[][] ver) throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "'   )");
-            st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "'    )");
+            st.execute("INSERT INTO AAAn VALUES ('33A',11,'" + a + "' )");
+            st.execute("INSERT INTO AAAn VALUES ('33B',111,'" + a + "' )");
             checkQuery("SELECT * FROM AAAn", ver);
         }
     }

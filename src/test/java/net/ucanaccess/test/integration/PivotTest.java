@@ -22,9 +22,9 @@ class PivotTest extends UcanaccessBaseTest {
         init(_accessVersion);
         Statement st = ucanaccess.createStatement();
         dumpQueryResult("SELECT * FROM Table1_trim");
-        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03#   )");
-        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE MIO',134.46,#2003-12-03#   )");
-        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('STA IN FRUNTE A MEEE',1344.46,#2003-12-05#   )");
+        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03# )");
+        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE MIO',134.46,#2003-12-03# )");
+        st.execute("INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('STA IN FRUNTE A MEEE',1344.46,#2003-12-05# )");
         initVerifyConnection();
         dumpQueryResult("SELECT * FROM Table1_trim");
         checkQuery("SELECT * FROM Table1_trim");

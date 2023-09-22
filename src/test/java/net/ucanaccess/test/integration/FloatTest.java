@@ -32,7 +32,7 @@ class FloatTest extends UcanaccessBaseTest {
         ps.setFloat(1, 1.4f);
         ps.execute();
         checkQuery("SELECT [row] FROM t ORDER BY pk");
-        ps = ucanaccess.prepareStatement("update t  set [row]=?");
+        ps = ucanaccess.prepareStatement("update t set [row]=?");
         ps.setObject(1, 4.9f);
         ps.execute();
         checkQuery("SELECT [row] FROM t ORDER BY pk");

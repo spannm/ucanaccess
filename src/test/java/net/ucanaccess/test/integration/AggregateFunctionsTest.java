@@ -38,7 +38,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT id, DCount('*', 't235', '1=1') FROM [t235]", new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT id as [WW \"SS], DCount('descr', 't235', '1=1')from t235",
             new Object[][] {{1234, 2}, {12344, 2}});
-        checkQuery("SELECT  DCount('*', 't235', '1=1') ", 2);
+        checkQuery("SELECT DCount('*', 't235', '1=1') ", 2);
 
     }
 
@@ -85,7 +85,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
         checkQuery("SELECT first(descr) FROM t235", "Show must go off");
         checkQuery("SELECT first(NUM) FROM t235", -1110.5540);
-        dumpQueryResult("SELECT  first(date0) FROM t235");
+        dumpQueryResult("SELECT first(date0) FROM t235");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

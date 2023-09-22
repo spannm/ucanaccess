@@ -19,7 +19,7 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß])  VALUES( 'the end','yeeep')");
+        execute("INSERT INTO NOROMAN ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES( 'the end','yeeep')");
         execute("UPDATE NOROMAN SET [ENd]='BLeah'");
         execute("DELETE FROM NOROMAN");
     }

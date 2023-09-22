@@ -57,7 +57,7 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     private void createSimple() throws SQLException, IOException {
         Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO AAA(baaaa,c)   VALUES ('33A','G'     )");
+        st.execute("INSERT INTO AAA(baaaa,c) VALUES ('33A','G' )");
         st.execute("INSERT INTO AAA(baaaa,a,c) VALUES ('33B',111,'G' )");
         Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
         checkQuery("SELECT baaaa,a,c FROM AAA ORDER BY baaaa", ver);
@@ -90,8 +90,8 @@ class CreateTableTest extends UcanaccessBaseTest {
         Statement st = null;
         try {
             st = ucanaccess.createStatement();
-            st.execute("create table dkey(c counter  , " + "number numeric(23,5)  , " + "  PRIMARY KEY (C,NUMBER))");
-            st.execute("create table dunique(c text  , " + "number numeric(23,5)  , " + "  unique (C,NUMBER))");
+            st.execute("create table dkey(c counter , " + "number numeric(23,5) , " + " PRIMARY KEY (C,NUMBER))");
+            st.execute("create table dunique(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
             st.close();
             ucanaccess.setAutoCommit(false);
             try {
@@ -99,7 +99,7 @@ class CreateTableTest extends UcanaccessBaseTest {
                 st.execute("INSERT INTO dunique values('ddl forces commit',2.3)");
                 st.close();
                 st = ucanaccess.createStatement();
-                st.execute("create table dtrx(c text  , " + "number numeric(23,5) , " + "  unique (C,NUMBER))");
+                st.execute("create table dtrx(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
                 st.execute("INSERT INTO dtrx values('I''ll be forgotten sob sob ',55555.3)");
                 st.close();
                 st = ucanaccess.createStatement();
@@ -114,8 +114,8 @@ class CreateTableTest extends UcanaccessBaseTest {
             dumpQueryResult("SELECT * FROM dtrx");
             dumpQueryResult("SELECT * FROM dunique");
             ucanaccess.commit();
-            checkQuery("SELECT * FROM  dunique");
-            checkQuery("SELECT * FROM  dtrx");
+            checkQuery("SELECT * FROM dunique");
+            checkQuery("SELECT * FROM dtrx");
         } finally {
             st.close();
         }
@@ -123,16 +123,16 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     void setTableProperties() throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("create table tbl(c counter  primary key , " + "number numeric(23,5) default -4.6 not null , "
-                    + "txt1 text(23)  default 'ciao', blank text  default ' ', dt date default date(), txt2 text(33),"
+            st.execute("create table tbl(c counter primary key , " + "number numeric(23,5) default -4.6 not null , "
+                    + "txt1 text(23) default 'ciao', blank text default ' ', dt date default date(), txt2 text(33),"
                     + "txt3 text)");
         }
     }
 
     private void notNullBug() throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("create table nnb(c counter  primary key , " + "number decimal (23,5) default -4.6 not null , "
-                    + "txt1 text(23)  not null, blank text  , dt date not null, txt2 text  ," + "txt3 text not null)");
+            st.execute("create table nnb(c counter primary key , " + "number decimal (23,5) default -4.6 not null , "
+                    + "txt1 text(23) not null, blank text , dt date not null, txt2 text ," + "txt3 text not null)");
 
             checkNotNull("nnb", "number", true);
             checkNotNull("nnb", "txt1", true);
@@ -157,7 +157,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         executeStatements(
-            "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long   default 3 not null, C text(255) not null, "
+            "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long default 3 not null, C text(255) not null, "
                 + "d DATETIME default now(), e text default 'l''aria')");
 
         createSimple();
@@ -184,7 +184,7 @@ class CreateTableTest extends UcanaccessBaseTest {
             " CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
         st.execute(
             " CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-        st.execute(" drop table  [ggg kk]");
+        st.execute(" drop table [ggg kk]");
         st.execute(
             " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
         st.execute(
@@ -204,7 +204,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         Statement st = ucanaccess.createStatement();
         st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");
         st.execute(
-            " CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y) REFERENCES Parent (x)  )");
+            " CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y) REFERENCES Parent (x) )");
         Database db = ucanaccess.getDbIO();
         Table tb = db.getTable("Babe");
         Table tbr = db.getTable("Parent");
@@ -216,7 +216,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         assertTrue(ar.contains("y"));
         st.execute(" CREATE TABLE [1 Parent]( [x 0] long , y long, PRIMARY KEY([x 0],y))");
         st.execute(
-            " CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y)  )");
+            " CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y) )");
 
         st.close();
     }

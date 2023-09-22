@@ -52,7 +52,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
         checkQuery("SELECT descr FROM T21 WHERE descr LIKE 'a[*]a' ORDER BY ID", ver);
         ver = new Object[][] {{"aa"}, {"aBa"}, {"aBBBa"}, {"a*a"}, {"A*a"}};
 
-        checkQuery("SELECT descr FROM T21 WHERE descr LIKE \"a*a\"  AND '1'='1' AND (descr) like \"a*a\" ORDER BY ID",
+        checkQuery("SELECT descr FROM T21 WHERE descr LIKE \"a*a\" AND '1'='1' AND (descr) like \"a*a\" ORDER BY ID",
             ver);
         ver = new Object[][] {{2, "aa"}, {3, "aBa"}, {4, "aBBBa"}, {7, "a*a"}, {8, "A*a"}};
         checkQuery("SELECT * FROM T21 WHERE descr LIKE 'a%a'", ver);

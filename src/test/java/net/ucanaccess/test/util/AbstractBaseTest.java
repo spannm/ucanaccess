@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +43,7 @@ public abstract class AbstractBaseTest extends Assertions {
     private Logger logger;
 
     /** Holds information about the current test. */
-    private TestInfo     lastTestInfo;
+    private TestInfo lastTestInfo;
 
     protected final Logger getLogger() {
         if (null == logger) {
@@ -114,18 +118,33 @@ public abstract class AbstractBaseTest extends Assertions {
         return tmpDir;
     }
 
+    protected static void copyFile(Path _source, Path _target) {
+        try {
+            Files.copy(_source, _target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException _ex) {
+            throw new UncheckedIOException("Failed to copy '" + _source + "' to '" + _target + "'", _ex);
+        }
+    }
+
+    protected static void copyFile(InputStream _in, Path _target) {
+        try {
+            Files.copy(_in, _target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException _ex) {
+            throw new UncheckedIOException("Failed to copy to '" + _target + "'", _ex);
+        }
+    }
+
     public static void assertEmpty(String _string) {
-        assertTrue("String not empty.", _string == null || _string.length() == 0);
+        assertTrue(_string == null || _string.isEmpty(), "String not empty");
     }
 
     public static void assertNotEmpty(String _string) {
-        assertFalse("String is empty.", _string == null || _string.length() == 0);
+        assertFalse(_string == null || _string.isEmpty(), "String is empty");
     }
 
     public static void assertContains(String _string, String _contains) {
         if (_contains != null) {
-            assertTrue("String does not contain [" + _contains + "]: " + _string,
-                !(_string == null || _string.length() == 0) && _string.contains(_contains));
+            assertTrue(!(_string == null || _string.length() == 0) && _string.contains(_contains), "String does not contain [" + _contains + "]: " + _string);
         }
     }
 
@@ -137,14 +156,6 @@ public abstract class AbstractBaseTest extends Assertions {
         String[] actual = new String[_actualList.size()];
         _actualList.toArray(actual);
         assertArrayEquals(_expected, actual);
-    }
-
-    public static final void assertTrue(String _message, boolean _expected) {
-        assertTrue(_expected, _message);
-    }
-
-    public static final void assertFalse(String _message, boolean _expected) {
-        assertFalse(_expected, _message);
     }
 
 }

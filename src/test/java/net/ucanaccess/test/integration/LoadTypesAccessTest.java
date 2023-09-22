@@ -18,7 +18,7 @@ class LoadTypesAccessTest extends UcanaccessBaseTest {
         super.init(_accessVersion);
         executeStatements(
                 "CREATE TABLE pluto (id LONG, descr MEMO, dt DATETIME,euros CURRENCY,float1 SINGLE, double1 DOUBLE, int1 INTEGER,numeric0 numeric(24,5), numeric1 double) ",
-                "INSERT INTO pluto (id,descr,dt,euros,float1,double1,int1,numeric0,numeric1 )  VALUES( 1234,'I like trippa with spaghettis bolognese',#10/03/2008 10:34:35 PM#,4.55555,5.6666,6.7,5,0.100051,4.677856)");
+                "INSERT INTO pluto (id,descr,dt,euros,float1,double1,int1,numeric0,numeric1 ) VALUES( 1234,'I like trippa with spaghettis bolognese',#10/03/2008 10:34:35 PM#,4.55555,5.6666,6.7,5,0.100051,4.677856)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

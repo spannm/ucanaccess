@@ -6,9 +6,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.sql.*;
 
 class BlobOleTest extends UcanaccessBaseTest {
@@ -53,7 +55,7 @@ class BlobOleTest extends UcanaccessBaseTest {
 
         try (InputStream isFromDb = rs1.getBinaryStream(1)) {
             
-            Files.copy(isFromDb, imgFileTemp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(isFromDb, imgFileTemp.toPath());
             getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
             
             byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
@@ -104,7 +106,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         PreparedStatement ps = null;
         File fl1 = copyFileFromClasspath(PPTX_FILE_NAME);
         Blob blob = ucanaccess.createBlob(fl1);
-        ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole)  VALUES( ?,?)");
+        ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES( ?,?)");
         ps.setString(1, "TestOle");
         ps.setBlob(2, blob);
 
@@ -144,7 +146,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         File tmpFile = createTempFileName(prefix, suffix);
         tmpFile.deleteOnExit();
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(_fn)) {
-            Files.copy(is, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(is, tmpFile.toPath());
         }
         return tmpFile;
     }

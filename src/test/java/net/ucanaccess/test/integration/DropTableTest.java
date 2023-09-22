@@ -20,8 +20,8 @@ class DropTableTest extends UcanaccessBaseTest {
 
     void createSimple(String _tableName, String a, Object[][] ver) throws SQLException, IOException {
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO " + _tableName + " VALUES ('33A',11,'" + a + "'   )");
-            st.execute("INSERT INTO " + _tableName + " VALUES ('33B',111,'" + a + "'    )");
+            st.execute("INSERT INTO " + _tableName + " VALUES ('33A',11,'" + a + "' )");
+            st.execute("INSERT INTO " + _tableName + " VALUES ('33B',111,'" + a + "' )");
             checkQuery("SELECT * FROM " + _tableName + " ORDER BY c", ver);
         }
     }

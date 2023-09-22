@@ -18,7 +18,7 @@ class MultipleGroupByTest extends UcanaccessBaseTest {
         String wCreateTable = "CREATE TABLE TXXX (F1 VARCHAR, F2 VARCHAR, F3 VARCHAR, F4 VARCHAR, VAL NUMBER)";
         conn.createStatement().executeUpdate(wCreateTable);
         wCreateTable =
-                "CREATE TABLE TABLEXXX_KO (F1,F2,VAL) AS  (SELECT F1 , F2 , SUM(VAL) FROM TXXX GROUP BY F1,F2) WITH DATA";
+                "CREATE TABLE TABLEXXX_KO (F1,F2,VAL) AS (SELECT F1 , F2 , SUM(VAL) FROM TXXX GROUP BY F1,F2) WITH DATA";
         conn.createStatement().executeUpdate(wCreateTable);
 
         conn.close();

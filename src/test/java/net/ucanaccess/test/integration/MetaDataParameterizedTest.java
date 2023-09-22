@@ -23,7 +23,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         st.execute(
             "create table [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
         st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
-        st.execute("update [健康] set   [Sometime I wonder who I am ]='d'");
+        st.execute("update [健康] set [Sometime I wonder who I am ]='d'");
         checkQuery("SELECT * FROM 健康 ");
         getLogger().info("crazy names in create table...");
         dumpQueryResult("SELECT * FROM [健康]");
@@ -32,7 +32,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
             + "[Πλήθος Αντιγράφων] CURRENCY,[ជំរាបសួរ] CURRENCY,[ЗДОРОВЫЙ] CURRENCY,[健康] CURRENCY,[健康な] CURRENCY,[किआओ ] CURRENCY default 12.88, [11q3 ¹²³¼½¾ß€] text(2), unique ([किआओ ] ,[健康な]) )");
         st.execute(
             "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
-        PreparedStatement ps = ucanaccess.prepareStatement("SELECT *  FROM [123456 nn%&/健康]",
+        PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM [123456 nn%&/健康]",
             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
         rs.moveToInsertRow();
@@ -47,14 +47,14 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
             st.execute(
                 "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)");
         } catch (Exception e) {
-            getLogger().info("ok,  unique constraint gotten");
+            getLogger().info("ok, unique constraint gotten");
         }
         st.execute(
             "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) VALUES('I''m a wonderful forty',11,11,14.01,13)");
         try {
-            st.execute("update [123456 nn%&/健康] set [健康な]=13,  [किआओ ]=14");
+            st.execute("update [123456 nn%&/健康] set [健康な]=13, [किआओ ]=14");
         } catch (Exception e) {
-            getLogger().info("ok,  unique constraint gotten");
+            getLogger().info("ok, unique constraint gotten");
         }
 
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
