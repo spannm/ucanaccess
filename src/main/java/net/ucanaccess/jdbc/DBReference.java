@@ -287,8 +287,8 @@ public class DBReference {
         }
     }
 
-    private void initHSQLDB(Connection conn) {
-        try (Statement st = conn.createStatement()) {
+    private void initHSQLDB(Connection _conn) {
+        try (Statement st = _conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute("SET DATABASE SQL CONCAT NULLS " + concatNulls);
             if (lobScale == null && inMemory) {
@@ -297,8 +297,8 @@ public class DBReference {
                 st.execute("SET FILES LOB SCALE " + lobScale);
             }
 
-        } catch (Exception w) {
-            w.printStackTrace();
+        } catch (Exception _ex) {
+            _ex.printStackTrace();
         }
     }
 
@@ -381,8 +381,8 @@ public class DBReference {
                         } else {
                             finalizeHsqlDb(session);
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception _ex) {
+                        _ex.printStackTrace();
                     }
                 }));
             }

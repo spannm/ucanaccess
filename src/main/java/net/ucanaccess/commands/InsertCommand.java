@@ -165,9 +165,8 @@ public class InsertCommand implements ICommand {
             BlobAction ba = new BlobAction(table, newRow);
             ba.doAction(this);
             return ana;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 

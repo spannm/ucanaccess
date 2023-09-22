@@ -32,68 +32,77 @@ import java.util.*;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class LoadJet {
     private static int namingCounter = 0;
 
     private final class FunctionsLoader {
-        private Set<String> functionsDefinition = new HashSet<>();
+
+        private final Set<String> functionDefinitions = new LinkedHashSet<>();
 
         private void addAggregates() {
-            functionsDefinition.add(getAggregate("LONGVARCHAR", "last"));
-            functionsDefinition.add(getAggregate("DECIMAL(100,10)", "last"));
-            functionsDefinition.add(getAggregate("BOOLEAN", "last"));
-            functionsDefinition.add(getAggregate("LONGVARCHAR", "first"));
-            functionsDefinition.add(getAggregate("DECIMAL(100,10)", "first"));
-            functionsDefinition.add(getAggregate("BOOLEAN", "first"));
-            functionsDefinition.add(getLastTimestamp());
-            functionsDefinition.add(getFirstTimestamp());
-
+            Stream.of(getAggregate("last", "LONGVARCHAR"),
+                      getAggregate("last", "DECIMAL(100,10)"),
+                      getAggregate("last", "BOOLEAN"),
+                      getAggregate("first", "LONGVARCHAR"),
+                      getAggregate("first", "DECIMAL(100,10)"),
+                      getAggregate("first", "BOOLEAN"),
+                      getLastTimestamp(),
+                      getFirstTimestamp()
+            ).forEach(functionDefinitions::add);
         }
 
         private String getLastTimestamp() {
             return "CREATE AGGREGATE FUNCTION last(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP, INOUT counter INT) "
-                    + "RETURNS TIMESTAMP " + "CONTAINS SQL " + "BEGIN ATOMIC " + "IF flag THEN " + "RETURN ts; "
-                    + "ELSE " + "IF counter IS NULL THEN SET counter = 0; END IF; " + "SET counter = counter + 1; "
-                    + "SET ts = val;" + "RETURN NULL; " + "END IF; " + "END ";
+                 + "RETURNS TIMESTAMP CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
+                 + "ELSE IF counter IS NULL THEN SET counter = 0; END IF; SET counter = counter + 1; "
+                 + "SET ts = val; RETURN NULL; END IF; END";
         }
 
         private String getFirstTimestamp() {
             return "CREATE AGGREGATE FUNCTION First(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP , INOUT counter INT) "
-                    + "RETURNS TIMESTAMP " + "CONTAINS SQL " + "BEGIN ATOMIC " + "IF flag THEN " + "RETURN ts; "
-                    + "ELSE " + "IF counter IS NULL THEN SET counter = 0; END IF; " + "SET counter = counter + 1; "
-                    + " IF counter = 1 THEN  " + " SET ts = val; END IF; " + "RETURN NULL; " + "END IF; " + "END ";
+                 + "RETURNS TIMESTAMP CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
+                 + "ELSE IF counter IS NULL THEN SET counter = 0; END IF; SET counter = counter + 1; "
+                 + " IF counter = 1 THEN SET ts = val; END IF; RETURN NULL; END IF; END ";
         }
 
-        private void addFunction(String functionName, String methodName, String returnType, String... parTypes) {
-            StringBuilder funDef = new StringBuilder();
+        private void addFunction(String _functionName, String _javaMethodName, String _returnType, String... _paramTypes) {
             if (DBReference.is2xx()) {
-                funDef.append("CREATE FUNCTION ").append(functionName).append("(");
-                String comma = "";
-                for (int i = 0; i < parTypes.length; i++) {
-                    funDef.append(comma).append("par").append(i).append(" ").append(parTypes[i]);
-                    comma = ",";
-                }
-                funDef.append(")");
-                funDef.append(" RETURNS ");
-                funDef.append(returnType);
-                funDef.append("  LANGUAGE JAVA DETERMINISTIC NO SQL  EXTERNAL NAME 'CLASSPATH:");
-                funDef.append(methodName).append("'");
+                functionDefinitions.add(new StringBuilder()
+                    .append("CREATE FUNCTION ")
+                    .append(_functionName)
+                    .append("(")
+                    .append(IntStream.range(0, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i]).collect(Collectors.joining(", ")))
+                    .append(")")
+                    .append(" RETURNS ")
+                    .append(_returnType)
+                    .append(" LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME 'CLASSPATH:")
+                    .append(_javaMethodName)
+                    .append("'")
+                    .toString());
             } else {
-                funDef.append("CREATE ALIAS ").append(functionName).append(" FOR \"").append(methodName).append("\"");
+                functionDefinitions.add(new StringBuilder()
+                    .append("CREATE ALIAS ")
+                    .append(_functionName)
+                    .append(" FOR \"")
+                    .append(_javaMethodName)
+                    .append("\"")
+                    .toString());
             }
-            functionsDefinition.add(funDef.toString());
         }
 
-        private void addFunctions(Class<?> clazz, boolean cswitch) throws SQLException {
-            Method[] mths = clazz.getDeclaredMethods();
+        private void addFunctions(Class<?> _clazz, boolean _cswitch) throws SQLException {
+            Method[] mths = _clazz.getDeclaredMethods();
             Map<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
             for (Method mth : mths) {
                 Annotation[] ants = mth.getAnnotations();
                 for (Annotation ant : ants) {
                     if (ant.annotationType().equals(FunctionType.class)) {
                         FunctionType ft = (FunctionType) ant;
-                        String methodName = clazz.getName() + "." + mth.getName();
+                        String methodName = _clazz.getName() + "." + mth.getName();
                         String functionName = ft.functionName();
                         if (functionName == null) {
                             functionName = methodName;
@@ -122,7 +131,7 @@ public class LoadJet {
                 }
             }
             createFunctions();
-            if (cswitch) {
+            if (_cswitch) {
                 createSwitch();
             }
         }
@@ -148,17 +157,16 @@ public class LoadJet {
         }
 
         private void createFunctions() {
-            for (String functionDef : functionsDefinition) {
+            for (String functionDef : functionDefinitions) {
 
                 try {
                     exec(functionDef, true);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    Logger.logWarning(LoggerMessageEnum.FUNCTION_ALREADY_ADDED, functionDef);
+                } catch (SQLException _ex) {
+                    Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, functionDef, _ex.toString());
                 }
             }
 
-            functionsDefinition.clear();
+            functionDefinitions.clear();
         }
 
         private void createSwitch() {
@@ -184,18 +192,18 @@ public class LoadJet {
                     header.append(") RETURNS").append(type).append(" RETURN").append(body);
                     try {
                         exec(header.toString(), true);
-                    } catch (SQLException e) {
-                        Logger.logWarning(LoggerMessageEnum.FUNCTION_ALREADY_ADDED, header.toString());
+                    } catch (SQLException _ex) {
+                        Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, header.toString(), _ex.toString());
                     }
                 }
             }
 
         }
 
-        private String getAggregate(String type, String fun) {
-            return "CREATE AGGREGATE FUNCTION " + fun + "(IN val " + type + ", IN flag BOOLEAN, INOUT register  "
-                    + type + ", INOUT counter INT) " + "  RETURNS  " + type + "  NO SQL  LANGUAGE JAVA "
-                    + "  EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + fun + "'";
+        private String getAggregate(String _functionName, String _type) {
+            return "CREATE AGGREGATE FUNCTION " + _functionName + "(IN val " + _type + ", IN flag BOOLEAN, INOUT register "
+                    + _type + ", INOUT counter INT) RETURNS " + _type + " NO SQL LANGUAGE JAVA "
+                    + "EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + _functionName + "'";
         }
 
         private void loadMappedFunctions() throws SQLException {
@@ -235,8 +243,8 @@ public class LoadJet {
         private final List<String>  unresolvedTables         = new ArrayList<>();
         private final List<String>  calculatedFieldsTriggers = new ArrayList<>();
         private final List<String>  loadingOrder             = new LinkedList<>();
-        private final Set<Column>   alreadyIndexed           = new HashSet<>();
-        private final Set<String>   readOnlyTables           = new HashSet<>();
+        private final Set<Column>   alreadyIndexed           = new LinkedHashSet<>();
+        private final Set<String>   readOnlyTables           = new LinkedHashSet<>();
 
         private String commaSeparated(List<? extends Index.Column> columns, boolean escape) throws SQLException {
             String comma = "";
@@ -322,13 +330,13 @@ public class LoadJet {
 
             return isCreate
                     ? "CREATE TRIGGER expr%d before insert ON " + ntn + " REFERENCING NEW  AS newrow  FOR EACH ROW "
-                            + " BEGIN  ATOMIC " + " SET newrow." + ecl + " = " + call + "; END "
+                            + " BEGIN  ATOMIC  SET newrow." + ecl + " = " + call + "; END "
                     : "CREATE TRIGGER expr%d before update ON " + ntn
-                            + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW " + " BEGIN  ATOMIC IF %s THEN "
+                            + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW  BEGIN  ATOMIC IF %s THEN "
                             + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
                             + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
                             + Logger.getMessage(LoggerMessageEnum.TRIGGER_UPDATE_CF_ERR) + cl.getName().replace("%", "%%")
-                            + "'" + ";  END IF ; END ";
+                            + "';  END IF ; END ";
         }
 
         private boolean isNumeric(DataType dt) {
@@ -1464,20 +1472,19 @@ public class LoadJet {
         return false;
     }
 
-    public void addFunctions(Class<?> clazz) throws SQLException {
-        functionsLoader.addFunctions(clazz, false);
+    public void addFunctions(Class<?> _clazz) throws SQLException {
+        functionsLoader.addFunctions(_clazz, false);
     }
 
-    private void exec(String expression, boolean logging) throws SQLException {
+    private void exec(String _expression, boolean _logging) throws SQLException {
         try (Statement st = conn.createStatement()) {
-
-            st.executeUpdate(expression);
-        } catch (SQLException e) {
-            if (logging && e.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                Logger.log("Cannot execute:" + expression + " " + e.getMessage());
+            st.executeUpdate(_expression);
+        } catch (SQLException _ex) {
+            if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
+                Logger.log("Cannot execute:" + _expression + " " + _ex.getMessage());
             }
 
-            throw e;
+            throw _ex;
         }
     }
 

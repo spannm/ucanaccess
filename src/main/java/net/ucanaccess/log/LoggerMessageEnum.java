@@ -13,6 +13,6 @@ public enum LoggerMessageEnum implements LoggerResourceMessage  {
     STATEMENT_DDL,
     CONSTRAINT,
     LOBSCALE,
-    FUNCTION_ALREADY_ADDED,
+    FAILED_TO_CREATE_FUNCTION,
     NO_SELECT
 }

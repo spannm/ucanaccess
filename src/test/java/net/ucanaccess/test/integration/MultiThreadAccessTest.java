@@ -79,8 +79,8 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
                     crud();
                     crudPS();
                     crudUpdatableRS();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                } catch (SQLException _ex) {
+                    fail(_ex);
                 }
             });
             threads[i].start();
@@ -88,8 +88,8 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         for (Thread t : threads) {
             try {
                 t.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException _ex) {
+                continue;
             }
         }
         ucanaccess = getUcanaccessConnection(dbPath);

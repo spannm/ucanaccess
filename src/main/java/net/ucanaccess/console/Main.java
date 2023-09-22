@@ -135,9 +135,9 @@ public class Main {
                 System.out.println(sqlw.getMessage());
                 sqlw = sqlw.getNextWarning();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
+        } catch (Exception _ex) {
+            _ex.printStackTrace();
+            System.out.println(_ex.getMessage());
             System.exit(1);
         }
         Main main = new Main(conn, input);

@@ -284,8 +284,8 @@ public class UcanaccessConnection implements Connection {
             if (testRollback) {
                 throw new RuntimeException("PhysicalRollbackTest");
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Throwable _t) {
+            _t.printStackTrace();
             hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -304,10 +304,10 @@ public class UcanaccessConnection implements Connection {
             try {
                 ref.getDbIO().flush();
                 unloadDB();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException _ex) {
+                _ex.printStackTrace();
             }
-            throw new UcanaccessSQLException(t);
+            throw new UcanaccessSQLException(_t);
         }
         try {
             ref.getDbIO().flush();
