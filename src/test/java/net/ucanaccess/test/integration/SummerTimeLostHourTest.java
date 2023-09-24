@@ -23,11 +23,11 @@ import java.util.TimeZone;
 
 class SummerTimeLostHourTest extends UcanaccessBaseTest {
 
-    private static Locale prevLocale;
+    private static Locale   prevLocale;
     private static TimeZone prevTimeZone;
 
     @BeforeAll
-    static void goToRome() {
+    static void setLocalAndTimezone() {
         prevLocale = Locale.getDefault();
         prevTimeZone = TimeZone.getDefault();
         Locale.setDefault(Locale.ITALY);
@@ -35,7 +35,7 @@ class SummerTimeLostHourTest extends UcanaccessBaseTest {
     }
 
     @AfterAll
-    static void returnHomeFromRome() {
+    static void resetLocalAndTimezone() {
         Locale.setDefault(prevLocale);
         TimeZone.setDefault(prevTimeZone);
     }
@@ -56,7 +56,7 @@ class SummerTimeLostHourTest extends UcanaccessBaseTest {
          */
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
         Statement hsqldbStmt = hsqldbConn.createStatement();
-        ResultSet rs = hsqldbStmt.executeQuery("SELECT CAST(DTMFIELD AS VARCHAR(26)) AS str FROM TABLE1 WHERE ID=1");
+        ResultSet rs = hsqldbStmt.executeQuery("SELECT CAST(f_datetime AS VARCHAR(26)) AS str FROM t_datetime WHERE id=1");
         rs.next();
         assertEquals("2017-03-26 02:00:00.000000", rs.getString(1));
 
@@ -64,13 +64,13 @@ class SummerTimeLostHourTest extends UcanaccessBaseTest {
          * also ensure that 02:00:00 -> 01:00:00 doesn't happen when writing back to Access
          */
         Statement ucaStmt = ucanaccess.createStatement();
-        ucaStmt.executeUpdate("UPDATE Table1 SET txtField='updated' WHERE id=1");
+        ucaStmt.executeUpdate("UPDATE t_datetime SET f_descr='updated' WHERE id=1");
 
         LocalDateTime expectedBackFromAccess = LocalDateTime.of(2017, 3, 26, 2, 0);
         Database db = ucanaccess.getDbIO();
-        Table tbl = db.getTable("Table1");
+        Table tbl = db.getTable("t_datetime");
         Row r = CursorBuilder.findRowByPrimaryKey(tbl, 1);
-        assertEquals(expectedBackFromAccess, r.get("dtmField"));
+        assertEquals(expectedBackFromAccess, r.get("f_datetime"));
     }
 
 }
