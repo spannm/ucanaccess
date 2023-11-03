@@ -24,11 +24,15 @@ public final class UcanaccessDriver implements Driver {
             DriverManager.registerDriver(new UcanaccessDriver());
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
 
-        } catch (ClassNotFoundException e) {
+            // Set property with semicolon-separated list (including wildcards) of Java classes
+            // that can be used for routines based on Java static methods
+            System.setProperty("hsqldb.method_class_names", "net.ucanaccess.converters.*");
+
+        } catch (ClassNotFoundException _ex) {
             Logger.logWarning(LoggerMessageEnum.HSQLDB_DRIVER_NOT_FOUND);
-            throw new RuntimeException(e.getMessage());
-        } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(_ex.getMessage());
+        } catch (SQLException _ex) {
+            throw new RuntimeException(_ex.getMessage());
         }
     }
 
@@ -173,7 +177,11 @@ public final class UcanaccessDriver implements Driver {
                 SQLWarning sqlw = null;
                 if (!alreadyLoaded) {
                     boolean toBeLoaded = !dbRef.loadedFromKeptMirror(session);
-                    LoadJet la = new LoadJet(dbRef.getHSQLDBConnection(session), dbRef.getDbIO());
+                    Connection conn = dbRef.getHSQLDBConnection(session);
+                    // from version 2.7 hsqldb translates timestamps stored without timezone in the database
+                    // into the default timezone. MS Access however does not know timezones, therefore assume timestamps are UTC
+                    conn.createStatement().executeQuery("SET TIME ZONE 'UTC'");
+                    LoadJet la = new LoadJet(conn, dbRef.getDbIO());
                     Logger.turnOffJackcessLog();
                     if (_props.containsKey("sysschema")) {
                         boolean sysSchema = Boolean.parseBoolean(_props.getProperty("sysschema"));

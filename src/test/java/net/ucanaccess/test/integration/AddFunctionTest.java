@@ -1,7 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import net.ucanaccess.converters.AddFunctions;
 import net.ucanaccess.test.util.AccessVersion;
-import net.ucanaccess.test.util.AddFunctionClass;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -31,9 +31,9 @@ class AddFunctionTest extends UcanaccessBaseTest {
             st.execute("INSERT INTO t_add_function (id) VALUES(1)");
         }
 
-        ucanaccess.addFunctions(AddFunctionClass.class);
-        dumpQueryResult("SELECT pluto('hello',' world ', NOW()) FROM t_add_function");
-        checkQuery("SELECT CONCAT('Hello World, ','Ucanaccess') FROM t_add_function", "Hello World, Ucanaccess");
+        ucanaccess.addFunctions(AddFunctions.class);
+        dumpQueryResult("SELECT pluto('hello', ' world ', NOW()) FROM t_add_function");
+        checkQuery("SELECT CONCAT('Hello World, ', 'Ucanaccess') FROM t_add_function", "Hello World, Ucanaccess");
 
         dropTable("t_add_function");
     }

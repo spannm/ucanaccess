@@ -18,31 +18,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.util.Locale;
 import java.util.TimeZone;
 
-class SummerTimeLostHourTest extends UcanaccessBaseTest {
+class UtcTimezoneTest extends UcanaccessBaseTest {
 
-    private static Locale   prevLocale;
     private static TimeZone prevTimeZone;
 
     @BeforeAll
     static void setLocalAndTimezone() {
-        prevLocale = Locale.getDefault();
         prevTimeZone = TimeZone.getDefault();
-        Locale.setDefault(Locale.ITALY);
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome"));
     }
 
     @AfterAll
     static void resetLocalAndTimezone() {
-        Locale.setDefault(prevLocale);
         TimeZone.setDefault(prevTimeZone);
     }
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "summerTimeLostHour.accdb"; // Access 2007
+        return TEST_DB_DIR + "utcTimezoneTest.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -56,9 +51,10 @@ class SummerTimeLostHourTest extends UcanaccessBaseTest {
          */
         Connection hsqldbConn = ucanaccess.getHSQLDBConnection();
         Statement hsqldbStmt = hsqldbConn.createStatement();
-        ResultSet rs = hsqldbStmt.executeQuery("SELECT CAST(f_datetime AS VARCHAR(26)) AS str FROM t_datetime WHERE id=1");
+        ResultSet rs = hsqldbStmt.executeQuery("SELECT f_datetime, CAST(f_datetime AS VARCHAR(26)) AS str FROM t_datetime WHERE id=1");
         rs.next();
-        assertEquals("2017-03-26 02:00:00.000000", rs.getString(1));
+        assertEquals("2017-03-26 02:00:00.000000", rs.getString("f_datetime"));
+        assertEquals("2017-03-26 02:00:00.000000", rs.getString("str"));
 
         /*
          * also ensure that 02:00:00 -> 01:00:00 doesn't happen when writing back to Access

@@ -22,26 +22,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected static final String TEST_DB_DIR   = "testdbs/";
-    private static final File TEST_TEMP_DIR = createTempDir("ucanaccess-test");
+    private static final File     TEST_TEMP_DIR = createTempDir("ucanaccess-test");
 
     static {
         Main.setBatchMode(true);
     }
 
-    private File fileAccDb;
-    private String password          = "";
-    private AccessVersion accessVersion;
+    private File                   fileAccDb;
+    private String                 password          = "";
+    private AccessVersion          accessVersion;
     // CHECKSTYLE:OFF
     protected UcanaccessConnection ucanaccess;
     // CHECKSTYLE:ON
-    private String user              = "ucanaccess";
-    private Connection verifyConnection;
-    private Boolean ignoreCase;
+    private String                 user              = "ucanaccess";
+    private Connection             verifyConnection;
+    private Boolean                ignoreCase;
 
-    private long inactivityTimeout = -1;
-    private String columnOrder;
-    private String append2JdbcURL    = "";
-    private Boolean showSchema;
+    private long                   inactivityTimeout = -1;
+    private String                 columnOrder;
+    private String                 append2JdbcURL    = "";
+    private Boolean                showSchema;
 
     protected UcanaccessBaseTest() {
     }
@@ -378,10 +378,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     private UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException {
-        if (_dbPath == null) {
-            _dbPath = getAccessTempPath();
-        }
-        String url = _urlPrefix + _dbPath;
+        String dbPath = Optional.ofNullable(_dbPath).orElseGet(this::getAccessTempPath);
+        String url = _urlPrefix + dbPath;
         if (ignoreCase != null) {
             url += ";ignoreCase=" + ignoreCase;
         }
