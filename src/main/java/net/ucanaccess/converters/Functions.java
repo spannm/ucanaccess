@@ -7,6 +7,7 @@ import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -160,8 +161,8 @@ public final class Functions {
         try {
             DecimalFormat dc = FormatCache.getNoArgs();
             return clng(dc.parse(value).doubleValue());
-        } catch (ParseException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (ParseException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -450,7 +451,7 @@ public final class Functions {
         if (mtc.find()) {
             gc.set(Integer.parseInt(mtc.group(1)), Integer.parseInt(mtc.group(2)) - 1, Integer.parseInt(mtc.group(3)));
         } else {
-            throw new RuntimeException("internal error in parsing timestamp");
+            throw new UcanaccessRuntimeException("internal error in parsing timestamp");
         }
         mtc = pth.matcher(dt);
         if (mtc.find()) {
@@ -458,7 +459,7 @@ public final class Functions {
             gc.set(Calendar.MINUTE, Integer.parseInt(mtc.group(2)));
             gc.set(Calendar.SECOND, Integer.parseInt(mtc.group(3)));
         } else {
-            throw new RuntimeException("internal error in parsing timestamp");
+            throw new UcanaccessRuntimeException("internal error in parsing timestamp");
         }
         gc.set(Calendar.MILLISECOND, 0);
         return new Timestamp(gc.getTime().getTime());
@@ -548,8 +549,8 @@ public final class Functions {
         try {
             DecimalFormat formatter = FormatCache.getDecimalFormat(par);
             return formatter.format(d);
-        } catch (Exception e) {
-            throw new UcanaccessSQLException(e);
+        } catch (Exception _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -572,8 +573,8 @@ public final class Functions {
             try {
 
                 return format(df.parse(s).doubleValue(), par);
-            } catch (ParseException e) {
-                throw new UcanaccessSQLException(e);
+            } catch (ParseException _ex) {
+                throw new UcanaccessSQLException(_ex);
             }
         } else if (isDate(s)) {
             return format(dateValue(s, false), par);
@@ -846,7 +847,7 @@ public final class Functions {
         }
         int len = start - 1 + length;
         if (start < 1) {
-            throw new RuntimeException("Invalid function call");
+            throw new UcanaccessRuntimeException("Invalid function call");
         }
         if (len > value.length()) {
             len = value.length();
@@ -1422,7 +1423,7 @@ public final class Functions {
                 d = Math.rint(d + APPROX);
             }
             return d;
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             return null;
         }
 
@@ -1529,7 +1530,7 @@ public final class Functions {
         }
         try {
             return dateValue(res, false);
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             return null;
         }
     }

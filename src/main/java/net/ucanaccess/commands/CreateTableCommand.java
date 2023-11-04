@@ -42,14 +42,7 @@ public class CreateTableCommand implements ICommand {
             return false;
         }
         CreateTableCommand other = (CreateTableCommand) obj;
-        if (tableName == null) {
-            if (other.tableName != null) {
-                return false;
-            }
-        } else if (!tableName.equals(other.tableName)) {
-            return false;
-        }
-        return true;
+        return tableName == null ? other.tableName == null : tableName.equals(other.tableName);
     }
 
     @Override
@@ -80,8 +73,8 @@ public class CreateTableCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.createTable(tableName, columnMap, types, defaults, notNulls);
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return null;
     }

@@ -3,6 +3,7 @@ package net.ucanaccess.console;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
 import java.sql.*;
@@ -34,7 +35,7 @@ public class Main {
         Database db;
         try {
             db = DatabaseBuilder.open(fl);
-        } catch (IOException e) {
+        } catch (IOException _ex) {
             DatabaseBuilder dbb = new DatabaseBuilder();
             dbb.setReadOnly(true);
             dbb.setFile(fl);
@@ -194,8 +195,8 @@ public class Main {
                 System.exit(0);
             }
             return ret.trim();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (IOException _ex) {
+            throw new UcanaccessRuntimeException(_ex.getMessage());
         }
     }
 
@@ -260,8 +261,8 @@ public class Main {
                     } else {
                         executeStatement(cmd);
                     }
-                } catch (Exception e) {
-                    prompt(e.getMessage());
+                } catch (Exception _ex) {
+                    prompt(_ex.getMessage());
                 }
                 if (exit) {
                    connected = false;

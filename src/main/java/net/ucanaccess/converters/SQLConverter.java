@@ -24,7 +24,7 @@ public final class SQLConverter {
     private static final Pattern QUOTE_M_PATTERN                  = Pattern.compile("'(([^'])*)'");
     private static final Pattern DOUBLE_QUOTE_M_PATTERN           = Pattern.compile("\"(([^\"])*)\"");
     private static final Pattern FIND_LIKE_PATTERN                = Pattern
-            .compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)((?i)NOT[\\s\n\r]*)*(?i)LIKE[\\s\n\r]*\'([^']*(?:'')*)\'");
+            .compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)((?i)NOT[\\s\n\r]*)*(?i)LIKE[\\s\n\r]*'([^']*(?:'')*)'");
     private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN =
             Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
     private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN       = Pattern.compile("\\[[\\*|_|#]\\]");
@@ -50,7 +50,7 @@ public final class SQLConverter {
     private static final String   UNDERSCORE_IDENTIFIERS     = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
     private static final String   XESCAPED                   = "(\\W)((?i)X)((?i)_)(\\W)";
     private static final String[] DEFAULT_CATCH              =
-            new String[] {"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\'(?:[^']*(?:'')*)*\')([\\s\n\r\\)\\,])",
+            new String[] {"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)('(?:[^']*(?:'')*)*')([\\s\n\r\\)\\,])",
                     "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
                     "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
                     "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])"};
@@ -480,13 +480,13 @@ public final class SQLConverter {
             }
             String value = g2.substring(1, g2.length() - 1);
             nsql.put(SQLConverter.preEscapingIdentifier(value), value);
-            sqlN += sqle.substring(0, mtc.start()) + mtc.group(1) + g2.replaceAll("[\'\"]", "") + mtc.group(3);
+            sqlN += sqle.substring(0, mtc.start()) + mtc.group(1) + g2.replaceAll("['\"]", "") + mtc.group(3);
             sqle = sqle.substring(mtc.end());
         }
         sql = sqlN + sqle;
         for (String escaped : hs) {
             sql = sql.replaceAll("\\[" + escaped.substring(1, escaped.length() - 1) + "\\]",
-                    escaped.replaceAll("[\'\"]", ""));
+                    escaped.replaceAll("['\"]", ""));
         }
         return sql;
     }
@@ -723,7 +723,7 @@ public final class SQLConverter {
         }
 
         String escaped = name;
-        escaped = name.replaceAll("\'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
+        escaped = name.replaceAll("'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
 
         if (escaped.length() > 0 && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
@@ -783,7 +783,7 @@ public final class SQLConverter {
             st = conn.createStatement();
             st.execute("SELECT 1 AS " + name0 + " FROM dual");
             return name;
-        } catch (SQLException e) {
+        } catch (SQLException _ex) {
             return quote ? "\"" + name + "\"" : "[" + name + "]";
         } finally {
             if (st != null) {

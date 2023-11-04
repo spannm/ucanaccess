@@ -134,7 +134,7 @@ public class Metadata {
             rs.next();
 
             return rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (SQLException _ex) {
             return getTableId(escaped);
         }
     }

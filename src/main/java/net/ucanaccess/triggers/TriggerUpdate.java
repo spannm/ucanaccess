@@ -31,8 +31,8 @@ public class TriggerUpdate extends TriggerBase {
                 UpdateCommand c4j = new UpdateCommand(t, rowPattern, newR, execId);
                 conn.add(c4j);
             }
-        } catch (Exception e) {
-            throw new TriggerException(e.getMessage());
+        } catch (Exception _ex) {
+            throw new TriggerException(_ex.getMessage());
         }
     }
 

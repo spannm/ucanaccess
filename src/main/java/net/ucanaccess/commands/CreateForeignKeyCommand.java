@@ -44,8 +44,8 @@ public class CreateForeignKeyCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.createForeignKey(tableName, referencedTable, relationshipName);
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return null;
     }

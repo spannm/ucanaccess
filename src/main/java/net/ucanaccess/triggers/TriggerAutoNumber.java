@@ -10,6 +10,7 @@ import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 import org.hsqldb.types.JavaObjectData;
 
 import java.sql.SQLException;
@@ -65,7 +66,7 @@ public class TriggerAutoNumber extends TriggerBase {
                     } else if (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW
                             && cl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {
                         if (!oldR[i].equals(newR[i])) {
-                            throw new RuntimeException("Cannot update autoincrement column");
+                            throw new UcanaccessRuntimeException("Cannot update autoincrement column");
                         }
                     } else if (cl.getAutoNumberGenerator().getType().equals(DataType.GUID)) {
                         validateGUID(newR[i]);
@@ -77,8 +78,8 @@ public class TriggerAutoNumber extends TriggerBase {
                 }
                 ++i;
             }
-        } catch (Exception e) {
-            throw new TriggerException(e.getMessage());
+        } catch (Exception _ex) {
+            throw new TriggerException(_ex.getMessage());
         }
     }
 

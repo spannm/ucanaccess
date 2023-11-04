@@ -14,5 +14,6 @@ public enum LoggerMessageEnum implements LoggerResourceMessage  {
     CONSTRAINT,
     LOBSCALE,
     FAILED_TO_CREATE_FUNCTION,
-    NO_SELECT
+    NO_SELECT,
+    NOT_SUPPORTED
 }

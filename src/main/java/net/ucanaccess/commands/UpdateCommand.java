@@ -90,14 +90,14 @@ public class UpdateCommand extends AbstractCursorCommand {
                 persist(cur);
 
             }
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return new BlobAction(table, modifiedRow);
     }
 
     @Override
-    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException {
+    public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException {
         if (blobColumns != null) {
             for (Column col : blobColumns) {
                 Object val = cur.getCurrentRowValue(col);

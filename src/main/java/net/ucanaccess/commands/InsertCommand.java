@@ -78,7 +78,7 @@ public class InsertCommand implements ICommand {
     public void insertRow(Table _table, Object[] _row) throws IOException {
         try {
             _table.addRow(newRow);
-        } catch (ConstraintViolationException e) {
+        } catch (ConstraintViolationException _ex) {
             List<? extends Column> lc = _table.getColumns();
             boolean retry = false;
             for (Column cl : lc) {
@@ -88,7 +88,7 @@ public class InsertCommand implements ICommand {
                 }
             }
             if (!retry) {
-                throw e;
+                throw _ex;
             }
             Database db = _table.getDatabase();
             File fl = db.getFile();

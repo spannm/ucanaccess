@@ -110,8 +110,8 @@ public class DBReference {
             } else {
                 try {
                     closeHsqlDb(session, true);
-                } catch (Exception e) {
-                    throw new UcanaccessSQLException(e);
+                } catch (Exception _ex) {
+                    throw new UcanaccessSQLException(_ex);
                 }
                 return false;
             }
@@ -388,8 +388,8 @@ public class DBReference {
             }
             String mro = mirrorReadOnly ? ";readonly=true" : "";
             return "jdbc:hsqldb:" + (inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -448,8 +448,8 @@ public class DBReference {
                 fileLock = tryLock;
                 readOnly = false;
             }
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 

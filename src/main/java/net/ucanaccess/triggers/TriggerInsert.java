@@ -16,8 +16,8 @@ public class TriggerInsert extends TriggerBase {
             InsertCommand c4j = t == null ? new InsertCommand(tableName, conn.getDbIO(), newR, execId)
                     : new InsertCommand(t, newR, execId);
             conn.add(c4j);
-        } catch (Exception e) {
-            throw new TriggerException(e.getMessage());
+        } catch (Exception _ex) {
+            throw new TriggerException(_ex.getMessage());
         }
     }
 }

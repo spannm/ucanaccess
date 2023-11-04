@@ -37,8 +37,8 @@ public class AlterRenameCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.renameTable(oldTableName, newTableName);
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return null;
     }

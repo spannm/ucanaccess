@@ -40,8 +40,8 @@ public class DropForeignKeyCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.dropForeignKey(relationshipName);
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return null;
     }

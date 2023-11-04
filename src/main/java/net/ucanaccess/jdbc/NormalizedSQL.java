@@ -1,11 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NormalizedSQL {
     private String                    sql;
-    private final Map<String, String> aliases = new HashMap<>();
+    private final Map<String, String> aliases = new LinkedHashMap<>();
 
     public String getSql() {
         return sql;
@@ -19,8 +19,8 @@ public class NormalizedSQL {
         return aliases;
     }
 
-    public String put(String key, String value) {
-        return aliases.put(key, value);
+    public String put(String _key, String _value) {
+        return aliases.put(_key, _value);
     }
 
     @Override

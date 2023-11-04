@@ -17,7 +17,7 @@ public class DefaultJackcessOpener implements IJackcessOpenerInterface {
         try {
             dbd.setReadOnly(false);
             db = dbd.open();
-        } catch (IOException e) {
+        } catch (IOException _ex) {
             dbd.setReadOnly(true);
             db = dbd.open();
         }

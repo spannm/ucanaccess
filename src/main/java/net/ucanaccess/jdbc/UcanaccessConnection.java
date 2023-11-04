@@ -11,6 +11,7 @@ import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,15 +30,15 @@ public class UcanaccessConnection implements Connection {
     private boolean                     autoCommit    = true;
     private Properties                  clientInfo;
     // test only!!!!
-    private boolean             testRollback;
-    private Session             session;
-    private SQLWarning          warnings;
-    private String              url;
-    private UcanaccessStatement currentStatement;
-    private Object              lastGeneratedKey;
-    private String              refId;
+    private boolean                     testRollback;
+    private Session                     session;
+    private SQLWarning                  warnings;
+    private String                      url;
+    private UcanaccessStatement         currentStatement;
+    private Object                      lastGeneratedKey;
+    private String                      refId;
 
-    static final String BATCH_ID = "BATCH_ID";
+    static final String                 BATCH_ID      = "BATCH_ID";
 
     public static synchronized UcanaccessConnection getCtxConnection() {
         if (ctx == null) {
@@ -71,8 +72,8 @@ public class UcanaccessConnection implements Connection {
             session = _session;
             hsqlDBConnection = _ref.getHSQLDBConnection(_session);
             clientInfo = _clientInfo;
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -146,8 +147,8 @@ public class UcanaccessConnection implements Connection {
             hsqlDBConnection.close();
             ref.decrementActiveConnection(session);
 
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -170,8 +171,8 @@ public class UcanaccessConnection implements Connection {
                     ref.updateLastModified();
                 }
 
-            } catch (SQLException e) {
-                throw new UcanaccessSQLException(e);
+            } catch (SQLException _ex) {
+                throw new UcanaccessSQLException(_ex);
             } finally {
                 finalizeEnlistedResources();
                 checkModified = true;
@@ -184,8 +185,8 @@ public class UcanaccessConnection implements Connection {
         try {
             checkConnection();
             return hsqlDBConnection.createArrayOf(typeName, elements);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -194,8 +195,8 @@ public class UcanaccessConnection implements Connection {
         try {
             checkConnection();
             return new UcanaccessBlob(UcanaccessBlob.createBlob(this), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -203,8 +204,8 @@ public class UcanaccessConnection implements Connection {
         try {
             checkConnection();
             return new UcanaccessBlob(UcanaccessBlob.createBlob(fl, this), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -217,17 +218,17 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public Clob createClob() throws SQLException {
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
@@ -255,8 +256,8 @@ public class UcanaccessConnection implements Connection {
         try {
             checkConnection();
             return hsqlDBConnection.createStruct(typeName, attributes);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -282,7 +283,7 @@ public class UcanaccessConnection implements Connection {
 
             }
             if (testRollback) {
-                throw new RuntimeException("PhysicalRollbackTest");
+                throw new UcanaccessRuntimeException("PhysicalRollbackTest");
             }
         } catch (Throwable _t) {
             _t.printStackTrace();
@@ -312,8 +313,8 @@ public class UcanaccessConnection implements Connection {
         try {
             ref.getDbIO().flush();
 
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
 
     }
@@ -334,8 +335,8 @@ public class UcanaccessConnection implements Connection {
     public String getCatalog() throws SQLException {
         try {
             return hsqlDBConnection.getCatalog();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -357,8 +358,8 @@ public class UcanaccessConnection implements Connection {
     public int getHoldability() throws SQLException {
         try {
             return hsqlDBConnection.getHoldability();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -370,8 +371,8 @@ public class UcanaccessConnection implements Connection {
     public DatabaseMetaData getMetaData() throws SQLException {
         try {
             return new UcanaccessDatabaseMetadata(hsqlDBConnection.getMetaData(), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -379,8 +380,8 @@ public class UcanaccessConnection implements Connection {
     public int getTransactionIsolation() throws SQLException {
         try {
             return hsqlDBConnection.getTransactionIsolation();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -388,8 +389,8 @@ public class UcanaccessConnection implements Connection {
     public Map<String, Class<?>> getTypeMap() throws SQLException {
         try {
             return hsqlDBConnection.getTypeMap();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -418,8 +419,8 @@ public class UcanaccessConnection implements Connection {
     public boolean isClosed() throws SQLException {
         try {
             return hsqlDBConnection.isClosed();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -432,8 +433,8 @@ public class UcanaccessConnection implements Connection {
     public boolean isValid(int timeout) throws SQLException {
         try {
             return hsqlDBConnection.isValid(timeout);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -441,8 +442,8 @@ public class UcanaccessConnection implements Connection {
     public boolean isWrapperFor(Class<?> arg0) throws SQLException {
         try {
             return hsqlDBConnection.isWrapperFor(arg0);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -456,8 +457,8 @@ public class UcanaccessConnection implements Connection {
         try {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessCallableStatement(nsql, hsqlDBConnection.prepareCall(sql), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -467,8 +468,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessCallableStatement(nsql,
                     hsqlDBConnection.prepareCall(sql, resultSetType, resultSetConcurrency), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -479,8 +480,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessCallableStatement(nsql,
                     hsqlDBConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -500,9 +501,9 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessPreparedStatement(nsql, hsqlDBConnection.prepareStatement(preprocess(nsql.getSql())),
                     this);
-        } catch (SQLException e) {
+        } catch (SQLException _ex) {
 
-            throw new UcanaccessSQLException(e);
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -516,8 +517,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessPreparedStatement(nsql,
                     hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), autoGeneratedKeys), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -554,8 +555,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessPreparedStatement(nsql, hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()),
                     resultSetType, resultSetConcurrency, resultSetHoldability), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -569,8 +570,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessPreparedStatement(nsql,
                     hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), columnIndexes), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -584,8 +585,8 @@ public class UcanaccessConnection implements Connection {
             NormalizedSQL nsql = prepare(sql);
             return new UcanaccessPreparedStatement(nsql,
                     hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), columnNames), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -594,8 +595,8 @@ public class UcanaccessConnection implements Connection {
         try {
             hsqlDBConnection.releaseSavepoint(((UcanaccessSavepoint) savepoint).getWrapped());
             savepointsMap.remove(savepoint);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -605,8 +606,8 @@ public class UcanaccessConnection implements Connection {
 
             hsqlDBConnection.rollback();
 
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         } finally {
             finalizeEnlistedResources();
             checkModified = true;
@@ -629,8 +630,8 @@ public class UcanaccessConnection implements Connection {
                 remove = remove || c4io.getExecId().equals(lastId);
             }
             checkModified = true;
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -650,7 +651,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
@@ -667,8 +668,8 @@ public class UcanaccessConnection implements Connection {
     public void setHoldability(int holdability) throws SQLException {
         try {
             hsqlDBConnection.setHoldability(holdability);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -676,8 +677,8 @@ public class UcanaccessConnection implements Connection {
     public void setReadOnly(boolean readOnly) throws SQLException {
         try {
             hsqlDBConnection.setReadOnly(readOnly);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -690,8 +691,8 @@ public class UcanaccessConnection implements Connection {
                 savepointsMap.put(sp, commands.getLast().getExecId());
             }
             return sp;
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -705,8 +706,8 @@ public class UcanaccessConnection implements Connection {
                 savepointsMap.put(sp, commands.getLast().getExecId());
             }
             return sp;
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -714,8 +715,8 @@ public class UcanaccessConnection implements Connection {
     public void setTransactionIsolation(int level) throws SQLException {
         try {
             hsqlDBConnection.setTransactionIsolation(level);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -723,8 +724,8 @@ public class UcanaccessConnection implements Connection {
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
         try {
             hsqlDBConnection.setTypeMap(map);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -732,8 +733,8 @@ public class UcanaccessConnection implements Connection {
     public <T> T unwrap(Class<T> arg0) throws SQLException {
         try {
             return hsqlDBConnection.unwrap(arg0);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -754,8 +755,8 @@ public class UcanaccessConnection implements Connection {
             }
             refId = ref.getId();
 
-        } catch (Exception e) {
-            throw new UcanaccessSQLException(e);
+        } catch (Exception _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
 
     }
@@ -788,8 +789,8 @@ public class UcanaccessConnection implements Connection {
                 ref.shutdown(session);
             }
 
-        } catch (Exception e) {
-            throw new UcanaccessSQLException(e);
+        } catch (Exception _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -797,8 +798,8 @@ public class UcanaccessConnection implements Connection {
     public void abort(Executor executor) throws SQLException {
         try {
             hsqlDBConnection.abort(executor);
-        } catch (Exception e) {
-            throw new UcanaccessSQLException(e);
+        } catch (Exception _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 

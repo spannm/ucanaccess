@@ -102,8 +102,8 @@ public class Pivot {
                     }
                     String v = nsql.getSql();
                     st.executeUpdate(v);
-                } catch (Exception e) {
-                    Logger.logWarning(e.getMessage());
+                } catch (Exception _ex) {
+                    Logger.logWarning(_ex.getMessage());
                 } finally {
                     if (st != null) {
                         try {
@@ -190,7 +190,7 @@ public class Pivot {
                 }
             }
             return true;
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             return false;
         }
     }
@@ -208,7 +208,7 @@ public class Pivot {
             return clns;
         }
         if (cln instanceof String) {
-            return "'" + cln.toString().replaceAll("\'", "''") + "'";
+            return "'" + cln.toString().replaceAll("'", "''") + "'";
         }
         return cln.toString();
     }
@@ -221,7 +221,7 @@ public class Pivot {
             cn = dcm.group(1);
         }
 
-        cn = cn.replaceAll("\'", "").replaceAll("\"", "");
+        cn = cn.replaceAll("'", "").replaceAll("\"", "");
 
         return "[" + cn + "]";
     }

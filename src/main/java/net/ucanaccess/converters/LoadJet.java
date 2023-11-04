@@ -94,7 +94,7 @@ public class LoadJet {
             }
         }
 
-        private void addFunctions(Class<?> _clazz, boolean _cswitch) throws SQLException {
+        private void addFunctions(Class<?> _clazz, boolean _cswitch) {
             Method[] mths = _clazz.getDeclaredMethods();
             Map<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
             for (Method mth : mths) {
@@ -661,11 +661,11 @@ public class LoadJet {
             }
             try {
                 exec(ci.toString(), true);
-            } catch (SQLException e) {
-                if (e.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
-                    Logger.log(e.getMessage());
+            } catch (SQLException _ex) {
+                if (_ex.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
+                    Logger.log(_ex.getMessage());
                 } else {
-                    throw e;
+                    throw _ex;
                 }
             }
             loadedIndexes.add("FK on " + ntn + " Columns:" + commaSeparated(cls, false) + " References " + nrt
@@ -708,8 +708,8 @@ public class LoadJet {
             }
             try {
                 exec(ci.toString(), true);
-            } catch (SQLException e) {
-                if (HSQL_UK_ALREADY_EXISTS == e.getErrorCode()) {
+            } catch (SQLException _ex) {
+                if (HSQL_UK_ALREADY_EXISTS == _ex.getErrorCode()) {
                     return;
                 }
                 if (idx.isUnique()) {
@@ -719,11 +719,11 @@ public class LoadJet {
                         }
                     }
                 }
-                Logger.logWarning(e.getMessage());
+                Logger.logWarning(_ex.getMessage());
                 return;
-            } catch (Exception e) {
+            } catch (Exception _ex) {
 
-                Logger.logWarning(e.getMessage());
+                Logger.logWarning(_ex.getMessage());
                 return;
             }
             String pre = pk ? "Primary Key " : uk ? "Index Unique " : "Index";
@@ -831,8 +831,8 @@ public class LoadJet {
                     if (errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
                         try {
                             ps.executeBatch();
-                        } catch (SQLException e) {
-                            int ec = e.getErrorCode();
+                        } catch (SQLException _ex) {
+                            int ec = _ex.getErrorCode();
                             if (!errorCheck && ec == HSQL_NOT_NULL) {
                                 dropTable(t, systemTable);
                                 createSyncrTable(t, systemTable, true);
@@ -840,11 +840,11 @@ public class LoadJet {
                             } else {
                                 if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
                                     if (ec == HSQL_FK_VIOLATION) {
-                                        Logger.logWarning(e.getMessage());
+                                        Logger.logWarning(_ex.getMessage());
                                     }
-                                    recreate(t, systemTable, row, e.getErrorCode());
+                                    recreate(t, systemTable, row, _ex.getErrorCode());
                                 } else {
-                                    throw e;
+                                    throw _ex;
                                 }
                             }
                         }
@@ -895,8 +895,8 @@ public class LoadJet {
                 try {
                     exec(trigger, false);
 
-                } catch (SQLException e) {
-                    Logger.logWarning(e.getMessage());
+                } catch (SQLException _ex) {
+                    Logger.logWarning(_ex.getMessage());
                 }
             }
         }
@@ -936,8 +936,8 @@ public class LoadJet {
                 try {
                     t2 = dbIO.getTable(tn);
                     t = new UcanaccessTable(t2, tn);
-                } catch (Exception e) {
-                    Logger.logWarning(e.getMessage());
+                } catch (Exception _ex) {
+                    Logger.logWarning(_ex.getMessage());
                     unresolvedTables.add(tn);
                 }
                 if (t2 != null && t != null && !tn.startsWith("~")) {
@@ -980,7 +980,7 @@ public class LoadJet {
                 if (!unresolvedTables.contains(tn)) {
                     try {
                         loadTableFKs(tn, true);
-                    } catch (SQLException e) {
+                    } catch (SQLException _ex) {
                         UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn), tn);
                         makeTableReadOnly(t, false);
                     }
@@ -1099,8 +1099,8 @@ public class LoadJet {
             if (value instanceof ComplexValueForeignKey) {
                 try {
                     return ComplexBase.convert((ComplexValueForeignKey) value);
-                } catch (IOException e) {
-                    throw new UcanaccessSQLException(e);
+                } catch (IOException _ex) {
+                    throw new UcanaccessSQLException(_ex);
                 }
             }
             if (value instanceof byte[] && BlobKey.hasPrimaryKey(table)) {
@@ -1249,12 +1249,12 @@ public class LoadJet {
                     pivot.registerPivot(SQLConverter.preEscapingIdentifier(q.getName()));
                 }
                 return true;
-            } catch (Exception e) {
-                if (e instanceof SQLSyntaxErrorException) {
-                    if (queryWKT == null && ((SQLSyntaxErrorException) e).getErrorCode() == OBJECT_ALREADY_EXISTS) {
+            } catch (Exception _ex) {
+                if (_ex instanceof SQLSyntaxErrorException) {
+                    if (queryWKT == null && ((SQLSyntaxErrorException) _ex).getErrorCode() == OBJECT_ALREADY_EXISTS) {
                         return loadView(q, solveAmbiguous(querySQL));
                     } else {
-                        SQLSyntaxErrorException sqle = (SQLSyntaxErrorException) e;
+                        SQLSyntaxErrorException sqle = (SQLSyntaxErrorException) _ex;
                         if (sqle.getErrorCode() == OBJECT_NOT_FOUND || sqle.getErrorCode() == UNEXPECTED_TOKEN) {
                             ParametricQuery pq = new ParametricQuery(conn, (QueryImpl) q);
                             pq.setIssueWithParameterName(sqle.getErrorCode() == UNEXPECTED_TOKEN);
@@ -1269,14 +1269,14 @@ public class LoadJet {
                     }
                 }
 
-                String cause = UcanaccessSQLException.explainCause(e);
+                String cause = UcanaccessSQLException.explainCause(_ex);
 
                 notLoaded.put(q.getName(), ": " + cause);
 
                 if (!err) {
                     Logger.log("Error occured at the first loading attempt of " + q.getName());
                     Logger.log("Converted view was :" + v);
-                    Logger.log("Error message was :" + e.getMessage());
+                    Logger.log("Error message was :" + _ex.getMessage());
                     err = true;
                 }
                 return false;
@@ -1327,7 +1327,7 @@ public class LoadJet {
                 } else {
                     return sql;
                 }
-            } catch (Exception e) {
+            } catch (Exception _ex) {
                 return sql;
             }
         }
@@ -1348,14 +1348,14 @@ public class LoadJet {
 
                 }
                 queryPorting(lq);
-            } catch (Exception e) {
+            } catch (Exception _ex) {
                 notLoaded.put("", "");
             }
             loadProcedures(procedures);
 
         }
 
-        private void loadProcedures(List<Query> procedures) throws SQLException {
+        private void loadProcedures(List<Query> procedures) {
             for (Query q : procedures) {
                 ParametricQuery pq = new ParametricQuery(conn, (QueryImpl) q);
                 if (!q.getType().equals(Query.Type.DATA_DEFINITION)) {
@@ -1452,7 +1452,7 @@ public class LoadJet {
         tablesLoader.setDefaultValue(cl);
     }
 
-    public String defaultValue4SQL(Column cl) throws SQLException, IOException {
+    public String defaultValue4SQL(Column cl) throws IOException {
         PropertyMap pm = cl.getProperties();
         Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
         if (defaulT == null) {
@@ -1527,7 +1527,7 @@ public class LoadJet {
         return sqlw;
     }
 
-    public void resetFunctionsDefault() throws SQLException {
+    public void resetFunctionsDefault() {
         functionsLoader.resetDefault();
     }
 
@@ -1563,7 +1563,7 @@ public class LoadJet {
                 return rs.getObject(1);
             }
             return null;
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             return null;
         }
     }

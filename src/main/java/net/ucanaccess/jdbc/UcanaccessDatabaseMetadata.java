@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
 import java.sql.*;
@@ -138,8 +139,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean allProceduresAreCallable() throws SQLException {
         try {
             return wrapped.allProceduresAreCallable();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -147,8 +148,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean allTablesAreSelectable() throws SQLException {
         try {
             return wrapped.allTablesAreSelectable();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -156,8 +157,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
         try {
             return wrapped.autoCommitFailureClosesAllResultSets();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -165,8 +166,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean dataDefinitionCausesTransactionCommit() throws SQLException {
         try {
             return wrapped.dataDefinitionCausesTransactionCommit();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -174,8 +175,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean dataDefinitionIgnoredInTransactions() throws SQLException {
         try {
             return wrapped.dataDefinitionIgnoredInTransactions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -183,8 +184,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean deletesAreDetected(int type) throws SQLException {
         try {
             return wrapped.deletesAreDetected(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -192,8 +193,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean doesMaxRowSizeIncludeBlobs() throws SQLException {
         try {
             return wrapped.doesMaxRowSizeIncludeBlobs();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -207,8 +208,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String attributeNamePattern) throws SQLException {
         try {
             return wrapped.getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -234,8 +235,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(in(NATIVE_ALIAS, "SCOPE", scopeArr));
 
             return executeQuery(sql.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -244,19 +245,19 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (connection.isShowSchema()) {
             try {
                 return wrapped.getCatalogs();
-            } catch (SQLException e) {
-                throw new UcanaccessSQLException(e);
+            } catch (SQLException _ex) {
+                throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
     public String getCatalogSeparator() throws SQLException {
         try {
             return wrapped.getCatalogSeparator();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -264,8 +265,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getCatalogTerm() throws SQLException {
         try {
             return wrapped.getCatalogTerm();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -273,8 +274,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getClientInfoProperties() throws SQLException {
         try {
             return executeQuery("SELECT * FROM UCA_METADATA.PROP");
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -306,8 +307,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 .append(and("COLUMN_NAME", "LIKE", columnNamePattern));
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -334,8 +335,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(and("COLUMN_NAME", "LIKE", columnNamePattern));
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -380,8 +381,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     .append(" ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -389,8 +390,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getDatabaseMajorVersion() throws SQLException {
         try {
             return wrapped.getDatabaseMajorVersion();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -398,8 +399,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getDatabaseMinorVersion() throws SQLException {
         try {
             return wrapped.getDatabaseMinorVersion();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -414,7 +415,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getDatabaseProductVersion() {
         try {
             return connection.getDbIO().getFileFormat().toString();
-        } catch (IOException e) {
+        } catch (IOException _ex) {
             return "";
         }
     }
@@ -423,8 +424,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getDefaultTransactionIsolation() throws SQLException {
         try {
             return wrapped.getDefaultTransactionIsolation();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -448,7 +449,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         try {
             String version = getClass().getPackage().getImplementationVersion();
             return version == null ? "3.x.x" : version;
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             return "2.x.x";
         }
     }
@@ -478,8 +479,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(" ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -487,8 +488,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getExtraNameCharacters() throws SQLException {
         try {
             return wrapped.getExtraNameCharacters();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -497,8 +498,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         try {
             columnNamePattern = normalizeName(columnNamePattern);
             return wrapped.getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -506,8 +507,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
         try {
             return wrapped.getFunctions(catalog, schemaPattern, functionNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -542,8 +543,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     .append(and("FKTABLE_SCHEM", "=", "PUBLIC")).append(and("FKTABLE_NAME", "=", table))
                     .append(" ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ");
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -567,8 +568,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(and("TABLE_NAME", "=", table)).append(nuS);
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -576,8 +577,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getJDBCMajorVersion() throws SQLException {
         try {
             return wrapped.getJDBCMajorVersion();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -585,8 +586,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getJDBCMinorVersion() throws SQLException {
         try {
             return wrapped.getJDBCMinorVersion();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -594,8 +595,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxBinaryLiteralLength() throws SQLException {
         try {
             return wrapped.getMaxBinaryLiteralLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -603,8 +604,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxCatalogNameLength() throws SQLException {
         try {
             return wrapped.getMaxCatalogNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -612,8 +613,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxCharLiteralLength() throws SQLException {
         try {
             return wrapped.getMaxCharLiteralLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -621,8 +622,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnNameLength() throws SQLException {
         try {
             return wrapped.getMaxColumnNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -630,8 +631,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnsInGroupBy() throws SQLException {
         try {
             return wrapped.getMaxColumnsInGroupBy();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -639,8 +640,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnsInIndex() throws SQLException {
         try {
             return wrapped.getMaxColumnsInIndex();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -648,8 +649,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnsInOrderBy() throws SQLException {
         try {
             return wrapped.getMaxColumnsInOrderBy();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -657,8 +658,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnsInSelect() throws SQLException {
         try {
             return wrapped.getMaxColumnsInSelect();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -666,8 +667,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxColumnsInTable() throws SQLException {
         try {
             return wrapped.getMaxColumnsInTable();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -675,8 +676,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxConnections() throws SQLException {
         try {
             return wrapped.getMaxConnections();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -684,8 +685,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxCursorNameLength() throws SQLException {
         try {
             return wrapped.getMaxCursorNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -693,8 +694,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxIndexLength() throws SQLException {
         try {
             return wrapped.getMaxIndexLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -702,8 +703,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxProcedureNameLength() throws SQLException {
         try {
             return wrapped.getMaxProcedureNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -711,8 +712,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxRowSize() throws SQLException {
         try {
             return wrapped.getMaxRowSize();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -720,8 +721,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxSchemaNameLength() throws SQLException {
         try {
             return wrapped.getMaxSchemaNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -729,8 +730,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxStatementLength() throws SQLException {
         try {
             return wrapped.getMaxStatementLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -738,8 +739,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxStatements() throws SQLException {
         try {
             return wrapped.getMaxStatements();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -747,8 +748,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxTableNameLength() throws SQLException {
         try {
             return wrapped.getMaxTableNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -756,8 +757,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxTablesInSelect() throws SQLException {
         try {
             return wrapped.getMaxTablesInSelect();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -765,8 +766,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getMaxUserNameLength() throws SQLException {
         try {
             return wrapped.getMaxUserNameLength();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -774,8 +775,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getNumericFunctions() throws SQLException {
         try {
             return wrapped.getNumericFunctions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -805,8 +806,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(and("TABLE_CAT", "=", "PUBLIC", " WHERE "))
                         .append(and("TABLE_SCHEM", "=", "PUBLIC")).append(and("TABLE_NAME", "=", table));
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -816,8 +817,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         try {
             columnNamePattern = normalizeName(columnNamePattern);
             return wrapped.getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -826,8 +827,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             throws SQLException {
         try {
             return wrapped.getProcedures(catalog, schemaPattern, procedureNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -835,8 +836,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getProcedureTerm() throws SQLException {
         try {
             return wrapped.getProcedureTerm();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -846,8 +847,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         try {
             return wrapped.getPseudoColumns(catalog, schemaPattern, tableNamePattern,
                     columnNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -855,14 +856,14 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getResultSetHoldability() throws SQLException {
         try {
             return wrapped.getResultSetHoldability();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
     @Override
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
@@ -870,11 +871,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (connection.isShowSchema()) {
             try {
                 return wrapped.getSchemas();
-            } catch (SQLException e) {
-                throw new UcanaccessSQLException(e);
+            } catch (SQLException _ex) {
+                throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
@@ -882,11 +883,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (connection.isShowSchema()) {
             try {
                 return wrapped.getSchemas(catalog, schemaPattern);
-            } catch (SQLException e) {
-                throw new UcanaccessSQLException(e);
+            } catch (SQLException _ex) {
+                throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedException();
+        throw UcanaccessRuntimeException.featureNotSupported();
     }
 
     @Override
@@ -898,8 +899,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getSearchStringEscape() throws SQLException {
         try {
             return wrapped.getSearchStringEscape();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -907,8 +908,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getSQLKeywords() throws SQLException {
         try {
             return wrapped.getSQLKeywords();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -916,8 +917,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public int getSQLStateType() throws SQLException {
         try {
             return wrapped.getSQLStateType();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -925,8 +926,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getStringFunctions() throws SQLException {
         try {
             return wrapped.getStringFunctions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -935,8 +936,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         try {
             tableNamePattern = normalizeName(tableNamePattern);
             return wrapped.getSuperTables(catalog, schemaPattern, tableNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -944,8 +945,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
         try {
             return wrapped.getSuperTypes(catalog, schemaPattern, typeNamePattern);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -953,8 +954,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getSystemFunctions() throws SQLException {
         try {
             return wrapped.getSystemFunctions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -973,8 +974,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(and("TABLE_NAME", "LIKE", tableNamePattern));
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1000,8 +1001,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                         .append(in(CUSTOM_ALIAS, "TYPE", types));
 
             return executeQuery(select.toString());
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1009,8 +1010,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getTableTypes() throws SQLException {
         try {
             return wrapped.getTableTypes();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1018,8 +1019,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getTimeDateFunctions() throws SQLException {
         try {
             return wrapped.getTimeDateFunctions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1027,8 +1028,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getTypeInfo() throws SQLException {
         try {
             return wrapped.getTypeInfo();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1037,8 +1038,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             throws SQLException {
         try {
             return wrapped.getUDTs(catalog, schemaPattern, typeNamePattern, types);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1051,8 +1052,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public String getUserName() throws SQLException {
         try {
             return wrapped.getUserName();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1060,8 +1061,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
         try {
             return wrapped.getVersionColumns(catalog, schema, table);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1069,8 +1070,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean insertsAreDetected(int type) throws SQLException {
         try {
             return wrapped.insertsAreDetected(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1078,8 +1079,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean isCatalogAtStart() throws SQLException {
         try {
             return wrapped.isCatalogAtStart();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1087,8 +1088,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean isReadOnly() throws SQLException {
         try {
             return wrapped.isReadOnly();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1096,8 +1097,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         try {
             return wrapped.isWrapperFor(iface);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1105,8 +1106,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean locatorsUpdateCopy() throws SQLException {
         try {
             return wrapped.locatorsUpdateCopy();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1134,8 +1135,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean nullPlusNonNullIsNull() throws SQLException {
         try {
             return wrapped.nullPlusNonNullIsNull();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1143,8 +1144,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean nullsAreSortedAtEnd() throws SQLException {
         try {
             return wrapped.nullsAreSortedAtEnd();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1152,8 +1153,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean nullsAreSortedAtStart() throws SQLException {
         try {
             return wrapped.nullsAreSortedAtStart();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1161,8 +1162,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean nullsAreSortedHigh() throws SQLException {
         try {
             return wrapped.nullsAreSortedHigh();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1170,8 +1171,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean nullsAreSortedLow() throws SQLException {
         try {
             return wrapped.nullsAreSortedLow();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1179,8 +1180,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean othersDeletesAreVisible(int type) throws SQLException {
         try {
             return wrapped.othersDeletesAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1188,8 +1189,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean othersInsertsAreVisible(int type) throws SQLException {
         try {
             return wrapped.othersInsertsAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1197,8 +1198,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean othersUpdatesAreVisible(int type) throws SQLException {
         try {
             return wrapped.othersUpdatesAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1206,8 +1207,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean ownDeletesAreVisible(int type) throws SQLException {
         try {
             return wrapped.ownDeletesAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1215,8 +1216,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean ownInsertsAreVisible(int type) throws SQLException {
         try {
             return wrapped.ownInsertsAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1224,8 +1225,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean ownUpdatesAreVisible(int type) throws SQLException {
         try {
             return wrapped.ownUpdatesAreVisible(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1233,8 +1234,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesLowerCaseIdentifiers() throws SQLException {
         try {
             return wrapped.storesLowerCaseIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1242,8 +1243,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
         try {
             return wrapped.storesLowerCaseQuotedIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1251,8 +1252,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesMixedCaseIdentifiers() throws SQLException {
         try {
             return wrapped.storesMixedCaseIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1260,8 +1261,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
         try {
             return wrapped.storesMixedCaseQuotedIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1269,8 +1270,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesUpperCaseIdentifiers() throws SQLException {
         try {
             return wrapped.storesUpperCaseIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1278,8 +1279,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
         try {
             return wrapped.storesUpperCaseQuotedIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1287,8 +1288,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsAlterTableWithAddColumn() throws SQLException {
         try {
             return wrapped.supportsAlterTableWithAddColumn();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1296,8 +1297,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsAlterTableWithDropColumn() throws SQLException {
         try {
             return wrapped.supportsAlterTableWithDropColumn();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1305,8 +1306,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsANSI92EntryLevelSQL() throws SQLException {
         try {
             return wrapped.supportsANSI92EntryLevelSQL();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1314,8 +1315,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsANSI92FullSQL() throws SQLException {
         try {
             return wrapped.supportsANSI92FullSQL();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1323,8 +1324,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsANSI92IntermediateSQL() throws SQLException {
         try {
             return wrapped.supportsANSI92IntermediateSQL();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1332,8 +1333,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsBatchUpdates() throws SQLException {
         try {
             return wrapped.supportsBatchUpdates();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1341,8 +1342,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCatalogsInDataManipulation() throws SQLException {
         try {
             return wrapped.supportsCatalogsInDataManipulation();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1350,8 +1351,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCatalogsInIndexDefinitions() throws SQLException {
         try {
             return wrapped.supportsCatalogsInIndexDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1359,8 +1360,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException {
         try {
             return wrapped.supportsCatalogsInPrivilegeDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1368,8 +1369,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCatalogsInProcedureCalls() throws SQLException {
         try {
             return wrapped.supportsCatalogsInProcedureCalls();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1377,8 +1378,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCatalogsInTableDefinitions() throws SQLException {
         try {
             return wrapped.supportsCatalogsInTableDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1386,8 +1387,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsColumnAliasing() throws SQLException {
         try {
             return wrapped.supportsColumnAliasing();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1395,8 +1396,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsConvert() throws SQLException {
         try {
             return wrapped.supportsConvert();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1404,8 +1405,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsConvert(int fromType, int toType) throws SQLException {
         try {
             return wrapped.supportsConvert(fromType, toType);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1413,8 +1414,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCoreSQLGrammar() throws SQLException {
         try {
             return wrapped.supportsCoreSQLGrammar();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1422,8 +1423,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsCorrelatedSubqueries() throws SQLException {
         try {
             return wrapped.supportsCorrelatedSubqueries();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1431,8 +1432,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException {
         try {
             return wrapped.supportsDataDefinitionAndDataManipulationTransactions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1440,8 +1441,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsDataManipulationTransactionsOnly() throws SQLException {
         try {
             return wrapped.supportsDataManipulationTransactionsOnly();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1449,8 +1450,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsDifferentTableCorrelationNames() throws SQLException {
         try {
             return wrapped.supportsDifferentTableCorrelationNames();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1458,8 +1459,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsExpressionsInOrderBy() throws SQLException {
         try {
             return wrapped.supportsExpressionsInOrderBy();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1467,8 +1468,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsExtendedSQLGrammar() throws SQLException {
         try {
             return wrapped.supportsExtendedSQLGrammar();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1476,8 +1477,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsFullOuterJoins() throws SQLException {
         try {
             return wrapped.supportsFullOuterJoins();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1485,8 +1486,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsGetGeneratedKeys() throws SQLException {
         try {
             return wrapped.supportsGetGeneratedKeys();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1494,8 +1495,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsGroupBy() throws SQLException {
         try {
             return wrapped.supportsGroupBy();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1503,8 +1504,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsGroupByBeyondSelect() throws SQLException {
         try {
             return wrapped.supportsGroupByBeyondSelect();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1512,8 +1513,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsGroupByUnrelated() throws SQLException {
         try {
             return wrapped.supportsGroupByUnrelated();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1521,8 +1522,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsIntegrityEnhancementFacility() throws SQLException {
         try {
             return wrapped.supportsIntegrityEnhancementFacility();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1530,8 +1531,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsLikeEscapeClause() throws SQLException {
         try {
             return wrapped.supportsLikeEscapeClause();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1539,8 +1540,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsLimitedOuterJoins() throws SQLException {
         try {
             return wrapped.supportsLimitedOuterJoins();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1548,8 +1549,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMinimumSQLGrammar() throws SQLException {
         try {
             return wrapped.supportsMinimumSQLGrammar();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1557,8 +1558,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMixedCaseIdentifiers() throws SQLException {
         try {
             return wrapped.supportsMixedCaseIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1566,8 +1567,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
         try {
             return wrapped.supportsMixedCaseQuotedIdentifiers();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1575,8 +1576,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMultipleOpenResults() throws SQLException {
         try {
             return wrapped.supportsMultipleOpenResults();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1584,8 +1585,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMultipleResultSets() throws SQLException {
         try {
             return wrapped.supportsMultipleResultSets();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1593,8 +1594,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsMultipleTransactions() throws SQLException {
         try {
             return wrapped.supportsMultipleTransactions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1602,8 +1603,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsNamedParameters() throws SQLException {
         try {
             return wrapped.supportsNamedParameters();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1611,8 +1612,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsNonNullableColumns() throws SQLException {
         try {
             return wrapped.supportsNonNullableColumns();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1620,8 +1621,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOpenCursorsAcrossCommit() throws SQLException {
         try {
             return wrapped.supportsOpenCursorsAcrossCommit();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1629,8 +1630,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOpenCursorsAcrossRollback() throws SQLException {
         try {
             return wrapped.supportsOpenCursorsAcrossRollback();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1638,8 +1639,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOpenStatementsAcrossCommit() throws SQLException {
         try {
             return wrapped.supportsOpenStatementsAcrossCommit();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1647,8 +1648,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOpenStatementsAcrossRollback() throws SQLException {
         try {
             return wrapped.supportsOpenStatementsAcrossRollback();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1656,8 +1657,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOrderByUnrelated() throws SQLException {
         try {
             return wrapped.supportsOrderByUnrelated();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1665,8 +1666,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsOuterJoins() throws SQLException {
         try {
             return wrapped.supportsOuterJoins();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1674,8 +1675,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsPositionedDelete() throws SQLException {
         try {
             return wrapped.supportsPositionedDelete();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1683,8 +1684,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsPositionedUpdate() throws SQLException {
         try {
             return wrapped.supportsPositionedUpdate();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1692,8 +1693,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
         try {
             return wrapped.supportsResultSetConcurrency(type, concurrency);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1701,8 +1702,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsResultSetHoldability(int holdability) throws SQLException {
         try {
             return wrapped.supportsResultSetHoldability(holdability);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1710,8 +1711,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsResultSetType(int type) throws SQLException {
         try {
             return wrapped.supportsResultSetType(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1719,8 +1720,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSavepoints() throws SQLException {
         try {
             return wrapped.supportsSavepoints();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1728,8 +1729,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSchemasInDataManipulation() throws SQLException {
         try {
             return wrapped.supportsSchemasInDataManipulation();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1737,8 +1738,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSchemasInIndexDefinitions() throws SQLException {
         try {
             return wrapped.supportsSchemasInIndexDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1746,8 +1747,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSchemasInPrivilegeDefinitions() throws SQLException {
         try {
             return wrapped.supportsSchemasInPrivilegeDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1755,8 +1756,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSchemasInProcedureCalls() throws SQLException {
         try {
             return wrapped.supportsSchemasInProcedureCalls();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1764,8 +1765,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSchemasInTableDefinitions() throws SQLException {
         try {
             return wrapped.supportsSchemasInTableDefinitions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1773,8 +1774,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSelectForUpdate() throws SQLException {
         try {
             return wrapped.supportsSelectForUpdate();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1782,8 +1783,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsStatementPooling() throws SQLException {
         try {
             return wrapped.supportsStatementPooling();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1791,8 +1792,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
         try {
             return wrapped.supportsStoredFunctionsUsingCallSyntax();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1800,8 +1801,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsStoredProcedures() throws SQLException {
         try {
             return wrapped.supportsStoredProcedures();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1809,8 +1810,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSubqueriesInComparisons() throws SQLException {
         try {
             return wrapped.supportsSubqueriesInComparisons();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1818,8 +1819,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSubqueriesInExists() throws SQLException {
         try {
             return wrapped.supportsSubqueriesInExists();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1827,8 +1828,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSubqueriesInIns() throws SQLException {
         try {
             return wrapped.supportsSubqueriesInIns();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1836,8 +1837,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsSubqueriesInQuantifieds() throws SQLException {
         try {
             return wrapped.supportsSubqueriesInQuantifieds();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1845,8 +1846,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsTableCorrelationNames() throws SQLException {
         try {
             return wrapped.supportsTableCorrelationNames();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1854,8 +1855,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
         try {
             return wrapped.supportsTransactionIsolationLevel(level);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1863,8 +1864,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsTransactions() throws SQLException {
         try {
             return wrapped.supportsTransactions();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1872,8 +1873,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsUnion() throws SQLException {
         try {
             return wrapped.supportsUnion();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1881,8 +1882,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean supportsUnionAll() throws SQLException {
         try {
             return wrapped.supportsUnionAll();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1890,8 +1891,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public <T> T unwrap(Class<T> iface) throws SQLException {
         try {
             return wrapped.unwrap(iface);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1899,8 +1900,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean updatesAreDetected(int type) throws SQLException {
         try {
             return wrapped.updatesAreDetected(type);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1908,8 +1909,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean usesLocalFilePerTable() throws SQLException {
         try {
             return wrapped.usesLocalFilePerTable();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -1917,8 +1918,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public boolean usesLocalFiles() throws SQLException {
         try {
             return wrapped.usesLocalFiles();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 }

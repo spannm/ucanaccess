@@ -125,8 +125,8 @@ public class Persist2Jet {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new SQLException(e);
+        } catch (Exception _ex) {
+            throw new SQLException(_ex);
         }
     }
 

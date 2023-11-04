@@ -22,8 +22,8 @@ public class DDLCommandEnlist {
     private Boolean[]           notNulls;
     private Map<String, String> columnMap = new HashMap<>();
 
-    private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
-        String tn = ddlType.getDBObjectName();
+    private void enlistCreateTable(String _sql, DDLType _ddlType) throws SQLException {
+        String tn = _ddlType.getDBObjectName();
         UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
         String execId = UcanaccessConnection.getCtxExcId();
         Connection hsqlConn = ac.getHSQLDBConnection();
@@ -36,12 +36,12 @@ public class DDLCommandEnlist {
 
         lfa.synchronisationTriggers(ntn, true, true);
         CreateTableCommand c4io;
-        if (ddlType.equals(DDLType.CREATE_TABLE)) {
-            parseTypesFromCreateStatement(sql);
+        if (_ddlType.equals(DDLType.CREATE_TABLE)) {
+            parseTypesFromCreateStatement(_sql);
             c4io = new CreateTableCommand(tn, execId, columnMap, types, defaults, notNulls);
         } else {
             try (Statement st = ac.createStatement()) {
-                ResultSet rs = st.executeQuery(ddlType.getSelect(sql));
+                ResultSet rs = st.executeQuery(_ddlType.getSelect(_sql));
                 ResultSetMetaData rsmd = rs.getMetaData();
                 Metadata mt = new Metadata(ac.getHSQLDBConnection());
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {

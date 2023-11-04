@@ -6,6 +6,7 @@ import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +31,9 @@ public final class UcanaccessDriver implements Driver {
 
         } catch (ClassNotFoundException _ex) {
             Logger.logWarning(LoggerMessageEnum.HSQLDB_DRIVER_NOT_FOUND);
-            throw new RuntimeException(_ex.getMessage());
+            throw new UcanaccessRuntimeException(_ex.getMessage());
         } catch (SQLException _ex) {
-            throw new RuntimeException(_ex.getMessage());
+            throw new UcanaccessRuntimeException(_ex.getMessage());
         }
     }
 
@@ -208,8 +209,8 @@ public final class UcanaccessDriver implements Driver {
                 uc.addWarnings(sqlw);
                 uc.setUrl(_url);
                 return uc;
-            } catch (Exception e) {
-                throw new UcanaccessSQLException(e);
+            } catch (Exception _ex) {
+                throw new UcanaccessSQLException(_ex);
             }
         }
     }

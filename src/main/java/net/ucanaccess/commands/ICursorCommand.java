@@ -3,7 +3,6 @@ package net.ucanaccess.commands;
 import com.healthmarketscience.jackcess.Cursor;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 
 public interface ICursorCommand extends ICommand {
@@ -13,5 +12,5 @@ public interface ICursorCommand extends ICommand {
 
     Map<String, Object> getRowPattern();
 
-    IFeedbackAction persistCurrentRow(Cursor cur) throws IOException, SQLException;
+    IFeedbackAction persistCurrentRow(Cursor cur) throws IOException;
 }

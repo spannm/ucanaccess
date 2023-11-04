@@ -75,14 +75,7 @@ public abstract class ComplexBase implements Serializable {
         if (id != other.id) {
             return false;
         }
-        if (tableName == null) {
-            if (other.tableName != null) {
-                return false;
-            }
-        } else if (!tableName.equals(other.tableName)) {
-            return false;
-        }
-        return true;
+        return tableName == null ? other.tableName == null : tableName.equals(other.tableName);
     }
 
     public static Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {

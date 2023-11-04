@@ -4,9 +4,9 @@ import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
-import net.ucanaccess.jdbc.FeatureNotSupportedException.NotSupportedMessage;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.HibernateSupport;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -109,9 +109,9 @@ public abstract class AbstractExecute {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
-            return new FeatureNotSupportedException(NotSupportedMessage.NOT_SUPPORTED_YET);
-        } catch (SQLException ex) {
-            return ex;
+            throw UcanaccessRuntimeException.featureNotSupported();
+        } catch (SQLException _ex) {
+            return _ex;
         }
     }
 
@@ -205,8 +205,8 @@ public abstract class AbstractExecute {
 
             DDLCommandEnlist ddle = new DDLCommandEnlist();
             ddle.enlistDDLCommand(SQLConverter.restoreWorkAroundFunctions(sql), ddlType);
-        } catch (Exception e) {
-            throw new SQLException(e);
+        } catch (Exception _ex) {
+            throw new SQLException(_ex);
         }
         return ret;
     }
@@ -231,11 +231,11 @@ public abstract class AbstractExecute {
         } else {
             try {
                 retv = executeWrapped();
-            } catch (SQLException e) {
+            } catch (SQLException _ex) {
                 if (conn.getAutoCommit()) {
                     conn.rollback();
                 }
-                throw e;
+                throw _ex;
             }
         }
         if (conn.getAutoCommit()) {

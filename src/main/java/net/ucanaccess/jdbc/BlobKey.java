@@ -49,8 +49,8 @@ public class BlobKey implements Serializable {
             Table t = _db.getTable(tableName);
             Cursor c = CursorBuilder.createPrimaryKeyCursor(t);
             return c.findFirstRow(key) ? c.getCurrentRow().getBlob(columnName) : null;
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -62,8 +62,8 @@ public class BlobKey implements Serializable {
             oos.writeObject(this);
             oos.flush();
             return bais.toByteArray();
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
 
     }
@@ -86,7 +86,7 @@ public class BlobKey implements Serializable {
         try {
             _is.read(bt);
             return getBlobKey(bt);
-        } catch (IOException e) {
+        } catch (IOException _ex) {
             return null;
         }
 

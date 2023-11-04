@@ -69,8 +69,8 @@ public class CompositeCommand implements ICommand {
                 }
             }
             return cfa;
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 

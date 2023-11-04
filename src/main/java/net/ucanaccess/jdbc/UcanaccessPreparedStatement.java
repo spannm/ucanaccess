@@ -1,6 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -60,8 +61,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
                     && ("setAsciiStream".equals(methodName) || "setUnicodeStream".equals(methodName))) {
                     ((InputStream) args[1]).reset();
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Exception _ex) {
+                throw new UcanaccessRuntimeException(_ex);
             }
         }
 
@@ -91,7 +92,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             boolean marked = true;
             try {
                 r.mark(1000000);
-            } catch (IOException e) {
+            } catch (IOException _ex) {
                 marked = false;
             }
             if (marked) {
@@ -114,8 +115,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             StringReader sr = new StringReader(sb.toString());
             sr.mark(1000000);
             return sr;
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (IOException _ex) {
+            throw new SQLException(_ex);
         }
     }
 
@@ -144,24 +145,24 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             ByteArrayInputStream ir = new ByteArrayInputStream(bos.toByteArray());
             ir.mark(1000000);
             return ir;
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (IOException _ex) {
+            throw new SQLException(_ex);
         }
     }
 
     private void resetReader(Reader r) throws SQLException {
         try {
             r.reset();
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (IOException _ex) {
+            throw new SQLException(_ex);
         }
     }
 
     private void resetInputStream(InputStream is) throws SQLException {
         try {
             is.reset();
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (IOException _ex) {
+            throw new SQLException(_ex);
         }
     }
 
@@ -178,8 +179,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public void addBatch() throws SQLException {
         try {
             wrapped.addBatch();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -188,8 +189,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             memento.clear();
             wrapped.clearParameters();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -203,8 +204,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new Execute(this).execute();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -215,8 +216,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new UcanaccessResultSet(wrapped.executeQuery(), this);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -230,8 +231,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new ExecuteUpdate(this).execute();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -239,8 +240,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public ResultSetMetaData getMetaData() throws SQLException {
         try {
             return wrapped.getMetaData();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -248,8 +249,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public ParameterMetaData getParameterMetaData() throws SQLException {
         try {
             return wrapped.getParameterMetaData();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -258,8 +259,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setArray", new Class[] {Array.class}, idx, array);
             wrapped.setArray(idx, array);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -270,8 +271,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setAsciiStream", new Class[] {InputStream.class}, idx, is);
             wrapped.setAsciiStream(idx, is);
             resetInputStream(is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -282,8 +283,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
             wrapped.setAsciiStream(idx, is, length);
             resetInputStream(is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -294,8 +295,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
             wrapped.setAsciiStream(idx, is, length);
             resetInputStream(is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -304,8 +305,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBigDecimal", new Class[] {BigDecimal.class}, idx, dec);
             wrapped.setBigDecimal(idx, dec);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -314,8 +315,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBinaryStream", new Class[] {InputStream.class}, idx, is);
             wrapped.setBinaryStream(idx, is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -324,8 +325,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
             wrapped.setBinaryStream(idx, is, length);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -334,8 +335,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
             wrapped.setBinaryStream(idx, is, length);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -344,8 +345,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBlob", new Class[] {Blob.class}, idx, blob);
             wrapped.setBlob(idx, blob);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -354,8 +355,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBlob", new Class[] {InputStream.class}, idx, is);
             wrapped.setBlob(idx, is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -364,8 +365,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBlob", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
             wrapped.setBlob(idx, is, length);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -374,8 +375,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBoolean", new Class[] {Boolean.TYPE}, idx, bool);
             wrapped.setBoolean(idx, bool);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -384,8 +385,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setByte", new Class[] {Byte.TYPE}, idx, b);
             wrapped.setByte(idx, b);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -394,8 +395,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setBytes", new Class[] {byte[].class}, idx, bytes);
             wrapped.setBytes(idx, bytes);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -407,8 +408,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
 
             wrapped.setCharacterStream(idx, reader);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -419,8 +420,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setCharacterStream", new Class[] {Reader.class, Integer.TYPE}, idx, reader, length);
             wrapped.setCharacterStream(idx, reader, length);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -431,8 +432,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setCharacterStream", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
             wrapped.setCharacterStream(idx, reader, length);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -441,8 +442,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setClob", new Class[] {Clob.class}, idx, clob);
             wrapped.setClob(idx, clob);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -453,8 +454,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setClob", new Class[] {Reader.class}, idx, reader);
             wrapped.setClob(idx, reader);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -465,8 +466,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setClob", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
             wrapped.setClob(idx, reader, length);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -474,8 +475,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public void setCursorName(String name) throws SQLException {
         try {
             wrapped.setCursorName(name);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -484,8 +485,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setDate", new Class[] {Date.class}, idx, date);
             wrapped.setDate(idx, date);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -494,8 +495,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setDate", new Class[] {Date.class, Calendar.class}, idx, date, cal);
             wrapped.setDate(idx, date, cal);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -504,8 +505,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setDouble", new Class[] {Double.TYPE}, idx, d);
             wrapped.setDouble(idx, d);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -514,8 +515,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setFloat", new Class[] {Float.TYPE}, idx, f);
             wrapped.setBigDecimal(idx, new BigDecimal(Float.toString(f)));
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -524,8 +525,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setInt", new Class[] {Integer.TYPE}, idx, i);
             wrapped.setInt(idx, i);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -534,8 +535,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setLong", new Class[] {Long.TYPE}, idx, l);
             wrapped.setLong(idx, l);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -546,8 +547,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setNCharacterStream", new Class[] {Reader.class}, idx, reader);
             wrapped.setNCharacterStream(idx, reader);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -558,8 +559,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setNCharacterStream", new Class[] {Reader.class, Long.TYPE}, idx, reader, l);
             wrapped.setNCharacterStream(idx, reader, l);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -568,8 +569,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setNClob", new Class[] {NClob.class}, idx, nclob);
             wrapped.setNClob(idx, nclob);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -580,8 +581,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setNClob", new Class[] {Reader.class}, idx, reader);
             wrapped.setNClob(idx, reader);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -592,8 +593,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setNClob", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
             wrapped.setNClob(idx, reader, length);
             resetReader(reader);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -602,8 +603,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setNString", new Class[] {String.class}, idx, string);
             wrapped.setNString(idx, string);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -612,8 +613,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setNull", new Class[] {Integer.TYPE}, idx, sqlt);
             wrapped.setNull(idx, sqlt);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -622,8 +623,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setNull", new Class[] {Integer.TYPE, String.class}, idx, sqlt, tn);
             wrapped.setNull(idx, sqlt, tn);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -651,8 +652,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
                 addMementoEntry("setObject", new Class[] {Object.class}, idx, x);
                 wrapped.setObject(idx, x);
             }
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -662,8 +663,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE}, idx, x, tsqlt);
             wrapped.setObject(idx, x, tsqlt);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -673,8 +674,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE, Integer.TYPE}, idx, x, tsqlt, sol);
             wrapped.setObject(idx, x, tsqlt, sol);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -683,8 +684,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setRef", new Class[] {Ref.class}, idx, ref);
             wrapped.setRef(idx, ref);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -693,8 +694,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setRowId", new Class[] {RowId.class}, idx, rowId);
             wrapped.setRowId(idx, rowId);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -703,8 +704,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setShort", new Class[] {Short.TYPE}, idx, sht);
             wrapped.setShort(idx, sht);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -713,8 +714,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setSQLXML", new Class[] {SQLXML.class}, idx, sx);
             wrapped.setSQLXML(idx, sx);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -723,8 +724,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setString", new Class[] {String.class}, idx, string);
             wrapped.setString(idx, string);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -738,8 +739,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             Timestamp ts = new Timestamp(cl.getTimeInMillis());
             addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
             wrapped.setTimestamp(idx, ts);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -753,8 +754,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             Timestamp ts = new Timestamp(cl.getTimeInMillis());
             addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
             wrapped.setTimestamp(idx, ts);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -763,8 +764,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
             wrapped.setTimestamp(idx, ts);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -773,8 +774,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         try {
             addMementoEntry("setTimestamp", new Class[] {Timestamp.class, Calendar.class}, idx, ts, cal);
             wrapped.setTimestamp(idx, ts, cal);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -786,8 +787,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             addMementoEntry("setUnicodeStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
             wrapped.setUnicodeStream(idx, is, length);
             resetInputStream(is);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -797,8 +798,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             String arg = "#" + url.toString() + "#";
             addMementoEntry("setString", new Class[] {String.class}, idx, arg);
             wrapped.setString(idx, arg);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -806,8 +807,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     public <T> T unwrap(Class<T> iface) throws SQLException {
         try {
             return wrapped.unwrap(iface);
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 

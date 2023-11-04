@@ -54,8 +54,8 @@ public class DeleteCommand extends AbstractCursorCommand {
             if (cur.findNextRow(rowPattern)) {
                 cur.deleteCurrentRow();
             }
-        } catch (IOException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (IOException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
         return null;
     }

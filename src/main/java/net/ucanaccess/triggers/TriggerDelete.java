@@ -15,8 +15,8 @@ public class TriggerDelete extends TriggerBase {
             super.convertRowTypes(oldR, t);
             DeleteCommand c4j = new DeleteCommand(t, getRowPattern(oldR, t), execId);
             conn.add(c4j);
-        } catch (Exception e) {
-            throw new TriggerException(e.getMessage());
+        } catch (Exception _ex) {
+            throw new TriggerException(_ex.getMessage());
         }
     }
 }

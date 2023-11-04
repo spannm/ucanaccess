@@ -12,11 +12,11 @@ public class DFunction {
     private static final Pattern      FROM_PATTERN             = Pattern.compile("\\w*(?i)FROM\\w*");
     private static final String       SELECT_FROM              = "(?i)SELECT(.*\\W)(?i)FROM(.*)";
     private static final String       DFUNCTIONS_WHERE         =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"][\\s\n\r]*\\)";
+            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"][\\s\n\r]*\\)";
     private static final String       DFUNCTIONS_WHERE_DYNAMIC =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"]\\,(.*)\\)";
+            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"]\\,(.*)\\)";
     private static final String       DFUNCTIONS_NO_WHERE      =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*[\'\"](.*)[\'\"]\\,[\\s\n\r]*[\'\"](.*)[\'\"][\\s\n\r]*\\)";
+            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"][\\s\n\r]*\\)";
     private static final String       IDENTIFIER               = "(\\W)((?i)_)(\\W)";
     private static final List<String> DFUNCTIONLIST            =
             List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
@@ -105,7 +105,7 @@ public class DFunction {
                 return identifier;
             }
             return tableN;
-        } catch (SQLException e) {
+        } catch (SQLException _ex) {
             return identifier;
         } finally {
             if (st != null) {

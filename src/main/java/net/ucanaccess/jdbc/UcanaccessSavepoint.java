@@ -14,8 +14,8 @@ public class UcanaccessSavepoint implements Savepoint {
     public int getSavepointId() throws SQLException {
         try {
             return wrapped.getSavepointId();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
@@ -23,8 +23,8 @@ public class UcanaccessSavepoint implements Savepoint {
     public String getSavepointName() throws SQLException {
         try {
             return wrapped.getSavepointName();
-        } catch (SQLException e) {
-            throw new UcanaccessSQLException(e);
+        } catch (SQLException _ex) {
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
