@@ -5,7 +5,6 @@ import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -45,7 +44,7 @@ class DropTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDropBlank(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDropBlank(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         // ucanaccess.setAutoCommit(false);

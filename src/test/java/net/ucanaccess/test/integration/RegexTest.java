@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -25,7 +24,7 @@ class RegexTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
-    void testRegex(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testRegex(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         String s = "C".repeat(5000);

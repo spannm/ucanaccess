@@ -1,5 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
@@ -54,7 +56,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
             ex = _ex;
         }
         assertNotNull(ex);
-        assertContains(ex.getMessage(), getClass().getSimpleName());
+        assertThat(ex.getMessage()).contains(getClass().getSimpleName());
 
         ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM T4");

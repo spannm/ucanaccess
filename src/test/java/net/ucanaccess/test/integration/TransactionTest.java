@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -26,7 +25,7 @@ class TransactionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testCommit(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testCommit(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
@@ -40,7 +39,7 @@ class TransactionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testSavepoint(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testSavepoint(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
@@ -58,7 +57,7 @@ class TransactionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testSavepoint2(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testSavepoint2(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);

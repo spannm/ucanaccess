@@ -1,5 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
@@ -30,15 +32,16 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testVUKException(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
+
         try (Statement st = ucanaccess.createStatement()) {
 
             st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
-            st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
 
-        } catch (SQLException _ex) {
-
-            assertEquals(-ErrorCode.X_23505, _ex.getErrorCode());
-            assertEquals("23505", _ex.getSQLState());
+            assertThatThrownBy(() -> st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)"))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("integrity constraint violation: unique constraint or index violation")
+                .hasFieldOrPropertyWithValue("ErrorCode", -ErrorCode.X_23505)
+                .hasFieldOrPropertyWithValue("SQLState", "23505");
         }
     }
 
@@ -53,9 +56,11 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testGException(AccessVersion _accessVersion) {
-        SQLException ex = assertThrows(SQLException.class, () -> DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "ciao ciao"));
-        assertEquals(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, ex.getErrorCode());
-        assertEquals(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR + "", ex.getSQLState());
+        assertThatThrownBy(() -> DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "kuso_yaro"))
+            .isInstanceOf(UcanaccessSQLException.class)
+            .hasMessageContaining("given file does not exist")
+            .hasFieldOrPropertyWithValue("ErrorCode", IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR)
+            .hasFieldOrPropertyWithValue("SQLState", String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR));
     }
 
 }

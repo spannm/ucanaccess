@@ -1,5 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
@@ -45,8 +47,9 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
                                 {"", "", "", "", ""}});
 
             // inserting NULL into a calculated column containing a STRING formula is not permitted
-            UcanaccessSQLException ex = assertThrows(UcanaccessSQLException.class, () -> st.execute("INSERT INTO clcdFlds (input) VALUES (null)"));
-            assertContains(ex.getMessage(), "Value[NULL] 'null' cannot be converted to STRING");
+            assertThatThrownBy(() -> st.execute("INSERT INTO clcdFlds (input) VALUES (null)"))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("Value[NULL] 'null' cannot be converted to STRING");
         }
     }
 

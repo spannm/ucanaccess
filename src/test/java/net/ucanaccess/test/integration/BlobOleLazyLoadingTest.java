@@ -1,5 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +32,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
         final long binaryFileSize = 32718;
         byte[] initialBlobBytes = getBlobBytes();
         getLogger().info("BLOB size in backing database before retrieval: {} bytes", initialBlobBytes.length);
-        assertTrue(initialBlobBytes.length < binaryFileSize);
+        assertThat((long) initialBlobBytes.length).isLessThan(binaryFileSize);
         Statement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
         File fl = createTempFileName("Copied", ".jpeg");

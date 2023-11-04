@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -132,30 +131,6 @@ public abstract class AbstractBaseTest extends Assertions {
         } catch (IOException _ex) {
             throw new UncheckedIOException("Failed to copy to '" + _target + "'", _ex);
         }
-    }
-
-    public static void assertEmpty(String _string) {
-        assertTrue(_string == null || _string.isEmpty(), "String not empty");
-    }
-
-    public static void assertNotEmpty(String _string) {
-        assertFalse(_string == null || _string.isEmpty(), "String is empty");
-    }
-
-    public static void assertContains(String _string, String _contains) {
-        if (_contains != null) {
-            assertTrue(!(_string == null || _string.length() == 0) && _string.contains(_contains), "String does not contain [" + _contains + "]: " + _string);
-        }
-    }
-
-    public static void assertDoubleEquals(double _expected, double _actual) {
-        assertEquals(_expected, _actual, 0.000001d);
-    }
-
-    public static void assertListEquals(List<String> _actualList, String... _expected) {
-        String[] actual = new String[_actualList.size()];
-        _actualList.toArray(actual);
-        assertArrayEquals(_expected, actual);
     }
 
 }

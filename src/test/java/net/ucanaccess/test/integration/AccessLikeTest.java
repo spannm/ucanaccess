@@ -75,7 +75,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
-    void testNotLikeExternal(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testNotLikeExternal(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         String tableName = "Tx21";

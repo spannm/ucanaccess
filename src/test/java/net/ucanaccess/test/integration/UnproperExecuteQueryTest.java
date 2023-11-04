@@ -32,8 +32,7 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
             assertThatThrownBy(() -> st.executeQuery(_sql))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageMatching("UCAExc:::[0-9\\.]+ General error");
-
-            assertDoesNotThrow(() -> st.execute(_sql));
+            st.execute(_sql);
         }
     }
 }

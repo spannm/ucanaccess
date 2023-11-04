@@ -1,5 +1,8 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,20 +37,16 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
     void testDisable(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        boolean exc = false;
-        Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
-        st.execute("DISABLE AUTOINCREMENT ON CT ");
-        try {
+        try (Statement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
-        } catch (Exception e) {
-            exc = true;
+            st.execute("DISABLE AUTOINCREMENT ON CT ");
+            assertThatThrownBy(() -> st.execute("INSERT INTO CT (descr) VALUES ('CIAO')"))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("integrity constraint violation: NOT NULL check constraint");
+            st.execute("ENABLE AUTOINCREMENT ON CT ");
+            st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
+            st.execute("DISABLE AUTOINCREMENT ON[C T]");
         }
-        assertTrue(exc);
-        st.execute("enable AUTOINCREMENT ON CT ");
-        st.execute("INSERT INTO CT (descr) VALUES ('CIAO')");
-        st.execute("DISABLE AUTOINCREMENT ON[C T]");
-        st.close();
     }
 
 }

@@ -21,7 +21,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testCrud(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testCrud(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         try (Statement st = ucanaccess.createStatement()) {
@@ -40,7 +40,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testCrudPS(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testCrudPS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         int id1 = 1234;
@@ -98,7 +98,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testUpdatableRS(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testUpdatableRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (Statement st = ucanaccess.createStatement()) {
             int id = 6666554;
@@ -139,7 +139,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testInsertRS(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testInsertRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (Statement st = ucanaccess.createStatement()) {
@@ -193,7 +193,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testPartialInsertRS(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testPartialInsertRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (Statement st = ucanaccess.createStatement()) {

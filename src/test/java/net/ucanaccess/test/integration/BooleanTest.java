@@ -25,7 +25,7 @@ class BooleanTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements(
-            "CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY, company TEXT NOT NULL, Closed YESNO)",
+            "CREATE TABLE tblMain (id INT NOT NULL PRIMARY KEY, company TEXT NOT NULL, closed YESNO)",
             "INSERT INTO tblMain (id, company) VALUES(1, 'pippo')",
             "UPDATE tblMain SET closed=yes",
             "INSERT INTO t (pk) VALUES('pippo')");

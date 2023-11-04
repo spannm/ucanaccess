@@ -1,11 +1,13 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import net.ucanaccess.jdbc.UcanaccessDataSource;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -14,7 +16,8 @@ class DataSourceTest extends UcanaccessBaseTest {
     @Test
     void setNewDatabaseVersionBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        assertThrows(IllegalArgumentException.class, () -> uds.setNewDatabaseVersion("V200?"));
+        assertThatThrownBy(() -> uds.setNewDatabaseVersion("V200?"))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -28,7 +31,8 @@ class DataSourceTest extends UcanaccessBaseTest {
     @Test
     void setLobScaleBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        assertThrows(IllegalArgumentException.class, () -> uds.setLobScale(3));
+        assertThatThrownBy(() -> uds.setLobScale(3))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -40,9 +44,9 @@ class DataSourceTest extends UcanaccessBaseTest {
     }
 
     @Test
-    void createNewDatabase() throws SQLException, IOException {
+    void createNewDatabase() throws SQLException {
         File fileMdb = createTempFileName("ucaDataSourceTest", ".mdb");
-        assertFalse(fileMdb.exists());
+        assertThat(fileMdb).doesNotExist();
 
         UcanaccessDataSource uds = new UcanaccessDataSource();
         uds.setAccessPath(fileMdb.getAbsolutePath());
@@ -50,7 +54,7 @@ class DataSourceTest extends UcanaccessBaseTest {
         uds.setImmediatelyReleaseResources(true); // so we can delete it immediately after close
 
         Connection conn = uds.getConnection();
-        assertTrue(fileMdb.exists());
+        assertThat(fileMdb).exists();
         getLogger().info("DataSource connection successfully created file {}", uds.getAccessPath());
         conn.close();
 
@@ -59,7 +63,7 @@ class DataSourceTest extends UcanaccessBaseTest {
         irrEffective = irrEffective != null && irrEffective;
         if (irrEffective) {
             assertTrue(fileMdb.delete());
-            assertFalse(fileMdb.exists());
+            assertThat(fileMdb).doesNotExist();
         } else {
             getLogger().info("(Test database remains on disk)");
         }

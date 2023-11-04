@@ -1,5 +1,7 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +21,7 @@ class PasswordTest extends UcanaccessBaseTest {
         try {
             ucanaccessConnection = getUcanaccessConnection(dbFile.getAbsolutePath());
         } catch (Exception _ex) {
-            assertContains(_ex.getMessage(), "Password authentication failed");
+            assertThat(_ex.getMessage()).contains("Password authentication failed");
         }
         assertNull(ucanaccessConnection);
 

@@ -28,7 +28,7 @@ class MetaDataTest extends UcanaccessBaseTest {
         dropTable("t_metadata");
     }
 
-    void createSimple(String a, Object[][] ver) throws SQLException, IOException {
+    void createSimple(String a, Object[][] ver) throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_metadata VALUES ('33A', 11, '" + a + "' )");
             st.execute("INSERT INTO t_metadata VALUES ('33B', 111, '" + a + "' )");

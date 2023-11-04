@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -26,7 +25,7 @@ class CounterTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testCreateTypes(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testCreateTypes(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (Statement st = ucanaccess.createStatement()) {
             st.execute("DISABLE AUTOINCREMENT ON " + tableName);

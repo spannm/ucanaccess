@@ -1,5 +1,6 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,15 +21,12 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         init(_accessVersion);
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
-        st.execute(
-            "create table [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
+        st.execute("CREATE TABLE [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
         st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
-        st.execute("update [健康] set [Sometime I wonder who I am ]='d'");
+        st.execute("UPDATE [健康] set [Sometime I wonder who I am ]='d'");
         checkQuery("SELECT * FROM 健康 ");
-        getLogger().info("crazy names in create table...");
         dumpQueryResult("SELECT * FROM [健康]");
-        st.execute(
-            "create table [123456 nn%&/健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] aUtoIncrement PRIMARY KEY, [Sometime I wonder who I am ] text, "
+        st.execute("CREATE TABLE [123456 nn%&/健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] aUtoIncrement PRIMARY KEY, [Sometime I wonder who I am ] text, "
             + "[Πλήθος Αντιγράφων] CURRENCY,[ជំរាបសួរ] CURRENCY,[ЗДОРОВЫЙ] CURRENCY,[健康] CURRENCY,[健康な] CURRENCY,[किआओ ] CURRENCY default 12.88, [11q3 ¹²³¼½¾ß€] text(2), unique ([किआओ ] ,[健康な]) )");
         st.execute(
             "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
@@ -46,14 +44,14 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         try {
             st.execute(
                 "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)");
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             getLogger().info("ok, unique constraint gotten");
         }
         st.execute(
             "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) VALUES('I''m a wonderful forty',11,11,14.01,13)");
         try {
             st.execute("update [123456 nn%&/健康] set [健康な]=13, [किआओ ]=14");
-        } catch (Exception e) {
+        } catch (Exception _ex) {
             getLogger().info("ok, unique constraint gotten");
         }
 
@@ -79,10 +77,10 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT * FROM NOROMAN");
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
-        ResultSetMetaData rsmd = st.executeQuery("SELECT * FROM NOROMAN").getMetaData();
-        assertTrue(rsmd.isAutoIncrement(1));
-        assertTrue(rsmd.isCurrency(6));
-        assertFalse(rsmd.isCurrency(7));
+        assertThat(st.executeQuery("SELECT * FROM NOROMAN").getMetaData())
+            .satisfies(x -> x.isAutoIncrement(1))
+            .satisfies(x -> x.isCurrency(6))
+            .satisfies(x -> x.isCurrency(7));
         DatabaseMetaData dbmd = ucanaccess.getMetaData();
 
         ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);

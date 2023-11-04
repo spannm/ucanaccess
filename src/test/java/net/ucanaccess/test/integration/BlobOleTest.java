@@ -125,8 +125,8 @@ class BlobOleTest extends UcanaccessBaseTest {
 
         // fix for ticket #23 should prevent this test from throwing an error
         try (Statement st = ucanaccess.createStatement()) {
-            assertDoesNotThrow(() -> st.execute("CREATE TABLE t_two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
-                + "CONSTRAINT pk_t_two_col_pk PRIMARY KEY (pk_col1, pk_col2))"));
+            st.execute("CREATE TABLE t_two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
+                + "CONSTRAINT pk_t_two_col_pk PRIMARY KEY (pk_col1, pk_col2))");
         }
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_two_col_pk VALUES (?, ?, ?)")) {

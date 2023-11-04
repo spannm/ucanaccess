@@ -1,5 +1,7 @@
 package net.ucanaccess.test.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
@@ -7,6 +9,7 @@ import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
+import net.ucanaccess.jdbc.UcanaccessRuntimeException;
 import org.junit.jupiter.api.AfterEach;
 
 import java.io.*;
@@ -55,7 +58,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         try {
             Class.forName(UcanaccessDriver.class.getName());
         } catch (ClassNotFoundException _ex) {
-            throw new RuntimeException(_ex);
+            throw new UcanaccessRuntimeException(_ex);
         }
         ucanaccess = getUcanaccessConnection();
     }
@@ -96,7 +99,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    public void checkQuery(String _query, Object... _expected) throws SQLException, IOException {
+    public void checkQuery(String _query, Object... _expected) throws SQLException {
         checkQuery(_query, new Object[][] {_expected});
     }
 
@@ -109,7 +112,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         int j = 0;
         while (_resultSet.next()) {
             for (int i = 0; i < mycolmax; ++i) {
-                assertTrue(j < _expectedResults.length, "Matrix with different length was expected: " + _expectedResults.length + " not" + j);
+                assertThat(j).isLessThan(_expectedResults.length).withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + j);
                 Object actualObj = _resultSet.getObject(i + 1);
                 Object expectedObj = _expectedResults[j][i];
                 if (expectedObj == null) {
@@ -142,7 +145,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         assertEquals(_expectedResults.length, j, "Matrix with different length was expected");
     }
 
-    public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException, IOException {
+    public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException {
         ResultSetMetaData msMetaData = _resultSet.getMetaData();
         int mycolmax = msMetaData.getColumnCount();
         ResultSetMetaData verifyRsMetaData = _verifyResultSet.getMetaData();
@@ -257,8 +260,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      */
     private static final class TempFileNameString {
         private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        private static final AtomicInteger COUNTER   = new AtomicInteger(1);
-        private final String name;
+        private static final AtomicInteger     COUNTER   = new AtomicInteger(1);
+        private final String                   name;
 
         private TempFileNameString() {
             name = LocalDateTime.now().format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
