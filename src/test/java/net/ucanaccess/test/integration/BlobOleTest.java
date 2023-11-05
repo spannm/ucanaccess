@@ -15,9 +15,6 @@ import java.sql.*;
 
 class BlobOleTest extends UcanaccessBaseTest {
 
-    private static final String IMG_FILE_NAME  = "BlobOleTest/elisaArt.jpeg";
-    private static final String PPTX_FILE_NAME = "BlobOleTest/test.pptx";
-
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
@@ -34,19 +31,20 @@ class BlobOleTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testBlobOle(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        File imgFileTemp = createTempFile(IMG_FILE_NAME);
-        
+
+        String imgFileName = String.join(File.separator, getClass().getSimpleName(), "blobOleTest.jpeg");
+
         Blob blob = ucanaccess.createBlob();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(IMG_FILE_NAME);
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(imgFileName.replace(File.separatorChar, '/'));
             OutputStream out = blob.setBinaryStream(1)) {
             is.transferTo(out);
         }
 
         String descr = "TestOle";
-        try (PreparedStatement ps1 = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES(?, ?)")) {
-            ps1.setString(1, descr);
-            ps1.setBlob(2, blob);
-            ps1.execute();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES(?, ?)")) {
+            ps.setString(1, descr);
+            ps.setBlob(2, blob);
+            ps.execute();
         }
 
         Statement st = ucanaccess.createStatement();
@@ -54,30 +52,34 @@ class BlobOleTest extends UcanaccessBaseTest {
         rs1.next();
 
         try (InputStream isFromDb = rs1.getBinaryStream(1)) {
-            
-            copyFile(isFromDb, imgFileTemp.toPath());
+
+            File imgFileTemp = createTempFileName(imgFileName, null);
+            copyFile(isFromDb, imgFileTemp).deleteOnExit();
             getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
-            
+
             byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
 
             checkQuery("SELECT * FROM t_ole_test", new Object[][] {{1, descr, fileBytes}});
 
-            PreparedStatement ps2 = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
-            ps2.setString(1, descr + "_OK");
-            ps2.setString(2, descr);
-            ps2.executeUpdate();
+            PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
+            ps.setString(1, descr + "_OK");
+            ps.setString(2, descr);
+            ps.executeUpdate();
             checkQuery("SELECT * FROM t_ole_test");
             checkQuery("SELECT * FROM t_ole_test", 1, descr + "_OK", fileBytes);
         }
 
-        try (PreparedStatement ps3 = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
-            File fl1 = copyFileFromClasspath(PPTX_FILE_NAME);
-            blob = ucanaccess.createBlob(fl1);
-            ps3.setObject(1, fl1);
-            ps3.setString(2, descr + "_OK");
-            ps3.executeUpdate();
-            fl1.delete();
-            getLogger().info("PPTX file was created in {}", getFileAccDb());
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
+            String binFileName = String.join(File.separator, getClass().getSimpleName(), "blobOleTest.mp4");
+            File file = createTempFileName(binFileName, null);
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName.replace('/', File.separatorChar))) {
+                copyFile(is, file).deleteOnExit();
+            }
+            blob = ucanaccess.createBlob(file);
+            ps.setObject(1, file);
+            ps.setString(2, descr + "_OK");
+            ps.executeUpdate();
+            getLogger().info("Binary file was created in {}", getFileAccDb());
             checkQuery("SELECT * FROM t_ole_test");
         }
 
@@ -99,22 +101,30 @@ class BlobOleTest extends UcanaccessBaseTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
 
+    /**
+     * @param _accessVersion
+     * @throws SQLException
+     * @throws IOException
+     */
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        PreparedStatement ps = null;
-        File fl1 = copyFileFromClasspath(PPTX_FILE_NAME);
-        Blob blob = ucanaccess.createBlob(fl1);
-        ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES( ?,?)");
+
+        String binFileName = "BlobOleTest/blobOleTest.mp4";
+        File file = createTempFileName(binFileName.replace('/', File.separatorChar), null);
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName)) {
+            copyFile(is, file).deleteOnExit();
+        }
+        Blob blob = ucanaccess.createBlob(file);
+        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES( ?,?)");
         ps.setString(1, "TestOle");
         ps.setBlob(2, blob);
 
         ps.execute();
-        getLogger().info("PPTX file was created in {}", getFileAccDb());
+        getLogger().info("Binary file was created in {}", getFileAccDb());
         checkQuery("SELECT * FROM t_ole_test");
         Statement st = ucanaccess.createStatement();
-        fl1.delete();
         st.execute("DELETE FROM t_ole_test");
     }
 
@@ -137,18 +147,6 @@ class BlobOleTest extends UcanaccessBaseTest {
             ps.setBlob(3, b);
             ps.executeUpdate();
         }
-    }
-
-    private File copyFileFromClasspath(String _fn) throws IOException {
-        int idxLastDot = _fn.lastIndexOf('.');
-        String prefix = idxLastDot < 0 ? _fn : _fn.substring(0, idxLastDot);
-        String suffix = idxLastDot < 0 ? ".tmp" : _fn.substring(idxLastDot).toLowerCase();
-        File tmpFile = createTempFileName(prefix, suffix);
-        tmpFile.deleteOnExit();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(_fn)) {
-            copyFile(is, tmpFile.toPath());
-        }
-        return tmpFile;
     }
 
 }

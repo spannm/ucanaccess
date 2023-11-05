@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -117,17 +118,23 @@ public abstract class AbstractBaseTest extends Assertions {
         return tmpDir;
     }
 
-    protected static void copyFile(Path _source, Path _target) {
+    protected static File copyFile(Path _source, File _target) {
+        Objects.requireNonNull(_source, "Source file required");
+        Objects.requireNonNull(_target, "Target file required");
         try {
-            Files.copy(_source, _target, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(_source, _target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return _target;
         } catch (IOException _ex) {
             throw new UncheckedIOException("Failed to copy '" + _source + "' to '" + _target + "'", _ex);
         }
     }
 
-    protected static void copyFile(InputStream _in, Path _target) {
+    protected static File copyFile(InputStream _in, File _target) {
+        Objects.requireNonNull(_in, "Input stream required");
+        Objects.requireNonNull(_target, "Target file required");
         try {
-            Files.copy(_in, _target, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(_in, _target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return _target;
         } catch (IOException _ex) {
             throw new UncheckedIOException("Failed to copy to '" + _target + "'", _ex);
         }

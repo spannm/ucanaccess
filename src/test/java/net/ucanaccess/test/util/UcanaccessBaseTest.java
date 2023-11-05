@@ -86,7 +86,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         initVerifyConnection();
         try (Statement st1 = ucanaccess.createStatement();
              Statement st2 = verifyConnection.createStatement()) {
-            
+
             ResultSet firstRs = st1.executeQuery(_query);
             ResultSet verifyRs = st2.executeQuery(_query);
 
@@ -284,7 +284,17 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         if (!name.isBlank() && !name.endsWith("-")) {
             name += "-";
         }
-        name += new TempFileNameString() + _suffix;
+        String suffix = _suffix;
+        if (suffix == null || suffix.isBlank()) {
+            int idxLastDot = _prefix.lastIndexOf('.');
+            if (idxLastDot > -1) {
+                suffix = _prefix.substring(idxLastDot);
+            }
+            if (suffix.isEmpty() || suffix.length() > 6) {
+                suffix = ".tmp";
+            }
+        }
+        name += new TempFileNameString() + suffix;
         return new File(TEST_TEMP_DIR, name);
     }
 
@@ -335,8 +345,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
             File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
             getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
-            copyFile(is, tempFile.toPath());
-            return tempFile;
+            return copyFile(is, tempFile);
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
         }
@@ -407,7 +416,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected void initVerifyConnection() throws SQLException {
         File tempVerifyFile = createTempFile(fileAccDb.getName().replace(".", "_") + "_verify");
-        copyFile(fileAccDb.toPath(), tempVerifyFile.toPath());
+        copyFile(fileAccDb.toPath(), tempVerifyFile);
 
         if (verifyConnection != null) {
             verifyConnection.close();

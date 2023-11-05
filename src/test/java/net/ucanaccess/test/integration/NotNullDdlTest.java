@@ -44,23 +44,24 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             return;
         }
 
-        String cscriptPath = System.getenv("SystemRoot")
-            + (System.getProperty("sun.arch.data.model").equals("64") ? "\\SYSWOW64" : "\\SYSTEM32")
-            + "\\CSCRIPT.EXE";
+        String cscriptPath = String.join("\\",
+            System.getenv("SystemRoot"),
+            System.getProperty("sun.arch.data.model").equals("64") ? "SYSWOW64" : "SYSTEM32",
+            "CSCRIPT.EXE");
 
         String command = "\"" + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + "\"";
         Process proc = Runtime.getRuntime().exec(command);
-        proc.waitFor(10, TimeUnit.SECONDS);
+        proc.waitFor(5, TimeUnit.SECONDS);
 
         assertThat(proc.exitValue()).isEqualTo(0);
 
         try (BufferedReader output = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-            List<String> errLines = output.lines().collect(Collectors.toList());
+            String stderr = output.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            if (errLines.isEmpty()) {
+            if (stderr.isEmpty()) {
                 fail("The VBScript should have thrown an error, but it did not");
             }
-            assertThat(errLines).contains("table1.txt_required").withFailMessage("The VBScript threw an unexpected error");
+            assertThat(stderr).contains("table1.txt_required").withFailMessage("The VBScript threw an unexpected error");
         }
 
 

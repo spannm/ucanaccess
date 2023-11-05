@@ -35,16 +35,15 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
         assertThat((long) initialBlobBytes.length).isLessThan(binaryFileSize);
         Statement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
-        File fl = createTempFileName("Copied", ".jpeg");
-        fl.deleteOnExit();
+        File file = createTempFileName("Copied", ".jpeg");
         rs.next();
         @SuppressWarnings("unused")
         Object obj = rs.getObject(1);
         try (InputStream isFromDb = rs.getBlob(1).getBinaryStream()) {
-            copyFile(isFromDb, fl.toPath());
+            copyFile(isFromDb, file).deleteOnExit();
         }
-        assertEquals(fl.length(), binaryFileSize);
-        getLogger().info("File was created in {}, size: {} bytes", fl.getAbsolutePath(), fl.length());
+        assertEquals(file.length(), binaryFileSize);
+        getLogger().info("File was created in {}, size: {} bytes", file.getAbsolutePath(), file.length());
         byte[] finalBlobBytes = getBlobBytes();
         getLogger().info("BLOB size in backing database after retrieval: {} bytes", finalBlobBytes.length);
         if (!Arrays.equals(initialBlobBytes, finalBlobBytes)) {
