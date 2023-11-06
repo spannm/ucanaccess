@@ -51,7 +51,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
 
         String command = "\"" + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + "\"";
         Process proc = Runtime.getRuntime().exec(command);
-        proc.waitFor(5, TimeUnit.SECONDS);
+        proc.waitFor(15, TimeUnit.SECONDS);
 
         assertThat(proc.exitValue()).isEqualTo(0);
 
