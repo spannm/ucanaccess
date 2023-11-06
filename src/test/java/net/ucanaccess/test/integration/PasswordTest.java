@@ -1,7 +1,8 @@
 package net.ucanaccess.test.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,18 +17,17 @@ class PasswordTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testPassword(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
+
         File dbFile = copyResourceToTempFile(TEST_DB_DIR + "pwd.mdb");
-        Connection ucanaccessConnection = null;
-        try {
-            ucanaccessConnection = getUcanaccessConnection(dbFile.getAbsolutePath());
-        } catch (Exception _ex) {
-            assertThat(_ex.getMessage()).contains("Password authentication failed");
-        }
-        assertNull(ucanaccessConnection);
+
+        setPassword("");
+        assertThatThrownBy(() -> getUcanaccessConnection(dbFile.getAbsolutePath()))
+            .isInstanceOf(UcanaccessSQLException.class)
+            .hasMessageContaining("Password authentication failed");
 
         setPassword("ucanaccess");
-        ucanaccessConnection = getUcanaccessConnection();
-        ucanaccessConnection.close();
-        assertNotNull(ucanaccessConnection);
+        try (Connection ucanaccessConnection = getUcanaccessConnection()) {
+            assertNotNull(ucanaccessConnection);
+        }
     }
 }

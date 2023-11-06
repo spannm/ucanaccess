@@ -29,11 +29,11 @@ class TransactionTest extends UcanaccessBaseTest {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         Statement st = ucanaccess.createStatement();
-        int i = getCount("SELECT COUNT(*) FROM T4", true);
+        int i = getCount("SELECT COUNT(*) FROM T4");
         st.execute("INSERT INTO T4 (id,descr) VALUES( 6666554,'nel mezzo del cammin di nostra vita')");
         assertEquals(i, getCount("SELECT COUNT(*) FROM T4", false));
         ucanaccess.commit();
-        assertEquals(i + 1, getCount("SELECT COUNT(*) FROM T4", true));
+        assertEquals(i + 1, getCount("SELECT COUNT(*) FROM T4"));
         st.close();
     }
 

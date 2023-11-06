@@ -14,7 +14,7 @@ class RegexTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE reg (id COUNTER,descr memo) ");
+        executeStatements("CREATE TABLE reg (id COUNTER, descr MEMO) ");
     }
 
     @AfterEach
@@ -33,7 +33,8 @@ class RegexTest extends UcanaccessBaseTest {
 
         try (Statement st = ucanaccess.createStatement()) {
             for (String c : in) {
-                executeStatement(c);
+                st.execute(getStatement(c.replaceAll("'", "''"), "'"));
+                st.execute(getStatement(c.replaceAll("\"", "\"\""), "\""));
             }
             String[][] out = new String[in.length * 2][1];
             int k = 0;
@@ -44,19 +45,6 @@ class RegexTest extends UcanaccessBaseTest {
                 }
             }
             checkQuery("SELECT descr FROM reg ORDER BY id ASC", out);
-        }
-    }
-
-    private void executeStatement(String s) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
-            st.execute(getStatement(s.replaceAll("'", "''"), "'"));
-
-            st.execute(getStatement(s.replaceAll("\"", "\"\""), "\""));
-
-        } catch (SQLException sqle) {
-            System.err.println(getStatement(s, "\""));
-            System.err.println("Converted sql: " + ucanaccess.nativeSQL(getStatement(s.replaceAll("\"", "\"\""), "\"")));
-            throw sqle;
         }
     }
 

@@ -361,10 +361,12 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         ResultSet joRs = st.executeQuery(_sql);
         joRs.next();
         int count = joRs.getInt(1);
+
         st = ucanaccess.createStatement();
         ResultSet myRs = st.executeQuery(_sql);
         myRs.next();
         int myCount = myRs.getInt(1);
+
         if (_equals) {
             assertEquals(count, myCount);
         } else {

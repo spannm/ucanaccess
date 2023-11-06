@@ -8,6 +8,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 class MultiThreadAccessTest extends UcanaccessBaseTest {
     private static int intVal;
@@ -71,20 +74,17 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.test.util.AccessVersion#getDefaultAccessVersion()")
     void testMultiThread(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        int nt = 50;
-        Thread[] threads = new Thread[nt];
-        for (int i = 0; i < nt; i++) {
-            threads[i] = new Thread(() -> {
-                try {
-                    crud();
-                    crudPS();
-                    crudUpdatableRS();
-                } catch (SQLException _ex) {
-                    fail(_ex);
-                }
+
+        List<Thread> threads = IntStream.range(0, 50).mapToObj(i -> new Thread(() -> {
+            assertDoesNotThrow(() -> {
+                crud();
+                crudPS();
+                crudUpdatableRS();
             });
-            threads[i].start();
-        }
+        })).collect(Collectors.toList());
+        
+        threads.forEach(Thread::start);
+
         for (Thread t : threads) {
             try {
                 t.join();

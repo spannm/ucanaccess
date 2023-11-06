@@ -1,8 +1,11 @@
 package net.ucanaccess.test.integration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.api.Disabled;
@@ -10,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -108,58 +110,54 @@ class ComplexTest extends UcanaccessBaseTest {
         ps.setObject(1, svs);
         ps.execute();
         checkQuery("SELECT * FROM TABLE1 ORDER BY id");
-        assertEquals(7, getCount("SELECT COUNT(*) FROM TABLE1", true));
+        assertEquals(7, getCount("SELECT COUNT(*) FROM TABLE1"));
         ps.close();
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
-    void testComplexRollback(AccessVersion _accessVersion) throws SQLException, IOException, SecurityException, IllegalArgumentException {
+    void testComplexRollback(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        PreparedStatement ps = null;
-        int i = getCount("SELECT COUNT(*) FROM TABLE1", true);
-        try {
+        // ucanaccess = Mockito.spy(ucanaccess);
+        // Mockito.when(ucanaccess.afterFlushIoHook()).thenReturn(...);
 
-            ucanaccess.setAutoCommit(false);
+        int countBefore = getCount("SELECT COUNT(*) FROM TABLE1");
 
-            Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
-            mth.setAccessible(true);
-            mth.invoke(ucanaccess, Boolean.TRUE);
-            ps = ucanaccess.prepareStatement(
-                "INSERT INTO TABLE1(ID , [MEMO-DATA] , [APPEND-MEMO-DATA] , [MULTI-VALUE-DATA] , [ATTACH-DATA]) "
-                    + "VALUES (?,?,?,?,?)");
+        ucanaccess.setAutoCommit(false);
+
+        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
+        mth.setAccessible(true);
+        mth.invoke(ucanaccess, Boolean.TRUE);
+
+        try (PreparedStatement ps = ucanaccess.prepareStatement(
+            "INSERT INTO TABLE1(ID, [MEMO-DATA], [APPEND-MEMO-DATA], [MULTI-VALUE-DATA], [ATTACH-DATA]) VALUES (?,?,?,?,?)")) {
 
             ps.setString(1, "row123");
             ps.setString(2, "ciao");
             ps.setString(3, "to version");
             SingleValue[] svs = new SingleValue[] {new SingleValue("16"), new SingleValue("24")};
             ps.setObject(4, svs);
-            Attachment[] atcs =
-                new Attachment[] {new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null), new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(),
-                    LocalDateTime.now(), null)};
+            Attachment[] atcs = new Attachment[] {
+                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
+                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null)};
             ps.setObject(5, atcs);
             ps.execute();
-            ps.close();
-            ps = ucanaccess
-                .prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12' ");
-            ps.execute();
-            ps.close();
-            dumpQueryResult("SELECT * FROM TABLE1");
-            ucanaccess.commit();
-            checkQuery("SELECT * FROM TABLE1 ORDER BY id");
-
-        } catch (Throwable _ex) {
-            getLogger().warn("Encountered exception: {}: ", _ex.getMessage(), _ex);
-        } finally {
-            if (ps != null) {
-                ps.close();
-            }
         }
 
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12'")) {
+            ps.execute();
+        }
+        dumpQueryResult("SELECT * FROM TABLE1");
+
+        assertThatThrownBy(() -> ucanaccess.commit())
+            .isInstanceOf(UcanaccessSQLException.class)
+            .hasMessageEndingWith("PhysicalRollbackTest");
+
         ucanaccess = getUcanaccessConnection();
+        checkQuery("SELECT * FROM TABLE1 ORDER BY id");
         dumpQueryResult("SELECT * FROM TABLE1");
         checkQuery("SELECT * FROM TABLE1 WHERE ID='row12' ORDER BY id");
-        assertEquals(i, getCount("SELECT COUNT(*) FROM TABLE1", true));
+        assertEquals(countBefore, getCount("SELECT COUNT(*) FROM TABLE1"));
     }
 }

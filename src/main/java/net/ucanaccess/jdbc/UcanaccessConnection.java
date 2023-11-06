@@ -99,7 +99,7 @@ public class UcanaccessConnection implements Connection {
         }
     }
 
-    public boolean isTestRollback() {
+    boolean isTestRollback() {
         return testRollback;
     }
 
@@ -310,9 +310,9 @@ public class UcanaccessConnection implements Connection {
             }
             throw new UcanaccessSQLException(_t);
         }
+
         try {
             ref.getDbIO().flush();
-
         } catch (IOException _ex) {
             throw new UcanaccessSQLException(_ex);
         }

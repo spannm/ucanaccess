@@ -1,6 +1,9 @@
 package net.ucanaccess.test.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,8 +31,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT * FROM [健康]");
         st.execute("CREATE TABLE [123456 nn%&/健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] aUtoIncrement PRIMARY KEY, [Sometime I wonder who I am ] text, "
             + "[Πλήθος Αντιγράφων] CURRENCY,[ជំរាបសួរ] CURRENCY,[ЗДОРОВЫЙ] CURRENCY,[健康] CURRENCY,[健康な] CURRENCY,[किआओ ] CURRENCY default 12.88, [11q3 ¹²³¼½¾ß€] text(2), unique ([किआओ ] ,[健康な]) )");
-        st.execute(
-            "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
+        st.execute("INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[健康な],[किआओ ] ) VALUES('I''m a wonderful forty',10.56,10.33,13,14)");
         PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM [123456 nn%&/健康]",
             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
@@ -38,22 +40,20 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         rs.updateString("Sometime I wonder who I am ", "Growing old without emotions");
         rs.updateString("11q3 ¹²³¼½¾ß€", "康");
         rs.insertRow();
-        getLogger().info("crazy names in create table with updatable resultset...");
+        getLogger().debug("Crazy names in create table with updatable resultset...");
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
 
-        try {
-            st.execute(
-                "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)");
-        } catch (Exception _ex) {
-            getLogger().info("ok, unique constraint gotten");
-        }
-        st.execute(
-            "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) VALUES('I''m a wonderful forty',11,11,14.01,13)");
-        try {
-            st.execute("update [123456 nn%&/健康] set [健康な]=13, [किआओ ]=14");
-        } catch (Exception _ex) {
-            getLogger().info("ok, unique constraint gotten");
-        }
+        assertThatThrownBy(() -> st.execute(
+            "INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,健康な) VALUES('I''m a wonderful forty',11,11,14,13)"))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("integrity constraint violation: unique constraint or index violation");
+        st.execute("INSERT INTO [123456 nn%&/健康] ([Sometime I wonder who I am ],[Πλήθος Αντιγράφων],[健康],[किआओ ] ,[健康な]) "
+            + "VALUES('I''m a wonderful forty',11,11,14.01,13)");
+
+        assertThatThrownBy(() -> st.execute(
+            "update [123456 nn%&/健康] set [健康な]=13, [किआओ ]=14"))
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("integrity constraint violation: unique constraint or index violation");
 
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
 

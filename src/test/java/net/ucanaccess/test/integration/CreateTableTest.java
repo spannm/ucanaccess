@@ -87,38 +87,30 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     void setDPK() throws SQLException, IOException {
-        Statement st = null;
-        try {
-            st = ucanaccess.createStatement();
-            st.execute("create table dkey(c counter , " + "number numeric(23,5) , " + " PRIMARY KEY (C,NUMBER))");
-            st.execute("create table dunique(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
-            st.close();
-            ucanaccess.setAutoCommit(false);
-            try {
-                st = ucanaccess.createStatement();
-                st.execute("INSERT INTO dunique values('ddl forces commit',2.3)");
-                st.close();
-                st = ucanaccess.createStatement();
-                st.execute("create table dtrx(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
-                st.execute("INSERT INTO dtrx values('I''ll be forgotten sob sob ',55555.3)");
-                st.close();
-                st = ucanaccess.createStatement();
-                st.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number)");
-                st.close();
-            } catch (Exception _ex) {
-                ucanaccess.rollback();
-            }
-            st = ucanaccess.createStatement();
-            st.execute("INSERT INTO dtrx values('Hi all',444.3)");
-            st.execute("INSERT INTO dtrx values('Hi all',4454.3)");
-            dumpQueryResult("SELECT * FROM dtrx");
-            dumpQueryResult("SELECT * FROM dunique");
-            ucanaccess.commit();
-            checkQuery("SELECT * FROM dunique");
-            checkQuery("SELECT * FROM dtrx");
-        } finally {
-            st.close();
+        Statement st1 = ucanaccess.createStatement();
+        st1.execute("create table dkey(c counter , " + "number numeric(23,5) , " + " PRIMARY KEY (C,NUMBER))");
+        st1.execute("create table dunique(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
+        st1.close();
+        ucanaccess.setAutoCommit(false);
+        try (Statement st2 = ucanaccess.createStatement()) {
+            st2.execute("INSERT INTO dunique values('ddl forces commit',2.3)");
+            st2.execute("create table dtrx(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
+            st2.execute("INSERT INTO dtrx values('I''ll be forgotten sob sob ',55555.3)");
+            st2.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number)");
+        } catch (Exception _ex) {
+            ucanaccess.rollback();
         }
+
+        try (Statement st3 = ucanaccess.createStatement()) {
+            st3.execute("INSERT INTO dtrx values('Hi all',444.3)");
+            st3.execute("INSERT INTO dtrx values('Hi all',4454.3)");
+        }
+
+        dumpQueryResult("SELECT * FROM dtrx");
+        dumpQueryResult("SELECT * FROM dunique");
+        ucanaccess.commit();
+        checkQuery("SELECT * FROM dunique");
+        checkQuery("SELECT * FROM dtrx");
     }
 
     void setTableProperties() throws SQLException {

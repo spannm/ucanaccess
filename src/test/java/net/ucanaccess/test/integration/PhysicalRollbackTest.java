@@ -1,6 +1,6 @@
 package net.ucanaccess.test.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.test.util.AccessVersion;
@@ -49,19 +49,15 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
         st.execute("INSERT INTO T4 (id, descr) VALUES(4, 'nel mezzo del cammin di nostra vita')");
 
         st.execute("DELETE FROM T4 WHERE id=4");
-        Exception ex = null;
-        try {
-            ucanaccess.commit();
-        } catch (Exception _ex) {
-            ex = _ex;
-        }
-        assertNotNull(ex);
-        assertThat(ex.getMessage()).contains(getClass().getSimpleName());
+
+        assertThatThrownBy(() -> ucanaccess.commit())
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining(getClass().getSimpleName());
 
         ucanaccess = getUcanaccessConnection();
         dumpQueryResult("SELECT * FROM T4");
 
-        assertEquals(0, getCount("SELECT COUNT(*) FROM T4", true));
+        assertEquals(0, getCount("SELECT COUNT(*) FROM T4"));
     }
 
 }
