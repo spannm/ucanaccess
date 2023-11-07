@@ -1,0 +1,31 @@
+name: SonarCloud analysis with JDK 17 on Ubuntu
+
+on:
+    push:
+        branches:
+        - master
+    pull_request:
+
+        branches:
+        - master
+
+jobs:
+
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        -   uses: actions/checkout@v3
+            with:
+                # disabling shallow clone is recommended for improving relevancy of reporting
+                fetch-depth: 0
+        -   name: Set up JDK 17
+            uses: actions/setup-java@v3
+            with:
+                java-version: '17'
+                distribution: temurin
+                cache: maven
+        -   name: Build with Maven, Test with SonarCloud
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            run: mvn -B verify -Psonarcloud --file pom.xml

@@ -1,8 +1,11 @@
 package net.ucanaccess.converters;
 
+import static net.ucanaccess.util.SqlConstants.PIVOT;
+
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.util.Try;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,12 +17,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Pivot {
-    private static final Pattern                   PIVOT            =
-    Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
-    private static final Pattern                   PIVOT_EXPR       = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
-    private static final Pattern                   PIVOT_AGGR       =
-    Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
-    private static final Pattern                   PIVOT_CN         = Pattern.compile("[\"'#](.*)[\"'#]");
+    private static final Pattern                   PIVOT_PATT       =
+        Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
+    private static final Pattern                   PIVOT_EXPR_PATT  = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
+    private static final Pattern                   PIVOT_AGGR_PATT  =
+        Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
+    private static final Pattern                   PIVOT_CN_PATT    = Pattern.compile("[\"'#](.*)[\"'#]");
     private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
     private String                                 transform;
     private String                                 select;
@@ -118,18 +121,18 @@ public class Pivot {
 
     public boolean parsePivot(String _originalQuery) {
         originalQuery = _originalQuery;
-        _originalQuery = _originalQuery.replaceAll("\n", " ").replaceAll("\r", " ")
+        _originalQuery = _originalQuery.replace('\n', ' ').replace('\r', ' ')
                 .replaceAll("(?i)(\\[PIVOT\\])", "XPIVOT").trim();
         if (_originalQuery.endsWith(";")) {
             _originalQuery = _originalQuery.substring(0, _originalQuery.length() - 1);
         }
-        Matcher mtc = PIVOT.matcher(_originalQuery);
+        Matcher mtc = PIVOT_PATT.matcher(_originalQuery);
         if (mtc.groupCount() < 4) {
             return false;
         }
         if (mtc.matches()) {
             transform = mtc.group(1);
-            Matcher aggr = PIVOT_AGGR.matcher(transform);
+            Matcher aggr = PIVOT_AGGR_PATT.matcher(transform);
             if (aggr.find()) {
                 if (aggr.groupCount() < 2) {
                     return false;
@@ -142,7 +145,7 @@ public class Pivot {
             select = mtc.group(2);
             from = mtc.group(3);
             String pe = mtc.group(4);
-            Matcher mtcExpr = PIVOT_EXPR.matcher(pe);
+            Matcher mtcExpr = PIVOT_EXPR_PATT.matcher(pe);
             if (mtcExpr.find()) {
                 if (mtcExpr.groupCount() < 2) {
                     return false;
@@ -172,15 +175,14 @@ public class Pivot {
     }
 
     public boolean prepare() {
-        try {
-            if (pivotInCondition) {
-                pivotIn = new ArrayList<>();
-            }
-            Statement st = conn.createStatement();
+        if (pivotInCondition) {
+            pivotIn = new ArrayList<>();
+        }
+        return Try.withResources(() -> conn.createStatement(), st -> {
             ResultSet rs = st.executeQuery(verifySQL());
             int i = 0;
             while (rs.next()) {
-                String frm = format(rs.getObject("PIVOT"));
+                String frm = format(rs.getObject(PIVOT));
                 if (frm != null) {
                     pivotIn.add(frm);
                 }
@@ -190,24 +192,20 @@ public class Pivot {
                 }
             }
             return true;
-        } catch (Exception _ex) {
-            return false;
-        }
+        }).orElse(false);
     }
 
     private String format(Object cln) {
         if (cln == null) {
             return null;
-        }
-        if (cln instanceof Date) {
+        } else if (cln instanceof Date) {
             SimpleDateFormat sdf = new SimpleDateFormat("#MM/dd/yyyy HH:mm:ss#");
             String clns = sdf.format((Date) cln);
             if (clns.endsWith(" 00:00:00#")) {
                 clns = clns.replaceAll(" 00:00:00", "");
             }
             return clns;
-        }
-        if (cln instanceof String) {
+        } else if (cln instanceof String) {
             return "'" + cln.toString().replaceAll("'", "''") + "'";
         }
         return cln.toString();
@@ -215,7 +213,7 @@ public class Pivot {
 
     private String replaceQuotation(String cn) {
         cn = cn.replaceAll("\n", " ").replaceAll("\r", " ");
-        Matcher dcm = PIVOT_CN.matcher(cn);
+        Matcher dcm = PIVOT_CN_PATT.matcher(cn);
 
         if (dcm.matches()) {
             cn = dcm.group(1);

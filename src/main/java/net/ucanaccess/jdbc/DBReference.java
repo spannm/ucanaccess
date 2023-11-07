@@ -224,11 +224,11 @@ public class DBReference {
         return lu;
     }
 
-    private void closeHSQLDB(Session session) throws Exception {
+    private void closeHSQLDB(Session session) throws IOException {
         closeHsqlDb(session, false);
     }
 
-    private void closeHsqlDb(Session _session, boolean _firstConnectionKeeptMirror) throws Exception {
+    private void closeHsqlDb(Session _session, boolean _firstConnectionKeeptMirror) throws IOException {
         finalizeHsqlDb(_session);
         if (!inMemory) {
             if (toKeepHsql == null) {
@@ -242,14 +242,15 @@ public class DBReference {
                 Files.delete(hbase.toPath());
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
                 Files.delete(toKeepHsql.toPath());
-                toKeepHsql.createNewFile();
+                if (!toKeepHsql.createNewFile()) {
+                    Logger.logWarning("Could not create file " + toKeepHsql);
+                }
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
                         Files.delete(hsqlf.toPath());
                     }
                 }
                 mirrorRecreated = true;
-
             }
         }
 
@@ -302,15 +303,15 @@ public class DBReference {
         }
     }
 
-    public Connection getHSQLDBConnection(Session session) throws SQLException {
-
+    public Connection getHSQLDBConnection(Session _session) throws SQLException {
         boolean keptMirror = false;
         if (firstConnection && toKeepHsql != null && toKeepHsql.exists()) {
             keptMirror = true;
         }
 
-        Connection conn = DriverManager.getConnection(getHsqlUrl(session),
-            session.getUser() == null ? "Admin" : session.getUser(), session.getPassword());
+        Connection conn = DriverManager.getConnection(getHsqlUrl(_session),
+            Optional.ofNullable(_session.getUser()).orElse("Admin"), _session.getPassword());
+
         if (version == null) {
             version = conn.getMetaData().getDriverVersion();
         }
@@ -362,8 +363,8 @@ public class DBReference {
             }
             if (!inMemory && tempHsql == null) {
                 if (toKeepHsql != null) {
-                    if (!toKeepHsql.exists()) {
-                        toKeepHsql.createNewFile();
+                    if (!toKeepHsql.exists() && !toKeepHsql.createNewFile()) {
+                        Logger.logWarning("Could not create file " + toKeepHsql);
                     }
                     tempHsql = toKeepHsql;
                 } else {
@@ -372,7 +373,9 @@ public class DBReference {
                     hbase.mkdir();
                     tempHsql = new File(hbase, id);
 
-                    tempHsql.createNewFile();
+                    if (!tempHsql.createNewFile()) {
+                        Logger.logWarning("Could not create file " + tempHsql);
+                    }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
@@ -427,7 +430,7 @@ public class DBReference {
         if (suffixStart < 0) {
             suffixStart = fileName.length();
         }
-        String suffix = FileFormat.V2016.equals(dbFormat) || FileFormat.V2010.equals(dbFormat) || FileFormat.V2007.equals(dbFormat)
+        String suffix = FileFormat.V2016 == dbFormat || FileFormat.V2010 == dbFormat || FileFormat.V2007 == dbFormat
             ? ".laccdb"
             : ".ldb";
         return new File(folder, fileName.substring(0, suffixStart) + suffix);
@@ -436,7 +439,10 @@ public class DBReference {
     private void lockMdbFile() throws UcanaccessSQLException {
         try {
             File flLock = fileLock();
-            flLock.createNewFile();
+            if (!flLock.createNewFile()) {
+                Logger.logWarning("Could not create file " + flLock);
+            }
+
             // suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess
             // "locks" the file
             @SuppressWarnings("resource")

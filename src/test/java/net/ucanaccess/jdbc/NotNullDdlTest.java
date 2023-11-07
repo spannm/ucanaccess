@@ -61,7 +61,9 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             if (stderr.isEmpty()) {
                 fail("The VBScript should have thrown an error, but it did not");
             }
-            assertThat(stderr).contains("table1.txt_required").withFailMessage("The VBScript threw an unexpected error");
+            assertThat(stderr)
+                .withFailMessage("The VBScript threw an unexpected error")
+                .contains("table1.txt_required");
         }
 
 

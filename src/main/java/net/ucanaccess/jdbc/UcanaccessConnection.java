@@ -154,7 +154,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void commit() throws SQLException {
-        synchronized (getClass()) {
+        synchronized (UcanaccessConnection.class) {
 
             try {
                 if (isReadOnly() && !commands.isEmpty()) {

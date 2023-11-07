@@ -1,55 +1,53 @@
 package net.ucanaccess.converters;
 
+import static net.ucanaccess.util.SqlConstants.*;
+
 import com.healthmarketscience.jackcess.DataType;
+import net.ucanaccess.util.SqlConstants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class TypesMap {
+
     public enum AccessType {
-        BYTE,
-        COUNTER,
-        CURRENCY,
-        DATETIME,
-        DOUBLE,
-        GUID,
-        INTEGER,
-        LONG,
-        MEMO,
-        NUMERIC,
-        OLE,
-        SINGLE,
-        TEXT,
-        YESNO,
-        AUTOINCREMENT,
-        COMPLEX,
-        CHAR,
-        HYPERLINK
+        AUTOINCREMENT(SqlConstants.INTEGER),
+        BYTE(SMALLINT),
+        CHAR(VARCHAR), // CHAR mapped into TEXT when used in CREATE TABLE.
+        COMPLEX("OBJECT"),
+        COUNTER(SqlConstants.INTEGER),
+        CURRENCY("DECIMAL(" + DataType.MONEY.getFixedSize() + ", 4)"),
+        DATETIME("TIMESTAMP"),
+        DOUBLE("DOUBLE"),
+        GUID("CHAR(38)"),
+        HYPERLINK(LONGVARCHAR), // HYPERLINK is a special type of MEMO field
+        INTEGER("SMALLINT"),
+        LONG(SqlConstants.INTEGER),
+        MEMO(LONGVARCHAR),
+        NUMERIC("DECIMAL"),
+        OLE("BLOB"),
+        SINGLE("FLOAT"),
+        TEXT(VARCHAR),
+        YESNO("BOOLEAN");
+
+        private final String hsqlType;
+
+        AccessType(String _hsqlType) {
+            hsqlType = _hsqlType;
+        }
+
+        protected String getHsqlType() {
+            return hsqlType;
+        }
+
     }
 
-    private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     = new LinkedHashMap<>();
+    private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     =
+        Arrays.stream(AccessType.values()).collect(Collectors.toMap(AccessType::name, AccessType::getHsqlType, (o, n) -> o, LinkedHashMap::new));
     private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new EnumMap<>(AccessType.class);
     private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new EnumMap<>(DataType.class);
 
     static {
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.BYTE.name(), "SMALLINT");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.INTEGER.name(), "SMALLINT");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.LONG.name(), "INTEGER");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.TEXT.name(), "VARCHAR");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.OLE.name(), "BLOB");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.MEMO.name(), "LONGVARCHAR");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.CURRENCY.name(), "DECIMAL(" + DataType.MONEY.getFixedSize() + ",4)");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.GUID.name(), "CHAR(38)");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.COUNTER.name(), "INTEGER");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.AUTOINCREMENT.name(), "INTEGER");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.NUMERIC.name(), "DECIMAL");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.YESNO.name(), "BOOLEAN");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.DATETIME.name(), "TIMESTAMP");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.SINGLE.name(), "FLOAT");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.COMPLEX.name(), "OBJECT");
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.CHAR.name(), "VARCHAR"); // CHAR mapped into TEXT when used in CREATE TABLE.
-        ACCESS_TO_HSQL_TYPES_MAP.put(AccessType.HYPERLINK.name(), "LONGVARCHAR"); // HYPERLINK is a special type of MEMO
-                                                                             // field
-
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.BYTE, DataType.BYTE);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.INTEGER, DataType.INT);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.LONG, DataType.LONG);
@@ -67,13 +65,13 @@ public final class TypesMap {
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.DOUBLE, DataType.DOUBLE);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.HYPERLINK, DataType.MEMO);
 
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BYTE, "SMALLINT");
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.INT, "SMALLINT");
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.LONG, "INTEGER");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BYTE, SMALLINT);
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.INT, SMALLINT);
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.LONG, SqlConstants.INTEGER);
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BIG_INT, "BIGINT");
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.TEXT, "VARCHAR");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.TEXT, VARCHAR);
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BINARY, "BLOB");
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.MEMO, "LONGVARCHAR");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.MEMO, LONGVARCHAR);
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.MONEY, "DECIMAL(100,4)");
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.GUID, "CHAR(38)");
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.OLE, "BLOB");
@@ -97,10 +95,7 @@ public final class TypesMap {
     }
 
     public static String map2hsqldb(DataType _type) {
-        if (JACKCESS_TO_HSQLDB_TYPES_MAP.containsKey(_type)) {
-            return JACKCESS_TO_HSQLDB_TYPES_MAP.get(_type);
-        }
-        return _type.name();
+        return JACKCESS_TO_HSQLDB_TYPES_MAP.getOrDefault(_type, _type.name());
     }
 
     public static DataType map2Jackcess(AccessType _type) {

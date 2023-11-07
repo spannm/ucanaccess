@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,7 +39,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class LoadJet {
-    private static int namingCounter = 0;
+    private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
     private final class FunctionsLoader {
 
@@ -363,9 +364,9 @@ public class LoadJet {
             createSyncrTable(t, systemTable, true);
         }
 
-        private void createSyncrTable(Table t, boolean systemTable, boolean constraints)
-                throws SQLException, IOException {
-            String tn = t.getName();
+        private void createSyncrTable(Table _t, boolean _systemTable, boolean _constraints) throws SQLException, IOException {
+
+            String tn = _t.getName();
             if (tn.equalsIgnoreCase("DUAL")) {
                 SQLConverter.setDualUsedAsTableName(true);
             }
@@ -375,26 +376,26 @@ public class LoadJet {
             int seq = metadata.newTable(tn, ntn, Metadata.Types.TABLE);
             ntn = SQLConverter.completeEscaping(ntn);
             ntn = SQLConverter.checkLang(ntn, conn);
-            ntn = schema(ntn, systemTable);
+            ntn = schema(ntn, _systemTable);
 
-            StringBuilder sbC = new StringBuilder("CREATE  CACHED TABLE ").append(ntn).append("(");
+            StringBuilder sbC = new StringBuilder("CREATE CACHED TABLE ").append(ntn).append("(");
 
-            List<? extends Column> lc = t.getColumns();
+            List<? extends Column> lc = _t.getColumns();
             String comma = "";
             for (Column cl : lc) {
                 if ("USER".equalsIgnoreCase(cl.getName())) {
-                    Logger.logWarning(LoggerMessageEnum.USER_AS_COLUMNNAME, t.getName());
+                    Logger.logWarning(LoggerMessageEnum.USER_AS_COLUMNNAME, _t.getName());
                 }
                 String expr = getExpression(cl);
-                if (expr != null && constraints) {
+                if (expr != null && _constraints) {
                     String tgrI = getCalculatedFieldTrigger(ntn, cl, true);
                     String tgrU = getCalculatedFieldTrigger(ntn, cl, false);
                     calculatedFieldsTriggers
-                            .add(String.format(tgrI, namingCounter++, SQLConverter.convertFormula(expr)));
+                            .add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
                     String uc = getUpdateConditions(cl);
                     if (uc.length() > 0) {
                         calculatedFieldsTriggers
-                                .add(String.format(tgrU, namingCounter++, uc, SQLConverter.convertFormula(expr)));
+                                .add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
                     }
 
                 }
@@ -412,8 +413,8 @@ public class LoadJet {
                     ctype = "HYPERLINK";
                 }
                 metadata.newColumn(cl.getName(), cn, ctype, seq);
-                if (expr != null && constraints) {
-                    metadata.calculatedField(t.getName(), cl.getName());
+                if (expr != null && _constraints) {
+                    metadata.calculatedField(_t.getName(), cl.getName());
                 }
                 cn = SQLConverter.completeEscaping(cn);
                 cn = SQLConverter.checkLang(cn, conn);
@@ -425,7 +426,7 @@ public class LoadJet {
 
                 PropertyMap pm = cl.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-                if (constraints && required instanceof Boolean && (Boolean) required) {
+                if (_constraints && required instanceof Boolean && (Boolean) required) {
                     sbC.append(" NOT NULL ");
                 }
                 comma = ",";
@@ -508,7 +509,7 @@ public class LoadJet {
                     && (!defaulT.toString().startsWith("\"") || !defaulT.toString().endsWith("\""))
 
             ) {
-                default4SQL = "'" + default4SQL.replaceAll("'", "''") + "'";
+                default4SQL = "'" + default4SQL.replace("'", "''") + "'";
             }
             return default4SQL;
         }
@@ -542,10 +543,9 @@ public class LoadJet {
                             Logger.logWarning(LoggerMessageEnum.DEFAULT_VALUES_DELIMETERS, "" + defaulT, cl.getName(),
                                     cl.getTable().getName(), "" + cl.getLengthInUnits());
                         }
-                        arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + namingCounter++ + " BEFORE INSERT ON " + ntn
+                        arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + ntn
                                 + "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
                                 + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
-
                     }
                 }
             }

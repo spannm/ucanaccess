@@ -58,7 +58,7 @@ public class Main {
         Logger.setLogPrintWriter(new PrintWriter(System.out));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info
-        Properties info = new Properties();
+        Properties props = new Properties();
         File fl = null;
         long size = 0;
         String passwordEntry = "";
@@ -68,9 +68,10 @@ public class Main {
             if (file.endsWith(".properties")) {
                 File pfl = new File(args[0]);
                 if (pfl.exists()) {
-                    FileInputStream fis = new FileInputStream(pfl);
-                    info.load(fis);
-                    lcProperties(info);
+                    try (FileInputStream fis = new FileInputStream(pfl)) {
+                        props.load(fis);
+                    }
+                    lcProperties(props);
                 }
             } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
                 fl = new File(file);
@@ -113,17 +114,17 @@ public class Main {
         Connection conn = null;
         try {
             String noMem = "";
-            if (passwordEntry.isEmpty() && (info.containsKey("jackcessopener") || hasPassword(fl))) {
+            if (passwordEntry.isEmpty() && (props.containsKey("jackcessopener") || hasPassword(fl))) {
                 System.out.print("Please, enter password: ");
                 passwordEntry = ";password=" + input.readLine().trim();
             }
 
-            if (!info.containsKey("jackcessopener")) {
+            if (!props.containsKey("jackcessopener")) {
                 noMem = size > 30000000 ? ";memory=false" : "";
             }
 
             conn = DriverManager.getConnection("jdbc:ucanaccess://" + fl.getAbsolutePath() + passwordEntry + noMem,
-                    info);
+                    props);
 
             SQLWarning sqlw = conn.getWarnings();
             while (sqlw != null) {
@@ -466,8 +467,8 @@ public class Main {
 
             records.add(colNames); // header record
             while (_resultSet.next() && (_maxRows < 0 || _maxRows < records.size())) {
-                List<String> record = new ArrayList<>();
-                records.add(record);
+                List<String> rec = new ArrayList<>();
+                records.add(rec);
                 for (int col = 1; col <= columnCount; ++col) {
                     Object obj = _resultSet.getObject(col);
                     if (obj != null && obj.getClass().isArray() && !obj.getClass().getComponentType().isPrimitive()) {
@@ -475,7 +476,7 @@ public class Main {
                     }
 
                     String s = obj == null ? "" : obj.toString();
-                    record.add(s);
+                    rec.add(s);
 
                     int colWidth = colWidths.get(col - 1);
                     if (colWidth < s.length() && colWidth < maxColWidth) {

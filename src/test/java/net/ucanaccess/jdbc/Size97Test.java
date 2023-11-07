@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.util.SqlConstants.COLUMN_SIZE;
+
 import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,6 +28,6 @@ class Size97Test extends UcanaccessBaseTest {
         DatabaseMetaData dbmd = conn.getMetaData();
         ResultSet rs = dbmd.getColumns(null, null, "table1", "field1");
         rs.next();
-        assertEquals(10, rs.getInt("COLUMN_SIZE"));
+        assertEquals(10, rs.getInt(COLUMN_SIZE));
     }
 }

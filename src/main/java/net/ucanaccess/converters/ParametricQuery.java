@@ -196,9 +196,8 @@ public class ParametricQuery {
         return type;
     }
 
-    private String treatApos(String s) {
-        s = s.replaceAll("'", "").replaceAll("\"", "").toUpperCase();
-        return s;
+    private String treatApos(String _s) {
+        return _s.replace("'", "").replace("\"", "").toUpperCase();
     }
 
     private boolean exec(String expression) {

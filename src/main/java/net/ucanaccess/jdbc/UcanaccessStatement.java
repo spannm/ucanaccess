@@ -275,21 +275,20 @@ public class UcanaccessStatement implements Statement {
     public ResultSet getGeneratedKeys() throws SQLException {
         try {
             checkLastModified();
-            Connection conn = connection.getHSQLDBConnection();
-            Statement st = conn.createStatement();
-            StringBuilder sql = new StringBuilder();
 
+            StringBuilder sql = new StringBuilder();
             if (generatedKey != null) {
                 sql.append(" SELECT ")
-
-                        .append(generatedKey instanceof String ? "'" + generatedKey + "'" : generatedKey)
-                        .append(" AS GENERATED_KEY ").append(" FROM DUAL");
-
+                   .append(generatedKey instanceof String ? "'" + generatedKey + "'" : generatedKey)
+                   .append(" AS GENERATED_KEY ").append(" FROM DUAL");
             } else {
-                sql.append(" SELECT ").append(0).append(" AS GENERATED_KEY ").append(" FROM DUAL where 1=2 ");
+                sql.append(" SELECT ").append(0).append(" AS GENERATED_KEY ").append(" FROM DUAL WHERE 1=2");
             }
 
-            return new UcanaccessResultSet(st.executeQuery(sql.toString()), this);
+            Connection conn = connection.getHSQLDBConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql.toString());
+            return new UcanaccessResultSet(rs, this);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
         }

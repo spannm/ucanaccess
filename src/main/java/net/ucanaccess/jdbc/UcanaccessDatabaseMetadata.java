@@ -1,7 +1,10 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.util.SqlConstants.COLUMN_NAME;
+
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
@@ -84,14 +87,14 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         if (right.length() == 0) {
             return sb.append(left).append(" IS NULL ").toString();
         }
-        String exp = right == null ? null : apos ? "'" + right + "'" : right;
+        String exp = apos ? "'" + right + "'" : right;
         sb.append(left).append(" ");
         if ("LIKE".equals(op)) {
             if (exp.indexOf('_') < 0 && exp.indexOf('%') < 0) {
                 sb.append(" = ").append(exp);
             } else {
-                sb.append(" LIKE ").append(exp);
-                sb.append(" ESCAPE '\\'");
+                sb.append(" LIKE ").append(exp)
+                  .append(" ESCAPE '\\'");
             }
         } else {
             sb.append(op).append(' ').append(exp);
@@ -129,10 +132,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         return sb.toString();
     }
 
-    private ResultSet executeQuery(String sql) throws SQLException {
+    private ResultSet executeQuery(String _sql) throws SQLException {
         connection.checkLastModified();
-        Statement st = connection.getHSQLDBConnection().createStatement();
-        return st.executeQuery(sql);
+        return Try.withResources(() -> connection.getHSQLDBConnection().createStatement(), st -> {
+            return st.executeQuery(_sql);
+        }).orThrow();
     }
 
     @Override
@@ -224,11 +228,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String nullableS = nullable ? null : String.valueOf(columnNoNulls);
             StringBuilder sql =
                 new StringBuilder(select("SYSTEM_BESTROWIDENTIFIER",
-                    List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
-                    Arrays.asList(null, null, "TABLE_NAME", "COLUMN_NAME")))
+                    List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", COLUMN_NAME),
+                    Arrays.asList(null, null, "TABLE_NAME", COLUMN_NAME)))
                         .append(from("SYSTEM_BESTROWIDENTIFIER", "COLUMNS_VIEW"))
 
-                        .append(on(List.of("TABLE_NAME", "COLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
+                        .append(on(List.of("TABLE_NAME", COLUMN_NAME), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(and("TABLE_CAT", "=", "PUBLIC", " WHERE "))
                         .append(and("TABLE_SCHEM", "=", schema)).append(and("TABLE_NAME", "=", table))
                         .append(and("NULLABLE", "=", nullableS, false))
@@ -295,16 +299,16 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
             String s = "SELECT " + cat + " TABLE_CAT, " + schem + " TABLE_SCHEM,";
             StringBuilder select = new StringBuilder(s)
-                .append(cAlias("TABLE_NAME")).append(",").append(cAlias("COLUMN_NAME")).append(",")
+                .append(cAlias("TABLE_NAME")).append(",").append(cAlias(COLUMN_NAME)).append(",")
                 .append(nAlias("GRANTOR")).append(",").append(nAlias("GRANTEE")).append(",")
                 .append(nAlias("PRIVILEGE_TYPE PRIVILEGE")).append(",").append(nAlias("IS_GRANTABLE"))
                 .append(from("COLUMN_PRIVILEGES", "COLUMNS_VIEW"))
-                .append(on(List.of("TABLE_NAME", "COLUMN_NAME"),
+                .append(on(List.of("TABLE_NAME", COLUMN_NAME),
                     List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                 .append(and("TABLE_CATALOG", "=", "PUBLIC", " WHERE "))
                 .append(and("TABLE_SCHEMA", "=", "PUBLIC"))
                 .append(and("TABLE_NAME", "=", table))
-                .append(and("COLUMN_NAME", "LIKE", columnNamePattern));
+                .append(and(COLUMN_NAME, "LIKE", columnNamePattern));
 
             return executeQuery(select.toString());
         } catch (SQLException _ex) {
@@ -324,15 +328,15 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String schem = connection.isShowSchema() ? "PUBLIC" : null;
 
             StringBuilder select = new StringBuilder(select("SYSTEM_COLUMNS",
-                List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"),
-                Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", "COLUMN_DEF", "IS_AUTOINCREMENT",
+                List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", COLUMN_NAME, "COLUMN_DEF", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"),
+                Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME, "COLUMN_DEF", "IS_AUTOINCREMENT",
                     "IS_GENERATEDCOLUMN"))).append(",").append(cAlias("ORIGINAL_TYPE"))
                         .append(from("SYSTEM_COLUMNS", "COLUMNS_VIEW"))
-                        .append(on(List.of("TABLE_NAME", "COLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
+                        .append(on(List.of("TABLE_NAME", COLUMN_NAME), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(and("TABLE_CAT", "=", "PUBLIC", " WHERE "))
                         .append(and("TABLE_SCHEM", "=", "PUBLIC"))
                         .append(and("TABLE_NAME", "LIKE", tableNamePattern))
-                        .append(and("COLUMN_NAME", "LIKE", columnNamePattern));
+                        .append(and(COLUMN_NAME, "LIKE", columnNamePattern));
 
             return executeQuery(select.toString());
         } catch (SQLException _ex) {
@@ -366,7 +370,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                     "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
-                Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME", "v.COLUMN_NAME")))
+                Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME, cat, schem, "v.TABLE_NAME", "v.COLUMN_NAME")))
                     .append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
 
                     .append(on(List.of("PKTABLE_NAME", "PKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
@@ -469,7 +473,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT",
                     "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME"),
-                Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME",
+                Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME, cat, schem, "v.TABLE_NAME",
                     "v.COLUMN_NAME"))).append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
                         .append(on(List.of("PKTABLE_NAME", "PKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
@@ -533,7 +537,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             StringBuilder select = new StringBuilder(select("SYSTEM_CROSSREFERENCE",
                 List.of("FKTABLE_CAT", "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME", "PKTABLE_CAT",
                     "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME"),
-                Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME", cat, schem, "v.TABLE_NAME", "v.COLUMN_NAME")))
+                Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME, cat, schem, "v.TABLE_NAME", "v.COLUMN_NAME")))
                     .append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
 
                     .append(on(List.of("FKTABLE_NAME", "FKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
@@ -559,10 +563,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String schem = connection.isShowSchema() ? "PUBLIC" : null;
             String nuS = unique ? "AND NON_UNIQUE IS FALSE" : "";
             StringBuilder select = new StringBuilder(
-                select("SYSTEM_INDEXINFO", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
-                    Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
+                select("SYSTEM_INDEXINFO", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", COLUMN_NAME),
+                    Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME)))
                         .append(from("SYSTEM_INDEXINFO", "COLUMNS_VIEW"))
-                        .append(on(List.of("TABLE_NAME", "COLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
+                        .append(on(List.of("TABLE_NAME", COLUMN_NAME), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(and("TABLE_CAT", "=", "PUBLIC"))
                         .append(and("TABLE_SCHEM", "=", "PUBLIC", " WHERE "))
                         .append(and("TABLE_NAME", "=", table)).append(nuS);
@@ -798,10 +802,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             String cat = connection.isShowSchema() ? "PUBLIC" : null;
             String schem = connection.isShowSchema() ? "PUBLIC" : null;
             StringBuilder select = new StringBuilder(
-                select("SYSTEM_PRIMARYKEYS", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME"),
-                    Arrays.asList(cat, schem, "TABLE_NAME", "COLUMN_NAME")))
+                select("SYSTEM_PRIMARYKEYS", List.of("TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", COLUMN_NAME),
+                    Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME)))
                         .append(from("SYSTEM_PRIMARYKEYS", "COLUMNS_VIEW"))
-                        .append(on(List.of("TABLE_NAME", "COLUMN_NAME"),
+                        .append(on(List.of("TABLE_NAME", COLUMN_NAME),
                             List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
                         .append(and("TABLE_CAT", "=", "PUBLIC", " WHERE "))
                         .append(and("TABLE_SCHEM", "=", "PUBLIC")).append(and("TABLE_NAME", "=", table));

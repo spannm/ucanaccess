@@ -6,6 +6,7 @@ import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.File;
@@ -178,10 +179,14 @@ public final class UcanaccessDriver implements Driver {
                 SQLWarning sqlw = null;
                 if (!alreadyLoaded) {
                     boolean toBeLoaded = !dbRef.loadedFromKeptMirror(session);
+
                     Connection conn = dbRef.getHSQLDBConnection(session);
                     // from version 2.7 hsqldb translates timestamps stored without timezone in the database
                     // into the default timezone. MS Access however does not know timezones, therefore assume timestamps are UTC
-                    conn.createStatement().executeQuery("SET TIME ZONE 'UTC'");
+                    Try.withResources(() -> conn.createStatement(), st -> {
+                        st.executeQuery("SET TIME ZONE 'UTC'");
+                    }).orThrow();
+
                     LoadJet la = new LoadJet(conn, dbRef.getDbIO());
                     Logger.turnOffJackcessLog();
                     if (_props.containsKey("sysschema")) {

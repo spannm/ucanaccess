@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.util.SqlConstants.SYSTEM_SUBQUERY;
+
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 
@@ -86,7 +88,7 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
     public String getTableName(int column) throws SQLException {
 
         String tableName = SQLConverter.preEscapingIdentifier(wrapped.getTableName(column));
-        if (Metadata.SYSTEM_SUBQUERY.equals(tableName)) {
+        if (SYSTEM_SUBQUERY.equals(tableName)) {
             return tableName;
         }
         return metadata.getTableName(tableName);

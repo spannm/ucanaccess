@@ -75,6 +75,8 @@
         <dep.assertj.version>3.24.2</dep.assertj.version>
         <dep.mockito.version>5.7.0</dep.mockito.version>
 
+        <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
+
         <basepom.check.skip-pmd>true</basepom.check.skip-pmd>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
@@ -174,7 +176,7 @@
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
                         <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-                        <argLine>@{basepom.coverage.test-args} -Xmx1024m -Dfile.encoding=UTF-8 </argLine>
+                        <argLine>@{basepom.coverage.test-args} -Xmx1024m -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
 
@@ -211,6 +213,7 @@
     </build>
 
     <profiles>
+
         <profile>
             <id>fast</id>
             <!-- Profile to skip time-consuming steps. -->
@@ -227,6 +230,41 @@
                 <basepom.check.skip-extended>true</basepom.check.skip-extended>
             </properties>
         </profile>
+
+        <profile>
+            <!-- mvn verify -P sonarcloud -->
+            <id>sonarcloud</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <sonar.skip>false</sonar.skip>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+                <sonar.organization>spannm</sonar.organization>
+                <!-- sonar.token>TODO_TOKEN_HERE</sonar.token -->
+
+                <basepom.test.skip>true</basepom.test.skip>
+                <basepom.check.skip-all>true</basepom.check.skip-all>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${dep.plugin.sonar.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>sonar</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 
 </project>

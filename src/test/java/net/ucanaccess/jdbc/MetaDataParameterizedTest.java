@@ -77,9 +77,9 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
         assertThat(st.executeQuery("SELECT * FROM NOROMAN").getMetaData())
-            .satisfies(x -> x.isAutoIncrement(1))
-            .satisfies(x -> x.isCurrency(6))
-            .satisfies(x -> x.isCurrency(7));
+            .satisfies(x -> assertThat(x.isAutoIncrement(1)).isTrue())
+            .satisfies(x -> assertThat(x.isCurrency(6)).isTrue())
+            .satisfies(x -> assertThat(x.isCurrency(7)).isFalse());
         DatabaseMetaData dbmd = ucanaccess.getMetaData();
 
         ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);

@@ -55,17 +55,6 @@ public final class IndexSelector {
                 }
             }
             if (_currVal instanceof byte[] && _dbVal instanceof byte[]) {
-//                byte[] val1 = (byte[]) _currVal;
-//                byte[] val2 = (byte[]) _dbVal;
-//                if (val1.length != val2.length) {
-//                    return false;
-//                }
-//                for (int y = 0; y < val1.length; y++) {
-//                    if (val1[y] != val2[y]) {
-//                        return false;
-//                    }
-//                }
-
                 return true;
             }
 

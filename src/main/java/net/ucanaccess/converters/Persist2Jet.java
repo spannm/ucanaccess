@@ -1,5 +1,7 @@
 package net.ucanaccess.converters;
 
+import static net.ucanaccess.util.SqlConstants.*;
+
 import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.impl.DatabaseImpl;
 import net.ucanaccess.commands.InsertCommand;
@@ -58,11 +60,11 @@ public class Persist2Jet {
         Connection conq = conn.getHSQLDBConnection();
         String key = pref + ntn;
         if (!columnNamesCache.containsKey(key)) {
-            ResultSet rs = conq.getMetaData().getColumns(null, "PUBLIC", ntn, null);
+            ResultSet rs = conq.getMetaData().getColumns(null, PUBLIC, ntn, null);
             Map<Integer, String> tm = new TreeMap<>();
             while (rs.next()) {
-                String cbase = rs.getString("COLUMN_NAME");
-                Integer i = rs.getInt("ORDINAL_POSITION");
+                String cbase = rs.getString(COLUMN_NAME);
+                Integer i = rs.getInt(ORDINAL_POSITION);
                 tm.put(i, cbase.toUpperCase());
 
             }
@@ -75,9 +77,9 @@ public class Persist2Jet {
     private List<String> getColumnNamesCreate(String ntn) throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         List<String> ar = new ArrayList<>();
-        ResultSet rs = conn.getMetaData().getColumns(null, "PUBLIC", ntn, null);
+        ResultSet rs = conn.getMetaData().getColumns(null, PUBLIC, ntn, null);
         while (rs.next()) {
-            String cbase = rs.getString("COLUMN_NAME");
+            String cbase = rs.getString(COLUMN_NAME);
             ar.add(cbase);
         }
         return ar;
@@ -154,11 +156,11 @@ public class Persist2Jet {
 
     private ColumnBuilder getColumn(ResultSet rs, int seq, String tableName, Map<String, String> columnMap,
             String[] types) throws SQLException, IOException {
-        String name = rs.getString("COLUMN_NAME");
+        String name = rs.getString(COLUMN_NAME);
         String nname = getNormalizedName(name, columnMap);
         ColumnBuilder cb = new ColumnBuilder(nname);
-        short length = (short) rs.getInt("COLUMN_SIZE");
-        byte scale = (byte) rs.getInt("DECIMAL_DIGITS");
+        short length = (short) rs.getInt(COLUMN_SIZE);
+        byte scale = (byte) rs.getInt(DECIMAL_DIGITS);
         DataType dt = null;
         if (length == 0 && types != null) {
             if (types[seq].equalsIgnoreCase(AccessType.MEMO.name())
@@ -197,7 +199,7 @@ public class Persist2Jet {
                 dt = DataType.NUMERIC;
             } else {
                 dt = DataType.fromSQLType(
-                        rs.getInt("DATA_TYPE"),
+                        rs.getInt(DATA_TYPE),
                         length,
                         UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
             }
@@ -227,15 +229,15 @@ public class Persist2Jet {
         return cb;
     }
 
-    private ColumnBuilder getColumn(String tableName, Map<String, String> columnMap, String[] types)
+    private ColumnBuilder getColumn(String _tableName, Map<String, String> _columnMap, String[] _types)
             throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        String columnName = columnMap.keySet().iterator().next();
-        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC", tableName.toUpperCase(),
+        String columnName = _columnMap.keySet().iterator().next();
+        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, _tableName.toUpperCase(),
                 SQLConverter.preEscapingIdentifier(columnName));
 
         if (rs.next()) {
-            return getColumn(rs, 0, tableName, columnMap, types);
+            return getColumn(rs, 0, _tableName, _columnMap, _types);
 
         }
         return null;
@@ -245,11 +247,10 @@ public class Persist2Jet {
             throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Map<Integer, ColumnBuilder> ordm = new TreeMap<>();
-        String tableNamePattern = tableName.toUpperCase(Locale.US).replaceAll("_", "\\\\_");
-        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, "PUBLIC",
-                tableNamePattern, null);
+        String tableNamePattern = tableName.toUpperCase(Locale.US).replace("_", "\\_");
+        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableNamePattern, null);
         while (rs.next()) {
-            int seq = rs.getInt("ORDINAL_POSITION") - 1;
+            int seq = rs.getInt(ORDINAL_POSITION) - 1;
             ordm.put(seq, getColumn(rs, seq, tableName, columnMap, types));
         }
         return ordm.values();
@@ -292,7 +293,7 @@ public class Persist2Jet {
 
     private IndexBuilder getIndexBuilderPK(String tableName, Map<String, String> columnMap) throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, "PUBLIC", tableName.toUpperCase());
+        ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, PUBLIC, tableName.toUpperCase());
         IndexBuilder indpk = null;
         while (pkrs.next()) {
             if (indpk == null) {
@@ -301,7 +302,7 @@ public class Persist2Jet {
                 indpk.setPrimaryKey();
 
             }
-            indpk.addColumns(getNormalizedName(pkrs.getString("COLUMN_NAME"), columnMap));
+            indpk.addColumns(getNormalizedName(pkrs.getString(COLUMN_NAME), columnMap));
         }
         return indpk;
     }
@@ -309,16 +310,16 @@ public class Persist2Jet {
     private void addIndexBuildersSimple(String tableName, Map<String, String> columnMap, List<IndexBuilder> arcl)
             throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        ResultSet idxrs = conn.getMetaData().getIndexInfo(null, "PUBLIC", tableName, false, false);
+        ResultSet idxrs = conn.getMetaData().getIndexInfo(null, PUBLIC, tableName, false, false);
         Map<String, IndexBuilder> hi = new HashMap<>();
         for (IndexBuilder ib : arcl) {
             hi.put(ib.getName(), ib);
         }
         while (idxrs.next()) {
-            String colName = getNormalizedName(idxrs.getString("COLUMN_NAME"), columnMap);
-            String indexName = idxrs.getString("INDEX_NAME");
-            boolean unique = !idxrs.getBoolean("NON_UNIQUE");
-            String ad = idxrs.getString("ASC_OR_DESC");
+            String colName = getNormalizedName(idxrs.getString(COLUMN_NAME), columnMap);
+            String indexName = idxrs.getString(INDEX_NAME);
+            boolean unique = !idxrs.getBoolean(NON_UNIQUE);
+            String ad = idxrs.getString(ASC_OR_DESC);
             boolean asc = ad == null || "A".equals(ad);
             if (!hi.containsKey(indexName)) {
                 IndexBuilder ib = new IndexBuilder(indexName);
@@ -426,12 +427,12 @@ public class Persist2Jet {
             ResultSet rs = st.executeQuery("SELECT * FROM " + tableName);
             List<String> clns = getColumnNamesCreate(tn);
             while (rs.next()) {
-                Object[] record = new Object[clns.size()];
+                Object[] rec = new Object[clns.size()];
                 int i = 0;
                 for (String columnName : clns) {
-                    record[i++] = rs.getObject(columnName);
+                    rec[i++] = rs.getObject(columnName);
                 }
-                new InsertCommand(table, record, null).persist();
+                new InsertCommand(table, rec, null).persist();
             }
         }
     }
@@ -539,22 +540,25 @@ public class Persist2Jet {
 
     }
 
-    public void addColumn(String tableName, String columnName, Map<String, String> columnMap, String[] types,
-            String[] defaults, Boolean[] notNulls) throws IOException, SQLException {
+    public void addColumn(String _tableName, String _columnName, Map<String, String> _columnMap, String[] _types,
+            String[] _defaults, Boolean[] _notNulls) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
-        String tn = escape4Access(tableName);
-        String ntn = escape4Hsqldb(tableName);
+        String tn = escape4Access(_tableName);
+        String ntn = escape4Hsqldb(_tableName);
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
-        ColumnBuilder cb = getColumn(ntn, columnMap, types);
+        ColumnBuilder cb = getColumn(ntn, _columnMap, _types);
+        if (cb == null) {
+            return;
+        }
         Table t = db.getTable(tn);
         Column cl = cb.addToTable(t);
         int idTable = mtd.getTableId(ntn.toUpperCase());
         mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),
-                getUcaMetadataTypeName(0, cb, types), idTable);
-        saveColumnsDefaults(defaults, notNulls, cl, 0);
-        updateNewColumn2Defaut(tableName, columnName, t, cl);
-        setHsqldbNotNull(tableName, columnName, types[0], cl);
+                getUcaMetadataTypeName(0, cb, _types), idTable);
+        saveColumnsDefaults(_defaults, _notNulls, cl, 0);
+        updateNewColumn2Defaut(_tableName, _columnName, t, cl);
+        setHsqldbNotNull(_tableName, _columnName, _types[0], cl);
         conn.reloadDbIO();
     }
 
@@ -623,23 +627,23 @@ public class Persist2Jet {
         Table t = db.getTable(tn);
 
         ResultSet idxrs =
-                conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, "PUBLIC", ntn.toUpperCase(), false, false);
+                conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(), false, false);
         boolean asc = false;
         List<String> cols = new ArrayList<>();
         IndexBuilder ib = new IndexBuilder(in);
         while (idxrs.next()) {
-            String dbIdxName = idxrs.getString("INDEX_NAME");
+            String dbIdxName = idxrs.getString(INDEX_NAME);
             if (dbIdxName.equalsIgnoreCase(idn)) {
 
-                boolean unique = !idxrs.getBoolean("NON_UNIQUE");
+                boolean unique = !idxrs.getBoolean(NON_UNIQUE);
 
                 if (unique) {
                     ib.setUnique();
                 }
-                String colName = idxrs.getString("COLUMN_NAME");
+                String colName = idxrs.getString(COLUMN_NAME);
                 Metadata mt = new Metadata(conn);
                 colName = mt.getColumnName(ntn, colName);
-                String ad = idxrs.getString("ASC_OR_DESC");
+                String ad = idxrs.getString(ASC_OR_DESC);
                 asc = ad == null || "A".equals(ad);
                 cols.add(colName);
 
@@ -659,7 +663,7 @@ public class Persist2Jet {
         IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
         ib.setPrimaryKey();
         while (pkrs.next()) {
-            String colName = pkrs.getString("COLUMN_NAME");
+            String colName = pkrs.getString(COLUMN_NAME);
             Metadata mt = new Metadata(conn);
             colName = mt.getColumnName(ntn, colName);
             cols.add(colName);
@@ -691,7 +695,7 @@ public class Persist2Jet {
         ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase());
         Set<String> hs = new HashSet<>();
         while (fkrs.next()) {
-            hs.add(fkrs.getString("PKTABLE_NAME"));
+            hs.add(fkrs.getString(PKTABLE_NAME));
         }
         Metadata mt = new Metadata(conn);
         for (String rntn : hs) {
@@ -718,10 +722,10 @@ public class Persist2Jet {
              * Limitation: If the user wants to create more than one relationship between the same two tables
              * then all of the relationships must be explicitly named.
              */
-            if (relationshipName == null || fkrs.getString("FK_NAME").equalsIgnoreCase(tn4Hsqldb + "_" + relationshipName)) {
-                String colName = fkrs.getString("FKCOLUMN_NAME");
+            if (relationshipName == null || fkrs.getString(FK_NAME).equalsIgnoreCase(tn4Hsqldb + "_" + relationshipName)) {
+                String colName = fkrs.getString(FKCOLUMN_NAME);
                 colName = mt.getColumnName(tn4Hsqldb, colName);
-                String rcolName = fkrs.getString("PKCOLUMN_NAME");
+                String rcolName = fkrs.getString(PKCOLUMN_NAME);
                 rcolName = mt.getColumnName(refTn4Hsqldb, rcolName);
                 rb.addColumns(rcolName, colName);
                 short dr = fkrs.getShort("DELETE_RULE");

@@ -1,14 +1,15 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.util.SqlConstants.ORIGINAL_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index.Column;
-import net.ucanaccess.test.AccessVersion;
-import net.ucanaccess.test.UcanaccessBaseTest;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.test.AccessVersion;
+import net.ucanaccess.test.UcanaccessBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -243,7 +244,7 @@ class CreateTableTest extends UcanaccessBaseTest {
             st.execute("INSERT INTO urlTest (id, website) VALUES (4, 'http://bad_link_no_hash_characters')");
             ResultSet rs1 = ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website");
             rs1.next();
-            assertEquals("HYPERLINK", rs1.getString("ORIGINAL_TYPE"));
+            assertEquals("HYPERLINK", rs1.getString(ORIGINAL_TYPE));
             ResultSet rs2 = st.executeQuery("SELECT website FROM urlTest ORDER BY id");
             rs2.next();
             assertEquals("http://whatever", rs2.getURL(1).toString());

@@ -42,14 +42,13 @@ public class Attachment extends ComplexBase {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object _obj) {
+        if (this == _obj) {
             return true;
-        }
-        if (getClass() != obj.getClass()) {
+        } else if (_obj == null || getClass() != _obj.getClass()) {
             return false;
         }
-        Attachment other = (Attachment) obj;
+        Attachment other = (Attachment) _obj;
         if (!Arrays.equals(data, other.data)) {
             return false;
         }

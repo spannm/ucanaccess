@@ -27,14 +27,13 @@ public class Version extends ComplexBase {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object _obj) {
+        if (this == _obj) {
             return true;
-        }
-        if (getClass() != obj.getClass()) {
+        } else if (_obj == null || getClass() != _obj.getClass()) {
             return false;
         }
-        Version other = (Version) obj;
+        Version other = (Version) _obj;
         if (modifiedDate == null) {
             if (other.modifiedDate != null) {
                 return false;

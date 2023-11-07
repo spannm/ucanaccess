@@ -1,5 +1,6 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.util.SqlConstants.ORIGINAL_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -97,7 +98,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             st.execute("ALTER TABLE Sample ADD COLUMN website HYPERLINK");
             ResultSet rs = ucanaccess.getMetaData().getColumns(null, null, "Sample", "website");
             rs.next();
-            assertEquals("HYPERLINK", rs.getString("ORIGINAL_TYPE"));
+            assertEquals("HYPERLINK", rs.getString(ORIGINAL_TYPE));
         }
     }
 

@@ -1,5 +1,7 @@
 package net.ucanaccess.converters;
 
+import static net.ucanaccess.util.SqlConstants.COLUMN_NAME;
+
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Try;
 
@@ -115,7 +117,7 @@ public class DFunction {
         DatabaseMetaData dbmd = conn.getMetaData();
         ResultSet rs = dbmd.getColumns(null, null, tableName, null);
         while (rs.next()) {
-            ar.add(rs.getString("COLUMN_NAME"));
+            ar.add(rs.getString(COLUMN_NAME));
         }
         return ar;
     }

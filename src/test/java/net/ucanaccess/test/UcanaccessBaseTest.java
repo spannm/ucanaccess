@@ -110,7 +110,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         int j = 0;
         while (_resultSet.next()) {
             for (int i = 0; i < mycolmax; ++i) {
-                assertThat(j).isLessThan(_expectedResults.length).withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + j);
+                assertThat(j)
+                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + j)
+                    .isLessThan(_expectedResults.length);
                 Object actualObj = _resultSet.getObject(i + 1);
                 Object expectedObj = _expectedResults[j][i];
                 if (expectedObj == null) {

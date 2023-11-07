@@ -23,14 +23,13 @@ public class SingleValue extends ComplexBase {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object _obj) {
+        if (this == _obj) {
             return true;
-        }
-        if (getClass() != obj.getClass()) {
+        } else if (_obj == null || getClass() != _obj.getClass()) {
             return false;
         }
-        SingleValue other = (SingleValue) obj;
+        SingleValue other = (SingleValue) _obj;
         if (value == null) {
             if (other.value != null) {
                 return false;

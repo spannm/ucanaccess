@@ -73,8 +73,8 @@ public class BlobKey implements Serializable {
     public static BlobKey getBlobKey(InputStream _is) {
         return Try.catching(() -> {
             byte[] bt = new byte[MAX_SIZE];
-            _is.read(bt);
-            return getBlobKey(bt);
+            int readBytes = _is.read(bt);
+            return readBytes > 0 ? getBlobKey(bt) : null;
         }).orIgnore();
     }
 

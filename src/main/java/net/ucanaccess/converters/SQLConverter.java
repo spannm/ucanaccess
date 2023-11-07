@@ -495,9 +495,12 @@ public final class SQLConverter {
         return sql.replaceAll(DISTINCT_ROW, " DISTINCT ");
     }
 
-    static void addWhiteSpacedTableNames(String name) {
-        name = basicEscapingIdentifier(name);
-        if (WHITE_SPACED_TABLE_NAMES.contains(name)) {
+    static void addWhiteSpacedTableNames(String _name) {
+        if (_name == null) {
+            return;
+        }
+        String name = basicEscapingIdentifier(_name);
+        if (name == null || WHITE_SPACED_TABLE_NAMES.contains(name)) {
             return;
         }
         for (String alrIn : WHITE_SPACED_TABLE_NAMES) {
@@ -588,14 +591,14 @@ public final class SQLConverter {
         return sql;
     }
 
-    private static String convertIdentifiers(String sql) {
-        int init = sql.indexOf('[');
+    private static String convertIdentifiers(String _sql) {
+        int init = _sql.indexOf('[');
         if (init != -1) {
-            int end = sql.indexOf(']');
+            int end = _sql.indexOf(']');
             if (end < init) {
-                return convertResidualSQL(sql);
+                return convertResidualSQL(_sql);
             }
-            String content = sql.substring(init + 1, end);
+            String content = _sql.substring(init + 1, end);
             if (content.indexOf(' ') > 0) {
                 String tryContent = " " + content + " ";
                 String tryConversion = convertXescaped(tryContent);
@@ -606,14 +609,16 @@ public final class SQLConverter {
             boolean isKeyword = KEYWORDLIST.contains(content.toUpperCase());
 
             content = basicEscapingIdentifier(content).toUpperCase();
-            String subs =
-                    !isKeyword && (content.indexOf(' ') > 0 || NO_ALFANUMERIC.matcher(content).find()) ? "\"" : " ";
-            sql = convertResidualSQL(sql.substring(0, init)) + subs + content + subs
-                    + convertIdentifiers(sql.substring(end + 1));
+            String subs = " ";
+            if (content != null && !isKeyword && (content.indexOf(' ') > 0 || NO_ALFANUMERIC.matcher(content).find())) {
+                subs = "\"";
+            }
+            _sql = convertResidualSQL(_sql.substring(0, init)) + subs + content + subs
+                    + convertIdentifiers(_sql.substring(end + 1));
         } else {
-            sql = convertResidualSQL(sql);
+            _sql = convertResidualSQL(_sql);
         }
-        return sql;
+        return _sql;
     }
 
     private static String convertResidualSQL(String sql) {
@@ -703,27 +708,27 @@ public final class SQLConverter {
         return name;
     }
 
-    public static String preEscapingIdentifier(String name) {
-        if (name.length() == 0) {
-            return name;
+    public static String preEscapingIdentifier(String _name) {
+        if (_name.length() == 0) {
+            return _name;
         }
-        if (name.startsWith("~")) {
+        if (_name.startsWith("~")) {
             return null;
         }
-        String nl = name.toUpperCase(Locale.US);
+        String nl = _name.toUpperCase(Locale.US);
         if (TableBuilder.isReservedWord(nl)) {
             ESCAPED_IDENTIFIERS.add(nl);
         }
-        if (name.contains("'") || name.indexOf('"') > 0) {
-            APOSTROPHISED_NAMES.add(name);
+        if (_name.contains("'") || _name.indexOf('"') > 0) {
+            APOSTROPHISED_NAMES.add(_name);
         }
 
         if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
             ALREADY_ESCAPED_IDENTIFIERS.add(nl.substring(1));
         }
 
-        String escaped = name;
-        escaped = name.replaceAll("'", "").replaceAll("\"", "").replaceAll(Pattern.quote("\\"), "_");
+        String escaped = _name;
+        escaped = _name.replace("'", "").replace("\"", "").replaceAll(Pattern.quote("\\"), "_");
 
         if (escaped.length() > 0 && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
