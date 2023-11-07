@@ -168,6 +168,17 @@
             <plugins>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <forkCount>1</forkCount>
+                        <reuseForks>true</reuseForks>
+                        <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+                        <argLine>@{basepom.coverage.test-args} -Xmx1024m -Dfile.encoding=UTF-8 </argLine>
+                    </configuration>
+                </plugin>
+
+                <plugin>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
                         <configLocation>src/test/resources/team/checkstyle-rules.xml</configLocation>
@@ -197,54 +208,6 @@
             </plugins>
         </pluginManagement>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>NONE</include>
-                    </includes>
-                    <trimStackTrace>false</trimStackTrace>
-                    <testFailureIgnore>false</testFailureIgnore>
-                    <forkCount>1</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
-                    <argLine>-Xmx1024m</argLine>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>unit-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>test</phase>
-                        <configuration>
-                            <includes>
-                                <include>**/*Test.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/test/*.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <includes>
-                                <include>**/test/*.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
     </build>
 
     <profiles>

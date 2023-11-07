@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.util.AbstractBaseTest;
+import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

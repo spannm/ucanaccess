@@ -1,6 +1,6 @@
 package net.ucanaccess.console;
 
-import net.ucanaccess.test.util.AbstractBaseTest;
+import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSetMetaData;
