@@ -19,6 +19,7 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.util.Try;
 import org.hsqldb.error.ErrorCode;
 
 import java.io.IOException;
@@ -158,12 +159,8 @@ public class LoadJet {
 
         private void createFunctions() {
             for (String functionDef : functionDefinitions) {
-
-                try {
-                    exec(functionDef, true);
-                } catch (SQLException _ex) {
-                    Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, functionDef, _ex.toString());
-                }
+                Try.catching(() -> exec(functionDef, true))
+                    .orElse(e -> Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, functionDef, e.toString()));
             }
 
             functionDefinitions.clear();
@@ -184,17 +181,14 @@ public class LoadJet {
                     String comma = "";
                     for (int j = 0; j < i; j++) {
                         body.append("  WHEN B").append(j).append(" THEN V").append(j);
-                        header.append(comma).append("B").append(j).append(" BOOLEAN ,").append("V").append(j)
-                                .append(type);
+                        header.append(comma).append("B").append(j).append(" BOOLEAN ,").append("V").append(j).append(type);
                         comma = ",";
                     }
                     body.append(" END)");
                     header.append(") RETURNS").append(type).append(" RETURN").append(body);
-                    try {
-                        exec(header.toString(), true);
-                    } catch (SQLException _ex) {
-                        Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, header.toString(), _ex.toString());
-                    }
+
+                    Try.catching(() -> exec(header.toString(), true))
+                        .orElse(e -> Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, header.toString(), e.toString()));
                 }
             }
 
@@ -202,8 +196,8 @@ public class LoadJet {
 
         private String getAggregate(String _functionName, String _type) {
             return "CREATE AGGREGATE FUNCTION " + _functionName + "(IN val " + _type + ", IN flag BOOLEAN, INOUT register "
-                    + _type + ", INOUT counter INT) RETURNS " + _type + " NO SQL LANGUAGE JAVA "
-                    + "EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + _functionName + "'";
+                + _type + ", INOUT counter INT) RETURNS " + _type + " NO SQL LANGUAGE JAVA "
+                + "EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + _functionName + "'";
         }
 
         private void loadMappedFunctions() throws SQLException {
@@ -891,14 +885,8 @@ public class LoadJet {
         }
 
         private void createCalculatedFieldsTriggers() {
-            for (String trigger : calculatedFieldsTriggers) {
-                try {
-                    exec(trigger, false);
-
-                } catch (SQLException _ex) {
-                    Logger.logWarning(_ex.getMessage());
-                }
-            }
+            calculatedFieldsTriggers.forEach(t -> Try.catching(() -> exec(t, false))
+                .orElse(e -> Logger.logWarning(e.getMessage())));
         }
 
         private void loadTableIndexesUK(String tn) throws IOException, SQLException {

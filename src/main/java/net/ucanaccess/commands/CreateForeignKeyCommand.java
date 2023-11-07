@@ -2,8 +2,8 @@ package net.ucanaccess.commands;
 
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class CreateForeignKeyCommand implements ICommand {
@@ -41,12 +41,8 @@ public class CreateForeignKeyCommand implements ICommand {
 
     @Override
     public IFeedbackAction persist() throws SQLException {
-        try {
-            Persist2Jet p2a = new Persist2Jet();
-            p2a.createForeignKey(tableName, referencedTable, relationshipName);
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        Try.catching(() -> new Persist2Jet().createForeignKey(tableName, referencedTable, relationshipName))
+            .orThrow(UcanaccessSQLException::new);
         return null;
     }
 

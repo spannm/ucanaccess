@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.util.OleBlob;
+import net.ucanaccess.util.Try;
 
 import java.io.*;
 import java.util.HashMap;
@@ -45,51 +46,36 @@ public class BlobKey implements Serializable {
     }
 
     public OleBlob getOleBlob(Database _db) throws UcanaccessSQLException {
-        try {
+        return Try.catching(() -> {
             Table t = _db.getTable(tableName);
             Cursor c = CursorBuilder.createPrimaryKeyCursor(t);
             return c.findFirstRow(key) ? c.getCurrentRow().getBlob(columnName) : null;
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        }).orThrow(UcanaccessSQLException::new);
     }
 
     public byte[] getBytes() throws UcanaccessSQLException {
-        ByteArrayOutputStream bais = new ByteArrayOutputStream();
-        ObjectOutputStream oos;
-        try {
-            oos = new ObjectOutputStream(bais);
+        return Try.withResources(ByteArrayOutputStream::new, bais -> {
+            ObjectOutputStream oos = new ObjectOutputStream(bais);
             oos.writeObject(this);
             oos.flush();
             return bais.toByteArray();
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
-
+        }).orThrow(UcanaccessSQLException::new);
     }
 
     public static BlobKey getBlobKey(byte[] _bytes) {
-        ByteArrayInputStream bais = null;
-
-        try {
-            bais = new ByteArrayInputStream(_bytes);
+        return Try.withResources(() -> new ByteArrayInputStream(_bytes), bais -> {
             ObjectInputStream ois = new ObjectInputStream(bais);
             Object obj = ois.readObject();
             return obj instanceof BlobKey ? (BlobKey) obj : null;
-        } catch (IOException | ClassNotFoundException e) {
-            return null;
-        }
+        }).orIgnore();
     }
 
     public static BlobKey getBlobKey(InputStream _is) {
-        byte[] bt = new byte[MAX_SIZE];
-        try {
+        return Try.catching(() -> {
+            byte[] bt = new byte[MAX_SIZE];
             _is.read(bt);
             return getBlobKey(bt);
-        } catch (IOException _ex) {
-            return null;
-        }
-
+        }).orIgnore();
     }
 
     public Map<String, Object> getKey() {

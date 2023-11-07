@@ -51,27 +51,18 @@ class CsvDumpTest extends UcanaccessBaseTest {
     void testCsvDump(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO csvtable (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
-        st.close();
+        try (Statement st = ucanaccess.createStatement()) {
+            st.execute("INSERT INTO csvtable (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) "
+                + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
 
-        st = null;
-        ResultSet rs = null;
-        try {
-            st = ucanaccess.createStatement();
-            rs = st.executeQuery("SELECT * FROM csvtable");
+        try (Statement st = ucanaccess.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
             Exporter exporter = new Exporter.Builder().setDelimiter(";").build();
             exporter.dumpCsv(rs, ps);
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
         }
 
         String actual = baos.toString(StandardCharsets.UTF_8);

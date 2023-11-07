@@ -2,6 +2,7 @@ package net.ucanaccess.test.integration;
 
 import net.ucanaccess.test.util.AccessVersion;
 import net.ucanaccess.test.util.UcanaccessBaseTest;
+import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -86,11 +87,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         threads.forEach(Thread::start);
 
         for (Thread t : threads) {
-            try {
-                t.join();
-            } catch (InterruptedException _ex) {
-                continue;
-            }
+            Try.catching(() -> t.join()).orIgnore();
         }
         ucanaccess = getUcanaccessConnection(dbPath);
         dumpQueryResult("SELECT * FROM " + tableName + " ORDER BY id");

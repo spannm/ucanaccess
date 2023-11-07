@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -49,14 +50,12 @@ public class DeleteCommand extends AbstractCursorCommand {
 
     @Override
     public IFeedbackAction persist() throws SQLException {
-        try {
+        Try.catching(() -> {
             Cursor cur = indexSelector.getCursor();
             if (cur.findNextRow(rowPattern)) {
                 cur.deleteCurrentRow();
             }
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        }).orThrow(UcanaccessSQLException::new);
         return null;
     }
 

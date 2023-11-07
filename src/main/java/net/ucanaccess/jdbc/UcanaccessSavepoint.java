@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.util.Try;
+
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
@@ -12,20 +14,12 @@ public class UcanaccessSavepoint implements Savepoint {
 
     @Override
     public int getSavepointId() throws SQLException {
-        try {
-            return wrapped.getSavepointId();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        return Try.catching(wrapped::getSavepointId).orThrow();
     }
 
     @Override
     public String getSavepointName() throws SQLException {
-        try {
-            return wrapped.getSavepointName();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        return Try.catching(wrapped::getSavepointName).orThrow();
     }
 
     Savepoint getWrapped() {

@@ -11,6 +11,7 @@ import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.complex.Version;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -77,7 +78,7 @@ public class UpdateCommand extends AbstractCursorCommand {
 
     @Override
     public IFeedbackAction persist() throws SQLException {
-        try {
+        Try.catching(() -> {
             Cursor cur = indexSelector.getCursor();
             if (cur.findNextRow(rowPattern)) {
                 if (blobColumns != null) {
@@ -88,11 +89,8 @@ public class UpdateCommand extends AbstractCursorCommand {
                 }
                 updateComplex(cur);
                 persist(cur);
-
             }
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        }).orThrow(UcanaccessSQLException::new);
         return new BlobAction(table, modifiedRow);
     }
 

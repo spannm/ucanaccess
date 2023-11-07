@@ -8,6 +8,7 @@ import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.util.SimpleColumnMatcher;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
@@ -69,11 +70,8 @@ public final class IndexSelector {
             }
 
             if (_currVal instanceof ComplexBase[] && _dbVal instanceof ComplexValueForeignKey) {
-                try {
-                    return Arrays.equals((ComplexBase[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal));
-                } catch (Exception _ex) {
-                    throw new UcanaccessRuntimeException(_ex);
-                }
+                return Try.catching(() -> Arrays.equals((ComplexBase[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal)))
+                    .orThrow(UcanaccessRuntimeException::new);
             }
 
             return super.matches(_table, _columnName, _currVal, _dbVal);

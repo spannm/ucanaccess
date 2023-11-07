@@ -2,8 +2,8 @@ package net.ucanaccess.commands;
 
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class CreatePrimaryKeyCommand implements ICommand {
@@ -32,12 +32,8 @@ public class CreatePrimaryKeyCommand implements ICommand {
 
     @Override
     public IFeedbackAction persist() throws SQLException {
-        try {
-            Persist2Jet p2a = new Persist2Jet();
-            p2a.createPrimaryKey(tableName);
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        Try.catching(() -> new Persist2Jet().createPrimaryKey(tableName))
+            .orThrow(UcanaccessSQLException::new);
         return null;
     }
 

@@ -5,6 +5,7 @@ import net.ucanaccess.commands.UpdateCommand;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.types.BlobData;
@@ -20,7 +21,8 @@ public class TriggerUpdate extends TriggerBase {
             return;
         }
         String execId = UcanaccessConnection.getCtxExcId();
-        try {
+
+        Try.catching(() -> {
             Table t = getTable(tableName, conn);
             fillBlobs(oldR);
             fillBlobs(newR);
@@ -31,9 +33,7 @@ public class TriggerUpdate extends TriggerBase {
                 UpdateCommand c4j = new UpdateCommand(t, rowPattern, newR, execId);
                 conn.add(c4j);
             }
-        } catch (Exception _ex) {
-            throw new TriggerException(_ex.getMessage());
-        }
+        }).orThrow(ex -> new TriggerException(ex.getMessage()));
     }
 
     public boolean valuesChanged(Object[] oldR, Object[] newR) {

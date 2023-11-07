@@ -10,6 +10,7 @@ import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessRuntimeException;
+import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 
 import java.io.*;
@@ -55,11 +56,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected void init(AccessVersion _accessVersion) throws SQLException {
         accessVersion = _accessVersion;
-        try {
-            Class.forName(UcanaccessDriver.class.getName());
-        } catch (ClassNotFoundException _ex) {
-            throw new UcanaccessRuntimeException(_ex);
-        }
+        Try.catching(() -> Class.forName(UcanaccessDriver.class.getName()))
+            .orThrow(UcanaccessRuntimeException::new);
         ucanaccess = getUcanaccessConnection();
     }
 
@@ -120,7 +118,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 } else {
                     if (actualObj instanceof Blob) {
 
-                        byte[] bt = getByteArray((Blob) actualObj);
+                        byte[] bt = Try.withResources((Blob.class.cast(actualObj))::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
                         byte[] btMtx = (byte[]) expectedObj;
                         for (int y = 0; y < btMtx.length; y++) {
                             assertEquals(btMtx[y], bt[y]);
@@ -177,8 +175,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                     assertNull(ob2, "Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + ob2 + " in [" + _query + "]");
                 } else {
                     if (ob1 instanceof Blob) {
-                        byte[] bt = getByteArray((Blob) ob1);
-                        byte[] btodbc = getByteArray((Blob) ob1);
+                        byte[] bt = Try.withResources(((Blob) ob1)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] btodbc = Try.withResources(((Blob) ob1)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
                         for (int y = 0; y < btodbc.length; y++) {
                             assertEquals(btodbc[y], bt[y]);
                         }
@@ -317,22 +315,15 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     protected File createTempFile(String _prefix) {
         File f = createTempFileName(_prefix);
 
-        try {
-            Files.createFile(f.toPath());
-            f.deleteOnExit();
-            return f;
-        } catch (IOException _ex) {
-            throw new UncheckedIOException(_ex);
-        }
+        Try.catching(() -> Files.createFile(f.toPath())).orThrow(UncheckedIOException::new);
+
+        f.deleteOnExit();
+        return f;
     }
 
     void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
-        try (Database db = DatabaseBuilder.create(_fileFormat, _dbFile)) {
-            db.flush();
-            getLogger().info("Access {} file created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
-        } catch (IOException _ex) {
-            throw new UncheckedIOException(_ex);
-        }
+        Try.withResources(() -> DatabaseBuilder.create(_fileFormat, _dbFile), Database::flush).orThrow(UncheckedIOException::new);
+        getLogger().info("Access {} file created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
     }
 
     protected File copyResourceToTempFile(String _resourcePath) {
@@ -462,45 +453,22 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    /**
-     * Execute the specified sql on the given statement logging the root cause of an exception encountered.
-     */
-    protected void executeStatement(Statement _statement, String _sql) {
-        try {
-            _statement.execute(_sql);
-        } catch (SQLException _ex) {
-            getLogger().warn("Exception executing [" + _sql + "].", _ex.getCause() != null ? _ex.getCause() : _ex);
-        }
-    }
-
     @AfterEach
     protected final void afterTestCaseBase() {
         if (ucanaccess != null) {
-            try {
+            Try.catching(() -> {
                 if (!ucanaccess.isClosed()) {
                     ucanaccess.close();
                 }
-            } catch (SQLException _ex) {
-                getLogger().warn("Database {} already closed: {}", fileAccDb, _ex);
-            }
+            }).orElse(e -> getLogger().warn("Database {} already closed: {}", fileAccDb, e));
         }
 
         if (verifyConnection != null) {
-            try {
+            Try.catching(() -> {
                 if (!verifyConnection.isClosed()) {
                     verifyConnection.close();
                 }
-            } catch (SQLException _ex) {
-                getLogger().warn("Verify connection {} already closed: {}", verifyConnection, _ex);
-            }
-        }
-    }
-
-    private byte[] getByteArray(Blob _blob) throws SQLException {
-        try (InputStream bs = _blob.getBinaryStream()) {
-            return bs.readAllBytes();
-        } catch (IOException _ex) {
-            throw new UncheckedIOException("Failed to get byte array", _ex);
+            }).orElse(e -> getLogger().warn("Verify connection {} already closed: {}", verifyConnection, e));
         }
     }
 }

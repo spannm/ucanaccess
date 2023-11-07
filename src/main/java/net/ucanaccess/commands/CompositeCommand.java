@@ -2,6 +2,7 @@ package net.ucanaccess.commands;
 
 import com.healthmarketscience.jackcess.Cursor;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -51,7 +52,7 @@ public class CompositeCommand implements ICommand {
 
     @Override
     public IFeedbackAction persist() throws SQLException {
-        try {
+        return Try.catching(() -> {
             CompositeFeedbackAction cfa = new CompositeFeedbackAction();
             Cursor cur = indexSelector.getCursor();
             cur.beforeFirst();
@@ -69,9 +70,7 @@ public class CompositeCommand implements ICommand {
                 }
             }
             return cfa;
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        }).orThrow(UcanaccessSQLException::new);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.ucanaccess.converters;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.util.Try;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -92,29 +93,14 @@ public class DFunction {
         return sql0;
     }
 
-    private String resolveAmbiguosTableName(String identifier) {
-        Statement st = null;
-        try {
+    private String resolveAmbiguosTableName(String _identifier) {
+        return Try.withResources(() -> conn.createStatement(), st -> {
             String f4t = SQLConverter.convertSQL(
-                    sql.replaceAll("[\r\n]", " ").replaceFirst(SELECT_FROM, "SELECT " + identifier + " FROM $2 "))
-                    .getSql();
-            st = conn.createStatement();
+                sql.replaceAll("[\r\n]", " ").replaceFirst(SELECT_FROM, "SELECT " + _identifier + " FROM $2 ")).getSql();
             ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
             String tableN = rsmd.getTableName(1);
-            if (tableN == null || tableN.isBlank()) {
-                return identifier;
-            }
-            return tableN;
-        } catch (SQLException _ex) {
-            return identifier;
-        } finally {
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (SQLException ignored) {
-                }
-            }
-        }
+            return tableN == null || tableN.isBlank() ? _identifier : tableN;
+        }).orElse(_identifier);
     }
 
     private List<String> getColumnNames(String tableName) throws SQLException {

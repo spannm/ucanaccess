@@ -7,6 +7,7 @@ import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.math.BigDecimal;
@@ -157,13 +158,8 @@ public final class Functions {
 
     @FunctionType(functionName = "CLNG", argumentTypes = { AccessType.MEMO }, returnType = AccessType.LONG)
     public static Integer clng(String value) throws UcanaccessSQLException {
-
-        try {
-            DecimalFormat dc = FormatCache.getNoArgs();
-            return clng(dc.parse(value).doubleValue());
-        } catch (ParseException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        return Try.catching(() -> clng(FormatCache.getNoArgs().parse(value).doubleValue()))
+            .orThrow(UcanaccessSQLException::new);
     }
 
     @FunctionType(functionName = "CLNG", argumentTypes = { AccessType.LONG }, returnType = AccessType.LONG)
@@ -465,11 +461,11 @@ public final class Functions {
         return new Timestamp(gc.getTime().getTime());
     }
 
-    private static Timestamp dateValue(String dt, boolean onlyDate) {
+    private static Timestamp dateValue(String _dt, boolean _onlyDate) {
         RegionalSettings reg = getRegionalSettings();
         if (!"true".equalsIgnoreCase(reg.getRS())
                 && (!"PM".equalsIgnoreCase(reg.getPM()) || !"AM".equalsIgnoreCase(reg.getAM()))) {
-            dt = dt.replaceAll("(?i)" + Pattern.quote(reg.getPM()), "PM")
+            _dt = _dt.replaceAll("(?i)" + Pattern.quote(reg.getPM()), "PM")
                     .replaceAll("(?i)" + Pattern.quote(reg.getAM()), "AM");
         }
 
@@ -478,8 +474,8 @@ public final class Functions {
             boolean yearOverride = entry.getValue();
 
             try {
-                Timestamp t = new Timestamp(sdf.parse(dt).getTime());
-                if (onlyDate) {
+                Timestamp t = new Timestamp(sdf.parse(_dt).getTime());
+                if (_onlyDate) {
                     t = dateValue(t);
                 }
                 if (yearOverride) {
@@ -513,45 +509,27 @@ public final class Functions {
     public static String format(Double d, String par) throws UcanaccessSQLException {
         if (d == null) {
             return "";
-        }
-        if ("percent".equalsIgnoreCase(par)) {
-            DecimalFormat formatter = FormatCache.getZpzz();
-            return formatter.format(d * 100) + "%";
-        }
-        if ("fixed".equalsIgnoreCase(par)) {
-            DecimalFormat formatter = FormatCache.getZpzz();
-            return formatter.format(d);
-        }
-        if ("standard".equalsIgnoreCase(par)) {
-            DecimalFormat formatter = FormatCache.getSharp();
-            return formatter.format(d);
-        }
-        if ("general number".equalsIgnoreCase(par)) {
-            DecimalFormat formatter = FormatCache.getNoGrouping();
-            return formatter.format(d);
-        }
-        if ("currency".equalsIgnoreCase(par)) {
-            NumberFormat formatter = FormatCache.getCurrencyDefault();
-            return formatter.format(d);
-        }
-        if ("yes/no".equalsIgnoreCase(par)) {
+        } else if ("percent".equalsIgnoreCase(par)) {
+            return FormatCache.getZpzz().format(d * 100) + "%";
+        } else if ("fixed".equalsIgnoreCase(par)) {
+            return FormatCache.getZpzz().format(d);
+        } else if ("standard".equalsIgnoreCase(par)) {
+            return FormatCache.getSharp().format(d);
+        } else if ("general number".equalsIgnoreCase(par)) {
+            return FormatCache.getNoGrouping().format(d);
+        } else if ("currency".equalsIgnoreCase(par)) {
+            return FormatCache.getCurrencyDefault().format(d);
+        } else if ("yes/no".equalsIgnoreCase(par)) {
             return d == 0 ? "No" : "Yes";
-        }
-        if ("true/false".equalsIgnoreCase(par)) {
+        } else if ("true/false".equalsIgnoreCase(par)) {
             return d == 0 ? "False" : "True";
-        }
-        if ("On/Off".equalsIgnoreCase(par)) {
+        } else if ("On/Off".equalsIgnoreCase(par)) {
             return d == 0 ? "Off" : "On";
-        }
-        if ("Scientific".equalsIgnoreCase(par)) {
+        } else if ("Scientific".equalsIgnoreCase(par)) {
             return String.format("%6.2E", d);
         }
-        try {
-            DecimalFormat formatter = FormatCache.getDecimalFormat(par);
-            return formatter.format(d);
-        } catch (Exception _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        return Try.catching(() -> FormatCache.getDecimalFormat(par).format(d))
+            .orThrow(UcanaccessSQLException::new);
     }
 
     @FunctionType(functionName = "FORMAT", argumentTypes = { AccessType.TEXT,
@@ -568,14 +546,8 @@ public final class Functions {
             if (incl) {
                 return format(Double.parseDouble(s), par);
             }
-
-            DecimalFormat df = FormatCache.getNoArgs();
-            try {
-
-                return format(df.parse(s).doubleValue(), par);
-            } catch (ParseException _ex) {
-                throw new UcanaccessSQLException(_ex);
-            }
+            return Try.catching(() -> format(FormatCache.getNoArgs().parse(s).doubleValue(), par))
+                .orThrow(UcanaccessSQLException::new);
         } else if (isDate(s)) {
             return format(dateValue(s, false), par);
         }
@@ -773,37 +745,35 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "ISNUMERIC", argumentTypes = { AccessType.MEMO }, returnType = AccessType.YESNO)
-    public static boolean isNumeric(String s) {
-        try {
+    public static boolean isNumeric(String _s) {
+        return Try.catching(() -> {
             Currency cr = Currency.getInstance(Locale.getDefault());
-            if (s.startsWith(cr.getSymbol())) {
-                return isNumeric(s.substring(cr.getSymbol().length()));
+            if (_s.startsWith(cr.getSymbol())) {
+                return isNumeric(_s.substring(cr.getSymbol().length()));
             }
-            if (s.startsWith("+") || s.startsWith("-")) {
-                return isNumeric(s.substring(1));
+            if (_s.startsWith("+") || _s.startsWith("-")) {
+                return isNumeric(_s.substring(1));
             }
             DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();
             String sep = dfs.getDecimalSeparator() + "";
             String gs = dfs.getGroupingSeparator() + "";
-            if (s.startsWith(gs)) {
+            if (_s.startsWith(gs)) {
                 return false;
             }
-            if (s.startsWith(sep)) {
-                return isNumeric(s.substring(1));
+            if (_s.startsWith(sep)) {
+                return isNumeric(_s.substring(1));
             }
 
+            String s;
             if (".".equals(sep)) {
-                s = s.replaceAll(gs, "");
+                s = _s.replaceAll(gs, "");
             } else {
-                s = s.replaceAll("\\.", "")
-                     .replace(sep, ".");
+                s = _s.replaceAll("\\.", "")
+                      .replace(sep, ".");
             }
-
             new BigDecimal(s);
             return true;
-        } catch (Exception ignored) {
-            return false;
-        }
+        }).orElse(false);
     }
 
     @FunctionType(functionName = "LEFT", namingConflict = true, argumentTypes = { AccessType.MEMO,
@@ -1405,28 +1375,25 @@ public final class Functions {
 
     @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.MEMO,
             AccessType.MEMO }, returnType = AccessType.DOUBLE)
-    public static Double formulaToNumeric(String res, String datatype) {
-        if (res == null) {
+    public static Double formulaToNumeric(String _res, String _datatype) {
+        if (_res == null) {
             return null;
         }
-        try {
+        return Try.catching(() -> {
             DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();
             String sep = dfs.getDecimalSeparator() + "";
             String gs = dfs.getGroupingSeparator() + "";
-            res = res.replaceAll(Pattern.quote(gs), "");
+            String res = _res.replaceAll(Pattern.quote(gs), "");
             if (!sep.equalsIgnoreCase(".")) {
                 res = res.replaceAll(Pattern.quote(sep), ".");
             }
             double d = val(res);
-            DataType dt = DataType.valueOf(datatype);
+            DataType dt = DataType.valueOf(_datatype);
             if (dt.equals(DataType.BYTE) || dt.equals(DataType.INT) || dt.equals(DataType.LONG)) {
                 d = Math.rint(d + APPROX);
             }
             return d;
-        } catch (Exception _ex) {
-            return null;
-        }
-
+        }).orIgnore();
     }
 
     @FunctionType(functionName = "formulaToNumeric", argumentTypes = { AccessType.DATETIME,
@@ -1528,11 +1495,7 @@ public final class Functions {
         if (res == null) {
             return null;
         }
-        try {
-            return dateValue(res, false);
-        } catch (Exception _ex) {
-            return null;
-        }
+        return Try.catching(() -> dateValue(res, false)).orIgnore();
     }
 
     @FunctionType(functionName = "formulaToDate", argumentTypes = { AccessType.YESNO,

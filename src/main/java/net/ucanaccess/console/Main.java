@@ -3,6 +3,7 @@ package net.ucanaccess.console;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
@@ -32,19 +33,12 @@ public class Main {
     }
 
     private static boolean hasPassword(File fl) throws IOException {
-        Database db;
-        try {
-            db = DatabaseBuilder.open(fl);
-        } catch (IOException _ex) {
-            DatabaseBuilder dbb = new DatabaseBuilder();
-            dbb.setReadOnly(true);
-            dbb.setFile(fl);
-            db = dbb.open();
-
+        try (Database db = Try.catching(() -> DatabaseBuilder.open(fl))
+            .orElseGet(() -> Try.catching(() -> new DatabaseBuilder()
+                .setReadOnly(true)
+                .setFile(fl).open()).orThrow())) {
+            return db.getDatabasePassword() != null;
         }
-        String pwd = db.getDatabasePassword();
-        db.close();
-        return pwd != null;
     }
 
     private static void lcProperties(Properties pr) {
