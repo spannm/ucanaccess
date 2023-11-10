@@ -29,8 +29,6 @@ public class UcanaccessConnection implements Connection {
     private boolean                     checkModified = false;
     private boolean                     autoCommit    = true;
     private Properties                  clientInfo;
-    // test only!!!!
-    private boolean                     testRollback;
     private Session                     session;
     private SQLWarning                  warnings;
     private String                      url;
@@ -97,16 +95,6 @@ public class UcanaccessConnection implements Connection {
         if (currentStatement != null) {
             currentStatement.setGeneratedKey(key);
         }
-    }
-
-    boolean isTestRollback() {
-        return testRollback;
-    }
-
-    // test only!!!!
-    @SuppressWarnings("unused")
-    private void setTestRollback(boolean _testRollback) {
-        testRollback = _testRollback;
     }
 
     public void addFunctions(Class<?> clazz) throws SQLException {
@@ -282,9 +270,9 @@ public class UcanaccessConnection implements Connection {
                 }
 
             }
-            if (testRollback) {
-                throw new UcanaccessRuntimeException("PhysicalRollbackTest");
-            }
+
+            afterFlushIoHook();
+
         } catch (Throwable _t) {
             _t.printStackTrace();
             hsqlDBConnection.rollback();
@@ -317,6 +305,12 @@ public class UcanaccessConnection implements Connection {
             throw new UcanaccessSQLException(_ex);
         }
 
+    }
+
+    /**
+     * Extension hook called towards end of {@link #flushIO()}.
+     */
+    void afterFlushIoHook() {
     }
 
     private void finalizeEnlistedResources() {

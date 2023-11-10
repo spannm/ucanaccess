@@ -6,12 +6,14 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.mockito.Mockito;
 
-import java.lang.reflect.Method;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,101 +37,100 @@ class ComplexTest extends UcanaccessBaseTest {
     }
 
     private void complex0() throws SQLException {
-        PreparedStatement ps = null;
-        ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM TABLE1 WHERE contains([MULTI-VALUE-DATA],?)");
-        ps.setObject(1, SingleValue.multipleValue("value1", "value2"));
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        assertEquals(2, rs.getInt(1));
-        ps.setObject(1, new SingleValue("value1"));
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(3, rs.getInt(1));
-        ps.close();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex WHERE contains([multi-value-data], ?)")) {
+            ps.setObject(1, SingleValue.multipleValue("value1", "value2"));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals(2, rs.getInt(1));
+            ps.setObject(1, new SingleValue("value1"));
+            rs = ps.executeQuery();
+            rs.next();
+            assertEquals(3, rs.getInt(1));
+        }
 
-        ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM TABLE1 WHERE EQUALS([MULTI-VALUE-DATA],?)");
-        ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(0, rs.getInt(1));
-        ps.setObject(1, SingleValue.multipleValue("value1", "value4"));
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(1, rs.getInt(1));
-        ps.close();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex WHERE EQUALS([multi-value-data], ?)")) {
+            ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
+            ResultSet rs1 = ps.executeQuery();
+            rs1.next();
+            assertEquals(0, rs1.getInt(1));
+            ps.setObject(1, SingleValue.multipleValue("value1", "value4"));
+            rs1 = ps.executeQuery();
+            rs1.next();
+            assertEquals(1, rs1.getInt(1));
+        }
 
-        ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM TABLE1 WHERE EQUALSIGNOREORDER([MULTI-VALUE-DATA],?)");
-        ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(1, rs.getInt(1));
-        ps.close();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex WHERE EQUALSIGNOREORDER([multi-value-data],?)")) {
+            ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
+            ResultSet rs2 = ps.executeQuery();
+            rs2.next();
+            assertEquals(1, rs2.getInt(1));
+        }
     }
 
-    private void complex1() throws Exception {
-        dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
-        checkQuery("SELECT * FROM Table1 ORDER BY id");
-        PreparedStatement ps =
-            ucanaccess.prepareStatement(
-                "INSERT INTO TABLE1(ID, [MEMO-DATA], [APPEND-MEMO-DATA], [MULTI-VALUE-DATA], [ATTACH-DATA]) "
-                    + "VALUES (?,?,?,?,?)");
+    private void complex1() throws SQLException, IOException {
+        dumpQueryResult("SELECT * FROM t_complex ORDER BY id");
+        checkQuery("SELECT * FROM t_complex ORDER BY id");
 
-        ps.setString(1, "row12");
-        ps.setString(2, "ciao");
-        ps.setString(3, "to version");
-        SingleValue[] svs = new SingleValue[] {new SingleValue("ccc16"), new SingleValue("ccc24")};
-        ps.setObject(4, svs);
-        LocalDateTime now = LocalDateTime.now();
-        Attachment[] atcs = new Attachment[] {
-            new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), now, null),
-            new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), now, null)};
-        ps.setObject(5, atcs);
-        ps.execute();
-        dumpQueryResult("SELECT * FROM Table1 ORDER BY id");
-        checkQuery("SELECT * FROM Table1 ORDER BY id");
-        ps.close();
-        ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE CAT' ");
-        ps.execute();
-        ps.close();
-        ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [ATTACH-DATA]=? WHERE ID=?");
+        try (PreparedStatement ps = ucanaccess.prepareStatement(
+            "INSERT INTO t_complex(id, [memo-data], [append-memo-data], [multi-value-data], [attach-data]) "
+                + "VALUES (?,?,?,?,?)")) {
+            ps.setString(1, "row12");
+            ps.setString(2, "ciao");
+            ps.setString(3, "to version");
+            ps.setObject(4, new SingleValue[] {new SingleValue("ccc16"), new SingleValue("ccc24")});
+            LocalDateTime now = LocalDateTime.now();
+            Attachment[] atcs = new Attachment[] {
+                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), now, null),
+                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), now, null)};
+            ps.setObject(5, atcs);
+            ps.execute();
+            dumpQueryResult("SELECT * FROM t_complex ORDER BY id");
+            checkQuery("SELECT * FROM t_complex ORDER BY id");
+        }
+
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_complex SET [append-memo-data]='THE CAT'")) {
+            ps.execute();
+        }
+
         Attachment[] atc = new Attachment[] {new Attachment(null, "cccsss.cvs", "cvs",
             "ddddd ;sssssssssssssssssssddd".getBytes(), LocalDateTime.now(), null)};
-        ps.setObject(1, atc);
-        ps.setString(2, "row12");
-        ps.execute();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_complex SET [attach-data]=? WHERE id=?")) {
+            ps.setObject(1, atc);
+            ps.setString(2, "row12");
+            ps.execute();
+        }
 
-        ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM Table1 where EQUALS([ATTACH-DATA],?) ");
-        ps.setObject(1, atc);
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        assertEquals(1, rs.getInt(1));
-        ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [MULTi-VALUE-DATA]=? ");
-        svs = new SingleValue[] {new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee")};
-        ps.setObject(1, svs);
-        ps.execute();
-        checkQuery("SELECT * FROM TABLE1 ORDER BY id");
-        assertEquals(7, getCount("SELECT COUNT(*) FROM TABLE1"));
-        ps.close();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex where EQUALS([attach-data],?) ")) {
+            ps.setObject(1, atc);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals(1, rs.getInt(1));
+        }
+
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_complex SET [multi-value-data]=?")) {
+            SingleValue[] svs = new SingleValue[] {new SingleValue("aaaaaaa14"), new SingleValue("2eeeeeeeeeee")};
+            ps.setObject(1, svs);
+            ps.execute();
+            checkQuery("SELECT * FROM t_complex ORDER BY id");
+            assertEquals(7, getCount("SELECT COUNT(*) FROM t_complex"));
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
-    void testComplexRollback(AccessVersion _accessVersion) throws Exception {
+    void testComplexRollback(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        // ucanaccess = Mockito.spy(ucanaccess);
-        // Mockito.when(ucanaccess.afterFlushIoHook()).thenReturn(...);
-
-        int countBefore = getCount("SELECT COUNT(*) FROM TABLE1");
-
+        ucanaccess = Mockito.spy(ucanaccess);
+        Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))
+            .when(ucanaccess).afterFlushIoHook();
+        
         ucanaccess.setAutoCommit(false);
 
-        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
-        mth.setAccessible(true);
-        mth.invoke(ucanaccess, Boolean.TRUE);
+        int countBefore = getCount("SELECT COUNT(*) FROM t_complex");
 
         try (PreparedStatement ps = ucanaccess.prepareStatement(
-            "INSERT INTO TABLE1(ID, [MEMO-DATA], [APPEND-MEMO-DATA], [MULTI-VALUE-DATA], [ATTACH-DATA]) VALUES (?,?,?,?,?)")) {
+            "INSERT INTO t_complex(id, [memo-data], [append-memo-data], [multi-value-data], [attach-data]) VALUES (?,?,?,?,?)")) {
 
             ps.setString(1, "row123");
             ps.setString(2, "ciao");
@@ -143,19 +144,20 @@ class ComplexTest extends UcanaccessBaseTest {
             ps.execute();
         }
 
-        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE TABLE1 SET [APPEND-MEMO-DATA]='THE BIG BIG CAT' WHERE ID='row12'")) {
+        try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_complex SET [append-memo-data]='THE BIG BIG CAT' WHERE id='row12'")) {
             ps.execute();
         }
-        dumpQueryResult("SELECT * FROM TABLE1");
+        dumpQueryResult("SELECT * FROM t_complex");
 
         assertThatThrownBy(() -> ucanaccess.commit())
             .isInstanceOf(UcanaccessSQLException.class)
-            .hasMessageEndingWith("PhysicalRollbackTest");
+            .hasMessageEndingWith("testComplexRollback");
 
         ucanaccess = getUcanaccessConnection();
-        checkQuery("SELECT * FROM TABLE1 ORDER BY id");
-        dumpQueryResult("SELECT * FROM TABLE1");
-        checkQuery("SELECT * FROM TABLE1 WHERE ID='row12' ORDER BY id");
-        assertEquals(countBefore, getCount("SELECT COUNT(*) FROM TABLE1"));
+        checkQuery("SELECT * FROM t_complex ORDER BY id");
+        dumpQueryResult("SELECT * FROM t_complex");
+        checkQuery("SELECT * FROM t_complex WHERE id='row12' ORDER BY id");
+        assertEquals(countBefore, getCount("SELECT COUNT(*) FROM t_complex"));
     }
+
 }

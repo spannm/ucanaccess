@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -33,22 +34,24 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
-    void testCommit(AccessVersion _accessVersion) throws Exception {
+    void testCommit(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
+
+        ucanaccess = Mockito.spy(ucanaccess);
+        Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))
+            .when(ucanaccess).afterFlushIoHook();
+
         ucanaccess.setAutoCommit(false);
 
-        Method mth = UcanaccessConnection.class.getDeclaredMethod("setTestRollback", boolean.class);
-        mth.setAccessible(true);
-        mth.invoke(ucanaccess, Boolean.TRUE);
-        Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO T4 (id, descr) VALUES(6666554, 'nel mezzo del cammin di nostra vita')");
-        st.execute("INSERT INTO T4 (id, descr) VALUES(77666554, 'nel mezzo del cammin di nostra vita')");
-        st.execute("UPDATE T4 SET ID=0 WHERE id=77666554");
+        try (Statement st = ucanaccess.createStatement()) {
+            st.execute("INSERT INTO T4 (id, descr) VALUES(6666554, 'nel mezzo del cammin di nostra vita')");
+            st.execute("INSERT INTO T4 (id, descr) VALUES(77666554, 'nel mezzo del cammin di nostra vita')");
+            st.execute("UPDATE T4 SET ID=0 WHERE id=77666554");
 
-        st.execute("INSERT INTO T4 (id, descr) VALUES(4, 'nel mezzo del cammin di nostra vita')");
+            st.execute("INSERT INTO T4 (id, descr) VALUES(4, 'nel mezzo del cammin di nostra vita')");
 
-        st.execute("DELETE FROM T4 WHERE id=4");
-
+            st.execute("DELETE FROM T4 WHERE id=4");
+        }
         assertThatThrownBy(() -> ucanaccess.commit())
             .isInstanceOf(SQLException.class)
             .hasMessageContaining(getClass().getSimpleName());
