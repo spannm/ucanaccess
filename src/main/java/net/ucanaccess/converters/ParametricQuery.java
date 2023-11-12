@@ -236,7 +236,7 @@ public class ParametricQuery {
         }
         List<String> params = SQLConverter.getParameters(s);
         Map<String, String> parem = new HashMap<>();
-        getParametersEmpiric(hm, params, parem, s);
+        doParametersEmpiric(hm, params, parem, s);
     }
 
     public Exception getException() {
@@ -333,7 +333,7 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void getParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem, String sql) {
+    private void doParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem, String sql) {
         String psTxt = null;
         try {
             psTxt = convertSQL(sql, _parameters);
@@ -403,7 +403,7 @@ public class ParametricQuery {
                     parem.put(par1, par);
                     String parname = originalParameters.length() == 0 ? par : "," + par;
                     originalParameters.append(parname);
-                    getParametersEmpiric(_psmp, _parameters, parem, sql);
+                    doParametersEmpiric(_psmp, _parameters, parem, sql);
 
                 } else {
                     exception = _ex;

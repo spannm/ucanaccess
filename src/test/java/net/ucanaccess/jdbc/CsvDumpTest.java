@@ -61,7 +61,7 @@ class CsvDumpTest extends UcanaccessBaseTest {
 
         try (Statement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
-            Exporter exporter = new Exporter.Builder().setDelimiter(";").build();
+            Exporter exporter = new Exporter.Builder().withDelimiter(";").build();
             exporter.dumpCsv(rs, ps);
         }
 
@@ -82,7 +82,7 @@ class CsvDumpTest extends UcanaccessBaseTest {
             Statement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
 
-            Exporter exporter = new Exporter.Builder().setDelimiter(";").build();
+            Exporter exporter = new Exporter.Builder().withDelimiter(";").build();
             exporter.dumpSchema(rs, ps);
             String actual = baos.toString(StandardCharsets.UTF_8);
             assertEquals(EXPECTED_SCHEMA, actual);

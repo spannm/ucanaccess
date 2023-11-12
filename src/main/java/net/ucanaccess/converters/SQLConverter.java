@@ -774,26 +774,20 @@ public final class SQLConverter {
         return escaped;
     }
 
-    public static String checkLang(String name, Connection conn) throws SQLException {
-        return checkLang(name, conn, true);
+    public static String checkLang(String _name, Connection _conn) throws SQLException {
+        return checkLang(_name, _conn, true);
     }
 
-    public static String checkLang(String name, Connection conn, boolean quote) throws SQLException {
-        Statement st = null;
-        try {
-            String name0 = name;
-            if (!quote) {
-                name0 = name.replaceAll(Pattern.quote("["), "\"").replaceAll(Pattern.quote("]"), "\"");
-            }
-            st = conn.createStatement();
-            st.execute("SELECT 1 AS " + name0 + " FROM dual");
-            return name;
+    public static String checkLang(String _name, Connection _conn, boolean _quote) throws SQLException {
+        String name = _name;
+        if (!_quote) {
+            name = _name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
+        }
+        try (Statement st = _conn.createStatement()) {
+            st.execute("SELECT 1 AS " + name + " FROM dual");
+            return _name;
         } catch (SQLException _ex) {
-            return quote ? "\"" + name + "\"" : "[" + name + "]";
-        } finally {
-            if (st != null) {
-                st.close();
-            }
+            return _quote ? "\"" + _name + "\"" : "[" + _name + "]";
         }
     }
 

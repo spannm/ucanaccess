@@ -799,50 +799,52 @@ public class LoadJet {
             loadTableData(t, systemTable, false);
         }
 
-        private void loadTableData(Table t, boolean systemTable, boolean errorCheck) throws IOException, SQLException {
-            TimeZone prevJackcessTimeZone = t.getDatabase().getTimeZone();
-            t.getDatabase().setTimeZone(TimeZone.getTimeZone("UTC"));
+        @SuppressWarnings("PMD.UseTryWithResources")
+        private void loadTableData(Table _t, boolean _systemTable, boolean _errorCheck) throws IOException, SQLException {
+            TimeZone prevJackcessTimeZone = _t.getDatabase().getTimeZone();
+            _t.getDatabase().setTimeZone(TimeZone.getTimeZone("UTC"));
+            int step = _errorCheck ? 1 : DEFAULT_STEP;
+            int i = 0;
             PreparedStatement ps = null;
-            int step = errorCheck ? 1 : DEFAULT_STEP;
+
             try {
-                int i = 0;
-                Iterator<Row> it = t.iterator();
+                Iterator<Row> it = _t.iterator();
 
                 while (it.hasNext()) {
                     Row row = it.next();
-                    List<Object> values = new ArrayList<>();
                     if (row == null) {
                         continue;
                     }
+                    List<Object> values = new ArrayList<>();
                     if (ps == null) {
-                        ps = sqlInsert(t, row, systemTable);
+                        ps = sqlInsert(_t, row, _systemTable);
                     }
                     for (Map.Entry<String, Object> entry : row.entrySet()) {
-                        values.add(value(entry.getValue(), t, entry.getKey(), row));
+                        values.add(value(entry.getValue(), _t, entry.getKey(), row));
                     }
                     tablesLoader.execInsert(ps, values);
 
-                    if (errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
+                    if (_errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
                         try {
                             ps.executeBatch();
                         } catch (SQLException _ex) {
                             int ec = _ex.getErrorCode();
-                            if (!errorCheck && ec == HSQL_NOT_NULL) {
-                                dropTable(t, systemTable);
-                                createSyncrTable(t, systemTable, true);
-                                loadTableData(t, systemTable, true);
+                            if (!_errorCheck && ec == HSQL_NOT_NULL) {
+                                dropTable(_t, _systemTable);
+                                createSyncrTable(_t, _systemTable, true);
+                                loadTableData(_t, _systemTable, true);
                             } else {
                                 if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
                                     if (ec == HSQL_FK_VIOLATION) {
                                         Logger.logWarning(_ex.getMessage());
                                     }
-                                    recreate(t, systemTable, row, _ex.getErrorCode());
+                                    recreate(_t, _systemTable, row, _ex.getErrorCode());
                                 } else {
                                     throw _ex;
                                 }
                             }
                         }
-                        if (errorCheck) {
+                        if (_errorCheck) {
                             conn.rollback();
                         } else {
                             conn.commit();
@@ -851,8 +853,8 @@ public class LoadJet {
                     i++;
 
                 }
-                if (i != t.getRowCount() && step != 1) {
-                    Logger.logWarning(LoggerMessageEnum.ROW_COUNT, t.getName(), String.valueOf(t.getRowCount()),
+                if (i != _t.getRowCount() && step != 1) {
+                    Logger.logWarning(LoggerMessageEnum.ROW_COUNT, _t.getName(), String.valueOf(_t.getRowCount()),
                             String.valueOf(i));
 
                 }
@@ -861,7 +863,7 @@ public class LoadJet {
                     ps.close();
                 }
             }
-            t.getDatabase().setTimeZone(prevJackcessTimeZone);
+            _t.getDatabase().setTimeZone(prevJackcessTimeZone);
         }
 
         private void loadTableFKs(String tn, boolean autoref) throws IOException, SQLException {
@@ -1116,8 +1118,7 @@ public class LoadJet {
     private final class TriggersLoader {
         private static final String DEFAULT_TRIGGERS_PACKAGE = "net.ucanaccess.triggers";
 
-        private void loadTrigger(String tableName, String namePrefix, String when, String className)
-                throws SQLException {
+        void loadTrigger(String tableName, String namePrefix, String when, String className) throws SQLException {
             String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
             String triggerName = namePrefix + "_" + tableName;
             // .replaceAll(" ", "_"));
@@ -1126,13 +1127,11 @@ public class LoadJet {
                     + " CALL \"" + className + "\" ", true);
         }
 
-        private void loadTriggerNP(String tableName, String namePrefix, String when, String className)
-                throws SQLException {
+        void loadTriggerNP(String tableName, String namePrefix, String when, String className) throws SQLException {
             loadTrigger(tableName, namePrefix, when, DEFAULT_TRIGGERS_PACKAGE + "." + className);
         }
 
-        private void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAutoAppendOnly)
-                throws SQLException {
+        void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAutoAppendOnly) throws SQLException {
             loadTriggerNP(tableName, "genericInsert", "AFTER INSERT", "TriggerInsert");
             loadTriggerNP(tableName, "genericUpdate", "AFTER UPDATE", "TriggerUpdate");
             loadTriggerNP(tableName, "genericDelete", "AFTER DELETE", "TriggerDelete");
@@ -1519,6 +1518,7 @@ public class LoadJet {
         functionsLoader.resetDefault();
     }
 
+    @SuppressWarnings("PMD.UseTryWithResources")
     public void loadDB() throws SQLException, IOException {
         try {
             functionsLoader.loadMappedFunctions();

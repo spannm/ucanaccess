@@ -1,6 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
@@ -49,8 +50,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             argClasses = _argClasses;
         }
 
-        private void execute() {
-            try {
+        void execute() {
+            Try.catching(() -> {
                 Method mth = PreparedStatement.class.getDeclaredMethod(methodName, argClasses);
                 mth.invoke(wrapped, args);
                 if (args[1] instanceof StringReader) {
@@ -61,9 +62,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
                     && ("setAsciiStream".equals(methodName) || "setUnicodeStream".equals(methodName))) {
                     ((InputStream) args[1]).reset();
                 }
-            } catch (Exception _ex) {
-                throw new UcanaccessRuntimeException(_ex);
-            }
+            }).orThrow(UcanaccessRuntimeException::new);
         }
 
     }

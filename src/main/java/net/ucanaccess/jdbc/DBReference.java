@@ -335,12 +335,12 @@ public class DBReference {
         return id;
     }
 
-    private String key(String _pwd) throws SQLException {
+    private String getKey() throws SQLException {
         if (encryptionKey == null) {
             String url = "jdbc:hsqldb:mem:" + id + "_tmp";
             try (Connection conn = DriverManager.getConnection(url);
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("CALL  CRYPT_KEY('" + CIPHER_SPEC + "', null) ")) {
+                ResultSet rs = stmt.executeQuery("CALL CRYPT_KEY('" + CIPHER_SPEC + "', null) ")) {
                 rs.next();
                 encryptionKey = rs.getString(1);
             }
@@ -356,7 +356,7 @@ public class DBReference {
             String enc = "";
             String log = "";
             if (encryptHSQLDB) {
-                enc = ";crypt_key=" + key("AES") + ";crypt_type=aes;crypt_lobs=true";
+                enc = ";crypt_key=" + getKey() + ";crypt_type=aes;crypt_lobs=true";
             }
             if (!inMemory && toKeepHsql == null) {
                 log = ";hsqldb.log_data=FALSE";
@@ -635,22 +635,22 @@ public class DBReference {
             }
         }
 
-        private synchronized int getActiveConnection() {
+        synchronized int getActiveConnection() {
             return activeConnection;
         }
 
-        private synchronized long getLastConnectionTime() {
+        synchronized long getLastConnectionTime() {
             return lastConnectionTime;
         }
 
-        private synchronized void incrementActiveConnection() {
+        synchronized void incrementActiveConnection() {
             activeConnection++;
             if (dbReference.inMemory && inactivityTimeout > 0) {
                 lastConnectionTime = System.currentTimeMillis();
             }
         }
 
-        private void setInactivityTimeout(int _inactivityTimeout) {
+        void setInactivityTimeout(int _inactivityTimeout) {
             inactivityTimeout = _inactivityTimeout;
         }
     }

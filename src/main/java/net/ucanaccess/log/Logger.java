@@ -10,7 +10,7 @@ public final class Logger {
 
     private static PrintWriter    logPrintWriter;
     /** The resource bundle with logger messages. */
-    private static ResourceBundle messageBundle = ResourceBundle.getBundle(LoggerResourceMessage.BUNDLE_NAME);
+    private static ResourceBundle messageBundle = ResourceBundle.getBundle(ILoggerResourceMessage.BUNDLE_NAME);
 
     private Logger() {
     }
@@ -36,7 +36,7 @@ public final class Logger {
         return msg;
     }
 
-    public static String getMessage(LoggerResourceMessage _code, Object... _params) {
+    public static String getMessage(ILoggerResourceMessage _code, Object... _params) {
         return _code == null ? null : getMessage(_code.name(), _params);
     }
 
@@ -55,7 +55,7 @@ public final class Logger {
         System.err.println("WARNING: " + _warning);
     }
 
-    public static void logWarning(LoggerResourceMessage _code, String... _par) {
+    public static void logWarning(ILoggerResourceMessage _code, String... _par) {
         logWarning(getMessage(_code, (Object[]) _par));
     }
 

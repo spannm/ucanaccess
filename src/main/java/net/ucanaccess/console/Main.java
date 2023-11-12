@@ -304,7 +304,7 @@ public class Main {
                         prompt(EXPORT_PROMPT);
                         return;
                     }
-                    exporterBuilder.setDelimiter(tokens.get(i));
+                    exporterBuilder.withDelimiter(tokens.get(i));
                     break;
                 case "-t":
                     ++i;

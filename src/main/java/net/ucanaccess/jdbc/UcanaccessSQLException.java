@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.log.ILoggerResourceMessage;
 import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerResourceMessage;
 import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 public class UcanaccessSQLException extends SQLException {
 
-    public enum ExceptionMessages implements LoggerResourceMessage {
+    public enum ExceptionMessages implements ILoggerResourceMessage {
         CONCURRENT_PROCESS_ACCESS,
         INVALID_CREATE_STATEMENT,
         INVALID_INTERVAL_VALUE,

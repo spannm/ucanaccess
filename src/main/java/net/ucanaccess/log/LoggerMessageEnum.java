@@ -1,6 +1,6 @@
 package net.ucanaccess.log;
 
-public enum LoggerMessageEnum implements LoggerResourceMessage  {
+public enum LoggerMessageEnum implements ILoggerResourceMessage  {
     HSQLDB_DRIVER_NOT_FOUND,
     COMPLEX_TYPE_UNSUPPORTED,
     KEEP_MIRROR_AND_OTHERS,

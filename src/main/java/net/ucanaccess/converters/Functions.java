@@ -179,7 +179,7 @@ public final class Functions {
     @FunctionType(functionName = "CSIGN", argumentTypes = { AccessType.DOUBLE }, returnType = AccessType.SINGLE)
     public static double csign(double _value) {
         MathContext mc = new MathContext(7);
-        return new BigDecimal(_value, mc).doubleValue();
+        return new BigDecimal(Double.toString(_value), mc).doubleValue();
     }
 
     @FunctionType(functionName = "CSTR", argumentTypes = { AccessType.YESNO }, returnType = AccessType.MEMO)

@@ -9,7 +9,6 @@ import net.ucanaccess.util.Try;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -41,10 +40,8 @@ public class Pivot {
         conn = _conn;
     }
 
-    private void cachePrepare(String name) {
-        if (pivotIn != null) {
-            PREPARE_MAP.put(name, pivotIn);
-        }
+    private void cachePrepare(String _name) {
+        Optional.ofNullable(pivotIn).ifPresent(p -> PREPARE_MAP.put(_name, p));
     }
 
     public static void clearPrepared() {
@@ -52,33 +49,30 @@ public class Pivot {
 
     }
 
-    private void getPrepareFromCache(String name) {
-        if (PREPARE_MAP.containsKey(name)) {
-            pivotIn = PREPARE_MAP.get(name);
-        }
+    private void prepareGetFromCache(String _name) {
+        pivotIn = PREPARE_MAP.getOrDefault(_name, pivotIn);
     }
 
-    public void registerPivot(String name) {
+    public void registerPivot(String _name) {
         if (!pivotInCondition) {
-            PIVOT_MAP.put(name, originalQuery);
+            PIVOT_MAP.put(_name, originalQuery);
         }
     }
 
-    public static void checkAndRefreshPivot(String currSql, UcanaccessConnection conu) {
+    public static void checkAndRefreshPivot(String _currSql, UcanaccessConnection _conn) {
 
         for (String name : PIVOT_MAP.keySet()) {
             Pattern ptrn = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
-            Matcher mtc = ptrn.matcher(currSql);
+            Matcher mtc = ptrn.matcher(_currSql);
             if (mtc.find()) {
-                Statement st = null;
                 try {
-                    if (conu == null && UcanaccessConnection.hasContext()) {
-                        conu = UcanaccessConnection.getCtxConnection();
+                    if (_conn == null && UcanaccessConnection.hasContext()) {
+                        _conn = UcanaccessConnection.getCtxConnection();
                     }
-                    if (conu == null) {
+                    if (_conn == null) {
                         return;
                     }
-                    Connection conh = conu.getHSQLDBConnection();
+                    Connection conh = _conn.getHSQLDBConnection();
                     Pivot pivot = new Pivot(conh);
 
                     if (!pivot.parsePivot(PIVOT_MAP.get(name))) {
@@ -88,32 +82,26 @@ public class Pivot {
                     if (sqlh == null) {
                         return;
                     }
-                    st = conh.createStatement();
-                    String escqn = SQLConverter.completeEscaping(name, false);
+                    try (Statement st = conh.createStatement()) {
+                        String escqn = SQLConverter.completeEscaping(name, false);
 
-                    st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
-                    NormalizedSQL nsql = SQLConverter.convertSQL("CREATE VIEW " + escqn + " AS " + sqlh, true);
-                    Metadata mt = new Metadata(conh);
-                    String eqn = SQLConverter.preEscapingIdentifier(name);
-                    Integer idTable = mt.getTableId(eqn);
-                    if (idTable != null) {
-                        for (Map.Entry<String, String> entry : nsql.getAliases().entrySet()) {
-                            if (mt.getColumnName(eqn, entry.getKey()) == null) {
-                                mt.newColumn(entry.getValue(), entry.getKey(), null, idTable);
+                        st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
+                        NormalizedSQL nsql = SQLConverter.convertSQL("CREATE VIEW " + escqn + " AS " + sqlh, true);
+                        Metadata mt = new Metadata(conh);
+                        String eqn = SQLConverter.preEscapingIdentifier(name);
+                        Integer idTable = mt.getTableId(eqn);
+                        if (idTable != null) {
+                            for (Map.Entry<String, String> entry : nsql.getAliases().entrySet()) {
+                                if (mt.getColumnName(eqn, entry.getKey()) == null) {
+                                    mt.newColumn(entry.getValue(), entry.getKey(), null, idTable);
+                                }
                             }
                         }
+                        String v = nsql.getSql();
+                        st.executeUpdate(v);
                     }
-                    String v = nsql.getSql();
-                    st.executeUpdate(v);
                 } catch (Exception _ex) {
                     Logger.logWarning(_ex.getMessage());
-                } finally {
-                    if (st != null) {
-                        try {
-                            st.close();
-                        } catch (SQLException ignored) {
-                        }
-                    }
                 }
             }
         }
@@ -227,7 +215,7 @@ public class Pivot {
     public String toSQL(String name) {
         if (pivotIn == null) {
             if (name != null && PREPARE_MAP.containsKey(name)) {
-                getPrepareFromCache(name);
+                prepareGetFromCache(name);
             } else if (prepare()) {
                 cachePrepare(name);
             } else {
