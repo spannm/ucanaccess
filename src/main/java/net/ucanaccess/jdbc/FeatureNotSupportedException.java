@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.log.ILoggerResourceMessage;
 import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerResourceMessage;
 
 /**
  * @deprecated Implement missing features or throw general Ucanacess exception.
@@ -9,7 +9,7 @@ import net.ucanaccess.log.LoggerResourceMessage;
 @Deprecated(forRemoval = true)
 public class FeatureNotSupportedException extends java.sql.SQLFeatureNotSupportedException {
 
-    public enum NotSupportedMessage implements LoggerResourceMessage {
+    public enum NotSupportedMessage implements ILoggerResourceMessage {
         NOT_SUPPORTED,
         NOT_SUPPORTED_YET
     }
