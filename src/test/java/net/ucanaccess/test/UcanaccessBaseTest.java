@@ -163,39 +163,38 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (i > 0) {
                     log.append(",");
                 }
-                Object ob1 = _resultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
+                Object objActual = _resultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
                     ? _resultSet.getBoolean(i + 1)
                     : _resultSet.getObject(i + 1);
-                Object ob2 = _verifyResultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
+                Object objExpected = _verifyResultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
                     ? _verifyResultSet.getBoolean(i + 1)
                     : _verifyResultSet.getObject(i + 1);
 
-                if (ob1 == null && ob2 == null) {
-                    // both null, ok
-                    assertNull(ob1);
-                } else if (ob1 == null) {
-                    assertNull(ob2, "Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + ob2 + " in [" + _query + "]");
+                if (objActual == null && objExpected == null) {
+                    continue;
+                } else if (objActual == null) {
+                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + objExpected + " in [" + _query + "]");
                 } else {
-                    if (ob1 instanceof Blob) {
-                        byte[] bt = Try.withResources(((Blob) ob1)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        byte[] btodbc = Try.withResources(((Blob) ob1)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        for (int y = 0; y < btodbc.length; y++) {
-                            assertEquals(btodbc[y], bt[y]);
+                    if (objActual instanceof Blob) {
+                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        for (int y = 0; y < barrExpected.length; y++) {
+                            assertEquals(barrExpected[y], barrActual[y]);
                         }
-                    } else if (ob1 instanceof ComplexBase[] && ob2 instanceof ComplexBase[]) {
-                        assertArrayEquals((ComplexBase[]) ob1, (ComplexBase[]) ob2);
+                    } else if (objActual instanceof ComplexBase[] && objExpected instanceof ComplexBase[]) {
+                        assertArrayEquals((ComplexBase[]) objExpected, (ComplexBase[]) objActual);
                     } else {
-                        if (ob1 instanceof Number && ob2 instanceof Number) {
-                            BigDecimal ob1b = new BigDecimal(ob1.toString());
-                            BigDecimal ob2b = new BigDecimal(ob2.toString());
-                            ob1 = ob1b.doubleValue();
-                            ob2 = ob2b.doubleValue();
+                        if (objActual instanceof Number && objExpected instanceof Number) {
+                            BigDecimal ob1b = new BigDecimal(objActual.toString());
+                            BigDecimal ob2b = new BigDecimal(objExpected.toString());
+                            objActual = ob1b.doubleValue();
+                            objExpected = ob2b.doubleValue();
                         }
-                        if (ob1 instanceof Date && ob2 instanceof Date) {
-                            ob1 = ((Date) ob1).getTime();
-                            ob2 = ((Date) ob2).getTime();
+                        if (objActual instanceof Date && objExpected instanceof Date) {
+                            objActual = ((Date) objActual).getTime();
+                            objExpected = ((Date) objExpected).getTime();
                         }
-                        assertEquals(ob1, ob2);
+                        assertEquals(objExpected, objActual);
                     }
                 }
             }
