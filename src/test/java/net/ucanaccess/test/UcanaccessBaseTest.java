@@ -102,28 +102,27 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression) throws SQLException {
-        ResultSetMetaData rsMetaData = _resultSet.getMetaData();
-        int mycolmax = rsMetaData.getColumnCount();
+        int colCountActual = _resultSet.getMetaData().getColumnCount();
         if (_expectedResults.length > 0) {
-            assertEquals(mycolmax, _expectedResults[0].length);
+            assertEquals(_expectedResults[0].length, colCountActual);
         }
-        int j = 0;
+        int expIdx = 0;
         while (_resultSet.next()) {
-            for (int i = 0; i < mycolmax; ++i) {
-                assertThat(j)
-                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + j)
+            for (int col = 1; col <= colCountActual; col++) {
+                assertThat(expIdx)
+                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + expIdx)
                     .isLessThan(_expectedResults.length);
-                Object actualObj = _resultSet.getObject(i + 1);
-                Object expectedObj = _expectedResults[j][i];
+                Object actualObj = _resultSet.getObject(col);
+                Object expectedObj = _expectedResults[expIdx][col - 1];
                 if (expectedObj == null) {
                     assertNull(actualObj);
                 } else {
                     if (actualObj instanceof Blob) {
 
-                        byte[] bt = Try.withResources((Blob.class.cast(actualObj))::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        byte[] btMtx = (byte[]) expectedObj;
-                        for (int y = 0; y < btMtx.length; y++) {
-                            assertEquals(btMtx[y], bt[y]);
+                        byte[] barrActual = Try.withResources((Blob.class.cast(actualObj))::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrExpected = (byte[]) expectedObj;
+                        for (int y = 0; y < barrExpected.length; y++) {
+                            assertEquals(barrExpected[y], barrActual[y]);
                         }
                     } else {
                         if (actualObj instanceof Number && expectedObj instanceof Number) {
@@ -140,17 +139,16 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                     }
                 }
             }
-            j++;
+            expIdx++;
         }
-        assertEquals(_expectedResults.length, j, "Matrix with different length was expected");
+        assertEquals(_expectedResults.length, expIdx, "Matrix with different length was expected");
     }
 
     public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException {
-        ResultSetMetaData msMetaData = _resultSet.getMetaData();
-        int mycolmax = msMetaData.getColumnCount();
-        ResultSetMetaData verifyRsMetaData = _verifyResultSet.getMetaData();
-        int jocolmax = verifyRsMetaData.getColumnCount();
-        assertEquals(jocolmax, mycolmax);
+        int colCountActual = _resultSet.getMetaData().getColumnCount();
+        int colCountExpected = _verifyResultSet.getMetaData().getColumnCount();
+        assertEquals(colCountExpected, colCountActual);
+
         StringBuilder log = new StringBuilder("{");
         int row = 0;
         while (next(_verifyResultSet, _resultSet)) {
@@ -159,21 +157,21 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 log.append(",");
             }
             log.append("{");
-            for (int i = 0; i < mycolmax; ++i) {
-                if (i > 0) {
+            for (int col = 1; col <= colCountActual; col++) {
+                if (col > 1) {
                     log.append(",");
                 }
-                Object objActual = _resultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
-                    ? _resultSet.getBoolean(i + 1)
-                    : _resultSet.getObject(i + 1);
-                Object objExpected = _verifyResultSet.getMetaData().getColumnType(i + 1) == Types.BOOLEAN
-                    ? _verifyResultSet.getBoolean(i + 1)
-                    : _verifyResultSet.getObject(i + 1);
+                Object objActual = _resultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
+                    ? _resultSet.getBoolean(col)
+                    : _resultSet.getObject(col);
+                Object objExpected = _verifyResultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
+                    ? _verifyResultSet.getBoolean(col)
+                    : _verifyResultSet.getObject(col);
 
                 if (objActual == null && objExpected == null) {
                     continue;
                 } else if (objActual == null) {
-                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + (i + 1) + " should be null, but was: " + objExpected + " in [" + _query + "]");
+                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + col + " should be null, but was: " + objExpected + " in [" + _query + "]");
                 } else {
                     if (objActual instanceof Blob) {
                         byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
@@ -350,21 +348,21 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     public int getCount(String _sql, boolean _equals) throws SQLException {
         initVerifyConnection();
         Statement st = verifyConnection.createStatement();
-        ResultSet joRs = st.executeQuery(_sql);
-        joRs.next();
-        int count = joRs.getInt(1);
+        ResultSet expectedResultset = st.executeQuery(_sql);
+        expectedResultset.next();
+        int expectedCount = expectedResultset.getInt(1);
 
         st = ucanaccess.createStatement();
-        ResultSet myRs = st.executeQuery(_sql);
-        myRs.next();
-        int myCount = myRs.getInt(1);
+        ResultSet actualResultset = st.executeQuery(_sql);
+        actualResultset.next();
+        int actualCount = actualResultset.getInt(1);
 
         if (_equals) {
-            assertEquals(count, myCount);
+            assertEquals(expectedCount, actualCount);
         } else {
-            assertNotEquals(count, myCount);
+            assertNotEquals(expectedCount, actualCount);
         }
-        return count;
+        return expectedCount;
     }
 
     public String getName() {
