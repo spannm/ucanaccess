@@ -32,7 +32,7 @@ public class Attachment extends ComplexBase {
         name = _name;
         type = _type;
         data = _data;
-        timeStamp = _timeStamp;
+        timeStamp = handleJackcessLocalDateTimeResolution(_timeStamp);
         flags = _flags;
     }
 
@@ -149,8 +149,8 @@ public class Attachment extends ComplexBase {
 
     @Override
     public String toString() {
-        return "Attachment [url=" + url + ", name=" + name + ", type=" + type + ", data=" + Arrays.toString(data)
-                + ", timeStamp=" + timeStamp + ", flags=" + flags + "]";
+        return String.format("%s[url=%s, name=%s, type=%s, data=%s, timeStamp=%s, flags=%s]",
+            getClass().getSimpleName(),  url, name, type, Arrays.toString(data), timeStamp, flags);
     }
 
 }

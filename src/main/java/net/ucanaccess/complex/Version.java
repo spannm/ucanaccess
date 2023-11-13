@@ -19,11 +19,27 @@ public class Version extends ComplexBase {
     public Version(ComplexValue.Id id, String tableName, String columnName, String _value, LocalDateTime _modifiedDate) {
         super(id, tableName, columnName);
         value = _value;
-        modifiedDate = _modifiedDate;
+        modifiedDate = handleJackcessLocalDateTimeResolution(_modifiedDate);
     }
 
     public Version(String _value, LocalDateTime _modifiedDate) {
         this(CREATE_ID, null, null, _value, _modifiedDate);
+    }
+
+    public LocalDateTime getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(LocalDateTime _modifiedDate) {
+        modifiedDate = _modifiedDate;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String _value) {
+        value = _value;
     }
 
     @Override
@@ -51,14 +67,6 @@ public class Version extends ComplexBase {
         return true;
     }
 
-    public LocalDateTime getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -68,17 +76,9 @@ public class Version extends ComplexBase {
         return result;
     }
 
-    public void setModifiedDate(LocalDateTime _modifiedDate) {
-        modifiedDate = _modifiedDate;
-    }
-
-    public void setValue(String _value) {
-        value = _value;
-    }
-
     @Override
     public String toString() {
-        return "Version [value=" + value + ", modifiedDate=" + modifiedDate + "]";
+        return String.format("%s[value=%s, modifiedDate=%s]", getClass().getSimpleName(), value, modifiedDate);
     }
 
 }

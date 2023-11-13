@@ -7,7 +7,6 @@ import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.util.UcanaccessRuntimeException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -28,7 +27,6 @@ class ComplexTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
-    @Disabled("TODO: Fails with Java 11 under Ubuntu")
     void testComplex(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

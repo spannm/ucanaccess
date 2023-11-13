@@ -22,6 +22,14 @@ public class SingleValue extends ComplexBase {
 
     }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object _value) {
+        value = _value;
+    }
+
     @Override
     public boolean equals(Object _obj) {
         if (this == _obj) {
@@ -40,10 +48,6 @@ public class SingleValue extends ComplexBase {
         return true;
     }
 
-    public Object getValue() {
-        return value;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -52,13 +56,9 @@ public class SingleValue extends ComplexBase {
         return result;
     }
 
-    public void setValue(Object _value) {
-        value = _value;
-    }
-
     @Override
     public String toString() {
-        return "SingleValue [value=" + value + "]";
+        return String.format("%s[value=%s]", getClass().getSimpleName(), value);
     }
 
     public static SingleValue[] multipleValue(String... rv) {

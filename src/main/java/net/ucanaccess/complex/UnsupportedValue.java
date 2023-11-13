@@ -37,16 +37,16 @@ public class UnsupportedValue extends ComplexBase {
         return true;
     }
 
-    public Map<String, Object> getValues() {
-        return values;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + (values == null ? 0 : values.hashCode());
         return result;
+    }
+
+    public Map<String, Object> getValues() {
+        return values;
     }
 
     public void setValues(Map<String, Object> _values) {

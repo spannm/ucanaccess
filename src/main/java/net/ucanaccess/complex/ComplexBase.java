@@ -9,7 +9,9 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class ComplexBase implements Serializable {
     private static final long           serialVersionUID = 1L;
@@ -113,6 +115,26 @@ public abstract class ComplexBase implements Serializable {
             return lat;
         }
         throw new UcanaccessSQLException(ExceptionMessages.COMPLEX_TYPE_UNSUPPORTED);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[id=%s, table=%s, column=%s]", getClass().getSimpleName(), id, tableName, columnName);
+    }
+
+    /**
+     * Converts a local date-time (date/time without timezone) with arbitrary resolution (depends on Java version)
+     * to millisecond-only resolution for compatibility with Jackcess.
+     *
+     * @param _ldt local datetime with arbitrary resolution
+     * @return local datetime with arbitrary resolution
+     */
+    static LocalDateTime handleJackcessLocalDateTimeResolution(LocalDateTime _ldt) {
+        if (_ldt == null) {
+            return _ldt;
+        }
+        long millis = TimeUnit.NANOSECONDS.toMillis(_ldt.getNano());
+        return _ldt.withNano((int) TimeUnit.MILLISECONDS.toNanos(millis));
     }
 
 }
