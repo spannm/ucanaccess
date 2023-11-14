@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
-import java.sql.DriverManager;
 import java.sql.Statement;
 
 class CreateDatabaseTest extends UcanaccessBaseTest {
@@ -19,20 +18,26 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
         File fileMdb = createTempFileName(getClass().getSimpleName());
         fileMdb.deleteOnExit();
 
-        String url = UcanaccessDriver.URL_PREFIX + fileMdb.getAbsolutePath() + ";immediatelyReleaseResources=true;newDatabaseVersion=" + getFileFormat().name();
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        UcanaccessConnection conn = buildConnection()
+            .withDbPath(fileMdb.getAbsolutePath())
+            .withUser("")
+            .withPassword("")
+            .withParm("immediatelyReleaseResources", true)
+            .withParm("newDatabaseVersion", getFileFormat().name())
+            .build();
 
-        UcanaccessConnection ucanaccessConnection = (UcanaccessConnection) DriverManager.getConnection(url, "", "");
-        assertNotNull(ucanaccessConnection);
+        assertNotNull(conn);
         ucanaccess.close();
-        ucanaccess = ucanaccessConnection;
+        ucanaccess = conn;
 
         getLogger().info("Database file successfully created: {}", fileMdb.getAbsolutePath());
 
-        try (Statement st = ucanaccessConnection.createStatement()) {
-            st.execute("CREATE TABLE AAA (baaaa text(3) PRIMARY KEY, A long default 3, C text(4))");
-            st.execute("INSERT INTO AAA(baaaa, c) VALUES ('33A','G' )");
-            st.execute("INSERT INTO AAA VALUES ('33B',111,'G' )");
+        
+        try (Statement st = conn.createStatement()) {
+            executeStatements(st,
+                "CREATE TABLE AAA (baaaa TEXT(3) PRIMARY KEY, A LONG DEFAULT 3, C TEXT(4))",
+                "INSERT INTO AAA(baaaa, c) VALUES ('33A','G' )",
+                "INSERT INTO AAA VALUES ('33B',111,'G' )");
         }
         dumpQueryResult("SELECT * FROM AAA");
     }

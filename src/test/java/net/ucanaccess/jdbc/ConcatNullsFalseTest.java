@@ -7,13 +7,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
-    ConcatNullsFalseTest() {
-        appendToJdbcURL(";concatnulls=false");
-    }
-
     @Override
     protected String getAccessPath() {
         return TEST_DB_DIR + "badDb.accdb";
+    }
+
+    protected UcanaccessConnectionBuilder buildConnection() {
+        return super.buildConnection()
+            .withParm("concatnulls", false);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

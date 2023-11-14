@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
@@ -23,12 +22,11 @@ class FolderTest extends UcanaccessBaseTest {
             return;
         }
 
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-
         File folder = new File(folderPath);
         for (File fl : folder.listFiles()) {
-            String url = UcanaccessDriver.URL_PREFIX + fl.getAbsolutePath();
-            Connection conn = DriverManager.getConnection(url);
+            Connection conn = buildConnection()
+                .withDbPath(fl.getAbsolutePath())
+                .build();
             SQLWarning sqlw = conn.getWarnings();
             getLogger().info("open {}", fl.getAbsolutePath());
             while (sqlw != null) {

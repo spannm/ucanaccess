@@ -32,7 +32,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crud() throws SQLException {
-        try (Connection conn = createUcanaccessConnection(dbPath)) {
+        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
             Statement st = conn.createStatement();
             intVal++;
@@ -43,7 +43,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crudPS() throws SQLException {
-        try (Connection conn = createUcanaccessConnection(dbPath)) {
+        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
             PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr) VALUES(?, ?)");
             ps.setInt(1, ++intVal);
@@ -57,7 +57,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crudUpdatableRS() throws SQLException {
-        try (Connection conn = createUcanaccessConnection(dbPath)) {
+        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
             Statement st = conn.createStatement();
             st.execute("INSERT INTO " + tableName + " (id,descr) VALUES(" + (++intVal) + " ,'" + Thread.currentThread() + "')");
@@ -89,7 +89,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         for (Thread t : threads) {
             Try.catching(() -> t.join()).orIgnore();
         }
-        ucanaccess = createUcanaccessConnection(dbPath);
+        ucanaccess = buildConnection().withDbPath(dbPath).build();
         dumpQueryResult("SELECT * FROM " + tableName + " ORDER BY id");
 
         checkQuery("SELECT * FROM " + tableName + " ORDER BY id");

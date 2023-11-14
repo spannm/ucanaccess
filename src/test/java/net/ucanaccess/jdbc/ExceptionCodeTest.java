@@ -9,7 +9,6 @@ import org.hsqldb.error.ErrorCode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
@@ -53,11 +52,14 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testGException(AccessVersion _accessVersion) {
-        assertThatThrownBy(() -> DriverManager.getConnection(UcanaccessDriver.URL_PREFIX + "kuso_yaro"))
-            .isInstanceOf(UcanaccessSQLException.class)
-            .hasMessageContaining("given file does not exist")
-            .hasFieldOrPropertyWithValue("ErrorCode", IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR)
-            .hasFieldOrPropertyWithValue("SQLState", String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR));
+        assertThatThrownBy(() -> buildConnection()
+            .withDbPath("kuso_yaro")
+            .withUser("")
+            .build())
+                .isInstanceOf(UcanaccessSQLException.class)
+                .hasMessageContaining("given file does not exist")
+                .hasFieldOrPropertyWithValue("ErrorCode", IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR)
+                .hasFieldOrPropertyWithValue("SQLState", String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR));
     }
 
 }

@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -29,14 +28,15 @@ class BigintTest extends UcanaccessBaseTest {
 
         ucanaccess.close();
 
-        String connUrl = UcanaccessDriver.URL_PREFIX + accdbPath + ";immediatelyReleaseResources=true";
-
-        try (Connection cnxn = DriverManager.getConnection(connUrl);
-            Statement st2 = cnxn.createStatement();
-            ResultSet rs = st2.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
+        try (Connection conn = buildConnection()
+                .withDbPath(accdbPath)
+                .withParm("immediatelyReleaseResources", true).build();
+                Statement st2 = conn.createStatement();
+                ResultSet rs = st2.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
             rs.next();
             Long actual = rs.getLong("x");
             assertEquals(expected, actual);
         }
     }
+
 }

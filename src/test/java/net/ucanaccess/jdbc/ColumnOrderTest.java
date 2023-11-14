@@ -16,12 +16,17 @@ class ColumnOrderTest extends UcanaccessBaseTest {
         return TEST_DB_DIR + "columnOrder.accdb";
     }
 
+    @Override
+    protected UcanaccessConnectionBuilder buildConnection() {
+        return super.buildConnection()
+            .withColumnOrder("display");
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
     void testColumnOrder1(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        setColumnOrder("display");
         try (Connection uca = createUcanaccessConnection();
             PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?,?,?)")) {
             ps.setInt(3, 3);

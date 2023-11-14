@@ -8,8 +8,7 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessDriver;
-import net.ucanaccess.jdbc.UcanaccessRuntimeException;
+import net.ucanaccess.jdbc.UcanaccessConnectionBuilder;
 import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
@@ -34,18 +33,11 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     private File                   fileAccDb;
-    private String                 password          = "";
     private AccessVersion          accessVersion;
     // CHECKSTYLE:OFF
     protected UcanaccessConnection ucanaccess;
     // CHECKSTYLE:ON
-    private String                 user              = "ucanaccess";
     private Connection             verifyConnection;
-    private Boolean                ignoreCase;
-
-    private long                   inactivityTimeout = -1;
-    private String                 columnOrder;
-    private String                 append2JdbcURL    = "";
 
     protected UcanaccessBaseTest() {
     }
@@ -56,8 +48,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected void init(AccessVersion _accessVersion) throws SQLException {
         accessVersion = _accessVersion;
-        Try.catching(() -> Class.forName(UcanaccessDriver.class.getName()))
-            .orThrow(UcanaccessRuntimeException::new);
         ucanaccess = createUcanaccessConnection();
     }
 
@@ -366,38 +356,24 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return getClass().getSimpleName() + " ver " + getFileFormat();
     }
 
-    protected String getPassword() {
-        return password;
+    /**
+     * Returns a pre-configured connection builder using {@link #getAccessTempPath()} as database path.
+     * @return connection builder
+     */
+    protected final UcanaccessConnection createUcanaccessConnection() {
+        return buildConnection()
+            .withDbPath(getAccessTempPath())
+            .build();
     }
 
-    protected UcanaccessConnection createUcanaccessConnection() throws SQLException {
-        return createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, getAccessTempPath());
-    }
-
-    protected UcanaccessConnection createUcanaccessConnection(String _dbPath) throws SQLException {
-        return createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, _dbPath);
-    }
-
-    private UcanaccessConnection createUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException {
-        String dbPath = Optional.ofNullable(_dbPath).orElseGet(this::getAccessTempPath);
-        String url = _urlPrefix + dbPath;
-        if (ignoreCase != null) {
-            url += ";ignoreCase=" + ignoreCase;
-        }
-        if (inactivityTimeout != -1) {
-            url += ";inactivityTimeout=" + inactivityTimeout;
-        } else {
-            url += ";immediatelyreleaseresources=true";
-        }
-        if (columnOrder != null) {
-            url += ";columnOrder=" + columnOrder;
-        }
-        url += append2JdbcURL;
-        return (UcanaccessConnection) DriverManager.getConnection(url, user, password);
-    }
-
-    protected void appendToJdbcURL(String s) {
-        append2JdbcURL += s;
+    /**
+     * Returns a pre-configured connection builder.
+     * @return connection builder
+     */
+    protected UcanaccessConnectionBuilder buildConnection() {
+        return new UcanaccessConnectionBuilder()
+            .withUser("ucanaccess")
+            .withPassword("");
     }
 
     protected void initVerifyConnection() throws SQLException {
@@ -406,32 +382,15 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
         if (verifyConnection != null) {
             verifyConnection.close();
-            verifyConnection = null;
         }
-        verifyConnection = createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, tempVerifyFile.getAbsolutePath());
+        verifyConnection = buildConnection().withDbPath(tempVerifyFile.getAbsolutePath()).build();
     }
 
-    private boolean next(ResultSet _joRs, ResultSet _myRs) throws SQLException {
-        boolean b1 = _joRs.next();
-        boolean b2 = _myRs.next();
+    private boolean next(ResultSet _verifyResultSet, ResultSet _resultSet) throws SQLException {
+        boolean b1 = _verifyResultSet.next();
+        boolean b2 = _resultSet.next();
         assertEquals(b1, b2);
         return b1;
-    }
-
-    public void setInactivityTimeout(long _inactivityTimeout) {
-        inactivityTimeout = _inactivityTimeout;
-    }
-
-    protected void setPassword(String _password) {
-        password = _password;
-    }
-
-    protected void setColumnOrder(String _columnOrder) {
-        columnOrder = _columnOrder;
-    }
-
-    public void setIgnoreCase(boolean _ignoreCase) {
-        ignoreCase = _ignoreCase;
     }
 
     protected final void executeStatements(String... _sqls) throws SQLException {

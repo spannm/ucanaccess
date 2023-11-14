@@ -123,8 +123,7 @@ public class Main {
                 noMem = size > 30000000 ? ";memory=false" : "";
             }
 
-            conn = DriverManager.getConnection("jdbc:ucanaccess://" + fl.getAbsolutePath() + passwordEntry + noMem,
-                    props);
+            conn = DriverManager.getConnection("jdbc:ucanaccess://" + fl.getAbsolutePath() + passwordEntry + noMem, props);
 
             SQLWarning sqlw = conn.getWarnings();
             while (sqlw != null) {

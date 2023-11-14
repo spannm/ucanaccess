@@ -17,8 +17,13 @@ class MemoryTest extends UcanaccessBaseTest {
         super.init(_accessVersion);
         getLogger().debug("Thread.activeCount (setup): " + Thread.activeCount());
 
-        setInactivityTimeout(1000L);
         executeStatements("CREATE TABLE memm(id LONG PRIMARY KEY, A LONG, C TEXT, D TEXT)");
+    }
+    
+    @Override
+    protected UcanaccessConnectionBuilder buildConnection() {
+        return super.buildConnection()
+            .withInactivityTimeout(1000L);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

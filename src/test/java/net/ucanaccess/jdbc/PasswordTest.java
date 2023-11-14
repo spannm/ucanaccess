@@ -24,8 +24,10 @@ class PasswordTest extends UcanaccessBaseTest {
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageContaining("Password authentication failed");
 
-        setPassword("ucanaccess");
-        try (Connection ucanaccessConnection = createUcanaccessConnection()) {
+        try (Connection ucanaccessConnection = new UcanaccessConnectionBuilder()
+            .withDbPath(getAccessTempPath())
+            .withPassword("ucanaccess")
+            .build()) {
             assertNotNull(ucanaccessConnection);
         }
     }
