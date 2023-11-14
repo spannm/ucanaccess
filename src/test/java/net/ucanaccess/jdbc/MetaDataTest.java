@@ -25,7 +25,7 @@ class MetaDataTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("t_metadata");
+        executeStatements("DROP TABLE t_metadata");
     }
 
     void createSimple(String a, Object[][] ver) throws SQLException {

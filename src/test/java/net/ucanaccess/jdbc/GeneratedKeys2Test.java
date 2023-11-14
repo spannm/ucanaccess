@@ -22,7 +22,7 @@ class GeneratedKeys2Test extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable(tableName);
+        executeStatements("DROP TABLE " + tableName);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -30,17 +30,17 @@ class GeneratedKeys2Test extends UcanaccessBaseTest {
     void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)");
-        ps.setString(1, "");
-        ps.execute();
-        ResultSet rs = ps.getGeneratedKeys();
-        rs.next();
-        PreparedStatement ps1 = ucanaccess.prepareStatement("Select @@identity ");
-        ResultSet rs1 = ps1.executeQuery();
-        rs1.next();
-        assertEquals(rs1.getString(1), rs.getString(1));
-        ps.close();
-
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)")) {
+            ps.setString(1, "");
+            ps.execute();
+            ResultSet rs1 = ps.getGeneratedKeys();
+            rs1.next();
+            try (PreparedStatement ps1 = ucanaccess.prepareStatement("Select @@identity ");
+                ResultSet rs2 = ps1.executeQuery()) {
+                rs2.next();
+                assertEquals(rs1.getString(1), rs2.getString(1));
+            }
+        }
         checkQuery("SELECT * FROM " + tableName);
 
     }

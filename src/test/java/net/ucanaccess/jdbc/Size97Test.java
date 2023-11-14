@@ -23,7 +23,7 @@ class Size97Test extends UcanaccessBaseTest {
     void testSize(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        UcanaccessConnection conn = getUcanaccessConnection();
+        UcanaccessConnection conn = createUcanaccessConnection();
         assertEquals("V1997", conn.getDbIO().getFileFormat().name());
         DatabaseMetaData dbmd = conn.getMetaData();
         ResultSet rs = dbmd.getColumns(null, null, "table1", "field1");

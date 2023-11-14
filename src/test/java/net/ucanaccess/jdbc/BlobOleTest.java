@@ -23,7 +23,7 @@ class BlobOleTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("t_ole_test");
+        executeStatements("DROP TABLE t_ole_test");
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)

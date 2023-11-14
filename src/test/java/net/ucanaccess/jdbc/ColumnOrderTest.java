@@ -22,7 +22,7 @@ class ColumnOrderTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         setColumnOrder("display");
-        try (Connection uca = getUcanaccessConnection();
+        try (Connection uca = createUcanaccessConnection();
             PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?,?,?)")) {
             ps.setInt(3, 3);
             ps.setDate(2, new Date(System.currentTimeMillis()));

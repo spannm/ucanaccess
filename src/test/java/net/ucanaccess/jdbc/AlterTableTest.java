@@ -58,24 +58,27 @@ class AlterTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("ALTER TABLE AAAn RENAME TO [GIà GIà]");
-            st.execute("INSERT INTO [GIà GIà] (baaaa) values('chi')");
+            executeStatements(st,
+                "ALTER TABLE AAAn RENAME TO [GIà GIà]",
+                "INSERT INTO [GIà GIà] (baaaa) values('chi')");
             checkQuery("SELECT * FROM [GIà GIà] ORDER BY c");
             dumpQueryResult("SELECT * FROM [GIà GIà] ORDER BY c");
             st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 alterTableTest123]");
             checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
             dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci] TEXT(100) NOT NULL DEFAULT 'PIPPO'");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [健康] decimal (23,5) ");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) default 13.031955 NOT NULL");
+            executeStatements(st,
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci] TEXT(100) NOT NULL DEFAULT 'PIPPO'",
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [健康] decimal (23,5) ",
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) default 13.031955 NOT NULL");
             assertThatThrownBy(() -> st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN defaultwwwdefault numeric (23,6) NOT NULL"))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageContaining("When adding a new column");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci1] DATETIME NOT NULL DEFAULT NOW()");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci2] YESNO");
-            st.execute("INSERT INTO [22 alterTableTest123] (baaaa) VALUES('cha')");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN Memo Memo ");
-            st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN ole OLE ");
+            executeStatements(st,
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci1] DATETIME NOT NULL DEFAULT NOW()",
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci2] YESNO",
+                "INSERT INTO [22 alterTableTest123] (baaaa) VALUES('cha')",
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN Memo Memo ",
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN ole OLE ");
             dumpQueryResult("SELECT * FROM [22 alterTableTest123] ORDER BY c");
             checkQuery("SELECT * FROM [22 alterTableTest123] ORDER BY c");
 

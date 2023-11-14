@@ -19,21 +19,24 @@ class BigintTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         String accdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
-        Statement st = ucanaccess.createStatement();
-        st.execute("CREATE TABLE table1 (entry TEXT(50) PRIMARY KEY, x BIGINT)");
         Long expected = 3000000000L;
-        String sql = String.format("INSERT INTO table1 (entry, x) VALUES ('3 billion', %d)", expected);
-        st.execute(sql);
-        st.close();
+
+        try (Statement st = ucanaccess.createStatement()) {
+            st.execute("CREATE TABLE table1 (entry TEXT(50) PRIMARY KEY, x BIGINT)");
+            String sql = String.format("INSERT INTO table1 (entry, x) VALUES ('3 billion', %d)", expected);
+            st.execute(sql);
+        }
+
         ucanaccess.close();
+
         String connUrl = UcanaccessDriver.URL_PREFIX + accdbPath + ";immediatelyReleaseResources=true";
 
-        Connection cnxn = DriverManager.getConnection(connUrl);
-        st = cnxn.createStatement();
-        ResultSet rs = st.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'");
-        rs.next();
-        Long actual = rs.getLong("x");
-        assertEquals(expected, actual);
-        cnxn.close();
+        try (Connection cnxn = DriverManager.getConnection(connUrl);
+            Statement st2 = cnxn.createStatement();
+            ResultSet rs = st2.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
+            rs.next();
+            Long actual = rs.getLong("x");
+            assertEquals(expected, actual);
+        }
     }
 }

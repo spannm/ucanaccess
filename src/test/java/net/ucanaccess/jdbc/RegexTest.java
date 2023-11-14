@@ -19,7 +19,7 @@ class RegexTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("reg");
+        executeStatements("DROP TABLE reg");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

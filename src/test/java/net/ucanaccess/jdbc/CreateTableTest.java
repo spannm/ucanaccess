@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 class CreateTableTest extends UcanaccessBaseTest {
 
@@ -56,12 +57,13 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void createSimple() throws SQLException {
-        Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO AAA(baaaa, c) VALUES ('33A', 'G')");
-        st.execute("INSERT INTO AAA(baaaa, a, c) VALUES ('33B', 111, 'G')");
-        Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-        checkQuery("SELECT baaaa, a, c FROM AAA ORDER BY baaaa", ver);
-        st.close();
+        try (Statement st = ucanaccess.createStatement()) {
+            executeStatements(st,
+                "INSERT INTO AAA(baaaa, c) VALUES ('33A', 'G')",
+                "INSERT INTO AAA(baaaa, a, c) VALUES ('33B', 111, 'G')");
+            Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
+            checkQuery("SELECT baaaa, a, c FROM AAA ORDER BY baaaa", ver);
+        }
     }
 
     void defaults() throws Exception {
@@ -87,23 +89,28 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     void setDPK() throws SQLException, IOException {
-        Statement st1 = ucanaccess.createStatement();
-        st1.execute("create table dkey(c counter , " + "number numeric(23,5) , " + " PRIMARY KEY (C,NUMBER))");
-        st1.execute("create table dunique(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
-        st1.close();
+        try (Statement st = ucanaccess.createStatement()) {
+            executeStatements(st,
+                "CREATE TABLE dkey(c COUNTER, number NUMERIC(23,5), PRIMARY KEY (c, number))",
+                "CREATE TABLE dunique(c TEXT, number NUMERIC(23,5), UNIQUE (c, number))");
+        }
+
         ucanaccess.setAutoCommit(false);
-        try (Statement st2 = ucanaccess.createStatement()) {
-            st2.execute("INSERT INTO dunique values('ddl forces commit',2.3)");
-            st2.execute("create table dtrx(c text , " + "number numeric(23,5) , " + " unique (C,NUMBER))");
-            st2.execute("INSERT INTO dtrx values('I''ll be forgotten sob sob ',55555.3)");
-            st2.execute("alter table dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c,number)");
+
+        try (Statement st = ucanaccess.createStatement()) {
+            executeStatements(st,
+                "INSERT INTO dunique VALUES('ddl forces commit', 2.3)",
+                "CREATE TABLE dtrx(c TEXT, number NUMERIC(23,5), UNIQUE(c, number))",
+                "INSERT INTO dtrx VALUES('I''ll be forgotten sob sob', 55555.3)",
+                "ALTER TABLE dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c, number)");
         } catch (Exception _ex) {
             ucanaccess.rollback();
         }
 
-        try (Statement st3 = ucanaccess.createStatement()) {
-            st3.execute("INSERT INTO dtrx values('Hi all',444.3)");
-            st3.execute("INSERT INTO dtrx values('Hi all',4454.3)");
+        try (Statement st = ucanaccess.createStatement()) {
+            executeStatements(st,
+                "INSERT INTO dtrx values('Hi all',444.3)",
+                "INSERT INTO dtrx values('Hi all',4454.3)");
         }
 
         dumpQueryResult("SELECT * FROM dtrx");
@@ -161,7 +168,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         defaults();
         notNullBug();
 
-        dropTable("AAA");
+        executeStatements("DROP TABLE AAA");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -169,22 +176,17 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testNaming(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        Statement st = ucanaccess.createStatement();
-        st.execute(
-            " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-        st.execute(
-            " CREATE TABLE [ggg kkff]( [---bgaaf() aa] autoincrement PRIMARY KEY, [---bghhaaf b aa()] text(222) default 'vvv')");
-        st.execute(
-            " CREATE TABLE [wHere12]( [where] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-        st.execute(" drop table [ggg kk]");
-        st.execute(
-            " CREATE TABLE [ggg kk]( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] numeric(22,6) default 12.99)");
-        st.execute(
-            " CREATE TABLE kkk ( [---bgaaf aa] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')");
-        st.execute(" INSERT INTO kkk([---bgaaf aa],[---bghhaaf b aa]) values(1,'23fff')");
-        st.execute(" CREATE TABLE counter ( counter autoincrement PRIMARY KEY, [simple] text(222) default 'vvv')");
-        st.close();
-
+        try (Statement st = ucanaccess.createStatement()) {
+            executeStatements(st,
+                "CREATE TABLE [ggg kk] ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
+                "CREATE TABLE [ggg kkff] ([---bgaaf() aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa()] TEXT(222) DEFAULT 'vvv')",
+                "CREATE TABLE [wHere12] ([where] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
+                "DROP TABLE [ggg kk]",
+                "CREATE TABLE [ggg kk] ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] NUMERIC(22,6) DEFAULT 12.99)",
+                "CREATE TABLE kkk  ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
+                "INSERT INTO kkk ([---bgaaf aa],[---bghhaaf b aa]) values(1, '23fff')",
+                "CREATE TABLE counter (counter AUTOINCREMENT PRIMARY KEY, [simple] text(222) DEFAULT 'vvv')");
+        }
         dumpQueryResult("SELECT * FROM counter");
     }
 
@@ -200,8 +202,9 @@ class CreateTableTest extends UcanaccessBaseTest {
             Table tb = db.getTable("Babe");
             Table tbr = db.getTable("Parent");
             assertThat(tb.getForeignKeyIndex(tbr).getColumns().stream().map(Column::getName)).contains("y");
-            st.execute("CREATE TABLE [1 Parent]( [x 0] long , y long, PRIMARY KEY([x 0],y))");
-            st.execute("CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y) )");
+            executeStatements(st,
+                "CREATE TABLE [1 Parent]( [x 0] long , y long, PRIMARY KEY([x 0],y))",
+                "CREATE TABLE [1 Babe]( k LONG , y LONG, [0 z] LONG, PRIMARY KEY(k,y), FOREIGN KEY (y,[0 z] ) REFERENCES [1 Parent] ( [x 0] , y) )");
         }
     }
 
@@ -210,14 +213,13 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testPs(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        PreparedStatement ps = ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)");
-        ps.execute();
-        ps = ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0);
-        ps.execute();
-        ps = ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0);
-        ps.execute();
-        ps = ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0);
-        ps.execute();
+        for (PreparedStatement ps : List.of(
+            ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)"),
+            ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0),
+            ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0),
+            ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0))) {
+            ps.execute();
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -225,10 +227,10 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testPsHyphen(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        String ddl = "CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))";
-        // #9 hyphen in DDL column name confuses PreparedStatement
-        PreparedStatement prepStmt = ucanaccess.prepareStatement(ddl);
-        prepStmt.executeUpdate();
+        try ( // #9 hyphen in DDL column name confuses PreparedStatement
+            PreparedStatement prepStmt = ucanaccess.prepareStatement("CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))")) {
+            prepStmt.executeUpdate();
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -237,25 +239,29 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)");
-            st.execute("INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')");
-            st.execute("INSERT INTO urlTest (id, website) VALUES (2, 'example.com#http://example.com#')");
-            st.execute("INSERT INTO urlTest (id, website) VALUES (3, 'the works#http://burger#with_bacon#and_cheese')");
-            st.execute("INSERT INTO urlTest (id, website) VALUES (4, 'http://bad_link_no_hash_characters')");
-            ResultSet rs1 = ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website");
-            rs1.next();
-            assertEquals("HYPERLINK", rs1.getString(ORIGINAL_TYPE));
-            ResultSet rs2 = st.executeQuery("SELECT website FROM urlTest ORDER BY id");
-            rs2.next();
-            assertEquals("http://whatever", rs2.getURL(1).toString());
-            rs2.next();
-            assertEquals("http://example.com", rs2.getURL(1).toString());
-            rs2.next();
-            assertEquals("http://burger#with_bacon", rs2.getURL(1).toString());
-            rs2.next();
-            assertThatThrownBy(() -> rs2.getURL(1))
-                .isInstanceOf(UcanaccessSQLException.class)
-                .hasMessageEndingWith("Invalid or unsupported URL format");
+            executeStatements(st,
+                "CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)",
+                "INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')",
+                "INSERT INTO urlTest (id, website) VALUES (2, 'example.com#http://example.com#')",
+                "INSERT INTO urlTest (id, website) VALUES (3, 'the works#http://burger#with_bacon#and_cheese')",
+                "INSERT INTO urlTest (id, website) VALUES (4, 'http://bad_link_no_hash_characters')");
+            try (ResultSet rs = ucanaccess.getMetaData().getColumns(null, null, "urlTest", "website")) {
+                rs.next();
+                assertEquals("HYPERLINK", rs.getString(ORIGINAL_TYPE));
+            }
+
+            try (ResultSet rs = st.executeQuery("SELECT website FROM urlTest ORDER BY id")) {
+                rs.next();
+                assertEquals("http://whatever", rs.getURL(1).toString());
+                rs.next();
+                assertEquals("http://example.com", rs.getURL(1).toString());
+                rs.next();
+                assertEquals("http://burger#with_bacon", rs.getURL(1).toString());
+                rs.next();
+                assertThatThrownBy(() -> rs.getURL(1))
+                    .isInstanceOf(UcanaccessSQLException.class)
+                    .hasMessageEndingWith("Invalid or unsupported URL format");
+            }
         }
     }
 
@@ -265,10 +271,9 @@ class CreateTableTest extends UcanaccessBaseTest {
         // Ticket #19
         init(_accessVersion);
 
-        Statement st = ucanaccess.createStatement();
-        st.execute("CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)");
-        st.execute("CREATE TABLE t_1 (id LONG PRIMARY KEY)");
-        st.close();
+        executeStatements(
+            "CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)",
+            "CREATE TABLE t_1 (id LONG PRIMARY KEY)");
     }
 
 }

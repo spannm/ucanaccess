@@ -10,6 +10,7 @@ import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDriver;
 import net.ucanaccess.jdbc.UcanaccessRuntimeException;
+import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 
@@ -45,7 +46,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     private long                   inactivityTimeout = -1;
     private String                 columnOrder;
     private String                 append2JdbcURL    = "";
-    private Boolean                showSchema;
 
     protected UcanaccessBaseTest() {
     }
@@ -58,7 +58,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         accessVersion = _accessVersion;
         Try.catching(() -> Class.forName(UcanaccessDriver.class.getName()))
             .orThrow(UcanaccessRuntimeException::new);
-        ucanaccess = getUcanaccessConnection();
+        ucanaccess = createUcanaccessConnection();
     }
 
     protected final AccessVersion getAccessVersion() {
@@ -202,25 +202,22 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     }
 
-    public void dumpQueryResult(ResultSet _resultSet) throws SQLException {
+    protected void dumpQueryResult(IThrowingSupplier<ResultSet, SQLException> _supplier) throws SQLException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(baos, true)) {
-            new Main(ucanaccess, null).consoleDump(_resultSet, ps);
+            new Main(ucanaccess, null).consoleDump(_supplier.get(), ps);
             getLogger().info("dumpQueryResult: {}", baos);
         }
     }
 
-    public void dumpQueryResult(String _query) throws SQLException {
+    protected void dumpQueryResult(String _query) throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
             ResultSet resultSet = st.executeQuery(_query);
-            dumpQueryResult(resultSet);
-        }
-    }
-
-    protected final void dumpVerify(String _expression) throws SQLException {
-        try (Statement st = verifyConnection.createStatement()) {
-            ResultSet rs = st.executeQuery(_expression);
-            dumpQueryResult(rs);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (PrintStream ps = new PrintStream(baos, true)) {
+                new Main(ucanaccess, null).consoleDump(resultSet, ps);
+                getLogger().info("dumpQueryResult: {}", baos);
+            }
         }
     }
 
@@ -334,7 +331,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 return null;
             }
             File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
-            getLogger().info("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
+            getLogger().debug("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
             return copyFile(is, tempFile);
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
@@ -373,15 +370,15 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return password;
     }
 
-    protected UcanaccessConnection getUcanaccessConnection() throws SQLException {
-        return getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, getAccessTempPath());
+    protected UcanaccessConnection createUcanaccessConnection() throws SQLException {
+        return createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, getAccessTempPath());
     }
 
-    protected UcanaccessConnection getUcanaccessConnection(String _dbPath) throws SQLException {
-        return getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, _dbPath);
+    protected UcanaccessConnection createUcanaccessConnection(String _dbPath) throws SQLException {
+        return createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, _dbPath);
     }
 
-    private UcanaccessConnection getUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException {
+    private UcanaccessConnection createUcanaccessConnection(String _urlPrefix, String _dbPath) throws SQLException {
         String dbPath = Optional.ofNullable(_dbPath).orElseGet(this::getAccessTempPath);
         String url = _urlPrefix + dbPath;
         if (ignoreCase != null) {
@@ -394,9 +391,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
         if (columnOrder != null) {
             url += ";columnOrder=" + columnOrder;
-        }
-        if (showSchema != null) {
-            url += ";showSchema=" + showSchema;
         }
         url += append2JdbcURL;
         return (UcanaccessConnection) DriverManager.getConnection(url, user, password);
@@ -414,7 +408,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             verifyConnection.close();
             verifyConnection = null;
         }
-        verifyConnection = getUcanaccessConnection(UcanaccessDriver.URL_PREFIX, tempVerifyFile.getAbsolutePath());
+        verifyConnection = createUcanaccessConnection(UcanaccessDriver.URL_PREFIX, tempVerifyFile.getAbsolutePath());
     }
 
     private boolean next(ResultSet _joRs, ResultSet _myRs) throws SQLException {
@@ -440,15 +434,15 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         ignoreCase = _ignoreCase;
     }
 
-    protected final void dropTable(String _tableName) throws SQLException {
-        executeStatements("DROP TABLE " + _tableName);
-    }
-
     protected final void executeStatements(String... _sqls) throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
-            for (String sql : _sqls) {
-                st.execute(sql);
-            }
+            executeStatements(st, _sqls);
+        }
+    }
+
+    protected final void executeStatements(Statement _statement, String... _sqls) throws SQLException {
+        for (String sql : _sqls) {
+            _statement.execute(sql);
         }
     }
 

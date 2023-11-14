@@ -142,7 +142,7 @@ public class Main {
     }
 
     public static void setBatchMode(boolean _batchMode) {
-        Main.batchMode = _batchMode;
+        batchMode = _batchMode;
     }
 
     /**

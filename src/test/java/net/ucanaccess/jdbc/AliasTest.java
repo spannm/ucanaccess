@@ -20,7 +20,7 @@ class AliasTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws Exception {
-        dropTable("Talias");
+        executeStatements("DROP TABLE Talias");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -35,7 +35,7 @@ class AddFunctionTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT pluto('hello', ' world ', NOW()) FROM t_add_function");
         checkQuery("SELECT CONCAT('Hello World, ', 'Ucanaccess') FROM t_add_function", "Hello World, Ucanaccess");
 
-        dropTable("t_add_function");
+        executeStatements("DROP TABLE t_add_function");
     }
 
 }

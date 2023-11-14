@@ -28,11 +28,9 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
         try (Connection conn = DriverManager.getConnection(url, "", "");
             Statement st = conn.createStatement()) {
 
-            ResultSet rs = st.executeQuery("SELECT * FROM table1");
-            dumpQueryResult(rs);
-
-            rs = st.executeQuery("SELECT * FROM table2");
-            dumpQueryResult(rs);
+            dumpQueryResult(() -> st.executeQuery("SELECT * FROM table1"));
+            dumpQueryResult(() -> st.executeQuery("SELECT * FROM table2"));
         }
     }
+
 }

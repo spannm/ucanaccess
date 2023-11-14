@@ -22,7 +22,7 @@ class BatchTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("Tb");
+        executeStatements("DROP TABLE Tb");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -27,7 +27,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("t235");
+        executeStatements("DROP TABLE t235");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -39,7 +39,6 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT id as [WW \"SS], DCount('descr', 't235', '1=1')from t235",
             new Object[][] {{1234, 2}, {12344, 2}});
         checkQuery("SELECT DCount('*', 't235', '1=1') ", 2);
-
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

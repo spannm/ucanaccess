@@ -20,7 +20,7 @@ class CounterTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable(tableName);
+        executeStatements("DROP TABLE " + tableName);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -28,24 +28,26 @@ class CounterTest extends UcanaccessBaseTest {
     void testCreateTypes(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (Statement st = ucanaccess.createStatement()) {
-            st.execute("DISABLE AUTOINCREMENT ON " + tableName);
-            // insert arbitrary AutoNumber value
-            st.execute("INSERT INTO " + tableName + " (z, b, c, d) VALUES (3, 'C', NULL, NULL)");
+            executeStatements(st,
+                "DISABLE AUTOINCREMENT ON " + tableName,
+                // insert arbitrary AutoNumber value
+                "INSERT INTO " + tableName + " (z, b, c, d) VALUES (3, 'C', NULL, NULL)",
 
-            st.execute("ENABLE AUTOINCREMENT ON " + tableName);
+                "ENABLE AUTOINCREMENT ON " + tableName,
 
-            // 4 (verify AutoNumber seed updated)
-            st.execute("INSERT INTO " + tableName + " (b, c, d) VALUES ('D', NULL, NULL)");
+                // 4 (verify AutoNumber seed updated)
+                "INSERT INTO " + tableName + " (b, c, d) VALUES ('D', NULL, NULL)",
 
-            st.execute("INSERT INTO " + tableName + " (b, c, d) VALUES ('E', NULL, NULL)"); // 5
-            st.execute("INSERT INTO " + tableName + " (b, c, d) VALUES ('F', NULL, NULL)"); // 6
+                "INSERT INTO " + tableName + " (b, c, d) VALUES ('E', NULL, NULL)", // 5
+                "INSERT INTO " + tableName + " (b, c, d) VALUES ('F', NULL, NULL)", // 6
 
-            st.execute("DISABLE AUTOINCREMENT ON " + tableName);
-            st.execute("INSERT INTO " + tableName + " (z, b, c, d) VALUES (8, 'H', NULL, NULL)"); // arbitrary, new seed = 9
-            st.execute("INSERT INTO " + tableName + " (z, b, c, d) VALUES (7, 'G', NULL, NULL)"); // arbitrary smaller than current seed
-            st.execute("INSERT INTO " + tableName + " (z, b, c, d) VALUES (-1, 'A', NULL, NULL)"); // arbitrary negative value
-            st.execute("ENABLE AUTOINCREMENT ON " + tableName);
-            st.execute("INSERT INTO " + tableName + " (b, c, d) VALUES ('I', NULL, NULL)"); // 9
+                "DISABLE AUTOINCREMENT ON " + tableName,
+                "INSERT INTO " + tableName + " (z, b, c, d) VALUES (8, 'H', NULL, NULL)", // arbitrary, new seed = 9
+                "INSERT INTO " + tableName + " (z, b, c, d) VALUES (7, 'G', NULL, NULL)", // arbitrary smaller than
+                                                                                          // current seed
+                "INSERT INTO " + tableName + " (z, b, c, d) VALUES (-1, 'A', NULL, NULL)", // arbitrary negative value
+                "ENABLE AUTOINCREMENT ON " + tableName,
+                "INSERT INTO " + tableName + " (b, c, d) VALUES ('I', NULL, NULL)"); // 9
         }
 
         dumpQueryResult("SELECT * FROM " + tableName);

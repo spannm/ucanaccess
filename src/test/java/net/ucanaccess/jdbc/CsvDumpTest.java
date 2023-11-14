@@ -19,31 +19,16 @@ import java.sql.Statement;
  */
 class CsvDumpTest extends UcanaccessBaseTest {
 
-    // Support both Linux and Windows.
-    private static final String LINE_SEPARATOR  = System.lineSeparator();
-
-    private static final String FORMAT          = "{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}";
-
-    private static final String EXPECTED_SCHEMA = "[" + LINE_SEPARATOR
-        + String.format(FORMAT, "id", "int64", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "text_field", "string", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "text_field2", "string", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "memo_field", "string", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "byte_field", "int64", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "boolean_field", "bool", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "double_field", "float64", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "currency_field", "float64", "nullable") + "," + LINE_SEPARATOR
-        + String.format(FORMAT, "date_field", "timestamp", "nullable") + LINE_SEPARATOR + "]" + LINE_SEPARATOR;
-
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE csvtable (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, byte_field BYTE, boolean_field YESNO, double_field DOUBLE, currency_field CURRENCY, date_field DATETIME)");
+        executeStatements("CREATE TABLE csvtable (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, "
+            + "byte_field BYTE, boolean_field YESNO, double_field DOUBLE, currency_field CURRENCY, date_field DATETIME)");
     }
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("csvtable");
+        executeStatements("DROP TABLE csvtable");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -56,20 +41,20 @@ class CsvDumpTest extends UcanaccessBaseTest {
                 + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
         }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-
-        try (Statement st = ucanaccess.createStatement();
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(baos);
+            Statement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
-            Exporter exporter = new Exporter.Builder().withDelimiter(";").build();
-            exporter.dumpCsv(rs, ps);
+
+            new Exporter.Builder().withDelimiter(";").build().dumpCsv(rs, ps);
+
+            String actual = baos.toString(StandardCharsets.UTF_8);
+            assertEquals("id;text_field;text_field2;memo_field;byte_field;boolean_field;double_field;"
+                + "currency_field;date_field" + System.lineSeparator()
+                + "1;\"embedded delimiter(;)\";\"double-quote(\"\")\";embedded newline( );2;true;9.12345;3.1235;" + "2017-01-01 00:00:00" + System.lineSeparator(),
+                actual);
         }
 
-        String actual = baos.toString(StandardCharsets.UTF_8);
-        assertEquals("id;text_field;text_field2;memo_field;byte_field;boolean_field;double_field;"
-            + "currency_field;date_field" + LINE_SEPARATOR + "1;\"embedded delimiter(;)\";"
-            + "\"double-quote(\"\")\";embedded newline( );2;true;9.12345;3.1235;" + "2017-01-01 00:00:00"
-            + LINE_SEPARATOR, actual);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -85,7 +70,22 @@ class CsvDumpTest extends UcanaccessBaseTest {
             Exporter exporter = new Exporter.Builder().withDelimiter(";").build();
             exporter.dumpSchema(rs, ps);
             String actual = baos.toString(StandardCharsets.UTF_8);
-            assertEquals(EXPECTED_SCHEMA, actual);
+
+            String format = "{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}";
+            String expectedSchema = "[" + System.lineSeparator()
+                + String.join("," + System.lineSeparator(),
+                    String.format(format, "id", "int64", "nullable"),
+                    String.format(format, "text_field", "string", "nullable"),
+                    String.format(format, "text_field2", "string", "nullable"),
+                    String.format(format, "memo_field", "string", "nullable"),
+                    String.format(format, "byte_field", "int64", "nullable"),
+                    String.format(format, "boolean_field", "bool", "nullable"),
+                    String.format(format, "double_field", "float64", "nullable"),
+                    String.format(format, "currency_field", "float64", "nullable"),
+                    String.format(format, "date_field", "timestamp", "nullable"))
+                + System.lineSeparator() + "]" + System.lineSeparator();
+
+            assertEquals(expectedSchema, actual);
         }
     }
 }

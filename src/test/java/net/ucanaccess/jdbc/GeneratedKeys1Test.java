@@ -23,7 +23,7 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable(tableName);
+        executeStatements("DROP TABLE " + tableName);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -31,25 +31,25 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
     void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)");
-        ps.setString(1, "");
-        ps.execute();
-        ResultSet rs = ps.getGeneratedKeys();
-        rs.next();
-        assertEquals(1, rs.getInt(1));
-        ps.close();
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)")) {
+            ps.setString(1, "");
+            ps.execute();
+            ResultSet rs = ps.getGeneratedKeys();
+            rs.next();
+            assertEquals(1, rs.getInt(1));
+        }
 
-        ps = ucanaccess.prepareStatement("Select @@identity ");
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(1, rs.getInt(1));
-        Statement st = ucanaccess.createStatement();
-        st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
+        try (PreparedStatement ps2 = ucanaccess.prepareStatement("Select @@identity ")) {
+            ResultSet rs2 = ps2.executeQuery();
+            rs2.next();
+            assertEquals(1, rs2.getInt(1));
+            Statement st = ucanaccess.createStatement();
+            st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
 
-        checkQuery("Select @@identity ", 2);
-        rs = st.getGeneratedKeys();
-        rs.next();
-        assertEquals(2, rs.getInt(1));
-
+            checkQuery("Select @@identity ", 2);
+            ResultSet rs3 = st.getGeneratedKeys();
+            rs3.next();
+            assertEquals(2, rs3.getInt(1));
+        }
     }
 }

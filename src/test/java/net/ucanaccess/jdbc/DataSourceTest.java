@@ -52,10 +52,10 @@ class DataSourceTest extends UcanaccessBaseTest {
         uds.setNewDatabaseVersion("V2003");
         uds.setImmediatelyReleaseResources(true); // so we can delete it immediately after close
 
-        Connection conn = uds.getConnection();
-        assertThat(fileMdb).exists();
-        getLogger().info("DataSource connection successfully created file {}", uds.getAccessPath());
-        conn.close();
+        try (Connection conn = uds.getConnection()) {
+            assertThat(fileMdb).exists();
+            getLogger().info("DataSource connection successfully created, file {}", uds.getAccessPath());
+        }
 
         Boolean irrEffective = uds.getImmediatelyReleaseResources();
         // Note that a property is returned as null if we haven't explicitly set it in the DataSource

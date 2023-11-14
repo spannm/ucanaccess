@@ -18,8 +18,10 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
 
         File fileMdb = createTempFileName(getClass().getSimpleName());
         fileMdb.deleteOnExit();
+
         String url = UcanaccessDriver.URL_PREFIX + fileMdb.getAbsolutePath() + ";immediatelyReleaseResources=true;newDatabaseVersion=" + getFileFormat().name();
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+
         UcanaccessConnection ucanaccessConnection = (UcanaccessConnection) DriverManager.getConnection(url, "", "");
         assertNotNull(ucanaccessConnection);
         ucanaccess.close();
@@ -29,9 +31,6 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
 
         try (Statement st = ucanaccessConnection.createStatement()) {
             st.execute("CREATE TABLE AAA (baaaa text(3) PRIMARY KEY, A long default 3, C text(4))");
-        }
-
-        try (Statement st = ucanaccessConnection.createStatement()) {
             st.execute("INSERT INTO AAA(baaaa, c) VALUES ('33A','G' )");
             st.execute("INSERT INTO AAA VALUES ('33B',111,'G' )");
         }

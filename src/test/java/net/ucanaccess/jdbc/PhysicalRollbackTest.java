@@ -29,7 +29,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("T4");
+        executeStatements("DROP TABLE T4");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -56,7 +56,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
             .isInstanceOf(SQLException.class)
             .hasMessageContaining(getClass().getSimpleName());
 
-        ucanaccess = getUcanaccessConnection();
+        ucanaccess = createUcanaccessConnection();
         dumpQueryResult("SELECT * FROM T4");
 
         assertEquals(0, getCount("SELECT COUNT(*) FROM T4"));

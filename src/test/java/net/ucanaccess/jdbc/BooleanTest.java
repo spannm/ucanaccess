@@ -33,7 +33,7 @@ class BooleanTest extends UcanaccessBaseTest {
 
     @AfterEach
     void afterEachTest() throws SQLException {
-        dropTable("tblMain");
+        executeStatements("DROP TABLE tblMain");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -66,7 +66,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         init(_accessVersion);
         Connection conn = ucanaccess;
         Statement st = conn.createStatement();
-        assertEquals(st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1), "Ciao");
+        assertEquals("Ciao", st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -74,70 +74,46 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     void testBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM NOROMAN");
-        Connection conn = ucanaccess;
-        Statement st = conn.createStatement();
+        Statement st = ucanaccess.createStatement();
         assertThat(st.executeQuery("SELECT * FROM NOROMAN").getMetaData())
             .satisfies(x -> assertThat(x.isAutoIncrement(1)).isTrue())
             .satisfies(x -> assertThat(x.isCurrency(6)).isTrue())
             .satisfies(x -> assertThat(x.isCurrency(7)).isFalse());
         DatabaseMetaData dbmd = ucanaccess.getMetaData();
 
-        ResultSet rs = dbmd.getTables(null, null, "NOROMAn", null);
-        getLogger().info("Noroman characters...");
-        dumpQueryResult(rs);
-        rs = dbmd.getColumns(null, null, "NOROMAn", null);
-        dumpQueryResult(rs);
-        rs = dbmd.getColumns(null, null, "%ROMAn", null);
-        dumpQueryResult(rs);
-        getLogger().info("getColumns...");
-        rs = dbmd.getColumns(null, null, "Πλήθ%", null);
-        dumpQueryResult(rs);
-        rs = dbmd.getColumns(null, null, "%健康", null);
-        dumpQueryResult(rs);
-        getLogger().info("getColumns IS_GENERATEDCOLUMN...");
-        rs = dbmd.getColumns(null, null, "TAbELLA1", "%e");
-        dumpQueryResult(rs);
-        getLogger().info("getColumnPrivileges...");
-        rs = dbmd.getColumnPrivileges(null, null, "NOROMAn", null);
-        dumpQueryResult(rs);
-        // rs=dbmd.getColumnPrivileges(null, null, null, null);
-        getLogger().info("getExportedKeys...");
-        rs = dbmd.getExportedKeys(null, null, "??###");
-        dumpQueryResult(rs);
-        getLogger().info("getImportedKeys...");
-        rs = dbmd.getImportedKeys(null, null, "Tabella1");
-        dumpQueryResult(rs);
-        getLogger().info("getPrimaryKeys...");
-        rs = dbmd.getPrimaryKeys(null, null, "Tabella1");
-        dumpQueryResult(rs);
-        getLogger().info("getIndexInfo...");
-        rs = dbmd.getIndexInfo(null, null, "Tabella1", false, false);
-        dumpQueryResult(rs);
-        getLogger().info("getCrossReference...");
-        rs = dbmd.getCrossReference(null, null, "??###", null, null, "Tabella1");
-        dumpQueryResult(rs);
-        getLogger().info("getVersionColumns...");
-        rs = dbmd.getVersionColumns(null, null, "Πλήθος");
-        dumpQueryResult(rs);
-        getLogger().info("getClientInfoProperties...");
-        rs = dbmd.getClientInfoProperties();
-        dumpQueryResult(rs);
-        getLogger().info("getTablePrivileges...");
-        rs = dbmd.getTablePrivileges(null, null, "??###");
-        dumpQueryResult(rs);
-        getLogger().info("getTables...");
-        rs = dbmd.getTables(null, null, "??###", new String[] {"TABLE"});
-        dumpQueryResult(rs);
-
-        rs = dbmd.getTables(null, null, null, new String[] {"VIEW"});
-        dumpQueryResult(rs);
-        getLogger().info("getBestRowIdentifier...");
-        rs = dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true);
-        dumpQueryResult(rs);
-        rs = dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowSession, true);
-        dumpQueryResult(rs);
-        getLogger().info("getTypesInfo...");
-        rs = dbmd.getTypeInfo();
-        dumpQueryResult(rs);
+        getLogger().info("Noroman characters:");
+        dumpQueryResult(() -> dbmd.getTables(null, null, "NOROMAn", null));
+        dumpQueryResult(() -> dbmd.getColumns(null, null, "NOROMAn", null));
+        dumpQueryResult(() -> dbmd.getColumns(null, null, "%ROMAn", null));
+        getLogger().info("getColumns:");
+        dumpQueryResult(() -> dbmd.getColumns(null, null, "Πλήθ%", null));
+        dumpQueryResult(() -> dbmd.getColumns(null, null, "%健康", null));
+        dumpQueryResult(() -> dbmd.getColumns(null, null, "TAbELLA1", "%e"));
+        getLogger().info("getColumnPrivileges:");
+        dumpQueryResult(() -> dbmd.getColumnPrivileges(null, null, "NOROMAn", null));
+        getLogger().info("getExportedKeys:");
+        dumpQueryResult(() -> dbmd.getExportedKeys(null, null, "??###"));
+        getLogger().info("getImportedKeys:");
+        dumpQueryResult(() -> dbmd.getImportedKeys(null, null, "Tabella1"));
+        getLogger().info("getPrimaryKeys:");
+        dumpQueryResult(() -> dbmd.getPrimaryKeys(null, null, "Tabella1"));
+        getLogger().info("getIndexInfo:");
+        dumpQueryResult(() -> dbmd.getIndexInfo(null, null, "Tabella1", false, false));
+        getLogger().info("getCrossReference:");
+        dumpQueryResult(() -> dbmd.getCrossReference(null, null, "??###", null, null, "Tabella1"));
+        getLogger().info("getVersionColumns:");
+        dumpQueryResult(() -> dbmd.getVersionColumns(null, null, "Πλήθος"));
+        getLogger().info("getClientInfoProperties:");
+        dumpQueryResult(dbmd::getClientInfoProperties);
+        getLogger().info("getTablePrivileges:");
+        dumpQueryResult(() -> dbmd.getTablePrivileges(null, null, "??###"));
+        getLogger().info("getTables:");
+        dumpQueryResult(() -> dbmd.getTables(null, null, "??###", new String[] {"TABLE"}));
+        dumpQueryResult(() -> dbmd.getTables(null, null, null, new String[] {"VIEW"}));
+        getLogger().info("getBestRowIdentifier:");
+        dumpQueryResult(() -> dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true));
+        dumpQueryResult(() -> dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowSession, true));
+        getLogger().info("getTypeInfo:");
+        dumpQueryResult(dbmd::getTypeInfo);
     }
 }

@@ -151,7 +151,7 @@ class ComplexTest extends UcanaccessBaseTest {
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageEndingWith("testComplexRollback");
 
-        ucanaccess = getUcanaccessConnection();
+        ucanaccess = createUcanaccessConnection();
         checkQuery("SELECT * FROM t_complex ORDER BY id");
         dumpQueryResult("SELECT * FROM t_complex");
         checkQuery("SELECT * FROM t_complex WHERE id='row12' ORDER BY id");
