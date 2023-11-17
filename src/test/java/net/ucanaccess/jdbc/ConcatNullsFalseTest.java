@@ -22,7 +22,7 @@ class ConcatNullsFalseTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testConcat(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT 'aa2'& null FROM dual", new Object[][] {{"aa2"}});
+        checkQuery("SELECT 'aa2'& null FROM dual", singleRec("aa2"));
     }
 
 }

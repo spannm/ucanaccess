@@ -59,14 +59,14 @@ class BlobOleTest extends UcanaccessBaseTest {
 
             byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
 
-            checkQuery("SELECT * FROM t_ole_test", new Object[][] {{1, descr, fileBytes}});
+            checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr, fileBytes));
 
             PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
             ps.setString(1, descr + "_OK");
             ps.setString(2, descr);
             ps.executeUpdate();
             checkQuery("SELECT * FROM t_ole_test");
-            checkQuery("SELECT * FROM t_ole_test", 1, descr + "_OK", fileBytes);
+            checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr + "_OK", fileBytes));
         }
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {

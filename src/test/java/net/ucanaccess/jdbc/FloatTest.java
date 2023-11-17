@@ -43,7 +43,7 @@ class FloatTest extends UcanaccessBaseTest {
         ps.setFloat(1, 4.10011001155f);
         ps.execute();
         checkQuery("SELECT [row] FROM t ORDER BY pk");
-        checkQuery("SELECT COUNT(*) FROM t WHERE [row]=4.10011", 2);
+        checkQuery("SELECT COUNT(*) FROM t WHERE [row]=4.10011", singleRec(2));
         dumpQueryResult("SELECT * FROM t ORDER BY pk");
     }
 

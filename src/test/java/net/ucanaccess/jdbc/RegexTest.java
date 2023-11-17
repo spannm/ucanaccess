@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 class RegexTest extends UcanaccessBaseTest {
 
@@ -33,14 +35,16 @@ class RegexTest extends UcanaccessBaseTest {
 
         try (Statement st = ucanaccess.createStatement()) {
             for (String c : in) {
-                st.execute(getStatement(c.replaceAll("'", "''"), "'"));
-                st.execute(getStatement(c.replaceAll("\"", "\"\""), "\""));
+                executeStatements(st,
+                    getStatement(c.replaceAll("'", "''"), "'"),
+                    getStatement(c.replaceAll("\"", "\"\""), "\""));
             }
-            String[][] out = new String[in.length * 2][1];
-            int k = 0;
-            for (int j = 0; j < out.length; j++) {
-                out[j][0] = in[k];
-                if (j % 2 == 1) {
+
+            int len = in.length * 2;
+            List<List<Object>> out = new ArrayList<>(len);
+            for (int i = 0, k = 0; i < len; i++) {
+                out.add(List.of(in[k]));
+                if (i % 2 == 1) {
                     k++;
                 }
             }

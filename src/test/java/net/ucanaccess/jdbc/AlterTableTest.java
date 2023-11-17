@@ -245,10 +245,10 @@ class AlterTableTest extends UcanaccessBaseTest {
             st.execute("ALTER TABLE tx ADD FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE CASCADE");
             st.execute("INSERT INTO tx1 values(1,\"ciao\")");
             st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1, 2, \"ciao\")");
-            checkQuery("SELECT COUNT(*) FROM tx", 1);
+            checkQuery("SELECT COUNT(*) FROM tx", singleRec(1));
             st.execute("DELETE FROM tx1");
             checkQuery("SELECT COUNT(*) FROM tx");
-            checkQuery("SELECT COUNT(*) FROM tx", 0);
+            checkQuery("SELECT COUNT(*) FROM tx", singleRec(0));
             st.execute("DROP TABLE tx ");
             st.execute("DROP TABLE tx1 ");
 
@@ -258,10 +258,10 @@ class AlterTableTest extends UcanaccessBaseTest {
             st.execute("ALTER TABLE tx ADD FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE SET NULL");
             st.execute("INSERT INTO tx1 VALUES(1, \"ciao\")");
             st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
-            checkQuery("SELECT COUNT(*) FROM tx", 1);
+            checkQuery("SELECT COUNT(*) FROM tx", singleRec(1));
             st.execute("DELETE FROM tx1");
-            checkQuery("SELECT COUNT(*) FROM tx", 1);
-            checkQuery("SELECT * FROM tx", 1, null, 2.0, null, "what's this?");
+            checkQuery("SELECT COUNT(*) FROM tx", singleRec(1));
+            checkQuery("SELECT * FROM tx", singleRec(1, null, 2.0, null, "what's this?"));
             st.execute("CREATE UNIQUE INDEX IDX111 ON tx ([my best friend])");
 
             assertThatThrownBy(() -> st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1, 2, \"ciao\")"))

@@ -29,7 +29,7 @@ class ParametersTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT * FROM z");
         dumpQueryResult("SELECT * FROM [queryWithParameters]");
         dumpQueryResult("SELECT * FROM table(queryWithParameters(#1971-03-13#,'hi babe'))");
-        checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", 3);
+        checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", singleRec(3));
         CallableStatement cs = ucanaccess.prepareCall("{call Insert_from_select_abxxx(?,?,?)}");
         cs.setString(1, "2");
         cs.setString(2, "YeaH!!!!");
@@ -37,7 +37,7 @@ class ParametersTest extends UcanaccessBaseTest {
         cs.executeUpdate();
 
         dumpQueryResult("SELECT * FROM [ab\"\"\"xxx]");
-        checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", 6);
+        checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", singleRec(6));
         // metaData();
         cs = ucanaccess.prepareCall("{call InsertWithFewParameters(?,?,?)}");
 
@@ -68,9 +68,9 @@ class ParametersTest extends UcanaccessBaseTest {
         cs.setString(2, "Gord");
         cs.setString(3, "Basic");
         cs.executeUpdate();
-        checkQuery("SELECT @@IDENTITY", 2); // verify that we can retrieve the AutoNumber ID
+        checkQuery("SELECT @@IDENTITY", singleRec(2)); // verify that we can retrieve the AutoNumber ID
         cs.executeUpdate();
-        checkQuery("SELECT @@IDENTITY", 3); // and again, just to be sure
+        checkQuery("SELECT @@IDENTITY", singleRec(3)); // and again, just to be sure
         cs = ucanaccess.prepareCall("{call UpdateWhere(?,?)}");
         cs.setString(1, "updated");
         cs.setString(2, "3x");

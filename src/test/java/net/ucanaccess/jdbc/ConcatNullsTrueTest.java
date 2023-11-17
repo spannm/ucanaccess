@@ -26,7 +26,7 @@ class ConcatNullsTrueTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testConcat(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT 'aa2'& null FROM dual", new Object[][] {{null}});
+        checkQuery("SELECT 'aa2'& null FROM dual", recs(rec((Object) null)));
     }
 
 }

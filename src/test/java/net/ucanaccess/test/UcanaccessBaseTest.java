@@ -20,9 +20,13 @@ import java.nio.file.Files;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
@@ -64,7 +68,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return fileAccDb;
     }
 
-    public void checkQuery(String _query, Object[][] _expected) throws SQLException {
+    public void checkQuery(String _query, List<List<Object>> _expected) throws SQLException {
         try (Statement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery(_query)) {
             diff(rs, _expected, _query);
@@ -88,23 +92,19 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    public void checkQuery(String _query, Object... _expected) throws SQLException {
-        checkQuery(_query, new Object[][] {_expected});
-    }
-
-    private void diff(ResultSet _resultSet, Object[][] _expectedResults, String _expression) throws SQLException {
+    private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, String _expression) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
-        if (_expectedResults.length > 0) {
-            assertEquals(_expectedResults[0].length, colCountActual);
+        if (_expectedResults.size() > 0) {
+            assertEquals(_expectedResults.get(0).size(), colCountActual);
         }
         int expIdx = 0;
         while (_resultSet.next()) {
             for (int col = 1; col <= colCountActual; col++) {
                 assertThat(expIdx)
-                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.length + " not " + expIdx)
-                    .isLessThan(_expectedResults.length);
+                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.size() + " not " + expIdx)
+                    .isLessThan(_expectedResults.size());
                 Object actualObj = _resultSet.getObject(col);
-                Object expectedObj = _expectedResults[expIdx][col - 1];
+                Object expectedObj = _expectedResults.get(expIdx).get(col - 1);
                 if (expectedObj == null) {
                     assertNull(actualObj);
                 } else {
@@ -132,7 +132,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
             expIdx++;
         }
-        assertEquals(_expectedResults.length, expIdx, "Matrix with different length was expected");
+        assertEquals(_expectedResults.size(), expIdx, "Matrix with different length was expected");
     }
 
     public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException {
@@ -403,6 +403,38 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         for (String sql : _sqls) {
             _statement.execute(sql);
         }
+    }
+
+    /**
+     * A single record made up of one column.
+     */
+    protected static final List<Object> rec(Object _col) {
+        List<Object> rec = new ArrayList<>();
+        rec.add(_col);
+        return rec;
+    }
+
+    /**
+     * A single record made up of one or more columns.
+     */
+    @SafeVarargs
+    protected static final List<Object> rec(Object... _cols) {
+        return Stream.of(_cols).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * A list of a single record made up of one or more columns.
+     */
+    protected static List<List<Object>> singleRec(Object... _cols) {
+        return recs(rec(_cols));
+    }
+
+    /**
+     * A list of records.
+     */
+    @SafeVarargs
+    protected static final List<List<Object>> recs(List<Object>... _recs) {
+        return Stream.of(_recs).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @AfterEach

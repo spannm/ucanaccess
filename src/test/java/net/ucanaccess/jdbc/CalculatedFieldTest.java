@@ -39,11 +39,11 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
             dumpQueryResult("SELECT * FROM clcdFlds");
 
             checkQuery("SELECT input, clcd1, clcd2, clcd3, clcd4 FROM clcdFlds ORDER BY id",
-                new String[][] {{"my", "my", "my", "my", "my"},
-                                {"myc", "myc", "myc", "myc", "myc"},
-                                {"mycat", "myc", "myc", "cat", "cat"},
-                                {"mycattom", "myc", "myc", "tom", "tom"},
-                                {"", "", "", "", ""}});
+                recs(rec("my", "my", "my", "my", "my"),
+                     rec("myc", "myc", "myc", "myc", "myc"),
+                     rec("mycat", "myc", "myc", "cat", "cat"),
+                     rec("mycattom", "myc", "myc", "tom", "tom"),
+                     rec("", "", "", "", "")));
 
             // inserting NULL into a calculated column containing a STRING formula is not permitted
             assertThatThrownBy(() -> st.execute("INSERT INTO clcdFlds (input) VALUES (null)"))

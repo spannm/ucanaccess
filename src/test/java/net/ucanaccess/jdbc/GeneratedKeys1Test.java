@@ -46,7 +46,7 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
             Statement st = ucanaccess.createStatement();
             st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
 
-            checkQuery("Select @@identity ", 2);
+            checkQuery("Select @@identity ", singleRec(2));
             ResultSet rs3 = st.getGeneratedKeys();
             rs3.next();
             assertEquals(2, rs3.getInt(1));

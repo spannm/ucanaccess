@@ -50,17 +50,16 @@ class CounterTest extends UcanaccessBaseTest {
         }
 
         dumpQueryResult("SELECT * FROM t_counter");
-        Object[][] ver = {
-            {-1, "A", null, null},
-            {3, "C", null, null},
-            {4, "D", null, null},
-            {5, "E", null, null},
-            {6, "F", null, null},
-            {7, "G", null, null},
-            {8, "H", null, null},
-            {9, "I", null, null}
-        };
-        checkQuery("SELECT * FROM t_counter ORDER BY cntr", ver);
+        checkQuery("SELECT * FROM t_counter ORDER BY cntr", recs(
+            rec(-1, "A", null, null),
+            rec(3, "C", null, null),
+            rec(4, "D", null, null),
+            rec(5, "E", null, null),
+            rec(6, "F", null, null),
+            rec(7, "G", null, null),
+            rec(8, "H", null, null),
+            rec(9, "I", null, null)
+        ));
 
     }
 

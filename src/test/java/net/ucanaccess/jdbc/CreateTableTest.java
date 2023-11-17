@@ -31,8 +31,8 @@ class CreateTableTest extends UcanaccessBaseTest {
     private void createAsSelect() throws SQLException {
         try (Statement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa,a,c FROM AAA) WITH DATA");
-            Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-            checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa", ver);
+            checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa",
+                recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
             st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa,AAA_BIS.baaaa as xxx FROM AAA,AAA_BIS) WITH DATA");
             dumpQueryResult("SELECT * FROM AAA_quadris ORDER BY baaaa");
         }
@@ -42,8 +42,8 @@ class CreateTableTest extends UcanaccessBaseTest {
         try (Statement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH NO DATA");
             st.execute("INSERT INTO AAA_TRIS SELECT * FROM AAA_bis");
-            Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-            checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa", ver);
+            checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa",
+                recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
         }
     }
 
@@ -61,8 +61,8 @@ class CreateTableTest extends UcanaccessBaseTest {
             executeStatements(st,
                 "INSERT INTO AAA(baaaa, c) VALUES ('33A', 'G')",
                 "INSERT INTO AAA(baaaa, a, c) VALUES ('33B', 111, 'G')");
-            Object[][] ver = {{"33A", 3, "G"}, {"33B", 111, "G"}};
-            checkQuery("SELECT baaaa, a, c FROM AAA ORDER BY baaaa", ver);
+            checkQuery("SELECT baaaa, a, c FROM AAA ORDER BY baaaa",
+                recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
         }
     }
 

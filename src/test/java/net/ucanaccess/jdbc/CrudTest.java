@@ -86,7 +86,7 @@ class CrudTest extends UcanaccessBaseTest {
             ps.executeBatch();
             ps.clearBatch();
         }
-        checkQuery("SELECT * FROM t1", new Object[][] {{id1, "Prep1"}, {id2, "Prep2"}});
+        checkQuery("SELECT * FROM t1", recs(rec(id1, "Prep1"), rec(id2, "Prep2")));
         assertEquals(2, getCount("SELECT COUNT(*) FROM t1 where id in (" + id1 + ", " + id2 + ")"), "Insert failed");
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("DELETE FROM t1")) {
@@ -110,7 +110,7 @@ class CrudTest extends UcanaccessBaseTest {
             rs.next();
             rs.updateString(2, "show must go off");
             rs.updateRow();
-            checkQuery("SELECT * FROM t1", new Object[][] {{6666554, "show must go off"}});
+            checkQuery("SELECT * FROM t1", singleRec(6666554, "show must go off"));
             st.execute("DELETE FROM t1");
         }
     }
@@ -133,8 +133,7 @@ class CrudTest extends UcanaccessBaseTest {
 
         rs.deleteRow();
         ps.getConnection().commit();
-
-        checkQuery("SELECT COUNT(*) FROM t1", 0);
+        checkQuery("SELECT COUNT(*) FROM t1", singleRec(0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -155,8 +154,8 @@ class CrudTest extends UcanaccessBaseTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            Object[][] ver = {{4, "Growing old in rural pleaces"}, {6666554, "tre canarini volano su e cadono"}};
-            checkQuery("SELECT * FROM t1 ORDER BY id", ver);
+            checkQuery("SELECT * FROM t1 ORDER BY id",
+                recs(rec(4, "Growing old in rural pleaces"), rec(6666554, "tre canarini volano su e cadono")));
             st.execute("DELETE FROM t1");
         }
     }
@@ -182,7 +181,7 @@ class CrudTest extends UcanaccessBaseTest {
             rs.next();
             ps.getConnection().commit();
 
-            checkQuery("SELECT * FROM T2 ORDER BY id", 1, "Growing old in rural places");
+            checkQuery("SELECT * FROM T2 ORDER BY id", singleRec(1, "Growing old in rural places"));
             Statement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs1 = stat.executeQuery("SELECT * FROM T2 ORDER BY id");
             rs1.last();
@@ -208,8 +207,7 @@ class CrudTest extends UcanaccessBaseTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            Object[][] ver = {{1, "Growing old without emotions"}};
-            checkQuery("SELECT * FROM T21 ORDER BY id", ver);
+            checkQuery("SELECT * FROM T21 ORDER BY id", singleRec(1, "Growing old without emotions"));
             st.execute("DELETE FROM t21");
         }
     }
