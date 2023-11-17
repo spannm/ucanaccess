@@ -296,6 +296,9 @@ public class UcanaccessConnection implements Connection {
             } catch (IOException _ex) {
                 _ex.printStackTrace();
             }
+            if (UcanaccessSQLException.class.isInstance(_t)) {
+                throw UcanaccessSQLException.class.cast(_t);
+            }
             throw new UcanaccessSQLException(_t);
         }
 
@@ -340,8 +343,8 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public String getClientInfo(String name) {
-        return clientInfo.getProperty(name);
+    public String getClientInfo(String _name) {
+        return clientInfo.getProperty(_name);
     }
 
     public Database getDbIO() {

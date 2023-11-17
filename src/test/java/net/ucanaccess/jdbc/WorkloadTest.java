@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,7 +24,7 @@ class WorkloadTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
+    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testLoadMany(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         final int nbRecords = 30000;

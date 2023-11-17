@@ -1,7 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -18,13 +19,13 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
         File fileMdb = createTempFileName(getClass().getSimpleName());
         fileMdb.deleteOnExit();
 
-        UcanaccessConnection conn = buildConnection()
+        UcanaccessConnectionBuilder bldr = buildConnection()
             .withDbPath(fileMdb.getAbsolutePath())
-            .withUser("")
-            .withPassword("")
-            .withParm("immediatelyReleaseResources", true)
-            .withParm("newDatabaseVersion", getFileFormat().name())
-            .build();
+            .withoutUserPass()
+            .withProp(Property.immediatelyReleaseResources, true)
+            .withProp(Property.newDatabaseVersion, getFileFormat().name());
+        getLogger().debug("Database url: {}", bldr.getUrl());
+        UcanaccessConnection conn = bldr.build();
 
         assertNotNull(conn);
         ucanaccess.close();

@@ -2,17 +2,15 @@ package net.ucanaccess.console;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     private static final String EXPORT_USAGE = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
@@ -32,29 +30,16 @@ public class Main {
 
     }
 
-    private static boolean hasPassword(File fl) throws IOException {
-        try (Database db = Try.catching(() -> DatabaseBuilder.open(fl))
+    private static boolean hasPassword(File _f) throws IOException {
+        try (Database db = Try.catching(() -> DatabaseBuilder.open(_f))
             .orElseGet(() -> Try.catching(() -> new DatabaseBuilder()
                 .setReadOnly(true)
-                .setFile(fl).open()).orThrow())) {
+                .setFile(_f).open()).orThrow())) {
             return db.getDatabasePassword() != null;
         }
     }
 
-    private static void lcProperties(Properties pr) {
-        Properties nb = new Properties();
-
-        for (Entry<Object, Object> entry : pr.entrySet()) {
-            String key = (String) entry.getKey();
-            if (key != null) {
-                nb.put(key.toLowerCase(), entry.getValue());
-            }
-        }
-        pr.clear();
-        pr.putAll(nb);
-    }
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] _args) throws Exception {
         Logger.setLogPrintWriter(new PrintWriter(System.out));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info
@@ -63,25 +48,29 @@ public class Main {
         long size = 0;
         String passwordEntry = "";
         String[] commands = null;
-        if (args.length > 0) {
-            String file = args[0];
+        if (_args.length > 0) {
+            String file = _args[0];
             if (file.endsWith(".properties")) {
-                File pfl = new File(args[0]);
+                File pfl = new File(_args[0]);
                 if (pfl.exists()) {
                     try (FileInputStream fis = new FileInputStream(pfl)) {
                         props.load(fis);
                     }
-                    lcProperties(props);
+                    // convert keys to enum name or lower-case
+                    props = props.stringPropertyNames().stream()
+                        .collect(Collectors.toMap(
+                            k -> Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase()),
+                            props::getProperty, (v1, v2) -> v1, Properties::new));
                 }
             } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
                 fl = new File(file);
                 size = fl.length();
-                if (args.length > 1) {
+                if (_args.length > 1) {
                     int arg = 1;
                     if (hasPassword(fl)) {
-                       passwordEntry = args[arg++];
+                       passwordEntry = _args[arg++];
                     } else {
-                       commands = Arrays.copyOfRange(args, arg++, args.length);
+                       commands = Arrays.copyOfRange(_args, arg++, _args.length);
                     }
                 }
             }
@@ -91,8 +80,8 @@ public class Main {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         } catch (ClassNotFoundException e) {
 
-            System.out.println(e.getMessage());
-            System.out.println("Check your classpath! ");
+            System.err.println(e.getMessage());
+            System.err.println("Check your classpath!");
             System.exit(1);
         }
         while (fl == null || !fl.exists()) {
@@ -114,13 +103,13 @@ public class Main {
         Connection conn = null;
         try {
             String noMem = "";
-            if (passwordEntry.isEmpty() && (props.containsKey("jackcessopener") || hasPassword(fl))) {
+            if (passwordEntry.isEmpty() && (props.containsKey(Property.jackcessOpener.name()) || hasPassword(fl))) {
                 System.out.print("Please, enter password: ");
                 passwordEntry = ";password=" + input.readLine().trim();
             }
 
-            if (!props.containsKey("jackcessopener")) {
-                noMem = size > 30000000 ? ";memory=false" : "";
+            if (!props.containsKey(Property.jackcessOpener.name())) {
+                noMem = size > 30000000 ? ";" + Property.memory + "=false" : "";
             }
 
             conn = DriverManager.getConnection("jdbc:ucanaccess://" + fl.getAbsolutePath() + passwordEntry + noMem, props);
@@ -132,7 +121,7 @@ public class Main {
             }
         } catch (Exception _ex) {
             _ex.printStackTrace();
-            System.out.println(_ex.getMessage());
+            System.err.println(_ex.getMessage());
             System.exit(1);
         }
         Main main = new Main(conn, input);

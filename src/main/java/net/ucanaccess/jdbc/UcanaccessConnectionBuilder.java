@@ -1,97 +1,128 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.converters.Metadata.Property.*;
+
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.converters.Metadata.Property;
+import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
 
 import java.sql.DriverManager;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A build for Ucanaccess database urls and connections.
+ * A builder for Ucanaccess database urls and connections.
+ *
+ * @author Markus Spann
+ * @since v5.1.0
  */
 public final class UcanaccessConnectionBuilder {
 
-    private String              user              = "ucanaccess";
-    private String              password;
-    private String              dbPath;
-    private boolean             ignoreCase;
-    private long                inactivityTimeout = -1;
-    private String              columnOrder;
-    private Map<String, Object> addParms          = new LinkedHashMap<>();
-
-    public UcanaccessConnectionBuilder withUser(String _user) {
-        user = _user;
-        return this;
-    }
-
-    public UcanaccessConnectionBuilder withPassword(String _password) {
-        password = _password;
-        return this;
-    }
-
-    public UcanaccessConnectionBuilder withoutUserPass() {
-        user = "";
-        password = "";
-        return this;
-    }
+    private String                      dbPath;
+    private final Map<Property, Object> props = new EnumMap<>(Property.class);
 
     public UcanaccessConnectionBuilder withDbPath(String _dbPath) {
         dbPath = _dbPath;
         return this;
     }
 
+    public UcanaccessConnectionBuilder withUser(String _user) {
+        return withProp(user, _user);
+    }
+
+    public UcanaccessConnectionBuilder withPassword(String _pass) {
+        return withProp(password, _pass);
+    }
+
+    public UcanaccessConnectionBuilder withoutUserPass() {
+        props.remove(ignoreCase);
+        props.remove(password);
+        return this;
+    }
+
     public UcanaccessConnectionBuilder withIgnoreCase(boolean _ignoreCase) {
-        ignoreCase = _ignoreCase;
+        return withProp(ignoreCase, _ignoreCase);
+    }
+
+    public UcanaccessConnectionBuilder withInactivityTimeout(int _inactivityTimeout) {
+        return withProp(inactivityTimeout, _inactivityTimeout);
+    }
+
+    public UcanaccessConnectionBuilder withColumnOrderData() {
+        return withProp(columnOrder, ColumnOrder.DATA);
+    }
+
+    public UcanaccessConnectionBuilder withColumnOrderDisplay() {
+        return withProp(columnOrder, ColumnOrder.DISPLAY);
+    }
+
+    public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {
+        Objects.requireNonNull(_prop, "Property required");
+
+        String val = Optional.ofNullable(_value).map(Object::toString).orElse("");
+        props.put(_prop, val);
+
         return this;
     }
 
-    public UcanaccessConnectionBuilder withInactivityTimeout(long _inactivityTimeout) {
-        inactivityTimeout = _inactivityTimeout;
-        return this;
-    }
-
-    public UcanaccessConnectionBuilder withColumnOrder(String _columnOrder) {
-        columnOrder = _columnOrder;
-        return this;
-    }
-
-    public UcanaccessConnectionBuilder withParm(String _key, Object _value) {
-        Objects.requireNonNull(_key, "Key required");
-        Objects.requireNonNull(_value, "Value required");
-        addParms.put(_key, _value);
-        return this;
-    }
-
-    public String buildUrl() {
+    public String getUrl() {
         Objects.requireNonNull(dbPath, "Database path required");
 
         String url = UcanaccessDriver.URL_PREFIX + dbPath;
 
-        if (ignoreCase) {
-            url += ";ignoreCase=" + ignoreCase;
-        }
-        if (inactivityTimeout > -1) {
-            url += ";inactivityTimeout=" + inactivityTimeout;
-        } else {
-            url += ";immediatelyReleaseResources=true";
-        }
-        if (columnOrder != null) {
-            url += ";columnOrder=" + columnOrder;
-        }
-        if (!addParms.isEmpty()) {
-            url += ";" + addParms.entrySet().stream().map(e -> e.getKey() + '=' + e.getValue()).collect(Collectors.joining(";"));
+        String propsStr = propsToString(";");
+        if (!propsStr.isEmpty()) {
+            url += ";" + propsStr;
         }
         return url;
+    }
+
+    public String getUser() {
+        return (String) props.get(user);
+    }
+
+    public String getPassword() {
+        return (String) props.get(password);
     }
 
     public UcanaccessConnection build() {
         Try.catching(() -> Class.forName(UcanaccessDriver.class.getName()))
             .orThrow(UcanaccessRuntimeException::new);
 
-        return Try.catching(() -> DriverManager.getConnection(buildUrl(), user, password))
+        return Try.catching(() -> DriverManager.getConnection(getUrl(), getUser(), getPassword()))
             .map(UcanaccessConnection.class::cast).orThrow();
+    }
+
+    /**
+     * Creates a semicolon-delimited string of all properties and their values, without properties {@code user} and {@code password},
+     * and performing special handling on certain properties.
+     *
+     * @param _delimiter delimiter
+     * @return property string
+     */
+    String propsToString(CharSequence _delimiter) {
+        Map<Property, Object> copy = new LinkedHashMap<>(props);
+
+        copy.remove(user);
+        copy.remove(password);
+
+        // special handling of certain properties
+        if (Integer.valueOf(copy.getOrDefault(inactivityTimeout, -1).toString()) > -1) {
+            copy.remove(immediatelyReleaseResources);
+        } else {
+            copy.put(immediatelyReleaseResources, true);
+        }
+
+        return copy.entrySet().stream()
+            .map(e -> e.getKey().name() + '=' + e.getValue())
+            .collect(Collectors.joining(_delimiter));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[user=%s, dbPath=%s, props={%s}]",
+            getClass().getSimpleName(), props.get(user), dbPath, propsToString(", "));
     }
 
 }

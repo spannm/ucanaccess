@@ -1,7 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -30,7 +31,7 @@ class BigintTest extends UcanaccessBaseTest {
 
         try (Connection conn = buildConnection()
                 .withDbPath(accdbPath)
-                .withParm("immediatelyReleaseResources", true).build();
+                .withProp(Property.immediatelyReleaseResources, true).build();
                 Statement st2 = conn.createStatement();
                 ResultSet rs = st2.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
             rs.next();

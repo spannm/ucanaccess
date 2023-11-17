@@ -2,6 +2,7 @@ package net.ucanaccess.log;
 
 public enum LoggerMessageEnum implements ILoggerResourceMessage  {
     HSQLDB_DRIVER_NOT_FOUND,
+    UNKNOWN_DRIVER_PROPERTY,
     COMPLEX_TYPE_UNSUPPORTED,
     KEEP_MIRROR_AND_OTHERS,
     UNKNOWN_EXPRESSION,

@@ -9,6 +9,7 @@ import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessConnectionBuilder;
+import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
@@ -372,8 +373,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      */
     protected UcanaccessConnectionBuilder buildConnection() {
         return new UcanaccessConnectionBuilder()
-            .withUser("ucanaccess")
-            .withPassword("");
+            .withUser("ucanaccess");
     }
 
     protected void initVerifyConnection() throws SQLException {

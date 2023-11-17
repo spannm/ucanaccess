@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,11 +23,11 @@ class MemoryTest extends UcanaccessBaseTest {
     @Override
     protected UcanaccessConnectionBuilder buildConnection() {
         return super.buildConnection()
-            .withInactivityTimeout(1000L);
+            .withInactivityTimeout(1000);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
+    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testMemory(AccessVersion _accessVersion) throws SQLException, InterruptedException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);

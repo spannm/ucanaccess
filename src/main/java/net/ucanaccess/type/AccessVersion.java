@@ -1,11 +1,11 @@
-package net.ucanaccess.test;
+package net.ucanaccess.type;
 
 import com.healthmarketscience.jackcess.Database.FileFormat;
 
 import java.util.List;
 
 /**
- * Enum of MS Access Versions to encapsulate Jackcess FileFormat. To be used for test purposes only.
+ * Enum of MS Access versions to encapsulate Jackcess {@link FileFormat}.
  */
 public enum AccessVersion {
 
@@ -34,6 +34,19 @@ public enum AccessVersion {
 
     public static List<AccessVersion> getDefaultAccessVersion() {
         return List.of(DEFAULT_ACCESS_VERSION);
+    }
+
+    public static AccessVersion parse(String _val) {
+        if (_val == null) {
+            return null;
+        }
+        String val = _val.strip().toLowerCase();
+        for (AccessVersion ver : values()) {
+            if (val.equals(ver.name())) {
+                return ver;
+            }
+        }
+        return null;
     }
 
 }

@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,16 +19,16 @@ class ColumnOrderTest extends UcanaccessBaseTest {
     @Override
     protected UcanaccessConnectionBuilder buildConnection() {
         return super.buildConnection()
-            .withColumnOrder("display");
+            .withColumnOrderDisplay();
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
+    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testColumnOrder1(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
         try (Connection uca = createUcanaccessConnection();
-            PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?,?,?)")) {
+            PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?, ?, ?)")) {
             ps.setInt(3, 3);
             ps.setDate(2, new Date(System.currentTimeMillis()));
             ps.setString(1, "This is the display order");

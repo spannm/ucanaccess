@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -15,7 +15,7 @@ class RomanCharacterTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
+    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM t_noroman");

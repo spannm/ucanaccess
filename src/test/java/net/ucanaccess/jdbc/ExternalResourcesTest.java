@@ -1,7 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -13,7 +14,7 @@ import java.sql.Statement;
 class ExternalResourcesTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.test.AccessVersion#getDefaultAccessVersion()")
+    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testLinks(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
         init(_accessVersion);
 
@@ -23,11 +24,10 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
 
         UcanaccessConnectionBuilder bldr = buildConnection()
             .withDbPath(main.getAbsolutePath())
-            .withUser("")
-            .withPassword("")
-            .withParm("immediatelyReleaseResources", true)
-            .withParm("remap", "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
-        getLogger().info("Database url: {}", bldr.buildUrl());
+            .withoutUserPass()
+            .withProp(Property.immediatelyReleaseResources, true)
+            .withProp(Property.reMap, "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
+        getLogger().debug("Database url: {}", bldr.getUrl());
         
         try (Connection conn = bldr.build();
             Statement st = conn.createStatement()) {

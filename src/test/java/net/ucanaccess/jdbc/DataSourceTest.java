@@ -16,7 +16,7 @@ class DataSourceTest extends UcanaccessBaseTest {
     void setNewDatabaseVersionBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         assertThatThrownBy(() -> uds.setNewDatabaseVersion("V200?"))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(UcanaccessRuntimeException.class);
     }
 
     @Test
@@ -31,7 +31,7 @@ class DataSourceTest extends UcanaccessBaseTest {
     void setLobScaleBad() {
         UcanaccessDataSource uds = new UcanaccessDataSource();
         assertThatThrownBy(() -> uds.setLobScale(3))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(UcanaccessRuntimeException.class);
     }
 
     @Test

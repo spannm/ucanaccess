@@ -1,7 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersion;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -25,8 +26,8 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         // create the database
         try (Connection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
-                .withParm("memory", true)
-                .withParm("newDatabaseVersion", getFileFormat().name())
+                .withProp(Property.memory, true)
+                .withProp(Property.newDatabaseVersion, getFileFormat().name())
                 .withoutUserPass()
                 .build();
                 Statement stCreate = conn.createStatement()) {
@@ -36,14 +37,14 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         // create the persistent mirror
         UcanaccessConnectionBuilder mirrorBuilder = buildConnection()
             .withDbPath(dbFile.getAbsolutePath())
-            .withParm("keepMirror", mirrorFile.getAbsolutePath())
+            .withProp(Property.keepMirror, mirrorFile.getAbsolutePath())
             .withoutUserPass();
         try (Connection conn = mirrorBuilder.build()) {}
 
         // do an update without the mirror involved
         try (Connection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
-                .withParm("memory", true)
+                .withProp(Property.memory, true)
                 .withoutUserPass().build();
                 Statement stUpdate = conn.createStatement()) {
             stUpdate.executeUpdate("INSERT INTO Table1 (TextField) VALUES ('NewStuff')");

@@ -1,11 +1,15 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.converters.Metadata.Property.*;
+
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
@@ -13,14 +17,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public final class UcanaccessDriver implements Driver {
+
     public static final String URL_PREFIX = "jdbc:ucanaccess://";
+
     static {
         try {
             DriverManager.registerDriver(new UcanaccessDriver());
@@ -39,8 +42,8 @@ public final class UcanaccessDriver implements Driver {
     }
 
     @Override
-    public boolean acceptsURL(String url) {
-        return url.startsWith(URL_PREFIX) && url.length() > URL_PREFIX.length();
+    public boolean acceptsURL(String _url) {
+        return _url != null && _url.startsWith(URL_PREFIX) && _url.length() > URL_PREFIX.length();
     }
 
     @Override
@@ -48,133 +51,141 @@ public final class UcanaccessDriver implements Driver {
         if (!acceptsURL(_url)) {
             return null;
         }
-        readProperties(_props, _url);
-        String fileMdbPath = _url.indexOf(';') > 0 ? _url.substring(URL_PREFIX.length(), _url.indexOf(';'))
-                : _url.substring(URL_PREFIX.length());
-        File mdb = new File(fileMdbPath);
+
+        Map<String, String> unknownProps = new LinkedHashMap<>();
+        Map<Property, String> props = readProperties(_props, _url,
+            (k, v) -> {
+                unknownProps.put(k, v);
+                Logger.logWarning(LoggerMessageEnum.UNKNOWN_DRIVER_PROPERTY, k, v);
+            });
+
+        int idxSemicolon = _url.indexOf(';');
+        String fileDbPath = idxSemicolon > 0 ? _url.substring(URL_PREFIX.length(), idxSemicolon) : _url.substring(URL_PREFIX.length());
+        File fileDb = new File(fileDbPath);
         DBReferenceSingleton as = DBReferenceSingleton.getInstance();
 
         synchronized (UcanaccessDriver.class) {
             try {
                 Session session = new Session();
 
-                boolean alreadyLoaded = as.loaded(mdb);
+                boolean alreadyLoaded = as.loaded(fileDb);
                 FileFormat ff = null;
-                if (_props.containsKey("newdatabaseversion")) {
-                    if (!mdb.exists()) {
-                        ff = FileFormat.valueOf(_props.getProperty("newdatabaseversion").toUpperCase());
+                if (props.containsKey(newDatabaseVersion)) {
+                    if (!fileDb.exists()) {
+                        ff = FileFormat.valueOf(props.get(newDatabaseVersion).toUpperCase());
                     }
 
                 }
-                boolean useCustomOpener = _props.containsKey("jackcessopener");
+                boolean useCustomOpener = props.containsKey(jackcessOpener);
 
                 IJackcessOpenerInterface jko = useCustomOpener
-                        ? newJackcessOpenerInstance(_props.getProperty("jackcessopener")) : new DefaultJackcessOpener();
-                DBReference dbRef = alreadyLoaded ? as.getReference(mdb)
-                        : as.loadReference(mdb, ff, jko, _props.getProperty("password"));
+                    ? newJackcessOpenerInstance(props.get(jackcessOpener))
+                    : new DefaultJackcessOpener();
+                DBReference dbRef = alreadyLoaded ? as.getReference(fileDb)
+                    : as.loadReference(fileDb, ff, jko, props.get(password));
 
                 if (!alreadyLoaded) {
                     if ((useCustomOpener
-                            || _props.containsKey("encrypt") && Boolean.parseBoolean(_props.getProperty("encrypt")))
-                            && (_props.containsKey("memory") && !Boolean.parseBoolean(_props.getProperty("memory"))
-                                    || _props.containsKey("keepmirror"))) {
+                        || props.containsKey(encrypt) && Boolean.parseBoolean(props.get(encrypt)))
+                        && (props.containsKey(memory) && !Boolean.parseBoolean(props.get(memory))
+                            || props.containsKey(keepMirror))) {
                         dbRef.setEncryptHSQLDB(true);
                     }
 
-                    if (_props.containsKey("memory")) {
-                        dbRef.setInMemory(Boolean.parseBoolean(_props.getProperty("memory")));
+                    if (props.containsKey(memory)) {
+                        dbRef.setInMemory(Boolean.parseBoolean(props.get(memory)));
                     }
 
-                    if (_props.containsKey("lobscale")) {
-                        Integer vl = validateLobScale(_props.getProperty("lobscale"));
+                    if (props.containsKey(lobScale)) {
+                        Integer vl = validateLobScale(props.get(lobScale));
                         dbRef.setLobScale(vl);
                     }
 
-                    if (_props.containsKey("keepmirror")) {
+                    if (props.containsKey(keepMirror)) {
                         dbRef.setInMemory(false);
                         if (dbRef.isEncryptHSQLDB()) {
                             Logger.logWarning(LoggerMessageEnum.KEEP_MIRROR_AND_OTHERS);
                         } else {
                             File dbMirror =
-                                    new File(_props.getProperty("keepmirror") + mdb.getName().toUpperCase().hashCode());
+                                new File(props.get(keepMirror) + fileDb.getName().toUpperCase().hashCode());
                             dbRef.setToKeepHsql(dbMirror);
-                            if (_props.containsKey("readonlymirror")) {
-                                dbRef.setMirrorReadOnly(Boolean.parseBoolean(_props.getProperty("readonlymirror")));
+                            if (props.containsKey(readOnlyMirror)) {
+                                dbRef.setMirrorReadOnly(Boolean.parseBoolean(props.get(readOnlyMirror)));
                             }
                         }
                     }
 
-                    if (_props.containsKey("showschema")) {
-                        dbRef.setShowSchema(Boolean.parseBoolean(_props.getProperty("showschema")));
+                    if (props.containsKey(showSchema)) {
+                        dbRef.setShowSchema(Boolean.parseBoolean(props.get(showSchema)));
                     }
-                    if (_props.containsKey("inactivitytimeout")) {
-                        int millis = 60000 * Integer.parseInt(_props.getProperty("inactivitytimeout"));
+                    if (props.containsKey(inactivityTimeout)) {
+                        int millis = 60000 * Integer.parseInt(props.get(inactivityTimeout));
                         dbRef.setInactivityTimeout(millis);
                     }
-                    if (_props.containsKey("singleconnection")) {
-                        dbRef.setImmediatelyReleaseResources(Boolean.parseBoolean(_props.getProperty("singleconnection")));
+                    if (props.containsKey(singleConnection)) {
+                        dbRef.setImmediatelyReleaseResources(Boolean.parseBoolean(props.get(singleConnection)));
                     }
-                    if (_props.containsKey("immediatelyreleaseresources")) {
+                    if (props.containsKey(immediatelyReleaseResources)) {
                         dbRef.setImmediatelyReleaseResources(
-                                Boolean.parseBoolean(_props.getProperty("immediatelyreleaseresources")));
+                            Boolean.parseBoolean(props.get(immediatelyReleaseResources)));
                     }
-                    if (_props.containsKey("lockmdb")) {
-                        dbRef.setOpenExclusive(Boolean.parseBoolean(_props.getProperty("lockmdb")));
-                    }
-
-                    if (_props.containsKey("openexclusive")) {
-                        dbRef.setOpenExclusive(Boolean.parseBoolean(_props.getProperty("openexclusive")));
+                    if (props.containsKey(lockMdb)) {
+                        dbRef.setOpenExclusive(Boolean.parseBoolean(props.get(lockMdb)));
                     }
 
-                    if (_props.containsKey("concatnulls")) {
-                        dbRef.setConcatNulls(Boolean.parseBoolean(_props.getProperty("concatnulls")));
+                    if (props.containsKey(openExclusive)) {
+                        dbRef.setOpenExclusive(Boolean.parseBoolean(props.get(openExclusive)));
                     }
-                    if (_props.containsKey("preventreloading")) {
-                        dbRef.setPreventReloading(Boolean.parseBoolean(_props.getProperty("preventreloading")));
+
+                    if (props.containsKey(concatNulls)) {
+                        dbRef.setConcatNulls(Boolean.parseBoolean(props.get(concatNulls)));
                     }
-                    if (_props.containsKey("remap")) {
-                        dbRef.setExternalResourcesMapping(toMap(_props.getProperty("remap")));
+                    if (props.containsKey(preventReloading)) {
+                        dbRef.setPreventReloading(Boolean.parseBoolean(props.get(preventReloading)));
                     }
-                    if (_props.containsKey("supportsaccesslike")) {
-                        SQLConverter
-                                .setSupportsAccessLike(Boolean.parseBoolean(_props.getProperty("supportsaccesslike")));
+                    if (props.containsKey(reMap)) {
+                        dbRef.setExternalResourcesMapping(toMap(props.get(reMap)));
                     }
-                    if (_props.containsKey("columnorder") && "display".equalsIgnoreCase(_props.getProperty("columnorder"))) {
+                    if (props.containsKey(supportsAccessLike)) {
+                        SQLConverter.setSupportsAccessLike(Boolean.parseBoolean(props.get(supportsAccessLike)));
+                    }
+                    if (props.containsKey(columnOrder)
+                        && ColumnOrder.DISPLAY == ColumnOrder.parse(props.get(columnOrder))) {
                         dbRef.setColumnOrderDisplay();
                     }
-                    if (_props.containsKey("mirrorfolder") && dbRef.getToKeepHsql() == null) {
+                    if (props.containsKey(mirrorFolder) && dbRef.getToKeepHsql() == null) {
                         dbRef.setInMemory(false);
-                        String fd = _props.getProperty("mirrorfolder");
-                        dbRef.setMirrorFolder(
-                                new File("java.io.tmpdir".equals(fd) ? System.getProperty("java.io.tmpdir") : fd));
+                        String fd = props.get(mirrorFolder);
+                        if ("java.io.tmpdir".equals(fd)) {
+                            fd = System.getProperty("java.io.tmpdir");
+                        }
+                        dbRef.setMirrorFolder(new File(fd));
                     }
-                    if (_props.containsKey("ignorecase")) {
-                        dbRef.setIgnoreCase(Boolean.parseBoolean(_props.getProperty("ignorecase")));
+                    if (props.containsKey(ignoreCase)) {
+                        dbRef.setIgnoreCase(Boolean.parseBoolean(props.get(ignoreCase)));
                     }
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
                             Logger.logWarning(LoggerMessageEnum.INVALID_CHARACTER_SEQUENCE,
-                                    cl.getTable().getName(), cl.getName(), new String(bt));
+                                cl.getTable().getName(), cl.getName(), new String(bt));
                         }
                         throw new IOException(ex.getMessage());
                     });
                 }
                 String pwd = dbRef.getDbIO().getDatabasePassword();
-                if (pwd != null && !_props.containsKey("jackcessopener")) {
-                    if (!pwd.equals(_props.get("password"))) {
+                if (pwd != null && !props.containsKey(jackcessOpener)) {
+                    if (!pwd.equals(props.get(password))) {
                         throw new UcanaccessSQLException(ExceptionMessages.NOT_A_VALID_PASSWORD);
                     }
 
-                } else if (_props.containsKey("jackcessopener")) {
-                    String mpwd = _props.getProperty("password");
+                } else if (props.containsKey(jackcessOpener)) {
+                    String mpwd = props.get(password);
                     session.setPassword(mpwd);
                 }
 
-                String user = _props.getProperty("user");
-                if (user != null) {
-                    session.setUser(user);
-                }
+                Optional.ofNullable(props.get(user))
+                    .ifPresent(session::setUser);
 
                 SQLWarning sqlw = null;
                 if (!alreadyLoaded) {
@@ -189,16 +200,16 @@ public final class UcanaccessDriver implements Driver {
 
                     LoadJet la = new LoadJet(conn, dbRef.getDbIO());
                     Logger.turnOffJackcessLog();
-                    if (_props.containsKey("sysschema")) {
-                        boolean sysSchema = Boolean.parseBoolean(_props.getProperty("sysschema"));
-                        dbRef.setSysSchema(sysSchema);
-                        la.setSysSchema(sysSchema);
+                    if (props.containsKey(sysSchema)) {
+                        boolean val = Boolean.parseBoolean(props.get(sysSchema));
+                        dbRef.setSysSchema(val);
+                        la.setSysSchema(val);
 
                     }
-                    if (_props.containsKey("skipindexes")) {
-                        boolean skipIndexes = Boolean.parseBoolean(_props.getProperty("skipindexes"));
-                        dbRef.setSkipIndexes(skipIndexes);
-                        la.setSkipIndexes(skipIndexes);
+                    if (props.containsKey(skipIndexes)) {
+                        boolean val = Boolean.parseBoolean(props.get(skipIndexes));
+                        dbRef.setSkipIndexes(val);
+                        la.setSkipIndexes(val);
                     }
 
                     if (toBeLoaded) {
@@ -206,11 +217,16 @@ public final class UcanaccessDriver implements Driver {
                     } else {
                         la.resetFunctionsDefault();
                     }
-                    as.put(mdb.getAbsolutePath(), dbRef);
+                    as.put(fileDb.getAbsolutePath(), dbRef);
                     sqlw = la.getLoadingWarnings();
                 }
 
-                UcanaccessConnection uc = new UcanaccessConnection(as.getReference(mdb), _props, session);
+                Properties newProps = new Properties();
+                props.entrySet().stream()
+                    .forEach(e -> newProps.put(e.getKey().name(), e.getValue()));
+                newProps.putAll(unknownProps);
+
+                UcanaccessConnection uc = new UcanaccessConnection(as.getReference(fileDb), newProps, session);
                 uc.addWarnings(sqlw);
                 uc.setUrl(_url);
                 return uc;
@@ -220,9 +236,9 @@ public final class UcanaccessDriver implements Driver {
         }
     }
 
-    private Integer validateLobScale(String property) {
+    private Integer validateLobScale(String _property) {
         try {
-            Integer i = Integer.parseInt(property);
+            Integer i = Integer.parseInt(_property);
 
             if (i == 1 || i == 2 || i == 4 || i == 8 || i == 16 || i == 32) {
                 return i;
@@ -274,7 +290,7 @@ public final class UcanaccessDriver implements Driver {
     }
 
     private IJackcessOpenerInterface newJackcessOpenerInstance(String className)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
         Object newInstance = Class.forName(className).getConstructor().newInstance();
         if (!(newInstance instanceof IJackcessOpenerInterface)) {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_JACKCESS_OPENER);
@@ -282,24 +298,47 @@ public final class UcanaccessDriver implements Driver {
         return (IJackcessOpenerInterface) newInstance;
     }
 
-    private void readProperties(Properties pr, String url) {
-        Properties nb = new Properties();
+    /**
+     * Normalizes properties received as input and found in the driver url and returns a map of typed properties.<br>
+     * The method differentiates between known and unknown properties by return known properties as typed properties
+     * with their value and calling an optional consumer for each property key and value.<br>
+     * If a property is found multiple times or found in both, the input properties as well as in the driver url,
+     * the url has precedence over the input properties and the latest occurrence overall will be used.
+     *
+     * @param _input input properties
+     * @param _url driver url
+     * @param _unknownConsumer consumer of unknown property key/value
+     * @return map of unknown and normalized properties
+     */
+    static Map<Property, String> readProperties(Properties _input, String _url, BiConsumer<String, String> _unknownConsumer) {
+        Objects.requireNonNull(_input, "Properties required");
+        Objects.requireNonNull(_url, "URL required");
 
-        for (Entry<Object, Object> entry : pr.entrySet()) {
-            String key = (String) entry.getKey();
-            if (key != null) {
-                nb.put(key.toLowerCase(), entry.getValue());
+        Map<Property, String> props = new EnumMap<>(Property.class);
+
+        for (String key : _input.stringPropertyNames()) {
+            Property prop = parse(key);
+            String val = _input.getProperty(key);
+            if (prop == null) {
+                _unknownConsumer.accept(key, val);
+            } else {
+                props.put(prop, val);
             }
         }
-        pr.clear();
-        pr.putAll(nb);
-        StringTokenizer st = new StringTokenizer(url, ";");
-        while (st.hasMoreTokens()) {
-            String entry = st.nextToken();
-            int sep = entry.indexOf('=');
-            if (sep > 0 && entry.length() > sep) {
-                pr.put(entry.substring(0, sep).toLowerCase(), entry.substring(sep + 1));
-            }
-        }
+
+        Arrays.stream(_url.split(";"))
+            .skip(1)
+            .map(s -> s.split("=")).forEach(arr -> {
+                Property prop = parse(arr[0]);
+                String val = arr.length > 1 ? arr[1].strip() : null;
+                if (prop == null) {
+                    _unknownConsumer.accept(arr[0], val);
+                } else {
+                    props.put(prop, val);
+                }
+            });
+
+        return props;
     }
+
 }

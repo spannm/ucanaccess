@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.converters.Metadata.Property;
+
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -17,27 +19,27 @@ public class UcanaccessDataSourceFactory implements ObjectFactory {
         if (ref.getClassName().equals(dataSourceClass)) {
             UcanaccessDataSource dataSource = new UcanaccessDataSource();
             dataSource.setAccessPath((String) ref.get("accessPath").getContent());
-            dataSource.setUser((String) ref.get("user").getContent());
-            dataSource.setPassword((String) ref.get("password").getContent());
+            dataSource.setUser((String) ref.get(Property.user.name()).getContent());
+            dataSource.setPassword((String) ref.get(Property.password.name()).getContent());
 
-            dataSource.setColumnOrder((String) ref.get("columnorder").getContent());
-            dataSource.setConcatNulls((Boolean) ref.get("concatnulls").getContent());
-            dataSource.setEncrypt((Boolean) ref.get("encrypt").getContent());
-            dataSource.setIgnoreCase((Boolean) ref.get("ignorecase").getContent());
-            dataSource.setImmediatelyReleaseResources((Boolean) ref.get("immediatelyreleaseresources").getContent());
-            dataSource.setInactivityTimeout((Integer) ref.get("inactivitytimeout").getContent());
-            dataSource.setJackcessOpener((String) ref.get("jackcessopener").getContent());
-            dataSource.setKeepMirror((String) ref.get("keepmirror").getContent());
-            dataSource.setLobScale((Integer) ref.get("lobscale").getContent());
-            dataSource.setMemory((Boolean) ref.get("memory").getContent());
-            dataSource.setMirrorFolder((String) ref.get("mirrorfolder").getContent());
-            dataSource.setNewDatabaseVersion((String) ref.get("newdatabaseversion").getContent());
-            dataSource.setOpenExclusive((Boolean) ref.get("openexclusive").getContent());
-            dataSource.setPreventReloading((Boolean) ref.get("preventreloading").getContent());
-            dataSource.setReMap((String) ref.get("remap").getContent());
-            dataSource.setShowSchema((Boolean) ref.get("showschema").getContent());
-            dataSource.setSkipIndexes((Boolean) ref.get("skipindexes").getContent());
-            dataSource.setSysSchema((Boolean) ref.get("sysschema").getContent());
+            dataSource.setColumnOrder((String) ref.get(Property.columnOrder.name()).getContent());
+            dataSource.setConcatNulls((Boolean) ref.get(Property.concatNulls.name()).getContent());
+            dataSource.setEncrypt((Boolean) ref.get(Property.encrypt.name()).getContent());
+            dataSource.setIgnoreCase((Boolean) ref.get(Property.ignoreCase.name()).getContent());
+            dataSource.setImmediatelyReleaseResources((Boolean) ref.get(Property.immediatelyReleaseResources.name()).getContent());
+            dataSource.setInactivityTimeout((Integer) ref.get(Property.inactivityTimeout.name()).getContent());
+            dataSource.setJackcessOpener((String) ref.get(Property.jackcessOpener.name()).getContent());
+            dataSource.setKeepMirror((String) ref.get(Property.keepMirror.name()).getContent());
+            dataSource.setLobScale((Integer) ref.get(Property.lobScale.name()).getContent());
+            dataSource.setMemory((Boolean) ref.get(Property.memory.name()).getContent());
+            dataSource.setMirrorFolder((String) ref.get(Property.mirrorFolder.name()).getContent());
+            dataSource.setNewDatabaseVersion((String) ref.get(Property.newDatabaseVersion.name()).getContent());
+            dataSource.setOpenExclusive((Boolean) ref.get(Property.openExclusive.name()).getContent());
+            dataSource.setPreventReloading((Boolean) ref.get(Property.preventReloading.name()).getContent());
+            dataSource.setReMap((String) ref.get(Property.reMap.name()).getContent());
+            dataSource.setShowSchema((Boolean) ref.get(Property.showSchema.name()).getContent());
+            dataSource.setSkipIndexes((Boolean) ref.get(Property.skipIndexes.name()).getContent());
+            dataSource.setSysSchema((Boolean) ref.get(Property.sysSchema.name()).getContent());
 
             return dataSource;
         } else {
