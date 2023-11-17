@@ -19,6 +19,7 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.log.Logger;
 import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
 import org.hsqldb.error.ErrorCode;
 
@@ -373,7 +374,7 @@ public class LoadJet {
             StringBuilder check = new StringBuilder();
             String ntn = SQLConverter.preEscapingIdentifier(tn);
 
-            int seq = metadata.newTable(tn, ntn, Metadata.Types.TABLE);
+            int seq = metadata.newTable(tn, ntn, ObjectType.TABLE);
             ntn = SQLConverter.completeEscaping(ntn);
             ntn = SQLConverter.checkLang(ntn, conn);
             ntn = schema(ntn, _systemTable);
@@ -1199,7 +1200,7 @@ public class LoadJet {
             if (qnn == null) {
                 return false;
             }
-            int seq = metadata.newTable(q.getName(), qnn, Metadata.Types.VIEW);
+            int seq = metadata.newTable(q.getName(), qnn, ObjectType.VIEW);
             registerQueryColumns(q, seq);
             qnn = SQLConverter.completeEscaping(qnn, false);
             qnn = SQLConverter.checkLang(qnn, conn, false);

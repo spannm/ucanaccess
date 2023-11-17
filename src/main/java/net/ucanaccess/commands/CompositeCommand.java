@@ -38,8 +38,8 @@ public class CompositeCommand implements ICommand {
     }
 
     @Override
-    public TYPES getType() {
-        return TYPES.COMPOSITE;
+    public CommandType getType() {
+        return CommandType.COMPOSITE;
     }
 
     public boolean moveToNextRow(Cursor cur, Set<String> columnNames) throws IOException {

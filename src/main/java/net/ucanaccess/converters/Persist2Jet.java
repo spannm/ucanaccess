@@ -13,6 +13,7 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.HibernateSupport;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;
@@ -393,7 +394,7 @@ public class Persist2Jet {
         String ntn = escape4Hsqldb(tableName);
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
         TableBuilder tb = new TableBuilder(tn);
-        int idTable = mtd.newTable(tn, ntn, Metadata.Types.TABLE);
+        int idTable = mtd.newTable(tn, ntn, ObjectType.TABLE);
         Collection<ColumnBuilder> lcb = getColumns(ntn, columnMap, types);
         tb.addColumns(lcb);
         int colIdx = 0;

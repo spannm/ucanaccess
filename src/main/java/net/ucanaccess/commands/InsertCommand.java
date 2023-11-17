@@ -53,8 +53,8 @@ public class InsertCommand implements ICommand {
     }
 
     @Override
-    public TYPES getType() {
-        return TYPES.INSERT;
+    public CommandType getType() {
+        return CommandType.INSERT;
     }
 
     private Object[] mementoRow() {

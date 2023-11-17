@@ -31,8 +31,8 @@ public class DropForeignKeyCommand implements ICommand {
     }
 
     @Override
-    public TYPES getType() {
-        return TYPES.DDL;
+    public CommandType getType() {
+        return CommandType.DDL;
     }
 
     @Override

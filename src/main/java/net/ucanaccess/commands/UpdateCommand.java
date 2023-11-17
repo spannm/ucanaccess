@@ -72,8 +72,8 @@ public class UpdateCommand extends AbstractCursorCommand {
     }
 
     @Override
-    public TYPES getType() {
-        return TYPES.UPDATE;
+    public CommandType getType() {
+        return CommandType.UPDATE;
     }
 
     @Override

@@ -3,7 +3,7 @@ package net.ucanaccess.jdbc;
 import com.healthmarketscience.jackcess.Database;
 import net.ucanaccess.commands.CompositeCommand;
 import net.ucanaccess.commands.ICommand;
-import net.ucanaccess.commands.ICommand.TYPES;
+import net.ucanaccess.commands.ICommand.CommandType;
 import net.ucanaccess.commands.ICursorCommand;
 import net.ucanaccess.commands.IFeedbackAction;
 import net.ucanaccess.converters.LoadJet;
@@ -109,7 +109,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     public synchronized boolean add(ICommand c4io) {
-        if (c4io.getType().equals(TYPES.UPDATE) || c4io.getType().equals(TYPES.DELETE)) {
+        if (c4io.getType().equals(CommandType.UPDATE) || c4io.getType().equals(CommandType.DELETE)) {
             ICommand last = !commands.isEmpty() ? commands.getLast() : null;
             ICursorCommand c4ioc = (ICursorCommand) c4io;
             if (last != null && !last.getExecId().equals(BATCH_ID) && last.getExecId().equals(c4io.getExecId())

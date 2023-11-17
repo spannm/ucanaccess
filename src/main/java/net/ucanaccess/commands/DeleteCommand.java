@@ -44,8 +44,8 @@ public class DeleteCommand extends AbstractCursorCommand {
     }
 
     @Override
-    public TYPES getType() {
-        return TYPES.DELETE;
+    public CommandType getType() {
+        return CommandType.DELETE;
     }
 
     @Override

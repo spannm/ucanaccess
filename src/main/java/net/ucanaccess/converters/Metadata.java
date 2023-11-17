@@ -4,6 +4,7 @@ import static net.ucanaccess.util.SqlConstants.*;
 
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.type.ColumnOrder;
+import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
 
 import java.sql.*;
@@ -175,11 +176,6 @@ public class Metadata {
 
     private Connection          conn;
 
-    public enum Types {
-        VIEW,
-        TABLE
-    }
-
     public Metadata(Connection _conn) {
         conn = _conn;
     }
@@ -209,7 +205,7 @@ public class Metadata {
         }
     }
 
-    public Integer newTable(String _name, String _escaped, Types _type) throws SQLException {
+    public Integer newTable(String _name, String _escaped, ObjectType _type) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(TABLE_RECORD, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, _name);
             ps.setString(2, _escaped);
