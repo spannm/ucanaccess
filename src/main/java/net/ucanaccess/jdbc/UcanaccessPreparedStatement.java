@@ -22,14 +22,13 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     private String                       sql;
     private Map<Integer, ParameterReset> memento = new HashMap<>();
 
-    public UcanaccessPreparedStatement(NormalizedSQL nsql, PreparedStatement hidden, UcanaccessConnection connection)
-        throws SQLException {
-        super(hidden, connection);
-        sql = nsql.getSql();
-        setAliases(nsql.getAliases());
-        wrapped = hidden;
-        if (hidden == null) {
-            super.wrapped = connection.createStatement();
+    public UcanaccessPreparedStatement(NormalizedSQL _nsql, PreparedStatement _hidden, UcanaccessConnection _conn) throws SQLException {
+        super(_hidden, _conn);
+        sql = _nsql.getSql();
+        setAliases(_nsql.getAliases());
+        wrapped = _hidden;
+        if (_hidden == null) {
+            super.wrapped = _conn.createStatement();
         }
     }
 
@@ -82,11 +81,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         }
     }
 
-    private Reader markableReader(Reader r) throws SQLException {
+    private Reader markableReader(Reader r) throws UcanaccessSQLException {
         return markableReader(r, -1);
     }
 
-    private Reader markableReader(Reader r, long l) throws SQLException {
+    private Reader markableReader(Reader r, long l) throws UcanaccessSQLException {
         if (r.markSupported() && l < 0) {
             boolean marked = true;
             try {
@@ -102,9 +101,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         StringBuilder sb = new StringBuilder();
         int dim = l >= 0 ? (int) l : 4096;
         char[] cb = new char[dim];
-        int rd;
-        try {
-
+        return tryCatch(() -> {
+            int rd;
             while ((rd = r.read(cb)) >= 0) {
                 sb.append(Arrays.copyOf(cb, rd));
                 if (l >= 0) {
@@ -114,16 +112,14 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             StringReader sr = new StringReader(sb.toString());
             sr.mark(1000000);
             return sr;
-        } catch (IOException _ex) {
-            throw new SQLException(_ex);
-        }
+        });
     }
 
-    private InputStream markableInputStream(InputStream is) throws SQLException {
+    private InputStream markableInputStream(InputStream is) throws UcanaccessSQLException {
         return markableInputStream(is, -1);
     }
 
-    private InputStream markableInputStream(InputStream is, long l) throws SQLException {
+    private InputStream markableInputStream(InputStream is, long l) throws UcanaccessSQLException {
         if (is.markSupported() && l < 0) {
             is.mark(1000000);
             return is;
@@ -145,57 +141,42 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             ir.mark(1000000);
             return ir;
         } catch (IOException _ex) {
-            throw new SQLException(_ex);
+            throw new UcanaccessSQLException(_ex);
         }
     }
 
-    private void resetReader(Reader r) throws SQLException {
-        try {
-            r.reset();
-        } catch (IOException _ex) {
-            throw new SQLException(_ex);
-        }
+    private void resetReader(Reader r) throws UcanaccessSQLException {
+        tryCatch(r::reset);
     }
 
-    private void resetInputStream(InputStream is) throws SQLException {
-        try {
-            is.reset();
-        } catch (IOException _ex) {
-            throw new SQLException(_ex);
-        }
+    private void resetInputStream(InputStream is) throws UcanaccessSQLException {
+        tryCatch(is::reset);
     }
 
-    private void preprocess() throws SQLException {
+    private void preprocess() throws UcanaccessSQLException {
         if (SQLConverter.hasIdentity(sql)) {
-            sql =
-                SQLConverter.preprocess(sql, getConnection().getLastGeneratedKey());
+            sql = SQLConverter.preprocess(sql, getConnection().getLastGeneratedKey());
             reset();
         }
 
     }
 
     @Override
-    public void addBatch() throws SQLException {
-        try {
-            wrapped.addBatch();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void addBatch() throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.addBatch());
     }
 
     @Override
-    public void clearParameters() throws SQLException {
-        try {
+    public void clearParameters() throws UcanaccessSQLException {
+        tryCatch(() -> {
             memento.clear();
             wrapped.clearParameters();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public boolean execute() throws SQLException {
-        try {
+    public boolean execute() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             if (wrapped == null) {
                 return super.wrapped.execute(sql);
             }
@@ -203,26 +184,22 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new Execute(this).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public ResultSet executeQuery() throws SQLException {
-        try {
+    public ResultSet executeQuery() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             preprocess();
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new UcanaccessResultSet(wrapped.executeQuery(), this);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public int executeUpdate() throws SQLException {
-        try {
+    public int executeUpdate() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             if (wrapped == null) {
                 return super.wrapped.executeUpdate(sql);
             }
@@ -230,45 +207,33 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             getConnection().setCurrentStatement(this);
             checkLastModified();
             return new ExecuteUpdate(this).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        try {
-            return wrapped.getMetaData();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public ResultSetMetaData getMetaData() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getMetaData);
     }
 
     @Override
-    public ParameterMetaData getParameterMetaData() throws SQLException {
-        try {
-            return wrapped.getParameterMetaData();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public ParameterMetaData getParameterMetaData() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getParameterMetaData);
     }
 
     @Override
-    public void setArray(int idx, Array array) throws SQLException {
-        try {
-            addMementoEntry("setArray", new Class[] {Array.class}, idx, array);
-            wrapped.setArray(idx, array);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setArray(int _parmIdx, Array array) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setArray", new Class[] {Array.class}, _parmIdx, array);
+            wrapped.setArray(_parmIdx, array);
+        });
     }
 
     @Override
-    public void setAsciiStream(int idx, InputStream is) throws SQLException {
+    public void setAsciiStream(int _parmIdx, InputStream is) throws UcanaccessSQLException {
         try {
             is = markableInputStream(is);
-            addMementoEntry("setAsciiStream", new Class[] {InputStream.class}, idx, is);
-            wrapped.setAsciiStream(idx, is);
+            addMementoEntry("setAsciiStream", new Class[] {InputStream.class}, _parmIdx, is);
+            wrapped.setAsciiStream(_parmIdx, is);
             resetInputStream(is);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -276,11 +241,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setAsciiStream(int idx, InputStream is, int length) throws SQLException {
+    public void setAsciiStream(int _parmIdx, InputStream is, int length) throws UcanaccessSQLException {
         try {
             is = markableInputStream(is, length);
-            addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
-            wrapped.setAsciiStream(idx, is, length);
+            addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Integer.TYPE}, _parmIdx, is, length);
+            wrapped.setAsciiStream(_parmIdx, is, length);
             resetInputStream(is);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -288,11 +253,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setAsciiStream(int idx, InputStream is, long length) throws SQLException {
+    public void setAsciiStream(int _parmIdx, InputStream is, long length) throws UcanaccessSQLException {
         try {
             is = markableInputStream(is, length);
-            addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
-            wrapped.setAsciiStream(idx, is, length);
+            addMementoEntry("setAsciiStream", new Class[] {InputStream.class, Long.TYPE}, _parmIdx, is, length);
+            wrapped.setAsciiStream(_parmIdx, is, length);
             resetInputStream(is);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -300,112 +265,92 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setBigDecimal(int idx, BigDecimal dec) throws SQLException {
-        try {
-            addMementoEntry("setBigDecimal", new Class[] {BigDecimal.class}, idx, dec);
-            wrapped.setBigDecimal(idx, dec);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBigDecimal(int _parmIdx, BigDecimal dec) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBigDecimal", new Class[] {BigDecimal.class}, _parmIdx, dec);
+            wrapped.setBigDecimal(_parmIdx, dec);
+        });
     }
 
     @Override
-    public void setBinaryStream(int idx, InputStream is) throws SQLException {
-        try {
-            addMementoEntry("setBinaryStream", new Class[] {InputStream.class}, idx, is);
-            wrapped.setBinaryStream(idx, is);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBinaryStream(int _parmIdx, InputStream is) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBinaryStream", new Class[] {InputStream.class}, _parmIdx, is);
+            wrapped.setBinaryStream(_parmIdx, is);
+        });
     }
 
     @Override
-    public void setBinaryStream(int idx, InputStream is, int length) throws SQLException {
-        try {
-            addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
-            wrapped.setBinaryStream(idx, is, length);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBinaryStream(int _parmIdx, InputStream is, int length) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Integer.TYPE}, _parmIdx, is, length);
+            wrapped.setBinaryStream(_parmIdx, is, length);
+        });
     }
 
     @Override
-    public void setBinaryStream(int idx, InputStream is, long length) throws SQLException {
-        try {
-            addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
-            wrapped.setBinaryStream(idx, is, length);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBinaryStream(int _parmIdx, InputStream is, long length) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBinaryStream", new Class[] {InputStream.class, Long.TYPE}, _parmIdx, is, length);
+            wrapped.setBinaryStream(_parmIdx, is, length);
+        });
     }
 
     @Override
-    public void setBlob(int idx, Blob blob) throws SQLException {
-        try {
-            addMementoEntry("setBlob", new Class[] {Blob.class}, idx, blob);
-            wrapped.setBlob(idx, blob);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBlob(int _parmIdx, Blob blob) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBlob", new Class[] {Blob.class}, _parmIdx, blob);
+            wrapped.setBlob(_parmIdx, blob);
+        });
     }
 
     @Override
-    public void setBlob(int idx, InputStream is) throws SQLException {
-        try {
-            addMementoEntry("setBlob", new Class[] {InputStream.class}, idx, is);
-            wrapped.setBlob(idx, is);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBlob(int _parmIdx, InputStream is) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBlob", new Class[] {InputStream.class}, _parmIdx, is);
+            wrapped.setBlob(_parmIdx, is);
+        });
     }
 
     @Override
-    public void setBlob(int idx, InputStream is, long length) throws SQLException {
-        try {
-            addMementoEntry("setBlob", new Class[] {InputStream.class, Long.TYPE}, idx, is, length);
-            wrapped.setBlob(idx, is, length);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBlob(int _parmIdx, InputStream is, long length) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBlob", new Class[] {InputStream.class, Long.TYPE}, _parmIdx, is, length);
+            wrapped.setBlob(_parmIdx, is, length);
+        });
     }
 
     @Override
-    public void setBoolean(int idx, boolean bool) throws SQLException {
-        try {
-            addMementoEntry("setBoolean", new Class[] {Boolean.TYPE}, idx, bool);
-            wrapped.setBoolean(idx, bool);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBoolean(int _parmIdx, boolean bool) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBoolean", new Class[] {Boolean.TYPE}, _parmIdx, bool);
+            wrapped.setBoolean(_parmIdx, bool);
+        });
     }
 
     @Override
-    public void setByte(int idx, byte b) throws SQLException {
-        try {
-            addMementoEntry("setByte", new Class[] {Byte.TYPE}, idx, b);
-            wrapped.setByte(idx, b);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setByte(int _parmIdx, byte b) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setByte", new Class[] {Byte.TYPE}, _parmIdx, b);
+            wrapped.setByte(_parmIdx, b);
+        });
     }
 
     @Override
-    public void setBytes(int idx, byte[] bytes) throws SQLException {
-        try {
-            addMementoEntry("setBytes", new Class[] {byte[].class}, idx, bytes);
-            wrapped.setBytes(idx, bytes);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setBytes(int _parmIdx, byte[] bytes) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setBytes", new Class[] {byte[].class}, _parmIdx, bytes);
+            wrapped.setBytes(_parmIdx, bytes);
+        });
     }
 
     @Override
-    public void setCharacterStream(int idx, Reader reader) throws SQLException {
+    public void setCharacterStream(int _parmIdx, Reader reader) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader);
-            addMementoEntry("setCharacterStream", new Class[] {Reader.class}, idx, reader);
+            addMementoEntry("setCharacterStream", new Class[] {Reader.class}, _parmIdx, reader);
 
-            wrapped.setCharacterStream(idx, reader);
+            wrapped.setCharacterStream(_parmIdx, reader);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -413,11 +358,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setCharacterStream(int idx, Reader reader, int length) throws SQLException {
+    public void setCharacterStream(int _parmIdx, Reader reader, int length) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader, length);
-            addMementoEntry("setCharacterStream", new Class[] {Reader.class, Integer.TYPE}, idx, reader, length);
-            wrapped.setCharacterStream(idx, reader, length);
+            addMementoEntry("setCharacterStream", new Class[] {Reader.class, Integer.TYPE}, _parmIdx, reader, length);
+            wrapped.setCharacterStream(_parmIdx, reader, length);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -425,11 +370,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setCharacterStream(int idx, Reader reader, long length) throws SQLException {
+    public void setCharacterStream(int _parmIdx, Reader reader, long length) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader, length);
-            addMementoEntry("setCharacterStream", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
-            wrapped.setCharacterStream(idx, reader, length);
+            addMementoEntry("setCharacterStream", new Class[] {Reader.class, Long.TYPE}, _parmIdx, reader, length);
+            wrapped.setCharacterStream(_parmIdx, reader, length);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -437,21 +382,19 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setClob(int idx, Clob clob) throws SQLException {
-        try {
-            addMementoEntry("setClob", new Class[] {Clob.class}, idx, clob);
-            wrapped.setClob(idx, clob);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setClob(int _parmIdx, Clob clob) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setClob", new Class[] {Clob.class}, _parmIdx, clob);
+            wrapped.setClob(_parmIdx, clob);
+        });
     }
 
     @Override
-    public void setClob(int idx, Reader reader) throws SQLException {
+    public void setClob(int _parmIdx, Reader reader) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader);
-            addMementoEntry("setClob", new Class[] {Reader.class}, idx, reader);
-            wrapped.setClob(idx, reader);
+            addMementoEntry("setClob", new Class[] {Reader.class}, _parmIdx, reader);
+            wrapped.setClob(_parmIdx, reader);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -459,11 +402,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setClob(int idx, Reader reader, long length) throws SQLException {
+    public void setClob(int _parmIdx, Reader reader, long length) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader, length);
-            addMementoEntry("setClob", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
-            wrapped.setClob(idx, reader, length);
+            addMementoEntry("setClob", new Class[] {Reader.class, Long.TYPE}, _parmIdx, reader, length);
+            wrapped.setClob(_parmIdx, reader, length);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -471,80 +414,64 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setCursorName(String name) throws SQLException {
-        try {
-            wrapped.setCursorName(name);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setCursorName(String _name) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setCursorName(_name));
     }
 
     @Override
-    public void setDate(int idx, Date date) throws SQLException {
-        try {
-            addMementoEntry("setDate", new Class[] {Date.class}, idx, date);
-            wrapped.setDate(idx, date);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setDate(int _parmIdx, Date date) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setDate", new Class[] {Date.class}, _parmIdx, date);
+            wrapped.setDate(_parmIdx, date);
+        });
     }
 
     @Override
-    public void setDate(int idx, Date date, Calendar cal) throws SQLException {
-        try {
-            addMementoEntry("setDate", new Class[] {Date.class, Calendar.class}, idx, date, cal);
-            wrapped.setDate(idx, date, cal);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setDate(int _parmIdx, Date date, Calendar cal) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setDate", new Class[] {Date.class, Calendar.class}, _parmIdx, date, cal);
+            wrapped.setDate(_parmIdx, date, cal);
+        });
     }
 
     @Override
-    public void setDouble(int idx, double d) throws SQLException {
-        try {
-            addMementoEntry("setDouble", new Class[] {Double.TYPE}, idx, d);
-            wrapped.setDouble(idx, d);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setDouble(int _parmIdx, double d) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setDouble", new Class[] {Double.TYPE}, _parmIdx, d);
+            wrapped.setDouble(_parmIdx, d);
+        });
     }
 
     @Override
-    public void setFloat(int idx, float f) throws SQLException {
-        try {
-            addMementoEntry("setFloat", new Class[] {Float.TYPE}, idx, f);
-            wrapped.setBigDecimal(idx, new BigDecimal(Float.toString(f)));
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setFloat(int _parmIdx, float f) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setFloat", new Class[] {Float.TYPE}, _parmIdx, f);
+            wrapped.setBigDecimal(_parmIdx, new BigDecimal(Float.toString(f)));
+        });
     }
 
     @Override
-    public void setInt(int idx, int i) throws SQLException {
-        try {
-            addMementoEntry("setInt", new Class[] {Integer.TYPE}, idx, i);
-            wrapped.setInt(idx, i);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setInt(int _parmIdx, int i) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setInt", new Class[] {Integer.TYPE}, _parmIdx, i);
+            wrapped.setInt(_parmIdx, i);
+        });
     }
 
     @Override
-    public void setLong(int idx, long l) throws SQLException {
-        try {
-            addMementoEntry("setLong", new Class[] {Long.TYPE}, idx, l);
-            wrapped.setLong(idx, l);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setLong(int _parmIdx, long l) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setLong", new Class[] {Long.TYPE}, _parmIdx, l);
+            wrapped.setLong(_parmIdx, l);
+        });
     }
 
     @Override
-    public void setNCharacterStream(int idx, Reader reader) throws SQLException {
+    public void setNCharacterStream(int _parmIdx, Reader reader) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader);
-            addMementoEntry("setNCharacterStream", new Class[] {Reader.class}, idx, reader);
-            wrapped.setNCharacterStream(idx, reader);
+            addMementoEntry("setNCharacterStream", new Class[] {Reader.class}, _parmIdx, reader);
+            wrapped.setNCharacterStream(_parmIdx, reader);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -552,11 +479,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setNCharacterStream(int idx, Reader reader, long l) throws SQLException {
+    public void setNCharacterStream(int _parmIdx, Reader reader, long l) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader, l);
-            addMementoEntry("setNCharacterStream", new Class[] {Reader.class, Long.TYPE}, idx, reader, l);
-            wrapped.setNCharacterStream(idx, reader, l);
+            addMementoEntry("setNCharacterStream", new Class[] {Reader.class, Long.TYPE}, _parmIdx, reader, l);
+            wrapped.setNCharacterStream(_parmIdx, reader, l);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -564,21 +491,19 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setNClob(int idx, NClob nclob) throws SQLException {
-        try {
-            addMementoEntry("setNClob", new Class[] {NClob.class}, idx, nclob);
-            wrapped.setNClob(idx, nclob);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setNClob(int _parmIdx, NClob nclob) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setNClob", new Class[] {NClob.class}, _parmIdx, nclob);
+            wrapped.setNClob(_parmIdx, nclob);
+        });
     }
 
     @Override
-    public void setNClob(int idx, Reader reader) throws SQLException {
+    public void setNClob(int _parmIdx, Reader reader) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader);
-            addMementoEntry("setNClob", new Class[] {Reader.class}, idx, reader);
-            wrapped.setNClob(idx, reader);
+            addMementoEntry("setNClob", new Class[] {Reader.class}, _parmIdx, reader);
+            wrapped.setNClob(_parmIdx, reader);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -586,11 +511,11 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setNClob(int idx, Reader reader, long length) throws SQLException {
+    public void setNClob(int _parmIdx, Reader reader, long length) throws UcanaccessSQLException {
         try {
             reader = markableReader(reader, length);
-            addMementoEntry("setNClob", new Class[] {Reader.class, Long.TYPE}, idx, reader, length);
-            wrapped.setNClob(idx, reader, length);
+            addMementoEntry("setNClob", new Class[] {Reader.class, Long.TYPE}, _parmIdx, reader, length);
+            wrapped.setNClob(_parmIdx, reader, length);
             resetReader(reader);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -598,58 +523,49 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setNString(int idx, String string) throws SQLException {
-        try {
-            addMementoEntry("setNString", new Class[] {String.class}, idx, string);
-            wrapped.setNString(idx, string);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setNString(int _parmIdx, String string) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setNString", new Class[] {String.class}, _parmIdx, string);
+            wrapped.setNString(_parmIdx, string);
+        });
     }
 
     @Override
-    public void setNull(int idx, int sqlt) throws SQLException {
-        try {
-            addMementoEntry("setNull", new Class[] {Integer.TYPE}, idx, sqlt);
-            wrapped.setNull(idx, sqlt);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setNull(int _parmIdx, int sqlt) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setNull", new Class[] {Integer.TYPE}, _parmIdx, sqlt);
+            wrapped.setNull(_parmIdx, sqlt);
+        });
     }
 
     @Override
-    public void setNull(int idx, int sqlt, String tn) throws SQLException {
-        try {
-            addMementoEntry("setNull", new Class[] {Integer.TYPE, String.class}, idx, sqlt, tn);
-            wrapped.setNull(idx, sqlt, tn);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setNull(int _parmIdx, int sqlt, String tn) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setNull", new Class[] {Integer.TYPE, String.class}, _parmIdx, sqlt, tn);
+            wrapped.setNull(_parmIdx, sqlt, tn);
+        });
     }
 
-    private Object mapLocalTimeToLocalDateTime(Object x) {
-        if (x instanceof LocalTime) {
-            return ((LocalTime) x).atDate(LocalDate.of(1899, 12, 30));
+    private Object mapLocalTimeToLocalDateTime(Object _x) {
+        if (_x instanceof LocalTime) {
+            return ((LocalTime) _x).atDate(LocalDate.of(1899, 12, 30));
         }
-        return x;
+        return _x;
     }
 
-    private Object mapToBlob(Object x) throws SQLException {
-        if (x instanceof File) {
-            x = UcanaccessBlob.createBlob((File) x, getConnection());
-        }
-        return x;
+    private Object mapToBlob(Object x) throws UcanaccessSQLException {
+        return tryCatch(() -> x instanceof File ? UcanaccessBlob.createBlob((File) x, getConnection()) : x);
     }
 
     @Override
-    public void setObject(int idx, Object x) throws SQLException {
+    public void setObject(int _parmIdx, Object x) throws UcanaccessSQLException {
         x = mapToBlob(mapLocalTimeToLocalDateTime(x));
         try {
             if (x instanceof Float) {
-                setFloat(idx, (Float) x);
+                setFloat(_parmIdx, (Float) x);
             } else {
-                addMementoEntry("setObject", new Class[] {Object.class}, idx, x);
-                wrapped.setObject(idx, x);
+                addMementoEntry("setObject", new Class[] {Object.class}, _parmIdx, x);
+                wrapped.setObject(_parmIdx, x);
             }
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -657,134 +573,112 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setObject(int idx, Object x, int tsqlt) throws SQLException {
-        x = mapToBlob(mapLocalTimeToLocalDateTime(x));
-        try {
-            addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE}, idx, x, tsqlt);
-            wrapped.setObject(idx, x, tsqlt);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setObject(int _parmIdx, Object _obj, int tsqlt) throws UcanaccessSQLException {
+        Object obj = mapToBlob(mapLocalTimeToLocalDateTime(_obj));
+        tryCatch(() -> {
+            addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE}, _parmIdx, obj, tsqlt);
+            wrapped.setObject(_parmIdx, obj, tsqlt);
+        });
     }
 
     @Override
-    public void setObject(int idx, Object x, int tsqlt, int sol) throws SQLException {
-        x = mapToBlob(mapLocalTimeToLocalDateTime(x));
-        try {
-            addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE, Integer.TYPE}, idx, x, tsqlt, sol);
-            wrapped.setObject(idx, x, tsqlt, sol);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setObject(int _parmIdx, Object _obj, int tsqlt, int sol) throws UcanaccessSQLException {
+        Object obj = mapToBlob(mapLocalTimeToLocalDateTime(_obj));
+        tryCatch(() -> {
+            addMementoEntry("setObject", new Class[] {Object.class, Integer.TYPE, Integer.TYPE}, _parmIdx, obj, tsqlt, sol);
+            wrapped.setObject(_parmIdx, obj, tsqlt, sol);
+        });
     }
 
     @Override
-    public void setRef(int idx, Ref ref) throws SQLException {
-        try {
-            addMementoEntry("setRef", new Class[] {Ref.class}, idx, ref);
-            wrapped.setRef(idx, ref);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setRef(int _parmIdx, Ref ref) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setRef", new Class[] {Ref.class}, _parmIdx, ref);
+            wrapped.setRef(_parmIdx, ref);
+        });
     }
 
     @Override
-    public void setRowId(int idx, RowId rowId) throws SQLException {
-        try {
-            addMementoEntry("setRowId", new Class[] {RowId.class}, idx, rowId);
-            wrapped.setRowId(idx, rowId);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setRowId(int _parmIdx, RowId rowId) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setRowId", new Class[] {RowId.class}, _parmIdx, rowId);
+            wrapped.setRowId(_parmIdx, rowId);
+        });
     }
 
     @Override
-    public void setShort(int idx, short sht) throws SQLException {
-        try {
-            addMementoEntry("setShort", new Class[] {Short.TYPE}, idx, sht);
-            wrapped.setShort(idx, sht);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setShort(int _parmIdx, short sht) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setShort", new Class[] {Short.TYPE}, _parmIdx, sht);
+            wrapped.setShort(_parmIdx, sht);
+        });
     }
 
     @Override
-    public void setSQLXML(int idx, SQLXML sx) throws SQLException {
-        try {
-            addMementoEntry("setSQLXML", new Class[] {SQLXML.class}, idx, sx);
-            wrapped.setSQLXML(idx, sx);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setSQLXML(int _parmIdx, SQLXML sx) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setSQLXML", new Class[] {SQLXML.class}, _parmIdx, sx);
+            wrapped.setSQLXML(_parmIdx, sx);
+        });
     }
 
     @Override
-    public void setString(int idx, String string) throws SQLException {
-        try {
-            addMementoEntry("setString", new Class[] {String.class}, idx, string);
-            wrapped.setString(idx, string);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setString(int _parmIdx, String string) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setString", new Class[] {String.class}, _parmIdx, string);
+            wrapped.setString(_parmIdx, string);
+        });
     }
 
     @Override
-    public void setTime(int idx, Time time) throws SQLException {
-        try {
+    public void setTime(int _parmIdx, Time time) throws UcanaccessSQLException {
+        tryCatch(() -> {
             Calendar cl = Calendar.getInstance();
             cl.setTime(time);
             cl.set(1899, 11, 30);
             cl.set(Calendar.MILLISECOND, 0);
             Timestamp ts = new Timestamp(cl.getTimeInMillis());
-            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
-            wrapped.setTimestamp(idx, ts);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, _parmIdx, ts);
+            wrapped.setTimestamp(_parmIdx, ts);
+        });
     }
 
     @Override
-    public void setTime(int idx, Time time, Calendar cal) throws SQLException {
-        try {
+    public void setTime(int _parmIdx, Time time, Calendar cal) throws UcanaccessSQLException {
+        tryCatch(() -> {
             Calendar cl = Calendar.getInstance();
             cal.setTime(time);
             cl.set(1899, 11, 30, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
             cl.set(Calendar.MILLISECOND, 0);
             Timestamp ts = new Timestamp(cl.getTimeInMillis());
-            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
-            wrapped.setTimestamp(idx, ts);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, _parmIdx, ts);
+            wrapped.setTimestamp(_parmIdx, ts);
+        });
     }
 
     @Override
-    public void setTimestamp(int idx, Timestamp ts) throws SQLException {
-        try {
-            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, idx, ts);
-            wrapped.setTimestamp(idx, ts);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setTimestamp(int _parmIdx, Timestamp ts) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setTimestamp", new Class[] {Timestamp.class}, _parmIdx, ts);
+            wrapped.setTimestamp(_parmIdx, ts);
+        });
     }
 
     @Override
-    public void setTimestamp(int idx, Timestamp ts, Calendar cal) throws SQLException {
-        try {
-            addMementoEntry("setTimestamp", new Class[] {Timestamp.class, Calendar.class}, idx, ts, cal);
-            wrapped.setTimestamp(idx, ts, cal);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setTimestamp(int _parmIdx, Timestamp ts, Calendar cal) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            addMementoEntry("setTimestamp", new Class[] {Timestamp.class, Calendar.class}, _parmIdx, ts, cal);
+            wrapped.setTimestamp(_parmIdx, ts, cal);
+        });
     }
 
     @Override
     @Deprecated
-    public void setUnicodeStream(int idx, InputStream is, int length) throws SQLException {
+    public void setUnicodeStream(int _parmIdx, InputStream is, int length) throws UcanaccessSQLException {
         try {
             is = markableInputStream(is, length);
-            addMementoEntry("setUnicodeStream", new Class[] {InputStream.class, Integer.TYPE}, idx, is, length);
-            wrapped.setUnicodeStream(idx, is, length);
+            addMementoEntry("setUnicodeStream", new Class[] {InputStream.class, Integer.TYPE}, _parmIdx, is, length);
+            wrapped.setUnicodeStream(_parmIdx, is, length);
             resetInputStream(is);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -792,36 +686,31 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     }
 
     @Override
-    public void setURL(int idx, URL url) throws SQLException {
-        try {
+    public void setURL(int _parmIdx, URL url) throws UcanaccessSQLException {
+        tryCatch(() -> {
             String arg = "#" + url.toString() + "#";
-            addMementoEntry("setString", new Class[] {String.class}, idx, arg);
-            wrapped.setString(idx, arg);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            addMementoEntry("setString", new Class[] {String.class}, _parmIdx, arg);
+            wrapped.setString(_parmIdx, arg);
+        });
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        try {
-            return wrapped.unwrap(iface);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public <T> T unwrap(Class<T> _iface) throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.unwrap(_iface));
     }
 
     @Override
-    protected void reset() throws SQLException {
+    protected void reset() throws UcanaccessSQLException {
         if (wrapped == null) {
             return;
         }
         PreparedStatement old = wrapped;
-        wrapped = getConnection().getHSQLDBConnection().prepareStatement(sql,
-            wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability());
+        PreparedStatement stat = tryCatch(() -> getConnection().getHSQLDBConnection().prepareStatement(sql,
+            wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
+        wrapped = stat;
         reset(wrapped);
         parametersReset();
-        old.close();
+        tryCatch(old::close);
     }
 
 }

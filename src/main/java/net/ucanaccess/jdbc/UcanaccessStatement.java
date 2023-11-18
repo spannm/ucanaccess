@@ -2,6 +2,9 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.util.IThrowingRunnable;
+import net.ucanaccess.util.IThrowingSupplier;
+import net.ucanaccess.util.Try;
 import org.hsqldb.jdbc.JDBCPreparedStatement;
 import org.hsqldb.jdbc.JDBCStatement;
 
@@ -9,10 +12,11 @@ import java.sql.*;
 import java.util.Map;
 
 public class UcanaccessStatement implements Statement {
+
     private UcanaccessConnection connection;
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     protected Statement          wrapped;
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
     private Object               generatedKey;
     private Map<String, String>  aliases;
     private boolean              enableDisable;
@@ -30,78 +34,56 @@ public class UcanaccessStatement implements Statement {
         connection = _conn;
     }
 
-    private String convertSQL(String sql, UcanaccessConnection conn) {
-        if (SQLConverter.checkDDL(sql)) {
-            return sql;
+    private String convertSql(String _sql, UcanaccessConnection _conn) {
+        if (SQLConverter.checkDDL(_sql)) {
+            return _sql;
         }
-        NormalizedSQL nsql = SQLConverter.convertSQL(sql, conn);
+        NormalizedSQL nsql = SQLConverter.convertSQL(_sql, _conn);
         aliases = nsql.getAliases();
         return preprocess(nsql.getSql());
     }
 
-    private String convertSQL(String sql) {
-        if (SQLConverter.checkDDL(sql)) {
-            return sql;
+    private String convertSql(String _sql) {
+        if (SQLConverter.checkDDL(_sql)) {
+            return _sql;
         }
-        NormalizedSQL nsql = SQLConverter.convertSQL(sql);
+        NormalizedSQL nsql = SQLConverter.convertSQL(_sql);
         aliases = nsql.getAliases();
         return preprocess(nsql.getSql());
     }
 
-    private String preprocess(String sql) {
-        return connection.preprocess(sql);
+    private String preprocess(String _sql) {
+        return connection.preprocess(_sql);
     }
 
     @Override
-    public void addBatch(String batch) throws SQLException {
-        try {
-
-            wrapped.addBatch(SQLConverter.convertSQL(batch).getSql());
-
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void addBatch(String _batch) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.addBatch(SQLConverter.convertSQL(_batch).getSql()));
     }
 
     @Override
-    public void cancel() throws SQLException {
-        try {
-            wrapped.cancel();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void cancel() throws UcanaccessSQLException {
+        tryCatch(wrapped::cancel);
     }
 
     @Override
-    public void clearBatch() throws SQLException {
-        try {
-            wrapped.clearBatch();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void clearBatch() throws UcanaccessSQLException {
+        tryCatch(wrapped::clearBatch);
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
-        try {
-            wrapped.clearWarnings();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void clearWarnings() throws UcanaccessSQLException {
+        tryCatch(wrapped::clearWarnings);
     }
 
     @Override
-    public void close() throws SQLException {
-        try {
-            wrapped.close();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void close() throws UcanaccessSQLException {
+        tryCatch(wrapped::close);
     }
 
     @Override
-    public void closeOnCompletion() throws SQLException {
-        try {
+    public void closeOnCompletion() throws UcanaccessSQLException {
+        tryCatch(() -> {
             if (wrapped instanceof JDBCStatement) {
                 ((JDBCStatement) wrapped).closeOnCompletion();
             } else if (wrapped instanceof JDBCPreparedStatement) {
@@ -112,140 +94,107 @@ public class UcanaccessStatement implements Statement {
             } else {
                 throw new UcanaccessSQLException(ExceptionMessages.CLOSE_ON_COMPLETION_STATEMENT);
             }
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
-    protected void checkLastModified() throws SQLException {
+    protected void checkLastModified() throws UcanaccessSQLException {
 
         if (connection.getAutoCommit() || connection.isCheckModified()) {
-            Connection hsqldb = wrapped.getConnection();
+            Connection hsqldb = tryCatch(wrapped::getConnection);
             connection.checkLastModified();
             if (hsqldb != connection.getHSQLDBConnection()) {
                 reset();
-
             }
         }
     }
 
     @Override
-    public boolean execute(String sql) throws SQLException {
-        try {
+    public boolean execute(String _sql) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql, connection);
-            return new Execute(this, sql).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new Execute(this, convertSql(_sql, connection)).execute();
+        });
     }
 
     @Override
-    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
-        try {
+    public boolean execute(String _sql, int autoGeneratedKeys) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql, connection);
-            return new Execute(this, sql, autoGeneratedKeys).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new Execute(this, convertSql(_sql, connection), autoGeneratedKeys).execute();
+        });
     }
 
     @Override
-    public boolean execute(String sql, int[] indexes) throws SQLException {
-        try {
+    public boolean execute(String _sql, int[] indexes) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql, connection);
-            return new Execute(this, sql, indexes).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new Execute(this, convertSql(_sql, connection), indexes).execute();
+        });
     }
 
     @Override
-    public boolean execute(String sql, String[] columnNames) throws SQLException {
-        try {
+    public boolean execute(String _sql, String[] columnNames) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql, connection);
-            return new Execute(this, sql, columnNames).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new Execute(this, _sql, columnNames).execute();
+        });
     }
 
     @Override
-    public int[] executeBatch() throws SQLException {
-        try {
+    public int[] executeBatch() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             return new ExecuteUpdate(this).executeBatch();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public ResultSet executeQuery(String sql) throws SQLException {
-        try {
+    public ResultSet executeQuery(String _sql) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql, connection);
-
-            return new UcanaccessResultSet(wrapped.executeQuery(sql), this);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new UcanaccessResultSet(wrapped.executeQuery(convertSql(_sql, connection)), this);
+        });
     }
 
     @Override
-    public int executeUpdate(String sql) throws SQLException {
-        try {
+    public int executeUpdate(String _sql) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql);
-            return new ExecuteUpdate(this, sql).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new ExecuteUpdate(this, convertSql(_sql)).execute();
+        });
     }
 
     @Override
-    public int executeUpdate(String sql, int arg) throws SQLException {
-        try {
+    public int executeUpdate(String _sql, int _arg) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql);
-            return new ExecuteUpdate(this, sql, arg).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new ExecuteUpdate(this, convertSql(_sql), _arg).execute();
+        });
     }
 
     @Override
-    public int executeUpdate(String sql, int[] arg) throws SQLException {
-        try {
+    public int executeUpdate(String _sql, int[] _arg) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql);
-            return new ExecuteUpdate(this, sql, arg).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new ExecuteUpdate(this, convertSql(_sql), _arg).execute();
+        });
     }
 
     @Override
-    public int executeUpdate(String sql, String[] arg) throws SQLException {
-        try {
+    public int executeUpdate(String _sql, String[] arg) throws UcanaccessSQLException {
+        return tryCatch(() -> {
             connection.setCurrentStatement(this);
             checkLastModified();
-            sql = convertSQL(sql);
-            return new ExecuteUpdate(this, sql, arg).execute();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return new ExecuteUpdate(this, convertSql(_sql), arg).execute();
+        });
     }
 
     @Override
@@ -254,152 +203,98 @@ public class UcanaccessStatement implements Statement {
     }
 
     @Override
-    public int getFetchDirection() throws SQLException {
-        try {
-            return wrapped.getFetchDirection();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getFetchDirection() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getFetchDirection);
     }
 
     @Override
-    public int getFetchSize() throws SQLException {
-        try {
-            return wrapped.getFetchSize();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getFetchSize() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getFetchSize);
     }
 
     @Override
-    public ResultSet getGeneratedKeys() throws SQLException {
-        try {
+    public ResultSet getGeneratedKeys() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             checkLastModified();
 
-            StringBuilder sql = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             if (generatedKey != null) {
-                sql.append(" SELECT ")
-                   .append(generatedKey instanceof String ? "'" + generatedKey + "'" : generatedKey)
-                   .append(" AS GENERATED_KEY ").append(" FROM DUAL");
+                sb.append(" SELECT ")
+                  .append(generatedKey instanceof String ? "'" + generatedKey + "'" : generatedKey)
+                  .append(" AS GENERATED_KEY ").append(" FROM DUAL");
             } else {
-                sql.append(" SELECT ").append(0).append(" AS GENERATED_KEY ").append(" FROM DUAL WHERE 1=2");
+                sb.append(" SELECT 0 ").append("AS GENERATED_KEY ").append("FROM DUAL WHERE 1=2");
             }
 
             Connection conn = connection.getHSQLDBConnection();
             Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql.toString());
+            ResultSet rs = st.executeQuery(sb.toString());
             return new UcanaccessResultSet(rs, this);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public int getMaxFieldSize() throws SQLException {
-        try {
-            return wrapped.getMaxFieldSize();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getMaxFieldSize() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getMaxFieldSize);
     }
 
     @Override
-    public int getMaxRows() throws SQLException {
-        try {
-            return wrapped.getMaxRows();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getMaxRows() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getMaxRows);
     }
 
     @Override
-    public boolean getMoreResults() throws SQLException {
-        try {
-            return wrapped.getMoreResults();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean getMoreResults() throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.getMoreResults());
     }
 
     @Override
-    public boolean getMoreResults(int arg0) throws SQLException {
-        try {
-            return wrapped.getMoreResults(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean getMoreResults(int _current) throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.getMoreResults(_current));
     }
 
     @Override
-    public int getQueryTimeout() throws SQLException {
-        try {
-            return wrapped.getQueryTimeout();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getQueryTimeout() throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.getQueryTimeout());
     }
 
     @Override
-    public ResultSet getResultSet() throws SQLException {
-        try {
+    public ResultSet getResultSet() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             ResultSet rs = wrapped.getResultSet();
-            if (wrapped == null || rs == null) {
-                return null;
-            }
-            return new UcanaccessResultSet(rs, this);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+            return wrapped == null || rs == null ? null : new UcanaccessResultSet(rs, this);
+        });
     }
 
     @Override
-    public int getResultSetConcurrency() throws SQLException {
-        try {
-            return wrapped.getResultSetConcurrency();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getResultSetConcurrency() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getResultSetConcurrency);
     }
 
     @Override
-    public int getResultSetHoldability() throws SQLException {
-        try {
-            return wrapped.getResultSetHoldability();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getResultSetHoldability() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getResultSetHoldability);
     }
 
     @Override
-    public int getResultSetType() throws SQLException {
-        try {
-            return wrapped.getResultSetType();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public int getResultSetType() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getResultSetType);
     }
 
     @Override
-    public int getUpdateCount() throws SQLException {
-        try {
-
+    public int getUpdateCount() throws UcanaccessSQLException {
+        return tryCatch(() -> {
             int i = wrapped.getUpdateCount();
             if (i == -1 && enableDisable) {
                 return 0;
             }
             return i;
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        });
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
-        try {
-            return wrapped.getWarnings();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public SQLWarning getWarnings() throws UcanaccessSQLException {
+        return tryCatch(wrapped::getWarnings);
     }
 
     Statement getWrapped() {
@@ -407,141 +302,92 @@ public class UcanaccessStatement implements Statement {
     }
 
     @Override
-    public boolean isClosed() throws SQLException {
-        try {
-            return wrapped.isClosed();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean isClosed() throws UcanaccessSQLException {
+        return tryCatch(wrapped::isClosed);
     }
 
     @Override
-    public boolean isCloseOnCompletion() throws SQLException {
-        try {
-            return ((JDBCStatement) wrapped).isCloseOnCompletion();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean isCloseOnCompletion() throws UcanaccessSQLException {
+        return tryCatch(wrapped::isCloseOnCompletion);
     }
 
     @Override
-    public boolean isPoolable() throws SQLException {
-        try {
-            return wrapped.isPoolable();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean isPoolable() throws UcanaccessSQLException {
+        return tryCatch(wrapped::isPoolable);
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> arg0) throws SQLException {
-        try {
-            return wrapped.isWrapperFor(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public boolean isWrapperFor(Class<?> _iface) throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.isWrapperFor(_iface));
     }
 
     @Override
-    public void setCursorName(String arg0) throws SQLException {
-        try {
-            wrapped.setCursorName(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setCursorName(String _name) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setCursorName(_name));
     }
 
     @Override
-    public void setEscapeProcessing(boolean arg0) throws SQLException {
-        try {
-            wrapped.setEscapeProcessing(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setEscapeProcessing(boolean _enable) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setEscapeProcessing(_enable));
     }
 
     @Override
-    public void setFetchDirection(int arg0) throws SQLException {
-        try {
-            wrapped.setFetchDirection(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setFetchDirection(int _direction) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setFetchDirection(_direction));
     }
 
     @Override
-    public void setFetchSize(int arg0) throws SQLException {
-        try {
-            wrapped.setFetchSize(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setFetchSize(int _rows) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setFetchSize(_rows));
     }
 
     @Override
-    public void setMaxFieldSize(int arg0) throws SQLException {
-        try {
-            wrapped.setMaxFieldSize(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setMaxFieldSize(int _max) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setMaxFieldSize(_max));
     }
 
     @Override
-    public void setMaxRows(int arg0) throws SQLException {
-        try {
-            wrapped.setMaxRows(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setMaxRows(int _max) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setMaxRows(_max));
     }
 
     @Override
-    public void setPoolable(boolean arg0) throws SQLException {
-        try {
-            wrapped.setPoolable(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setPoolable(boolean _poolable) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setPoolable(_poolable));
     }
 
     @Override
-    public void setQueryTimeout(int arg0) throws SQLException {
-        try {
-            wrapped.setQueryTimeout(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public void setQueryTimeout(int _seconds) throws UcanaccessSQLException {
+        tryCatch(() -> wrapped.setQueryTimeout(_seconds));
     }
 
     @Override
-    public <T> T unwrap(Class<T> arg0) throws SQLException {
-        try {
-            return wrapped.unwrap(arg0);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+    public <T> T unwrap(Class<T> _iface) throws UcanaccessSQLException {
+        return tryCatch(() -> wrapped.unwrap(_iface));
     }
 
-    protected void reset() throws SQLException {
+    protected void reset() throws UcanaccessSQLException {
         Statement old = wrapped;
-        reset(getConnection().getHSQLDBConnection().createStatement(
+        Statement stat = tryCatch(() -> getConnection().getHSQLDBConnection().createStatement(
                 wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
-        old.close();
+        reset(stat);
+        tryCatch(old::close);
     }
 
-    protected void reset(Statement _st) throws SQLException {
-        final int maxr = wrapped.getMaxRows();
-        final int maxf = wrapped.getMaxFieldSize();
-        final int direction = wrapped.getFetchDirection();
-        final int fs = wrapped.getFetchSize();
-        final int qt = wrapped.getQueryTimeout();
-        wrapped = _st;
-        wrapped.setMaxRows(maxr);
-        wrapped.setMaxFieldSize(maxf);
-        wrapped.setFetchDirection(direction);
-        wrapped.setFetchSize(fs);
-        wrapped.setQueryTimeout(qt);
+    protected void reset(Statement _st) throws UcanaccessSQLException {
+        tryCatch(() -> {
+            final int maxr = wrapped.getMaxRows();
+            final int maxf = wrapped.getMaxFieldSize();
+            final int direction = wrapped.getFetchDirection();
+            final int fs = wrapped.getFetchSize();
+            final int qt = wrapped.getQueryTimeout();
+            wrapped = _st;
+            wrapped.setMaxRows(maxr);
+            wrapped.setMaxFieldSize(maxf);
+            wrapped.setFetchDirection(direction);
+            wrapped.setFetchSize(fs);
+            wrapped.setQueryTimeout(qt);
+        });
     }
 
     public void setGeneratedKey(Object key) {
@@ -554,6 +400,14 @@ public class UcanaccessStatement implements Statement {
 
     void setEnableDisable(boolean _enableDisable) {
         enableDisable = _enableDisable;
+    }
+
+    protected static final <T extends Throwable> void tryCatch(IThrowingRunnable<T> _catchable) throws UcanaccessSQLException {
+        Try.catching(_catchable).orThrow(UcanaccessSQLException::wrap);
+    }
+
+    protected static final <R, T extends Throwable> R tryCatch(IThrowingSupplier<R, T> _catchable) throws UcanaccessSQLException {
+        return Try.catching(_catchable).orThrow(UcanaccessSQLException::wrap);
     }
 
 }

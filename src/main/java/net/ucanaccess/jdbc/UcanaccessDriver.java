@@ -292,7 +292,8 @@ public final class UcanaccessDriver implements Driver {
     private IJackcessOpenerInterface newJackcessOpenerInstance(String className)
         throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
         Object newInstance = Class.forName(className).getConstructor().newInstance();
-        if (!(newInstance instanceof IJackcessOpenerInterface)) {
+
+        if (!IJackcessOpenerInterface.class.isInstance(newInstance)) {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_JACKCESS_OPENER);
         }
         return (IJackcessOpenerInterface) newInstance;

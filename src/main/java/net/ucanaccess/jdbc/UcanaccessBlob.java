@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import com.healthmarketscience.jackcess.util.OleBlob;
 import com.healthmarketscience.jackcess.util.OleBlob.Content;
+import net.ucanaccess.util.Try;
 
 import java.io.*;
 import java.sql.Blob;
@@ -24,14 +25,11 @@ public class UcanaccessBlob implements Blob {
         }
     }
 
-    public static Blob createBlob(File fl, UcanaccessConnection _conn) throws SQLException {
-        Blob oleBlob;
-        try {
-            oleBlob = new OleBlob.Builder().setPackagePrettyName(fl.getName()).setSimplePackage(fl).toBlob();
+    public static Blob createBlob(File fl, UcanaccessConnection _conn) throws UcanaccessSQLException {
+        return Try.catching(() -> {
+            Blob oleBlob = new OleBlob.Builder().setPackagePrettyName(fl.getName()).setSimplePackage(fl).toBlob();
             return new UcanaccessBlob(oleBlob, _conn);
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
-        }
+        }).orThrow(UcanaccessSQLException::new);
     }
 
     public static Blob createBlob(UcanaccessConnection _conn) throws SQLException {
