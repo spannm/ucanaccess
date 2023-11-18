@@ -1,7 +1,7 @@
 package net.ucanaccess.type;
 
 /**
- * Valid values of driver property {@link Property} {@code columnOrder}.
+ * Valid values of driver property {@code columnOrder}.
  *
  * @author Markus Spann
  * @since v5.1.0
