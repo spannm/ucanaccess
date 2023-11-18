@@ -96,12 +96,12 @@ public final class Try<V, EC extends Throwable> {
     /**
      * Creates a new instance from a throwing {@link Supplier}.
      *
-     * @param <V> the type of value supplied by the supplier
+     * @param <R> the type of value supplied by the supplier
      * @param <EC> the type of exception, if any, thrown by the supplier
      * @param _catchable a throwing supplier
      * @return new instance
      */
-    public static <V, EC extends Throwable> Try<V, EC> catching(IThrowingSupplier<V, EC> _catchable) {
+    public static <R, EC extends Throwable> Try<R, EC> catching(IThrowingSupplier<R, EC> _catchable) {
         return new Try<>(Objects.requireNonNull(_catchable, "Supplier required"));
     }
 
@@ -283,15 +283,23 @@ public final class Try<V, EC extends Throwable> {
     }
 
     /**
-     * Returns the successful value or throws an exception if one is returned by {@code _function}.
+     * Returns the successful value or throws the exception returned by {@code _function}.<br>
+     * The function is applied if this object has previously thrown and must provide an exception.
+     *
+     * @param <T2> the type of exception returned by {@code _function}
      * @param _function non-null function to provide an exception. The previous exception object is passed to the function.
      * @return the successful value
+     * @throws T2 the exception returned by {@code _function}
      */
-    public V orThrow(Function<EC, ? extends Throwable> _function) {
+    public <T2 extends Throwable> V orThrow(Function<EC, T2> _function) throws T2 {
         Objects.requireNonNull(_function, "Function required");
         if (hasThrown()) {
             Throwable t2 = _function.apply(t);
-            doThrow(t2 == null ? t : t2);
+            if (t2 == null) {
+                doThrow(new IllegalStateException("Function must provide a throwable"));
+            } else {
+                doThrow(t2);
+            }
         }
         return val;
     }
