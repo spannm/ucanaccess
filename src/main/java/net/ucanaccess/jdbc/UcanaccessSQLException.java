@@ -108,4 +108,18 @@ public class UcanaccessSQLException extends SQLException {
         return addVersionInfo(super.getMessage());
     }
 
+    /**
+     * Wraps the specified exception into a {@link UcanaccessSQLException}
+     * unless its type can be cast to {@link UcanaccessSQLException}.
+     *
+     * @param <T> the type of exception to wrap
+     * @param _t the exception to wrap
+     * @return wrapped exception or parameter if can be cast to {@link UcanaccessSQLException}
+     */
+    public static final <T extends Throwable> UcanaccessSQLException wrap(T _t) {
+        return UcanaccessSQLException.class.isInstance(_t)
+            ? UcanaccessSQLException.class.cast(_t)
+            : new UcanaccessSQLException(_t);
+    }
+
 }
