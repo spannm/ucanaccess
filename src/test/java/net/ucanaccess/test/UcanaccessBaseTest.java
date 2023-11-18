@@ -97,14 +97,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         if (_expectedResults.size() > 0) {
             assertEquals(_expectedResults.get(0).size(), colCountActual);
         }
-        int expIdx = 0;
+        int rowIdx = 0;
         while (_resultSet.next()) {
             for (int col = 1; col <= colCountActual; col++) {
-                assertThat(expIdx)
-                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.size() + " not " + expIdx)
+                assertThat(rowIdx)
+                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.size() + " not " + rowIdx)
                     .isLessThan(_expectedResults.size());
                 Object actualObj = _resultSet.getObject(col);
-                Object expectedObj = _expectedResults.get(expIdx).get(col - 1);
+                Object expectedObj = _expectedResults.get(rowIdx).get(col - 1);
                 if (expectedObj == null) {
                     assertNull(actualObj);
                 } else {
@@ -126,13 +126,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                             actualObj = ((Date) actualObj).getTime();
                             expectedObj = ((Date) expectedObj).getTime();
                         }
-                        assertEquals(expectedObj, actualObj, "Expected ob2 and ob1 to be equal in [" + _expression + "]");
+                        assertEquals(expectedObj, actualObj, "Expected ob2 and ob1 to be equal at row "
+                            + rowIdx + ", col " + col + " in '" + _expression + "'");
                     }
                 }
             }
-            expIdx++;
+            rowIdx++;
         }
-        assertEquals(_expectedResults.size(), expIdx, "Matrix with different length was expected");
+        assertEquals(_expectedResults.size(), rowIdx, "Matrix with different length was expected");
     }
 
     public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException {
