@@ -87,8 +87,8 @@ public abstract class AbstractExecute {
         if (rtn == null) {
             throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
         }
-        boolean inable = _ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
-        conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!inable);
+        boolean enableAutoIncr = _ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
+        conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!enableAutoIncr);
         if (this instanceof Execute) {
             return false;
         } else {

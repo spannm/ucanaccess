@@ -2,63 +2,61 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class CounterTest extends UcanaccessBaseTest {
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE t_counter (cntr COUNTER PRIMARY KEY, chr CHAR(4), blb BLOB, txt TEXT)");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE t_counter");
+        executeStatements("CREATE TABLE t_counter (cntr COUNTER PRIMARY KEY, chr CHAR(4), descr MEMO)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testCreateTypes(AccessVersion _accessVersion) throws SQLException {
+    void testCreateTypes(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
+            String table = "t_counter";
+            executeStatements(st, "DISABLE AUTOINCREMENT ON " + table);
+            assertTrue(st.getConnection().getDbIO().getTable(table).isAllowAutoNumberInsert());
+
             executeStatements(st,
+                "INSERT INTO t_counter (cntr, chr, descr) VALUES (3, 'C', 'autoincr OFF, insert arbitrary AutoNumber value')");
+
+            executeStatements(st,
+                "ENABLE AUTOINCREMENT ON t_counter");
+            assertFalse(st.getConnection().getDbIO().getTable(table).isAllowAutoNumberInsert());
+
+            executeStatements(st,
+                "INSERT INTO t_counter (chr, descr) VALUES ('D', 'autoincr ON, expecting cntr=4 (verify AutoNumber seed updated)')",
+                "INSERT INTO t_counter (chr, descr) VALUES ('E', 'autoincr ON, expecting cntr=5')",
+                "INSERT INTO t_counter (chr, descr) VALUES ('F', 'autoincr ON, expecting cntr=6')",
+
                 "DISABLE AUTOINCREMENT ON t_counter",
-                // insert arbitrary AutoNumber value
-                "INSERT INTO t_counter (cntr, chr, blb, txt) VALUES (3, 'C', NULL, NULL)",
-
+                "INSERT INTO t_counter (cntr, chr, descr) VALUES (8, 'H', 'autoincr OFF, arbitrary, new seed = 9')", //
+                "INSERT INTO t_counter (cntr, chr, descr) VALUES (7, 'G', 'autoincr OFF, arbitrary smaller than current seed')",
+                "INSERT INTO t_counter (cntr, chr, descr) VALUES (-1, 'A', 'autoincr OFF, arbitrary negative value')",
                 "ENABLE AUTOINCREMENT ON t_counter",
-
-                // expecting cntr=4 (verify AutoNumber seed updated)
-                "INSERT INTO t_counter (chr, blb, txt) VALUES ('D', NULL, NULL)",
-
-                "INSERT INTO t_counter (chr, blb, txt) VALUES ('E', NULL, NULL)", // cntr=5
-                "INSERT INTO t_counter (chr, blb, txt) VALUES ('F', NULL, NULL)", // cntr=6
-
-                "DISABLE AUTOINCREMENT ON t_counter",
-                "INSERT INTO t_counter (cntr, chr, blb, txt) VALUES (8, 'H', NULL, NULL)", // arbitrary, new seed = 9
-                "INSERT INTO t_counter (cntr, chr, blb, txt) VALUES (7, 'G', NULL, NULL)", // arbitrary smaller than current seed
-                "INSERT INTO t_counter (cntr, chr, blb, txt) VALUES (-1, 'A', NULL, NULL)", // arbitrary negative value
-                "ENABLE AUTOINCREMENT ON t_counter",
-                "INSERT INTO t_counter (chr, blb, txt) VALUES ('I', NULL, NULL)"); // cntr=9
+                "INSERT INTO t_counter (chr, descr) VALUES ('I', 'autoincr ON')"); // cntr=9
         }
 
-        dumpQueryResult("SELECT * FROM t_counter");
-        checkQuery("SELECT * FROM t_counter ORDER BY cntr", recs(
-            rec(-1, "A", null, null),
-            rec(3, "C", null, null),
-            rec(4, "D", null, null),
-            rec(5, "E", null, null),
-            rec(6, "F", null, null),
-            rec(7, "G", null, null),
-            rec(8, "H", null, null),
-            rec(9, "I", null, null)
+        dumpQueryResult("SELECT * FROM t_counter ORDER BY cntr");
+
+        checkQuery("SELECT cntr, chr FROM t_counter ORDER BY cntr", recs(
+            rec(-1, "A"),
+            rec(3, "C"),
+            rec(4, "D"),
+            rec(5, "E"),
+            rec(6, "F"),
+            rec(7, "G"),
+            rec(8, "H"),
+            rec(9, "I")
         ));
 
     }
