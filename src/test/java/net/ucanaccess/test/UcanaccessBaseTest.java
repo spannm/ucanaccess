@@ -402,6 +402,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected final void executeStatements(Statement _statement, String... _sqls) throws SQLException {
         for (String sql : _sqls) {
+            getLogger().info("Executing sql: {}", sql);
             _statement.execute(sql);
         }
     }
