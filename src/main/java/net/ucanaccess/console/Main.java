@@ -496,7 +496,6 @@ public class Main {
             if (records.size() > 1) {
                 _printStream.println(interline);
             }
-            _printStream.println();
         }
 
         String joinWithLen(CharSequence _delim, List<? extends String> _elems) {
