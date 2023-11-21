@@ -220,19 +220,19 @@ public class UcanaccessConnection implements Connection {
     }
 
     @Override
-    public Statement createStatement() throws SQLException {
+    public UcanaccessStatement createStatement() throws SQLException {
         checkConnection();
         return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+    public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
         checkConnection();
         return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+    public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         checkConnection();
         return new UcanaccessStatement(
