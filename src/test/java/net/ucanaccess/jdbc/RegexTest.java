@@ -2,7 +2,6 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -17,11 +16,6 @@ class RegexTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements("CREATE TABLE reg (id COUNTER, descr MEMO) ");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE reg");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

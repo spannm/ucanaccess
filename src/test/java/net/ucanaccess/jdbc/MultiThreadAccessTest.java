@@ -3,7 +3,6 @@ package net.ucanaccess.jdbc;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Try;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -24,11 +23,6 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
         super.init(_accessVersion);
         dbPath = getFileAccDb().getAbsolutePath();
         executeStatements("CREATE TABLE " + tableName + " (id COUNTER primary key, descr MEMO)");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE " + tableName);
     }
 
     void crud() throws SQLException {

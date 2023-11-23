@@ -2,7 +2,6 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -16,11 +15,6 @@ class TransactionTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements("CREATE TABLE T4 (id LONG, descr text(200))");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE T4");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -2,7 +2,6 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -23,11 +22,6 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         executeStatements("CREATE TABLE t235 (id INTEGER, descr TEXT(400), num NUMERIC(12,3), date0 DATETIME)",
             "INSERT INTO t235 (id, descr, num, date0) VALUES(1234, 'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)",
             "INSERT INTO t235 (id, descr, num, date0) VALUES(12344, 'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE t235");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
