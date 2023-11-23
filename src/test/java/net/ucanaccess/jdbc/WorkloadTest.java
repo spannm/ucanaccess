@@ -2,7 +2,6 @@ package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -16,11 +15,6 @@ class WorkloadTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements("CREATE TABLE AAAB (id COUNTER PRIMARY KEY, A LONG, C TEXT, D TEXT)");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE AAAB");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

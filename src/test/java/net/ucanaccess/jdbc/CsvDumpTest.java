@@ -3,7 +3,6 @@ package net.ucanaccess.jdbc;
 import net.ucanaccess.console.Exporter;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -24,11 +23,6 @@ class CsvDumpTest extends UcanaccessBaseTest {
         super.init(_accessVersion);
         executeStatements("CREATE TABLE csvtable (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, "
             + "byte_field BYTE, boolean_field YESNO, double_field DOUBLE, currency_field CURRENCY, date_field DATETIME)");
-    }
-
-    @AfterEach
-    void afterEachTest() throws SQLException {
-        executeStatements("DROP TABLE csvtable");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
