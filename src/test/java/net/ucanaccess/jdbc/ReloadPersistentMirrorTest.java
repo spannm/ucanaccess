@@ -26,9 +26,9 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         // create the database
         try (Connection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
-                .withProp(Property.memory, true)
-                .withProp(Property.newDatabaseVersion, getFileFormat().name())
                 .withoutUserPass()
+                .withMemory()
+                .withNewDatabaseVersionProp(getFileFormat().name())
                 .build();
                 Statement stCreate = conn.createStatement()) {
             stCreate.execute("CREATE TABLE Table1 (ID COUNTER PRIMARY KEY, TextField TEXT(50))");
@@ -44,7 +44,7 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         // do an update without the mirror involved
         try (Connection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
-                .withProp(Property.memory, true)
+                .withMemory()
                 .withoutUserPass().build();
                 Statement stUpdate = conn.createStatement()) {
             stUpdate.executeUpdate("INSERT INTO Table1 (TextField) VALUES ('NewStuff')");

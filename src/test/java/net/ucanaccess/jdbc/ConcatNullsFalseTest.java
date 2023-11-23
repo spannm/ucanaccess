@@ -1,6 +1,5 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +14,7 @@ class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
     protected UcanaccessConnectionBuilder buildConnection() {
         return super.buildConnection()
-            .withProp(Property.concatNulls, false);
+            .withConcatNulls(false);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

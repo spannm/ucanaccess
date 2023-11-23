@@ -25,7 +25,7 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
         UcanaccessConnectionBuilder bldr = buildConnection()
             .withDbPath(main.getAbsolutePath())
             .withoutUserPass()
-            .withProp(Property.immediatelyReleaseResources, true)
+            .withImmediatelyReleaseResources()
             .withProp(Property.reMap, "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
         getLogger().debug("Database url: {}", bldr.getUrl());
 

@@ -41,20 +41,36 @@ public final class UcanaccessConnectionBuilder {
         return this;
     }
 
-    public UcanaccessConnectionBuilder withIgnoreCase(boolean _ignoreCase) {
-        return withProp(ignoreCase, _ignoreCase);
-    }
-
-    public UcanaccessConnectionBuilder withInactivityTimeout(int _inactivityTimeout) {
-        return withProp(inactivityTimeout, _inactivityTimeout);
-    }
-
     public UcanaccessConnectionBuilder withColumnOrderData() {
         return withProp(columnOrder, ColumnOrder.DATA);
     }
 
     public UcanaccessConnectionBuilder withColumnOrderDisplay() {
         return withProp(columnOrder, ColumnOrder.DISPLAY);
+    }
+
+    public UcanaccessConnectionBuilder withConcatNulls(boolean _concatNulls) {
+        return withProp(concatNulls, _concatNulls);
+    }
+
+    public UcanaccessConnectionBuilder withIgnoreCase(boolean _ignoreCase) {
+        return withProp(ignoreCase, _ignoreCase);
+    }
+
+    public UcanaccessConnectionBuilder withImmediatelyReleaseResources() {
+        return withProp(immediatelyReleaseResources, true);
+    }
+
+    public UcanaccessConnectionBuilder withInactivityTimeout(int _inactivityTimeout) {
+        return withProp(inactivityTimeout, _inactivityTimeout);
+    }
+
+    public UcanaccessConnectionBuilder withMemory() {
+        return withProp(memory, true);
+    }
+
+    public UcanaccessConnectionBuilder withNewDatabaseVersionProp(String _name) {
+        return withProp(newDatabaseVersion, _name);
     }
 
     public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {

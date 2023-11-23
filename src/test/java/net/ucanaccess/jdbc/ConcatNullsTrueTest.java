@@ -1,6 +1,5 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +18,7 @@ class ConcatNullsTrueTest extends UcanaccessBaseTest {
         // If the property is set false, then NULL values are replaced with empty strings.
         // see: http://hsqldb.org/doc/guide/builtinfunctions-chapt.html
         return super.buildConnection()
-            .withProp(Property.concatNulls, true);
+            .withConcatNulls(true);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
