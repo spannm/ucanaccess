@@ -83,7 +83,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
                 crudUpdatableRS();
             });
         })).collect(Collectors.toList());
-        
+
         threads.forEach(Thread::start);
 
         for (Thread t : threads) {

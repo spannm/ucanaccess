@@ -255,7 +255,7 @@ public class UcanaccessStatement implements Statement {
 
     @Override
     public int getQueryTimeout() throws UcanaccessSQLException {
-        return tryCatch(() -> wrapped.getQueryTimeout());
+        return tryCatch(wrapped::getQueryTimeout);
     }
 
     @Override

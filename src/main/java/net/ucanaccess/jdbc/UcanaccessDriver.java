@@ -194,7 +194,7 @@ public final class UcanaccessDriver implements Driver {
                     Connection conn = dbRef.getHSQLDBConnection(session);
                     // from version 2.7 hsqldb translates timestamps stored without timezone in the database
                     // into the default timezone. MS Access however does not know timezones, therefore assume timestamps are UTC
-                    Try.withResources(() -> conn.createStatement(), st -> {
+                    Try.withResources(conn::createStatement, st -> {
                         st.executeQuery("SET TIME ZONE 'UTC'");
                     }).orThrow();
 

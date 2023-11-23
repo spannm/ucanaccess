@@ -122,7 +122,7 @@ class ComplexTest extends UcanaccessBaseTest {
         ucanaccess = Mockito.spy(ucanaccess);
         Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))
             .when(ucanaccess).afterFlushIoHook();
-        
+
         ucanaccess.setAutoCommit(false);
 
         int countBefore = getCount("SELECT COUNT(*) FROM t_complex");
@@ -147,7 +147,7 @@ class ComplexTest extends UcanaccessBaseTest {
         }
         dumpQueryResult("SELECT * FROM t_complex");
 
-        assertThatThrownBy(() -> ucanaccess.commit())
+        assertThatThrownBy(ucanaccess::commit)
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageEndingWith("testComplexRollback");
 

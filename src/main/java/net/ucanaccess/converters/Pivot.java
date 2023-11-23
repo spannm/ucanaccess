@@ -166,7 +166,7 @@ public class Pivot {
         if (pivotInCondition) {
             pivotIn = new ArrayList<>();
         }
-        return Try.withResources(() -> conn.createStatement(), st -> {
+        return Try.withResources(conn::createStatement, st -> {
             ResultSet rs = st.executeQuery(verifySQL());
             int i = 0;
             while (rs.next()) {

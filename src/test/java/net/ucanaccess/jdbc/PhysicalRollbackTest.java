@@ -52,7 +52,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
 
             st.execute("DELETE FROM T4 WHERE id=4");
         }
-        assertThatThrownBy(() -> ucanaccess.commit())
+        assertThatThrownBy(ucanaccess::commit)
             .isInstanceOf(SQLException.class)
             .hasMessageContaining(getClass().getSimpleName());
 
