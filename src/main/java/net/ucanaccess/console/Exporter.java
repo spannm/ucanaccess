@@ -225,8 +225,8 @@ public final class Exporter {
      * Converts the {@code nullable} indicator from {@code ResultSetMetaData.isNullable()} to the equivalent BigQuery
      * schema value.
      */
-    static String toBigQueryNullable(int nullable) {
-        switch (nullable) {
+    static String toBigQueryNullable(int _nullable) {
+        switch (_nullable) {
         case ResultSetMetaData.columnNoNulls:
             return "required";
         case ResultSetMetaData.columnNullable:
