@@ -2,6 +2,8 @@ package net.ucanaccess.console;
 
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
@@ -25,24 +27,29 @@ class ExporterTest extends AbstractBaseTest {
         assertEquals("\"a\r\nb\"", Exporter.toCsv("a\r\nb", ",", preserveNewlines));
     }
 
-    @Test
-    void testToBigQueryType() {
-        assertEquals("int64", Exporter.toBigQueryType(Types.INTEGER));
-        assertEquals("float64", Exporter.toBigQueryType(Types.DECIMAL));
-        assertEquals("timestamp", Exporter.toBigQueryType(Types.TIMESTAMP));
-        assertEquals("string", Exporter.toBigQueryType(Types.CHAR));
-        assertEquals("string", Exporter.toBigQueryType(Types.VARCHAR));
-
+    @ParameterizedTest(name = "[{index}] {0} --> {1}")
+    @CsvSource(delimiter = ';', value = {
+        Types.CHAR + "; string",
+        Types.DECIMAL + "; float64",
+        Types.INTEGER + "; int64",
+        Types.TIMESTAMP + "; timestamp",
+        Types.VARCHAR + "; string",
         // any type not explicitly defined in the switch statement is mapped to a "string".
-        assertEquals("string", Exporter.toBigQueryType(Types.BIT));
+        Types.BIT + "; string"
+    })
+    void testToBigQueryType(int _sqlType, String _expected) {
+        assertEquals(_expected, Exporter.toBigQueryType(_sqlType));
     }
 
-    @Test
-    void testToBigQueryNullable() {
-        assertEquals("required", Exporter.toBigQueryNullable(0));
-        assertEquals("nullable", Exporter.toBigQueryNullable(1));
-        assertEquals("nullable", Exporter.toBigQueryNullable(2));
-        assertEquals("nullable", Exporter.toBigQueryNullable(3));
+    @ParameterizedTest(name = "[{index}] {0} --> {1}")
+    @CsvSource(delimiter = ';', value = {
+        "0; required",
+        "1; nullable",
+        "2; nullable",
+        "3; nullable"
+    })
+    void testToBigQueryNullable(int _nullable, String _expected) {
+        assertEquals(_expected, Exporter.toBigQueryNullable(_nullable));
     }
 
     @Test
