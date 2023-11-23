@@ -19,7 +19,7 @@ class FloatTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "float.accdb"; // Access 2007
+        return getTestDbDir() + "float.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

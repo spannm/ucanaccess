@@ -13,7 +13,7 @@ class ColumnOrderTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "columnOrder.accdb";
+        return getTestDbDir() + "columnOrder.accdb";
     }
 
     @Override

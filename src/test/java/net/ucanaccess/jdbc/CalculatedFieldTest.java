@@ -15,7 +15,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "calculatedField.accdb";
+        return getTestDbDir() + "calculatedField.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

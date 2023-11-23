@@ -14,7 +14,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "accessLike.mdb"; // Access 2000
+        return getTestDbDir() + "accessLike.mdb"; // Access 2000
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

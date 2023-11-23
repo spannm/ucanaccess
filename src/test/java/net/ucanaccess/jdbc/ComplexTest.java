@@ -22,7 +22,7 @@ class ComplexTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "complex.accdb";
+        return getTestDbDir() + "complex.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -15,7 +15,7 @@ class Size97Test extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "size97.mdb";
+        return getTestDbDir() + "size97.mdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

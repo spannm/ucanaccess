@@ -28,7 +28,7 @@ class CorruptedTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "corrupted.accdb"; // Access 2007
+        return getTestDbDir() + "corrupted.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

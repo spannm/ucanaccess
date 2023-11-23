@@ -13,7 +13,7 @@ class PivotTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "pivot.mdb";
+        return getTestDbDir() + "pivot.mdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

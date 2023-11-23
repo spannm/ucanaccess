@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 
 public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
-    protected static final String TEST_DB_DIR   = "testdbs/";
     private static final File     TEST_TEMP_DIR = createTempDir("ucanaccess-test");
 
     static {
@@ -239,6 +238,10 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
 
         return fileAccDb.getAbsolutePath();
+    }
+
+    protected static final String getTestDbDir() {
+        return "testdbs/";
     }
 
     /**

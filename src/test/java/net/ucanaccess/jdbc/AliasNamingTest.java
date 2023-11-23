@@ -11,7 +11,7 @@ class AliasNamingTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "aliasNaming.accdb";
+        return getTestDbDir() + "aliasNaming.accdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

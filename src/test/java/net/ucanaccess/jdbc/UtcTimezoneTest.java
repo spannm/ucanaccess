@@ -37,7 +37,7 @@ class UtcTimezoneTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "utcTimezoneTest.accdb"; // Access 2007
+        return getTestDbDir() + "utcTimezoneTest.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

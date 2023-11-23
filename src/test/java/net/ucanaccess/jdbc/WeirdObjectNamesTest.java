@@ -9,7 +9,7 @@ class WeirdObjectNamesTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "weirdObjectNames.mdb";
+        return getTestDbDir() + "weirdObjectNames.mdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

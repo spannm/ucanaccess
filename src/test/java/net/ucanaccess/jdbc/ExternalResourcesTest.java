@@ -18,9 +18,9 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
     void testLinks(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
         init(_accessVersion);
 
-        File main = copyResourceToTempFile(TEST_DB_DIR + "main.mdb");
-        File linkee1 = copyResourceToTempFile(TEST_DB_DIR + "linkee1.mdb");
-        File linkee2 = copyResourceToTempFile(TEST_DB_DIR + "linkee2.mdb");
+        File main = copyResourceToTempFile(getTestDbDir() + "main.mdb");
+        File linkee1 = copyResourceToTempFile(getTestDbDir() + "linkee1.mdb");
+        File linkee2 = copyResourceToTempFile(getTestDbDir() + "linkee2.mdb");
 
         UcanaccessConnectionBuilder bldr = buildConnection()
             .withDbPath(main.getAbsolutePath())
@@ -28,7 +28,7 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
             .withProp(Property.immediatelyReleaseResources, true)
             .withProp(Property.reMap, "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
         getLogger().debug("Database url: {}", bldr.getUrl());
-        
+
         try (Connection conn = bldr.build();
             Statement st = conn.createStatement()) {
 

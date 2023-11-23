@@ -10,7 +10,7 @@ class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "badDb.accdb";
+        return getTestDbDir() + "badDb.accdb";
     }
 
     protected UcanaccessConnectionBuilder buildConnection() {

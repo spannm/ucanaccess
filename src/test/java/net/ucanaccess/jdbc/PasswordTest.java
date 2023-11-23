@@ -13,7 +13,7 @@ class PasswordTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return TEST_DB_DIR + "pwd.mdb";
+        return getTestDbDir() + "pwd.mdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
