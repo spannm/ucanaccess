@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 class AccessLikeTest extends UcanaccessBaseTest {
@@ -30,7 +29,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         String tableName = "T21";
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE " + tableName + " (id COUNTER PRIMARY KEY, descr MEMO)");
 
             for (String val : List.of(
@@ -66,7 +65,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         String tableName = "Tx21";
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE " + tableName + " (id COUNTER PRIMARY KEY, descr MEMO)");
 
             st.execute("INSERT INTO Tx21(descr) VALUES('t11114')");

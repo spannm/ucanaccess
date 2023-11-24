@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class AliasTest extends UcanaccessBaseTest {
 
@@ -21,7 +20,7 @@ class AliasTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testBig(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("INSERT INTO Talias (id, descr) VALUES( " + id + ",'t')");
             ResultSet rs = st.executeQuery("SELECT descr AS [cipol%'&la] FROM Talias WHERE descr<>'ciao'&'bye'&'pippo'");
@@ -35,7 +34,7 @@ class AliasTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testAccent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO Talias (id, Actuación) VALUES(1, 'X')");
             ResultSet rs = st.executeQuery("SELECT [Actuación] AS Actuació8_0_0_ FROM Talias ");
             rs.next();
@@ -48,7 +47,7 @@ class AliasTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testAsin(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE xxxx (asin TEXT, ff TEXT)");
             dumpQueryResult("SELECT asin, ff FROM xxxx");
         }

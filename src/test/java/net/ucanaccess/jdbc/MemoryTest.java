@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
 @Disabled
 class MemoryTest extends UcanaccessBaseTest {
@@ -32,7 +31,7 @@ class MemoryTest extends UcanaccessBaseTest {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             getLogger().debug("Total memory 0={}", Runtime.getRuntime().totalMemory());
             getLogger().debug("Free memory 0={}", Runtime.getRuntime().freeMemory());
             int nbRecords = 100000;

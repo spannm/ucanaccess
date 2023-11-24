@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class PhysicalRollbackTest extends UcanaccessBaseTest {
 
@@ -37,7 +36,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
 
         ucanaccess.setAutoCommit(false);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO T4 (id, descr) VALUES(6666554, 'nel mezzo del cammin di nostra vita')");
             st.execute("INSERT INTO T4 (id, descr) VALUES(77666554, 'nel mezzo del cammin di nostra vita')");
             st.execute("UPDATE T4 SET ID=0 WHERE id=77666554");

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 class NoRomanCharacterTest extends UcanaccessBaseTest {
 
@@ -21,7 +20,7 @@ class NoRomanCharacterTest extends UcanaccessBaseTest {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM t_noroman");
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES( 'the end','yeeep')");
             st.execute("UPDATE t_noroman SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
             ResultSet rs = st.executeQuery("SELECT * FROM t_noroman");

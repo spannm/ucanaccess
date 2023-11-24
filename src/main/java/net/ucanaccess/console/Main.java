@@ -27,7 +27,6 @@ public class Main {
     public Main(Connection _conn, BufferedReader _input) {
         conn = _conn;
         input = _input;
-
     }
 
     private static boolean hasPassword(File _f) throws IOException {

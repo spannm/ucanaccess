@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ class RegexTest extends UcanaccessBaseTest {
         String[] in = new String[] {"", "\"\"'tCC", s, s + "'", s + "\"", s + "\"''t",
             "\"'\"t" + s, "ss\"1234567890wwwwwwwwww1", "ssss'DDDD", s + "\"\"\"" + s};
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             for (String c : in) {
                 executeStatements(st,
                     getStatement(c.replaceAll("'", "''"), "'"),

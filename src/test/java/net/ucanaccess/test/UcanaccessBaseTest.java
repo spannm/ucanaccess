@@ -9,6 +9,7 @@ import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessConnectionBuilder;
+import net.ucanaccess.jdbc.UcanaccessStatement;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
@@ -41,7 +42,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     // CHECKSTYLE:OFF
     protected UcanaccessConnection ucanaccess;
     // CHECKSTYLE:ON
-    private Connection             verifyConnection;
+    private UcanaccessConnection   verifyConnection;
 
     protected UcanaccessBaseTest() {
     }
@@ -68,7 +69,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     public void checkQuery(String _query, List<List<Object>> _expected) throws SQLException {
-        try (Statement st = ucanaccess.createStatement();
+        try (UcanaccessStatement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery(_query)) {
             diff(rs, _expected, _query);
         }
@@ -76,8 +77,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     public void checkQuery(String _query) throws SQLException, IOException {
         initVerifyConnection();
-        try (Statement st1 = ucanaccess.createStatement();
-             Statement st2 = verifyConnection.createStatement()) {
+        try (UcanaccessStatement st1 = ucanaccess.createStatement();
+            UcanaccessStatement st2 = verifyConnection.createStatement()) {
 
             ResultSet firstRs = st1.executeQuery(_query);
             ResultSet verifyRs = st2.executeQuery(_query);
@@ -202,7 +203,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected void dumpQueryResult(String _query) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             ResultSet resultSet = st.executeQuery(_query);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (PrintStream ps = new PrintStream(baos, true)) {
@@ -339,7 +340,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     public int getCount(String _sql, boolean _equals) throws SQLException {
         initVerifyConnection();
-        Statement st = verifyConnection.createStatement();
+        UcanaccessStatement st = verifyConnection.createStatement();
         ResultSet expectedResultset = st.executeQuery(_sql);
         expectedResultset.next();
         int expectedCount = expectedResultset.getInt(1);
@@ -398,7 +399,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected final void executeStatements(String... _sqls) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st, _sqls);
         }
     }

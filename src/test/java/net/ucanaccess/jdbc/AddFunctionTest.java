@@ -6,7 +6,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.sql.Statement;
 import java.util.Locale;
 
 class AddFunctionTest extends UcanaccessBaseTest {
@@ -23,11 +22,11 @@ class AddFunctionTest extends UcanaccessBaseTest {
          */
         getLogger().info("Locale language is {}", Locale.getDefault().getLanguage());
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE t_add_function (id INTEGER) ");
         }
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_add_function (id) VALUES(1)");
         }
 

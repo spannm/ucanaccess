@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 class CreateTableTest extends UcanaccessBaseTest {
@@ -29,7 +28,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void createAsSelect() throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa,a,c FROM AAA) WITH DATA");
             checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
@@ -39,7 +38,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void createAsSelect2() throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH NO DATA");
             st.execute("INSERT INTO AAA_TRIS SELECT * FROM AAA_bis");
             checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa",
@@ -48,7 +47,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void createPs() throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE \nTABLE BBB (baaaa \nVARCHAR(2) PRIMARY KEY)");
             assertThatThrownBy(() -> st.execute("CREATE TABLE BBB (baaaa TEXT PRIMARY KEY, b TEXT)"))
                 .isInstanceOf(SQLException.class)
@@ -57,7 +56,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void createSimple() throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "INSERT INTO AAA(baaaa, c) VALUES ('33A', 'G')",
                 "INSERT INTO AAA(baaaa, a, c) VALUES ('33B', 111, 'G')");
@@ -67,7 +66,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     void defaults() throws Exception {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT D, E FROM AAA");
             while (rs.next()) {
                 assertNotNull(rs.getObject(1));
@@ -89,7 +88,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     void setDPK() throws SQLException, IOException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "CREATE TABLE dkey(c COUNTER, number NUMERIC(23,5), PRIMARY KEY (c, number))",
                 "CREATE TABLE dunique(c TEXT, number NUMERIC(23,5), UNIQUE (c, number))");
@@ -97,7 +96,7 @@ class CreateTableTest extends UcanaccessBaseTest {
 
         ucanaccess.setAutoCommit(false);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "INSERT INTO dunique VALUES('ddl forces commit', 2.3)",
                 "CREATE TABLE dtrx(c TEXT, number NUMERIC(23,5), UNIQUE(c, number))",
@@ -107,7 +106,7 @@ class CreateTableTest extends UcanaccessBaseTest {
             ucanaccess.rollback();
         }
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "INSERT INTO dtrx values('Hi all',444.3)",
                 "INSERT INTO dtrx values('Hi all',4454.3)");
@@ -121,7 +120,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     void setTableProperties() throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("create table tbl(c counter primary key , " + "number numeric(23,5) default -4.6 not null , "
                     + "txt1 text(23) default 'ciao', blank text default ' ', dt date default date(), txt2 text(33),"
                     + "txt3 text)");
@@ -129,7 +128,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     private void notNullBug() throws SQLException, IOException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("create table nnb(c counter primary key , " + "number decimal (23,5) default -4.6 not null , "
                     + "txt1 text(23) not null, blank text , dt date not null, txt2 text ," + "txt3 text not null)");
 
@@ -176,7 +175,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testNaming(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "CREATE TABLE [ggg kk] ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
                 "CREATE TABLE [ggg kkff] ([---bgaaf() aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa()] TEXT(222) DEFAULT 'vvv')",
@@ -195,7 +194,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testCreateWithFK(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE Parent(x AUTOINCREMENT PRIMARY KEY, y text(222))");
             st.execute("CREATE TABLE Babe(k LONG, y LONG, PRIMARY KEY(k, y), FOREIGN KEY (y) REFERENCES Parent (x))");
             Database db = ucanaccess.getDbIO();
@@ -238,7 +237,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testCreateHyperlink(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "CREATE TABLE urlTest (id LONG PRIMARY KEY, website HYPERLINK)",
                 "INSERT INTO urlTest (id, website) VALUES (1, '#http://whatever#')",

@@ -8,10 +8,7 @@ import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.UnsupportedValue;
 import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.jdbc.*;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.HibernateSupport;
@@ -420,7 +417,7 @@ public class Persist2Jet {
         LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), db);
         lj.loadDefaultValues(table);
         createForeignKeys(tableName);
-        try (Statement st = conn.createStatement()) {
+        try (UcanaccessStatement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery("SELECT * FROM " + tableName);
             List<String> clns = getColumnNamesCreate(tn);
             while (rs.next()) {

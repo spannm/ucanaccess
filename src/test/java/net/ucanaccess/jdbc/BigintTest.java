@@ -6,9 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 class BigintTest extends UcanaccessBaseTest {
 
@@ -20,7 +18,7 @@ class BigintTest extends UcanaccessBaseTest {
         String accdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
         Long expected = 3000000000L;
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE table1 (entry TEXT(50) PRIMARY KEY, x BIGINT)");
             String sql = String.format("INSERT INTO table1 (entry, x) VALUES ('3 billion', %d)", expected);
             st.execute(sql);
@@ -28,12 +26,12 @@ class BigintTest extends UcanaccessBaseTest {
 
         ucanaccess.close();
 
-        try (Connection conn = buildConnection()
+        try (UcanaccessConnection conn = buildConnection()
                 .withDbPath(accdbPath)
                 .withImmediatelyReleaseResources()
                 .build();
-                Statement st2 = conn.createStatement();
-                ResultSet rs = st2.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
+                UcanaccessStatement st = conn.createStatement();
+                ResultSet rs = st.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
             rs.next();
             Long actual = rs.getLong("x");
             assertEquals(expected, actual);

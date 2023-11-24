@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class DisableAutoIncrementTest extends UcanaccessBaseTest {
 
@@ -24,7 +23,7 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testGuid(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
             "CREATE TABLE CT1 (id GUID PRIMARY KEY, descr TEXT)",
             "INSERT INTO CT1 (descr) VALUES ('CIAO')");
@@ -37,7 +36,7 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
     void testDisable(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "INSERT INTO CT (descr) VALUES ('CIAO')",
                 "DISABLE AUTOINCREMENT ON CT");

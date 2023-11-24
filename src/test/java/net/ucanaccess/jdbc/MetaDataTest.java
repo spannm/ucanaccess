@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 class MetaDataTest extends UcanaccessBaseTest {
@@ -24,7 +23,7 @@ class MetaDataTest extends UcanaccessBaseTest {
     }
 
     void createSimple(String _a, List<List<Object>> _ver) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_metadata VALUES ('33A', 11, '" + _a + "' )");
             st.execute("INSERT INTO t_metadata VALUES ('33B', 111, '" + _a + "' )");
         }
@@ -37,7 +36,7 @@ class MetaDataTest extends UcanaccessBaseTest {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         createSimple("a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("DROP TABLE t_metadata");
 
             st.execute("CREATE TABLE t_metadata (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");

@@ -72,8 +72,8 @@ public class Pivot {
                     if (_conn == null) {
                         return;
                     }
-                    Connection conh = _conn.getHSQLDBConnection();
-                    Pivot pivot = new Pivot(conh);
+                    Connection connHsql = _conn.getHSQLDBConnection();
+                    Pivot pivot = new Pivot(connHsql);
 
                     if (!pivot.parsePivot(PIVOT_MAP.get(name))) {
                         return;
@@ -82,12 +82,12 @@ public class Pivot {
                     if (sqlh == null) {
                         return;
                     }
-                    try (Statement st = conh.createStatement()) {
+                    try (Statement st = connHsql.createStatement()) {
                         String escqn = SQLConverter.completeEscaping(name, false);
 
                         st.executeUpdate(SQLConverter.convertSQL("DROP VIEW " + escqn, true).getSql());
                         NormalizedSQL nsql = SQLConverter.convertSQL("CREATE VIEW " + escqn + " AS " + sqlh, true);
-                        Metadata mt = new Metadata(conh);
+                        Metadata mt = new Metadata(connHsql);
                         String eqn = SQLConverter.preEscapingIdentifier(name);
                         Integer idTable = mt.getTableId(eqn);
                         if (idTable != null) {

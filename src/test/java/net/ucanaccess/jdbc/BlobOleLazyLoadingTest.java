@@ -33,7 +33,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
         byte[] initialBlobBytes = getBlobBytes();
         getLogger().info("BLOB size in backing database before retrieval: {} bytes", initialBlobBytes.length);
         assertThat((long) initialBlobBytes.length).isLessThan(binaryFileSize);
-        Statement st = ucanaccess.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
         File file = createTempFileName("Copied", ".jpeg");
         rs.next();

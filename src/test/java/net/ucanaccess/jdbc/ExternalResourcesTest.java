@@ -7,9 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class ExternalResourcesTest extends UcanaccessBaseTest {
 
@@ -29,8 +27,8 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
             .withProp(Property.reMap, "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
         getLogger().debug("Database url: {}", bldr.getUrl());
 
-        try (Connection conn = bldr.build();
-            Statement st = conn.createStatement()) {
+        try (UcanaccessConnection conn = bldr.build();
+            UcanaccessStatement st = conn.createStatement()) {
 
             dumpQueryResult(() -> st.executeQuery("SELECT * FROM table1"));
             dumpQueryResult(() -> st.executeQuery("SELECT * FROM table2"));

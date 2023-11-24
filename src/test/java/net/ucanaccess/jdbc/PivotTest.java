@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class PivotTest extends UcanaccessBaseTest {
 
@@ -20,7 +19,7 @@ class PivotTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testPivot(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             dumpQueryResult("SELECT * FROM Table1_trim");
             executeStatements(st,
                 "INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03# )",

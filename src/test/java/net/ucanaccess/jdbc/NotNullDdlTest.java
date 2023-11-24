@@ -28,7 +28,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
 
         String mdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
 
-        Statement st = ucanaccess.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE table1 (id LONG PRIMARY KEY, txt_required TEXT(50) NOT NULL)");
         ucanaccess.close();
 
