@@ -6,7 +6,6 @@ import net.ucanaccess.util.Try;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -69,7 +68,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
-    void testMultiThread(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testMultiThread(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         List<Thread> threads = IntStream.range(0, 50).mapToObj(i -> new Thread(() -> {

@@ -37,7 +37,7 @@ class AlterTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
-    void testRename(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testRename(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -148,7 +148,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             Database db = ucanaccess.getDbIO();
             assertThat(db.getTable(tbl).getPrimaryKeyIndex().getColumns().stream().map(Column::getName))
                 .containsExactly("baaaa", "A");
-            
+
             st.execute("ALTER TABLE Sample ADD PRIMARY KEY (RegionId)");
             assertThat(db.getTable("Sample").getPrimaryKeyIndex().getColumns().stream().map(Column::getName))
                 .containsExactly("RegionId");
@@ -230,7 +230,7 @@ class AlterTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
-    void testMiscellaneous(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testMiscellaneous(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -278,7 +278,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE tx2 (id COUNTER, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), [Is not Pippo] TEXT DEFAULT \"what's this?\")");
             st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
-            
+
             Map.of(
                 "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY ([i d]) ", "unexpected token: PRIMARY",
                 "ALTER TABLE tx2 ADD COLUMN [my best friend] ", "unexpected end of statement",

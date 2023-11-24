@@ -5,7 +5,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Locale;
 
@@ -26,7 +25,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDCount(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDCount(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         checkQuery("SELECT id, DCount('*', 't_aggrfunc', '1=1') FROM [t_aggrfunc]", recs(rec(1234, 2), rec(12344, 2)));
@@ -37,35 +36,35 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDSum(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDSum(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DSum('id', 't_aggrfunc', '1=1')", singleRec(13578));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDMax(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDMax(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DMax('id', 't_aggrfunc')", singleRec(12344));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDMin(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDMin(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DMin('id', 't_aggrfunc')", singleRec(1234));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDAvg(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDAvg(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DAvg('id', 't_aggrfunc')", singleRec(6789));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testLast(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testLast(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT last(descr) FROM t_aggrfunc", singleRec("Show must go up and down"));
         checkQuery("SELECT last(NUM) FROM t_aggrfunc", singleRec(-113.5540));
@@ -74,7 +73,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testFirst(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testFirst(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT first(descr) FROM t_aggrfunc", singleRec("Show must go off"));
         checkQuery("SELECT first(NUM) FROM t_aggrfunc", singleRec(-1110.5540));
@@ -83,14 +82,14 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDLast(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDLast(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DLast('descr', 't_aggrfunc')", singleRec("Show must go up and down"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDFirst(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDFirst(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DFirst('descr', 't_aggrfunc') ", singleRec("Show must go off"));
     }

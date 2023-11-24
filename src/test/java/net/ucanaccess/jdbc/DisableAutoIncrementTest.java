@@ -7,7 +7,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 class DisableAutoIncrementTest extends UcanaccessBaseTest {
@@ -21,7 +20,7 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
-    void testGuid(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testGuid(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,

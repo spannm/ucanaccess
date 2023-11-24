@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +21,7 @@ class ParametersTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
-    void testParameters(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testParameters(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         dumpQueryResult("SELECT * FROM tq");

@@ -5,7 +5,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +22,7 @@ class LoadTypesAccessTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDate(AccessVersion _accessVersion) throws SQLException, IOException, ParseException {
+    void testDate(AccessVersion _accessVersion) throws SQLException, ParseException {
         init(_accessVersion);
         checkQuery("SELECT #10/03/2004# , #11/23/1811#,#10/03/2008 22:34:35#,#10/03/2008 22:34:35 aM#,#10/03/2008 10:34:35 PM# from pluto",
             recs(rec(SDF.parse("2004-10-03 00:00:00.0"), SDF.parse("1811-11-23 00:00:00.0"), SDF.parse("2008-10-03 22:34:35.0"), SDF.parse("2008-10-03 22:34:35.0"), SDF.parse("2008-10-03 22:34:35.0"))));
@@ -33,7 +32,7 @@ class LoadTypesAccessTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testQuery(AccessVersion _accessVersion) throws SQLException, IOException, ParseException {
+    void testQuery(AccessVersion _accessVersion) throws SQLException, ParseException {
         init(_accessVersion);
         checkQuery("SELECT * FROM pluto",
             recs(rec(1234, "I like trippa with spaghettis bolognese", SDF.parse("2008-10-03 22:34:35"), 4.5555, 5.6666, 6.7, 5, 0.10005, 4.677856)));

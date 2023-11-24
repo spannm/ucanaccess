@@ -87,7 +87,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         }
     }
 
-    void setDPK() throws SQLException, IOException {
+    void setDPK() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "CREATE TABLE dkey(c COUNTER, number NUMERIC(23,5), PRIMARY KEY (c, number))",
@@ -108,8 +108,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "INSERT INTO dtrx values('Hi all',444.3)",
-                "INSERT INTO dtrx values('Hi all',4454.3)");
+                "INSERT INTO dtrx VALUES('Hi all',444.3)",
+                "INSERT INTO dtrx VALUES('Hi all',4454.3)");
         }
 
         dumpQueryResult("SELECT * FROM dtrx");
@@ -121,32 +121,31 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     void setTableProperties() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("create table tbl(c counter primary key , " + "number numeric(23,5) default -4.6 not null , "
-                    + "txt1 text(23) default 'ciao', blank text default ' ', dt date default date(), txt2 text(33),"
-                    + "txt3 text)");
+            st.execute("CREATE TABLE tbl(c COUNTER PRIMARY KEY, " + "number NUMERIC(23,5) DEFAULT -4.6 NOT NULL, "
+                    + "txt1 TEXT(23) DEFAULT 'ciao', blank TEXT DEFAULT ' ', dt DATE DEFAULT date(), txt2 TEXT(33),"
+                    + "txt3 TEXT)");
         }
     }
 
     private void notNullBug() throws SQLException, IOException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("create table nnb(c counter primary key , " + "number decimal (23,5) default -4.6 not null , "
-                    + "txt1 text(23) not null, blank text , dt date not null, txt2 text ," + "txt3 text not null)");
+            st.execute("CREATE TABLE nnb(c COUNTER PRIMARY KEY, " + "number decimal(23,5) default -4.6 NOT NULL , "
+                    + "txt1 text(23) NOT NULL, blank TEXT, dt DATE NOT NULL, txt2 TEXT," + "txt3 TEXT NOT NULL)");
 
-            checkNotNull("nnb", "number", true);
-            checkNotNull("nnb", "txt1", true);
-            checkNotNull("nnb", "blank", false);
-            checkNotNull("nnb", "dt", true);
-            checkNotNull("nnb", "txt2", false);
-            checkNotNull("nnb", "txt3", true);
+            assertNotNull("nnb", "number", true);
+            assertNotNull("nnb", "txt1", true);
+            assertNotNull("nnb", "blank", false);
+            assertNotNull("nnb", "dt", true);
+            assertNotNull("nnb", "txt2", false);
+            assertNotNull("nnb", "txt3", true);
         }
     }
 
-    private void checkNotNull(String tn, String cn, boolean notNull) throws IOException {
+    private void assertNotNull(String _table, String _column, boolean _expectedNotNull) throws IOException {
         Database db = ucanaccess.getDbIO();
-        Table tb = db.getTable(tn);
-        PropertyMap pm = tb.getColumn(cn).getProperties();
-        assertEquals(notNull, pm.getValue(PropertyMap.REQUIRED_PROP));
-
+        Table tb = db.getTable(_table);
+        PropertyMap pm = tb.getColumn(_column).getProperties();
+        assertEquals(_expectedNotNull, pm.getValue(PropertyMap.REQUIRED_PROP));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -155,8 +154,8 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         executeStatements(
-            "CREATE \nTABLE AAA ( baaaa \ntext PRIMARY KEY,A long default 3 not null, C text(255) not null, "
-                + "d DATETIME default now(), e text default 'l''aria')");
+            "CREATE \nTABLE AAA( baaaa \nTEXT PRIMARY KEY, A LONG DEFAULT 3 NOT NULL, C TEXT(255) NOT NULL, "
+                + "d DATETIME DEFAULT now(), e TEXT DEFAULT 'l''aria')");
 
         createSimple();
         createPs();

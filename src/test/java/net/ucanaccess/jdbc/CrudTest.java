@@ -5,7 +5,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -116,7 +115,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDeleteRS(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testDeleteRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         ucanaccess.setAutoCommit(false);
@@ -161,7 +160,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testInsertRSNoAllSet(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testInsertRSNoAllSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
