@@ -28,7 +28,7 @@ class ColumnOrderTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (Connection uca = createUcanaccessConnection();
-            PreparedStatement ps = uca.prepareStatement("INSERT INTO t1 values (?, ?, ?)")) {
+            PreparedStatement ps = uca.prepareStatement("INSERT INTO t_columnorder values (?, ?, ?)")) {
             ps.setInt(3, 3);
             ps.setDate(2, new Date(System.currentTimeMillis()));
             ps.setString(1, "This is the display order");

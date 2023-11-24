@@ -19,17 +19,17 @@ class ByteTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements(
-            "CREATE TABLE tblMain (ID int NOT NULL PRIMARY KEY,company TEXT NOT NULL, Closed byte); ",
-            "INSERT INTO tblMain (id,company) VALUES(1, 'pippo')",
-            "UPDATE tblMain SET closed=255");
+            "CREATE TABLE t_byte (ID int NOT NULL PRIMARY KEY, company TEXT NOT NULL, Closed byte); ",
+            "INSERT INTO t_byte (id,company) VALUES(1, 'pippo')",
+            "UPDATE t_byte SET closed=255");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testCreate(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        dumpQueryResult("SELECT * FROM tblMain");
-        checkQuery("SELECT * FROM tblMain");
+        dumpQueryResult("SELECT * FROM t_byte");
+        checkQuery("SELECT * FROM t_byte");
     }
 
 }

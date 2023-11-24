@@ -19,8 +19,8 @@ class BigintTest extends UcanaccessBaseTest {
         Long expected = 3000000000L;
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE table1 (entry TEXT(50) PRIMARY KEY, x BIGINT)");
-            String sql = String.format("INSERT INTO table1 (entry, x) VALUES ('3 billion', %d)", expected);
+            st.execute("CREATE TABLE t_bigint (entry TEXT(50) PRIMARY KEY, x BIGINT)");
+            String sql = String.format("INSERT INTO t_bigint (entry, x) VALUES ('3 billion', %d)", expected);
             st.execute(sql);
         }
 
@@ -31,7 +31,7 @@ class BigintTest extends UcanaccessBaseTest {
                 .withImmediatelyReleaseResources()
                 .build();
                 UcanaccessStatement st = conn.createStatement();
-                ResultSet rs = st.executeQuery("SELECT x FROM table1 WHERE entry='3 billion'")) {
+                ResultSet rs = st.executeQuery("SELECT x FROM t_bigint WHERE entry='3 billion'")) {
             rs.next();
             Long actual = rs.getLong("x");
             assertEquals(expected, actual);
