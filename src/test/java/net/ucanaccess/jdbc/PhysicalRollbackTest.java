@@ -52,7 +52,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
         ucanaccess = createUcanaccessConnection();
         dumpQueryResult("SELECT * FROM T4");
 
-        assertEquals(0, getCount("SELECT COUNT(*) FROM T4"));
+        assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM T4"));
     }
 
 }
