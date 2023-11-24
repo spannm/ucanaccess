@@ -279,8 +279,8 @@ public class DBReference {
         return dbIO;
     }
 
-    private void setIgnoreCase(Connection conn) {
-        try (Statement st = conn.createStatement()) {
+    private void setIgnoreCase(Connection _conn) {
+        try (Statement st = _conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 
         } catch (Exception ignored) {

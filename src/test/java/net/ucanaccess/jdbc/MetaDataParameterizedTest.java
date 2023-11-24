@@ -8,7 +8,9 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 class MetaDataParameterizedTest extends UcanaccessBaseTest {
 
@@ -21,8 +23,8 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testCreateBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        Connection conn = ucanaccess;
-        Statement st = conn.createStatement();
+        UcanaccessConnection conn = ucanaccess;
+        UcanaccessStatement st = conn.createStatement();
         st.execute("CREATE TABLE [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
         st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
         st.execute("UPDATE [健康] set [Sometime I wonder who I am ]='d'");
@@ -64,8 +66,8 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        Connection conn = ucanaccess;
-        Statement st = conn.createStatement();
+        UcanaccessConnection conn = ucanaccess;
+        UcanaccessStatement st = conn.createStatement();
         assertEquals("Ciao", st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1));
     }
 
@@ -74,7 +76,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     void testBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM NOROMAN");
-        Statement st = ucanaccess.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         assertThat(st.executeQuery("SELECT * FROM NOROMAN").getMetaData())
             .satisfies(x -> assertThat(x.isAutoIncrement(1)).isTrue())
             .satisfies(x -> assertThat(x.isCurrency(6)).isTrue())

@@ -30,14 +30,14 @@ class CsvDumpTest extends UcanaccessBaseTest {
     void testCsvDump(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO csvtable (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) "
                 + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
         }
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);
-            Statement st = ucanaccess.createStatement();
+            UcanaccessStatement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
 
             new Exporter.Builder().withDelimiter(";").build().dumpCsv(rs, ps);
@@ -58,7 +58,7 @@ class CsvDumpTest extends UcanaccessBaseTest {
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);
-            Statement st = ucanaccess.createStatement();
+            UcanaccessStatement st = ucanaccess.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
 
             Exporter exporter = new Exporter.Builder().withDelimiter(";").build();

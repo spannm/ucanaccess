@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class BatchTest extends UcanaccessBaseTest {
 
@@ -23,7 +22,7 @@ class BatchTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testBatch(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.addBatch("UPDATE Tb SET [name]='ccc'");
             st.addBatch("UPDATE Tb SET age=95");
             st.executeBatch();

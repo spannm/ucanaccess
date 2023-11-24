@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 class DropTableTest extends UcanaccessBaseTest {
@@ -19,7 +18,7 @@ class DropTableTest extends UcanaccessBaseTest {
     }
 
     void createSimple(String _tableName, String _a, List<List<Object>> _ver) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO " + _tableName + " VALUES ('33A', 11,'" + _a + "')");
             st.execute("INSERT INTO " + _tableName + " VALUES ('33B',111,'" + _a + "')");
             checkQuery("SELECT * FROM " + _tableName + " ORDER BY c", _ver);
@@ -33,7 +32,7 @@ class DropTableTest extends UcanaccessBaseTest {
 
         // ucanaccess.setAutoCommit(false);
         createSimple("AAAn", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("DROP TABLE AAAn");
             // ucanaccess.commit();
             st.execute("CREATE TABLE AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
@@ -50,7 +49,7 @@ class DropTableTest extends UcanaccessBaseTest {
 
         // ucanaccess.setAutoCommit(false);
         createSimple("[AAA n]", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("DROP TABLE [AAA n]");
             // ucanaccess.commit();
             st.execute("CREATE TABLE [AAA n] (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");

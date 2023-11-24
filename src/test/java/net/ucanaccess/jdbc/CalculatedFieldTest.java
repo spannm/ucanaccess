@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 class CalculatedFieldTest extends UcanaccessBaseTest {
 
@@ -23,7 +22,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
     void testFunctionBuiltInCall(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             // definition of calculated columns:
             // clcd1: LEFT([input];3)
             // clcd2: LEFT$([input];3)
@@ -57,7 +56,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
     void testCalculatedFieldNameContainsPercentSign(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             // definition of calculated column [%markup]: ([retail]/[wholesale]-1)*100
             st.execute("INSERT INTO products (wholesale, retail) VALUES (4, 5)");
             ResultSet rs = st.executeQuery("SELECT wholesale, retail, [%markup] FROM products WHERE [id]=3");

@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 class BlobOleTest extends UcanaccessBaseTest {
 
@@ -41,7 +44,7 @@ class BlobOleTest extends UcanaccessBaseTest {
             ps.execute();
         }
 
-        Statement st = ucanaccess.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         ResultSet rs1 = st.executeQuery("SELECT c_ole FROM t_ole_test");
         rs1.next();
 
@@ -118,7 +121,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         ps.execute();
         getLogger().info("Binary file was created in {}", getFileAccDb());
         checkQuery("SELECT * FROM t_ole_test");
-        Statement st = ucanaccess.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         st.execute("DELETE FROM t_ole_test");
     }
 
@@ -128,7 +131,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         // fix for ticket #23 should prevent this test from throwing an error
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE t_two_col_pk (pk_col1 LONG, pk_col2 LONG, blob_col OLE, "
                 + "CONSTRAINT pk_t_two_col_pk PRIMARY KEY (pk_col1, pk_col2))");
         }

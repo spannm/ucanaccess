@@ -8,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class UnproperExecuteQueryTest extends UcanaccessBaseTest {
 
@@ -27,7 +26,7 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     }
 
     private void execute(String _sql) throws SQLException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             assertThatThrownBy(() -> st.executeQuery(_sql))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageMatching("UCAExc:::[0-9\\.]+ General error");

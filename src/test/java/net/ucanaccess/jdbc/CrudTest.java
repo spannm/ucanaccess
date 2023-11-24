@@ -24,7 +24,7 @@ class CrudTest extends UcanaccessBaseTest {
     void testCrud(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id1 = 1234;
             int id2 = 5678;
 
@@ -46,7 +46,7 @@ class CrudTest extends UcanaccessBaseTest {
         int id1 = 1234;
         int id2 = 5678;
 
-        try (Statement st = ucanaccess.createStatement();
+        try (UcanaccessStatement st = ucanaccess.createStatement();
              PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t1 (id, descr) VALUES(?, ?)")) {
             st.execute("DELETE FROM t1");
             ps.setInt(1, id1);
@@ -100,7 +100,7 @@ class CrudTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testUpdatableRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("DELETE FROM t1");
             st.execute("INSERT INTO t1 (id,descr) VALUES( " + id + ", 'tre canarini volano su e cadono')");
@@ -119,9 +119,9 @@ class CrudTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testDeleteRS(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
-        
+
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("DELETE FROM t1");
             st.execute("INSERT INTO t1 (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
@@ -141,7 +141,7 @@ class CrudTest extends UcanaccessBaseTest {
     void testInsertRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("DELETE FROM t1");
             st.execute("INSERT INTO t1 (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
@@ -165,7 +165,7 @@ class CrudTest extends UcanaccessBaseTest {
     void testInsertRSNoAllSet(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE T2 (id AUTOINCREMENT, descr TEXT)");
             st.execute("DELETE FROM t2");
 
@@ -182,7 +182,7 @@ class CrudTest extends UcanaccessBaseTest {
             ps.getConnection().commit();
 
             checkQuery("SELECT * FROM T2 ORDER BY id", singleRec(1, "Growing old in rural places"));
-            Statement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            UcanaccessStatement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs1 = stat.executeQuery("SELECT * FROM T2 ORDER BY id");
             rs1.last();
 
@@ -195,7 +195,7 @@ class CrudTest extends UcanaccessBaseTest {
     void testPartialInsertRS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE T21 (id autoincrement, descr TEXT)");
 
             PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T21", ResultSet.TYPE_FORWARD_ONLY,

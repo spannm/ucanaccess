@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Statement;
 
 class TransactionTest extends UcanaccessBaseTest {
 
@@ -22,7 +21,7 @@ class TransactionTest extends UcanaccessBaseTest {
     void testCommit(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int i = getCount("SELECT COUNT(*) FROM T4");
             st.execute("INSERT INTO T4 (id, descr) VALUES(6666554, 'nel mezzo del cammin di nostra vita')");
             assertEquals(i, getCount("SELECT COUNT(*) FROM T4", false));
@@ -37,7 +36,7 @@ class TransactionTest extends UcanaccessBaseTest {
         init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO T4 (id, descr) VALUES(1, 'nel mezzo del cammin di nostra vita')");
             Savepoint sp = ucanaccess.setSavepoint();
             assertEquals(count, getCount("SELECT COUNT(*) FROM T4", false));
@@ -55,7 +54,7 @@ class TransactionTest extends UcanaccessBaseTest {
         init(_accessVersion);
         int count = getCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO T4 (id, descr) VALUES(1, 'nel mezzo del cammin di nostra vita')");
             Savepoint sp = ucanaccess.setSavepoint("Gord svp");
             assertEquals(count, getCount("SELECT COUNT(*) FROM T4", false));

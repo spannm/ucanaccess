@@ -10,7 +10,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Locale;
 
 class ExceptionCodeTest extends UcanaccessBaseTest {
@@ -29,7 +28,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     void testVUKException(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
 
             st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
 

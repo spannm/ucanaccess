@@ -7,7 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,9 +29,9 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crud() throws SQLException {
-        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
+        try (UcanaccessConnection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
-            Statement st = conn.createStatement();
+            UcanaccessStatement st = conn.createStatement();
             intVal++;
             st.execute("INSERT INTO " + tableName + " (id,descr) VALUES( " + intVal + ",'" + intVal + "Bla bla bla bla:"
                     + Thread.currentThread() + "')");
@@ -51,9 +54,9 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crudUpdatableRS() throws SQLException {
-        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
+        try (UcanaccessConnection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
-            Statement st = conn.createStatement();
+            UcanaccessStatement st = conn.createStatement();
             st.execute("INSERT INTO " + tableName + " (id,descr) VALUES(" + (++intVal) + " ,'" + Thread.currentThread() + "')");
             PreparedStatement ps = conn.prepareStatement("SELECT * FROM " + tableName + "", ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);

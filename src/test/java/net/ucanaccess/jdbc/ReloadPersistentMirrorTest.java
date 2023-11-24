@@ -7,9 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
 
@@ -24,13 +22,13 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         mirrorFile.deleteOnExit();
 
         // create the database
-        try (Connection conn = buildConnection()
+        try (UcanaccessConnection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
                 .withoutUserPass()
                 .withMemory()
                 .withNewDatabaseVersionProp(getFileFormat().name())
                 .build();
-                Statement stCreate = conn.createStatement()) {
+             UcanaccessStatement stCreate = conn.createStatement()) {
             stCreate.execute("CREATE TABLE Table1 (ID COUNTER PRIMARY KEY, TextField TEXT(50))");
         }
 
@@ -39,20 +37,20 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
             .withDbPath(dbFile.getAbsolutePath())
             .withProp(Property.keepMirror, mirrorFile.getAbsolutePath())
             .withoutUserPass();
-        try (Connection conn = mirrorBuilder.build()) {}
+        try (UcanaccessConnection conn = mirrorBuilder.build()) {}
 
         // do an update without the mirror involved
-        try (Connection conn = buildConnection()
+        try (UcanaccessConnection conn = buildConnection()
                 .withDbPath(dbFile.getAbsolutePath())
                 .withMemory()
                 .withoutUserPass().build();
-                Statement stUpdate = conn.createStatement()) {
+             UcanaccessStatement stUpdate = conn.createStatement()) {
             stUpdate.executeUpdate("INSERT INTO Table1 (TextField) VALUES ('NewStuff')");
         }
 
         // now try and open the database with the (outdated) mirror
-        try (Connection conn = mirrorBuilder.build()) {
-            Statement stSelect = conn.createStatement();
+        try (UcanaccessConnection conn = mirrorBuilder.build()) {
+             UcanaccessStatement stSelect = conn.createStatement();
             ResultSet rs = stSelect.executeQuery("SELECT COUNT(*) AS n FROM Table1");
             rs.next();
             assertEquals(1, rs.getInt(1), "Unexpected record count");

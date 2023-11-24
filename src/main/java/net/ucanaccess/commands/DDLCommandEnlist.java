@@ -8,8 +8,12 @@ import net.ucanaccess.converters.SQLConverter.DDLType;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.jdbc.UcanaccessStatement;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +44,7 @@ public class DDLCommandEnlist {
             parseTypesFromCreateStatement(_sql);
             c4io = new CreateTableCommand(tn, execId, columnMap, types, defaults, notNulls);
         } else {
-            try (Statement st = ac.createStatement()) {
+            try (UcanaccessStatement st = ac.createStatement()) {
                 ResultSet rs = st.executeQuery(_ddlType.getSelect(_sql));
                 ResultSetMetaData rsmd = rs.getMetaData();
                 Metadata mt = new Metadata(ac.getHSQLDBConnection());

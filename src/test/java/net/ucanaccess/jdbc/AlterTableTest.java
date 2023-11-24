@@ -40,7 +40,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testRename(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
             assertThatThrownBy(() -> st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]"))
                 .isInstanceOf(SQLException.class)
@@ -57,7 +57,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testAddColumn(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "ALTER TABLE AAAn RENAME TO [GIà GIà]",
                 "INSERT INTO [GIà GIà] (baaaa) values('chi')");
@@ -110,7 +110,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testCreateIndex(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String tbl = "AAA n";
             st.execute("CREATE UNIQUE INDEX [èèè 23] on [" + tbl + "] (a ASC, c ASC)");
             st.execute("INSERT INTO [" + tbl + "] (a, C) VALUES (24, 'su')");
@@ -142,7 +142,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testCreatePk(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String tbl = "AAA n";
             st.execute("ALTER TABLE [" + tbl + "] ADD PRIMARY KEY (baaaa, a)");
             Database db = ucanaccess.getDbIO();
@@ -156,7 +156,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     }
 
     void createFK() throws SQLException, IOException {
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             // test case: constraint name specified
             st.execute("ALTER TABLE [AAA n] ADD CONSTRAINT [pippo1] FOREIGN KEY (c) REFERENCES [22 alterTableTest123] (baaaa) ON DELETE CASCADE");
             Database db = ucanaccess.getDbIO();
@@ -205,7 +205,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         // repro code from https://stackoverflow.com/q/49160150/2144390
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String tableToBeReferenced = "PersonsTable";
             String tableWithTheReferences = "RelationShipsTable";
 
@@ -233,7 +233,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testMiscellaneous(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE tx ADD CONSTRAINT pk PRIMARY KEY ([i d]) ");
             st.execute("ALTER TABLE tx ADD COLUMN [my best friend] LONG ");
             st.execute("ALTER TABLE tx ADD COLUMN [my worst friend] SINGLE ");
@@ -275,7 +275,7 @@ class AlterTableTest extends UcanaccessBaseTest {
     void testSqlErrors(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE tx2 (id COUNTER, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), [Is not Pippo] TEXT DEFAULT \"what's this?\")");
             st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
             

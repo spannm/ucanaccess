@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 class GeneratedKeys1Test extends UcanaccessBaseTest {
     private String tableName = "T_Key";
@@ -37,7 +36,7 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
             ResultSet rs2 = ps2.executeQuery();
             rs2.next();
             assertEquals(1, rs2.getInt(1));
-            Statement st = ucanaccess.createStatement();
+            UcanaccessStatement st = ucanaccess.createStatement();
             st.execute("INSERT INTO " + tableName + " (B) VALUES ('W')");
 
             checkQuery("Select @@identity ", singleRec(2));

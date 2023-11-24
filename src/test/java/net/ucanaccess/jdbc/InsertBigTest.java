@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,7 +25,7 @@ class InsertBigTest extends UcanaccessBaseTest {
     void testBig(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String s = IntStream.range(0, 100000).mapToObj(i -> String.format("%05d", i)).collect(Collectors.joining("\r\n"));
             int id = 6666554;
             assertThat(s).hasSizeGreaterThanOrEqualTo(65536);

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
 class WorkloadTest extends UcanaccessBaseTest {
@@ -26,7 +25,7 @@ class WorkloadTest extends UcanaccessBaseTest {
 
         long startTime = System.currentTimeMillis();
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             for (int i = 0; i <= nbRecords; i++) {
                 st.execute("INSERT INTO AAAB(id,a,c,d) VALUES (" + i + ",'33','booo','ddddddddddddddddddddd' )");
             }
@@ -38,7 +37,7 @@ class WorkloadTest extends UcanaccessBaseTest {
         getLogger().info("Autoincrement insert performance test, {} records inserted in {} seconds.", nbRecords,
                 TimeUnit.MILLISECONDS.toSeconds(midTime - startTime));
 
-        try (Statement st = ucanaccess.createStatement()) {
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("update aaAB set c='yessssss'&a");
             ucanaccess.commit();
             getLogger().info("Update performance test, all {} table records updated in {} seconds.", nbRecords,
