@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +39,7 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     }
 
     void crudPS() throws SQLException {
-        try (Connection conn = buildConnection().withDbPath(dbPath).build()) {
+        try (UcanaccessConnection conn = buildConnection().withDbPath(dbPath).build()) {
             conn.setAutoCommit(false);
             PreparedStatement ps = conn.prepareStatement("INSERT INTO " + tableName + " (id,descr) VALUES(?, ?)");
             ps.setInt(1, ++intVal);
