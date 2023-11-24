@@ -23,8 +23,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testCreateBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        UcanaccessConnection conn = ucanaccess;
-        UcanaccessStatement st = conn.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] text )");
         st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) values ('I''m a crazy man')");
         st.execute("UPDATE [健康] set [Sometime I wonder who I am ]='d'");
@@ -66,8 +65,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        UcanaccessConnection conn = ucanaccess;
-        UcanaccessStatement st = conn.createStatement();
+        UcanaccessStatement st = ucanaccess.createStatement();
         assertEquals("Ciao", st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1));
     }
 
