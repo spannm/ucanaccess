@@ -15,7 +15,7 @@ class CloseOnCompletionTest extends UcanaccessBaseTest {
     void testCloseOnCompletion(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (PreparedStatement st = ucanaccess.prepareStatement("CREATE TABLE pluto1 (id varchar(23))")) {
+        try (PreparedStatement st = ucanaccess.prepareStatement("CREATE TABLE t_cloc (id varchar(23))")) {
             st.closeOnCompletion();
             st.execute();
         }

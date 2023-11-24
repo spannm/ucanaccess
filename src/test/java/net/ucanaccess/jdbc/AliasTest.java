@@ -13,7 +13,7 @@ class AliasTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE Talias (id LONG, descr MEMO, Actuación TEXT)");
+        executeStatements("CREATE TABLE t_alias (id LONG, descr MEMO, Actuación TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -22,8 +22,8 @@ class AliasTest extends UcanaccessBaseTest {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
-            st.execute("INSERT INTO Talias (id, descr) VALUES( " + id + ",'t')");
-            ResultSet rs = st.executeQuery("SELECT descr AS [cipol%'&la] FROM Talias WHERE descr<>'ciao'&'bye'&'pippo'");
+            st.execute("INSERT INTO t_alias (id, descr) VALUES( " + id + ",'t')");
+            ResultSet rs = st.executeQuery("SELECT descr AS [cipol%'&la] FROM t_alias WHERE descr<>'ciao'&'bye'&'pippo'");
             rs.next();
             getLogger().debug("metaData columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
             getLogger().debug("getObject: {}", rs.getObject("cipol%'&la"));
@@ -35,8 +35,8 @@ class AliasTest extends UcanaccessBaseTest {
     void testAccent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO Talias (id, Actuación) VALUES(1, 'X')");
-            ResultSet rs = st.executeQuery("SELECT [Actuación] AS Actuació8_0_0_ FROM Talias ");
+            st.execute("INSERT INTO t_alias (id, Actuación) VALUES(1, 'X')");
+            ResultSet rs = st.executeQuery("SELECT [Actuación] AS Actuació8_0_0_ FROM t_alias ");
             rs.next();
             getLogger().debug("metaData columnLabel(1): {}", rs.getMetaData().getColumnLabel(1));
             getLogger().debug("getObject: {}", rs.getObject("Actuació8_0_0_"));
@@ -48,8 +48,8 @@ class AliasTest extends UcanaccessBaseTest {
     void testAsin(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE xxxx (asin TEXT, ff TEXT)");
-            dumpQueryResult("SELECT asin, ff FROM xxxx");
+            st.execute("CREATE TABLE t_asin (asin TEXT, ff TEXT)");
+            dumpQueryResult("SELECT asin, ff FROM t_asin");
         }
     }
 

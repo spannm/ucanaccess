@@ -20,7 +20,7 @@ class CsvDumpTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE csvtable (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, "
+        executeStatements("CREATE TABLE t_csv (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, "
             + "byte_field BYTE, boolean_field YESNO, double_field DOUBLE, currency_field CURRENCY, date_field DATETIME)");
     }
 
@@ -30,14 +30,14 @@ class CsvDumpTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO csvtable (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) "
+            st.execute("INSERT INTO t_csv (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) "
                 + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
         }
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);
             UcanaccessStatement st = ucanaccess.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
+            ResultSet rs = st.executeQuery("SELECT * FROM t_csv")) {
 
             new Exporter.Builder().withDelimiter(";").build().dumpCsv(rs, ps);
 
@@ -58,7 +58,7 @@ class CsvDumpTest extends UcanaccessBaseTest {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);
             UcanaccessStatement st = ucanaccess.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM csvtable")) {
+            ResultSet rs = st.executeQuery("SELECT * FROM t_csv")) {
 
             Exporter exporter = new Exporter.Builder().withDelimiter(";").build();
             exporter.dumpSchema(rs, ps);

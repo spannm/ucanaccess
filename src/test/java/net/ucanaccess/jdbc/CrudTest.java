@@ -15,7 +15,7 @@ class CrudTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE t1 (id LONG, descr TEXT)");
+        executeStatements("CREATE TABLE t_crud (id LONG, descr TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -27,13 +27,13 @@ class CrudTest extends UcanaccessBaseTest {
             int id1 = 1234;
             int id2 = 5678;
 
-            st.execute("DELETE FROM t1");
-            st.execute("INSERT INTO t1 (id, descr) VALUES(" + id1 + ", 'nel mezzo del cammin di nostra vita')");
-            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1"), "Insert failed");
-            st.executeUpdate("UPDATE t1 SET id=" + id2 + " WHERE id=" + id1);
-            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
-            st.executeUpdate("DELETE FROM t1 WHERE id=" + id2);
-            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Delete failed");
+            st.execute("DELETE FROM t_crud");
+            st.execute("INSERT INTO t_crud (id, descr) VALUES(" + id1 + ", 'nel mezzo del cammin di nostra vita')");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t_crud"), "Insert failed");
+            st.executeUpdate("UPDATE t_crud SET id=" + id2 + " WHERE id=" + id1);
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t_crud where id=" + id2), "Update failed");
+            st.executeUpdate("DELETE FROM t_crud WHERE id=" + id2);
+            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t_crud where id=" + id2), "Delete failed");
         }
     }
 
@@ -46,25 +46,25 @@ class CrudTest extends UcanaccessBaseTest {
         int id2 = 5678;
 
         try (UcanaccessStatement st = ucanaccess.createStatement();
-             PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t1 (id, descr) VALUES(?, ?)")) {
-            st.execute("DELETE FROM t1");
+             PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_crud (id, descr) VALUES(?, ?)")) {
+            st.execute("DELETE FROM t_crud");
             ps.setInt(1, id1);
             ps.setString(2, "Prep1");
             ps.execute();
-            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1"), "Insert failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t_crud"), "Insert failed");
         }
 
-        try (PreparedStatement ps2 = ucanaccess.prepareStatement("UPDATE t1 SET id=? WHERE id=?")) {
+        try (PreparedStatement ps2 = ucanaccess.prepareStatement("UPDATE t_crud SET id=? WHERE id=?")) {
             ps2.setInt(1, id2);
             ps2.setInt(2, id1);
             ps2.executeUpdate();
-            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t_crud where id=" + id2), "Update failed");
         }
 
-        try (PreparedStatement ps3 = ucanaccess.prepareStatement("DELETE * FROM t1 WHERE id=?")) {
+        try (PreparedStatement ps3 = ucanaccess.prepareStatement("DELETE * FROM t_crud WHERE id=?")) {
             ps3.setInt(1, id2);
             ps3.executeUpdate();
-            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1 WHERE id=" + id2), "Delete failed");
+            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t_crud WHERE id=" + id2), "Delete failed");
         }
     }
 
@@ -75,7 +75,7 @@ class CrudTest extends UcanaccessBaseTest {
 
         int id1 = 1234;
         int id2 = 5678;
-        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t1 (id, descr) VALUES(?, ?)")) {
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_crud (id, descr) VALUES(?, ?)")) {
             ps.setInt(1, id1);
             ps.setString(2, "Prep1");
             ps.addBatch();
@@ -85,14 +85,14 @@ class CrudTest extends UcanaccessBaseTest {
             ps.executeBatch();
             ps.clearBatch();
         }
-        checkQuery("SELECT * FROM t1", recs(rec(id1, "Prep1"), rec(id2, "Prep2")));
-        assertEquals(2, getVerifyCount("SELECT COUNT(*) FROM t1 where id in (" + id1 + ", " + id2 + ")"), "Insert failed");
+        checkQuery("SELECT * FROM t_crud", recs(rec(id1, "Prep1"), rec(id2, "Prep2")));
+        assertEquals(2, getVerifyCount("SELECT COUNT(*) FROM t_crud where id in (" + id1 + ", " + id2 + ")"), "Insert failed");
 
-        try (PreparedStatement ps = ucanaccess.prepareStatement("DELETE FROM t1")) {
+        try (PreparedStatement ps = ucanaccess.prepareStatement("DELETE FROM t_crud")) {
             ps.addBatch();
             ps.executeBatch();
         }
-        assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1"), "Delete failed");
+        assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t_crud"), "Delete failed");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -101,16 +101,16 @@ class CrudTest extends UcanaccessBaseTest {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
-            st.execute("DELETE FROM t1");
-            st.execute("INSERT INTO t1 (id,descr) VALUES( " + id + ", 'tre canarini volano su e cadono')");
-            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t1", ResultSet.TYPE_FORWARD_ONLY,
+            st.execute("DELETE FROM t_crud");
+            st.execute("INSERT INTO t_crud (id,descr) VALUES( " + id + ", 'tre canarini volano su e cadono')");
+            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t_crud", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             ResultSet rs = ps.executeQuery();
             rs.next();
             rs.updateString(2, "show must go off");
             rs.updateRow();
-            checkQuery("SELECT * FROM t1", singleRec(6666554, "show must go off"));
-            st.execute("DELETE FROM t1");
+            checkQuery("SELECT * FROM t_crud", singleRec(6666554, "show must go off"));
+            st.execute("DELETE FROM t_crud");
         }
     }
 
@@ -122,17 +122,17 @@ class CrudTest extends UcanaccessBaseTest {
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
-            st.execute("DELETE FROM t1");
-            st.execute("INSERT INTO t1 (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
+            st.execute("DELETE FROM t_crud");
+            st.execute("INSERT INTO t_crud (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
         }
-        PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t1", ResultSet.TYPE_FORWARD_ONLY,
+        PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t_crud", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = ps.executeQuery();
         rs.next();
 
         rs.deleteRow();
         ps.getConnection().commit();
-        checkQuery("SELECT COUNT(*) FROM t1", singleRec(0));
+        checkQuery("SELECT COUNT(*) FROM t_crud", singleRec(0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -142,9 +142,9 @@ class CrudTest extends UcanaccessBaseTest {
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
-            st.execute("DELETE FROM t1");
-            st.execute("INSERT INTO t1 (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
-            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t1", ResultSet.TYPE_FORWARD_ONLY,
+            st.execute("DELETE FROM t_crud");
+            st.execute("INSERT INTO t_crud (id, descr) VALUES(" + id + ", 'tre canarini volano su e cadono')");
+            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t_crud", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             ResultSet rs = ps.executeQuery();
             rs.moveToInsertRow();
@@ -153,9 +153,9 @@ class CrudTest extends UcanaccessBaseTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            checkQuery("SELECT * FROM t1 ORDER BY id",
+            checkQuery("SELECT * FROM t_crud ORDER BY id",
                 recs(rec(4, "Growing old in rural pleaces"), rec(6666554, "tre canarini volano su e cadono")));
-            st.execute("DELETE FROM t1");
+            st.execute("DELETE FROM t_crud");
         }
     }
 
@@ -165,10 +165,10 @@ class CrudTest extends UcanaccessBaseTest {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE T2 (id AUTOINCREMENT, descr TEXT)");
-            st.execute("DELETE FROM t2");
+            st.execute("CREATE TABLE t_crud2 (id AUTOINCREMENT, descr TEXT)");
+            st.execute("DELETE FROM t_crud2");
 
-            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T2", ResultSet.TYPE_FORWARD_ONLY,
+            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t_crud2", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             ResultSet rs = ps.executeQuery();
             rs.moveToInsertRow();
@@ -180,12 +180,12 @@ class CrudTest extends UcanaccessBaseTest {
             rs.next();
             ps.getConnection().commit();
 
-            checkQuery("SELECT * FROM T2 ORDER BY id", singleRec(1, "Growing old in rural places"));
+            checkQuery("SELECT * FROM t_crud2 ORDER BY id", singleRec(1, "Growing old in rural places"));
             UcanaccessStatement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs1 = stat.executeQuery("SELECT * FROM T2 ORDER BY id");
+            ResultSet rs1 = stat.executeQuery("SELECT * FROM t_crud2 ORDER BY id");
             rs1.last();
 
-            st.execute("DELETE FROM t1");
+            st.execute("DELETE FROM t_crud");
         }
     }
 
@@ -195,9 +195,9 @@ class CrudTest extends UcanaccessBaseTest {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE T21 (id autoincrement, descr TEXT)");
+            st.execute("CREATE TABLE t_crud3 (id autoincrement, descr TEXT)");
 
-            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM T21", ResultSet.TYPE_FORWARD_ONLY,
+            PreparedStatement ps = ucanaccess.prepareStatement("SELECT * FROM t_crud3", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
             ResultSet rs = ps.executeQuery();
             rs.moveToInsertRow();
@@ -206,8 +206,8 @@ class CrudTest extends UcanaccessBaseTest {
 
             rs.insertRow();
             ps.getConnection().commit();
-            checkQuery("SELECT * FROM T21 ORDER BY id", singleRec(1, "Growing old without emotions"));
-            st.execute("DELETE FROM t21");
+            checkQuery("SELECT * FROM t_crud3 ORDER BY id", singleRec(1, "Growing old without emotions"));
+            st.execute("DELETE FROM t_crud3");
         }
     }
 

@@ -34,11 +34,11 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = conn.createStatement()) {
             executeStatements(st,
-                "CREATE TABLE AAA (baaaa TEXT(3) PRIMARY KEY, A LONG DEFAULT 3, C TEXT(4))",
-                "INSERT INTO AAA(baaaa, c) VALUES ('33A','G' )",
-                "INSERT INTO AAA VALUES ('33B',111,'G' )");
+                "CREATE TABLE t_createdb (baaaa TEXT(3) PRIMARY KEY, A LONG DEFAULT 3, C TEXT(4))",
+                "INSERT INTO t_createdb(baaaa, c) VALUES ('33A','G' )",
+                "INSERT INTO t_createdb VALUES ('33B',111,'G' )");
         }
-        dumpQueryResult("SELECT * FROM AAA");
+        dumpQueryResult("SELECT * FROM t_createdb");
     }
 
 }
