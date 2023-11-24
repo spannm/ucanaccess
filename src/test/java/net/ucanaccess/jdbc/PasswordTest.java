@@ -7,8 +7,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.sql.Connection;
-
 class PasswordTest extends UcanaccessBaseTest {
 
     @Override
@@ -24,11 +22,11 @@ class PasswordTest extends UcanaccessBaseTest {
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageContaining("Password authentication failed");
 
-        try (Connection ucanaccessConnection = new UcanaccessConnectionBuilder()
+        try (UcanaccessConnection conn = new UcanaccessConnectionBuilder()
             .withDbPath(getAccessTempPath())
             .withPassword("ucanaccess")
             .build()) {
-            assertNotNull(ucanaccessConnection);
+            assertNotNull(conn);
         }
     }
 }

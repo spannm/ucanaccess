@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
@@ -24,7 +23,7 @@ class FolderTest extends UcanaccessBaseTest {
 
         File folder = new File(folderPath);
         for (File fl : folder.listFiles()) {
-            Connection conn = buildConnection()
+            UcanaccessConnection conn = buildConnection()
                 .withDbPath(fl.getAbsolutePath())
                 .build();
             SQLWarning sqlw = conn.getWarnings();
