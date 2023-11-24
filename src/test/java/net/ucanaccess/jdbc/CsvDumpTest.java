@@ -11,7 +11,6 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * Integration test for {@link net.ucanaccess.console.Exporter}.
