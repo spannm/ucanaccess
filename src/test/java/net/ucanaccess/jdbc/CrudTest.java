@@ -29,11 +29,11 @@ class CrudTest extends UcanaccessBaseTest {
 
             st.execute("DELETE FROM t1");
             st.execute("INSERT INTO t1 (id, descr) VALUES(" + id1 + ", 'nel mezzo del cammin di nostra vita')");
-            assertEquals(1, getCount("SELECT COUNT(*) FROM t1"), "Insert failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1"), "Insert failed");
             st.executeUpdate("UPDATE t1 SET id=" + id2 + " WHERE id=" + id1);
-            assertEquals(1, getCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
             st.executeUpdate("DELETE FROM t1 WHERE id=" + id2);
-            assertEquals(0, getCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Delete failed");
+            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Delete failed");
         }
     }
 
@@ -51,20 +51,20 @@ class CrudTest extends UcanaccessBaseTest {
             ps.setInt(1, id1);
             ps.setString(2, "Prep1");
             ps.execute();
-            assertEquals(1, getCount("SELECT COUNT(*) FROM t1"), "Insert failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1"), "Insert failed");
         }
 
         try (PreparedStatement ps2 = ucanaccess.prepareStatement("UPDATE t1 SET id=? WHERE id=?")) {
             ps2.setInt(1, id2);
             ps2.setInt(2, id1);
             ps2.executeUpdate();
-            assertEquals(1, getCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
+            assertEquals(1, getVerifyCount("SELECT COUNT(*) FROM t1 where id=" + id2), "Update failed");
         }
 
         try (PreparedStatement ps3 = ucanaccess.prepareStatement("DELETE * FROM t1 WHERE id=?")) {
             ps3.setInt(1, id2);
             ps3.executeUpdate();
-            assertEquals(0, getCount("SELECT COUNT(*) FROM t1 WHERE id=" + id2), "Delete failed");
+            assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1 WHERE id=" + id2), "Delete failed");
         }
     }
 
@@ -86,13 +86,13 @@ class CrudTest extends UcanaccessBaseTest {
             ps.clearBatch();
         }
         checkQuery("SELECT * FROM t1", recs(rec(id1, "Prep1"), rec(id2, "Prep2")));
-        assertEquals(2, getCount("SELECT COUNT(*) FROM t1 where id in (" + id1 + ", " + id2 + ")"), "Insert failed");
+        assertEquals(2, getVerifyCount("SELECT COUNT(*) FROM t1 where id in (" + id1 + ", " + id2 + ")"), "Insert failed");
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("DELETE FROM t1")) {
             ps.addBatch();
             ps.executeBatch();
         }
-        assertEquals(0, getCount("SELECT COUNT(*) FROM t1"), "Delete failed");
+        assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t1"), "Delete failed");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

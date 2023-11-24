@@ -110,7 +110,7 @@ class ComplexTest extends UcanaccessBaseTest {
             ps.setObject(1, svs);
             ps.execute();
             checkQuery("SELECT * FROM t_complex ORDER BY id");
-            assertEquals(7, getCount("SELECT COUNT(*) FROM t_complex"));
+            assertEquals(7, getVerifyCount("SELECT COUNT(*) FROM t_complex"));
         }
     }
 
@@ -125,7 +125,7 @@ class ComplexTest extends UcanaccessBaseTest {
 
         ucanaccess.setAutoCommit(false);
 
-        int countBefore = getCount("SELECT COUNT(*) FROM t_complex");
+        int countBefore = getVerifyCount("SELECT COUNT(*) FROM t_complex");
 
         try (PreparedStatement ps = ucanaccess.prepareStatement(
             "INSERT INTO t_complex(id, [memo-data], [append-memo-data], [multi-value-data], [attach-data]) VALUES (?,?,?,?,?)")) {
@@ -155,7 +155,7 @@ class ComplexTest extends UcanaccessBaseTest {
         checkQuery("SELECT * FROM t_complex ORDER BY id");
         dumpQueryResult("SELECT * FROM t_complex");
         checkQuery("SELECT * FROM t_complex WHERE id='row12' ORDER BY id");
-        assertEquals(countBefore, getCount("SELECT COUNT(*) FROM t_complex"));
+        assertEquals(countBefore, getVerifyCount("SELECT COUNT(*) FROM t_complex"));
     }
 
 }

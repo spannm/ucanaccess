@@ -335,29 +335,31 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    public int getCount(CharSequence _sql) throws SQLException {
-        return getCount(_sql, true);
+    public int getVerifyCount(CharSequence _sql) throws SQLException {
+        return getVerifyCount(_sql, true);
     }
 
-    public int getCount(CharSequence _sql, boolean _equals) throws SQLException {
+    public int getVerifyCount(CharSequence _sql, boolean _equals) throws SQLException {
         String sql = _sql == null ? null : _sql.toString();
         initVerifyConnection();
-        UcanaccessStatement st = verifyConnection.createStatement();
-        ResultSet expectedResultset = st.executeQuery(sql);
-        expectedResultset.next();
-        int expectedCount = expectedResultset.getInt(1);
 
-        st = ucanaccess.createStatement();
-        ResultSet actualResultset = st.executeQuery(sql);
-        actualResultset.next();
-        int actualCount = actualResultset.getInt(1);
+        try (UcanaccessStatement stVerify = verifyConnection.createStatement();
+             UcanaccessStatement stActual = ucanaccess.createStatement()) {
+            ResultSet expectedRs = stVerify.executeQuery(sql);
+            expectedRs.next();
+            int expectedCount = expectedRs.getInt(1);
 
-        if (_equals) {
-            assertEquals(expectedCount, actualCount);
-        } else {
-            assertNotEquals(expectedCount, actualCount);
+            ResultSet actualRs = stActual.executeQuery(sql);
+            actualRs.next();
+            int actualCount = actualRs.getInt(1);
+
+            if (_equals) {
+                assertEquals(expectedCount, actualCount);
+            } else {
+                assertNotEquals(expectedCount, actualCount);
+            }
+            return expectedCount;
         }
-        return expectedCount;
     }
 
     public String getName() {
