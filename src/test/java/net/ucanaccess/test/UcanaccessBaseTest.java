@@ -68,20 +68,21 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return fileAccDb;
     }
 
-    public void checkQuery(String _query, List<List<Object>> _expected) throws SQLException {
+    public void checkQuery(CharSequence _query, List<List<Object>> _expected) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement();
-            ResultSet rs = st.executeQuery(_query)) {
+            ResultSet rs = st.executeQuery(_query == null ? null : _query.toString())) {
             diff(rs, _expected, _query);
         }
     }
 
-    public void checkQuery(String _query) throws SQLException, IOException {
+    public void checkQuery(CharSequence _query) throws SQLException, IOException {
         initVerifyConnection();
         try (UcanaccessStatement st1 = ucanaccess.createStatement();
-            UcanaccessStatement st2 = verifyConnection.createStatement()) {
+             UcanaccessStatement st2 = verifyConnection.createStatement()) {
 
-            ResultSet firstRs = st1.executeQuery(_query);
-            ResultSet verifyRs = st2.executeQuery(_query);
+            String query = _query == null ? null : _query.toString();
+            ResultSet firstRs = st1.executeQuery(query);
+            ResultSet verifyRs = st2.executeQuery(query);
 
             diffResultSets(firstRs, verifyRs, _query);
         } finally {
@@ -92,7 +93,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, String _expression) throws SQLException {
+    private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, CharSequence _expression) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
         if (_expectedResults.size() > 0) {
             assertEquals(_expectedResults.get(0).size(), colCountActual);
@@ -136,7 +137,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         assertEquals(_expectedResults.size(), rowIdx, "Matrix with different length was expected");
     }
 
-    public void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, String _query) throws SQLException {
+    private void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, CharSequence _query) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
         int colCountExpected = _verifyResultSet.getMetaData().getColumnCount();
         assertEquals(colCountExpected, colCountActual);
@@ -202,9 +203,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    protected void dumpQueryResult(String _query) throws SQLException {
+    protected void dumpQueryResult(CharSequence _query) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            ResultSet resultSet = st.executeQuery(_query);
+            ResultSet resultSet = st.executeQuery(_query == null ? null : _query.toString());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (PrintStream ps = new PrintStream(baos, true)) {
                 new Main(ucanaccess, null).consoleDump(resultSet, ps);
@@ -334,19 +335,20 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    public int getCount(String _sql) throws SQLException {
+    public int getCount(CharSequence _sql) throws SQLException {
         return getCount(_sql, true);
     }
 
-    public int getCount(String _sql, boolean _equals) throws SQLException {
+    public int getCount(CharSequence _sql, boolean _equals) throws SQLException {
+        String sql = _sql == null ? null : _sql.toString();
         initVerifyConnection();
         UcanaccessStatement st = verifyConnection.createStatement();
-        ResultSet expectedResultset = st.executeQuery(_sql);
+        ResultSet expectedResultset = st.executeQuery(sql);
         expectedResultset.next();
         int expectedCount = expectedResultset.getInt(1);
 
         st = ucanaccess.createStatement();
-        ResultSet actualResultset = st.executeQuery(_sql);
+        ResultSet actualResultset = st.executeQuery(sql);
         actualResultset.next();
         int actualCount = actualResultset.getInt(1);
 
@@ -398,16 +400,16 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return b1;
     }
 
-    protected final void executeStatements(String... _sqls) throws SQLException {
+    protected final void executeStatements(CharSequence... _sqls) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st, _sqls);
         }
     }
 
-    protected final void executeStatements(Statement _statement, String... _sqls) throws SQLException {
-        for (String sql : _sqls) {
+    protected final void executeStatements(Statement _statement, CharSequence... _sqls) throws SQLException {
+        for (CharSequence sql : _sqls) {
             getLogger().info("Executing sql: {}", sql);
-            _statement.execute(sql);
+            _statement.execute(sql == null ? null : sql.toString());
         }
     }
 

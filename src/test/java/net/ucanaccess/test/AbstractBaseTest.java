@@ -80,7 +80,7 @@ public abstract class AbstractBaseTest extends Assertions {
         logTestBeginEnd("END", _testInfo);
     }
 
-    protected void logTestBeginEnd(String _prefix, TestInfo _testInfo) {
+    protected void logTestBeginEnd(CharSequence _prefix, TestInfo _testInfo) {
         if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
             getLogger().info(">>>>>>>>>> {} Test: {} <<<<<<<<<<", _prefix, _testInfo.getDisplayName());
         } else {

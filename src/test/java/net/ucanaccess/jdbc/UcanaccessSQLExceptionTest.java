@@ -13,7 +13,7 @@ class UcanaccessSQLExceptionTest  extends AbstractBaseTest {
         "''; UCAExc:::5.1.0 (n/a)",
         "; UCAExc:::5.1.0 (n/a)"
     })
-    void testAddVersionInfo(String _message, String _expectedResult) {
+    void testAddVersionInfo(String _message, CharSequence _expectedResult) {
         assertEquals(_expectedResult, new UcanaccessSQLException().addVersionInfo(_message));
     }
 
