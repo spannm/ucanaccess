@@ -5,7 +5,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +20,7 @@ class GeneratedKeys2Test extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)")) {

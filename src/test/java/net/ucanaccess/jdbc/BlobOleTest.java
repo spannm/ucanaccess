@@ -97,12 +97,6 @@ class BlobOleTest extends UcanaccessBaseTest {
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
-
-    /**
-     * @param _accessVersion
-     * @throws SQLException
-     * @throws IOException
-     */
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {

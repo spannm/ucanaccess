@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Locale;
@@ -24,7 +23,7 @@ class FloatTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
-    void testCreate(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testCreate(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         checkQuery("SELECT [row] FROM t ORDER BY pk");

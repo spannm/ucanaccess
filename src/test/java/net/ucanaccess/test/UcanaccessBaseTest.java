@@ -75,7 +75,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    public void checkQuery(CharSequence _query) throws SQLException, IOException {
+    public void checkQuery(CharSequence _query) throws SQLException {
         initVerifyConnection();
         try (UcanaccessStatement st1 = ucanaccess.createStatement();
              UcanaccessStatement st2 = verifyConnection.createStatement()) {

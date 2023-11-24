@@ -5,7 +5,6 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 class PivotTest extends UcanaccessBaseTest {
@@ -17,7 +16,7 @@ class PivotTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testPivot(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testPivot(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             dumpQueryResult("SELECT * FROM Table1_trim");

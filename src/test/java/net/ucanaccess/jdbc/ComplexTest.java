@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -65,7 +64,7 @@ class ComplexTest extends UcanaccessBaseTest {
         }
     }
 
-    private void complex1() throws SQLException, IOException {
+    private void complex1() throws SQLException {
         dumpQueryResult("SELECT * FROM t_complex ORDER BY id");
         checkQuery("SELECT * FROM t_complex ORDER BY id");
 
@@ -116,7 +115,7 @@ class ComplexTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
-    void testComplexRollback(AccessVersion _accessVersion) throws SQLException, IOException {
+    void testComplexRollback(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         ucanaccess = Mockito.spy(ucanaccess);
