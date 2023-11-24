@@ -45,7 +45,7 @@ class RegexTest extends UcanaccessBaseTest {
         }
     }
 
-    private String getStatement(String _s, String _dlm) {
+    private String getStatement(CharSequence _s, CharSequence _dlm) {
         return "INSERT INTO reg (descr) VALUES( " + _dlm + _s + _dlm + ")";
     }
 
