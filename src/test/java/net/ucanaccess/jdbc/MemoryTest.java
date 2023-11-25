@@ -14,11 +14,11 @@ class MemoryTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        getLogger().debug("Thread.activeCount (setup): " + Thread.activeCount());
+        getLogger().debug("Thread.activeCount (setup): {}", Thread.activeCount());
 
-        executeStatements("CREATE TABLE memm(id LONG PRIMARY KEY, A LONG, C TEXT, D TEXT)");
+        executeStatements("CREATE TABLE t_mem(id LONG PRIMARY KEY, a LONG, c TEXT, d TEXT)");
     }
-    
+
     @Override
     protected UcanaccessConnectionBuilder buildConnection() {
         return super.buildConnection()
@@ -32,29 +32,29 @@ class MemoryTest extends UcanaccessBaseTest {
         ucanaccess.setAutoCommit(false);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            getLogger().debug("Total memory 0={}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("Free memory 0={}", Runtime.getRuntime().freeMemory());
+            getLogger().debug("Total memory 0= {}", Runtime.getRuntime().totalMemory());
+            getLogger().debug("Free memory 0= {}", Runtime.getRuntime().freeMemory());
             int nbRecords = 100000;
             for (int i = 0; i <= nbRecords; i++) {
-                st.execute("INSERT INTO memm(id,a,c,d) VALUES (" + i
-                        + ",'33','booddddddddddddddddddddddddddddddo','dddddddddddddddddsssssssssssssssdddd' )");
+                st.execute("INSERT INTO t_mem(id, a, c, d) VALUES ("
+                    + i + ",'33','booddddddddddddddddddddddddddddddo','dddddddddddddddddsssssssssssssssdddd' )");
             }
             ucanaccess.commit();
 
             long occ = Runtime.getRuntime().freeMemory();
             int ac = Thread.activeCount();
             getLogger().debug("Thread.activeCount {}", Thread.activeCount());
-            getLogger().debug("total memory 1={}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("free memory 1={}", occ);
+            getLogger().debug("total memory 1 = {}", Runtime.getRuntime().totalMemory());
+            getLogger().debug("free memory 1 = {}", occ);
 
             Thread.sleep(2000L);
 
             getLogger().debug("Thread.activeCount() diff {}", Thread.activeCount() - ac);
-            getLogger().debug("total memory 2={}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("free memory 2={}", Runtime.getRuntime().freeMemory());
-            getLogger().debug("free memory diff = {}", Runtime.getRuntime().freeMemory() - occ);
+            getLogger().debug("Total memory 2 = {}", Runtime.getRuntime().totalMemory());
+            getLogger().debug("Tree memory 2 = {}", Runtime.getRuntime().freeMemory());
+            getLogger().debug("Tree memory diff = {}", Runtime.getRuntime().freeMemory() - occ);
 
-            dumpQueryResult("SELECT * FROM memm limit 10");
+            dumpQueryResult("SELECT * FROM t_mem LIMIT 10");
             getLogger().info("Thread.activeCount() diff {}", Thread.activeCount() - ac);
         }
     }

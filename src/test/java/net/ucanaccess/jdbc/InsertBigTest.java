@@ -17,7 +17,7 @@ class InsertBigTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE Tbig (id LONG, descr MEMO)");
+        executeStatements("CREATE TABLE t_big (id LONG, descr MEMO)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -29,8 +29,8 @@ class InsertBigTest extends UcanaccessBaseTest {
             String s = IntStream.range(0, 100000).mapToObj(i -> String.format("%05d", i)).collect(Collectors.joining("\r\n"));
             int id = 6666554;
             assertThat(s).hasSizeGreaterThanOrEqualTo(65536);
-            st.execute("INSERT INTO Tbig (id, descr) VALUES(" + id + ", '" + s + "')");
-            ResultSet rs = st.executeQuery("SELECT descr FROM Tbig WHERE id=" + id);
+            st.execute("INSERT INTO t_big (id, descr) VALUES(" + id + ", '" + s + "')");
+            ResultSet rs = st.executeQuery("SELECT descr FROM t_big WHERE id=" + id);
             rs.next();
             String retrieved = rs.getString(1);
             assertEquals(s, retrieved);

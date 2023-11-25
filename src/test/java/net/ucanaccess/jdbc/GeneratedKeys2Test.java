@@ -10,12 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 class GeneratedKeys2Test extends UcanaccessBaseTest {
-    private String tableName = "T_Key1";
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE " + tableName + " ( Z GUID PRIMARY KEY, B char(4) )");
+        executeStatements("CREATE TABLE t_key (c_guid GUID PRIMARY KEY, c_char char(4))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -23,7 +22,7 @@ class GeneratedKeys2Test extends UcanaccessBaseTest {
     void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO " + tableName + " (B) VALUES (?)")) {
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_key (c_char) VALUES (?)")) {
             ps.setString(1, "");
             ps.execute();
             ResultSet rs1 = ps.getGeneratedKeys();
@@ -34,7 +33,7 @@ class GeneratedKeys2Test extends UcanaccessBaseTest {
                 assertEquals(rs1.getString(1), rs2.getString(1));
             }
         }
-        checkQuery("SELECT * FROM " + tableName);
+        checkQuery("SELECT * FROM t_key");
 
     }
 }
