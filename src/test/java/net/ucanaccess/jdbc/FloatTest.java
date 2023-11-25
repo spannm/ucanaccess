@@ -26,24 +26,24 @@ class FloatTest extends UcanaccessBaseTest {
     void testCreate(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        checkQuery("SELECT [row] FROM t ORDER BY pk");
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t (row) values(?)");
+        checkQuery("SELECT [row] FROM t_float ORDER BY pk");
+        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_float (row) values(?)");
         ps.setFloat(1, 1.4f);
         ps.execute();
-        checkQuery("SELECT [row] FROM t ORDER BY pk");
-        ps = ucanaccess.prepareStatement("update t set [row]=?");
+        checkQuery("SELECT [row] FROM t_float ORDER BY pk");
+        ps = ucanaccess.prepareStatement("UPDATE t_float SET [row]=?");
         ps.setObject(1, 4.9f);
         ps.execute();
-        checkQuery("SELECT [row] FROM t ORDER BY pk");
+        checkQuery("SELECT [row] FROM t_float ORDER BY pk");
         ps.setDouble(1, 0.0000000000000000000000000000000000000000000000001d);
         ps.execute();
-        dumpQueryResult("SELECT * FROM t ORDER BY pk");
-        checkQuery("SELECT [row] FROM t ORDER BY pk");
+        dumpQueryResult("SELECT * FROM t_float ORDER BY pk");
+        checkQuery("SELECT [row] FROM t_float ORDER BY pk");
         ps.setFloat(1, 4.10011001155f);
         ps.execute();
-        checkQuery("SELECT [row] FROM t ORDER BY pk");
-        checkQuery("SELECT COUNT(*) FROM t WHERE [row]=4.10011", singleRec(2));
-        dumpQueryResult("SELECT * FROM t ORDER BY pk");
+        checkQuery("SELECT [row] FROM t_float ORDER BY pk");
+        checkQuery("SELECT COUNT(*) FROM t_float WHERE [row]=4.10011", singleRec(2));
+        dumpQueryResult("SELECT * FROM t_float ORDER BY pk");
     }
 
 }

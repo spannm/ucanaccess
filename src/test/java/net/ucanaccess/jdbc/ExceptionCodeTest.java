@@ -30,9 +30,9 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
 
-            st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)");
+            st.execute("INSERT INTO T(pk, b) VALUES('pippo', true)");
 
-            assertThatThrownBy(() -> st.execute("INSERT INTO T(pk,b) VALUES('pippo', true)"))
+            assertThatThrownBy(() -> st.execute("INSERT INTO T(pk, b) VALUES('pippo', true)"))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageContaining("integrity constraint violation: unique constraint or index violation")
                 .hasFieldOrPropertyWithValue("ErrorCode", -ErrorCode.X_23505)
