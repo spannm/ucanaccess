@@ -28,27 +28,27 @@ class NotNullDdlTest extends UcanaccessBaseTest {
         String mdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
 
         UcanaccessStatement st = ucanaccess.createStatement();
-        st.execute("CREATE TABLE table1 (id LONG PRIMARY KEY, txt_required TEXT(50) NOT NULL)");
+        st.execute("CREATE TABLE t_nnd (id LONG PRIMARY KEY, txt_required TEXT(50) NOT NULL)");
         ucanaccess.close();
 
         File vbsFile = createTempFileName(getClass().getSimpleName(), ".vbs");
         vbsFile.deleteOnExit();
         Files.write(vbsFile.toPath(), List.of(
             "Set conn = CreateObject(\"ADODB.Connection\")",
-            "conn.Open \"DRIVER={Microsoft Access Driver (*.mdb)};DBQ=" + mdbPath + "\"",
-            "conn.Execute \"INSERT INTO table1 (id) VALUES (1)\"",
+            "conn.Open \"DRIVER={Microsoft Access Driver (*.mdb)};DBQ=" + mdbPath + '\"',
+            "conn.Execute \"INSERT INTO t_nnd (id) VALUES (1)\"",
             "conn.Close"), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
         if (!System.getProperty("os.name").startsWith("Windows")) {
+            getLogger().warn("Not Windows, aborting test");
             return;
         }
 
         String cscriptPath = String.join("\\",
             System.getenv("SystemRoot"),
-            System.getProperty("sun.arch.data.model").equals("64") ? "SYSWOW64" : "SYSTEM32",
-            "CSCRIPT.EXE");
+            System.getProperty("sun.arch.data.model").equals("64") ? "SYSWOW64" : "SYSTEM32", "CSCRIPT.EXE");
 
-        String command = "\"" + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + "\"";
+        String command = '\"' + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + '\"';
         Process proc = Runtime.getRuntime().exec(command);
         proc.waitFor(15, TimeUnit.SECONDS);
 
@@ -62,7 +62,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             }
             assertThat(stderr)
                 .withFailMessage("The VBScript threw an unexpected error")
-                .contains("table1.txt_required");
+                .contains("t_nnd.txt_required");
         }
 
 

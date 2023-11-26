@@ -15,7 +15,7 @@ class MultipleGroupByTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         executeStatements(
-            "CREATE TABLE TXXX (F1 VARCHAR, F2 VARCHAR, F3 VARCHAR, F4 VARCHAR, VAL NUMBER)",
-            "CREATE TABLE TABLEXXX_KO (F1, F2, VAL) AS (SELECT F1, F2, SUM(VAL) FROM TXXX GROUP BY F1, F2) WITH DATA");
+            "CREATE TABLE t_xxx (f1 VARCHAR, f2 VARCHAR, f3 VARCHAR, f4 VARCHAR, val NUMBER)",
+            "CREATE TABLE t_xxx_ko (f1, f2, val) AS (SELECT f1, f2, SUM(val) FROM t_xxx GROUP BY f1, f2) WITH DATA");
     }
 }
