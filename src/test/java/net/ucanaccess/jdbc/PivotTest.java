@@ -18,15 +18,17 @@ class PivotTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testPivot(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
+
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            dumpQueryResult("SELECT * FROM Table1_trim");
+            dumpQueryResult("SELECT * FROM q_trim");
             executeStatements(st,
-                "INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE',1234.56,#2003-12-03# )",
-                "INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('O SOLE MIO',134.46,#2003-12-03# )",
-                "INSERT INTO TABLE1(COD,VALUE,DT) VALUES ('STA IN FRUNTE A MEEE',1344.46,#2003-12-05# )");
+                "INSERT INTO t_pivot(c_cod, c_val, c_dt) VALUES('O SOLE', 1234.56, #2003-12-03#)",
+                "INSERT INTO t_pivot(c_cod, c_val, c_dt) VALUES('O SOLE MIO', 134.46, #2003-12-03#)",
+                "INSERT INTO t_pivot(c_cod, c_val, c_dt) VALUES('STA IN FRUNTE A MEEE', 1344.46, #2003-12-05#)");
             initVerifyConnection();
-            dumpQueryResult("SELECT * FROM Table1_trim");
-            checkQuery("SELECT * FROM Table1_trim");
+
+            dumpQueryResult("SELECT * FROM q_trim");
+            checkQuery("SELECT * FROM q_trim");
         }
     }
 }
