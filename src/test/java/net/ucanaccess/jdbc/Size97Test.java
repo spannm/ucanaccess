@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import static net.ucanaccess.util.SqlConstants.COLUMN_SIZE;
+import static net.ucanaccess.type.SqlConstants.COLUMN_SIZE;
 
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;

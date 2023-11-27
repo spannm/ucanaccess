@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import static net.ucanaccess.util.SqlConstants.COLUMN_NAME;
+import static net.ucanaccess.type.SqlConstants.COLUMN_NAME;
 
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;

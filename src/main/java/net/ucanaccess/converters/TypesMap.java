@@ -1,7 +1,7 @@
 package net.ucanaccess.converters;
 
 import com.healthmarketscience.jackcess.DataType;
-import net.ucanaccess.util.SqlConstants;
+import net.ucanaccess.type.SqlConstants;
 
 import java.util.*;
 import java.util.stream.Collectors;

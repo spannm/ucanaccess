@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import static net.ucanaccess.util.SqlConstants.SYSTEM_SUBQUERY;
+import static net.ucanaccess.type.SqlConstants.SYSTEM_SUBQUERY;
 
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;

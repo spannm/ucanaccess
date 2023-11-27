@@ -1,6 +1,6 @@
 package net.ucanaccess.converters;
 
-import static net.ucanaccess.util.SqlConstants.COLUMN_NAME;
+import static net.ucanaccess.type.SqlConstants.COLUMN_NAME;
 
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Try;

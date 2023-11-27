@@ -1,6 +1,6 @@
 package net.ucanaccess.converters;
 
-import static net.ucanaccess.util.SqlConstants.*;
+import static net.ucanaccess.type.SqlConstants.*;
 
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.type.ColumnOrder;
