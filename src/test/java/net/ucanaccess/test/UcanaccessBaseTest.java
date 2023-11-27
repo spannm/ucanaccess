@@ -409,9 +409,10 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected final void executeStatements(Statement _statement, CharSequence... _sqls) throws SQLException {
-        for (CharSequence sql : _sqls) {
-            getLogger().info("Executing sql: {}", sql);
-            _statement.execute(sql == null ? null : sql.toString());
+        for (CharSequence s : _sqls) {
+            String sql = s == null ? null : s.toString();
+            getLogger().info("Executing sql: {}", sql.length() > 500 ? sql.substring(0, 500) + "..." : sql);
+            _statement.execute(sql);
         }
     }
 
