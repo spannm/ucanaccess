@@ -29,17 +29,16 @@ class ParametersTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT * FROM [queryWithParameters]");
         dumpQueryResult("SELECT * FROM table(queryWithParameters(#1971-03-13#,'hi babe'))");
         checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", singleRec(3));
+
         CallableStatement cs = ucanaccess.prepareCall("{call Insert_from_select_abxxx(?,?,?)}");
         cs.setString(1, "2");
         cs.setString(2, "YeaH!!!!");
         cs.setString(3, "u can see it works");
         cs.executeUpdate();
-
         dumpQueryResult("SELECT * FROM [ab\"\"\"xxx]");
         checkQuery("SELECT COUNT(*) FROM [ab\"\"\"xxx]", singleRec(6));
-        // metaData();
-        cs = ucanaccess.prepareCall("{call InsertWithFewParameters(?,?,?)}");
 
+        cs = ucanaccess.prepareCall("{call InsertWithFewParameters(?,?,?)}");
         cs.setString(1, "555");
         cs.setString(2, "YeaH!ddd!!!");
         cs.setDate(3, new java.sql.Date(System.currentTimeMillis()));
@@ -55,6 +54,7 @@ class ParametersTest extends UcanaccessBaseTest {
         cs.setInt(2, 1);
         cs.executeUpdate();
         dumpQueryResult("SELECT * FROM Membership");
+
         // same again, but with space after the procedure name
         cs = ucanaccess.prepareCall("{call UpdateMembershipLevel (?,?)}");
         cs.setString(1, "Platinum");
@@ -70,6 +70,7 @@ class ParametersTest extends UcanaccessBaseTest {
         checkQuery("SELECT @@IDENTITY", singleRec(2)); // verify that we can retrieve the AutoNumber ID
         cs.executeUpdate();
         checkQuery("SELECT @@IDENTITY", singleRec(3)); // and again, just to be sure
+
         cs = ucanaccess.prepareCall("{call UpdateWhere(?,?)}");
         cs.setString(1, "updated");
         cs.setString(2, "3x");
@@ -82,22 +83,22 @@ class ParametersTest extends UcanaccessBaseTest {
     void testLocalTimeParameters(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        final LocalTime desiredTime = LocalTime.of(12, 0, 1);
-        final String expectedText = "one second past noon";
+        LocalTime desiredTime = LocalTime.of(12, 0, 1);
+        String expectedText = "one second past noon";
 
-        ResultSet rs = null;
+        try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT Description FROM TimeValues WHERE TimeValue=?")) {
+            ps.setObject(1, desiredTime);
+            ResultSet rs1 = ps.executeQuery();
+            rs1.next();
+            assertEquals(expectedText, rs1.getString("Description"));
+        }
 
-        PreparedStatement ps = ucanaccess.prepareStatement("SELECT Description FROM TimeValues WHERE TimeValue=?");
-        ps.setObject(1, desiredTime);
-        rs = ps.executeQuery();
-        rs.next();
-        assertEquals(expectedText, rs.getString("Description"));
-
-        CallableStatement cs = ucanaccess.prepareCall("{CALL SelectTimeValueUsingParameter(?)}");
-        cs.setObject(1, desiredTime);
-        rs = cs.executeQuery();
-        rs.next();
-        assertEquals(expectedText, rs.getString("Description"));
+        try (CallableStatement cs = ucanaccess.prepareCall("{CALL SelectTimeValueUsingParameter(?)}")) {
+            cs.setObject(1, desiredTime);
+            ResultSet rs2 = cs.executeQuery();
+            rs2.next();
+            assertEquals(expectedText, rs2.getString("Description"));
+        }
     }
 
 }

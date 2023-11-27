@@ -14,7 +14,7 @@ class RegexTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE reg (id COUNTER, descr MEMO) ");
+        executeStatements("CREATE TABLE t_regex (id COUNTER, descr MEMO) ");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -41,12 +41,12 @@ class RegexTest extends UcanaccessBaseTest {
                     k++;
                 }
             }
-            checkQuery("SELECT descr FROM reg ORDER BY id ASC", out);
+            checkQuery("SELECT descr FROM t_regex ORDER BY id ASC", out);
         }
     }
 
     private String getStatement(CharSequence _s, CharSequence _dlm) {
-        return "INSERT INTO reg (descr) VALUES( " + _dlm + _s + _dlm + ")";
+        return "INSERT INTO t_regex (descr) VALUES( " + _dlm + _s + _dlm + ")";
     }
 
 }
