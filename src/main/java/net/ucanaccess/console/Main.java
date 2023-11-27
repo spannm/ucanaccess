@@ -119,8 +119,7 @@ public class Main {
                 sqlw = sqlw.getNextWarning();
             }
         } catch (Exception _ex) {
-            _ex.printStackTrace();
-            System.err.println(_ex.getMessage());
+            System.err.println(_ex);
             System.exit(1);
         }
         Main main = new Main(conn, input);

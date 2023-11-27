@@ -274,7 +274,7 @@ public class UcanaccessConnection implements Connection {
             afterFlushIoHook();
 
         } catch (Throwable _t) {
-            _t.printStackTrace();
+            Logger.logWarning(_t.toString());
             hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -294,7 +294,7 @@ public class UcanaccessConnection implements Connection {
                 ref.getDbIO().flush();
                 unloadDB();
             } catch (IOException _ex) {
-                _ex.printStackTrace();
+                Logger.logWarning(_ex.toString());
             }
             if (UcanaccessSQLException.class.isInstance(_t)) {
                 throw UcanaccessSQLException.class.cast(_t);
