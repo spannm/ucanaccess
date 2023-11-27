@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import static net.ucanaccess.util.SqlConstants.ORIGINAL_TYPE;
+import static net.ucanaccess.type.SqlConstants.ORIGINAL_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

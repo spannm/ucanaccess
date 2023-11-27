@@ -1,6 +1,6 @@
 package net.ucanaccess.converters;
 
-import static net.ucanaccess.util.SqlConstants.PIVOT;
+import static net.ucanaccess.type.SqlConstants.PIVOT;
 
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
