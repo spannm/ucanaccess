@@ -299,7 +299,7 @@ public class DBReference {
             }
 
         } catch (Exception _ex) {
-            _ex.printStackTrace();
+            Logger.logWarning(_ex.toString());
         }
     }
 
@@ -385,7 +385,7 @@ public class DBReference {
                             finalizeHsqlDb(session);
                         }
                     } catch (Exception _ex) {
-                        _ex.printStackTrace();
+                        Logger.logWarning(_ex.toString());
                     }
                 }));
             }
