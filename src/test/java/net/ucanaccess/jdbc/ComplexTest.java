@@ -47,20 +47,20 @@ class ComplexTest extends UcanaccessBaseTest {
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex WHERE EQUALS([multi-value-data], ?)")) {
             ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
-            ResultSet rs1 = ps.executeQuery();
-            rs1.next();
-            assertEquals(0, rs1.getInt(1));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals(0, rs.getInt(1));
             ps.setObject(1, SingleValue.multipleValue("value1", "value4"));
-            rs1 = ps.executeQuery();
-            rs1.next();
-            assertEquals(1, rs1.getInt(1));
+            rs = ps.executeQuery();
+            rs.next();
+            assertEquals(1, rs.getInt(1));
         }
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT COUNT(*) FROM t_complex WHERE EQUALSIGNOREORDER([multi-value-data],?)")) {
             ps.setObject(1, SingleValue.multipleValue("value4", "value1"));
-            ResultSet rs2 = ps.executeQuery();
-            rs2.next();
-            assertEquals(1, rs2.getInt(1));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals(1, rs.getInt(1));
         }
     }
 

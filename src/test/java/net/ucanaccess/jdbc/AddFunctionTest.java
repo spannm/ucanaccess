@@ -1,8 +1,12 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.type.SqlConstants.FROM;
+import static net.ucanaccess.type.SqlConstants.SELECT;
+
 import net.ucanaccess.converters.AddFunctions;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
+import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -31,8 +35,8 @@ class AddFunctionTest extends UcanaccessBaseTest {
         }
 
         ucanaccess.addFunctions(AddFunctions.class);
-        dumpQueryResult("SELECT pluto('hello', ' world ', NOW()) FROM t_add_function");
-        checkQuery("SELECT CONCAT('Hello World, ', 'Ucanaccess') FROM t_add_function", singleRec("Hello World, Ucanaccess"));
+        dumpQueryResult(Sql.of(SELECT, "pluto('hello', ' world ', NOW())", FROM, "t_add_function"));
+        checkQuery(Sql.of(SELECT, "CONCAT('Hello World, ', 'Ucanaccess')", FROM, "t_add_function"), singleRec("Hello World, Ucanaccess"));
 
         executeStatements("DROP TABLE t_add_function");
     }

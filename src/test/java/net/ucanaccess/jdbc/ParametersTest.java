@@ -88,9 +88,9 @@ class ParametersTest extends UcanaccessBaseTest {
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("SELECT Description FROM TimeValues WHERE TimeValue=?")) {
             ps.setObject(1, desiredTime);
-            ResultSet rs1 = ps.executeQuery();
-            rs1.next();
-            assertEquals(expectedText, rs1.getString("Description"));
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals(expectedText, rs.getString("Description"));
         }
 
         try (CallableStatement cs = ucanaccess.prepareCall("{CALL SelectTimeValueUsingParameter(?)}")) {
