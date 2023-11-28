@@ -1545,9 +1545,9 @@ public class LoadJet {
         triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
     }
 
-    public Object tryDefault(Object defaulT) {
+    public Object tryDefault(Object _default) {
         try (Statement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery("SELECT " + defaulT + " FROM   DUAL ");
+            ResultSet rs = st.executeQuery("SELECT " + _default + " FROM DUAL");
             if (rs.next()) {
                 return rs.getObject(1);
             }
