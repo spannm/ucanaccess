@@ -1,19 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import java.sql.SQLException;
+import java.sql.ResultSet;
 
-public class UpdateResultSet extends AbstractExecute {
-    protected UpdateResultSet(UcanaccessResultSet resultSet) {
-        super(resultSet);
+public class UpdateResultSet extends AbstractExecuteResultSet {
+
+    protected UpdateResultSet(UcanaccessResultSet _resultSet) {
+        super(_resultSet, ResultSet::updateRow);
     }
 
-    public void execute() throws SQLException {
-        executeBase();
-    }
-
-    @Override
-    public Object executeWrapped() throws SQLException {
-        super.getWrappedResultSet().updateRow();
-        return true;
-    }
 }
