@@ -1,7 +1,10 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.type.SqlConstants.*;
+
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
+import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -14,8 +17,8 @@ class BatchTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements(
-            "CREATE TABLE t_batch (id LONG, name TEXT, age LONG)",
-            "INSERT INTO t_batch VALUES(1, 'Sophia', 33)");
+            Sql.of(CREATE, TABLE, "t_batch (id LONG, name TEXT, age LONG)"),
+            Sql.of(INSERT,  INTO, "t_batch VALUES(1, 'Sophia', 33)"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -26,7 +29,7 @@ class BatchTest extends UcanaccessBaseTest {
             st.addBatch("UPDATE t_batch SET [name]='ccc'");
             st.addBatch("UPDATE t_batch SET age=95");
             st.executeBatch();
-            checkQuery("SELECT * FROM t_batch");
+            checkQuery(Sql.of(SELECT, "*", FROM, "t_batch"));
         }
     }
 
@@ -42,7 +45,7 @@ class BatchTest extends UcanaccessBaseTest {
             st.setInt(2, 43);
             st.addBatch();
             st.executeBatch();
-            checkQuery("SELECT * FROM t_batch");
+            checkQuery(Sql.of(SELECT, "*", FROM, "t_batch"));
         }
     }
 

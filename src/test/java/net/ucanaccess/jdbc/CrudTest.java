@@ -181,8 +181,8 @@ class CrudTest extends UcanaccessBaseTest {
 
             checkQuery("SELECT * FROM t_crud2 ORDER BY id", singleRec(1, "Growing old in rural places"));
             UcanaccessStatement stat = ucanaccess.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs1 = stat.executeQuery("SELECT * FROM t_crud2 ORDER BY id");
-            rs1.last();
+            ResultSet rs2 = stat.executeQuery("SELECT * FROM t_crud2 ORDER BY id");
+            rs2.last();
 
             st.execute("DELETE FROM t_crud");
         }

@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import static net.ucanaccess.type.SqlConstants.ORIGINAL_TYPE;
+import static net.ucanaccess.type.SqlConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -9,6 +9,7 @@ import com.healthmarketscience.jackcess.Index.Column;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.HibernateSupport;
+import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -31,8 +32,8 @@ class AlterTableTest extends UcanaccessBaseTest {
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
         executeStatements(
-            "CREATE TABLE AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))",
-            "CREATE TABLE [AAA n] (baaaa TEXT(3), A INTEGER, C TEXT(4), b YESNO, d DATETIME DEFAULT NOW(), e NUMERIC(8,3), [f f] TEXT)");
+            Sql.of(CREATE, TABLE, "AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))"),
+            Sql.of(CREATE, TABLE, "[AAA n] (baaaa TEXT(3), A INTEGER, C TEXT(4), b YESNO, d DATETIME DEFAULT NOW(), e NUMERIC(8,3), [f f] TEXT)"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -45,10 +46,10 @@ class AlterTableTest extends UcanaccessBaseTest {
             assertThatThrownBy(() -> st.execute("ALTER TABLE T4 RENAME TO [1GIà GIà]"))
                 .isInstanceOf(SQLException.class)
                 .hasMessageContaining("object name already exists");
-            checkQuery("SELECT * FROM [1GIà GIà]");
-            dumpQueryResult("SELECT * FROM [1GIà GIà]");
+            checkQuery(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
+            dumpQueryResult(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
             getLogger().debug("After having renamed a few tables ...");
-            dumpQueryResult("SELECT * FROM UCA_METADATA.TABLES");
+            dumpQueryResult(Sql.of(SELECT, "*", FROM, "UCA_METADATA.TABLES"));
         }
     }
 

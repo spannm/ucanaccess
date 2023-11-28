@@ -44,26 +44,27 @@ class BlobOleTest extends UcanaccessBaseTest {
             ps.execute();
         }
 
-        UcanaccessStatement st = ucanaccess.createStatement();
-        ResultSet rs1 = st.executeQuery("SELECT c_ole FROM t_ole_test");
-        rs1.next();
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
+            ResultSet rs = st.executeQuery("SELECT c_ole FROM t_ole_test");
+            rs.next();
 
-        try (InputStream isFromDb = rs1.getBinaryStream(1)) {
+            try (InputStream isFromDb = rs.getBinaryStream(1)) {
 
-            File imgFileTemp = createTempFileName(imgFileName, null);
-            copyFile(isFromDb, imgFileTemp).deleteOnExit();
-            getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
+                File imgFileTemp = createTempFileName(imgFileName, null);
+                copyFile(isFromDb, imgFileTemp).deleteOnExit();
+                getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
 
-            byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
+                byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
 
-            checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr, fileBytes));
+                checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr, fileBytes));
 
-            PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
-            ps.setString(1, descr + "_OK");
-            ps.setString(2, descr);
-            ps.executeUpdate();
-            checkQuery("SELECT * FROM t_ole_test");
-            checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr + "_OK", fileBytes));
+                PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_descr=? WHERE c_descr=?");
+                ps.setString(1, descr + "_OK");
+                ps.setString(2, descr);
+                ps.executeUpdate();
+                checkQuery("SELECT * FROM t_ole_test");
+                checkQuery("SELECT * FROM t_ole_test", singleRec(1, descr + "_OK", fileBytes));
+            }
         }
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
@@ -88,10 +89,11 @@ class BlobOleTest extends UcanaccessBaseTest {
         try (PreparedStatement ps5 = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr) VALUES (?)")) {
             ps5.setString(1, "value of OLE column is null");
             ps5.executeUpdate();
-            try (ResultSet rs2 = st.executeQuery("SELECT c_ole FROM t_ole_test WHERE c_descr = 'value of OLE column is null'")) {
-                rs2.next();
-                assertNull(rs2.getBinaryStream(1));
-                assertNull(rs2.getBlob(1));
+            try (UcanaccessStatement st = ucanaccess.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT c_ole FROM t_ole_test WHERE c_descr = 'value of OLE column is null'")) {
+                rs.next();
+                assertNull(rs.getBinaryStream(1));
+                assertNull(rs.getBlob(1));
             }
         }
     }
