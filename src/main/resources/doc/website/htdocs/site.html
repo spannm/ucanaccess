@@ -81,42 +81,42 @@ a:hover {
 }
 </style>
 <script type="text/javascript">
-	var _gaq = _gaq || [];
-	_gaq.push([ '_setAccount', 'UA-37155261-1' ]);
-	_gaq.push([ '_trackPageview' ]);
+    var _gaq = _gaq || [];
+    _gaq.push([ '_setAccount', 'UA-37155261-1' ]);
+    _gaq.push([ '_trackPageview' ]);
 
-	(function() {
-		var ga = document.createElement('script');
-		ga.type = 'text/javascript';
-		ga.async = true;
-		ga.src = ('https:' == document.location.protocol ? 'https://ssl'
-				: 'http://www')
-				+ '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0];
-		s.parentNode.insertBefore(ga, s);
-	})();
+    (function() {
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+                : 'http://www')
+                + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+    })();
 </script>
 
 <script type="text/javascript" src="./jquery-3.2.1.min.js"></script>
 <script>
-	function selectDiv() {
-		var divid = window.location.hash ? window.location.hash.substring(1)
-				: 'home';
-		$(window).scrollTop(0);
-		$("#" + divid + "_div").show().siblings().hide();
-		if (divid != 'donate') {
-			$("#" + divid).css('color', '#3399CC').siblings().css('color',
-					'grey');
-			$("#donate_img").css('border', '0px solid yellow');
-		} else {
-			$("#donate_img").css('border', '2px solid yellow');
-			$(".menubutton").css('color', 'grey');
-		}
-	}
-	$(document).ready(function() {
-		selectDiv();
-		$(window).on('hashchange', selectDiv);
-	});
+    function selectDiv() {
+        var divid = window.location.hash ? window.location.hash.substring(1)
+                : 'home';
+        $(window).scrollTop(0);
+        $("#" + divid + "_div").show().siblings().hide();
+        if (divid != 'donate') {
+            $("#" + divid).css('color', '#3399CC').siblings().css('color',
+                    'grey');
+            $("#donate_img").css('border', '0px solid yellow');
+        } else {
+            $("#donate_img").css('border', '2px solid yellow');
+            $(".menubutton").css('color', 'grey');
+        }
+    }
+    $(document).ready(function() {
+        selectDiv();
+        $(window).on('hashchange', selectDiv);
+    });
 </script>
 <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 
@@ -130,17 +130,17 @@ a:hover {
         id="donate_img" src="donate.png" border="0" width="120" /></a>
 
       <div id="buttonsDiv">
-        <a id="home" href="#home" class="menubutton">Home</a> 
-        <a id="examples" href="#examples" class="menubutton">Getting Started</a> 
-        <a id="clients" href="#clients" class="menubutton">JDBC Client Tools</a> 
-        <a id="change" href="#change" class="menubutton">Change Log</a> 
-        <a id="clicense" href="#license" class="menubutton">Links/Licensing</a> 
+        <a id="home" href="#home" class="menubutton">Home</a>
+        <a id="examples" href="#examples" class="menubutton">Getting Started</a>
+        <a id="clients" href="#clients" class="menubutton">JDBC Client Tools</a>
+        <a id="change" href="#change" class="menubutton">Change Log</a>
+        <a id="clicense" href="#license" class="menubutton">Links/Licensing</a>
         <a id="about" href="#about" class="menubutton">About</a>
       </div>
 
       <div id="content">
       
-        <!--  
+        <!--
               ***** "Home" tab *****
         -->
         <div id="home_div">
@@ -205,28 +205,28 @@ a:hover {
           </ul>
           <h2>Limitations</h2>
           <ul>
-            <li>Access 
+            <li>Access
               <a href=https://support.office.com/en-us/article/Create-a-data-macro-b1b94bca-4f17-47ad-a66d-f296ef834200>data macros</a>
               are not supported. UCanAccess can update tables for which event-driven data macros are defined, but the macros
               themselves are ignored.</li>
             <li>In versions prior to UCanAccess 4.0.0, only basic DDL was supported (<span class="inlineCode">CREATE
                 TABLE</span> with Primary Key, <span class="inlineCode">DROP TABLE</span>).<br>
                 Since version 4.0.0
-              UCanAccess can now support DDL for <b>Table metadata modification</b>: 
+              UCanAccess can now support DDL for <b>Table metadata modification</b>:
               <ul>
                 <li>Columns, Primary Keys and other Indexes can now be added to an <b>existing</b> table.</li>
                 <li>UCanAccess 4.x.x has also the ability to create Foreign Keys and to rename Tables.</li>
               </ul>
             </li>
 
-            <li>Very limited multiprocess access support (details 
-              <a href=http://ucanaccess.blogspot.ca/2017/07/multiuser-concurrent-write-access.html>here</a>). 
+            <li>Very limited multiprocess access support (details
+              <a href=http://ucanaccess.blogspot.ca/2017/07/multiuser-concurrent-write-access.html>here</a>).
               Nevertheless, it tries to synchronize data when a
               concurrent process modifies the Access database file.</li>
           </ul>
           <h2>Requirements</h2>
           <b>UCanAccess 5.0.0 requires Java 8 or later to run.</b>
-	  Older versions require Java 6 or later.
+      Older versions require Java 6 or later.
           <p>
             When dealing with large databases and using the default "memory" setting (i.e., with driver property <span
               class="inlineCode">memory=true</span>), it is recommended that users allocate sufficient memory to the JVM
@@ -236,8 +236,8 @@ a:hover {
               DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/data/pippo.mdb;memory=false&quot;);</span> <br>
           <h2>Dependencies</h2>
           <p>
-            UCanAccess depends on Jackcess and HSQLDB. If you are using 
-            <a href=https://maven.apache.org>Apache Maven</a> to manage your dependencies (recommended) 
+            UCanAccess depends on Jackcess and HSQLDB. If you are using
+            <a href=https://maven.apache.org>Apache Maven</a> to manage your dependencies (recommended)
             simply add the following to your pom.xml&nbsp;...<br>
             <pre>
 &lt;dependency&gt;
@@ -262,7 +262,7 @@ a:hover {
             Otherwise, check the <a href=http://jackcessencrypt.sourceforge.net>Jackcess Encrypt website</a> for more information.
         </div>
 
-        <!--  
+        <!--
               ***** "Getting Started" tab *****
         -->
         <div id="examples_div">
@@ -487,21 +487,21 @@ a:hover {
           <h2>Creating tables with DDL</h2>
           <div class="source">
             <i>Statement st =conn.createStatement(); st.execute(&quot;CREATE TABLE example1 (id COUNTER PRIMARY
-              KEY,descr text(400), number numeric(12,3), date0 datetime) &quot;);<br> ...st.execute(&quot;create
-              table dkey(c counter , number numeric(23,5) , PRIMARY KEY (C,NUMBER) &quot;);<br>
-              ...st.execute(&quot;create table dtrx(c text , number numeric(23,5) , unique (C,NUMBER)) &quot;);<br>
-              ...st.execute(" CREATE TABLE Parent( x autoincrement PRIMARY KEY, y text(222))");<br> ...st.execute("
+              KEY, descr TEXT(400), number NUMERIC(12,3), date0 DATETIME) &quot;);<br> ...st.execute(&quot;create
+              table dkey(c COUNTER , number NUMERIC(23,5) , PRIMARY KEY (C,NUMBER) &quot;);<br>
+              ...st.execute(&quot;CREATE TABLE dtrx(c TEXT, number NUMERIC(23,5), unique (C,NUMBER)) &quot;);<br>
+              ...st.execute(" CREATE TABLE Parent( x AUTOINCREMENT PRIMARY KEY, y TEXT(222))");<br> ...st.execute("
               CREATE TABLE Babe( k LONG , y LONG, PRIMARY KEY(k,y), <span class="red1">FOREIGN KEY (y) REFERENCES
                 Parent (x) </span> )");<br> Notice that the part highlighted <span class="red1">in red</span> in the
               statement above is only supported since UCanAccess 4.0.0.<br>
             </i><br>Also UCanAccess supports create table as (&lt;sql select&gt;) syntax:<br>
-            <i>st.executeUpdate(&quot;CREATE TABLE copy as (select * from example1) WITH DATA &quot;);</i>
+            <i>st.executeUpdate(&quot;CREATE TABLE copy AS (SELECT * FROM example1) WITH DATA &quot;);</i>
           </div>
           <h2>Executing queries</h2>
           <div class="source">
             The following example shows a <b>full outer join</b><b>:</b> <br>
-            <i>st =conn.createStatement();<br> ResultSet rs=st.executeQuery("SELECT * FROM example3 full outer
-              join example4 on (example3.id=example4.id)");
+            <i>st =conn.createStatement();<br> ResultSet rs=st.executeQuery("SELECT * FROM example3 FULL OUTER
+              JOIN example4 ON (example3.id=example4.id)");
             </i>
           </div>
           <h2>Using Access functions</h2>
@@ -612,16 +612,16 @@ a:hover {
               version array<br>
             <br> ps.execute();<br> ...<br>
             <br>
-            // insert existing file as an attachment<br> 
-            // &nbsp;&nbsp;(note that the parameter value is an Attachment *array*, even for a single attachment)<br> 
-            String attachmentPath = "C:/Users/Gord/Documents/sample.pdf";<br> 
-            byte[] attachmentData = java.nio.file.Files.readAllBytes(Paths.get(attachmentPath));<br> 
-            ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=?");<br> 
-            Attachment[] attachmentArray = new Attachment[] {<br> 
-            &nbsp;&nbsp;&nbsp;&nbsp;new Attachment(null, "sample.pdf", "pdf", attachmentData, new java.util.Date(), null)<br> 
-            };<br> 
-            ps.setObject(1, attachmentArray);<br> 
-            ps.executeUpdate();<br> 
+            // insert existing file as an attachment<br>
+            // &nbsp;&nbsp;(note that the parameter value is an Attachment *array*, even for a single attachment)<br>
+            String attachmentPath = "C:/Users/Gord/Documents/sample.pdf";<br>
+            byte[] attachmentData = java.nio.file.Files.readAllBytes(Paths.get(attachmentPath));<br>
+            ps=super.ucanaccess.prepareStatement("UPDATE TABLE1 SET ATTACH_DATA=?");<br>
+            Attachment[] attachmentArray = new Attachment[] {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;new Attachment(null, "sample.pdf", "pdf", attachmentData, new java.util.Date(), null)<br>
+            };<br>
+            ps.setObject(1, attachmentArray);<br>
+            ps.executeUpdate();<br>
             <br>
             //you can't use
               = operator here: use the Equals or the EqualsIgnoreOrder functions instead<br>
@@ -689,7 +689,7 @@ a:hover {
           </div>
         </div>
 
-        <!--  
+        <!--
               ***** "JDBC Client Tools" tab *****
         -->
         <div id="clients_div">
@@ -857,28 +857,28 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
             <br> Squirrel SQL web site: <a href='http://www.squirrelsql.org/'>http://www.squirrelsql.org/</a> <br>
         </div>
 
-        <!--  
+        <!--
               ***** "Change Log" tab *****
         -->
          <div id="change_div">
-		<h2>5.0.1 Release</h2>
+        <h2>5.0.1 Release</h2>
           <ul>
-		<li>fix updates failed in tables with Blob/Ole not null</li>
-		<li>Insert/Update of Blob/Ole objects in this simplified way:  preparedStetement.setObject(1, new File("c:\\&lt;file path&gt;"));</li>
-		
+        <li>fix updates failed in tables with Blob/Ole not null</li>
+        <li>Insert/Update of Blob/Ole objects in this simplified way:  preparedStetement.setObject(1, new File("c:\\&lt;file path&gt;"));</li>
+        
           </ul>
-		
-		
+        
+        
          <h2>5.0.0 Release</h2>
           <ul>
-		<li>BLOB insert failed for table with multi-column PK</li>
-		<li>Add "Currency" as named format for Format function</li>
-		<li>CREATE TABLE with underscore in table name could cause error</li>	 
-		<li>Upgrade to hsqldb-2.5.0 and jackcess 3.0.1</li>
-		<li>Support for java.time.LocalTime parameters to prepared statements</li>
-		<li>ParametersTest failures under HSQLDB 2.4.x</li>	 
-		<li>Date/​Time values corrupted by JVM timezone</li>
-		<li>It now requires Java 8 or later to run</li>
+        <li>BLOB insert failed for table with multi-column PK</li>
+        <li>Add "Currency" as named format for Format function</li>
+        <li>CREATE TABLE with underscore in table name could cause error</li>
+        <li>Upgrade to hsqldb-2.5.0 and jackcess 3.0.1</li>
+        <li>Support for java.time.LocalTime parameters to prepared statements</li>
+        <li>ParametersTest failures under HSQLDB 2.4.x</li>
+        <li>Date/​Time values corrupted by JVM timezone</li>
+        <li>It now requires Java 8 or later to run</li>
           </ul>
 
           <h2>4.0.4 Release</h2>
@@ -1079,7 +1079,7 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
             <li>Fixed bug in "create table as select..." statement where there is a name conflict in columns
               defined in the select.</li>
             <li>Fixed bug in "create table" where one or more column names are the same names of specific access
-              types(e.g., create table ttt(counter counter primary key, text text)).</li>
+              types(e.g., CREATE TABLE ttt(counter COUNTER PRIMARY KEY, text TEXT)).</li>
             <li>Classloading isolation: in order to avoid conflicts in dependencies jars used by user development
               environment a new jar named ucanload.jar has been added to this distribution. This is strongly suggested
               for the use of ucanaccess with LibreOffice/OpenOffice. In other words, this allows you to use in your
@@ -1264,8 +1264,8 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
             </li>
             <li>Allowed special characters and blank spaces in DDL. Column and table names, in this specific case,
               are not more escaped in the persisted table definition on the access file, but just in the mirror hsqldb
-              database. <br>e.g. <i>CREATE TABLE [result ccc]( [aa a()] autoincrement PRIMARY KEY, [---bghhaaf
-                b aa] text(222) default 'vvv') <br>DROP TABLE [result ccc]
+              database. <br>e.g. <i>CREATE TABLE [result ccc]( [aa a()] AUTOINCREMENT PRIMARY KEY, [---bghhaaf
+                b aa] TEXT(222) DEFAULT 'vvv') <br>DROP TABLE [result ccc]
             </i>
             </li>
             <li>Allowed the use of the "autoincrement" keyword as "counter" synonymous in DDL.</li>
@@ -1445,8 +1445,8 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
           <ul>
             <li>Added support for persisting the column properties defined in create table statements: default
               column value and nullability(i.e. required property). Supported both constants and functions as default
-              values<br> e.g., <i>CREATE TABLE AAA ( baaaa text PRIMARY KEY,A long default 3 not null, C
-                text(255) not null, d DATETIME default now(), e text default 'bla')</i>
+              values<br> e.g., <i>CREATE TABLE AAA ( baaaa TEXT PRIMARY KEY,A LONG DEFAULT 3 NOT NULL, C
+                TEXT(255) NOT NULL, d DATETIME DEFAULT now(), e TEXT DEFAULT 'bla')</i>
             </li>
             <li>Fix method closeOnCompletion of UcanaccessStatement (patch missed in the 2.0.0)</li>
           </ul>
@@ -1493,9 +1493,9 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
             <li>improved escaping of column, table, query names for allowing the use of '(' and ')' character</li>
             <li>fixed a 1.0.2 bug in inserting or updating string with new line or carriage return characters:
               under particular conditions, \n and \r characters were replaced by a blank character</li>
-            <li>in create table ddl statement, text columns default lenght to 255 where not specified (before the
+            <li>in create table ddl statement, text columns default length to 255 where not specified (before the
               explicit setting of length of text columns was mandatory)</li>
-            <li>patched handling of temporary access artefacts (i.e. temporary tables, queries, foreign key and
+            <li>patched handling of temporary access artifacts (i.e. temporary tables, queries, foreign key and
               indexes with the name starting with a tilde)</li>
             <li>jackcess upgrade to version 1.2.14</li>
           </ul>
@@ -1513,7 +1513,7 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
               queries</li>
             <li>added functions int, strcomp, strconv, strreverse, rnd, timeserial, string, weekday</li>
             <li>added support for non-standard subquery sintax [SELECT ... FROM ...]. As T</li>
-            <li>patched "create table" implementation for the right size of text columns</li>
+            <li>patched "CREATE TABLE" implementation for the right size of text columns</li>
             <li>fixed regular expression support in like conditions</li>
             <li>jackess upgrade to version 1.2.13</li>
           </ul>
@@ -1554,7 +1554,7 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
           </ul>
         </div>
 
-        <!--  
+        <!--
               ***** "Links/Licensing" tab *****
         -->
         <div id="license_div">
@@ -1600,7 +1600,7 @@ UCanAccess&gt;export -t License "c:\\temp\\new\\License.csv";
           </form>
         </div>
 
-        <!--  
+        <!--
               ***** "About" tab *****
         -->
         <div id='about_div'>

@@ -129,8 +129,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     private void notNullBug() throws SQLException, IOException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE nnb(c COUNTER PRIMARY KEY, " + "number decimal(23,5) default -4.6 NOT NULL , "
-                    + "txt1 text(23) NOT NULL, blank TEXT, dt DATE NOT NULL, txt2 TEXT," + "txt3 TEXT NOT NULL)");
+            st.execute("CREATE TABLE nnb(c COUNTER PRIMARY KEY, " + "number DECIMAL(23,5) DEFAULT -4.6 NOT NULL, "
+                    + "txt1 TEXT(23) NOT NULL, blank TEXT, dt DATE NOT NULL, txt2 TEXT, txt3 TEXT NOT NULL)");
 
             assertNotNull("nnb", "number", true);
             assertNotNull("nnb", "txt1", true);
@@ -182,8 +182,8 @@ class CreateTableTest extends UcanaccessBaseTest {
                 "DROP TABLE [ggg kk]",
                 "CREATE TABLE [ggg kk] ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] NUMERIC(22,6) DEFAULT 12.99)",
                 "CREATE TABLE kkk  ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
-                "INSERT INTO kkk ([---bgaaf aa],[---bghhaaf b aa]) values(1, '23fff')",
-                "CREATE TABLE counter (counter AUTOINCREMENT PRIMARY KEY, [simple] text(222) DEFAULT 'vvv')");
+                "INSERT INTO kkk ([---bgaaf aa],[---bghhaaf b aa]) VALUES(1, '23fff')",
+                "CREATE TABLE counter (counter AUTOINCREMENT PRIMARY KEY, [simple] TEXT(222) DEFAULT 'vvv')");
         }
         dumpQueryResult("SELECT * FROM counter");
     }
@@ -194,7 +194,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE Parent(x AUTOINCREMENT PRIMARY KEY, y text(222))");
+            st.execute("CREATE TABLE Parent(x AUTOINCREMENT PRIMARY KEY, y TEXT(222))");
             st.execute("CREATE TABLE Babe(k LONG, y LONG, PRIMARY KEY(k, y), FOREIGN KEY (y) REFERENCES Parent (x))");
             Database db = ucanaccess.getDbIO();
             Table tb = db.getTable("Babe");
