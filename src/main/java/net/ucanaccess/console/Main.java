@@ -1,9 +1,12 @@
 package net.ucanaccess.console;
 
+import static net.ucanaccess.type.SqlConstants.*;
+
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.util.Sql;
 import net.ucanaccess.util.Try;
 import net.ucanaccess.util.UcanaccessRuntimeException;
 
@@ -265,7 +268,7 @@ public class Main {
      * </pre>
      *
      * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The
-     * {@code -t License} option dumps the {@code License} table using the SQL statement "select * from [License]".
+     * {@code -t License} option dumps the {@code License} table using the SQL statement "SELECT * FROM [License]".
      */
     private void executeExport(String cmd) throws SQLException, IOException {
         List<String> tokens = tokenize(cmd);
@@ -347,7 +350,7 @@ public class Main {
         // executing the 'lastSqlQuery'.
         String sqlQuery;
         if (table != null && !table.isEmpty()) {
-            sqlQuery = "SELECT * FROM [" + table + "]";
+            sqlQuery = Sql.of(SELECT, "*", FROM, "[" + table + "]").toString();
         } else if (lastSqlQuery != null) {
             sqlQuery = lastSqlQuery;
         } else {
@@ -363,24 +366,25 @@ public class Main {
      * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export
      * operations.
      */
-    private void exportCsvAndSchema(String sqlQuery, String csvFileName, String schemaFileName, Exporter exporter)
-            throws SQLException, IOException {
+    private void exportCsvAndSchema(CharSequence _sqlQuery, String _csvFileName, String _schemaFileName, Exporter _exporter)
+        throws SQLException, IOException {
+        Objects.requireNonNull(_sqlQuery, "Sql required");
         try (Statement statement = conn.createStatement()) {
-            ResultSet rs = statement.executeQuery(sqlQuery);
+            ResultSet rs = statement.executeQuery(_sqlQuery.toString());
 
             // output the csvFile
-            File csvFile = new File(csvFileName);
+            File csvFile = new File(_csvFileName);
             try (PrintStream out = new PrintStream(csvFile)) {
-                exporter.dumpCsv(rs, out);
+                _exporter.dumpCsv(rs, out);
                 out.flush();
             }
             prompt("Created CSV file: " + csvFile.getAbsolutePath());
 
             // output the schema file if requested
-            if (schemaFileName != null) {
-                File schemaFile = new File(schemaFileName);
+            if (_schemaFileName != null) {
+                File schemaFile = new File(_schemaFileName);
                 try (PrintStream out = new PrintStream(csvFile)) {
-                    exporter.dumpSchema(rs, out);
+                    _exporter.dumpSchema(rs, out);
                     out.flush();
                 }
                 prompt("Created schema file: " + schemaFile.getAbsolutePath());
