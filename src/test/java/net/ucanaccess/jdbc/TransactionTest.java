@@ -13,7 +13,7 @@ class TransactionTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE T4 (id LONG, descr text(200))");
+        executeStatements("CREATE TABLE T4 (id LONG, descr TEXT(200))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

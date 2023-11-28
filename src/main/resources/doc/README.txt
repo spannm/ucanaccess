@@ -1,6 +1,6 @@
 ﻿UCanAccess is an open source pure Java JDBC Driver implementation for access (mdb and accdb),
-originally licensed under LGPL 2.1.  
-Since the 3.0.0 release UCanAccess has been relicensed under the Apache License, Version 2.0. 
+originally licensed under LGPL 2.1.
+Since the 3.0.0 release UCanAccess has been relicensed under the Apache License, Version 2.0.
 
 UCanAccess uses:
 -Jackcess as MS Access Input/Output library.
@@ -16,7 +16,7 @@ Features:
 -MS Access SQL.
 -Main Access functions implementation.
 -You can execute select queries defined and saved in Access.
--LIKE operator accepts both standard '_' and access specific '?' as wildcard character, 
+-LIKE operator accepts both standard '_' and access specific '?' as wildcard character,
  both standard '%' and access specific '*' as jolly, # for single digit(access), [xxx][!xxx]for characters intervals.
 -Both & and || string concat.
 -Access date format (e.g., #11/22/2003 10:42:58 PM#).
@@ -29,27 +29,27 @@ For more details see http://ucanaccess.sourceforge.net/site.html.
 You can contact the author Marco Amadei at amadei.mar@gmail.com
 
 Current Release:
-UCanAccess 5.0.0 Release 
+UCanAccess 5.0.0 Release
 ========================
 -BLOB insert failed for table with multi-column PK
 -Add "Currency" as named format for Format function
--CREATE TABLE with underscore in table name could cause error	 
+-CREATE TABLE with underscore in table name could cause error
 -Upgrade to hsqldb-2.5.0 and jackcess 3.0.1
 -Support for java.time.LocalTime parameters to prepared statements
--ParametersTest failures under HSQLDB 2.4.x	 
+-ParametersTest failures under HSQLDB 2.4.x
 -Date/​Time values corrupted by JVM timezone
 -It now requires Java 8 or later to run.
 
-UCanAccess 4.0.4 Release 
+UCanAccess 4.0.4 Release
 ========================
 -Upgrade to Jackcess 2.1.11
 -Support Access_2016 "version 5" file format
 -Initial support for "Large Number" (BIGINT) columns: CRUD, DDL
 -Fix issue with NOT NULL columns created by UCanAccess DDL not respected by ACE/Jet
 -Fix issue with multiple FK constraints between the same two tables
--Reduce HSQLDB resource consumption by lazy-loading "OLE Object" (BLOB) fields 
+-Reduce HSQLDB resource consumption by lazy-loading "OLE Object" (BLOB) fields
 
-UCanAccess 4.0.3 Release 
+UCanAccess 4.0.3 Release
 ========================
 -Upgrade to Jackcess 2.1.9
 -Enable arbitrary AutoNumber insert values <= 0
@@ -68,15 +68,15 @@ UCanAccess 4.0.3 Release
 UCanAccess 4.0.2 Release
 ========================
 -Enhanced the console features
-   Better escaping of exported CSV fields with embedded delimiters and quotes. 
-   Add -d flag to change delimiter 
+   Better escaping of exported CSV fields with embedded delimiters and quotes.
+   Add -d flag to change delimiter
    Add -t flag to export large tables directly
    Add --big_query_schema flag to export the Google BigQuery schema file
    Add --newlines flag to preserve embedded newlines when exporting to CSV
    Print UTF-8 byte order mark if --bom flag is given
    Fix incorrect SimpleDateFormat which outputs 12:00:00 for midnight in the "export" command
 -Optimized the preparser
--Fix problem with remap= under Linux 
+-Fix problem with remap= under Linux
 -Fix bug with built-in functions used in calculated field expressions. Added fake left$ and right$ functions
 -Patched mapping of CHAR type when used in DDL
 -Fix insert of arbitrary AutoNumber values
@@ -117,8 +117,8 @@ UCanAccess 3.0.7 Release
 -Fixed aggregate functions on the datatype DATE (e.g. select first(date_init) from ...)
 -Fixed update queries having a parametric condition in the where clause (e.g. UPDATE COL1 SET COL1=[PAR1] WHERE COL2=[PAR2])
 -Optimized the CLNG function
--Fixed a few bugs the happened when the parameter keepMirror is being used: 
-see ReloadPersistentMirrorTest, a bug on the ORDER BY case-sensitivity  when the access db is updated externally 
+-Fixed a few bugs the happened when the parameter keepMirror is being used:
+see ReloadPersistentMirrorTest, a bug on the ORDER BY case-sensitivity  when the access db is updated externally
 
 
 UCanAccess 3.0.6 Release
@@ -142,18 +142,18 @@ Thanks to Gord Thompson for the idea and  having suggested the code
 
 UCanAccess 3.0.4 Release
 ========================
--Implemented MS Access parametric SELECT queries. They will be available, where possibile, using the "table()" syntax, e.g., 	
+-Implemented MS Access parametric SELECT queries. They will be available, where possibile, using the "table()" syntax, e.g.,
 select * from table(queryWithParameters(#1971-03-13#,'hi babe'))
 A default query, parametrized with all parameters to null, will be available as well.
 
--Implemented APPEND, DELETE and UPDATE MS Access queries. They will be available, where possibile, as stored precedures and via CallableStatement, e.g.:  
+-Implemented APPEND, DELETE and UPDATE MS Access queries. They will be available, where possibile, as stored precedures and via CallableStatement, e.g.:
 CallableStatement cs= ucanaccess.prepareCall("{call insert_xxx(?,?,?)}");
 
 -fixed issue(in the connecting phase) with table/column names starting with the $ character
 -fixed issue(in querying) with table/column names within both a single quote character and a blank space character
 -fixed bug that happened in subsequent drop and create table statements when executed without calling a commit between them
 -fixed dlookup function
--fixed capitalisation  in column metadata for MS Access queries(views) like 
+-fixed capitalisation  in column metadata for MS Access queries(views) like
 SELECT tablename.* FROM ....
 -fixed getBestRowIdentifier DatabaseMatadata method
 -the proper exception is thrown when calling executeQuery method for update, insert and delete executions
@@ -162,7 +162,7 @@ SELECT tablename.* FROM ....
 
 UCanAccess 3.0.3.1 Release
 ==========================
-Fixed major bug: in several cases exclamation mark in literal textual values (i.e., if you didn't use a PreparedStatement) was saved as point. 	
+Fixed major bug: in several cases exclamation mark in literal textual values (i.e., if you didn't use a PreparedStatement) was saved as point.
 
 
 Old releases:
@@ -190,20 +190,20 @@ Fixed bug in CREATE TABLE DDL implementation, when using DECIMAL or NUMERIC colu
 UCanAccess 3.0.1 Release
 ======================
 - Fixed bug in "create table as select..." statement where there is a name conflict in  columns defined in the select.
-- Fixed bug in "create table" where one or more column names are the same names of specific access types(e.g., create table ttt(counter counter primary key, text text)) 
-- Classloading isolation: in order to avoid conflicts in dependencies jars used by user development environment a new jar named ucanload.jar has been added to this distribution. 
+- Fixed bug in "create table" where one or more column names are the same names of specific access types(e.g., create table ttt(counter counter primary key, text text))
+- Classloading isolation: in order to avoid conflicts in dependencies jars used by user development environment a new jar named ucanload.jar has been added to this distribution.
 This is strongly suggested for the use of ucanaccess with LibreOffice/OpenOffice.
-In other words, this allows you to use in your applications/tools the version of commons-lang, commons-logging, jackcess and hsqldb you need, without any issue or impact on UCanAccess. 
+In other words, this allows you to use in your applications/tools the version of commons-lang, commons-logging, jackcess and hsqldb you need, without any issue or impact on UCanAccess.
 If you are facing with a library conflict issue, you MUSTN'T add neither ucanaccess.jar nor any of the dependencies jars to your classpath but:
-	1. unzip the UCanAccess-3.X.X-bin.zip distribution.
-	2. add to your classpath just the ucanload.jar from the "loader" folder of the distribution
-	3. set the system variable UCANACCESS_HOME so that it points the UCanAccess-3.x.x-bin folder (e.g. -DUCANACCESS_HOME=D:\301\UCanAccess-3.0.1-bin) 
-	4. when required  (e.g. with java 6)  use the net.ucanaccess.jdbc.UcanloadDriver (e.g., Class.forName("net.ucanaccess.jdbc.UcanloadDriver")) 
-	instead of the original one net.ucanaccess.jdbc.UcanaccessDriver.
+    1. unzip the UCanAccess-3.X.X-bin.zip distribution.
+    2. add to your classpath just the ucanload.jar from the "loader" folder of the distribution
+    3. set the system variable UCANACCESS_HOME so that it points the UCanAccess-3.x.x-bin folder (e.g. -DUCANACCESS_HOME=D:\301\UCanAccess-3.0.1-bin)
+    4. when required  (e.g. with java 6)  use the net.ucanaccess.jdbc.UcanloadDriver (e.g., Class.forName("net.ucanaccess.jdbc.UcanloadDriver"))
+    instead of the original one net.ucanaccess.jdbc.UcanaccessDriver.
 
-See also the updates to the LibreOffice/OpenOffice configuration on the ucanaccess web site. 
+See also the updates to the LibreOffice/OpenOffice configuration on the ucanaccess web site.
 
-UCanAccess 3.0.0 Release 
+UCanAccess 3.0.0 Release
 ======================
 - Relicense to Apache 2.0!!
 - Upgrade to jackcess 2.1.2
@@ -212,21 +212,21 @@ Metadata issues:
 - Solved capitalization issues in both DatabaseMetaData and ResultSetMetaData implementations.
 They both have  been reimplemented for this specific purpose.
 Now UCanAccess can provide metadata with the correct capitalization(and no more all in upper case).
-- Changed escaping of column and table names containing special characters or out-of-rules(e.g. starting with a number): 
-now, in these cases, you can and must use the names defined in access(obviously in a case insensitive manner). 
-- Supported all characterset with metadata (they were supported in data but not always in metadata elements like column or table names) 
+- Changed escaping of column and table names containing special characters or out-of-rules(e.g. starting with a number):
+now, in these cases, you can and must use the names defined in access(obviously in a case insensitive manner).
+- Supported all characterset with metadata (they were supported in data but not always in metadata elements like column or table names)
 - Fixed isAutoIncrement and isCurrency ResultSetMetaData methods.
 - Customized DatabaseMetaData.getColumns so that it can now provide:
  the default column values in the COLUMN_DEF columm
  the correct IS_AUTOINCREMENT informations
  the correct IS_GENERATEDCOLUMN	(used for calculated fields)
  the customized column ORIGINAL_TYPE(original type in access)
-- Customized DatabaseMetaData.getClientInfoProperties method that now returns ucanaccess driver available properties. 
+- Customized DatabaseMetaData.getClientInfoProperties method that now returns ucanaccess driver available properties.
 
-Implemented, for counters handling: 
+Implemented, for counters handling:
 DISABLE AUTOINCREMENT ON TABLE_NAME
-and 
-ENABLE AUTOINCREMENT ON  TABLE_NAME. 
+and
+ENABLE AUTOINCREMENT ON  TABLE_NAME.
 It may be useful in import/export of data from and to different tables with the same structure, avoiding to break some FK constraint.
 
 Optimization issues:
@@ -238,8 +238,8 @@ Changed behaviour:
 - Extended SELECT @@IDENTITY and Statement.getGeneratedKeys() features to the GUID type.
 - In updatable ResultSet removed the  constraint to set all columns before inserting new rows, even if they are null or autoincrement.
 - Concat character operators (&,+,||) behaviour with null:
-	null & 'thing' -> 'thing'. It gave null in previous versions.
-	null + 'thing' -> 'thing'. It gave null in previous versions.
+    null & 'thing' -> 'thing'. It gave null in previous versions.
+    null + 'thing' -> 'thing'. It gave null in previous versions.
 If you want to switch to the old behaviour, you have to set the new connection property concatnulls=true.
 
 UCanAccess 2.0.9.5 Release
@@ -262,10 +262,10 @@ UCanAccess 2.0.9.4 Release
 This may also allow, in many cases, to use the memory=true setting, whilst it was impossible before.
 It should be set to a value close to the average size of  Ole instances.
 According with the HSQLDB documentation, the values allowed are 1,2,4,8,18,32 (the unit is Kb).
-Default is 2 if memory=true, 32 (hsqldb default) otherwise. 
+Default is 2 if memory=true, 32 (hsqldb default) otherwise.
 
-- Added parameter Skipindexes(default=false), in order to minimize memory occupation. It allows  skipping the creation of  simple, untied to contraints, indexes. 
-It doesn't have effect on referential integrity constraints (i.e.,  Index Unique, Foreign Key or Primary Key).   
+- Added parameter Skipindexes(default=false), in order to minimize memory occupation. It allows  skipping the creation of  simple, untied to contraints, indexes.
+It doesn't have effect on referential integrity constraints (i.e.,  Index Unique, Foreign Key or Primary Key).
 
 -Solved bug related to the ß character, when used in column names.
 -Fixed the error message logged when a db link metadata is broken(for metadata corruption).
@@ -280,10 +280,10 @@ It doesn't have effect on referential integrity constraints (i.e.,  Index Unique
 
 UCanAccess 2.0.9.3 Release
 ======================
--Upgrade to jackcess 2.0.8 
+-Upgrade to jackcess 2.0.8
 -Fixed console output(it sometime showed correctly loaded queries in the list of the queries it wasn't able to load)
 -Fixed issues that may happen with few unregistred keywords(e.g. 'cardinality')  if used as column name with a default value.
-Those keywords didn't have any effect on SQL, except for the particular case above.  
+Those keywords didn't have any effect on SQL, except for the particular case above.
 -Fixed Connection setSavepoint(String spn) method(setSavepoint only worked fine with no-arguments);
 -Fixed "Create table as select ..." DDL statement when using with a group by clause with two or more columns.
 -Allowed DDL with PreparedStatement(for ORM libraries' use)
@@ -294,35 +294,35 @@ Logs about on-disk database were shown when program terminates (long after the l
 -Added mirrorFolder connection parameter that forces memory=false and allows users to set the directory in which the mirror db will be created.
 Simply set this parameter to java.io.tmpdir in order to specify the system temp folder for that.
 -Fixed residual issue (access 2007) creating new tables on NOT NULL property
--Added orderJet function to allow compliance with Jet sorting logic that skip hyphen minus '-', en dash '–', em dash '—'  
+-Added orderJet function to allow compliance with Jet sorting logic that skip hyphen minus '-', en dash '–', em dash '—'
 and  in the middle of a string:
 i.e. even  if "-" comes before  "/"
 and "a-" before  "a/"
 and "a- b" before  "a/ b"
-	unexpectedly, likely to handle compound words "a/b" comes before "a-b"
+    unexpectedly, likely to handle compound words "a/b" comes before "a-b"
  WORKAROUND suggested: if you want the same behaviour of Access: select * from table2 order by orderJet( COLUMN1).
 
 
 
 UCanAccess 2.0.9.2 Release
 ======================
--Upgrade to jackcess 2.0.6. 
--Fixed methods getErrorCode and getSQLState in the UCanAccess SQLException  implementation (class UcanaccessSQLException). 
-SQL error codes and states are those gotten from hsqldb (you can handle them by using the constants in  net.ucanaccess.jdbc.UcanaccessErrorCodes) 
+-Upgrade to jackcess 2.0.6.
+-Fixed methods getErrorCode and getSQLState in the UCanAccess SQLException  implementation (class UcanaccessSQLException).
+SQL error codes and states are those gotten from hsqldb (you can handle them by using the constants in  net.ucanaccess.jdbc.UcanaccessErrorCodes)
 except for the internal UCanAccess or Jackcess exceptions that always give the  error code  UcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR.
 
 UCanAccess 2.0.9.1 Release
 ======================
 -Now UCanAccess completely supports calculated fields, even in insert and/or update statements.
 -Speeded the first connection (loading time) when dealing with large databases, especially with the memory=false. Optimized the use of resources(memory, filesystem).
--Upgrade to jackcess 2.0.5. A later fix from the jackcess trunk to the 2.0.5 release  has been included in this distribution. 
- It's limited to the class LongValueColumnImpl and it's about empty memo values. Source file version: http://svn.code.sf.net/p/jackcess/code/jackcess/trunk/src/main/java/com/healthmarketscience/jackcess/impl/LongValueColumnImpl.java?p=884. 
+-Upgrade to jackcess 2.0.5. A later fix from the jackcess trunk to the 2.0.5 release  has been included in this distribution.
+ It's limited to the class LongValueColumnImpl and it's about empty memo values. Source file version: http://svn.code.sf.net/p/jackcess/code/jackcess/trunk/src/main/java/com/healthmarketscience/jackcess/impl/LongValueColumnImpl.java?p=884.
 
 
 UCanAccess 2.0.9 Release
 ======================
 -A major issue, involving some already damaged mdb, has been solved: the data of some table could be partially loaded with the previous UCanAccess versions.
-A table in an access database has a row count in its metadata(saved in the database), and this issue was due to a misalignment between row count in the metadata and the real number of table rows. 
+A table in an access database has a row count in its metadata(saved in the database), and this issue was due to a misalignment between row count in the metadata and the real number of table rows.
 So, it has been fixed in UCanAccess 2.0.9 by avoiding to rely on this metadata information while loading data.
 Also, UCanAccess 2.0.9 will raise a warning in these cases, suggesting to repair the mdb file.
 -Strongly improved the UCanAccess behaviour in the case of multiple processes concurrency.
@@ -331,23 +331,23 @@ e.g., jdbc:ucanaccess://c:/db/cico.mdb;COLUMNORDER=DISPLAY. Once a column order 
 connection to a given database, the column order setting will be the same for all the following connections to that database, in the whole VM life.
 -Allowed special characters and blank spaces in DDL.
 Column and table names, in this specific case, are not more escaped in the persisted table definition on the access file, but just in the mirror hsqldb database.
-e.g. CREATE TABLE [result ccc]( [aa a()] autoincrement PRIMARY KEY, [---bghhaaf b aa] text(222) default 'vvv')
+e.g. CREATE TABLE [result ccc]( [aa a()] autoincrement PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')
 DROP TABLE [result ccc]
 Notice that you have to use square brackets or backtick around the column/table name.
--Allowed the use of the "autoincrement" keyword as "counter" synonymous in DDL. 
+-Allowed the use of the "autoincrement" keyword as "counter" synonymous in DDL.
 -Implemented @@IDENTITY: SELECT @@IDENTITY query will return the latest generated key in the context of the current connection.
 -Implemented Statement.getGeneratedKeys(): it returns the latest  key generated by the statement.
--Allowed filtering on complex type columns(version, attachment, multi-value). 
+-Allowed filtering on complex type columns(version, attachment, multi-value).
  You can do that through one of the following functions: Equals, EqualsIgnoreOrder, Contains. For more details see the UCanAccess web site.
 -Implemented Partition function.
 -Added support to PreparedStatement.setTime
 
 UCanAccess 2.0.8 Release
 ======================
--Added support to not standard syntax(accepted by MS Access) DELETE * FROM TABLENAME 
+-Added support to not standard syntax(accepted by MS Access) DELETE * FROM TABLENAME
 (besides the always supported standard syntax DELETE  FROM TABLENAME).
--Fixed behaviour when the USER SQL keyword is used as column name. 
-You still need to escape it using square brackets, to avoid ambiguity(e.g. SELECT [USER] FROM USERS). 
+-Fixed behaviour when the USER SQL keyword is used as column name.
+You still need to escape it using square brackets, to avoid ambiguity(e.g. SELECT [USER] FROM USERS).
 Notice that the user keyword, in general, refers to the database user.
 -Fixed bug  that could have effect, in the previous versions, on delete and update statements, when a SQL keyword is used as table name.
 
@@ -356,14 +356,14 @@ UCanAccess 2.0.7.1 Release
 -Fix bug on byte type management (when the byte value is between 128 and 255).
 -Strongly enhanced  implementation of calculated fields (support to power operator ^, return type management, fixed rounding bug in operations involving  integer literals and so on).
  Nevertheless tables with one or more  calculated  field are still marked as read-only, waiting for an enhanced I/O support.
-	Also notice that calculated fields values are currently "calculated on fly" (that's, for the moment, just a simulation) and they aren't read from the database through jackcess. 
-	As result, elaborating the expressions that depend on the Regional Settings(e.g character string parsed to date value), there could be a difference between UCanAccess  output and the value saved in the database, 
-	if  data were inserted with a locale setting and then they are read with another one.
+    Also notice that calculated fields values are currently "calculated on fly" (that's, for the moment, just a simulation) and they aren't read from the database through jackcess.
+    As result, elaborating the expressions that depend on the Regional Settings(e.g character string parsed to date value), there could be a difference between UCanAccess  output and the value saved in the database,
+    if  data were inserted with a locale setting and then they are read with another one.
 -Added financial functions (PMT, NPER, IPMT, PPMT, RATE, PV, FV, DDB, SYD, SLN), SQR and FIX function.
 -Treated some more "special characters" (e.g. °) in column and table names.
 -Fix bugs on DATEVALUE function (internationalisation).
--Overloading  of all "date functions", so that they can accept a string (VARCHAR) instead of a date as argument. 
-Nevertheless keep in mind that this kind of calls forces a parsing operation, with a result which depend on the regional settings (locale), 
+-Overloading  of all "date functions", so that they can accept a string (VARCHAR) instead of a date as argument.
+Nevertheless keep in mind that this kind of calls forces a parsing operation, with a result which depend on the regional settings (locale),
 so you had better use the # delimiters and thus pass a date value instead of a character string.
 
 UCanAccess 2.0.7 Release
@@ -375,21 +375,21 @@ UCanAccess 2.0.7 Release
 
 UCanAccess 2.0.6.3 Release
 ======================
--Fix bugs on Format and IsNumeric functions implementation: fixed  the internationalization of numeric values, introduced internationalization (related to the current locale ) in the formatting of date values,  
+-Fix bugs on Format and IsNumeric functions implementation: fixed  the internationalization of numeric values, introduced internationalization (related to the current locale ) in the formatting of date values,
  rounding mode "Round Half Up"  for numeric values when a pattern is passed as argument
-(e.g., format(48.1425,'.###') gives the string 48.143 as result).  
+(e.g., format(48.1425,'.###') gives the string 48.143 as result).
 -Fix bug on Int function: now it returns an Integer value (in previous versions it wrongly returned a short).
--Added ResultSet.deleteRow implementation. 
+-Added ResultSet.deleteRow implementation.
 
 
 UCanAccess 2.0.6.2 Release
 ======================
--Fix bugs on DDL implementation (in the previous version a Unique Key  was created instead of a Primary Key, issue using a space string " " as default value, multiple columns Primary Key). 
+-Fix bugs on DDL implementation (in the previous version a Unique Key  was created instead of a Primary Key, issue using a space string " " as default value, multiple columns Primary Key).
 -Driver version read directly from the manifest file (Package.getImplementationVersion()),  pom.xml modified to include default implementation entries in the manifest file.
 
 UCanAccess 2.0.6.1 Release
 ======================
--Fix bug on batch implementation: consecutive SQL update operations on the same record using executeBatch(). 
+-Fix bug on batch implementation: consecutive SQL update operations on the same record using executeBatch().
 -Fix bug on saving column "required" property,in the case of autonumber type columns.
 -Fix bug on boolean type management (the handling of null values  is different between Access and hsqldb).
 
@@ -428,10 +428,10 @@ Fix bug release.
 
 UCanAccess 2.0.3 Release
 ======================
--Changed UCanAccess behaviour in handling (incorrect) default column values with a size greater than the column size. 
+-Changed UCanAccess behaviour in handling (incorrect) default column values with a size greater than the column size.
 UCanAccess has now the same behaviour of Access: a data truncation error will be thrown  at the real attempt to insert an incorrect value  and no more at the accdb/mdb opening
 (or, in other words, at the first connection).
--Improved performances in conversions. In the precedent versions, UCanAccess  ran slow in some particular case, 
+-Improved performances in conversions. In the precedent versions, UCanAccess  ran slow in some particular case,
 e.g., sql statement not parametric(not Prepared Statement), with a very long string containing a double quote (") character.
 -Fixed bug in handling column name with both numbers and spaces (e.g. 'bla 1err').
 -Fixed bug related to numbers passed in scientific notation when not using a PreparedStatement.
@@ -439,12 +439,12 @@ e.g., sql statement not parametric(not Prepared Statement), with a very long str
 
 UCanAccess 2.0.2 Release
 ====================
--Added connection parameter remap. It allows to remap the paths to one or more external linked databases. The syntax is: 
+-Added connection parameter remap. It allows to remap the paths to one or more external linked databases. The syntax is:
 jdbc:ucanaccess://C:/db/<main db>remap=<original db1 path>|<new db1 path>&<original i-db path>|<new i-db path>
 e.g.,
-jdbc:ucanaccess://C:/db/main.mdb;remap=c:\db\linkee1.mdb|C:\pluto\linkee1.mdb&c:\db\linkee2.mdb|C:\pluto\linkee2.mdb. 
+jdbc:ucanaccess://C:/db/main.mdb;remap=c:\db\linkee1.mdb|C:\pluto\linkee1.mdb&c:\db\linkee2.mdb|C:\pluto\linkee2.mdb.
 Original path and new path must be separated by '|', different pairs must by separated by '&'.;
--Added parameter keepMirror for keeping the mirror hsqldb database after the VM ends and so for reusing it in the following VM process. 
+-Added parameter keepMirror for keeping the mirror hsqldb database after the VM ends and so for reusing it in the following VM process.
 It should be used with very large databases (e.g., 1GB with many OLE binary data) and when UCanaccess takes too time to establish the first connection.
 -Added support for ISO no roman characters and euro symbol in column and table names.
 -Added "END" to the keywords list.
@@ -453,14 +453,14 @@ It should be used with very large databases (e.g., 1GB with many OLE binary data
 UCanAccess 2.0.1 Release
 ====================
 -Added support for persisting the column properties defined  in create table statements: default column value and nullability(i.e. required property).
-Supported both constants and functions as default values 
-(e.g., CREATE TABLE AAA ( baaaa text PRIMARY KEY,A long   default 3 not null, C text(255) not null, d DATETIME default now(), e text default 'bla'))
+Supported both constants and functions as default values
+(e.g., CREATE TABLE AAA (baaaa TEXT PRIMARY KEY, A LONG DEFAULT 3 NOT NULL, C TEXT(255) NOT NULL, d DATETIME DEFAULT now(), e TEXT DEFAULT 'bla'))
 -Fix method closeOnCompletion of UcanaccessStatement (patch missed in the 2.0.0).
 
 UCanAccess 2.0.0 Release
 ====================
 -jackcess upgrade to version 2.0.1. So UCanAccess 2.0.0 is compliant with jackcess2 API
--implemented backtick character (`) for escaping identifiers including blank characters(as alternative of using square brackets) 
+-implemented backtick character (`) for escaping identifiers including blank characters(as alternative of using square brackets)
 -fixed major bug on update and delete statements on tables having one or more column names that contain a blank character: it caused a de-sync between hsqldb and the access file
 -fixed interfacing problem about using UCanAccess from Open Office or Libre Office (the office tools, in some cases, weren't able to open few tables)
 -fixed problem about turning off jackcess logging

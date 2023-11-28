@@ -13,7 +13,7 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        executeStatements("CREATE TABLE t_key ( Z COUNTER PRIMARY KEY, B char(4) )");
+        executeStatements("CREATE TABLE t_key (Z COUNTER PRIMARY KEY, B CHAR(4))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -29,14 +29,14 @@ class GeneratedKeys1Test extends UcanaccessBaseTest {
             assertEquals(1, rs.getInt(1));
         }
 
-        try (PreparedStatement ps2 = ucanaccess.prepareStatement("Select @@identity")) {
+        try (PreparedStatement ps2 = ucanaccess.prepareStatement("SELECT @@identity")) {
             ResultSet rs2 = ps2.executeQuery();
             rs2.next();
             assertEquals(1, rs2.getInt(1));
             UcanaccessStatement st = ucanaccess.createStatement();
             st.execute("INSERT INTO t_key (B) VALUES ('W')");
 
-            checkQuery("Select @@identity", singleRec(2));
+            checkQuery("SELECT @@identity", singleRec(2));
             ResultSet rs3 = st.getGeneratedKeys();
             rs3.next();
             assertEquals(2, rs3.getInt(1));

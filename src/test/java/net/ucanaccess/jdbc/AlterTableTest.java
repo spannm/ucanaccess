@@ -61,7 +61,7 @@ class AlterTableTest extends UcanaccessBaseTest {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "ALTER TABLE AAAn RENAME TO [GIà GIà]",
-                "INSERT INTO [GIà GIà] (baaaa) values('chi')");
+                "INSERT INTO [GIà GIà] (baaaa) VALUES('chi')");
             checkQuery("SELECT * FROM [GIà GIà] ORDER BY c");
             dumpQueryResult("SELECT * FROM [GIà GIà] ORDER BY c");
             st.execute("ALTER TABLE [GIà GIà] RENAME TO [22 alterTableTest123]");
@@ -210,10 +210,10 @@ class AlterTableTest extends UcanaccessBaseTest {
             String tableToBeReferenced = "PersonsTable";
             String tableWithTheReferences = "RelationShipsTable";
 
-            st.execute("CREATE TABLE " + tableToBeReferenced + " (ID AUTOINCREMENT NOT NULL PRIMARY KEY, "
+            st.execute("CREATE TABLE " + tableToBeReferenced + " (id AUTOINCREMENT NOT NULL PRIMARY KEY, "
                 + "Name VARCHAR(255))");
 
-            st.execute("CREATE TABLE " + tableWithTheReferences + " (ID LONG NOT NULL PRIMARY KEY, "
+            st.execute("CREATE TABLE " + tableWithTheReferences + " (id LONG NOT NULL PRIMARY KEY, "
                 + "RelationShip VARCHAR(255) NOT NULL DEFAULT 'FRIENDS', "
                 + "Person1Id LONG NOT NULL, "
                 + "Person2Id LONG NOT NULL)");
@@ -221,12 +221,12 @@ class AlterTableTest extends UcanaccessBaseTest {
             // reference #1
             st.execute("ALTER TABLE " + tableWithTheReferences
                 + " ADD CONSTRAINT FOREIGN_KEY_1 FOREIGN KEY (Person1Id) REFERENCES "
-                + tableToBeReferenced + "(ID) ON DELETE CASCADE");
+                + tableToBeReferenced + "(id) ON DELETE CASCADE");
 
             // reference #2
             st.execute("ALTER TABLE " + tableWithTheReferences
                 + " ADD CONSTRAINT FOREIGN_KEY_2 FOREIGN KEY (Person2Id) REFERENCES "
-                + tableToBeReferenced + "(ID) ON DELETE CASCADE");        }
+                + tableToBeReferenced + "(id) ON DELETE CASCADE");        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -241,11 +241,11 @@ class AlterTableTest extends UcanaccessBaseTest {
             st.execute("ALTER TABLE tx ADD COLUMN [Is Pippo] TEXT(100) ");
             st.execute("ALTER TABLE tx ADD COLUMN [Is not Pippo] TEXT DEFAULT \"what's this?\"");
 
-            st.execute("CREATE TABLE tx1 (n1 long, [n 2] text)");
-            st.execute("ALTER TABLE tx1 add primary key (n1, [n 2])");
+            st.execute("CREATE TABLE tx1 (n1 LONG, [n 2] TEXT)");
+            st.execute("ALTER TABLE tx1 ADD PRIMARY KEY (n1, [n 2])");
             st.execute("ALTER TABLE tx ADD FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE CASCADE");
-            st.execute("INSERT INTO tx1 values(1,\"ciao\")");
-            st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1, 2, \"ciao\")");
+            st.execute("INSERT INTO tx1 VALUES(1,\"ciao\")");
+            st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
             checkQuery("SELECT COUNT(*) FROM tx", singleRec(1));
             st.execute("DELETE FROM tx1");
             checkQuery("SELECT COUNT(*) FROM tx");
@@ -265,7 +265,7 @@ class AlterTableTest extends UcanaccessBaseTest {
             checkQuery("SELECT * FROM tx", singleRec(1, null, 2.0, null, "what's this?"));
             st.execute("CREATE UNIQUE INDEX IDX111 ON tx ([my best friend])");
 
-            assertThatThrownBy(() -> st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) values(1, 2, \"ciao\")"))
+            assertThatThrownBy(() -> st.execute("INSERT INTO tx ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")"))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageContaining("integrity constraint violation: foreign key no parent");
         }

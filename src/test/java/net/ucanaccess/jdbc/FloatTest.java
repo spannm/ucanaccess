@@ -27,7 +27,7 @@ class FloatTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         checkQuery("SELECT [row] FROM t_float ORDER BY pk");
-        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_float (row) values(?)");
+        PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_float (row) VALUES(?)");
         ps.setFloat(1, 1.4f);
         ps.execute();
         checkQuery("SELECT [row] FROM t_float ORDER BY pk");
