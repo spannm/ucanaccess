@@ -1,20 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import java.sql.SQLException;
+import java.sql.ResultSet;
 
-public class DeleteResultSet extends AbstractExecute {
-    protected DeleteResultSet(UcanaccessResultSet resultSet) {
-        super(resultSet);
+public class DeleteResultSet extends AbstractExecuteResultSet {
+
+    protected DeleteResultSet(UcanaccessResultSet _resultSet) {
+        super(_resultSet, ResultSet::deleteRow);
     }
 
-    public void execute() throws SQLException {
-        executeBase();
-    }
-
-    @Override
-    public Object executeWrapped() throws SQLException {
-        super.getWrappedResultSet().deleteRow();
-        return true;
-
-    }
 }
