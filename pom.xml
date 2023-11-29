@@ -24,16 +24,17 @@
 
     <licenses>
         <license>
-            <name>Apache 2.0</name>
+            <name>The Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <id>spannm</id>
+            <id>${developerId}</id>
             <name>Markus Spann</name>
             <email>spannm@outlook.de</email>
+            <organizationUrl>https://github.com/${developerId}/</organizationUrl>
         </developer>
 
         <developer>
@@ -51,18 +52,32 @@
                 <role>developer emeritus</role>
             </roles>
         </developer>
-        <developer>
-            <name>Brian Park</name>
-            <email>btpark@users.sf.net</email>
-            <roles>
-                <role>contributor emeritus</role>
-            </roles>
-        </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
+        <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <project.build.systemJdk>11</project.build.systemJdk>
         <project.build.targetJdk>11</project.build.targetJdk>
+
+        <developerId>spannm</developerId>
 
         <dep.jackcess.version>4.0.5</dep.jackcess.version>
 
@@ -264,6 +279,66 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <configuration>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <useReleaseProfile>false</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
+                            <goals>deploy</goals>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <configuration>
+                            <executable>gpg</executable>
+                            <!--passphrase>${gpg.passphrase}</passphrase-->
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                 </plugins>
             </build>
         </profile>
