@@ -8,7 +8,7 @@
         <version>56</version>
     </parent>
 
-    <groupId>com.github.spannm</groupId>
+    <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
     <version>5.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
