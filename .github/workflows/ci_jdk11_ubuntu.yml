@@ -21,5 +21,12 @@ jobs:
                 java-version: '11'
                 distribution: temurin
                 cache: maven
+                # must match distributionManagement/snapshotRepository/id in pom:
+                server-id: sonatype-nexus-snapshots
+                server-username: SONATYPE_OSSRH_USERNAME
+                server-password: SONATYPE_OSSRH_PASSWORD
         -   name: Build with Maven/JDK 11
-            run: mvn -B clean verify --file pom.xml
+            run: mvn -B clean deploy --file pom.xml
+            env:
+                SONATYPE_OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
+                SONATYPE_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
