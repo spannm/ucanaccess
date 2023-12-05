@@ -5,6 +5,7 @@ import static net.ucanaccess.converters.Metadata.Property.*;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.log.Logger;
+import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
