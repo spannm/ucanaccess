@@ -58,7 +58,6 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
@@ -91,6 +90,7 @@
         <dep.assertj.version>3.24.2</dep.assertj.version>
         <dep.mockito.version>5.8.0</dep.mockito.version>
 
+        <dep.plugin.sortpom.version>3.3.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
 
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
@@ -219,6 +219,7 @@
                 <plugin>
                     <groupId>com.github.ekryd.sortpom</groupId>
                     <artifactId>sortpom-maven-plugin</artifactId>
+                    <version>${dep.plugin.sortpom.version}</version>
                     <configuration>
                         <createBackupFile>false</createBackupFile>
                         <expandEmptyElements>false</expandEmptyElements>
