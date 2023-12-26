@@ -82,7 +82,7 @@
         <dep.jackcess.version>4.0.5</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
-        <dep.hsqldb.classifier>debug</dep.hsqldb.classifier>
+        <dep.hsqldb.classifier></dep.hsqldb.classifier>
 
         <dep.slf4j.version>2.0.9</dep.slf4j.version>
 
