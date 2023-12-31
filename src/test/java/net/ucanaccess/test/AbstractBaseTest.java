@@ -84,7 +84,8 @@ public abstract class AbstractBaseTest extends Assertions {
         if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
             getLogger().info(">>>>>>>>>> {} Test: {} <<<<<<<<<<", _prefix, _testInfo.getDisplayName());
         } else {
-            getLogger().info(">>>>>>>>>> {} Test: {} ({}) <<<<<<<<<<", _prefix, _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
+            getLogger().info(">>>>>>>>>> {} Test: {} ({}) <<<<<<<<<<",
+                _prefix, _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
         }
     }
 

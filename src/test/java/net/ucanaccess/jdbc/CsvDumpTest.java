@@ -30,8 +30,10 @@ class CsvDumpTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO t_csv (id, text_field, text_field2, memo_field, byte_field, boolean_field, double_field, currency_field, date_field) "
-                + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, 9.12345, 3.1234567, #2017-01-01 00:00:00#)");
+            st.execute("INSERT INTO t_csv (id, text_field, text_field2, memo_field, byte_field, boolean_field, "
+                + "double_field, currency_field, date_field) "
+                + "VALUES(1, 'embedded delimiter(;)', 'double-quote(\")', 'embedded newline(\n)', 2, true, "
+                + "9.12345, 3.1234567, #2017-01-01 00:00:00#)");
         }
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -44,8 +46,8 @@ class CsvDumpTest extends UcanaccessBaseTest {
             String actual = baos.toString(StandardCharsets.UTF_8);
             assertEquals("id;text_field;text_field2;memo_field;byte_field;boolean_field;double_field;"
                 + "currency_field;date_field" + System.lineSeparator()
-                + "1;\"embedded delimiter(;)\";\"double-quote(\"\")\";embedded newline( );2;true;9.12345;3.1235;" + "2017-01-01 00:00:00" + System.lineSeparator(),
-                actual);
+                + "1;\"embedded delimiter(;)\";\"double-quote(\"\")\";embedded newline( );2;true;9.12345;3.1235;"
+                + "2017-01-01 00:00:00" + System.lineSeparator(), actual);
         }
 
     }

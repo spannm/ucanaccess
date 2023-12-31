@@ -62,7 +62,8 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     public UcanaccessSQLException(String _reason, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+        super(_reason == null ? null : Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR,
+            IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState) {

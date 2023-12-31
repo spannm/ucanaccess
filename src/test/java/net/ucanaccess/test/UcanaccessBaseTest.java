@@ -111,7 +111,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 } else {
                     if (actualObj instanceof Blob) {
 
-                        byte[] barrActual = Try.withResources((Blob.class.cast(actualObj))::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrActual = Try.withResources(Blob.class.cast(actualObj)::getBinaryStream,
+                            InputStream::readAllBytes).orThrow(UncheckedIOException::new);
                         byte[] barrExpected = (byte[]) expectedObj;
                         for (int y = 0; y < barrExpected.length; y++) {
                             assertEquals(barrExpected[y], barrActual[y]);
@@ -164,11 +165,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (objActual == null && objExpected == null) {
                     continue;
                 } else if (objActual == null) {
-                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + col + " should be null, but was: " + objExpected + " in [" + _query + "]");
+                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + col + " should be null, but was: "
+                        + objExpected + " in [" + _query + "]");
                 } else {
                     if (objActual instanceof Blob) {
-                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes)
+                            .orThrow(UncheckedIOException::new);
+                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes)
+                            .orThrow(UncheckedIOException::new);
                         for (int y = 0; y < barrExpected.length; y++) {
                             assertEquals(barrExpected[y], barrActual[y]);
                         }

@@ -1127,8 +1127,8 @@ public final class SQLConverter {
         return j + 1;
     }
 
-    public static int asUnsigned(byte a) {
-        int b = a & 0xFF;
+    public static int asUnsigned(byte _a) {
+        int b = _a & 0xFF;
         return b;
     }
 

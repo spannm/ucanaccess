@@ -57,7 +57,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testNz(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT NZ(null,'lampredotto'), nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t_funcs", singleRec("lampredotto", "turtelaz", 1.5, 2));
+        checkQuery("SELECT NZ(null,'lampredotto'), nz('turtelaz','lampredotto'), nz(null, 1.5), nz(2, 2) FROM t_funcs",
+            singleRec("lampredotto", "turtelaz", 1.5, 2));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -212,7 +213,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testIif(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'), IIf(IsNull(descr)=true,'pippo','pl''uto'&'\" \" cccc') FROM t_funcs", singleRec("pl'uto\" \" cccc", "pl'uto\" \" cccc"));
+        checkQuery("SELECT IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'), IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc') "
+            + "FROM t_funcs", singleRec("pl'uto\" \" cccc", "pl'uto\" \" cccc"));
         checkQuery("SELECT IIf(true, false, true) FROM t_funcs", singleRec(false));
         checkQuery("SELECT IIf('pippo'=null, 'capra', 'd''una capra') FROM t_funcs", singleRec("d'una capra"));
     }
@@ -431,8 +433,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testVal(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT val('0.'), Val('hhh'), val('.a'), val('.'), val('.44'), Val('1222.3hhh'), Val('12 22.3hhh'), VAL('-'), VAL('-2,3') FROM t_funcs",
-            singleRec(0.0, 0.0, 0.0, 0.0, 0.44, 1222.3, 1222.3, 0.0, -2.0));
+        checkQuery("SELECT val('0.'), Val('hhh'), val('.a'), val('.'), val('.44'), Val('1222.3hhh'), Val('12 22.3hhh'), VAL('-'), VAL('-2,3') "
+            + "FROM t_funcs", singleRec(0.0, 0.0, 0.0, 0.0, 0.44, 1222.3, 1222.3, 0.0, -2.0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -491,7 +493,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT DateSerial(1998,5, 10) FROM t_funcs", recs(rec(sdf.parse("1998-05-10 00:00:00"))));
-        checkQuery("SELECT 'It works, I can''t believe it.' FROM t_funcs" + " WHERE #05/13/1992#=dateserial(1992,05,13)", singleRec("It works, I can't believe it."));
+        checkQuery("SELECT 'It works, I can''t believe it.' FROM t_funcs" + " WHERE #05/13/1992#=dateserial(1992,05,13)",
+            singleRec("It works, I can't believe it."));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -650,7 +653,9 @@ class FunctionsTest extends UcanaccessBaseTest {
     @EnumSource(value = AccessVersion.class)
     void testFinancial(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), IPmt(0.5,4,8,10*1,10000,0.5), PV(0,4,-10000,1000,-1.55),PPmt(0.5,3,7,100000,15000.1),SLN(10000,110000,9),SYD(10000,200,12,4),Pmt(0.08,30,5000,-15000,0.1) FROM t_funcs",
+        checkQuery("SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), "
+            + "IPmt(0.5,4,8,10*1,10000,0.5), PV(0,4,-10000,1000,-1.55), PPmt(0.5,3,7,100000,15000.1), SLN(10000,110000,9), "
+            + "SYD(10000,200,12,4), Pmt(0.08,30,5000,-15000,0.1) FROM t_funcs",
             singleRec(20000.0, 2234.68083152805, -7.721791247488574, 477.63917525773195, 39000.0, -8042.7461874696455, -11111.111111111111, 1130.7692307692307, -311.72566612727735));
         checkQuery("SELECT Rate(3,200,-610,0,-20,0.1) FROM t_funcs", singleRec(-0.01630483472667564));
     }

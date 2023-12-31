@@ -25,7 +25,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 

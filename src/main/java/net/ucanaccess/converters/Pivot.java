@@ -23,6 +23,10 @@ public class Pivot {
         Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
     private static final Pattern                   PIVOT_CN_PATT    = Pattern.compile("[\"'#](.*)[\"'#]");
     private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
+
+    private static final Map<String, String>       PIVOT_MAP        = new HashMap<>();
+    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<>();
+
     private String                                 transform;
     private String                                 select;
     private String                                 from;
@@ -33,8 +37,6 @@ public class Pivot {
     private Connection                             conn;
     private boolean                                pivotInCondition = true;
     private String                                 originalQuery;
-    private static final Map<String, String>       PIVOT_MAP        = new HashMap<>();
-    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<>();
 
     public Pivot(Connection _conn) {
         conn = _conn;

@@ -58,7 +58,7 @@ public class DDLCommandEnlist {
                     }
                 }
                 c4io = new CreateTableCommand(tn, execId, columnMap);
-            } catch (Exception ignore) {
+            } catch (Exception _ignored) {
                 c4io = new CreateTableCommand(tn, execId);
             }
 
@@ -202,38 +202,37 @@ public class DDLCommandEnlist {
         }
     }
 
-    private String[] checkEscaped(String _ll, String rl, String[] colDecls, String tknt) {
-        if (colDecls[0].startsWith(_ll) && tknt.indexOf(rl, 1) > 0) {
-            for (int k = 0; k < colDecls.length; k++) {
-                if (colDecls[k].endsWith(rl)) {
-                    String[] colDecls0 = new String[colDecls.length - k];
-                    colDecls0[0] = tknt.substring(1, tknt.substring(1).indexOf(rl) + 1);
+    private String[] checkEscaped(String _ll, String _rl, String[] _colDecls, String _tknt) {
+        if (_colDecls[0].startsWith(_ll) && _tknt.indexOf(_rl, 1) > 0) {
+            for (int k = 0; k < _colDecls.length; k++) {
+                if (_colDecls[k].endsWith(_rl)) {
+                    String[] colDecls0 = new String[_colDecls.length - k];
+                    colDecls0[0] = _tknt.substring(1, _tknt.substring(1).indexOf(_rl) + 1);
                     for (int y = 1; y < colDecls0.length; y++) {
-                        colDecls0[y] = colDecls[y + k];
+                        colDecls0[y] = _colDecls[y + k];
                     }
-                    colDecls = colDecls0;
+                    _colDecls = colDecls0;
                     break;
                 }
             }
         }
-        return colDecls;
+        return _colDecls;
     }
 
-    private void parseColumnTypes(List<String> typeList, List<String> defaultList,
-            List<Boolean> notNullList, String tknt) {
+    private void parseColumnTypes(List<String> _typeList, List<String> _defaultList, List<Boolean> _notNullList, String _tknt) {
 
-        String[] colDecls = tknt.split("[\\s\n\r]+");
-        colDecls = checkEscaped("[", "]", colDecls, tknt);
-        colDecls = checkEscaped("`", "`", colDecls, tknt);
+        String[] colDecls = _tknt.split("[\\s\n\r]+");
+        colDecls = checkEscaped("[", "]", colDecls, _tknt);
+        colDecls = checkEscaped("`", "`", colDecls, _tknt);
         String escaped = SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()) ? colDecls[0].toUpperCase()
                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
         columnMap.put(escaped, colDecls[0]);
 
         boolean reset = false;
-        if (tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")) {
+        if (_tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")) {
             reset = true;
-            tknt = tknt.substring(tknt.indexOf(')') + 1).trim();
-            colDecls = tknt.split("[\\s\n\r]+");
+            _tknt = _tknt.substring(_tknt.indexOf(')') + 1).trim();
+            colDecls = _tknt.split("[\\s\n\r]+");
         }
 
         if (!reset && colDecls.length < 2) {
@@ -245,38 +244,38 @@ public class DDLCommandEnlist {
                 colDecls[1] = "NUMERIC";
                 decDef = true;
             }
-            typeList.add(colDecls[1]);
+            _typeList.add(colDecls[1]);
 
         }
 
         if ((colDecls.length > 2 || reset && colDecls.length == 2)
                 && "not".equalsIgnoreCase(colDecls[colDecls.length - 2])
                 && "null".equalsIgnoreCase(colDecls[colDecls.length - 1])) {
-            notNullList.add(true);
+            _notNullList.add(true);
         } else if (!decDef) {
-            notNullList.add(false);
+            _notNullList.add(false);
         }
 
         if (!decDef) {
-            defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
+            _defaultList.add(value(SQLConverter.getDDLDefault(_tknt)));
         }
 
-        types = typeList.toArray(new String[0]);
-        defaults = defaultList.toArray(new String[0]);
-        notNulls = notNullList.toArray(new Boolean[0]);
+        types = _typeList.toArray(new String[0]);
+        defaults = _defaultList.toArray(new String[0]);
+        notNulls = _notNullList.toArray(new Boolean[0]);
     }
 
     // getting AUTOINCREMENT and GUID
-    private void parseTypesFromCreateStatement(String sql) throws SQLException {
-        sql = sql.replaceAll("([\\s\n\r]+)((?i)DECIMAL)([\\s\n\r]*\\()", "$1NUMERIC(")
+    private void parseTypesFromCreateStatement(String _sql) throws SQLException {
+        _sql = _sql.replaceAll("([\\s\n\r]+)((?i)DECIMAL)([\\s\n\r]*\\()", "$1NUMERIC(")
                 .replaceAll("([\\s\n\r]+)((?i)NUMERIC)([\\s\n\r]*\\()", "$1NUMERIC(");
-        int startDecl = sql.indexOf('(');
-        int endDecl = sql.lastIndexOf(')');
+        int startDecl = _sql.indexOf('(');
+        int endDecl = _sql.lastIndexOf(')');
 
         if (startDecl >= endDecl) {
             throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
         }
-        String decl = sql.substring(startDecl + 1, endDecl);
+        String decl = _sql.substring(startDecl + 1, endDecl);
         String[] tokens = decl.split(",");
 
         List<String> typeList = new ArrayList<>();
@@ -290,17 +289,17 @@ public class DDLCommandEnlist {
         }
     }
 
-    private String value(String value) {
-        if (value == null) {
+    private String value(String _value) {
+        if (_value == null) {
             return null;
         }
-        if (value.startsWith("\"") && value.endsWith("\"")) {
-            return value.substring(1, value.length() - 1).replace("\"\"", "\"");
+        if (_value.startsWith("\"") && _value.endsWith("\"")) {
+            return _value.substring(1, _value.length() - 1).replace("\"\"", "\"");
         }
-        if (value.startsWith("'") && value.endsWith("'")) {
-            return value.substring(1, value.length() - 1).replace("''", "'");
+        if (_value.startsWith("'") && _value.endsWith("'")) {
+            return _value.substring(1, _value.length() - 1).replace("''", "'");
         }
-        return value;
+        return _value;
     }
 
 }

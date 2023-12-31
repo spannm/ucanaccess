@@ -69,7 +69,7 @@ public class DBReference {
             try {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
-            } catch (Exception ignored) {
+            } catch (Exception _ignored) {
             }
             dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
                 if (linkeeFileName == null) {
@@ -119,8 +119,8 @@ public class DBReference {
         return false;
     }
 
-    public static boolean addOnReloadRefListener(IOnReloadReferenceListener action) {
-        return onReloadListeners.add(action);
+    public static boolean addOnReloadRefListener(IOnReloadReferenceListener _action) {
+        return onReloadListeners.add(_action);
     }
 
     public static String getVersion() {
@@ -139,25 +139,25 @@ public class DBReference {
         return lm;
     }
 
-    Connection checkLastModified(Connection conn, Session session) throws Exception {
+    Connection checkLastModified(Connection _conn, Session _session) throws Exception {
         // I'm detecting if another process(and not another thread) is writing
 
         if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
-            return conn;
+            return _conn;
         }
         updateLastModified();
-        closeHSQLDB(session);
+        closeHSQLDB(_session);
         dbIO.flush();
         dbIO.close();
         dbIO = open(dbFile, pwd);
         id = id();
         firstConnection = true;
-        LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
+        LoadJet lj = new LoadJet(getHSQLDBConnection(_session), dbIO);
         lj.setSkipIndexes(skipIndexes);
         lj.setSysSchema(sysSchema);
         lj.loadDB();
 
-        return getHSQLDBConnection(session);
+        return getHSQLDBConnection(_session);
     }
 
     private boolean checkInside(Database db) throws IOException {
@@ -266,7 +266,7 @@ public class DBReference {
             try (Connection conn = getHSQLDBConnection(_session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
-            } catch (Exception ignored) {
+            } catch (Exception _ignored) {
             }
         }
     }
@@ -283,7 +283,7 @@ public class DBReference {
         try (Statement st = _conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 
-        } catch (Exception ignored) {
+        } catch (Exception _ignored) {
 
         }
     }
@@ -624,8 +624,7 @@ public class DBReference {
                                 && getActiveConnection() == 0) {
                                 try {
                                     dbReference.shutdown(_session);
-                                } catch (Exception ignored) {
-                                    // ignored
+                                } catch (Exception _ignored) {
                                 }
                             }
                         }

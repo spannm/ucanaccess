@@ -244,7 +244,7 @@ public final class UcanaccessDriver implements Driver {
                 return i;
             }
 
-        } catch (Exception ignored) {
+        } catch (Exception _ignored) {
 
         }
         Logger.logWarning(LoggerMessageEnum.LOBSCALE);

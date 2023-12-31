@@ -25,7 +25,7 @@ class ComplexTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testComplex(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
@@ -114,7 +114,7 @@ class ComplexTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testComplexRollback(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -124,7 +124,7 @@ class ComplexTest extends UcanaccessBaseTest {
 
         ucanaccess.setAutoCommit(false);
 
-        int countBefore = getVerifyCount("SELECT COUNT(*) FROM t_complex");
+        final int countBefore = getVerifyCount("SELECT COUNT(*) FROM t_complex");
 
         try (PreparedStatement ps = ucanaccess.prepareStatement(
             "INSERT INTO t_complex(id, [memo-data], [append-memo-data], [multi-value-data], [attach-data]) VALUES (?,?,?,?,?)")) {

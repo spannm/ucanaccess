@@ -80,9 +80,8 @@ public class Main {
 
         try {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        } catch (ClassNotFoundException e) {
-
-            System.err.println(e.getMessage());
+        } catch (ClassNotFoundException _ex) {
+            System.err.println(_ex.getMessage());
             System.err.println("Check your classpath!");
             System.exit(1);
         }
@@ -95,7 +94,7 @@ public class Main {
             if (path.endsWith(";")) {
                 path = path.substring(0, path.length() - 1);
             }
-            if (path.equalsIgnoreCase("quit")) {
+            if ("quit".equalsIgnoreCase(path)) {
                 System.out.println("I'm so unhappy. Goodbye.");
                 System.exit(1);
             }
@@ -230,7 +229,7 @@ public class Main {
             } else {
                 userInput = readInput();
             }
-            if (userInput.equalsIgnoreCase("quit")) {
+            if ("quit".equalsIgnoreCase(userInput)) {
                 connected = false;
                 break;
             }

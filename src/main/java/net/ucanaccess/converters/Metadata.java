@@ -18,7 +18,8 @@ public class Metadata {
     private static final String SCHEMA  = "CREATE SCHEMA UCA_METADATA AUTHORIZATION DBA";
 
     private static final String TABLES  =
-        "CREATE TABLE UCA_METADATA.TABLES(TABLE_ID INTEGER IDENTITY, TABLE_NAME LONGVARCHAR, ESCAPED_TABLE_NAME LONGVARCHAR, TYPE VARCHAR(5), UNIQUE(TABLE_NAME))";
+        "CREATE TABLE UCA_METADATA.TABLES(TABLE_ID INTEGER IDENTITY, TABLE_NAME LONGVARCHAR, "
+            + "ESCAPED_TABLE_NAME LONGVARCHAR, TYPE VARCHAR(5), UNIQUE(TABLE_NAME))";
     private static final String COLUMNS =
         "CREATE MEMORY TABLE UCA_METADATA.COLUMNS(COLUMN_ID INTEGER IDENTITY, COLUMN_NAME LONGVARCHAR, ESCAPED_COLUMN_NAME LONGVARCHAR, "
             + "ORIGINAL_TYPE VARCHAR(20), COLUMN_DEF LONGVARCHAR, IS_GENERATEDCOLUMN VARCHAR(3), TABLE_ID INTEGER, UNIQUE(TABLE_ID, COLUMN_NAME) )";
@@ -230,7 +231,7 @@ public class Metadata {
             ps.setString(3, _originalType);
             ps.setInt(4, _idTable);
             ps.executeUpdate();
-        } catch (SQLException ignored) {
+        } catch (SQLException _ignored) {
 
         }
     }

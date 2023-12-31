@@ -20,7 +20,9 @@ import java.util.*;
 import java.util.concurrent.Executor;
 
 public class UcanaccessConnection implements Connection {
+    static final String                 BATCH_ID      = "BATCH_ID";
     private static ThreadLocal<Context> ctx           = new ThreadLocal<>();
+
     private boolean                     feedbackState;
     private LinkedList<ICommand>        commands      = new LinkedList<>();
     private Connection                  hsqlDBConnection;
@@ -36,13 +38,8 @@ public class UcanaccessConnection implements Connection {
     private Object                      lastGeneratedKey;
     private String                      refId;
 
-    static final String                 BATCH_ID      = "BATCH_ID";
-
     public static synchronized UcanaccessConnection getCtxConnection() {
-        if (ctx == null) {
-            return null;
-        }
-        return ctx.get().getCurrentConnection();
+        return Optional.ofNullable(ctx).map(tl -> tl.get().getCurrentConnection()).orElse(null);
     }
 
     public static synchronized boolean hasContext() {
@@ -273,8 +270,8 @@ public class UcanaccessConnection implements Connection {
 
             afterFlushIoHook();
 
-        } catch (Throwable _t) {
-            Logger.logWarning(_t.toString());
+        } catch (Throwable _ex) {
+            Logger.logWarning(_ex.toString());
             hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -293,13 +290,13 @@ public class UcanaccessConnection implements Connection {
             try {
                 ref.getDbIO().flush();
                 unloadDB();
-            } catch (IOException _ex) {
-                Logger.logWarning(_ex.toString());
+            } catch (IOException _ex2) {
+                Logger.logWarning(_ex2.toString());
             }
-            if (UcanaccessSQLException.class.isInstance(_t)) {
-                throw UcanaccessSQLException.class.cast(_t);
+            if (UcanaccessSQLException.class.isInstance(_ex)) {
+                throw UcanaccessSQLException.class.cast(_ex);
             }
-            throw new UcanaccessSQLException(_t);
+            throw new UcanaccessSQLException(_ex);
         }
 
         try {

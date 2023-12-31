@@ -37,7 +37,9 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
             .withDbPath(dbFile.getAbsolutePath())
             .withProp(Property.keepMirror, mirrorFile.getAbsolutePath())
             .withoutUserPass();
-        try (UcanaccessConnection conn = mirrorBuilder.build()) {}
+        try (UcanaccessConnection conn = mirrorBuilder.build()) {
+            getLogger().debug("Openend and closed mirror connection");
+        }
 
         // do an update without the mirror involved
         try (UcanaccessConnection conn = buildConnection()

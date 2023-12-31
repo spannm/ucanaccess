@@ -31,7 +31,6 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
 
         getLogger().info("Database file successfully created: {}", fileMdb.getAbsolutePath());
 
-
         try (UcanaccessStatement st = conn.createStatement()) {
             executeStatements(st,
                 "CREATE TABLE t_createdb (baaaa TEXT(3) PRIMARY KEY, A LONG DEFAULT 3, C TEXT(4))",

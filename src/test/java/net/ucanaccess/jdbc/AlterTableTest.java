@@ -120,7 +120,8 @@ class AlterTableTest extends UcanaccessBaseTest {
                 .hasMessageContaining("unique constraint or index violation");
             Database db = ucanaccess.getDbIO();
             db.getTable(tbl).getIndexes().stream().filter(Index::isUnique).filter(idx -> "èèè 23".equals(idx.getName())).findFirst()
-                .ifPresentOrElse(idx -> assertThat(idx.getColumns().stream().map(Column::getName)).contains("A", "C"), () -> fail("Unique index not found"));
+                .ifPresentOrElse(idx -> assertThat(idx.getColumns().stream().map(Column::getName)).contains("A", "C"),
+                    () -> fail("Unique index not found"));
 
             st.execute("CREATE INDEX [健 康] on [" + tbl + "] (c DESC)");
             db.getTable(tbl).getIndexes().stream().filter(idx -> !idx.isUnique()).filter(idx -> "健 康".equals(idx.getName())).findFirst()
@@ -226,7 +227,8 @@ class AlterTableTest extends UcanaccessBaseTest {
             // reference #2
             st.execute("ALTER TABLE " + tableWithTheReferences
                 + " ADD CONSTRAINT FOREIGN_KEY_2 FOREIGN KEY (Person2Id) REFERENCES "
-                + tableToBeReferenced + "(id) ON DELETE CASCADE");        }
+                + tableToBeReferenced + "(id) ON DELETE CASCADE");
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -277,18 +279,21 @@ class AlterTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE tx2 (id COUNTER, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), [Is not Pippo] TEXT DEFAULT \"what's this?\")");
+            st.execute("CREATE TABLE tx2 (id COUNTER, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), "
+                + "[Is not Pippo] TEXT DEFAULT \"what's this?\")");
             st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
 
             Map.of(
                 "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY ([i d]) ", "unexpected token: PRIMARY",
                 "ALTER TABLE tx2 ADD COLUMN [my best friend] ", "unexpected end of statement",
-                "ALTER TABLE tx2 ADD CONSTRAINT FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE CASCADE", "type not found or user lacks privilege: FOREIGN",
+                "ALTER TABLE tx2 ADD CONSTRAINT FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE CASCADE",
+                "type not found or user lacks privilege: FOREIGN",
                 "DROP TABLE tx2 CASCADE", "Feature not supported.",
                 "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY (id)", "unexpected token: PRIMARY",
                 "ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported.",
                 "ALTER TABLE tx2 DROP COLUMN [my best friend]", "Feature not supported.",
-                "ALTER TABLE tx2 ADD COLUMN [1 my best friend] LONG NOT NULL", "x2 already contains one or more records(1 records)").entrySet().stream().forEach(
+                "ALTER TABLE tx2 ADD COLUMN [1 my best friend] LONG NOT NULL", "x2 already contains one or more records(1 records)")
+                .entrySet().stream().forEach(
                     e -> {
                         String ddl = e.getKey();
                         String expectedMessage = e.getValue();

@@ -65,6 +65,6 @@ class NotNullDdlTest extends UcanaccessBaseTest {
                 .contains("t_nnd.txt_required");
         }
 
-
     }
+
 }

@@ -19,7 +19,7 @@ class Size97Test extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testSize(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

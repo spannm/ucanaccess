@@ -18,7 +18,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testFunctionBuiltInCall(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
@@ -28,7 +28,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
             // clcd2: LEFT$([input];3)
             // clcd3: RIGHT([input];3)
             // clcd4: RIGHT$([input];3)
-            
+
             st.execute("INSERT INTO clcdFlds (input) VALUES ('my')");
             st.execute("INSERT INTO clcdFlds (input) VALUES ('myc')");
             st.execute("INSERT INTO clcdFlds (input) VALUES ('mycat')");
@@ -52,7 +52,7 @@ class CalculatedFieldTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode=Mode.INCLUDE, names = {"V2010"})
+    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
     void testCalculatedFieldNameContainsPercentSign(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

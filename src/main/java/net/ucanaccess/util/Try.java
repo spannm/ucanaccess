@@ -239,7 +239,8 @@ public final class Try<V, EC extends Throwable> {
     }
 
     /**
-     * If an exception has occurred, executes {@code _function} with the exception as parameter to retrieve an alternative value, otherwise returns the value.
+     * If an exception has occurred, executes {@code _function} with the exception as parameter
+     * to retrieve an alternative value, otherwise returns the value.
      * @param _function function to execute in case of exception. The exception object is passed to the function.
      * @return the successful value or value returned by the function
      */

@@ -90,7 +90,7 @@ public class DFunction {
                     sql0 = sql0.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun), sb.toString());
                 }
             }
-        } catch (SQLException ignored) {
+        } catch (SQLException _ignored) {
         }
         return sql0;
     }

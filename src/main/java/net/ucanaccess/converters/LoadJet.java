@@ -368,7 +368,7 @@ public class LoadJet {
         private void createSyncrTable(Table _t, boolean _systemTable, boolean _constraints) throws SQLException, IOException {
 
             String tn = _t.getName();
-            if (tn.equalsIgnoreCase("DUAL")) {
+            if ("DUAL".equalsIgnoreCase(tn)) {
                 SQLConverter.setDualUsedAsTableName(true);
             }
             StringBuilder check = new StringBuilder();
@@ -1019,7 +1019,7 @@ public class LoadJet {
                             exec("GRANT SELECT  ON " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
                                     + " TO PUBLIC ", false);
                         }
-                    } catch (Exception ignore) {
+                    } catch (Exception _ignored) {
                     }
                 }
             }
@@ -1148,18 +1148,19 @@ public class LoadJet {
     }
 
     private final class ViewsLoader {
-        private Map<String, String> notLoaded             = new HashMap<>();
-        private Map<String, String> notLoadedProcedure    = new HashMap<>();
         private static final int    OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
         private static final int    OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
         private static final int    UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
 
-        private boolean loadView(Query q) throws SQLException {
-            return loadView(q, null);
+        private Map<String, String> notLoaded             = new HashMap<>();
+        private Map<String, String> notLoadedProcedure    = new HashMap<>();
+
+        private boolean loadView(Query _q) throws SQLException {
+            return loadView(_q, null);
         }
 
-        private void registerQueryColumns(Query q, int seq) throws SQLException {
-            QueryImpl qi = (QueryImpl) q;
+        private void registerQueryColumns(Query _q, int _seq) throws SQLException {
+            QueryImpl qi = (QueryImpl) _q;
             for (QueryImpl.Row row : qi.getRows()) {
 
                 if (QueryFormat.COLUMN_ATTRIBUTE.equals(row.attribute)) {
@@ -1181,7 +1182,7 @@ public class LoadJet {
                             List<String> result = metadata.getColumnNames(table);
                             if (result != null) {
                                 for (String column : result) {
-                                    metadata.newColumn(column, SQLConverter.preEscapingIdentifier(column), null, seq);
+                                    metadata.newColumn(column, SQLConverter.preEscapingIdentifier(column), null, _seq);
                                 }
                                 // return;
                             }
@@ -1189,7 +1190,7 @@ public class LoadJet {
                         }
                     }
 
-                    metadata.newColumn(name, SQLConverter.preEscapingIdentifier(name), null, seq);
+                    metadata.newColumn(name, SQLConverter.preEscapingIdentifier(name), null, _seq);
 
                 }
             }
@@ -1374,7 +1375,7 @@ public class LoadJet {
                     boolean qryGot = true;
                     try {
                         qtxt = q.toSQLString().toLowerCase();
-                    } catch (Exception ignore) {
+                    } catch (Exception _ignored) {
                         qryGot = false;
                     }
                     boolean foundDep = false;
@@ -1426,27 +1427,27 @@ public class LoadJet {
         dbIO = _dbIo;
         try {
             ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
-        } catch (Exception ignore) {
+        } catch (Exception _ignored) {
             // Logger.logWarning(e.getMessage());
         }
         metadata = new Metadata(_conn);
     }
 
-    public void loadDefaultValues(Table t) throws SQLException, IOException {
-        tablesLoader.setDefaultValues(t);
+    public void loadDefaultValues(Table _t) throws SQLException, IOException {
+        tablesLoader.setDefaultValues(_t);
     }
 
-    public void loadDefaultValues(Column cl) throws SQLException, IOException {
-        tablesLoader.setDefaultValue(cl);
+    public void loadDefaultValues(Column _cl) throws SQLException, IOException {
+        tablesLoader.setDefaultValue(_cl);
     }
 
-    public String defaultValue4SQL(Column cl) throws IOException {
-        PropertyMap pm = cl.getProperties();
+    public String defaultValue4SQL(Column _cl) throws IOException {
+        PropertyMap pm = _cl.getProperties();
         Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
         if (defaulT == null) {
             return null;
         }
-        return tablesLoader.defaultValue4SQL(defaulT, cl.getType());
+        return tablesLoader.defaultValue4SQL(defaulT, _cl.getType());
     }
 
     private static boolean hasAutoNumberColumn(Table t) {

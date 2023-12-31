@@ -374,7 +374,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     .append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
 
                     .append(on(List.of("PKTABLE_NAME", "PKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
-                    .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND  l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
+                    .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v "
+                        + "ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
 
                     .append(and("PKTABLE_CAT", "=", "PUBLIC", " WHERE "))
                     .append(and("PKTABLE_SCHEM", "=", "PUBLIC"))
@@ -476,7 +477,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 Arrays.asList(cat, schem, "TABLE_NAME", COLUMN_NAME, cat, schem, "v.TABLE_NAME",
                     "v.COLUMN_NAME"))).append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
                         .append(on(List.of("PKTABLE_NAME", "PKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
-                        .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
+                        .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v "
+                            + "ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
 
                         .append(and("PKTABLE_CAT", "=", "PUBLIC", " WHERE "))
                         .append(and("PKTABLE_SCHEM", "=", "PUBLIC")).append(and("PKTABLE_NAME", "=", table))
@@ -498,10 +500,11 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+    public ResultSet getFunctionColumns(String _catalog, String _schemaPattern,
+        String _functionNamePattern, String _columnNamePattern) throws SQLException {
         try {
-            columnNamePattern = normalizeName(columnNamePattern);
-            return wrapped.getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern);
+            _columnNamePattern = normalizeName(_columnNamePattern);
+            return wrapped.getFunctionColumns(_catalog, _schemaPattern, _functionNamePattern, _columnNamePattern);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
         }
@@ -541,7 +544,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     .append(from("SYSTEM_CROSSREFERENCE", "COLUMNS_VIEW"))
 
                     .append(on(List.of("FKTABLE_NAME", "FKCOLUMN_NAME"), List.of("ESCAPED_TABLE_NAME", "ESCAPED_COLUMN_NAME")))
-                    .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v ON( l.PKTABLE_NAME= v.ESCAPED_TABLE_NAME AND  l.PKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
+                    .append(" INNER JOIN UCA_METADATA.COLUMNS_VIEW v "
+                        + "ON( l.PKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.PKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)")
 
                     .append(and("FKTABLE_CAT", "=", "PUBLIC", " WHERE "))
                     .append(and("FKTABLE_SCHEM", "=", "PUBLIC")).append(and("FKTABLE_NAME", "=", table))
