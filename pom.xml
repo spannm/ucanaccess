@@ -93,6 +93,9 @@
         <dep.plugin.sortpom.version>3.3.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
 
+        <dep.checkstyle.version>10.12.6</dep.checkstyle.version>
+        <dep.spotbugs.version>4.8.3</dep.spotbugs.version>
+
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
