@@ -75,8 +75,10 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
+    @SuppressWarnings("PMD.UseTryWithResources")
     public void checkQuery(CharSequence _query) throws SQLException {
         initVerifyConnection();
+
         try (UcanaccessStatement st1 = ucanaccess.createStatement();
              UcanaccessStatement st2 = verifyConnection.createStatement()) {
 
@@ -95,7 +97,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, CharSequence _expression) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
-        if (_expectedResults.size() > 0) {
+        if (!_expectedResults.isEmpty()) {
             assertEquals(_expectedResults.get(0).size(), colCountActual);
         }
         int rowIdx = 0;

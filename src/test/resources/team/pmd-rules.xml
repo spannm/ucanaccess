@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
     <description>
-        The default ruleset used for UCanAccess project.
+        PMD rules of the UCanAccess project.
     </description>
 
     <!--rule ref="category/java/bestpractices.xml/CheckResultSet" /-->
@@ -32,16 +32,16 @@
     <rule ref="category/java/codestyle.xml/ControlStatementBraces" />
     <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
     <rule ref="category/java/codestyle.xml/ExtendsObject" />
-    <!--rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" /-->
+    <rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
     <rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
-    <!--rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
+    <rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
         <properties>
-            <property name="methodParameterPattern" value="_[a-z][a-zA-Z0-9]*" />
+            <property name="methodParameterPattern" value="_?[a-z][a-zA-Z0-9]*" />
             <property name="finalMethodParameterPattern" value="_[a-z][a-zA-Z0-9]*" />
             <property name="lambdaParameterPattern" value="[a-z][a-zA-Z0-9]*" />
             <property name="explicitLambdaParameterPattern" value="[a-z][a-zA-Z0-9]*" />
         </properties>
-    </rule-->
+    </rule>
     <rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
     <rule ref="category/java/codestyle.xml/LinguisticNaming">
         <properties>

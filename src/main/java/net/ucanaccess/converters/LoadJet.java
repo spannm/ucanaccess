@@ -42,6 +42,165 @@ import java.util.stream.Stream;
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
+    private final Connection      conn;
+    private final Database        dbIO;
+    private boolean               err;
+    private final FunctionsLoader functionsLoader   = new FunctionsLoader();
+    private final List<String>    loadedIndexes     = new ArrayList<>();
+    private final List<String>    loadedQueries     = new ArrayList<>();
+    private final List<String>    loadedProcedures  = new ArrayList<>();
+    private final List<String>    loadedTables      = new ArrayList<>();
+    private final LogsFlusher     logsFlusher       = new LogsFlusher();
+    private final TablesLoader    tablesLoader      = new TablesLoader();
+    private final TriggersLoader  triggersGenerator = new TriggersLoader();
+    private final ViewsLoader     viewsLoader       = new ViewsLoader();
+    private boolean               sysSchema;
+    private boolean               ff1997;
+    private boolean               skipIndexes;
+    private final Metadata        metadata;
+
+    public LoadJet(Connection _conn, Database _dbIo) {
+        conn = _conn;
+        dbIO = _dbIo;
+        try {
+            ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
+        } catch (Exception _ignored) {
+            // Logger.logWarning(e.getMessage());
+        }
+        metadata = new Metadata(_conn);
+    }
+
+    public void loadDefaultValues(Table _t) throws SQLException, IOException {
+        tablesLoader.setDefaultValues(_t);
+    }
+
+    public void loadDefaultValues(Column _cl) throws SQLException, IOException {
+        tablesLoader.setDefaultValue(_cl);
+    }
+
+    public String defaultValue4SQL(Column _cl) throws IOException {
+        PropertyMap pm = _cl.getProperties();
+        Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
+        if (defaulT == null) {
+            return null;
+        }
+        return tablesLoader.defaultValue4SQL(defaulT, _cl.getType());
+    }
+
+    private static boolean hasAutoNumberColumn(Table t) {
+        List<? extends Column> lc = t.getColumns();
+        for (Column cl : lc) {
+            if (cl.isAutoNumber() || DataType.BOOLEAN.equals(cl.getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addFunctions(Class<?> _clazz) throws SQLException {
+        functionsLoader.addFunctions(_clazz, false);
+    }
+
+    private void exec(String _expression, boolean _logging) throws SQLException {
+        try (Statement st = conn.createStatement()) {
+            st.executeUpdate(_expression);
+        } catch (SQLException _ex) {
+            if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
+                Logger.log("Cannot execute:" + _expression + " " + _ex.getMessage());
+            }
+            throw _ex;
+        }
+    }
+
+    private String escapeIdentifier(String tn) throws SQLException {
+        return SQLConverter.escapeIdentifier(tn, conn);
+    }
+
+    public SQLWarning getLoadingWarnings() {
+        if (viewsLoader.notLoaded.isEmpty() && tablesLoader.unresolvedTables.isEmpty()) {
+            return null;
+        }
+        SQLWarning sqlw = null;
+        for (String s : viewsLoader.notLoaded.keySet()) {
+            String message = s.length() > 0 ? "Cannot load view " + s + " " + viewsLoader.notLoaded.get(s)
+                    : "Cannot load views ";
+            if (sqlw == null) {
+                sqlw = new SQLWarning(message);
+            } else {
+                sqlw.setNextWarning(new SQLWarning(message));
+            }
+        }
+        for (String s : viewsLoader.notLoadedProcedure.keySet()) {
+            String message =
+                    s.length() > 0 ? "Cannot load procedure " + s + " " + viewsLoader.notLoadedProcedure.get(s)
+                            : "Cannot load procedures ";
+            if (sqlw == null) {
+                sqlw = new SQLWarning(message);
+            } else {
+                sqlw.setNextWarning(new SQLWarning(message));
+            }
+        }
+        for (String s : tablesLoader.unresolvedTables) {
+            String message = "Cannot resolve table " + s;
+            if (sqlw == null) {
+                sqlw = new SQLWarning(message);
+            } else {
+                sqlw.setNextWarning(new SQLWarning(message));
+            }
+        }
+        return sqlw;
+    }
+
+    public void resetFunctionsDefault() {
+        functionsLoader.resetDefault();
+    }
+
+    @SuppressWarnings("PMD.UseTryWithResources")
+    public void loadDB() throws SQLException, IOException {
+        try {
+            functionsLoader.loadMappedFunctions();
+            tablesLoader.loadTables();
+            viewsLoader.loadViews();
+            conn.commit();
+            SQLConverter.cleanEscaped();
+        } finally {
+            Logger.log("Loaded Tables:");
+            logsFlusher.dumpList(loadedTables);
+            Logger.log("Loaded Queries:");
+            logsFlusher.dumpList(loadedQueries);
+            Logger.log("Loaded Procedures:");
+            logsFlusher.dumpList(loadedProcedures);
+            Logger.log("Loaded Indexes:");
+            logsFlusher.dumpList(loadedIndexes, true);
+            conn.close();
+        }
+    }
+
+    public void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAppendOnly)
+            throws SQLException {
+        triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
+    }
+
+    public Object tryDefault(Object _default) {
+        try (Statement st = conn.createStatement()) {
+            ResultSet rs = st.executeQuery("SELECT " + _default + " FROM DUAL");
+            if (rs.next()) {
+                return rs.getObject(1);
+            }
+            return null;
+        } catch (Exception _ex) {
+            return null;
+        }
+    }
+
+    public void setSysSchema(boolean _sysSchema) {
+        sysSchema = _sysSchema;
+    }
+
+    public void setSkipIndexes(boolean _skipIndexes) {
+        skipIndexes = _skipIndexes;
+    }
+
     private final class FunctionsLoader {
 
         private final Set<String> functionDefinitions = new LinkedHashSet<>();
@@ -1403,169 +1562,6 @@ public class LoadJet {
             }
             Pivot.clearPrepared();
         }
-    }
-
-    private final Connection      conn;
-    private final Database        dbIO;
-    private boolean               err;
-    private final FunctionsLoader functionsLoader   = new FunctionsLoader();
-    private final List<String>    loadedIndexes     = new ArrayList<>();
-    private final List<String>    loadedQueries     = new ArrayList<>();
-    private final List<String>    loadedProcedures  = new ArrayList<>();
-    private final List<String>    loadedTables      = new ArrayList<>();
-    private final LogsFlusher     logsFlusher       = new LogsFlusher();
-    private final TablesLoader    tablesLoader      = new TablesLoader();
-    private final TriggersLoader  triggersGenerator = new TriggersLoader();
-    private final ViewsLoader     viewsLoader       = new ViewsLoader();
-    private boolean               sysSchema;
-    private boolean               ff1997;
-    private boolean               skipIndexes;
-    private final Metadata        metadata;
-
-    public LoadJet(Connection _conn, Database _dbIo) {
-        conn = _conn;
-        dbIO = _dbIo;
-        try {
-            ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
-        } catch (Exception _ignored) {
-            // Logger.logWarning(e.getMessage());
-        }
-        metadata = new Metadata(_conn);
-    }
-
-    public void loadDefaultValues(Table _t) throws SQLException, IOException {
-        tablesLoader.setDefaultValues(_t);
-    }
-
-    public void loadDefaultValues(Column _cl) throws SQLException, IOException {
-        tablesLoader.setDefaultValue(_cl);
-    }
-
-    public String defaultValue4SQL(Column _cl) throws IOException {
-        PropertyMap pm = _cl.getProperties();
-        Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-        if (defaulT == null) {
-            return null;
-        }
-        return tablesLoader.defaultValue4SQL(defaulT, _cl.getType());
-    }
-
-    private static boolean hasAutoNumberColumn(Table t) {
-        List<? extends Column> lc = t.getColumns();
-        for (Column cl : lc) {
-            if (cl.isAutoNumber() || DataType.BOOLEAN.equals(cl.getType())) {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    public void addFunctions(Class<?> _clazz) throws SQLException {
-        functionsLoader.addFunctions(_clazz, false);
-    }
-
-    private void exec(String _expression, boolean _logging) throws SQLException {
-        try (Statement st = conn.createStatement()) {
-            st.executeUpdate(_expression);
-        } catch (SQLException _ex) {
-            if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                Logger.log("Cannot execute:" + _expression + " " + _ex.getMessage());
-            }
-
-            throw _ex;
-        }
-    }
-
-    private String escapeIdentifier(String tn) throws SQLException {
-        return SQLConverter.escapeIdentifier(tn, conn);
-    }
-
-    public SQLWarning getLoadingWarnings() {
-        if (viewsLoader.notLoaded.isEmpty() && tablesLoader.unresolvedTables.isEmpty()) {
-            return null;
-        }
-        SQLWarning sqlw = null;
-        for (String s : viewsLoader.notLoaded.keySet()) {
-            String message = s.length() > 0 ? "Cannot load view " + s + " " + viewsLoader.notLoaded.get(s)
-                    : "Cannot load views ";
-            if (sqlw == null) {
-                sqlw = new SQLWarning(message);
-            } else {
-                sqlw.setNextWarning(new SQLWarning(message));
-            }
-        }
-        for (String s : viewsLoader.notLoadedProcedure.keySet()) {
-            String message =
-                    s.length() > 0 ? "Cannot load procedure " + s + " " + viewsLoader.notLoadedProcedure.get(s)
-                            : "Cannot load procedures ";
-            if (sqlw == null) {
-                sqlw = new SQLWarning(message);
-            } else {
-                sqlw.setNextWarning(new SQLWarning(message));
-            }
-        }
-        for (String s : tablesLoader.unresolvedTables) {
-            String message = "Cannot resolve table " + s;
-            if (sqlw == null) {
-                sqlw = new SQLWarning(message);
-            } else {
-                sqlw.setNextWarning(new SQLWarning(message));
-            }
-        }
-        return sqlw;
-    }
-
-    public void resetFunctionsDefault() {
-        functionsLoader.resetDefault();
-    }
-
-    @SuppressWarnings("PMD.UseTryWithResources")
-    public void loadDB() throws SQLException, IOException {
-        try {
-            functionsLoader.loadMappedFunctions();
-            tablesLoader.loadTables();
-            viewsLoader.loadViews();
-            conn.commit();
-            SQLConverter.cleanEscaped();
-        } finally {
-            Logger.log("Loaded Tables:");
-            logsFlusher.dumpList(loadedTables);
-            Logger.log("Loaded Queries:");
-            logsFlusher.dumpList(loadedQueries);
-            Logger.log("Loaded Procedures:");
-            logsFlusher.dumpList(loadedProcedures);
-            Logger.log("Loaded Indexes:");
-            logsFlusher.dumpList(loadedIndexes, true);
-            conn.close();
-        }
-    }
-
-    public void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAppendOnly)
-            throws SQLException {
-        triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
-    }
-
-    public Object tryDefault(Object _default) {
-        try (Statement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery("SELECT " + _default + " FROM DUAL");
-            if (rs.next()) {
-                return rs.getObject(1);
-            }
-            return null;
-        } catch (Exception _ex) {
-            return null;
-        }
-    }
-
-    public void setSysSchema(boolean _sysSchema) {
-        sysSchema = _sysSchema;
-
-    }
-
-    public void setSkipIndexes(boolean _skipIndexes) {
-        skipIndexes = _skipIndexes;
-
     }
 
 }

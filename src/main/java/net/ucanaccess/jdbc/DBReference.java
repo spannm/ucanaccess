@@ -348,7 +348,7 @@ public class DBReference {
         return encryptionKey;
     }
 
-    private String getHsqlUrl(final Session session) throws SQLException {
+    private String getHsqlUrl(Session _session) throws SQLException {
         try {
             if (openExclusive && fileLock == null) {
                 lockMdbFile();
@@ -380,9 +380,9 @@ public class DBReference {
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
                         if (toKeepHsql == null) {
-                            closeHSQLDB(session);
+                            closeHSQLDB(_session);
                         } else {
-                            finalizeHsqlDb(session);
+                            finalizeHsqlDb(_session);
                         }
                     } catch (Exception _ex) {
                         Logger.logWarning(_ex.toString());
