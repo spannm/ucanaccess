@@ -233,25 +233,19 @@ public class LoadJet {
 
         private void addFunction(String _functionName, String _javaMethodName, String _returnType, String... _paramTypes) {
             if (DBReference.is2xx()) {
+                String parms = IntStream.range(0, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i]).collect(Collectors.joining(", "));
                 functionDefinitions.add(new StringBuilder()
-                    .append("CREATE FUNCTION ")
-                    .append(_functionName)
-                    .append("(")
-                    .append(IntStream.range(0, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i]).collect(Collectors.joining(", ")))
-                    .append(")")
-                    .append(" RETURNS ")
-                    .append(_returnType)
-                    .append(" LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME 'CLASSPATH:")
-                    .append(_javaMethodName)
-                    .append("'")
+                    .append("CREATE FUNCTION ").append(_functionName)
+                    .append("(").append(parms).append(")")
+                    .append(" RETURNS ").append(_returnType)
+                    .append(" LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME ")
+                    .append("'CLASSPATH:").append(_javaMethodName).append("'")
                     .toString());
             } else {
                 functionDefinitions.add(new StringBuilder()
                     .append("CREATE ALIAS ")
                     .append(_functionName)
-                    .append(" FOR \"")
-                    .append(_javaMethodName)
-                    .append("\"")
+                    .append(" FOR \"").append(_javaMethodName).append("\"")
                     .toString());
             }
         }
@@ -328,10 +322,10 @@ public class LoadJet {
         }
 
         private void createSwitch() {
-            DataType[] dtypes = new DataType[] {
+            List<DataType> dtypes = List.of(
                 DataType.BINARY, DataType.BOOLEAN, DataType.SHORT_DATE_TIME,
                 DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.MONEY, DataType.NUMERIC,
-                DataType.COMPLEX_TYPE, DataType.MEMO};
+                DataType.COMPLEX_TYPE, DataType.MEMO);
 
             for (DataType dtype : dtypes) {
                 String type = " " + TypesMap.map2hsqldb(dtype) + " ";
