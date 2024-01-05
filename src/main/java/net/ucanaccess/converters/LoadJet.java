@@ -232,59 +232,57 @@ public class LoadJet {
         }
 
         private void addFunction(String _functionName, String _javaMethodName, String _returnType, String... _paramTypes) {
+            StringBuilder code = new StringBuilder();
             if (DBReference.is2xx()) {
-                String parms = IntStream.range(0, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i]).collect(Collectors.joining(", "));
-                functionDefinitions.add(new StringBuilder()
-                    .append("CREATE FUNCTION ").append(_functionName)
+                String parms = IntStream.rangeClosed(1, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i - 1]).collect(Collectors.joining(", "));
+                code.append("CREATE FUNCTION ").append(_functionName)
                     .append("(").append(parms).append(")")
                     .append(" RETURNS ").append(_returnType)
                     .append(" LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME ")
-                    .append("'CLASSPATH:").append(_javaMethodName).append("'")
-                    .toString());
+                    .append("'CLASSPATH:").append(_javaMethodName).append("'");
             } else {
-                functionDefinitions.add(new StringBuilder()
-                    .append("CREATE ALIAS ")
+                code.append("CREATE ALIAS ")
                     .append(_functionName)
-                    .append(" FOR \"").append(_javaMethodName).append("\"")
-                    .toString());
+                    .append(" FOR \"").append(_javaMethodName).append("\"");
             }
+            functionDefinitions.add(code.toString());
         }
 
         private void addFunctions(Class<?> _clazz, boolean _cswitch) {
-            Method[] mths = _clazz.getDeclaredMethods();
             Map<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
-            for (Method mth : mths) {
-                Annotation[] ants = mth.getAnnotations();
-                for (Annotation ant : ants) {
-                    if (ant.annotationType().equals(FunctionType.class)) {
-                        FunctionType ft = (FunctionType) ant;
-                        String methodName = _clazz.getName() + "." + mth.getName();
-                        String functionName = ft.functionName();
-                        if (functionName == null) {
-                            functionName = methodName;
-                        }
-                        AccessType[] acts = ft.argumentTypes();
-                        AccessType ret = ft.returnType();
-                        String retTypeName = ret.name();
-                        String returnType = tmap.getOrDefault(retTypeName, retTypeName);
-                        if (AccessType.TEXT.equals(ret)) {
-                            returnType += "(255)";
-                        }
-                        String[] args = new String[acts.length];
-                        for (int i = 0; i < args.length; i++) {
-                            String typeName = acts[i].name();
-                            args[i] = tmap.getOrDefault(typeName, typeName);
-                            if (AccessType.TEXT.equals(acts[i])) {
-                                args[i] += "(255)";
-                            }
-                        }
-                        if (ft.namingConflict()) {
-                            SQLConverter.addWAFunctionName(functionName);
-                            functionName += "WA";
-                        }
-                        addFunction(functionName, methodName, returnType, args);
+
+            for (Method method : _clazz.getDeclaredMethods()) {
+
+                List<FunctionType> functionTypes = Stream.of(method.getAnnotations())
+                    .filter(ant -> ant.annotationType().equals(FunctionType.class))
+                    .map(FunctionType.class::cast)
+                    .collect(Collectors.toList());
+
+                for (FunctionType func : functionTypes) {
+                    String methodName = _clazz.getName() + "." + method.getName();
+                    String functionName = Objects.requireNonNullElse(func.functionName(), methodName);
+                    AccessType[] acts = func.argumentTypes();
+                    AccessType ret = func.returnType();
+                    String retTypeName = ret.name();
+                    String returnType = tmap.getOrDefault(retTypeName, retTypeName);
+                    if (AccessType.TEXT.equals(ret)) {
+                        returnType += "(255)";
                     }
+                    String[] args = new String[acts.length];
+                    for (int i = 0; i < args.length; i++) {
+                        String typeName = acts[i].name();
+                        args[i] = tmap.getOrDefault(typeName, typeName);
+                        if (AccessType.TEXT.equals(acts[i])) {
+                            args[i] += "(255)";
+                        }
+                    }
+                    if (func.namingConflict()) {
+                        SQLConverter.addWAFunctionName(functionName);
+                        functionName += "WA";
+                    }
+                    addFunction(functionName, methodName, returnType, args);
                 }
+
             }
             createFunctions();
             if (_cswitch) {
