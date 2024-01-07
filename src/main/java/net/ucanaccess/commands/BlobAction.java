@@ -32,13 +32,13 @@ public class BlobAction implements IFeedbackAction {
         HashSet<String> hsBlob = new HashSet<>();
         int i = 0;
         Map<String, Object> keyMap = new HashMap<>();
-        for (Column cl : _table.getColumns()) {
-            if (cl.getType().equals(DataType.OLE) && newValues[i] != null) {
+        for (Column col : _table.getColumns()) {
+            if (col.getType().equals(DataType.OLE) && newValues[i] != null) {
                 containsBlob = true;
-                hsBlob.add(cl.getName());
+                hsBlob.add(col.getName());
             }
-            if (hsKey.contains(cl.getName())) {
-                keyMap.put(cl.getName(), newValues[i]);
+            if (hsKey.contains(col.getName())) {
+                keyMap.put(col.getName(), newValues[i]);
             }
             ++i;
         }

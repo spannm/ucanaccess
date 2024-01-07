@@ -23,7 +23,7 @@ public class ParametricQuery {
     private boolean             isProcedure;
     private String              sqlContent;
     private String              signature;
-    private StringBuffer        originalParameters = new StringBuffer();
+    private StringBuilder       originalParameters = new StringBuilder();
 
     public ParametricQuery(Connection _hsqldb, QueryImpl _qi) {
         hsqldb = _hsqldb;
@@ -245,7 +245,7 @@ public class ParametricQuery {
 
     private void parametersDeclared() {
         List<String> ls = queryParameters();
-        StringBuffer args = new StringBuffer();
+        StringBuilder args = new StringBuilder();
         String comma = "";
         List<String> ar = new ArrayList<>();
         for (String par : ls) {
@@ -448,7 +448,7 @@ public class ParametricQuery {
             rlhm.put(me.getValue(), me.getKey() + dI.get(me.getValue()));
         }
         if (changedSignature) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             String comma = "";
             for (String key : rlhm.keySet()) {
                 sb.append(comma).append(parem.get(key));

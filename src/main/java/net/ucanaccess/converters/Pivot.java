@@ -151,16 +151,16 @@ public class Pivot {
         }
     }
 
-    private void appendCaseWhen(StringBuffer sb, String condition, String cn) {
-        sb.append(aggregateFun).append("(CASE WHEN ").append(condition).append(" THEN ").append(expression)
-                .append(" END) AS ").append(cn);
+    private void appendCaseWhen(StringBuilder _sb, String _condition, String _cn) {
+        _sb.append(aggregateFun).append("(CASE WHEN ").append(_condition).append(" THEN ").append(expression)
+                .append(" END) AS ").append(_cn);
     }
 
     public String verifySQL() {
         StringBuilder sb = new StringBuilder();
         String[] fromS = from.split(PIVOT_GROUP_BY);
-        sb.append("SELECT DISTINCT ").append(pivot).append(" AS PIVOT ");
-        sb.append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivot).append(",").append(fromS[1]);
+        sb.append("SELECT DISTINCT ").append(pivot).append(" AS PIVOT ")
+          .append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivot).append(",").append(fromS[1]);
         return SQLConverter.convertSQL(sb.toString()).getSql();
     }
 
@@ -225,9 +225,9 @@ public class Pivot {
             }
             pivotInCondition = false;
         }
-        StringBuffer sb = new StringBuffer();
-        sb.append("SELECT ");
-        sb.append(select);
+        StringBuilder sb = new StringBuilder()
+          .append("SELECT ")
+          .append(select);
         for (String s : pivotIn) {
             sb.append(",");
             appendCaseWhen(sb, pivot + "=" + s, replaceQuotation(s));

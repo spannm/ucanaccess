@@ -81,8 +81,8 @@ public class InsertCommand implements ICommand {
         } catch (ConstraintViolationException _ex) {
             List<? extends Column> lc = _table.getColumns();
             boolean retry = false;
-            for (Column cl : lc) {
-                if (cl.isAutoNumber()) {
+            for (Column col : lc) {
+                if (col.isAutoNumber()) {
                     retry = true;
                     break;
                 }
@@ -111,35 +111,35 @@ public class InsertCommand implements ICommand {
             Object[] memento = mementoRow();
             initComplex();
             int j = 0;
-            List<? extends Column> lc = table.getColumns();
+            List<? extends Column> colList = table.getColumns();
             if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
                 Object[] newRowReorded = new Object[newRow.length];
                 Column[] cllReorded = new Column[newRow.length];
-                for (Column cli : table.getColumns()) {
-                    newRowReorded[cli.getColumnIndex()] = newRow[j];
-                    memento[cli.getColumnIndex()] = newRow[j];
-                    cllReorded[cli.getColumnIndex()] = cli;
+                for (Column col : table.getColumns()) {
+                    newRowReorded[col.getColumnIndex()] = newRow[j];
+                    memento[col.getColumnIndex()] = newRow[j];
+                    cllReorded[col.getColumnIndex()] = col;
                     j++;
                 }
                 newRow = newRowReorded;
-                lc = Arrays.asList(cllReorded);
+                colList = Arrays.asList(cllReorded);
             }
 
             insertRow(table, newRow);
             j = 0;
-            for (Column cli : lc) {
-                ColumnImpl cl = (ColumnImpl) cli;
-                if (cl.isAutoNumber() && !memento[j].equals(newRow[j])
-                        && !cl.getAutoNumberGenerator().getType().equals(DataType.COMPLEX_TYPE)) {
+            for (Column col : colList) {
+                ColumnImpl colImpl = (ColumnImpl) col;
+                if (colImpl.isAutoNumber() && !memento[j].equals(newRow[j])
+                        && !colImpl.getAutoNumberGenerator().getType().equals(DataType.COMPLEX_TYPE)) {
 
-                    if (cl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {
-                        AutoNumberManager.reset(cl, (Integer) newRow[j]);
+                    if (colImpl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {
+                        AutoNumberManager.reset(colImpl, (Integer) newRow[j]);
                     }
                     ana = new AutoNumberAction(table, memento, newRow);
                 }
 
-                if (cl.getType() == DataType.COMPLEX_TYPE) {
-                    ComplexValueForeignKey rowFk = (ComplexValueForeignKey) cl.getRowValue(newRow);
+                if (colImpl.getType() == DataType.COMPLEX_TYPE) {
+                    ComplexValueForeignKey rowFk = (ComplexValueForeignKey) colImpl.getRowValue(newRow);
                     if (memento[j] instanceof Attachment[]) {
                         Attachment[] atcs = (Attachment[]) memento[j];
                         for (Attachment atc : atcs) {

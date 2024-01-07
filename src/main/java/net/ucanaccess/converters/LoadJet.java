@@ -88,9 +88,9 @@ public class LoadJet {
     }
 
     private static boolean hasAutoNumberColumn(Table t) {
-        List<? extends Column> lc = t.getColumns();
-        for (Column cl : lc) {
-            if (cl.isAutoNumber() || DataType.BOOLEAN.equals(cl.getType())) {
+        List<? extends Column> cols = t.getColumns();
+        for (Column col : cols) {
+            if (col.isAutoNumber() || DataType.BOOLEAN.equals(col.getType())) {
                 return true;
             }
         }
@@ -411,20 +411,19 @@ public class LoadJet {
             return name;
         }
 
-        private DataType getReturnType(Column cl) throws IOException {
-            if (cl.getProperties().get(PropertyMap.EXPRESSION_PROP) == null
-                    || cl.getProperties().get(PropertyMap.RESULT_TYPE_PROP) == null) {
+        private DataType getReturnType(Column _col) throws IOException {
+            if (_col.getProperties().get(PropertyMap.EXPRESSION_PROP) == null
+                || _col.getProperties().get(PropertyMap.RESULT_TYPE_PROP) == null) {
                 return null;
             }
-            byte pos = (Byte) cl.getProperties().get(PropertyMap.RESULT_TYPE_PROP).getValue();
+            byte pos = (Byte) _col.getProperties().get(PropertyMap.RESULT_TYPE_PROP).getValue();
             return DataType.fromByte(pos);
-
         }
 
-        private String getHsqldbColumnType(Column cl) throws IOException {
+        private String getHsqldbColumnType(Column _col) throws IOException {
             String htype;
-            DataType dtyp = cl.getType();
-            DataType rtyp = getReturnType(cl);
+            DataType dtyp = _col.getType();
+            DataType rtyp = getReturnType(_col);
             boolean calcType = false;
             if (rtyp != null) {
                 dtyp = rtyp;
@@ -432,26 +431,26 @@ public class LoadJet {
             }
 
             if (dtyp.equals(DataType.TEXT)) {
-                int ln = ff1997 ? cl.getLength() : cl.getLengthInUnits();
+                int ln = ff1997 ? _col.getLength() : _col.getLengthInUnits();
                 htype = "VARCHAR(" + ln + ")";
-            } else if (dtyp.equals(DataType.NUMERIC) && (cl.getScale() > 0 || calcType)) {
+            } else if (dtyp.equals(DataType.NUMERIC) && (_col.getScale() > 0 || calcType)) {
                 if (calcType) {
                     htype = "NUMERIC(100 ,4)";
                 } else {
-                    htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + cl.getScale() + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + _col.getScale() + ")";
                 }
             } else if (dtyp.equals(DataType.FLOAT)) {
                 if (calcType) {
-                    htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + 7 + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + 7 + ")";
                 } else {
                     Object dps = null;
-                    Object dpso = cl.getProperties().get("DecimalPlaces");
+                    Object dpso = _col.getProperties().get("DecimalPlaces");
                     if (dpso != null) {
-                        dps = cl.getProperties().get("DecimalPlaces").getValue();
+                        dps = _col.getProperties().get("DecimalPlaces").getValue();
                     }
                     byte dp = dps == null ? 7 : (Byte) dps < 0 ? 7 : (Byte) dps;
 
-                    htype = "NUMERIC(" + (cl.getPrecision() > 0 ? cl.getPrecision() : 100) + "," + dp + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + dp + ")";
                 }
             } else {
                 htype = TypesMap.map2hsqldb(dtyp);
@@ -459,9 +458,9 @@ public class LoadJet {
             return htype;
         }
 
-        private String getCalculatedFieldTrigger(String ntn, Column cl, boolean isCreate)
+        private String getCalculatedFieldTrigger(String _ntn, Column _col, boolean _isCreate)
                 throws IOException, SQLException {
-            DataType dt = getReturnType(cl);
+            DataType dt = getReturnType(_col);
             String fun = null;
             if (isNumeric(dt)) {
                 fun = "formulaToNumeric";
@@ -473,22 +472,22 @@ public class LoadJet {
                 fun = "formulaToText";
             }
             String call = fun == null ? "%s" : fun + "(%s,'" + dt.name() + "')";
-            String ecl = procedureEscapingIdentifier(cl.getName()).replace("%", "%%");
+            String ecl = procedureEscapingIdentifier(_col.getName()).replace("%", "%%");
 
-            return isCreate
-                    ? "CREATE TRIGGER expr%d before insert ON " + ntn + " REFERENCING NEW  AS newrow  FOR EACH ROW "
-                            + " BEGIN  ATOMIC  SET newrow." + ecl + " = " + call + "; END "
-                    : "CREATE TRIGGER expr%d before update ON " + ntn
-                            + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW  BEGIN  ATOMIC IF %s THEN "
-                            + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
-                            + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
-                            + Logger.getMessage(LoggerMessageEnum.TRIGGER_UPDATE_CF_ERR) + cl.getName().replace("%", "%%")
-                            + "';  END IF ; END ";
+            return _isCreate
+                ? "CREATE TRIGGER expr%d before insert ON " + _ntn + " REFERENCING NEW AS newrow FOR EACH ROW "
+                    + " BEGIN  ATOMIC  SET newrow." + ecl + " = " + call + "; END "
+                : "CREATE TRIGGER expr%d before update ON " + _ntn
+                    + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW BEGIN ATOMIC IF %s THEN "
+                    + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
+                    + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
+                    + Logger.getMessage(LoggerMessageEnum.TRIGGER_UPDATE_CF_ERR) + _col.getName().replace("%", "%%")
+                    + "';  END IF ; END ";
         }
 
         private boolean isNumeric(DataType dt) {
             return typeGroup(dt, DataType.NUMERIC, DataType.MONEY, DataType.DOUBLE, DataType.FLOAT, DataType.LONG,
-                    DataType.INT, DataType.BYTE);
+                DataType.INT, DataType.BYTE);
         }
 
         private boolean isDate(DataType dt) {
@@ -532,51 +531,48 @@ public class LoadJet {
 
             StringBuilder sbC = new StringBuilder("CREATE CACHED TABLE ").append(ntn).append("(");
 
-            List<? extends Column> lc = _t.getColumns();
             String comma = "";
-            for (Column cl : lc) {
-                if ("USER".equalsIgnoreCase(cl.getName())) {
+            for (Column col : _t.getColumns()) {
+                if ("USER".equalsIgnoreCase(col.getName())) {
                     Logger.logWarning(LoggerMessageEnum.USER_AS_COLUMNNAME, _t.getName());
                 }
-                String expr = getExpression(cl);
+                String expr = getExpression(col);
                 if (expr != null && _constraints) {
-                    String tgrI = getCalculatedFieldTrigger(ntn, cl, true);
-                    String tgrU = getCalculatedFieldTrigger(ntn, cl, false);
-                    calculatedFieldsTriggers
-                            .add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
-                    String uc = getUpdateConditions(cl);
+                    String tgrI = getCalculatedFieldTrigger(ntn, col, true);
+                    String tgrU = getCalculatedFieldTrigger(ntn, col, false);
+                    calculatedFieldsTriggers.add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
+                    String uc = getUpdateConditions(col);
                     if (uc.length() > 0) {
-                        calculatedFieldsTriggers
-                                .add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
+                        calculatedFieldsTriggers.add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
                     }
 
                 }
 
-                String cn = SQLConverter.preEscapingIdentifier(cl.getName());
-                String ctype = cl.getType().name();
-                if (cl.isAutoNumber()) {
-                    ColumnImpl cli = (ColumnImpl) cl;
+                String cn = SQLConverter.preEscapingIdentifier(col.getName());
+                String colType = col.getType().name();
+                if (col.isAutoNumber()) {
+                    ColumnImpl cli = (ColumnImpl) col;
                     AutoNumberGenerator ang = cli.getAutoNumberGenerator();
                     if (ang.getType().equals(DataType.LONG)) {
-                        ctype = "COUNTER";
+                        colType = "COUNTER";
                     }
 
-                } else if (cl.isHyperlink()) {
-                    ctype = "HYPERLINK";
+                } else if (col.isHyperlink()) {
+                    colType = "HYPERLINK";
                 }
-                metadata.newColumn(cl.getName(), cn, ctype, seq);
+                metadata.newColumn(col.getName(), cn, colType, seq);
                 if (expr != null && _constraints) {
-                    metadata.calculatedField(_t.getName(), cl.getName());
+                    metadata.calculatedField(_t.getName(), col.getName());
                 }
                 cn = SQLConverter.completeEscaping(cn);
                 cn = SQLConverter.checkLang(cn, conn);
-                sbC.append(comma).append(cn).append(" ").append(getHsqldbColumnType(cl));
-                if (DataType.FLOAT.equals(cl.getType())) {
+                sbC.append(comma).append(cn).append(" ").append(getHsqldbColumnType(col));
+                if (DataType.FLOAT.equals(col.getType())) {
                     check.append(", check (3.4028235E+38>=").append(cn).append(" AND -3.4028235E+38<=").append(cn)
                             .append(")");
                 }
 
-                PropertyMap pm = cl.getProperties();
+                PropertyMap pm = col.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
                 if (_constraints && required instanceof Boolean && (Boolean) required) {
                     sbC.append(" NOT NULL ");
@@ -589,23 +585,23 @@ public class LoadJet {
 
         }
 
-        private String getExpression(Column cl) throws IOException {
-            PropertyMap map = cl.getProperties();
+        private String getExpression(Column _col) throws IOException {
+            PropertyMap map = _col.getProperties();
             Property exprp = map.get(PropertyMap.EXPRESSION_PROP);
 
             if (exprp != null) {
-                Table tl = cl.getTable();
+                Table tl = _col.getTable();
                 String expr = SQLConverter.convertPowOperator((String) exprp.getValue());
-                for (Column cl1 : tl.getColumns()) {
-                    expr = expr.replaceAll("\\[(?i)(" + Pattern.quote(cl1.getName()) + ")\\]", "newrow.$0");
+                for (Column col : tl.getColumns()) {
+                    expr = expr.replaceAll("\\[(?i)(" + Pattern.quote(col.getName()) + ")\\]", "newrow.$0");
                 }
                 return expr;
             }
             return null;
         }
 
-        private String getUpdateConditions(Column cl) throws IOException, SQLException {
-            PropertyMap map = cl.getProperties();
+        private String getUpdateConditions(Column _col) throws IOException, SQLException {
+            PropertyMap map = _col.getProperties();
             Property exprp = map.get(PropertyMap.EXPRESSION_PROP);
 
             if (exprp != null) {
@@ -631,11 +627,11 @@ public class LoadJet {
             return SQLConverter.procedureEscapingIdentifier(escapeIdentifier(name));
         }
 
-        private void setDefaultValue(Column cl) throws SQLException, IOException {
-            String tn = cl.getTable().getName();
+        private void setDefaultValue(Column _col) throws SQLException, IOException {
+            String tn = _col.getTable().getName();
             String ntn = escapeIdentifier(tn);
             List<String> arTrigger = new ArrayList<>();
-            setDefaultValue(cl, ntn, arTrigger);
+            setDefaultValue(_col, ntn, arTrigger);
             for (String trigger : arTrigger) {
                 exec(trigger, true);
             }
@@ -666,38 +662,38 @@ public class LoadJet {
             return default4SQL;
         }
 
-        private void setDefaultValue(Column cl, String ntn, List<String> arTrigger) throws IOException, SQLException {
-            PropertyMap pm = cl.getProperties();
-            String ncn = procedureEscapingIdentifier(cl.getName());
+        private void setDefaultValue(Column _col, String _ntn, List<String> _arTrigger) throws IOException, SQLException {
+            PropertyMap pm = _col.getProperties();
+            String ncn = procedureEscapingIdentifier(_col.getName());
             Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
             if (defaulT != null) {
-                String default4SQL = defaultValue4SQL(defaulT, cl.getType());
+                String default4SQL = defaultValue4SQL(defaulT, _col.getType());
                 String guidExp = "GenGUID()";
                 if (!guidExp.equals(defaulT)) {
                     boolean defaultIsFunction =
-                            defaulT.toString().trim().endsWith(")") && defaulT.toString().indexOf('(') > 0;
+                        defaulT.toString().trim().endsWith(")") && defaulT.toString().indexOf('(') > 0;
                     if (defaultIsFunction) {
-                        metadata.columnDef(cl.getTable().getName(), cl.getName(), defaulT.toString());
+                        metadata.columnDef(_col.getTable().getName(), _col.getName(), defaulT.toString());
                     }
                     Object defFound = default4SQL;
                     boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                     if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        Logger.logWarning(LoggerMessageEnum.UNKNOWN_EXPRESSION, "" + defaulT, cl.getName(),
-                                cl.getTable().getName());
+                        Logger.logWarning(LoggerMessageEnum.UNKNOWN_EXPRESSION, "" + defaulT, _col.getName(),
+                            _col.getTable().getName());
                     } else {
                         if (defFound != null && !defaultIsFunction) {
-                            metadata.columnDef(cl.getTable().getName(), cl.getName(), defFound.toString());
+                            metadata.columnDef(_col.getTable().getName(), _col.getName(), defFound.toString());
                         }
-                        if (cl.getType() == DataType.TEXT && defaulT.toString().startsWith("'")
-                                && defaulT.toString().endsWith("'")
-                                && defaulT.toString().length() > cl.getLengthInUnits()) {
-                            Logger.logWarning(LoggerMessageEnum.DEFAULT_VALUES_DELIMETERS, "" + defaulT, cl.getName(),
-                                    cl.getTable().getName(), "" + cl.getLengthInUnits());
+                        if (_col.getType() == DataType.TEXT && defaulT.toString().startsWith("'")
+                            && defaulT.toString().endsWith("'")
+                            && defaulT.toString().length() > _col.getLengthInUnits()) {
+                            Logger.logWarning(LoggerMessageEnum.DEFAULT_VALUES_DELIMETERS, "" + defaulT, _col.getName(),
+                                _col.getTable().getName(), "" + _col.getLengthInUnits());
                         }
-                        arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + ntn
-                                + "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
-                                + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
+                        _arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + _ntn
+                            + "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
+                            + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
                     }
                 }
             }
@@ -707,10 +703,9 @@ public class LoadJet {
         private void setDefaultValues(Table t) throws SQLException, IOException {
             String tn = t.getName();
             String ntn = escapeIdentifier(tn);
-            List<? extends Column> lc = t.getColumns();
             List<String> arTrigger = new ArrayList<>();
-            for (Column cl : lc) {
-                setDefaultValue(cl, ntn, arTrigger);
+            for (Column col : t.getColumns()) {
+                setDefaultValue(col, ntn, arTrigger);
             }
             for (String trigger : arTrigger) {
                 exec(trigger, true);
@@ -790,8 +785,8 @@ public class LoadJet {
             String colsIdx = commaSeparated(cls, true);
             String colsIdxRef = commaSeparated(idx.getReferencedIndex().getColumns(), true);
 
-            StringBuilder ci = new StringBuilder("ALTER TABLE ").append(ntn);
-            ci.append(" ADD CONSTRAINT ").append(nin);
+            StringBuilder ci = new StringBuilder("ALTER TABLE ").append(ntn)
+              .append(" ADD CONSTRAINT ").append(nin);
             String nrt = escapeIdentifier(rtn);
 
             if (nrt == null) {
@@ -828,14 +823,14 @@ public class LoadJet {
             boolean uk = idx.isUnique();
             boolean pk = idx.isPrimaryKey();
             if (!uk && !pk && idx.getColumns().size() == 1) {
-                Column cl = idx.getColumns().get(0).getColumn();
-                if (alreadyIndexed.contains(cl)) {
+                Column col = idx.getColumns().get(0).getColumn();
+                if (alreadyIndexed.contains(col)) {
                     return;
                 }
             }
             if (uk && idx.getColumns().size() == 1) {
-                Column cl = idx.getColumns().get(0).getColumn();
-                DataType dt = cl.getType();
+                Column col = idx.getColumns().get(0).getColumn();
+                DataType dt = col.getType();
                 if (dt.equals(DataType.COMPLEX_TYPE)) {
                     return;
                 }
@@ -846,8 +841,8 @@ public class LoadJet {
             if (pk) {
                 ci.append(" ADD PRIMARY KEY ").append(colsIdx);
             } else if (uk) {
-                ci.append(" ADD CONSTRAINT ").append(nin);
-                ci.append(" UNIQUE ").append(colsIdx);
+                ci.append(" ADD CONSTRAINT ").append(nin)
+                  .append(" UNIQUE ").append(colsIdx);
 
             } else {
                 ci = new StringBuilder("CREATE INDEX ").append(nin).append(" ON ").append(ntn).append(colsIdx);
@@ -897,31 +892,30 @@ public class LoadJet {
             loadedTables.add(tn + " READONLY");
         }
 
-        private void recreate(Table t, boolean systemTable, Row record, int errorCode)
-                throws SQLException, IOException {
+        private void recreate(Table _t, boolean _systemTable, Row _record, int _errorCode) throws SQLException, IOException {
             String type = "";
-            switch (errorCode) {
-            case HSQL_FK_VIOLATION:
-                type = "Foreign Key";
-                break;
-            case HSQL_NOT_NULL:
-                type = "Not Null";
-                break;
-            case HSQL_UK_VIOLATION:
-                type = "Unique";
-                break;
-            default:
-                break;
+            switch (_errorCode) {
+                case HSQL_FK_VIOLATION:
+                    type = "Foreign Key";
+                    break;
+                case HSQL_NOT_NULL:
+                    type = "Not Null";
+                    break;
+                case HSQL_UK_VIOLATION:
+                    type = "Unique";
+                    break;
+                default:
+                    break;
             }
-            Logger.logWarning(LoggerMessageEnum.CONSTRAINT, type, t.getName(), record.toString(), t.getName());
+            Logger.logWarning(LoggerMessageEnum.CONSTRAINT, type, _t.getName(), _record.toString(), _t.getName());
 
-            dropTable(t, systemTable);
-            createSyncrTable(t, systemTable, false);
-            if (errorCode != HSQL_FK_VIOLATION) {
-                loadTableFKs(t.getName(), false);
+            dropTable(_t, _systemTable);
+            createSyncrTable(_t, _systemTable, false);
+            if (_errorCode != HSQL_FK_VIOLATION) {
+                loadTableFKs(_t.getName(), false);
             }
-            loadTableData(t, systemTable);
-            makeTableReadOnly(t, systemTable);
+            loadTableData(_t, _systemTable);
+            makeTableReadOnly(_t, _systemTable);
 
         }
 

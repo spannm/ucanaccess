@@ -111,9 +111,9 @@ public class UpdateCommand extends AbstractCursorCommand {
     private void updateComplex(Cursor cur) throws IOException {
         int j = 0;
 
-        for (Column cl : tableColumns) {
-            if (cl.getType() == DataType.COMPLEX_TYPE) {
-                ComplexValueForeignKey rowFk = (ComplexValueForeignKey) cl.getRowValue(cur.getCurrentRow());
+        for (Column col : tableColumns) {
+            if (col.getType() == DataType.COMPLEX_TYPE) {
+                ComplexValueForeignKey rowFk = (ComplexValueForeignKey) col.getRowValue(cur.getCurrentRow());
 
                 if (modifiedRow[j] instanceof Attachment[]) {
                     rowFk.deleteAllValues();
@@ -167,8 +167,8 @@ public class UpdateCommand extends AbstractCursorCommand {
         if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
             Object[] newRowReorded = new Object[modifiedRow.length];
             int j = 0;
-            for (Column cli : table.getColumns()) {
-                newRowReorded[cli.getColumnIndex()] = modifiedRow[j];
+            for (Column col : table.getColumns()) {
+                newRowReorded[col.getColumnIndex()] = modifiedRow[j];
                 j++;
             }
             mr = newRowReorded;

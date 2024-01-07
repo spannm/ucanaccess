@@ -871,8 +871,8 @@ public class UcanaccessResultSet implements ResultSet {
                 if (parts.length > 1) {
                     url.append(parts[1]);
                     if (parts.length > 2 && parts[2].length() > 0) {
-                        url.append("#");
-                        url.append(parts[2]);
+                        url.append("#")
+                           .append(parts[2]);
                     }
                     return new URL(url.toString());
                 }

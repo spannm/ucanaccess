@@ -133,8 +133,8 @@ public class Persist2Jet {
     private Map<String, Object> escapeIdentifiers(Map<String, Object> map, Table t) {
         List<? extends Column> colums = t.getColumns();
         Map<String, Object> vl = new LinkedHashMap<>();
-        for (Column cl : colums) {
-            String key = cl.getName();
+        for (Column col : colums) {
+            String key = col.getName();
             String keyu = key.toUpperCase();
             String ekey = map.containsKey(keyu) ? keyu : SQLConverter.escapeIdentifier(key).toUpperCase();
             if (!map.containsKey(ekey) && map.containsKey(ekey.substring(1, ekey.length() - 1))) {
@@ -256,12 +256,12 @@ public class Persist2Jet {
         return arcl;
     }
 
-    private void checkPK(List<IndexBuilder> arcl, IndexBuilder ibpk) {
-        if (ibpk == null) {
+    private void checkPK(List<IndexBuilder> _arcl, IndexBuilder _ibpk) {
+        if (_ibpk == null) {
             return;
         }
-        Iterator<IndexBuilder> itib = arcl.iterator();
-        List<IndexBuilder.Column> clspk = ibpk.getColumns();
+        Iterator<IndexBuilder> itib = _arcl.iterator();
+        List<IndexBuilder.Column> clspk = _ibpk.getColumns();
         List<String> columnNamesPK = new ArrayList<>();
         for (IndexBuilder.Column clpk : clspk) {
             columnNamesPK.add(clpk.getName().toUpperCase());
@@ -328,15 +328,15 @@ public class Persist2Jet {
         }
     }
 
-    private void saveColumnsDefaults(String[] defaults, Boolean[] required, Column cl, int j) throws IOException {
+    private void saveColumnsDefaults(String[] _defaults, Boolean[] _required, Column _cl, int _j) throws IOException {
 
-        PropertyMap map = cl.getProperties();
-        if (defaults != null && j < defaults.length && defaults[j] != null) {
-            map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, defaults[j]);
+        PropertyMap map = _cl.getProperties();
+        if (_defaults != null && _j < _defaults.length && _defaults[_j] != null) {
+            map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, _defaults[_j]);
         }
 
-        if (required != null && j < required.length && required[j] != null && !cl.isAutoNumber()) {
-            map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, required[j]);
+        if (_required != null && _j < _required.length && _required[_j] != null && !_cl.isAutoNumber()) {
+            map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, _required[_j]);
         }
 
         map.save();
@@ -347,8 +347,8 @@ public class Persist2Jet {
         int j = 0;
 
         if (defaults != null || required != null) {
-            for (Column cl : cols) {
-                saveColumnsDefaults(defaults, required, cl, j);
+            for (Column col : cols) {
+                saveColumnsDefaults(defaults, required, col, j);
                 j++;
             }
         }
@@ -535,7 +535,7 @@ public class Persist2Jet {
     }
 
     public void addColumn(String _tableName, String _columnName, Map<String, String> _columnMap, String[] _types,
-            String[] _defaults, Boolean[] _notNulls) throws IOException, SQLException {
+        String[] _defaults, Boolean[] _notNulls) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
         String tn = escape4Access(_tableName);
@@ -546,13 +546,13 @@ public class Persist2Jet {
             return;
         }
         Table t = db.getTable(tn);
-        Column cl = cb.addToTable(t);
+        Column col = cb.addToTable(t);
         int idTable = mtd.getTableId(ntn.toUpperCase());
         mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),
-                getUcaMetadataTypeName(0, cb, _types), idTable);
-        saveColumnsDefaults(_defaults, _notNulls, cl, 0);
-        updateNewColumn2Defaut(_tableName, _columnName, t, cl);
-        setHsqldbNotNull(_tableName, _columnName, cl);
+            getUcaMetadataTypeName(0, cb, _types), idTable);
+        saveColumnsDefaults(_defaults, _notNulls, col, 0);
+        updateNewColumn2Defaut(_tableName, _columnName, t, col);
+        setHsqldbNotNull(_tableName, _columnName, col);
         conn.reloadDbIO();
     }
 
@@ -568,28 +568,28 @@ public class Persist2Jet {
         }
     }
 
-    private void updateNewColumn2Defaut(String tableName, String columnName, Table t, Column cl)
-            throws SQLException, IOException {
+    private void updateNewColumn2Defaut(String _tableName, String _columnName, Table t, Column _col)
+        throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());
-        lj.loadDefaultValues(cl);
-        String default4SQL = lj.defaultValue4SQL(cl);
+        lj.loadDefaultValues(_col);
+        String default4SQL = lj.defaultValue4SQL(_col);
 
         Object defObj = lj.tryDefault(default4SQL);
         conn.setFeedbackState(true);
         if (default4SQL != null) {
             for (Row row : t) {
-                row.put(cl.getName(), defObj);
+                row.put(_col.getName(), defObj);
                 t.updateRow(row);
             }
             conn.getDbIO().flush();
 
         }
 
-        if (default4SQL != null || cl.getType().equals(DataType.BOOLEAN)) {
-            defObj = default4SQL == null && cl.getType().equals(DataType.BOOLEAN) ? Boolean.FALSE : defObj;
+        if (default4SQL != null || _col.getType().equals(DataType.BOOLEAN)) {
+            defObj = default4SQL == null && _col.getType().equals(DataType.BOOLEAN) ? Boolean.FALSE : defObj;
             try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(
-                    SQLConverter.convertSQL("UPDATE " + tableName + " SET " + columnName + "= ?").getSql())) {
+                SQLConverter.convertSQL("UPDATE " + _tableName + " SET " + _columnName + "= ?").getSql())) {
                 ps.setObject(1, defObj);
                 ps.executeUpdate();
             }
@@ -607,8 +607,7 @@ public class Persist2Jet {
         String in = escape4Access(indexName);
         Table t = db.getTable(tn);
 
-        ResultSet idxrs =
-                conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(), false, false);
+        ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(), false, false);
         boolean asc = false;
         List<String> cols = new ArrayList<>();
         IndexBuilder ib = new IndexBuilder(in);

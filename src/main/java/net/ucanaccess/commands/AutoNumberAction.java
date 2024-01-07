@@ -20,18 +20,18 @@ public class AutoNumberAction implements IFeedbackAction {
         table = _table;
         int i = 0;
 
-        for (Column cl : _table.getColumns()) {
-            if (cl.isAutoNumber()) {
+        for (Column col : _table.getColumns()) {
+            if (col.isAutoNumber()) {
                 UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
                 Connection connHsqldb = conn.getHSQLDBConnection();
-                String cn = SQLConverter.escapeIdentifier(cl.getName(), connHsqldb);
+                String cn = SQLConverter.escapeIdentifier(col.getName(), connHsqldb);
                 Object cnOld = memento[i];
                 Object cnNew = byAccess[i];
                 if (cnNew instanceof String) {
                     cnNew = ((String) cnNew).toUpperCase();
                 }
-                oldAutoValues.put(cl.getName(), cnOld);
-                newAutoValues.put(cl.getName(), cnNew);
+                oldAutoValues.put(col.getName(), cnOld);
+                newAutoValues.put(col.getName(), cnNew);
                 conn.setFeedbackState(true);
                 String stmt = "UPDATE " + SQLConverter.escapeIdentifier(_table.getName(), connHsqldb) + " SET " + cn
                         + "=? WHERE " + cn + "=?";

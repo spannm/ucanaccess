@@ -26,9 +26,9 @@ public class TriggerAppendOnly extends TriggerBase {
                 throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
             }
             int i = 0;
-            for (Column cl : t.getColumns()) {
-                if (cl.isAppendOnly()) {
-                    ColumnImpl verCol = (ColumnImpl) cl.getVersionHistoryColumn();
+            for (Column col : t.getColumns()) {
+                if (col.isAppendOnly()) {
+                    ColumnImpl verCol = (ColumnImpl) col.getVersionHistoryColumn();
                     LocalDateTime upTime = LocalDateTime.now();
                     String val = newR[i] == null ? null : newR[i].toString();
                     if (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {

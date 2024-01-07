@@ -28,34 +28,34 @@ public final class AutoNumberManager {
     }
 
     /** Returns the next AutoNumber value, and increments the seed. */
-    static synchronized int getNext(Column cl) {
+    static synchronized int getNext(Column _col) {
         // Note: This code assumes *sequential* integer AutoNumber values.
         // (Access also supports *random* integer AutoNumber values, but they
         // are not very common.)
-        ColumnImpl ci = (ColumnImpl) cl;
-        AtomicInteger next = REGISTER.get(ci);
+        ColumnImpl col = (ColumnImpl) _col;
+        AtomicInteger next = REGISTER.get(col);
         if (next == null) {
-            next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
-            REGISTER.put(ci, next);
+            next = new AtomicInteger((Integer) col.getAutoNumberGenerator().getLast());
+            REGISTER.put(col, next);
         }
         return next.incrementAndGet();
     }
 
     /** Sets the AutoNumber seed to {@code newVal}. */
-    public static synchronized void reset(Column cl, int newVal) {
-        REGISTER.put(cl, new AtomicInteger(newVal));
+    public static synchronized void reset(Column _col, int _newVal) {
+        REGISTER.put(_col, new AtomicInteger(_newVal));
     }
 
     /** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
-    public static synchronized void bump(Column cl, int newVal) {
-        ColumnImpl ci = (ColumnImpl) cl;
-        AtomicInteger next = REGISTER.get(ci);
+    public static synchronized void bump(Column _col, int _newVal) {
+        ColumnImpl col = (ColumnImpl) _col;
+        AtomicInteger next = REGISTER.get(col);
         if (next == null) {
-            next = new AtomicInteger((Integer) ci.getAutoNumberGenerator().getLast());
-            REGISTER.put(ci, next);
+            next = new AtomicInteger((Integer) col.getAutoNumberGenerator().getLast());
+            REGISTER.put(col, next);
         }
-        if (newVal > next.get()) {
-            next.set(newVal);
+        if (_newVal > next.get()) {
+            next.set(_newVal);
         }
     }
 
