@@ -304,10 +304,7 @@ public class DBReference {
     }
 
     public Connection getHSQLDBConnection(Session _session) throws SQLException {
-        boolean keptMirror = false;
-        if (firstConnection && toKeepHsql != null && toKeepHsql.exists()) {
-            keptMirror = true;
-        }
+        boolean keptMirror = firstConnection && toKeepHsql != null && toKeepHsql.exists();
 
         Connection conn = DriverManager.getConnection(getHsqlUrl(_session),
             Optional.ofNullable(_session.getUser()).orElse("Admin"), _session.getPassword());

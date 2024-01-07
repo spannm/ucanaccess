@@ -28,13 +28,10 @@ public class UnsupportedValue extends ComplexBase {
         }
         UnsupportedValue other = (UnsupportedValue) _obj;
         if (values == null) {
-            if (other.values != null) {
-                return false;
-            }
-        } else if (!values.equals(other.values)) {
-            return false;
+            return other.values == null;
+        } else {
+            return values.equals(other.values);
         }
-        return true;
     }
 
     @Override

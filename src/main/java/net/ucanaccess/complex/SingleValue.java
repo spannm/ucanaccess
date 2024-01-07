@@ -39,13 +39,10 @@ public class SingleValue extends ComplexBase {
         }
         SingleValue other = (SingleValue) _obj;
         if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
-            return false;
+            return other.value == null;
+        } else {
+            return value.equals(other.value);
         }
-        return true;
     }
 
     @Override
