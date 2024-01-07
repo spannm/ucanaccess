@@ -33,12 +33,7 @@ public interface IThrowingSupplier<R, T extends Throwable> {
      * @return a throwing supplier
      */
     static <R, T extends Throwable> IThrowingSupplier<R, T> of(Supplier<R> _supplier) {
-        return new IThrowingSupplier<R, T>() {
-            @Override
-            public R get() throws T {
-                return _supplier.get();
-            }
-        };
+        return () -> _supplier.get();
     }
 
     /**

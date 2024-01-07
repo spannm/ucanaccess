@@ -125,7 +125,7 @@ public final class UcanaccessConnectionBuilder {
         copy.remove(password);
 
         // special handling of certain properties
-        if (Integer.valueOf(copy.getOrDefault(inactivityTimeout, -1).toString()) > -1) {
+        if (Integer.parseInt(copy.getOrDefault(inactivityTimeout, -1).toString()) > -1) {
             copy.remove(immediatelyReleaseResources);
         } else {
             copy.put(immediatelyReleaseResources, true);

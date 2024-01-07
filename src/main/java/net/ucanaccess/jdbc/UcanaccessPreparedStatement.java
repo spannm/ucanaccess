@@ -69,9 +69,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     private void addMementoEntry(String methodName, Class<?>[] argClasses, Object... args) {
         Class<?>[] ac = new Class[args.length];
         ac[0] = Integer.TYPE;
-        for (int y = 1; y < ac.length; y++) {
-            ac[y] = argClasses[y - 1];
-        }
+        System.arraycopy(argClasses, 0, ac, 1, ac.length - 1);
         memento.put((Integer) args[0], new ParameterReset(methodName, ac, args));
     }
 

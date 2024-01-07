@@ -15,9 +15,7 @@ public class DefaultJackcessOpener implements IJackcessOpenerInterface {
         DatabaseBuilder dbd = new DatabaseBuilder(fl).setAutoSync(false);
         Database db = Try.catching(() -> {
             return dbd.setReadOnly(false).open();
-        }).orElseGet(() -> {
-            return dbd.setReadOnly(true).open();
-        });
+        }).orElseGet(() -> dbd.setReadOnly(true).open());
         db.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
         return db;
     }

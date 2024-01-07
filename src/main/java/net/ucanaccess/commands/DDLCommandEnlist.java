@@ -208,9 +208,7 @@ public class DDLCommandEnlist {
                 if (_colDecls[k].endsWith(_rl)) {
                     String[] colDecls0 = new String[_colDecls.length - k];
                     colDecls0[0] = _tknt.substring(1, _tknt.substring(1).indexOf(_rl) + 1);
-                    for (int y = 1; y < colDecls0.length; y++) {
-                        colDecls0[y] = _colDecls[y + k];
-                    }
+                    System.arraycopy(_colDecls, 1 + k, colDecls0, 1, colDecls0.length - 1);
                     _colDecls = colDecls0;
                     break;
                 }

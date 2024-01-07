@@ -183,7 +183,7 @@ public final class Try<V, EC extends Throwable> {
         if (t != null) {
             @SuppressWarnings("unchecked")
             E1 e1 = (E1) t;
-            return new Try<V1, E1>((V1) null, e1);
+            return new Try<>((V1) null, e1);
         }
         return Try.catching((IThrowingSupplier<V1, E1>) () -> _mapper.apply(val));
     }
@@ -258,7 +258,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public V orElseGet(IThrowingSupplier<V, Throwable> _supplier) {
         if (hasThrown()) {
-            return Try.catching(_supplier::get).orThrow();
+            return Try.catching(_supplier).orThrow();
         }
         return val;
     }
@@ -296,11 +296,7 @@ public final class Try<V, EC extends Throwable> {
         Objects.requireNonNull(_function, "Function required");
         if (hasThrown()) {
             Throwable t2 = _function.apply(t);
-            if (t2 == null) {
-                doThrow(new IllegalStateException("Function must provide a throwable"));
-            } else {
-                doThrow(t2);
-            }
+            doThrow(Objects.requireNonNullElseGet(t2, () -> new IllegalStateException("Function must provide a throwable")));
         }
         return val;
     }

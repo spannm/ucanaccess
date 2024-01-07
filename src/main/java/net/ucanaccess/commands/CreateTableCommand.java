@@ -6,6 +6,7 @@ import net.ucanaccess.jdbc.UcanaccessSQLException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 
 public class CreateTableCommand implements ICommand {
     private String              execId;
@@ -42,7 +43,7 @@ public class CreateTableCommand implements ICommand {
             return false;
         }
         CreateTableCommand other = (CreateTableCommand) obj;
-        return tableName == null ? other.tableName == null : tableName.equals(other.tableName);
+        return Objects.equals(tableName, other.tableName);
     }
 
     @Override

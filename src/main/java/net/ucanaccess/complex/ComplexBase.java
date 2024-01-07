@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public abstract class ComplexBase implements Serializable {
@@ -77,7 +78,7 @@ public abstract class ComplexBase implements Serializable {
         if (id != other.id) {
             return false;
         }
-        return tableName == null ? other.tableName == null : tableName.equals(other.tableName);
+        return Objects.equals(tableName, other.tableName);
     }
 
     public static Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {

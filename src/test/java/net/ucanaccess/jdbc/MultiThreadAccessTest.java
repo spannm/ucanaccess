@@ -71,13 +71,11 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     void testMultiThread(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
-        List<Thread> threads = IntStream.range(0, 50).mapToObj(i -> new Thread(() -> {
-            assertDoesNotThrow(() -> {
-                crud();
-                crudPreparedStatement();
-                crudUpdatableResultset();
-            });
-        })).collect(Collectors.toList());
+        List<Thread> threads = IntStream.range(0, 50).mapToObj(i -> new Thread(() -> assertDoesNotThrow(() -> {
+            crud();
+            crudPreparedStatement();
+            crudUpdatableResultset();
+        }))).collect(Collectors.toList());
 
         threads.forEach(Thread::start);
 

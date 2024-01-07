@@ -14,16 +14,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class SQLConverter {
-    private static final Pattern QUOTE_S_PATTERN        = Pattern.compile("(')+");
-    private static final Pattern DOUBLE_QUOTE_S_PATTERN = Pattern.compile("(\")+");
+    private static final Pattern QUOTE_S_PATTERN           = Pattern.compile("(')+");
+    private static final Pattern DOUBLE_QUOTE_S_PATTERN    = Pattern.compile("(\")+");
 
     private static final Pattern SELECT_FROM_PATTERN_START = Pattern.compile("[\\s\n\r]*(?i)SELECT[\\s\n\r]+");
     private static final Pattern SELECT_FROM_PATTERN_END   = Pattern.compile("[\\s\n\r]*(?i)FROM[\\s\n\r\\[]+");
     private static final Pattern UNESCAPED_ALIAS           = Pattern.compile("[\\s\n\r]*(?i)AS[\\s\n\r]*");
 
-    private static final Pattern QUOTE_M_PATTERN                  = Pattern.compile("'(([^'])*)'");
-    private static final Pattern DOUBLE_QUOTE_M_PATTERN           = Pattern.compile("\"(([^\"])*)\"");
-    private static final Pattern FIND_LIKE_PATTERN                = Pattern
+    private static final Pattern QUOTE_M_PATTERN           = Pattern.compile("'(([^'])*)'");
+    private static final Pattern DOUBLE_QUOTE_M_PATTERN    = Pattern.compile("\"(([^\"])*)\"");
+    private static final Pattern FIND_LIKE_PATTERN         = Pattern
             .compile("[\\s\n\r\\(]*([\\w\\.]*)([\\s\n\r\\)]*)((?i)NOT[\\s\n\r]*)*(?i)LIKE[\\s\n\r]*'([^']*(?:'')*)'");
     private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN =
             Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
@@ -49,11 +49,11 @@ public final class SQLConverter {
             Pattern.compile("(\\W)(([0-9])+(([_a-zA-Z])+([0-9])*)+)(\\W)");
     private static final String   UNDERSCORE_IDENTIFIERS     = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
     private static final String   XESCAPED                   = "(\\W)((?i)X)((?i)_)(\\W)";
-    private static final String[] DEFAULT_CATCH              =
-            new String[] {"([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)('(?:[^']*(?:'')*)*')([\\s\n\r\\)\\,])",
-                    "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
-                    "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
-                    "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])"};
+    private static final String[] DEFAULT_CATCH              = new String[] {
+        "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)('(?:[^']*(?:'')*)*')([\\s\n\r\\)\\,])",
+        "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\n\r\\)\\,])",
+        "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([0-9\\.\\-\\+]+)([\\s\n\r\\)\\,])",
+        "([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\n\r\\)\\,])"};
     private static final Pattern  DEFAULT_CATCH_0            = Pattern.compile("([\\s\n\r]*(?i)DEFAULT[\\s\n\r]+)");
     public static final String    NOT_NULL                   = "[\\s\n\r](?i)NOT[\\s\n\r](?i)NULL";
 
@@ -82,15 +82,14 @@ public final class SQLConverter {
     private static final String                  PARAMETERS                   = "(?i)PARAMETERS([^;]*);";
     private static final Pattern                 ESPRESSION_DIGIT             = Pattern.compile("([\\d]+)(?![\\.\\d])");
     private static final String                  BIG_BANG                     = "1899-12-30";
-    private static final Map<String, String>     NO_ROMAN_CHARACTERS = new HashMap<>();
     private static final List<String>            KEYWORDLIST                  = List.of("ALL", "AND", "ANY",
-            "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
-            "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
-            "EXISTS", "EXCEPT", "FOR", "FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN", "INNER",
-            "INTERSECT", "INTO", "IS", "JOIN", "LEFT", "LEADING", "LIKE", "MAX", "MIN", "NATURAL", "NOT", "NULLIF",
-            "ON", "ORDER", "OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "SOME", "STDDEV_POP",
-            "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
-            "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
+        "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
+        "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
+        "EXISTS", "EXCEPT", "FOR", "FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN", "INNER",
+        "INTERSECT", "INTO", "IS", "JOIN", "LEFT", "LEADING", "LIKE", "MAX", "MIN", "NATURAL", "NOT", "NULLIF",
+        "ON", "ORDER", "OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "SOME", "STDDEV_POP",
+        "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
+        "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
     private static final String              KEYWORD_ALIAS                  = createKeywordAliasRegex();
     private static final List<String>        PROCEDURE_KEYWORD_LIST         = List.of("NEW", "ROW");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
@@ -102,21 +101,6 @@ public final class SQLConverter {
 
     private static boolean supportsAccessLike  = true;
     private static boolean dualUsedAsTableName = false;
-    static {
-        NO_ROMAN_CHARACTERS.put("\u20ac", "EUR");
-        NO_ROMAN_CHARACTERS.put("\u00B9", "1");
-        NO_ROMAN_CHARACTERS.put("\u00B2", "2");
-        NO_ROMAN_CHARACTERS.put("\u00B3", "3");
-        NO_ROMAN_CHARACTERS.put("\u00BC", "1_4");
-        NO_ROMAN_CHARACTERS.put("\u00BD", "1_2");
-        NO_ROMAN_CHARACTERS.put("\u00BE", "3_4");
-        NO_ROMAN_CHARACTERS.put("\u00D0", "D");
-        NO_ROMAN_CHARACTERS.put("\u00D7", "X");
-        NO_ROMAN_CHARACTERS.put("\u00DE", "P");
-        NO_ROMAN_CHARACTERS.put("\u00F0", "O");
-        NO_ROMAN_CHARACTERS.put("\u00FD", "Y");
-        NO_ROMAN_CHARACTERS.put("\u00FE", "P");
-    }
 
     private SQLConverter() {
     }

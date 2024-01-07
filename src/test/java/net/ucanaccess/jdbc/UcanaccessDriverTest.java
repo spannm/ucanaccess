@@ -21,7 +21,7 @@ class UcanaccessDriverTest extends UcanaccessBaseTest {
         String url = "jdbc:ucanaccess:///tmp/testdb.mdb;CONCATNULLS=true;bo=gus;withoutVal1;withoutVal2=;enCrypt=false";
         Map<String, String> unknownProps = new LinkedHashMap<>();
 
-        Map<Property, String> output = UcanaccessDriver.readProperties(input, url, (k, v) -> unknownProps.put(k, v));
+        Map<Property, String> output = UcanaccessDriver.readProperties(input, url, unknownProps::put);
 
         assertThat(output).hasSize(3)
             .containsEntry(columnOrder, "data")
