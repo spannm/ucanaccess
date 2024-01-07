@@ -193,8 +193,7 @@ public final class SQLConverter {
             return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
             int[] ret = new int[] {-1, -1};
-            Pattern pt = QUOTE_S_PATTERN;
-            Matcher mc = pt.matcher(_s);
+            Matcher mc = QUOTE_S_PATTERN.matcher(_s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
@@ -221,8 +220,7 @@ public final class SQLConverter {
             return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
         } else {
             int[] ret = new int[] {-1, -1};
-            Pattern pt = DOUBLE_QUOTE_S_PATTERN;
-            Matcher mc = pt.matcher(_s);
+            Matcher mc = DOUBLE_QUOTE_S_PATTERN.matcher(_s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
@@ -357,8 +355,7 @@ public final class SQLConverter {
         public String getSelect(String s) {
             Matcher m = pattern.matcher(s);
             if (m.find()) {
-                String sub = s.substring(m.start(m.groupCount()), s.lastIndexOf(')'));
-                return sub;
+                return s.substring(m.start(m.groupCount()), s.lastIndexOf(')'));
             }
             return null;
         }
@@ -813,9 +810,8 @@ public final class SQLConverter {
         if (mtc.find()) {
             typeDeclaration = typeDeclaration.substring(0, mtc.start());
         }
-        String ret = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + typeDeclaration;
 
-        return ret;
+        return "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + typeDeclaration;
     }
 
     private static String convertTypeDeclaration(String typeDecl) {
@@ -888,8 +884,7 @@ public final class SQLConverter {
     }
 
     private static String convertLike(String sql) {
-        Pattern ptfl = FIND_LIKE_PATTERN;
-        Matcher matcher = ptfl.matcher(sql);
+        Matcher matcher = FIND_LIKE_PATTERN.matcher(sql);
         if (matcher.find()) {
             return sql.substring(0, matcher.start(1))
                     + convertLike(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4))
@@ -900,8 +895,7 @@ public final class SQLConverter {
     }
 
     private static String convert2RegexMatches(String likeContent) {
-        Pattern ptn = ACCESS_LIKE_ESCAPE_PATTERN;
-        Matcher mtc = ptn.matcher(likeContent);
+        Matcher mtc = ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
         if (mtc.find()) {
             return convert2RegexMatches(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2RegexMatches(likeContent.substring(mtc.end(0)));
@@ -911,8 +905,7 @@ public final class SQLConverter {
     }
 
     private static String convert2LikeCondition(String likeContent) {
-        Pattern ptn = ACCESS_LIKE_ESCAPE_PATTERN;
-        Matcher mtc = ptn.matcher(likeContent);
+        Matcher mtc = ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
         if (mtc.find()) {
             return convert2LikeCondition(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2LikeCondition(likeContent.substring(mtc.end(0)));
@@ -921,10 +914,9 @@ public final class SQLConverter {
     }
 
     private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
-        Pattern inter = ACCESS_LIKE_CHARINTERVAL_PATTERN;
         int i = likeContent.replaceAll("\\[#\\]", "").indexOf('#');
         not = not == null ? "" : " NOT ";
-        if (i >= 0 || inter.matcher(likeContent).find()) {
+        if (i >= 0 || ACCESS_LIKE_CHARINTERVAL_PATTERN.matcher(likeContent).find()) {
             return not + "REGEXP_MATCHES(" + conditionField + ",'" + convert2RegexMatches(likeContent) + "')" + closePar
                     + " ";
         }
@@ -1128,8 +1120,7 @@ public final class SQLConverter {
     }
 
     public static int asUnsigned(byte _a) {
-        int b = _a & 0xFF;
-        return b;
+        return _a & 0xFF;
     }
 
     public static Set<String> getFormulaDependencies(String formula) {

@@ -705,9 +705,8 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
             return;
         }
         PreparedStatement old = wrapped;
-        PreparedStatement stat = tryCatch(() -> getConnection().getHSQLDBConnection().prepareStatement(sql,
+        wrapped = tryCatch(() -> getConnection().getHSQLDBConnection().prepareStatement(sql,
             wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
-        wrapped = stat;
         reset(wrapped);
         parametersReset();
         tryCatch(old::close);
