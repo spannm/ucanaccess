@@ -48,7 +48,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             System.getenv("SystemRoot"),
             System.getProperty("sun.arch.data.model").equals("64") ? "SYSWOW64" : "SYSTEM32", "CSCRIPT.EXE");
 
-        String command = '\"' + cscriptPath + "\" \"" + vbsFile.getAbsolutePath() + '\"';
+        String[] command = new String[] {"\"" + cscriptPath + "\"", "\"" + vbsFile.getAbsolutePath() + "\""};
         Process proc = Runtime.getRuntime().exec(command);
         proc.waitFor(15, TimeUnit.SECONDS);
 

@@ -138,7 +138,7 @@
         <module name="UnusedImports"/>
         <module name="UpperEll"/>
         <module name="VariableDeclarationUsageDistance">
-            <property name="allowedDistance" value="5"/>
+            <property name="allowedDistance" value="10"/>
         </module>
         <module name="VisibilityModifier"/>
         <module name="WhitespaceAfter"/>

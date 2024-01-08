@@ -96,7 +96,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testUpdatableRS(AccessVersion _accessVersion) throws SQLException {
+    void testUpdatableResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
@@ -115,7 +115,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testDeleteRS(AccessVersion _accessVersion) throws SQLException {
+    void testDeleteResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         ucanaccess.setAutoCommit(false);
@@ -136,7 +136,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testInsertRS(AccessVersion _accessVersion) throws SQLException {
+    void testInsertResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -160,7 +160,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testInsertRSNoAllSet(AccessVersion _accessVersion) throws SQLException {
+    void testInsertResultSetNoAllSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -190,7 +190,7 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
-    void testPartialInsertRS(AccessVersion _accessVersion) throws SQLException {
+    void testPartialInsertResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

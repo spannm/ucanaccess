@@ -285,10 +285,7 @@ public class UcanaccessStatement implements Statement {
     public int getUpdateCount() throws UcanaccessSQLException {
         return tryCatch(() -> {
             int i = wrapped.getUpdateCount();
-            if (i == -1 && enableDisable) {
-                return 0;
-            }
-            return i;
+            return i == -1 && enableDisable ? 0 : i;
         });
     }
 
@@ -369,24 +366,24 @@ public class UcanaccessStatement implements Statement {
     protected void reset() throws UcanaccessSQLException {
         Statement old = wrapped;
         Statement stat = tryCatch(() -> getConnection().getHSQLDBConnection().createStatement(
-                wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
+            wrapped.getResultSetType(), wrapped.getResultSetConcurrency(), wrapped.getResultSetHoldability()));
         reset(stat);
         tryCatch(old::close);
     }
 
     protected void reset(Statement _st) throws UcanaccessSQLException {
         tryCatch(() -> {
-            final int maxr = wrapped.getMaxRows();
-            final int maxf = wrapped.getMaxFieldSize();
-            final int direction = wrapped.getFetchDirection();
-            final int fs = wrapped.getFetchSize();
-            final int qt = wrapped.getQueryTimeout();
+            int maxRows = wrapped.getMaxRows();
+            int maxFldSz = wrapped.getMaxFieldSize();
+            int fetchDir = wrapped.getFetchDirection();
+            int fetchSz = wrapped.getFetchSize();
+            int qryTimeout = wrapped.getQueryTimeout();
             wrapped = _st;
-            wrapped.setMaxRows(maxr);
-            wrapped.setMaxFieldSize(maxf);
-            wrapped.setFetchDirection(direction);
-            wrapped.setFetchSize(fs);
-            wrapped.setQueryTimeout(qt);
+            wrapped.setMaxRows(maxRows);
+            wrapped.setMaxFieldSize(maxFldSz);
+            wrapped.setFetchDirection(fetchDir);
+            wrapped.setFetchSize(fetchSz);
+            wrapped.setQueryTimeout(qryTimeout);
         });
     }
 
