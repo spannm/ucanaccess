@@ -14,9 +14,8 @@ import java.util.Map;
 public class UcanaccessStatement implements Statement {
 
     private UcanaccessConnection connection;
-    // CHECKSTYLE:OFF
+    @SuppressWarnings("checkstyle:VisibilityModifierCheck")
     protected Statement          wrapped;
-    // CHECKSTYLE:ON
     private Object               generatedKey;
     private Map<String, String>  aliases;
     private boolean              enableDisable;

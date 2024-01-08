@@ -39,9 +39,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     private File                   fileAccDb;
     private AccessVersion          accessVersion;
-    // CHECKSTYLE:OFF
+    @SuppressWarnings("checkstyle:VisibilityModifierCheck")
     protected UcanaccessConnection ucanaccess;
-    // CHECKSTYLE:ON
     private UcanaccessConnection   verifyConnection;
 
     protected UcanaccessBaseTest() {
