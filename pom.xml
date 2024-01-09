@@ -300,6 +300,19 @@
                 <plugins>
 
                     <plugin>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>dep.hsqldb.classifier</property>
+                                    <regex>^$</regex>
+                                    <regexMessage>hsqldb classifier must be blank during release (property dep.hsqldb.classifier)</regexMessage>
+                                </requireProperty>
+                            </rules>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
                         <configuration>
