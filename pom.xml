@@ -84,7 +84,7 @@
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
         <dep.hsqldb.classifier></dep.hsqldb.classifier>
 
-        <dep.slf4j.version>2.0.9</dep.slf4j.version>
+        <dep.slf4j.version>2.0.11</dep.slf4j.version>
 
         <dep.junit.version>5.10.1</dep.junit.version>
         <dep.assertj.version>3.25.1</dep.assertj.version>
