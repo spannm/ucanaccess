@@ -1,7 +1,6 @@
-<project xmlns="http://maven.apache.org/DECORATION/1.8.1"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.1 https://maven.apache.org/xsd/decoration-1.8.1.xsd"
-    name="UCanAccess">
+<site xmlns="http://maven.apache.org/SITE/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
+  name="UCanAccess">
 
     <skin>
         <groupId>org.apache.maven.skins</groupId>
@@ -9,23 +8,24 @@
         <version>2.0.0-M8</version>
     </skin>
 
-    <bannerLeft>
-        <name>UCanAccess</name>
-    </bannerLeft>
+    <bannerLeft name="UCanAccess"/>
 
     <custom>
-        <fluidoSkin>
-        </fluidoSkin>
+        <fluidoSkin/>
     </custom>
 
-    <version position="right"/>
+    <version position="left"/>
+    <publishDate position="right"/>
 
     <body>
+
+        <breadcrumbs/>
+
         <links>
-            <item name="GitHub Repository" href="https://github.com/spannm/ucanaccess" />
-            <item name="GitHub Wiki" href="https://github.com/spannm/ucanaccess/wiki" />
-            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess" />
-            <item name="SourceForge" href="https://ucanaccess.sourceforge.net/" />
+            <item name="GitHub Repository" href="https://github.com/spannm/ucanaccess" target="_blank"/>
+            <item name="GitHub Wiki" href="https://github.com/spannm/ucanaccess/wiki" target="_blank"/>
+            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess" target="_blank"/>
+            <item name="SourceForge" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
         </links>
 
         <menu name="Overview">
@@ -40,5 +40,4 @@
         <menu ref="modules"/>
     </body>
 
-</project>
-
+</site>
