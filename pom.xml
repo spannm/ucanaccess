@@ -20,6 +20,7 @@
 
     <organization>
         <name>UCanAccess</name>
+        <url>${project.url}</url>
     </organization>
 
     <licenses>
@@ -58,7 +59,7 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-  </scm>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -71,6 +72,10 @@
             <name>Nexus Release Repository</name>
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
+        <site>
+            <id>local</id>
+            <url>file://${java.io.tmpdir}/${project.artifactId}/site-prepared</url>
+        </site>
     </distributionManagement>
 
     <properties>
@@ -102,6 +107,9 @@
 
         <basepom.javadoc.skip>false</basepom.javadoc.skip>
         <basepom.javadoc.show>protected</basepom.javadoc.show>
+
+        <basepom.site.scm.branch>master</basepom.site.scm.branch>
+        <basepom.site.skip-deploy>false</basepom.site.skip-deploy>
     </properties>
 
     <dependencyManagement>

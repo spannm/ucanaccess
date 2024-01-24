@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.8.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.1 https://maven.apache.org/xsd/decoration-1.8.1.xsd"
+    name="UCanAccess">
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>2.0.0-M8</version>
+    </skin>
+
+    <bannerLeft>
+        <name>UCanAccess</name>
+    </bannerLeft>
+
+    <custom>
+        <fluidoSkin>
+        </fluidoSkin>
+    </custom>
+
+    <version position="right"/>
+
+    <body>
+        <links>
+            <item name="GitHub Repository" href="https://github.com/spannm/ucanaccess" />
+            <item name="GitHub Wiki" href="https://github.com/spannm/ucanaccess/wiki" />
+            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess" />
+            <item name="SourceForge" href="https://ucanaccess.sourceforge.net/" />
+        </links>
+
+        <menu name="Overview">
+            <item name="UCanAccess" href="/10-index.html" />
+            <item name="Getting Started" href="/20-getting-started.html" />
+            <item name="JDBC Client Tools" href="/30-jdbc-client-tools.html" />
+            <item name="Change Log" href="/40-change-log.html" />
+            <item name="Links/Licensing" href="/50-links-licensing.html" />
+            <item name="About" href="/60-about.html" />
+        </menu>
+        <menu ref="reports"/>
+        <menu ref="modules"/>
+    </body>
+
+</project>
+
