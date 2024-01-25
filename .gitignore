@@ -6,6 +6,7 @@
 **/.eclipse-pmd
 **/.pmd
 **/.pmdruleset.xml
+**/NOTES.txt
 *.iml
 .checkstyle
 .idea/
