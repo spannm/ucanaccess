@@ -29,7 +29,7 @@ class BlobOleTest extends UcanaccessBaseTest {
     void testBlobOle(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        String imgFileName = String.join(File.separator, getClass().getSimpleName(), "blobOleTest.jpeg");
+        String imgFileName = getFileResource("blobOleTest.jpg"); // media file (c) Markus Spann
 
         Blob blob = ucanaccess.createBlob();
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(imgFileName.replace(File.separatorChar, '/'));
@@ -67,8 +67,11 @@ class BlobOleTest extends UcanaccessBaseTest {
             }
         }
 
+        // media file found here: https://commons.wikimedia.org/wiki/File:Animhorse.gif
+        // (licensed under the Creative Commons Attribution-Share Alike 2.5 Generic license)
+        String binFileName = getFileResource("blobOleTest.gif");
+
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
-            String binFileName = String.join(File.separator, getClass().getSimpleName(), "blobOleTest.mp4");
             File file = createTempFileName(binFileName, null);
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName.replace('/', File.separatorChar))) {
                 copyFile(is, file).deleteOnExit();
@@ -98,14 +101,21 @@ class BlobOleTest extends UcanaccessBaseTest {
         }
     }
 
+    private String getFileResource(String fileName) {
+        String folder = getClass().getSimpleName();
+        folder = folder.substring(0, 1).toLowerCase() + folder.substring(1);
+        return String.join(File.separator, folder, fileName);
+    }
+
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        String binFileName = "BlobOleTest/blobOleTest.mp4";
+        String binFileName = getFileResource("blobOleTest.gif");
         File file = createTempFileName(binFileName.replace('/', File.separatorChar), null);
+
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName)) {
             copyFile(is, file).deleteOnExit();
         }
