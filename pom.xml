@@ -10,7 +10,7 @@
 
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.1.1-SNAPSHOT</version>
+    <version>5.1.1</version>
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
@@ -59,7 +59,8 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-    </scm>
+      <tag>ucanaccess-5.1.1</tag>
+  </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -87,7 +88,7 @@
         <dep.jackcess.version>4.0.5</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
-        <dep.hsqldb.classifier></dep.hsqldb.classifier>
+        <dep.hsqldb.classifier />
 
         <dep.slf4j.version>2.0.11</dep.slf4j.version>
 
