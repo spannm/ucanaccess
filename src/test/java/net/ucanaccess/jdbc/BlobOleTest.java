@@ -67,9 +67,7 @@ class BlobOleTest extends UcanaccessBaseTest {
             }
         }
 
-        // media file found here: https://commons.wikimedia.org/wiki/File:Animhorse.gif
-        // (licensed under the Creative Commons Attribution-Share Alike 2.5 Generic license)
-        String binFileName = getFileResource("blobOleTest.gif");
+        String binFileName = getFileResource("blobOleTest.gif"); // media file (c) Markus Spann
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
             File file = createTempFileName(binFileName, null);
@@ -113,7 +111,7 @@ class BlobOleTest extends UcanaccessBaseTest {
     void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
-        String binFileName = getFileResource("blobOleTest.gif");
+        String binFileName = getFileResource("blobOleTest.gif"); // media file (c) Markus Spann
         File file = createTempFileName(binFileName.replace('/', File.separatorChar), null);
 
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName)) {
