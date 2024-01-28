@@ -1,6 +1,6 @@
 ### Welcome to (the new home of) UCanAccess
 
-**UCanAccess** is a popular open-source pure Java JDBC driver capable of reading/writing Microsoft Access databases.
+**UCanAccess** is an open-source pure Java JDBC driver capable of reading and writing Microsoft Access databases.
 
 ---
 
@@ -23,8 +23,6 @@ Your feedback, thoughts and contributions are very welcome.
 
 &nbsp;
 
-&nbsp;
-
 ---
 
 UCanAccess is licensed under the Apache License, Version 2.0. Please see here for detailed [license info](LICENSE.txt).
@@ -36,3 +34,5 @@ The Apache POI project is licensed under Apache License, Version 2.0
 Some of the UcanaccessDatabaseMetadata methods have been originally inspired by the hsqldb DatabaseMetaData implementation.
 They have been then modified and adapted so that they are integrated with UCanAccess in a consistent manner.
 The Hsqldb project is licensed under a BSD-based license.
+
+Microsoft, Access, Microsoft Office, Microsoft Access are trademarks of Microsoft Corporation.

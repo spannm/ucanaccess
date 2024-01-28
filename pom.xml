@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
-    <description>An open source pure Java JDBC Driver implementation which allows Java developers and JDBC client programs (e.g., Open Office, Libre Office, Squirrel SQL) to read/write Microsoft Access databases.</description>
+    <description>Open-source pure Java JDBC driver for Access databases. Allows Java developers and client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write various versions of Microsoft Access databases.</description>
     <url>https://github.com/spannm/${project.artifactId}</url>
     <inceptionYear>2012</inceptionYear>
 
