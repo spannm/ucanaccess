@@ -3,6 +3,8 @@ package net.ucanaccess.jdbc;
 import net.ucanaccess.converters.Functions;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -13,11 +15,19 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 class FunctionsTest extends UcanaccessBaseTest {
 
-    FunctionsTest() {
+    @BeforeAll
+    static void setLocale() {
+        locale = Locale.getDefault();
         Locale.setDefault(Locale.US);
+    }
+
+    @AfterAll
+    static void resetLocale() {
+        Locale.setDefault(Objects.requireNonNullElseGet(locale, Locale::getDefault));
     }
 
     @Override
@@ -518,10 +528,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT Format(11111210.6, '#,##0.00') FROM t_funcs", singleRec("11,111,210.60"));
         checkQuery("SELECT Format(1111111210.6, 'Scientific') FROM t_funcs", singleRec("1.11E+09"));
         checkQuery("SELECT Format(0.00000000000000015661112106, 'Scientific') FROM t_funcs", singleRec("1.57E-16"));
-        Locale prevLocale = Locale.getDefault();
-        Locale.setDefault(Locale.US);
         checkQuery("SELECT Format(1.239, 'Currency') FROM t_funcs", singleRec("$1.24"));
-        Locale.setDefault(prevLocale);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

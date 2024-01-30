@@ -6,16 +6,26 @@ import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.hsqldb.error.ErrorCode;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.Objects;
 
 class ExceptionCodeTest extends UcanaccessBaseTest {
 
-    ExceptionCodeTest() {
+    @BeforeAll
+    static void setLocale() {
+        locale = Locale.getDefault();
         Locale.setDefault(Locale.US);
+    }
+
+    @AfterAll
+    static void resetLocale() {
+        Locale.setDefault(Objects.requireNonNullElseGet(locale, Locale::getDefault));
     }
 
     @Override

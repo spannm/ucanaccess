@@ -6,7 +6,7 @@
 <!-- Checkstyle-Configuration: UCanAccess Checkstyle -->
 
 <module name="Checker">
-    <property name="fileExtensions" value="java,properties,xml"/>
+    <property name="fileExtensions" value="java, properties, xml"/>
     <property name="tabWidth" value="4"/>
 
     <!-- Excludes all 'module-info.java' files -->
@@ -158,4 +158,3 @@
     </module>
 
 </module>
-
