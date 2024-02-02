@@ -9,9 +9,9 @@ import java.sql.Blob;
 import java.sql.SQLException;
 
 public class UcanaccessBlob implements Blob {
-    private Blob                 blob;
-    private boolean              usingBlobKey;
-    private UcanaccessConnection conn;
+    private Blob                       blob;
+    private boolean                    usingBlobKey;
+    private final UcanaccessConnection conn;
 
     public UcanaccessBlob(Blob _blob, UcanaccessConnection _conn) throws SQLException {
         blob = _blob;

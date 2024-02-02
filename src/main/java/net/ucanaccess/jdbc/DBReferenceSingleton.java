@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DBReferenceSingleton {
-    private static DBReferenceSingleton singleton;
-    private Map<String, DBReference>    dbRegistry = Collections.synchronizedMap(new HashMap<>());
+    private static DBReferenceSingleton    singleton;
+    private final Map<String, DBReference> dbRegistry = Collections.synchronizedMap(new HashMap<>());
 
     private DBReferenceSingleton() {
     }

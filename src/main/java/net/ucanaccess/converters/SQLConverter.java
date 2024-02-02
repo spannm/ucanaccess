@@ -90,17 +90,17 @@ public final class SQLConverter {
         "ON", "ORDER", "OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "SOME", "STDDEV_POP",
         "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
         "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
-    private static final String              KEYWORD_ALIAS                  = createKeywordAliasRegex();
-    private static final List<String>        PROCEDURE_KEYWORD_LIST         = List.of("NEW", "ROW");
-    private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
-    private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<>();
-    private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<>();
-    private static final Map<String, String> IDENTIFIERS_CONTAINING_KEYWORD = new HashMap<>();
-    private static final Set<String>         APOSTROPHISED_NAMES            = new HashSet<>();
-    private static final Set<String>         WORKAROUND_FUNCTIONS           = new HashSet<>();
+    private static final String              KEYWORD_ALIAS                    = createKeywordAliasRegex();
+    private static final List<String>        PROCEDURE_KEYWORD_LIST           = List.of("NEW", "ROW");
+    private static final List<String>        WHITE_SPACED_TABLE_NAMES         = new ArrayList<>();
+    private static final Set<String>         ESCAPED_IDENTIFIERS              = new HashSet<>();
+    private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS      = new HashSet<>();
+    private static final Map<String, String> IDENTIFIERS_CONTAINING_KEYWORD   = new HashMap<>();
+    private static final Set<String>         APOSTROPHISED_NAMES              = new HashSet<>();
+    private static final Set<String>         WORKAROUND_FUNCTIONS             = new HashSet<>();
 
-    private static boolean supportsAccessLike  = true;
-    private static boolean dualUsedAsTableName = false;
+    private static boolean                   supportsAccessLike               = true;
+    private static boolean                   dualUsedAsTableName              = false;
 
     private SQLConverter() {
     }
@@ -228,47 +228,47 @@ public final class SQLConverter {
 
     public enum DDLType {
 
-        CREATE_TABLE_AS_SELECT(
-                Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")),
-        CREATE_TABLE(Pattern.compile("[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN)),
-        DROP_TABLE_CASCADE(
-                Pattern.compile(
-                        "[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN + "[\\s\n\r]+(?i)cascade")),
+        CREATE_TABLE_AS_SELECT(Pattern.compile(
+            "[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+                + "[\\s\n\r]*(?)AS[\\s\n\r]*\\(\\s*((?)SELECT)")),
+        CREATE_TABLE(Pattern.compile(
+            "[\\s\n\r]*(?i)create[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN)),
+        DROP_TABLE_CASCADE(Pattern.compile(
+            "[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN + "[\\s\n\r]+(?i)cascade")),
 
-        DROP_TABLE(Pattern.compile("[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN)),
-        ALTER_RENAME(
-                Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" + NAME_PATTERN)),
-        CREATE_PRIMARY_KEY(
-                Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+)?(?i)primary[\\s\n\r]+(?i)key(.*)")),
-        CREATE_FOREIGN_KEY(
-                Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+)?(?i)foreign[\\s\n\r]+(?i)key[\\s\n\r]+"
-                        + "(?:\\(.*\\))[\\s\n\r]*(?i)references[\\s\n\r]+" + NAME_PATTERN + "(.*)")),
-        DROP_FOREIGN_KEY(
-                Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)drop[\\s\n\r]+(?i)constraint[\\s\n\r]+" + NAME_PATTERN)),
+        DROP_TABLE(Pattern.compile(
+            "[\\s\n\r]*(?i)drop[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN)),
+        ALTER_RENAME(Pattern.compile(
+            "[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)rename[\\s\n\r]+(?i)to[\\s\n\r]+" + NAME_PATTERN)),
+        CREATE_PRIMARY_KEY(Pattern.compile(
+            "[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+)?(?i)primary[\\s\n\r]+(?i)key(.*)")),
+        CREATE_FOREIGN_KEY(Pattern.compile(
+            "[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)constraint[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+)?(?i)foreign[\\s\n\r]+(?i)key[\\s\n\r]+"
+            + "(?:\\(.*\\))[\\s\n\r]*(?i)references[\\s\n\r]+" + NAME_PATTERN + "(.*)")),
+        DROP_FOREIGN_KEY(Pattern.compile(
+            "[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)drop[\\s\n\r]+(?i)constraint[\\s\n\r]+" + NAME_PATTERN)),
 
-        ADD_COLUMN(
-                Pattern.compile("[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)column[\\s\n\r]+)?" + NAME_PATTERN + "(.*)")),
-        CREATE_INDEX(
-                Pattern.compile("(?i)CREATE[\\s\n\r]+(?:(?i)unique)?[\\s\n\r]*(?i)index[\\s\n\r]+" + NAME_PATTERN
-                        + "[\\s\n\r]+(?i)ON[\\s\n\r]+" + NAME_PATTERN + "[\\s\n\r]+")),
+        ADD_COLUMN(Pattern.compile(
+            "[\\s\n\r]*(?i)alter[\\s\n\r]+(?i)table[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)add[\\s\n\r]+(?:(?i)column[\\s\n\r]+)?" + NAME_PATTERN + "(.*)")),
+        CREATE_INDEX(Pattern.compile(
+            "(?i)CREATE[\\s\n\r]+(?:(?i)unique)?[\\s\n\r]*(?i)index[\\s\n\r]+" + NAME_PATTERN
+            + "[\\s\n\r]+(?i)ON[\\s\n\r]+" + NAME_PATTERN + "[\\s\n\r]+")),
 
-        DISABLE_AUTOINCREMENT(
-                Pattern.compile(
-                        "[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*" + NAME_PATTERN)),
+        DISABLE_AUTOINCREMENT(Pattern.compile(
+            "[\\s\n\r]*(?i)disable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*" + NAME_PATTERN)),
 
-        ENABLE_AUTOINCREMENT(
-                Pattern.compile(
-                        "[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*" + NAME_PATTERN));
-        private Pattern pattern;
-        private String  ddl;
+        ENABLE_AUTOINCREMENT(Pattern.compile(
+            "[\\s\n\r]*(?i)enable[\\s\n\r]+(?i)autoincrement[\\s\n\r]+(?i)on[\\s\n\r]*" + NAME_PATTERN));
+
+        private final Pattern pattern;
+        private String        ddl;
 
         DDLType(Pattern _pattern) {
             pattern = _pattern;

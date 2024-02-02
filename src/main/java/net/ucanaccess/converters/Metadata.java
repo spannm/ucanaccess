@@ -175,7 +175,7 @@ public class Metadata {
     private static final String RENAME                    =
         "UPDATE UCA_METADATA.TABLES SET TABLE_NAME=?, ESCAPED_TABLE_NAME=? WHERE TABLE_NAME=?";
 
-    private Connection          conn;
+    private final Connection    conn;
 
     public Metadata(Connection _conn) {
         conn = _conn;

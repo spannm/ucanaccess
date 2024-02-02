@@ -21,19 +21,19 @@ import java.util.List;
 import java.util.Map;
 
 public class UpdateCommand extends AbstractCursorCommand {
-    private List<Column>           blobColumns;
-    private String                 execId;
-    private IndexSelector          indexSelector;
-    private Object[]               modifiedRow;
-    private Map<String, Object>    rowPattern;
-    private Table                  table;
-    private List<? extends Column> tableColumns;
-    private boolean                isRollbacking;
+    private final List<? extends Column> tableColumns;
+    private final IndexSelector          indexSelector;
+    private final Map<String, Object>    rowPattern;
+    private final Object[]               modifiedRow;
+    private final String                 execId;
+    private List<Column>                 blobColumns;
+    private final Table                  table;
+    private boolean                      isRollbacking;
 
-    public UpdateCommand(Table _table, Map<String, Object> _map, Object[] _modifiedRow, String _execId) {
+    public UpdateCommand(Table _table, Map<String, Object> _rowPattern, Object[] _modifiedRow, String _execId) {
         tableColumns = _table.getColumns();
         indexSelector = new IndexSelector(_table);
-        rowPattern = _map;
+        rowPattern = _rowPattern;
         modifiedRow = _modifiedRow;
         execId = _execId;
         checkBlob(_modifiedRow);

@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CreateTableCommand implements ICommand {
-    private String              execId;
-    private String              tableName;
+    private final String        execId;
+    private final String        tableName;
     private String[]            types;
     private String[]            defaults;
     private Boolean[]           notNulls;

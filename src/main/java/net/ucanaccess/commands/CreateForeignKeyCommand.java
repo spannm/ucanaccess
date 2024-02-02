@@ -8,10 +8,10 @@ import java.sql.SQLException;
 
 public class CreateForeignKeyCommand implements ICommand {
 
-    private String tableName;
-    private String referencedTable;
-    private String execId;
-    private String relationshipName;
+    private final String tableName;
+    private final String referencedTable;
+    private final String execId;
+    private final String relationshipName;
 
     public CreateForeignKeyCommand(String _tableName, String _referencedTable, String _execId, String _relationshipName) {
         tableName = _tableName;

@@ -212,10 +212,10 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         for (PreparedStatement ps : List.of(
-            ucanaccess.prepareStatement("CREATE TABLE PS (PS AUTOINCREMENT PRIMARY KEY)"),
-            ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0),
-            ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0),
-            ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0))) {
+            ucanaccess.prepareStatement("CREATE TABLE PS0 (PS AUTOINCREMENT PRIMARY KEY)"),
+            ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0),
+            ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0),
+            ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0))) {
             ps.execute();
         }
     }

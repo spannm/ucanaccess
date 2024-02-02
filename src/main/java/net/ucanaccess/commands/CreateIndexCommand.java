@@ -7,9 +7,9 @@ import net.ucanaccess.util.Try;
 import java.sql.SQLException;
 
 public class CreateIndexCommand implements ICommand {
-    private String indexName;
-    private String tableName;
-    private String execId;
+    private final String indexName;
+    private final String tableName;
+    private final String execId;
 
     public CreateIndexCommand(String _indexName, String _tableName, String _execId) {
         indexName = _indexName;

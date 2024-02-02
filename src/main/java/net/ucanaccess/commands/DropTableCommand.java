@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class DropTableCommand implements ICommand {
-    private String execId;
-    private String tableName;
+    private final String execId;
+    private final String tableName;
 
     public DropTableCommand(String _tableName, String _execId) {
         tableName = _tableName;

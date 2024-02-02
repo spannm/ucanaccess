@@ -8,9 +8,9 @@ import java.util.logging.Level;
 
 public final class Logger {
 
-    private static PrintWriter    logPrintWriter;
+    private static PrintWriter          logPrintWriter;
     /** The resource bundle with logger messages. */
-    private static ResourceBundle messageBundle = ResourceBundle.getBundle(ILoggerResourceMessage.BUNDLE_NAME);
+    private static final ResourceBundle MESSAGE_BUNDLE = ResourceBundle.getBundle(ILoggerResourceMessage.BUNDLE_NAME);
 
     private Logger() {
     }
@@ -29,7 +29,7 @@ public final class Logger {
     }
 
     public static String getMessage(String _code, Object... _params) {
-        String msg = Optional.ofNullable(_code).map(messageBundle::getString).orElse(_code);
+        String msg = Optional.ofNullable(_code).map(MESSAGE_BUNDLE::getString).orElse(_code);
         if (_code != null && _params != null && _params.length > 0) {
             msg = String.format(msg, _params);
         }

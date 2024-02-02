@@ -1293,12 +1293,12 @@ public class LoadJet {
     }
 
     private final class ViewsLoader {
-        private static final int    OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
-        private static final int    OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
-        private static final int    UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
+        private static final int          OBJECT_ALREADY_EXISTS = -ErrorCode.X_42504;
+        private static final int          OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
+        private static final int          UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
 
-        private Map<String, String> notLoaded             = new HashMap<>();
-        private Map<String, String> notLoadedProcedure    = new HashMap<>();
+        private final Map<String, String> notLoaded             = new HashMap<>();
+        private final Map<String, String> notLoadedProcedure    = new HashMap<>();
 
         private boolean loadView(Query _q) throws SQLException {
             return loadView(_q, null);

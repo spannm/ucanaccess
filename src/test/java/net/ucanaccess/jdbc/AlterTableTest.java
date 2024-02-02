@@ -293,7 +293,7 @@ class AlterTableTest extends UcanaccessBaseTest {
                 "ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported.",
                 "ALTER TABLE tx2 DROP COLUMN [my best friend]", "Feature not supported.",
                 "ALTER TABLE tx2 ADD COLUMN [1 my best friend] LONG NOT NULL", "x2 already contains one or more records(1 records)")
-                .entrySet().stream().forEach(
+                .entrySet().forEach(
                     e -> {
                         String ddl = e.getKey();
                         String expectedMessage = e.getValue();

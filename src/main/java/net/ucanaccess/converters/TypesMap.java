@@ -34,7 +34,7 @@ public final class TypesMap {
             hsqlType = _hsqlType;
         }
 
-        protected String getHsqlType() {
+        String getHsqlType() {
             return hsqlType;
         }
 
@@ -43,9 +43,9 @@ public final class TypesMap {
     private static final Map<String, String>       ACCESS_TO_HSQL_TYPES_MAP     =
         Arrays.stream(AccessType.values()).collect(Collectors.toMap(AccessType::name, AccessType::getHsqlType, (o, n) -> o, LinkedHashMap::new));
     @SuppressWarnings("PMD.UseDiamondOperator")
-    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new EnumMap<AccessType, DataType>(AccessType.class);
+    private static final Map<AccessType, DataType> ACCESS_TO_JACKCESS_TYPES_MAP = new EnumMap<>(AccessType.class);
     @SuppressWarnings("PMD.UseDiamondOperator")
-    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new EnumMap<DataType, String>(DataType.class);
+    private static final Map<DataType, String>     JACKCESS_TO_HSQLDB_TYPES_MAP = new EnumMap<>(DataType.class);
 
     static {
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.AUTOINCREMENT, DataType.LONG);

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public class UcanaccessTable implements Table {
-    private Table  wrapped;
-    private String tableName;
+    private final Table  wrapped;
+    private final String tableName;
 
     public UcanaccessTable(Table _table, String _tableName) {
         wrapped = _table;

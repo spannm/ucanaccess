@@ -9,8 +9,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class ParametricQuery {
-    private Connection          hsqldb;
-    private QueryImpl           qi;
+    private final Connection    hsqldb;
+    private final QueryImpl     qi;
     private boolean             loaded;
     private PreparedStatement   ps;
     private String              parameters;

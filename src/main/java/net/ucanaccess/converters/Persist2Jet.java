@@ -24,9 +24,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class Persist2Jet {
-    private static Map<String, List<String>> columnNamesCache = new HashMap<>();
+    private static final Map<String, List<String>> COL_NAMES_CACHE = new HashMap<>();
     static {
-        DBReference.addOnReloadRefListener(() -> columnNamesCache.clear());
+        DBReference.addOnReloadRefListener(COL_NAMES_CACHE::clear);
     }
 
     public Map<String, Object> getRowPattern(Object[] varr, Table t) throws SQLException {
@@ -57,7 +57,7 @@ public class Persist2Jet {
         String pref = conn.getDbIO().getFile().getAbsolutePath();
         Connection conq = conn.getHSQLDBConnection();
         String key = pref + ntn;
-        if (!columnNamesCache.containsKey(key)) {
+        if (!COL_NAMES_CACHE.containsKey(key)) {
             ResultSet rs = conq.getMetaData().getColumns(null, PUBLIC, ntn, null);
             Map<Integer, String> tm = new TreeMap<>();
             while (rs.next()) {
@@ -67,9 +67,9 @@ public class Persist2Jet {
 
             }
             List<String> ar = new ArrayList<>(tm.values());
-            columnNamesCache.put(key, ar);
+            COL_NAMES_CACHE.put(key, ar);
         }
-        return columnNamesCache.get(key);
+        return COL_NAMES_CACHE.get(key);
     }
 
     private List<String> getColumnNamesCreate(String ntn) throws SQLException {

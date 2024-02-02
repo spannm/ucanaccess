@@ -11,10 +11,10 @@ import java.sql.Date;
 import java.util.*;
 
 public class UcanaccessResultSet implements ResultSet {
-    private ResultSet           wrapped;
-    private UcanaccessStatement wrappedStatement;
-    private Set<String>         metadata;
-    private Set<Integer>        updIndexes = new HashSet<>();
+    private final ResultSet           wrapped;
+    private final UcanaccessStatement wrappedStatement;
+    private Set<String>               metadata;
+    private final Set<Integer>        updIndexes = new HashSet<>();
 
     public UcanaccessResultSet(ResultSet _wrapped, UcanaccessStatement _statement) {
         wrapped = _wrapped;

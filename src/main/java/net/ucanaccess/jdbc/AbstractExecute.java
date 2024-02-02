@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
 public abstract class AbstractExecute {
     protected enum CommandType {
@@ -55,7 +56,7 @@ public abstract class AbstractExecute {
     }
 
     private Object enableDisable(DDLType _ddlType) throws SQLException, IOException {
-        String tableName = _ddlType.getDBObjectName();
+        String tableName = Objects.requireNonNull(_ddlType.getDBObjectName());
         if (tableName.startsWith("[") && tableName.endsWith("]")) {
             tableName = tableName.substring(1, tableName.length() - 1);
         }

@@ -222,7 +222,7 @@ public final class UcanaccessDriver implements Driver {
                 }
 
                 Properties newProps = new Properties();
-                props.entrySet().stream()
+                props.entrySet()
                     .forEach(e -> newProps.put(e.getKey().name(), e.getValue()));
                 newProps.putAll(unknownProps);
 
@@ -238,14 +238,13 @@ public final class UcanaccessDriver implements Driver {
 
     private Integer validateLobScale(String _property) {
         try {
-            Integer i = Integer.parseInt(_property);
+            int i = Integer.parseInt(_property);
 
             if (i == 1 || i == 2 || i == 4 || i == 8 || i == 16 || i == 32) {
                 return i;
             }
 
         } catch (Exception _ignored) {
-
         }
         Logger.logWarning(LoggerMessageEnum.LOBSCALE);
         return null;

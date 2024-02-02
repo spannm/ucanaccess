@@ -34,7 +34,7 @@ public class Pivot {
     private String                                 pivot;
     private List<String>                           pivotIn;
     private String                                 aggregateFun;
-    private Connection                             conn;
+    private final Connection                       conn;
     private boolean                                pivotInCondition = true;
     private String                                 originalQuery;
 

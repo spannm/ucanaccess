@@ -7,8 +7,8 @@ import net.ucanaccess.util.Try;
 import java.sql.SQLException;
 
 public class CreatePrimaryKeyCommand implements ICommand {
-    private String tableName;
-    private String execId;
+    private final String tableName;
+    private final String execId;
 
     public CreatePrimaryKeyCommand(String _tableName, String _execId) {
         tableName = _tableName;

@@ -13,7 +13,7 @@ class FolderTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
-    void testFolderContent(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
+    void testFolderContent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         String folderPath = System.getProperty("accessFolder");

@@ -19,9 +19,9 @@ import java.util.List;
 
 public final class IndexSelector {
 
-    private Index   bestIndex;
-    private boolean primaryCursor;
-    private Table   table;
+    private final Table table;
+    private Index       bestIndex;
+    private boolean     primaryCursor;
 
     public IndexSelector(Table _table) {
         table = _table;

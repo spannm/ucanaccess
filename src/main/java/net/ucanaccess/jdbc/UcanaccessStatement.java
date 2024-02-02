@@ -13,12 +13,12 @@ import java.util.Map;
 
 public class UcanaccessStatement implements Statement {
 
-    private UcanaccessConnection connection;
+    private final UcanaccessConnection connection;
     @SuppressWarnings("checkstyle:VisibilityModifierCheck")
-    protected Statement          wrapped;
-    private Object               generatedKey;
-    private Map<String, String>  aliases;
-    private boolean              enableDisable;
+    protected Statement                wrapped;
+    private Object                     generatedKey;
+    private Map<String, String>        aliases;
+    private boolean                    enableDisable;
 
     protected Map<String, String> getAliases() {
         return aliases;

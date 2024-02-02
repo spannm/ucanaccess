@@ -20,42 +20,42 @@ import java.util.*;
 import java.util.concurrent.Executor;
 
 public class UcanaccessConnection implements Connection {
-    static final String                 BATCH_ID      = "BATCH_ID";
-    private static ThreadLocal<Context> ctx           = new ThreadLocal<>();
+    static final String                       BATCH_ID      = "BATCH_ID";
+    private static final ThreadLocal<Context> CTX           = new ThreadLocal<>();
 
-    private boolean                     feedbackState;
-    private LinkedList<ICommand>        commands      = new LinkedList<>();
-    private Connection                  hsqlDBConnection;
-    private Map<Savepoint, String>      savepointsMap = new HashMap<>();
-    private DBReference                 ref;
-    private boolean                     checkModified = false;
-    private boolean                     autoCommit    = true;
-    private Properties                  clientInfo;
-    private Session                     session;
-    private SQLWarning                  warnings;
-    private String                      url;
-    private UcanaccessStatement         currentStatement;
-    private Object                      lastGeneratedKey;
-    private String                      refId;
+    private boolean                           feedbackState;
+    private final LinkedList<ICommand>        commands      = new LinkedList<>();
+    private Connection                        hsqlDBConnection;
+    private final Map<Savepoint, String>      savepointsMap = new HashMap<>();
+    private DBReference                       ref;
+    private boolean                           checkModified = false;
+    private boolean                           autoCommit    = true;
+    private Properties                        clientInfo;
+    private Session                           session;
+    private SQLWarning                        warnings;
+    private String                            url;
+    private UcanaccessStatement               currentStatement;
+    private Object                            lastGeneratedKey;
+    private String                            refId;
 
     public static synchronized UcanaccessConnection getCtxConnection() {
-        return Optional.ofNullable(ctx).map(tl -> tl.get().getCurrentConnection()).orElse(null);
+        return Optional.ofNullable(CTX).map(tl -> tl.get().getCurrentConnection()).orElse(null);
     }
 
     public static synchronized boolean hasContext() {
-        return ctx.get() != null;
+        return CTX.get() != null;
     }
 
     public static synchronized String getCtxExcId() {
-        return ctx.get().getCurrentExecId();
+        return CTX.get().getCurrentExecId();
     }
 
     public static synchronized void setCtxConnection(UcanaccessConnection conn) {
-        ctx.set(new Context(conn));
+        CTX.set(new Context(conn));
     }
 
     public static synchronized void setCtxExecId(String id) {
-        ctx.get().setCurrentExecId(id);
+        CTX.get().setCurrentExecId(id);
     }
 
     public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session)

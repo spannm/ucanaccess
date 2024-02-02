@@ -18,7 +18,7 @@ public abstract class ComplexBase implements Serializable {
     private static final long           serialVersionUID = 1L;
     public static final ComplexValue.Id CREATE_ID        = ComplexColumnInfoImpl.INVALID_ID;
 
-    private int                         id;
+    private final int                   id;
     private String                      tableName;
     private String                      columnName;
 

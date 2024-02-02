@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 public class UcanaccessSavepoint implements Savepoint {
-    private Savepoint wrapped;
+    private final Savepoint wrapped;
 
     public UcanaccessSavepoint(Savepoint _wrapped) {
         wrapped = _wrapped;

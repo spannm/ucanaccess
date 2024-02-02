@@ -8,8 +8,8 @@ import java.sql.SQLException;
 
 public class DropForeignKeyCommand implements ICommand {
 
-    private String execId;
-    private String relationshipName;
+    private final String execId;
+    private final String relationshipName;
 
     public DropForeignKeyCommand(String _execId, String _relationshipName) {
         execId = _execId;

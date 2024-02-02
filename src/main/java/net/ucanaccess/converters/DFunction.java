@@ -25,7 +25,7 @@ public class DFunction {
             List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
 
     private Connection                conn;
-    private String                    sql;
+    private final String              sql;
 
     public DFunction(Connection _conn, String _sql) {
         conn = _conn;

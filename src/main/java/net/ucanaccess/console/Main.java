@@ -16,16 +16,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
-    private static final String EXPORT_USAGE = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
-            + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";
+    private static final String  EXPORT_USAGE  = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
+        + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";
 
-    private static final String EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
+    private static final String  EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
 
-    private static boolean batchMode = false;
-    private Connection     conn;
-    private boolean        connected = true;
-    private BufferedReader input;
-    private String         lastSqlQuery;
+    private static boolean       batchMode     = false;
+    private final Connection     conn;
+    private boolean              connected     = true;
+    private final BufferedReader input;
+    private String               lastSqlQuery;
 
     public Main(Connection _conn, BufferedReader _input) {
         conn = _conn;
@@ -430,7 +430,7 @@ public class Main {
         static final List<Integer>       NUMERIC_JDBC_TYPES =
             List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
                 Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
-        private int                      maxColWidth        = 50;
+        private final int                maxColWidth        = 50;
         private final List<String>       colNames;
         private final List<Integer>      colWidths;
         private final List<Integer>      colTypes;

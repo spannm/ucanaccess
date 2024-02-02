@@ -18,9 +18,9 @@ import java.util.Map;
 
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
 
-    private PreparedStatement            wrapped;
-    private String                       sql;
-    private Map<Integer, ParameterReset> memento = new HashMap<>();
+    private PreparedStatement                  wrapped;
+    private String                             sql;
+    private final Map<Integer, ParameterReset> memento = new HashMap<>();
 
     public UcanaccessPreparedStatement(NormalizedSQL _nsql, PreparedStatement _hidden, UcanaccessConnection _conn) throws SQLException {
         super(_hidden, _conn);

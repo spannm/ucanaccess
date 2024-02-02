@@ -13,7 +13,7 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
-    void testLinks(AccessVersion _accessVersion) throws SQLException, ClassNotFoundException {
+    void testLinks(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
         File main = copyResourceToTempFile(getTestDbDir() + "main.mdb");

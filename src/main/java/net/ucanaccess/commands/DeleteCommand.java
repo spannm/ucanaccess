@@ -11,10 +11,10 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public class DeleteCommand extends AbstractCursorCommand {
-    private String              execId;
-    private IndexSelector       indexSelector;
-    private Map<String, Object> rowPattern;
-    private Table               table;
+    private final String              execId;
+    private final IndexSelector       indexSelector;
+    private final Map<String, Object> rowPattern;
+    private final Table               table;
 
     public DeleteCommand(Table _table, Map<String, Object> _rowPattern, String _execId) {
         indexSelector = new IndexSelector(_table);

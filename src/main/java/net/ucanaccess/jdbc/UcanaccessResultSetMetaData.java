@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 
-    private ResultSetMetaData         wrapped;
+    private final ResultSetMetaData   wrapped;
     private Metadata                  metadata;
 
     private final Map<String, String> aliases;

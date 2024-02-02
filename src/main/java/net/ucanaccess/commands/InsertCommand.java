@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InsertCommand implements ICommand {
-    private Database dbIO;
-    private String   execId;
-    private Object[] newRow;
-    private Table    table;
-    private String   tableName;
+    private final String tableName;
+    private Database     dbIO;
+    private Object[]     newRow;
+    private final String execId;
+    private Table        table;
 
     public InsertCommand(String _tableName, Database _dbIo, Object[] _newRow, String _execId) {
         tableName = _tableName;
