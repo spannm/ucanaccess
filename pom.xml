@@ -35,6 +35,7 @@
             <id>${developerId}</id>
             <name>Markus Spann</name>
             <email>spannm@outlook.de</email>
+            <timezone>+1</timezone>
             <organizationUrl>https://github.com/${developerId}/</organizationUrl>
         </developer>
 
@@ -59,7 +60,6 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
@@ -80,8 +80,11 @@
     </distributionManagement>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.systemJdk>11</project.build.systemJdk>
         <project.build.targetJdk>11</project.build.targetJdk>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <developerId>spannm</developerId>
 
@@ -90,7 +93,7 @@
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
         <dep.hsqldb.classifier />
 
-        <dep.slf4j.version>2.0.11</dep.slf4j.version>
+        <dep.slf4j.version>2.0.12</dep.slf4j.version>
 
         <dep.junit.version>5.10.2</dep.junit.version>
         <dep.assertj.version>3.25.3</dep.assertj.version>
@@ -136,19 +139,33 @@
             <groupId>com.healthmarketscience.jackcess</groupId>
             <artifactId>jackcess</artifactId>
             <version>${dep.jackcess.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${dep.slf4j.version}</version>
-            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${dep.slf4j.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- replaces the dependency on commons-logging brought by jackcess -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${dep.slf4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -188,6 +205,7 @@
             <version>${dep.mockito.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -255,7 +273,7 @@
             <properties>
                 <!-- skip _compiling_ the tests -->
                 <maven.test.skip>true</maven.test.skip>
-                <!-- skip the tests -->
+                <!-- skip execution of tests -->
                 <skipTests>true</skipTests>
 
                 <maven.javadoc.skip>true</maven.javadoc.skip>
