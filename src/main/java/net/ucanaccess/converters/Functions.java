@@ -4,11 +4,12 @@ import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
 
 import com.healthmarketscience.jackcess.DataType;
 import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.exception.InvalidFunctionParameterException;
+import net.ucanaccess.exception.InvalidIntervalValueException;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.ext.FunctionType;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -295,7 +296,7 @@ public final class Functions {
         } else if ("s".equalsIgnoreCase(_intv)) { // second
             cl.add(Calendar.SECOND, _vl);
         } else {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
+            throw new InvalidIntervalValueException(_intv);
         }
         return _dt instanceof Timestamp
             ? new Timestamp(cl.getTimeInMillis())
@@ -362,7 +363,7 @@ public final class Functions {
         } else if ("s".equalsIgnoreCase(_intv)) {
             result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / 1000);
         } else {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
+            throw new InvalidIntervalValueException(_intv);
         }
         return result * sign;
     }
@@ -466,7 +467,7 @@ public final class Functions {
         } else if ("s".equalsIgnoreCase(_intv)) {
             return cl.get(Calendar.SECOND);
         } else {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_INTERVAL_VALUE);
+            throw new InvalidIntervalValueException(_intv);
         }
     }
 
@@ -891,7 +892,7 @@ public final class Functions {
             DateFormatSymbols dfs = new DateFormatSymbols();
             return _abbreviate ? dfs.getShortMonths()[_number - 1] : dfs.getMonths()[_number - 1];
         }
-        throw new UcanaccessSQLException(ExceptionMessages.INVALID_MONTH_NUMBER);
+        throw new UcanaccessSQLException("Invalid month number");
     }
 
     /**
@@ -1182,7 +1183,7 @@ public final class Functions {
             case 1:
                 return _value1.toUpperCase().compareTo(_value2.toUpperCase());
             default:
-                throw new UcanaccessSQLException(ExceptionMessages.INVALID_PARAMETER);
+                throw new InvalidFunctionParameterException("StrComp", _type);
         }
     }
 

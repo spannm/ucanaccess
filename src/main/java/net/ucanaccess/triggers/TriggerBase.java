@@ -6,8 +6,6 @@ import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.UcanaccessTable;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerMessageEnum;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,7 +23,9 @@ public abstract class TriggerBase implements org.hsqldb.Trigger {
         if (!UcanaccessConnection.hasContext() || UcanaccessConnection.getCtxConnection() == null) {
             for (StackTraceElement el : Thread.currentThread().getStackTrace()) {
                 if ("executeQuery".equals(el.getMethodName())) {
-                    throw new TriggerException(Logger.getMessage(LoggerMessageEnum.NO_SELECT));
+                    throw new TriggerException("Please do not use executeQuery method to execute "
+                        + "INSERT, DELETE or UPDATE SQL statement (it isn't correct). "
+                        + "Use execute or executeUpdate methods instead");
                 }
             }
         }

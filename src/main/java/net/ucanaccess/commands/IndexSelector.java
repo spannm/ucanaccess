@@ -8,8 +8,8 @@ import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.util.SimpleColumnMatcher;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
 import java.math.BigDecimal;

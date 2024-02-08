@@ -1,12 +1,9 @@
-package net.ucanaccess.util;
-
-import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerMessageEnum;
+package net.ucanaccess.exception;
 
 /**
  * Unspecific {@code Ucanaccess} run-time exception.
  */
-public final class UcanaccessRuntimeException extends RuntimeException {
+public class UcanaccessRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,10 +17,6 @@ public final class UcanaccessRuntimeException extends RuntimeException {
 
     public UcanaccessRuntimeException(String _message, Throwable _cause) {
         super(_message, _cause);
-    }
-
-    public static UcanaccessRuntimeException featureNotSupported() {
-        return new UcanaccessRuntimeException(Logger.getMessage(LoggerMessageEnum.NOT_SUPPORTED));
     }
 
 }

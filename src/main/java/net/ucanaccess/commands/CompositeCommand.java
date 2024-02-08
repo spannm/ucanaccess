@@ -1,7 +1,7 @@
 package net.ucanaccess.commands;
 
 import com.healthmarketscience.jackcess.Cursor;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.io.IOException;

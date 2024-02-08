@@ -2,7 +2,7 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.hsqldb.error.ErrorCode;
@@ -53,7 +53,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = AccessVersion.class)
     void testGenException(AccessVersion _accessVersion) {
-        UcanaccessSQLException ex = new UcanaccessSQLException(ExceptionMessages.CONCURRENT_PROCESS_ACCESS.name(), "ko", 11111);
+        UcanaccessSQLException ex = new UcanaccessSQLException("foo", "ko", 11111);
         assertEquals(11111, ex.getErrorCode());
         assertEquals("ko", ex.getSQLState());
     }

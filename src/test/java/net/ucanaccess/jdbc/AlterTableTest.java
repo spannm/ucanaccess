@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Index.Column;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.HibernateSupport;
@@ -284,23 +285,18 @@ class AlterTableTest extends UcanaccessBaseTest {
             st.execute("INSERT INTO tx2 ([my best friend], [my worst friend], [Is Pippo]) VALUES(1, 2, \"ciao\")");
 
             Map.of(
-                "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY ([i d]) ", "unexpected token: PRIMARY",
-                "ALTER TABLE tx2 ADD COLUMN [my best friend] ", "unexpected end of statement",
+                "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY ([i d])", "unexpected token: PRIMARY",
+                "ALTER TABLE tx2 ADD COLUMN [my best friend]", "unexpected end of statement",
                 "ALTER TABLE tx2 ADD CONSTRAINT FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE CASCADE",
                 "type not found or user lacks privilege: FOREIGN",
-                "DROP TABLE tx2 CASCADE", "Feature not supported.",
+                "DROP TABLE tx2 CASCADE", "Feature not supported",
                 "ALTER TABLE tx2 ADD CONSTRAINT PRIMARY KEY (id)", "unexpected token: PRIMARY",
-                "ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported.",
-                "ALTER TABLE tx2 DROP COLUMN [my best friend]", "Feature not supported.",
-                "ALTER TABLE tx2 ADD COLUMN [1 my best friend] LONG NOT NULL", "x2 already contains one or more records(1 records)")
-                .entrySet().forEach(
-                    e -> {
-                        String ddl = e.getKey();
-                        String expectedMessage = e.getValue();
-                        assertThatThrownBy(() -> st.execute(ddl))
-                            .isInstanceOf(UcanaccessSQLException.class)
-                            .hasMessageEndingWith(expectedMessage);
-                    });
+                "ALTER TABLE tx2 ALTER COLUMN [my best friend] SET DEFAULT 33", "Feature not supported",
+                "ALTER TABLE tx2 DROP COLUMN [my best friend]", "Feature not supported",
+                "ALTER TABLE tx2 ADD COLUMN [1 my best friend] LONG NOT NULL", "table tx2 already contains one or more records (1)")
+                .forEach((ddl, expectedMessage) -> assertThatThrownBy(() -> st.execute(ddl))
+                    .isInstanceOf(UcanaccessSQLException.class)
+                    .hasMessageEndingWith(expectedMessage));
         }
     }
 

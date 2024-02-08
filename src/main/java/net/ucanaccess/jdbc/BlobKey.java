@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.util.OleBlob;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.io.*;

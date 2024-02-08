@@ -4,9 +4,10 @@ import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
+import net.ucanaccess.exception.TableNotFoundException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.HibernateSupport;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -64,7 +65,7 @@ public abstract class AbstractExecute {
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
         String rtn = mtd.getTableName(tableName);
         if (rtn == null) {
-            throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
+            throw new TableNotFoundException(tableName);
         }
         boolean enableAutoIncr = _ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
         conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!enableAutoIncr);
@@ -88,7 +89,7 @@ public abstract class AbstractExecute {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
-            throw UcanaccessRuntimeException.featureNotSupported();
+            throw new FeatureNotSupportedRuntimeException();
         } catch (SQLException _ex) {
             return _ex;
         }
@@ -113,7 +114,10 @@ public abstract class AbstractExecute {
                 String tn = ddlType.getDBObjectName();
                 int count = count(ddlType.getDBObjectName());
                 if (count > 0) {
-                    throw new UcanaccessSQLException(ExceptionMessages.DEFAULT_NEEDED, cn, tn, count);
+                    throw new UcanaccessSQLException(String.format(
+                        "When adding a new column not null(%s), you must specify a default "
+                            + "because table %s already contains one or more records (%d)",
+                        cn, tn, count));
                 }
 
             }
@@ -148,7 +152,7 @@ public abstract class AbstractExecute {
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
-                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
+                        throw new TableNotFoundException(tableName);
                     }
                     ddlExpr = sql0.replaceFirst("(?i)\\s+ADD\\s+CONSTRAINT\\s+.*\\s+FOREIGN\\s+KEY\\s+",
                         " ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US)
@@ -170,7 +174,7 @@ public abstract class AbstractExecute {
                     Metadata mtd = new Metadata(conn.getHSQLDBConnection());
                     tableName = mtd.getEscapedTableName(tableName);
                     if (tableName == null) {
-                        throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
+                        throw new TableNotFoundException(tableName);
                     }
                     ddlExpr = sql0.replaceFirst("(?i)\\s+DROP\\s+CONSTRAINT\\s+.*",
                         " DROP CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\"");

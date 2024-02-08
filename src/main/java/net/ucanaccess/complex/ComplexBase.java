@@ -4,8 +4,7 @@ import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.complex.ComplexValue;
 import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
 import com.healthmarketscience.jackcess.impl.complex.ComplexColumnInfoImpl;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -115,7 +114,7 @@ public abstract class ComplexBase implements Serializable {
             }
             return lat;
         }
-        throw new UcanaccessSQLException(ExceptionMessages.COMPLEX_TYPE_UNSUPPORTED);
+        throw new UcanaccessSQLException("Complex type not supported yet");
     }
 
     @Override

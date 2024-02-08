@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +21,7 @@ class PasswordTest extends UcanaccessBaseTest {
 
         assertThatThrownBy(() -> init(_accessVersion))
             .isInstanceOf(UcanaccessSQLException.class)
-            .hasMessageContaining("Password authentication failed");
+            .hasMessageContaining("Authentication failed");
 
         try (UcanaccessConnection conn = new UcanaccessConnectionBuilder()
             .withDbPath(getAccessTempPath())

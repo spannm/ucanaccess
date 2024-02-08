@@ -3,9 +3,10 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.type.SqlConstants.COLUMN_NAME;
 
 import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
+import net.ucanaccess.exception.InvalidParameterException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.IOException;
 import java.sql.*;
@@ -251,7 +252,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw UcanaccessRuntimeException.featureNotSupported();
+        throw new FeatureNotSupportedRuntimeException();
     }
 
     @Override
@@ -285,7 +286,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
         try {
             if (table == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
+                throw new InvalidParameterException("table", table);
             }
             columnNamePattern = normalizeName(columnNamePattern);
             table = normalizeName(table);
@@ -353,10 +354,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
         try {
             if (parentTable == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "parentTable");
-            }
-            if (foreignTable == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "foreignTable");
+                throw new InvalidParameterException("parentTable", parentTable);
+            } else if (foreignTable == null) {
+                throw new InvalidParameterException("foreignTable", foreignTable);
             }
             parentTable = normalizeName(parentTable);
             foreignTable = normalizeName(foreignTable);
@@ -460,7 +460,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
         try {
             if (table == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
+                throw new InvalidParameterException("table", table);
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
@@ -524,7 +524,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
         try {
             if (table == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
+                throw new InvalidParameterException("table", table);
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
@@ -554,7 +554,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
         try {
             if (table == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
+                throw new InvalidParameterException("table", table);
             }
             table = normalizeName(table);
             String cat = connection.isShowSchema() ? "PUBLIC" : null;
@@ -790,7 +790,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
         try {
             if (table == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.PARAMETER_NULL, "table");
+                throw new InvalidParameterException("table", table);
             }
             table = normalizeName(table);
             if (invokeWrapper(catalog, schema)) {
@@ -863,7 +863,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw UcanaccessRuntimeException.featureNotSupported();
+        throw new FeatureNotSupportedRuntimeException("RowIdLifetime");
     }
 
     @Override
@@ -875,7 +875,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw UcanaccessRuntimeException.featureNotSupported();
+        throw new FeatureNotSupportedRuntimeException();
     }
 
     @Override
@@ -887,7 +887,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw UcanaccessRuntimeException.featureNotSupported();
+        throw new FeatureNotSupportedRuntimeException();
     }
 
     @Override

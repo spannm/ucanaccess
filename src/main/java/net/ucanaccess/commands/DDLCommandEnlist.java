@@ -5,9 +5,8 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
+import net.ucanaccess.exception.InvalidCreateStatementException;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import net.ucanaccess.jdbc.UcanaccessStatement;
 
 import java.sql.Connection;
@@ -271,7 +270,7 @@ public class DDLCommandEnlist {
         int endDecl = _sql.lastIndexOf(')');
 
         if (startDecl >= endDecl) {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
+            throw new InvalidCreateStatementException(_sql);
         }
         String decl = _sql.substring(startDecl + 1, endDecl);
         String[] tokens = decl.split(",");

@@ -3,8 +3,8 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.test.UcanaccessBaseTest;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

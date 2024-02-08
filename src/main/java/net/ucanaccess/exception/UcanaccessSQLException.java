@@ -1,37 +1,16 @@
-package net.ucanaccess.jdbc;
+package net.ucanaccess.exception;
 
-import net.ucanaccess.log.ILoggerResourceMessage;
-import net.ucanaccess.log.Logger;
+import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
 import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The sql exception specific to {@code Ucanaccess}.
  */
 public class UcanaccessSQLException extends SQLException {
-
-    public enum ExceptionMessages implements ILoggerResourceMessage {
-        CONCURRENT_PROCESS_ACCESS,
-        INVALID_CREATE_STATEMENT,
-        INVALID_INTERVAL_VALUE,
-        INVALID_JACKCESS_OPENER,
-        INVALID_MONTH_NUMBER,
-        NOT_A_VALID_PASSWORD,
-        ONLY_IN_MEMORY_ALLOWED,
-        UNPARSABLE_DATE,
-        COMPLEX_TYPE_UNSUPPORTED,
-        INVALID_PARAMETER,
-        INVALID_TYPES_IN_COMBINATION,
-        UNSUPPORTED_TYPE,
-        STATEMENT_DDL,
-        CLOSE_ON_COMPLETION_STATEMENT,
-        ACCESS_97,
-        PARAMETER_NULL,
-        TABLE_DOES_NOT_EXIST,
-        DEFAULT_NEEDED
-    }
 
     static final String         MSG_PREFIX                   = "UCAExc:";
 
@@ -45,29 +24,29 @@ public class UcanaccessSQLException extends SQLException {
         super(_reason, _sqlState, _vendorCode, _cause);
     }
 
-    public UcanaccessSQLException(ExceptionMessages _reason) {
-        this(Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+    public UcanaccessSQLException(String _reason) {
+        this(_reason, UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
-    public UcanaccessSQLException(ExceptionMessages _reason, Object... _args) {
-        this(Logger.getMessage(_reason, _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+    public UcanaccessSQLException(String _reason, Object... _args) {
+        this(String.format(_reason, _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, _vendorCode, null);
+        super(_reason, _sqlState, _vendorCode, null);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+        super(_reason, _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
     }
 
     public UcanaccessSQLException(String _reason, Throwable _cause) {
-        super(_reason == null ? null : Logger.getMessage(_reason), UCANACCESS_GENERIC_ERROR_STR,
+        super(_reason, UCANACCESS_GENERIC_ERROR_STR,
             IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
     }
 
     public UcanaccessSQLException(String _reason, String _sqlState) {
-        super(_reason == null ? null : Logger.getMessage(_reason), _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+        super(_reason, _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
     public UcanaccessSQLException(Throwable _cause) {
@@ -81,8 +60,11 @@ public class UcanaccessSQLException extends SQLException {
         if (_cause instanceof SQLException) {
             SQLException se = (SQLException) _cause;
             if (se.getErrorCode() == -ErrorCode.X_42562) {
-                return _cause.getMessage() + " "
-                    + Logger.getMessage(ExceptionMessages.INVALID_TYPES_IN_COMBINATION);
+                return _cause.getMessage()
+                    + " This exception may happen if you add integers representing units of time directly to datetime values "
+                    + "using the arithmetic plus operator but without specifying the unit of date."
+                    + System.lineSeparator()
+                    + "In this specific case you have to use, for example, <dateColumn> + 1 DAY.";
             }
         }
         return _cause.getMessage();
@@ -121,6 +103,12 @@ public class UcanaccessSQLException extends SQLException {
         return UcanaccessSQLException.class.isInstance(_t)
             ? UcanaccessSQLException.class.cast(_t)
             : new UcanaccessSQLException(_t);
+    }
+
+    public static final <T extends UcanaccessSQLException> void throwIf(Supplier<Boolean> _condition, Supplier<T> _exceptionSupplier) throws T {
+        if (_condition.get()) {
+            throw _exceptionSupplier.get();
+        }
     }
 
 }

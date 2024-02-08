@@ -4,8 +4,8 @@ import static net.ucanaccess.type.SqlConstants.PIVOT;
 
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.log.Logger;
 import net.ucanaccess.util.Try;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -103,7 +103,7 @@ public class Pivot {
                         st.executeUpdate(v);
                     }
                 } catch (Exception _ex) {
-                    Logger.logWarning(_ex.getMessage());
+                    LoggerFactory.getLogger(Pivot.class).warn(_ex.getMessage());
                 }
             }
         }

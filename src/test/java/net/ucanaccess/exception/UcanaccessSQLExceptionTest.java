@@ -1,4 +1,4 @@
-package net.ucanaccess.jdbc;
+package net.ucanaccess.exception;
 
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.params.ParameterizedTest;

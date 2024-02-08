@@ -1,14 +1,14 @@
 package net.ucanaccess.console;
 
-import static net.ucanaccess.type.SqlConstants.*;
+import static net.ucanaccess.type.SqlConstants.FROM;
+import static net.ucanaccess.type.SqlConstants.SELECT;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import net.ucanaccess.converters.Metadata.Property;
-import net.ucanaccess.log.Logger;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.util.Sql;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
 import java.sql.*;
@@ -42,7 +42,6 @@ public class Main {
     }
 
     public static void main(String[] _args) throws Exception {
-        Logger.setLogPrintWriter(new PrintWriter(System.out));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info
         Properties props = new Properties();

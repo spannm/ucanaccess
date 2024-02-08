@@ -1,10 +1,9 @@
 package net.ucanaccess.converters;
 
 import com.healthmarketscience.jackcess.TableBuilder;
+import net.ucanaccess.exception.InvalidCreateStatementException;
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -840,20 +839,20 @@ public final class SQLConverter {
         return null;
     }
 
-    private static String clearDefaultsCreateStatement(String sql) throws SQLException {
-        if (!sql.toUpperCase().contains("DEFAULT")) {
-            return sql;
+    private static String clearDefaultsCreateStatement(String _sql) throws SQLException {
+        if (!_sql.toUpperCase().contains("DEFAULT")) {
+            return _sql;
         }
-        int startDecl = sql.indexOf('(');
-        int endDecl = sql.lastIndexOf(')');
+        int startDecl = _sql.indexOf('(');
+        int endDecl = _sql.lastIndexOf(')');
         if (startDecl >= endDecl) {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_CREATE_STATEMENT);
+            throw new InvalidCreateStatementException(_sql);
         }
         for (String pattern : DEFAULT_CATCH) {
-            sql = sql.replaceAll(pattern, "$3");
+            _sql = _sql.replaceAll(pattern, "$3");
         }
 
-        return sql;
+        return _sql;
     }
 
     public static String convertCreateTable(String sql) throws SQLException {

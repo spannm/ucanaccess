@@ -1,7 +1,7 @@
 package net.ucanaccess.commands;
 
 import net.ucanaccess.converters.Persist2Jet;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.sql.SQLException;

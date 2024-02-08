@@ -1,8 +1,9 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.io.*;
 import java.lang.reflect.Method;

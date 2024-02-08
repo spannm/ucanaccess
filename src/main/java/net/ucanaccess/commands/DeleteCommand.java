@@ -3,7 +3,7 @@ package net.ucanaccess.commands;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.io.IOException;

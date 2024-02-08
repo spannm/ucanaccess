@@ -4,7 +4,9 @@ import com.healthmarketscience.jackcess.*;
 import com.healthmarketscience.jackcess.Database.FileFormat;
 import com.healthmarketscience.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
-import net.ucanaccess.log.Logger;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,8 @@ public class DBReference {
     private static final String                     CIPHER_SPEC       = "AES";
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
     private static String                           version;
+
+    private final Logger                            logger            = LoggerFactory.getLogger(getClass());
     private final File                              dbFile;
     private Database                                dbIO;
     private FileLock                                fileLock          = null;
@@ -60,7 +64,6 @@ public class DBReference {
         jko = _jko;
         lastModified = System.currentTimeMillis();
         memoryTimer = new MemoryTimer(this);
-        Logger.turnOffJackcessLog();
         if (!fl.exists() && ff != null) {
             DatabaseBuilder dbb = new DatabaseBuilder();
             dbIO = dbb.setAutoSync(false).setFileFormat(ff).setFile(fl).create();
@@ -81,7 +84,7 @@ public class DBReference {
                     linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
                 }
                 if (!linkeeFile.exists()) {
-                    Logger.logWarning("External file " + linkeeFile.getAbsolutePath() + " does not exist");
+                    logger.warn("External file {} does not exist", linkeeFile.getAbsolutePath());
                 } else {
                     links.add(linkeeFile);
                 }
@@ -95,7 +98,6 @@ public class DBReference {
     }
 
     public Database open(File _dbfl, String _pwd) throws IOException {
-        Logger.turnOffJackcessLog();
         Database ret = jko.open(_dbfl, _pwd);
         if (columnOrderDisplay) {
             ret.setColumnOrder(ColumnOrder.DISPLAY);
@@ -243,7 +245,7 @@ public class DBReference {
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
                 Files.delete(toKeepHsql.toPath());
                 if (!toKeepHsql.createNewFile()) {
-                    Logger.logWarning("Could not create file " + toKeepHsql);
+                    logger.warn("Could not create file {}", toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
@@ -299,7 +301,7 @@ public class DBReference {
             }
 
         } catch (Exception _ex) {
-            Logger.logWarning(_ex.toString());
+            logger.warn(_ex.toString());
         }
     }
 
@@ -361,7 +363,7 @@ public class DBReference {
             if (!inMemory && tempHsql == null) {
                 if (toKeepHsql != null) {
                     if (!toKeepHsql.exists() && !toKeepHsql.createNewFile()) {
-                        Logger.logWarning("Could not create file " + toKeepHsql);
+                        logger.warn("Could not create file " + toKeepHsql);
                     }
                     tempHsql = toKeepHsql;
                 } else {
@@ -371,7 +373,7 @@ public class DBReference {
                     tempHsql = new File(hbase, id);
 
                     if (!tempHsql.createNewFile()) {
-                        Logger.logWarning("Could not create file " + tempHsql);
+                        logger.warn("Could not create file " + tempHsql);
                     }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -382,7 +384,7 @@ public class DBReference {
                             finalizeHsqlDb(_session);
                         }
                     } catch (Exception _ex) {
-                        Logger.logWarning(_ex.toString());
+                        logger.warn(_ex.toString());
                     }
                 }));
             }
@@ -437,7 +439,7 @@ public class DBReference {
         try {
             File flLock = fileLock();
             if (!flLock.createNewFile()) {
-                Logger.logWarning("Could not create file " + flLock);
+                logger.warn("Could not create file " + flLock);
             }
 
             // suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess
@@ -606,7 +608,7 @@ public class DBReference {
                 try {
                     dbReference.shutdown(_session);
                 } catch (Exception _ex) {
-                    Logger.logWarning("Error shutting down db " + dbReference + ": " + _ex);
+                    LoggerFactory.getLogger(MemoryTimer.class).warn("Error shutting down db " + dbReference + ": " + _ex);
                 }
                 timer.cancel();
 

@@ -4,9 +4,8 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import net.ucanaccess.complex.Version;
+import net.ucanaccess.exception.TableNotFoundException;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
 import org.hsqldb.types.JavaObjectData;
 
 import java.time.LocalDateTime;
@@ -23,7 +22,7 @@ public class TriggerAppendOnly extends TriggerBase {
         try {
             Table t = getTable(tableName, conn);
             if (t == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
+                throw new TableNotFoundException(tableName);
             }
             int i = 0;
             for (Column col : t.getColumns()) {

@@ -4,9 +4,9 @@ import static net.ucanaccess.converters.Metadata.Property.*;
 
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 
 import java.sql.DriverManager;
 import java.util.*;

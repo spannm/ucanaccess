@@ -1,6 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.InputStream;
 import java.io.Reader;

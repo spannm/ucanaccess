@@ -8,6 +8,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index.Column;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Table;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;

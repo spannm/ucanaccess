@@ -7,10 +7,9 @@ import com.healthmarketscience.jackcess.complex.ComplexDataType;
 import com.healthmarketscience.jackcess.impl.ColumnImpl;
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.exception.TableNotFoundException;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import net.ucanaccess.util.UcanaccessRuntimeException;
 import org.hsqldb.types.JavaObjectData;
 
 import java.sql.SQLException;
@@ -30,7 +29,7 @@ public class TriggerAutoNumber extends TriggerBase {
         try {
             Table t = getTable(tableName, conn);
             if (t == null) {
-                throw new UcanaccessSQLException(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
+                throw new TableNotFoundException(tableName);
             }
             int i = 0;
             for (Column cli : t.getColumns()) {

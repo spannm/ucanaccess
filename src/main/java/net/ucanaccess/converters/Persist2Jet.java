@@ -8,8 +8,11 @@ import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.UnsupportedValue;
 import net.ucanaccess.converters.TypesMap.AccessType;
-import net.ucanaccess.jdbc.*;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.UnsupportedTypeException;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
+import net.ucanaccess.jdbc.UcanaccessStatement;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.HibernateSupport;
 import org.hsqldb.SessionInterface;
@@ -113,7 +116,7 @@ public class Persist2Jet {
                         if (obj instanceof ComplexBase[] && !(obj instanceof UnsupportedValue[])) {
                             values[i] = obj;
                         } else {
-                            throw new UcanaccessSQLException(ExceptionMessages.UNSUPPORTED_TYPE);
+                            throw new UnsupportedTypeException(Optional.ofNullable(obj).map(o -> o.getClass().getName()).orElse("null"));
                         }
                     }
 

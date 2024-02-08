@@ -4,8 +4,7 @@ import static net.ucanaccess.converters.Metadata.Property.*;
 
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
-import net.ucanaccess.log.Logger;
-import net.ucanaccess.util.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -26,7 +25,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     private String                      accessPath;
     private int                         loginTimeout     = 0;
-    private final transient PrintWriter logWriter        = Logger.getLogPrintWriter();
+    private transient PrintWriter       logWriter        = new PrintWriter(System.out);
     private final Map<Property, String> userPass         = new HashMap<>();
 
     private final Map<Property, String> props            = new EnumMap<>(Property.class);
@@ -379,7 +378,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     @Override
     public void setLogWriter(PrintWriter _logWriter) {
-        Logger.setLogPrintWriter(_logWriter);
+        logWriter = _logWriter;
     }
 
     /**

@@ -1,14 +1,17 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.IThrowingRunnable;
 import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
 import org.hsqldb.jdbc.JDBCPreparedStatement;
 import org.hsqldb.jdbc.JDBCStatement;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Map;
 
 public class UcanaccessStatement implements Statement {
@@ -91,7 +94,7 @@ public class UcanaccessStatement implements Statement {
                 UcanaccessStatement stat = (UcanaccessStatement) wrapped;
                 stat.closeOnCompletion();
             } else {
-                throw new UcanaccessSQLException(ExceptionMessages.CLOSE_ON_COMPLETION_STATEMENT);
+                throw new UcanaccessSQLException("Internal error. Object 'wrapped' is neither a JDBCStatement nor a JDBCPreparedStatement");
             }
         });
     }

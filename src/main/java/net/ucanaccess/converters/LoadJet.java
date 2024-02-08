@@ -13,15 +13,15 @@ import com.healthmarketscience.jackcess.impl.query.QueryImpl;
 import com.healthmarketscience.jackcess.query.Query;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.DBReference;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
-import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerMessageEnum;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
 import org.hsqldb.error.ErrorCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -42,30 +42,31 @@ import java.util.stream.Stream;
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
-    private final Connection      conn;
-    private final Database        dbIO;
-    private boolean               err;
-    private final FunctionsLoader functionsLoader   = new FunctionsLoader();
-    private final List<String>    loadedIndexes     = new ArrayList<>();
-    private final List<String>    loadedQueries     = new ArrayList<>();
-    private final List<String>    loadedProcedures  = new ArrayList<>();
-    private final List<String>    loadedTables      = new ArrayList<>();
-    private final LogsFlusher     logsFlusher       = new LogsFlusher();
-    private final TablesLoader    tablesLoader      = new TablesLoader();
-    private final TriggersLoader  triggersGenerator = new TriggersLoader();
-    private final ViewsLoader     viewsLoader       = new ViewsLoader();
-    private boolean               sysSchema;
-    private boolean               ff1997;
-    private boolean               skipIndexes;
-    private final Metadata        metadata;
+    private final Logger               logger;
+    private final Connection           conn;
+    private final Database             dbIO;
+    private boolean                    err;
+    private final FunctionsLoader      functionsLoader   = new FunctionsLoader();
+    private final List<String>         loadedIndexes     = new ArrayList<>();
+    private final List<String>         loadedQueries     = new ArrayList<>();
+    private final List<String>         loadedProcedures  = new ArrayList<>();
+    private final List<String>         loadedTables      = new ArrayList<>();
+    private final TablesLoader         tablesLoader      = new TablesLoader();
+    private final TriggersLoader       triggersGenerator = new TriggersLoader();
+    private final ViewsLoader          viewsLoader       = new ViewsLoader();
+    private boolean                    sysSchema;
+    private boolean                    ff1997;
+    private boolean                    skipIndexes;
+    private final Metadata             metadata;
 
     public LoadJet(Connection _conn, Database _dbIo) {
+        logger = LoggerFactory.getLogger(getClass());
         conn = _conn;
         dbIO = _dbIo;
         try {
             ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
         } catch (Exception _ignored) {
-            // Logger.logWarning(e.getMessage());
+            logger.warn(_ignored.getMessage());
         }
         metadata = new Metadata(_conn);
     }
@@ -106,7 +107,7 @@ public class LoadJet {
             st.executeUpdate(_expression);
         } catch (SQLException _ex) {
             if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                Logger.log("Cannot execute:" + _expression + " " + _ex.getMessage());
+                logger.warn("Cannot execute: " + _expression + " " + _ex.getMessage());
             }
             throw _ex;
         }
@@ -164,14 +165,10 @@ public class LoadJet {
             conn.commit();
             SQLConverter.cleanEscaped();
         } finally {
-            Logger.log("Loaded Tables:");
-            logsFlusher.dumpList(loadedTables);
-            Logger.log("Loaded Queries:");
-            logsFlusher.dumpList(loadedQueries);
-            Logger.log("Loaded Procedures:");
-            logsFlusher.dumpList(loadedProcedures);
-            Logger.log("Loaded Indexes:");
-            logsFlusher.dumpList(loadedIndexes, true);
+            logger.debug("Loaded tables: {}", loadedTables);
+            logger.debug("Loaded queries: {}", loadedQueries);
+            logger.debug("Loaded procedures: {}", loadedProcedures);
+            logger.debug("Loaded indexes: {}", loadedIndexes);
             conn.close();
         }
     }
@@ -206,15 +203,15 @@ public class LoadJet {
         private final Set<String> functionDefinitions = new LinkedHashSet<>();
 
         private void addAggregates() {
-            Stream.of(getAggregate("last", "LONGVARCHAR"),
-                      getAggregate("last", "DECIMAL(100,10)"),
-                      getAggregate("last", "BOOLEAN"),
-                      getAggregate("first", "LONGVARCHAR"),
-                      getAggregate("first", "DECIMAL(100,10)"),
-                      getAggregate("first", "BOOLEAN"),
-                      getLastTimestamp(),
-                      getFirstTimestamp()
-            ).forEach(functionDefinitions::add);
+            functionDefinitions.addAll(List.of(
+                getAggregate("last", "LONGVARCHAR"),
+                getAggregate("last", "DECIMAL(100,10)"),
+                getAggregate("last", "BOOLEAN"),
+                getAggregate("first", "LONGVARCHAR"),
+                getAggregate("first", "DECIMAL(100,10)"),
+                getAggregate("first", "BOOLEAN"),
+                getLastTimestamp(),
+                getFirstTimestamp()));
         }
 
         private String getLastTimestamp() {
@@ -313,7 +310,7 @@ public class LoadJet {
         private void createFunctions() {
             for (String functionDef : functionDefinitions) {
                 Try.catching(() -> exec(functionDef, true))
-                    .orElse(e -> Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, functionDef, e.toString()));
+                    .orElse(e -> logger.warn("Failed to create function '{}': {}", functionDef, e.toString()));
             }
 
             functionDefinitions.clear();
@@ -341,7 +338,7 @@ public class LoadJet {
                     header.append(") RETURNS").append(type).append(" RETURN").append(body);
 
                     Try.catching(() -> exec(header.toString(), true))
-                        .orElse(e -> Logger.logWarning(LoggerMessageEnum.FAILED_TO_CREATE_FUNCTION, header.toString(), e.toString()));
+                        .orElse(e -> logger.warn("Failed to create function '{}': {}", header, e.toString()));
                 }
             }
 
@@ -357,24 +354,6 @@ public class LoadJet {
             addFunctions(Functions.class, true);
             addAggregates();
             createFunctions();
-        }
-    }
-
-    private static final class LogsFlusher {
-        private void dumpList(List<String> logs) {
-            dumpList(logs, false);
-        }
-
-        private void dumpList(List<String> logs, boolean cr) {
-            String comma = "";
-            StringBuilder sb = new StringBuilder();
-            String crs = cr ? System.lineSeparator() : "";
-            for (String log : logs) {
-                sb.append(comma).append(log).append(crs);
-                comma = ", ";
-            }
-            Logger.log(sb.toString());
-            logs.clear();
         }
     }
 
@@ -481,7 +460,7 @@ public class LoadJet {
                     + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW BEGIN ATOMIC IF %s THEN "
                     + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
                     + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
-                    + Logger.getMessage(LoggerMessageEnum.TRIGGER_UPDATE_CF_ERR) + _col.getName().replace("%", "%%")
+                    + "The following column is not updatable: " + _col.getName().replace("%", "%%")
                     + "';  END IF ; END ";
         }
 
@@ -534,7 +513,9 @@ public class LoadJet {
             String comma = "";
             for (Column col : _t.getColumns()) {
                 if ("USER".equalsIgnoreCase(col.getName())) {
-                    Logger.logWarning(LoggerMessageEnum.USER_AS_COLUMNNAME, _t.getName());
+                    logger.warn("You should not use the 'user' reserved word as column name in table {} "
+                        + "(it refers to the database user). "
+                        + "Escape it in your SQL e.g. SELECT [user] FROM table WHERE [user] = 'Joe'", _t.getName());
                 }
                 String expr = getExpression(col);
                 if (expr != null && _constraints) {
@@ -679,7 +660,7 @@ public class LoadJet {
                     boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                     if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        Logger.logWarning(LoggerMessageEnum.UNKNOWN_EXPRESSION, "" + defaulT, _col.getName(),
+                        logger.warn("Unknown expression: {} (default value of column {} table {})", "" + defaulT, _col.getName(),
                             _col.getTable().getName());
                     } else {
                         if (defFound != null && !defaultIsFunction) {
@@ -688,11 +669,13 @@ public class LoadJet {
                         if (_col.getType() == DataType.TEXT && defaulT.toString().startsWith("'")
                             && defaulT.toString().endsWith("'")
                             && defaulT.toString().length() > _col.getLengthInUnits()) {
-                            Logger.logWarning(LoggerMessageEnum.DEFAULT_VALUES_DELIMETERS, "" + defaulT, _col.getName(),
-                                _col.getTable().getName(), "" + _col.getLengthInUnits());
+                            logger.warn("Default values should start and end with a double quote, "
+                                + "the single quote is considered as part of the default value {} "
+                                + "(column {},table {}). It may result in a data truncation error at run-time due to max column size {}",
+                                defaulT, _col.getName(), _col.getTable().getName(), _col.getLengthInUnits());
                         }
                         _arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + _ntn
-                            + "  REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
+                            + " REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
                             + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
                     }
                 }
@@ -804,7 +787,7 @@ public class LoadJet {
                 exec(ci.toString(), true);
             } catch (SQLException _ex) {
                 if (_ex.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
-                    Logger.log(_ex.getMessage());
+                    logger.warn(_ex.getMessage());
                 } else {
                     throw _ex;
                 }
@@ -860,11 +843,11 @@ public class LoadJet {
                         }
                     }
                 }
-                Logger.logWarning(_ex.getMessage());
+                logger.warn(_ex.getMessage());
                 return;
             } catch (Exception _ex) {
 
-                Logger.logWarning(_ex.getMessage());
+                logger.warn(_ex.getMessage());
                 return;
             }
             String pre = pk ? "Primary Key " : uk ? "Index Unique " : "Index";
@@ -907,7 +890,8 @@ public class LoadJet {
                 default:
                     break;
             }
-            Logger.logWarning(LoggerMessageEnum.CONSTRAINT, type, _t.getName(), _record.toString(), _t.getName());
+            logger.warn("Detected {} constraint breach, table {}, record {}: making the table {} read-only",
+                type, _t.getName(), _record, _t.getName());
 
             dropTable(_t, _systemTable);
             createSyncrTable(_t, _systemTable, false);
@@ -982,7 +966,7 @@ public class LoadJet {
                             } else {
                                 if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
                                     if (ec == HSQL_FK_VIOLATION) {
-                                        Logger.logWarning(_ex.getMessage());
+                                        logger.warn(_ex.getMessage());
                                     }
                                     recreate(_t, _systemTable, row, _ex.getErrorCode());
                                 } else {
@@ -1000,9 +984,10 @@ public class LoadJet {
 
                 }
                 if (i != _t.getRowCount() && step != 1) {
-                    Logger.logWarning(LoggerMessageEnum.ROW_COUNT, _t.getName(), String.valueOf(_t.getRowCount()),
-                            String.valueOf(i));
-
+                    logger.warn("Error in the metadata of the table {}: the table's row count in metadata is {} "
+                        + "but {} records have been found and loaded by UCanAccess. "
+                        + "All will work fine, but it's better to repair your database",
+                        _t.getName(), _t.getRowCount(), i);
                 }
             } finally {
                 if (ps != null) {
@@ -1034,7 +1019,7 @@ public class LoadJet {
 
         private void createCalculatedFieldsTriggers() {
             calculatedFieldsTriggers.forEach(t -> Try.catching(() -> exec(t, false))
-                .orElse(e -> Logger.logWarning(e.getMessage())));
+                .orElse(e -> logger.warn(e.getMessage())));
         }
 
         private void loadTableIndexesUK(String tn) throws IOException, SQLException {
@@ -1073,7 +1058,7 @@ public class LoadJet {
                     t2 = dbIO.getTable(tn);
                     t = new UcanaccessTable(t2, tn);
                 } catch (Exception _ex) {
-                    Logger.logWarning(_ex.getMessage());
+                    logger.warn(_ex.getMessage());
                     unresolvedTables.add(tn);
                 }
                 if (t2 != null && t != null && !tn.startsWith("~")) {
@@ -1408,9 +1393,9 @@ public class LoadJet {
                 notLoaded.put(q.getName(), ": " + cause);
 
                 if (!err) {
-                    Logger.log("Error occured at the first loading attempt of " + q.getName());
-                    Logger.log("Converted view was :" + v);
-                    Logger.log("Error message was :" + _ex.getMessage());
+                    logger.warn("Error occured at the first loading attempt of {}", q.getName());
+                    logger.warn("Converted view was: {}", v);
+                    logger.warn("Error message was: {}", _ex.getMessage());
                     err = true;
                 }
                 return false;

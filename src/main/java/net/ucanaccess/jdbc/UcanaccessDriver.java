@@ -6,12 +6,13 @@ import com.healthmarketscience.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-import net.ucanaccess.log.Logger;
-import net.ucanaccess.log.LoggerMessageEnum;
+import net.ucanaccess.exception.AuthenticationException;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
-import net.ucanaccess.util.UcanaccessRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,10 @@ import java.util.function.BiConsumer;
 
 public final class UcanaccessDriver implements Driver {
 
-    public static final String URL_PREFIX = "jdbc:ucanaccess://";
+    public static final String  URL_PREFIX = "jdbc:ucanaccess://";
+
+    private static final Logger LOGGER     = LoggerFactory.getLogger(UcanaccessDriver.class);
+    private final Logger        logger     = LoggerFactory.getLogger(getClass());
 
     static {
         try {
@@ -34,7 +38,7 @@ public final class UcanaccessDriver implements Driver {
             System.setProperty("hsqldb.method_class_names", "net.ucanaccess.converters.*");
 
         } catch (ClassNotFoundException _ex) {
-            Logger.logWarning(LoggerMessageEnum.HSQLDB_DRIVER_NOT_FOUND);
+            LOGGER.warn("Unable to find hsqldb driver (version 2.x.x. or later) on your classpath");
             throw new UcanaccessRuntimeException(_ex.getMessage());
         } catch (SQLException _ex) {
             throw new UcanaccessRuntimeException(_ex.getMessage());
@@ -56,7 +60,7 @@ public final class UcanaccessDriver implements Driver {
         Map<Property, String> props = readProperties(_props, _url,
             (k, v) -> {
                 unknownProps.put(k, v);
-                Logger.logWarning(LoggerMessageEnum.UNKNOWN_DRIVER_PROPERTY, k, v);
+                logger.warn("Unknown driver property {} with value {}", k, v);
             });
 
         int idxSemicolon = _url.indexOf(';');
@@ -104,7 +108,8 @@ public final class UcanaccessDriver implements Driver {
                     if (props.containsKey(keepMirror)) {
                         dbRef.setInMemory(false);
                         if (dbRef.isEncryptHSQLDB()) {
-                            Logger.logWarning(LoggerMessageEnum.KEEP_MIRROR_AND_OTHERS);
+                            logger.warn("{} parameter cannot be combined with parameters {} or {}, {} skipped",
+                                keepMirror, jackcessOpener, encrypt, keepMirror);
                         } else {
                             File dbMirror =
                                 new File(props.get(keepMirror) + fileDb.getName().toUpperCase().hashCode());
@@ -167,16 +172,16 @@ public final class UcanaccessDriver implements Driver {
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
-                            Logger.logWarning(LoggerMessageEnum.INVALID_CHARACTER_SEQUENCE,
+                            logger.warn("Invalid textual value in table {}, column {}: it might look like {}",
                                 cl.getTable().getName(), cl.getName(), new String(bt));
                         }
-                        throw new IOException(ex.getMessage());
+                        throw new IOException(ex);
                     });
                 }
                 String pwd = dbRef.getDbIO().getDatabasePassword();
                 if (pwd != null && !props.containsKey(jackcessOpener)) {
                     if (!pwd.equals(props.get(password))) {
-                        throw new UcanaccessSQLException(ExceptionMessages.NOT_A_VALID_PASSWORD);
+                        throw new AuthenticationException();
                     }
 
                 } else if (props.containsKey(jackcessOpener)) {
@@ -199,7 +204,6 @@ public final class UcanaccessDriver implements Driver {
                     }).orThrow();
 
                     LoadJet la = new LoadJet(conn, dbRef.getDbIO());
-                    Logger.turnOffJackcessLog();
                     if (props.containsKey(sysSchema)) {
                         boolean val = Boolean.parseBoolean(props.get(sysSchema));
                         dbRef.setSysSchema(val);
@@ -222,8 +226,7 @@ public final class UcanaccessDriver implements Driver {
                 }
 
                 Properties newProps = new Properties();
-                props.entrySet()
-                    .forEach(e -> newProps.put(e.getKey().name(), e.getValue()));
+                props.forEach((key, value) -> newProps.put(key.name(), value));
                 newProps.putAll(unknownProps);
 
                 UcanaccessConnection uc = new UcanaccessConnection(as.getReference(fileDb), newProps, session);
@@ -243,10 +246,9 @@ public final class UcanaccessDriver implements Driver {
             if (i == 1 || i == 2 || i == 4 || i == 8 || i == 16 || i == 32) {
                 return i;
             }
-
         } catch (Exception _ignored) {
         }
-        Logger.logWarning(LoggerMessageEnum.LOBSCALE);
+        logger.warn("Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
         return null;
     }
 
@@ -293,7 +295,7 @@ public final class UcanaccessDriver implements Driver {
         Object newInstance = Class.forName(className).getConstructor().newInstance();
 
         if (!IJackcessOpenerInterface.class.isInstance(newInstance)) {
-            throw new UcanaccessSQLException(ExceptionMessages.INVALID_JACKCESS_OPENER);
+            throw new UcanaccessSQLException("Jackess Opener class must implement " + IJackcessOpenerInterface.class.getName());
         }
         return (IJackcessOpenerInterface) newInstance;
     }

@@ -2,9 +2,9 @@ package net.ucanaccess.triggers;
 
 import com.healthmarketscience.jackcess.Table;
 import net.ucanaccess.commands.UpdateCommand;
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.UcanaccessConnection;
-import net.ucanaccess.jdbc.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.jdbc.JDBCConnection;

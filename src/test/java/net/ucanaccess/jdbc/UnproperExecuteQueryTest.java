@@ -2,6 +2,7 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
