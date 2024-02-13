@@ -35,8 +35,8 @@
             <id>${developerId}</id>
             <name>Markus Spann</name>
             <email>spannm@outlook.de</email>
-            <timezone>+1</timezone>
             <organizationUrl>https://github.com/${developerId}/</organizationUrl>
+            <timezone>+1</timezone>
         </developer>
 
         <developer>
@@ -85,14 +85,12 @@
         <project.build.systemJdk>11</project.build.systemJdk>
         <project.build.targetJdk>11</project.build.targetJdk>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <developerId>spannm</developerId>
 
         <dep.jackcess.version>4.0.5</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
-        <dep.hsqldb.classifier />
+        <dep.hsqldb.classifier/>
 
         <dep.slf4j.version>2.0.12</dep.slf4j.version>
 
@@ -228,7 +226,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <systemPropertyVariables combine.children="append">
-                            <user.timezone />
+                            <user.timezone/>
                         </systemPropertyVariables>
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
