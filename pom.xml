@@ -60,7 +60,7 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-  </scm>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -81,6 +81,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <project.build.systemJdk>11</project.build.systemJdk>
         <project.build.targetJdk>11</project.build.targetJdk>
 
@@ -214,6 +215,13 @@
 
         <pluginManagement>
             <plugins>
+
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <compilerArgument>-Xlint:all</compilerArgument>
+                    </configuration>
+                </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
