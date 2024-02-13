@@ -62,6 +62,11 @@
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
     </scm>
 
+    <issueManagement>
+        <system>Github</system>
+        <url>${project.url}/issues</url>
+    </issueManagement>
+
     <distributionManagement>
         <snapshotRepository>
             <id>sonatype-nexus-snapshots</id>
