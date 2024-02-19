@@ -91,8 +91,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.sql.Connection,com.healthmarketscience.jackcess.Database)" class="member-name-link">LoadJet</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a>&nbsp;_conn,
- com.healthmarketscience.jackcess.Database&nbsp;_dbIo)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.sql.Connection,io.github.spannm.jackcess.Database)" class="member-name-link">LoadJet</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a>&nbsp;_conn,
+ io.github.spannm.jackcess.Database&nbsp;_dbIo)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -112,7 +112,7 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addFunctions(java.lang.Class)" class="member-name-link">addFunctions</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;_clazz)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#defaultValue4SQL(com.healthmarketscience.jackcess.Column)" class="member-name-link">defaultValue4SQL</a><wbr>(com.healthmarketscience.jackcess.Column&nbsp;_cl)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#defaultValue4SQL(io.github.spannm.jackcess.Column)" class="member-name-link">defaultValue4SQL</a><wbr>(io.github.spannm.jackcess.Column&nbsp;_cl)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/SQLWarning.html" title="class or interface in java.sql" class="external-link">SQLWarning</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLoadingWarnings()" class="member-name-link">getLoadingWarnings</a>()</code></div>
@@ -121,10 +121,10 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadDB()" class="member-name-link">loadDB</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadDefaultValues(com.healthmarketscience.jackcess.Column)" class="member-name-link">loadDefaultValues</a><wbr>(com.healthmarketscience.jackcess.Column&nbsp;_cl)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadDefaultValues(io.github.spannm.jackcess.Column)" class="member-name-link">loadDefaultValues</a><wbr>(io.github.spannm.jackcess.Column&nbsp;_cl)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadDefaultValues(com.healthmarketscience.jackcess.Table)" class="member-name-link">loadDefaultValues</a><wbr>(com.healthmarketscience.jackcess.Table&nbsp;_t)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadDefaultValues(io.github.spannm.jackcess.Table)" class="member-name-link">loadDefaultValues</a><wbr>(io.github.spannm.jackcess.Table&nbsp;_t)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetFunctionsDefault()" class="member-name-link">resetFunctionsDefault</a>()</code></div>
@@ -161,10 +161,10 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.sql.Connection,com.healthmarketscience.jackcess.Database)">
+<section class="detail" id="&lt;init&gt;(java.sql.Connection,io.github.spannm.jackcess.Database)">
 <h3>LoadJet</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">LoadJet</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a>&nbsp;_conn,
- com.healthmarketscience.jackcess.Database&nbsp;_dbIo)</span></div>
+ io.github.spannm.jackcess.Database&nbsp;_dbIo)</span></div>
 </section>
 </li>
 </ul>
@@ -176,9 +176,9 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="loadDefaultValues(com.healthmarketscience.jackcess.Table)">
+<section class="detail" id="loadDefaultValues(io.github.spannm.jackcess.Table)">
 <h3>loadDefaultValues</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadDefaultValues</span><wbr><span class="parameters">(com.healthmarketscience.jackcess.Table&nbsp;_t)</span>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadDefaultValues</span><wbr><span class="parameters">(io.github.spannm.jackcess.Table&nbsp;_t)</span>
                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/SQLException.html" title="class or interface in java.sql" class="external-link">SQLException</a>,
 <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
@@ -189,9 +189,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="loadDefaultValues(com.healthmarketscience.jackcess.Column)">
+<section class="detail" id="loadDefaultValues(io.github.spannm.jackcess.Column)">
 <h3>loadDefaultValues</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadDefaultValues</span><wbr><span class="parameters">(com.healthmarketscience.jackcess.Column&nbsp;_cl)</span>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadDefaultValues</span><wbr><span class="parameters">(io.github.spannm.jackcess.Column&nbsp;_cl)</span>
                        throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/SQLException.html" title="class or interface in java.sql" class="external-link">SQLException</a>,
 <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
@@ -202,9 +202,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="defaultValue4SQL(com.healthmarketscience.jackcess.Column)">
+<section class="detail" id="defaultValue4SQL(io.github.spannm.jackcess.Column)">
 <h3>defaultValue4SQL</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">defaultValue4SQL</span><wbr><span class="parameters">(com.healthmarketscience.jackcess.Column&nbsp;_cl)</span>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">defaultValue4SQL</span><wbr><span class="parameters">(io.github.spannm.jackcess.Column&nbsp;_cl)</span>
                         throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/IOException.html" title="class or interface in java.io" class="external-link">IOException</a></span></div>
 <dl class="notes">
 <dt>Throws:</dt>
