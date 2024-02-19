@@ -1,8 +1,8 @@
 package net.ucanaccess.triggers;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.Table;
+import io.github.spannm.jackcess.impl.ColumnImpl;
 import net.ucanaccess.complex.Version;
 import net.ucanaccess.exception.TableNotFoundException;
 import net.ucanaccess.jdbc.UcanaccessConnection;

@@ -1,16 +1,16 @@
 package net.ucanaccess.converters;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.PropertyMap.Property;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
-import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
-import com.healthmarketscience.jackcess.impl.IndexData;
-import com.healthmarketscience.jackcess.impl.IndexImpl;
-import com.healthmarketscience.jackcess.impl.query.QueryFormat;
-import com.healthmarketscience.jackcess.impl.query.QueryImpl;
-import com.healthmarketscience.jackcess.query.Query;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.PropertyMap.Property;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.impl.ColumnImpl;
+import io.github.spannm.jackcess.impl.ColumnImpl.AutoNumberGenerator;
+import io.github.spannm.jackcess.impl.IndexData;
+import io.github.spannm.jackcess.impl.IndexImpl;
+import io.github.spannm.jackcess.impl.query.QueryFormat;
+import io.github.spannm.jackcess.impl.query.QueryImpl;
+import io.github.spannm.jackcess.query.Query;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.exception.UcanaccessSQLException;
@@ -1293,22 +1293,22 @@ public class LoadJet {
             QueryImpl qi = (QueryImpl) _q;
             for (QueryImpl.Row row : qi.getRows()) {
 
-                if (QueryFormat.COLUMN_ATTRIBUTE.equals(row.attribute)) {
-                    String name = row.name1;
+                if (QueryFormat.COLUMN_ATTRIBUTE.equals(row._attribute)) {
+                    String name = row._name1;
 
                     if (name == null) {
-                        int beginIndex = Math.max(row.expression.lastIndexOf('['), row.expression.lastIndexOf('.'));
+                        int beginIndex = Math.max(row._expression.lastIndexOf('['), row._expression.lastIndexOf('.'));
 
-                        if (beginIndex < 0 || beginIndex == row.expression.length() - 1
-                                || row.expression.endsWith(")")) {
+                        if (beginIndex < 0 || beginIndex == row._expression.length() - 1
+                                || row._expression.endsWith(")")) {
                             continue;
                         }
-                        name = row.expression.substring(beginIndex + 1);
+                        name = row._expression.substring(beginIndex + 1);
                         if (name.endsWith("]")) {
                             name = name.substring(0, name.length() - 1);
                         }
                         if (name.contentEquals("*")) {
-                            String table = row.expression.substring(0, beginIndex);
+                            String table = row._expression.substring(0, beginIndex);
                             List<String> result = metadata.getColumnNames(table);
                             if (result != null) {
                                 for (String column : result) {

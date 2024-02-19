@@ -1,9 +1,9 @@
 package net.ucanaccess.converters;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.impl.TableImpl;
-import com.healthmarketscience.jackcess.impl.TableImpl.RowState;
-import com.healthmarketscience.jackcess.util.ErrorHandler;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.impl.TableImpl;
+import io.github.spannm.jackcess.impl.TableImpl.RowState;
+import io.github.spannm.jackcess.util.ErrorHandler;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

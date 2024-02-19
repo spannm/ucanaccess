@@ -4,10 +4,10 @@ import static net.ucanaccess.type.SqlConstants.ORIGINAL_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index.Column;
-import com.healthmarketscience.jackcess.PropertyMap;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Index.Column;
+import io.github.spannm.jackcess.PropertyMap;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;

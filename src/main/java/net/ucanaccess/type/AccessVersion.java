@@ -1,6 +1,6 @@
 package net.ucanaccess.type;
 
-import com.healthmarketscience.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.Database.FileFormat;
 
 import java.util.List;
 

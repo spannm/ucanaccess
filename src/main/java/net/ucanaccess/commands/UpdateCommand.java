@@ -1,11 +1,11 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.Table.ColumnOrder;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.Cursor;
+import io.github.spannm.jackcess.DataType;
+import io.github.spannm.jackcess.Table;
+import io.github.spannm.jackcess.Table.ColumnOrder;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.complex.Version;
@@ -135,7 +135,7 @@ public class UpdateCommand extends AbstractCursorCommand {
                     Version[] vs = (Version[]) modifiedRow[j];
                     if (vs.length > 0) {
                         Version v = vs[0];
-                        List<com.healthmarketscience.jackcess.complex.Version> oldV = rowFk.getVersions();
+                        List<io.github.spannm.jackcess.complex.Version> oldV = rowFk.getVersions();
                         String vn = v.getValue();
                         String vo = !oldV.isEmpty() ? oldV.get(0).getValue() : null;
                         LocalDateTime upTime = isRollbacking ? LocalDateTime.now() : v.getModifiedDate();

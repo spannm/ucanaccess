@@ -4,8 +4,8 @@ import static net.ucanaccess.type.SqlConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.Index.Column;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Index.Column;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;

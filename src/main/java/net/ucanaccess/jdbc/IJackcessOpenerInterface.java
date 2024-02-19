@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.Database;
+import io.github.spannm.jackcess.Database;
 
 import java.io.File;
 import java.io.IOException;

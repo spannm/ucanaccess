@@ -1,7 +1,7 @@
 package net.ucanaccess.triggers;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.UcanaccessTable;

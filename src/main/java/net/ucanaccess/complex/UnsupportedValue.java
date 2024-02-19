@@ -1,6 +1,6 @@
 package net.ucanaccess.complex;
 
-import com.healthmarketscience.jackcess.complex.ComplexValue;
+import io.github.spannm.jackcess.complex.ComplexValue;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ public class UnsupportedValue extends ComplexBase {
     private static final long   serialVersionUID = 1L;
     private Map<String, Object> values;
 
-    public UnsupportedValue(com.healthmarketscience.jackcess.complex.UnsupportedValue cv) {
+    public UnsupportedValue(io.github.spannm.jackcess.complex.UnsupportedValue cv) {
         super(cv);
         values = cv.getValues();
     }

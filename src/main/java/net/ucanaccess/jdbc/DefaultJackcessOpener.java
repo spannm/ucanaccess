@@ -1,8 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
-import com.healthmarketscience.jackcess.DateTimeType;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.DatabaseBuilder;
+import io.github.spannm.jackcess.DateTimeType;
 import net.ucanaccess.util.Try;
 
 import java.io.File;
@@ -12,10 +12,10 @@ public class DefaultJackcessOpener implements IJackcessOpenerInterface {
 
     @Override
     public Database open(File fl, String pwd) throws IOException {
-        DatabaseBuilder dbd = new DatabaseBuilder(fl).setAutoSync(false);
+        DatabaseBuilder dbd = new DatabaseBuilder(fl).withAutoSync(false);
         Database db = Try.catching(() -> {
-            return dbd.setReadOnly(false).open();
-        }).orElseGet(() -> dbd.setReadOnly(true).open());
+            return dbd.withReadOnly(false).open();
+        }).orElseGet(() -> dbd.withReadOnly(true).open());
         db.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
         return db;
     }

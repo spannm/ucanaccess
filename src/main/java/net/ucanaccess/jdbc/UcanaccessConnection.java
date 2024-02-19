@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.Database;
+import io.github.spannm.jackcess.Database;
 import net.ucanaccess.commands.CompositeCommand;
 import net.ucanaccess.commands.ICommand;
 import net.ucanaccess.commands.ICommand.CommandType;

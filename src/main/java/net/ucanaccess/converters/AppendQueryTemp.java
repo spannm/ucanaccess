@@ -1,8 +1,8 @@
 package net.ucanaccess.converters;
 
-import static com.healthmarketscience.jackcess.impl.query.QueryFormat.NEWLINE;
+import static io.github.spannm.jackcess.impl.query.QueryFormat.NEWLINE;
 
-import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
+import io.github.spannm.jackcess.impl.query.AppendQueryImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +39,9 @@ public class AppendQueryTemp extends AppendQueryImpl {
         return new RowFormatter(getDeclaration(getValueRows())) {
             @Override
             protected void format(StringBuilder builder, Row row) {
-                String column = row.name2;
+                String column = row._name2;
                 if (!(column.startsWith("[") && column.endsWith("]"))) {
-                    column = "[" + row.name2 + "]";
+                    column = "[" + row._name2 + "]";
                 }
                 builder.append(column);
             }
@@ -52,9 +52,9 @@ public class AppendQueryTemp extends AppendQueryImpl {
         return new RowFormatter(getDeclaration(getColumnRows())) {
             @Override
             protected void format(StringBuilder builder, Row row) {
-                String column = row.name2;
+                String column = row._name2;
                 if (!(column.startsWith("[") && column.endsWith("]"))) {
-                    column = "[" + row.name2 + "]";
+                    column = "[" + row._name2 + "]";
                 }
                 builder.append(column);
             }
@@ -64,7 +64,7 @@ public class AppendQueryTemp extends AppendQueryImpl {
     private List<Row> getDeclaration(List<Row> valueRows) {
         List<Row> ardc = new ArrayList<>();
         for (Row row : valueRows) {
-            if (row.name2 != null) {
+            if (row._name2 != null) {
                 ardc.add(row);
             }
         }

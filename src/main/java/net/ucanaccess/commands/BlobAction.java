@@ -1,9 +1,9 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.DataType;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.DataType;
+import io.github.spannm.jackcess.Index;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.UcanaccessConnection;

@@ -3,8 +3,8 @@ package net.ucanaccess.triggers;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
-import com.healthmarketscience.jackcess.impl.ColumnImpl.AutoNumberGenerator;
+import io.github.spannm.jackcess.impl.ColumnImpl;
+import io.github.spannm.jackcess.impl.ColumnImpl.AutoNumberGenerator;
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,9 +1,9 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.Table.ColumnOrder;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Table.ColumnOrder;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.impl.ColumnImpl;
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.SingleValue;

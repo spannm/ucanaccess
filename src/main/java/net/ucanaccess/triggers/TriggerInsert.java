@@ -1,6 +1,6 @@
 package net.ucanaccess.triggers;
 
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Try;

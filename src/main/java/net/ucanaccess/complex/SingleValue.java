@@ -1,13 +1,13 @@
 package net.ucanaccess.complex;
 
-import com.healthmarketscience.jackcess.complex.ComplexValue;
+import io.github.spannm.jackcess.complex.ComplexValue;
 
 public class SingleValue extends ComplexBase {
 
     private static final long serialVersionUID = 1L;
     private Object            value;
 
-    public SingleValue(com.healthmarketscience.jackcess.complex.SingleValue cv) {
+    public SingleValue(io.github.spannm.jackcess.complex.SingleValue cv) {
         super(cv);
         value = cv.get();
     }

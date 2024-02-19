@@ -2,7 +2,7 @@ package net.ucanaccess.converters;
 
 import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
 
-import com.healthmarketscience.jackcess.DataType;
+import io.github.spannm.jackcess.DataType;
 import net.ucanaccess.converters.TypesMap.AccessType;
 import net.ucanaccess.exception.InvalidFunctionParameterException;
 import net.ucanaccess.exception.InvalidIntervalValueException;

@@ -1,7 +1,7 @@
 package net.ucanaccess.triggers;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.impl.ColumnImpl;
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.impl.ColumnImpl;
 import net.ucanaccess.jdbc.DBReference;
 
 import java.util.HashMap;

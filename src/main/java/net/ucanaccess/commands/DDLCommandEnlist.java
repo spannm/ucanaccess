@@ -1,6 +1,6 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Database;
+import io.github.spannm.jackcess.Database;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;

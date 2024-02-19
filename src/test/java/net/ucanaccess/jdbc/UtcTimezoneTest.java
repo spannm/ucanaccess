@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.CursorBuilder;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Row;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;

@@ -2,7 +2,7 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.converters.Metadata.Property.*;
 
-import com.healthmarketscience.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.converters.SQLConverter;

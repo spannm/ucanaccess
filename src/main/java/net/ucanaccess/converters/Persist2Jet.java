@@ -2,8 +2,8 @@ package net.ucanaccess.converters;
 
 import static net.ucanaccess.type.SqlConstants.*;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.impl.DatabaseImpl;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.impl.DatabaseImpl;
 import net.ucanaccess.commands.InsertCommand;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.UnsupportedValue;
@@ -163,14 +163,14 @@ public class Persist2Jet {
             if (_types[_seq].equalsIgnoreCase(AccessType.MEMO.name())
                     || _types[_seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
                 dt = DataType.MEMO;
-                cb.setType(dt);
+                cb.withType(dt);
                 if (_types[_seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
-                    cb.setHyperlink(true);
+                    cb.withHyperlink(true);
                 }
             }
             if (_types[_seq].equalsIgnoreCase(AccessType.TEXT.name())) {
                 dt = DataType.TEXT;
-                cb.setType(dt);
+                cb.withType(dt);
             }
         }
 
@@ -186,8 +186,8 @@ public class Persist2Jet {
                         || _types[_seq].equalsIgnoreCase(AccessType.COUNTER.name())
                         || _types[_seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {
             dt = TypesMap.map2Jackcess(AccessType.valueOf(_types[_seq].toUpperCase(Locale.US)));
-            cb.setType(dt);
-            cb.setLengthInUnits((short) dt.getFixedSize());
+            cb.withType(dt)
+              .withLengthInUnits((short) dt.getFixedSize());
         }
 
         if (dt == null) {
@@ -200,14 +200,14 @@ public class Persist2Jet {
                         length,
                         UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
             }
-            cb.setType(dt);
+            cb.withType(dt);
             if (length > 0 && dt.equals(DataType.TEXT)) {
-                cb.setLengthInUnits(length);
+                cb.withLengthInUnits(length);
             }
             if (scale > 0) {
-                cb.setScale(scale);
+                cb.withScale(scale);
                 if (length > 0) {
-                    cb.setPrecision(length);
+                    cb.withPrecision(length);
                 }
             }
         }
@@ -215,12 +215,12 @@ public class Persist2Jet {
         if (_types != null && _seq < _types.length) {
             if (_types[_seq].equalsIgnoreCase(AccessType.COUNTER.name())
                     || _types[_seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())) {
-                cb.setAutoNumber(true);
-                cb.putProperty(PropertyMap.REQUIRED_PROP, false); // re: Ticket #2
+                cb.withAutoNumber(true)
+                  .withProperty(PropertyMap.REQUIRED_PROP, false); // re: Ticket #2
             }
             if (_types[_seq].equalsIgnoreCase(AccessType.GUID.name())) {
-                cb.setType(DataType.GUID);
-                cb.setAutoNumber(true);
+                cb.withType(DataType.GUID)
+                  .withAutoNumber(true);
             }
         }
         return cb;
@@ -295,11 +295,11 @@ public class Persist2Jet {
         while (pkrs.next()) {
             if (indpk == null) {
                 String indexName = IndexBuilder.PRIMARY_KEY_NAME;
-                indpk = new IndexBuilder(indexName);
-                indpk.setPrimaryKey();
+                indpk = new IndexBuilder(indexName)
+                    .withPrimaryKey();
 
             }
-            indpk.addColumns(getNormalizedName(pkrs.getString(COLUMN_NAME), columnMap));
+            indpk.withColumns(getNormalizedName(pkrs.getString(COLUMN_NAME), columnMap));
         }
         return indpk;
     }
@@ -321,13 +321,13 @@ public class Persist2Jet {
             if (!hi.containsKey(indexName)) {
                 IndexBuilder ib = new IndexBuilder(indexName);
                 if (unique) {
-                    ib.setUnique();
+                    ib.withUnique();
                 }
                 arcl.add(ib);
                 hi.put(indexName, ib);
             }
             IndexBuilder toIdx = hi.get(indexName);
-            toIdx.addColumns(asc, colName);
+            toIdx.withColumns(asc, colName);
         }
     }
 
@@ -621,7 +621,7 @@ public class Persist2Jet {
                 boolean unique = !idxrs.getBoolean(NON_UNIQUE);
 
                 if (unique) {
-                    ib.setUnique();
+                    ib.withUnique();
                 }
                 String colName = idxrs.getString(COLUMN_NAME);
                 Metadata mt = new Metadata(conn);
@@ -632,7 +632,7 @@ public class Persist2Jet {
 
             }
         }
-        ib.addColumns(asc, cols.toArray(new String[0])).addToTable(t);
+        ib.withColumns(asc, cols.toArray(new String[0])).addToTable(t);
     }
 
     public void createPrimaryKey(String tableName) throws IOException, SQLException {
@@ -643,15 +643,14 @@ public class Persist2Jet {
         Table t = db.getTable(tn);
         ResultSet pkrs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase());
         List<String> cols = new ArrayList<>();
-        IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME);
-        ib.setPrimaryKey();
+        IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME).withPrimaryKey();
         while (pkrs.next()) {
             String colName = pkrs.getString(COLUMN_NAME);
             Metadata mt = new Metadata(conn);
             colName = mt.getColumnName(ntn, colName);
             cols.add(colName);
         }
-        ib.addColumns(cols.toArray(new String[0])).addToTable(t);
+        ib.withColumns(cols).addToTable(t);
     }
 
     public void createForeignKey(String tableName, String referencedTable) throws IOException, SQLException {
@@ -692,9 +691,9 @@ public class Persist2Jet {
         Database db = conn.getDbIO();
         Table t = db.getTable(tn4Access);
         Table rt = db.getTable(refTn4Access);
-        RelationshipBuilder rb = new RelationshipBuilder(rt, t);
-        rb.setName(relationshipName);
-        rb.setReferentialIntegrity();
+        RelationshipBuilder rb = new RelationshipBuilder(rt, t)
+            .withName(relationshipName)
+            .withReferentialIntegrity();
         ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getCrossReference(null, null,
                 refTn4Hsqldb.toUpperCase(), null, null, tn4Hsqldb.toUpperCase());
         Metadata mt = new Metadata(conn);
@@ -715,16 +714,16 @@ public class Persist2Jet {
                 short ur = fkrs.getShort("UPDATE_RULE");
                 switch (dr) {
                 case DatabaseMetaData.importedKeyCascade:
-                    rb.setCascadeDeletes();
+                    rb.withCascadeDeletes();
                     break;
                 case DatabaseMetaData.importedKeySetNull:
-                    rb.setCascadeNullOnDelete();
+                    rb.withCascadeNullOnDelete();
                     break;
                 default:
                     break;
                 }
                 if (ur == DatabaseMetaData.importedKeyCascade) {
-                    rb.setCascadeUpdates();
+                    rb.withCascadeUpdates();
                 }
             }
         }

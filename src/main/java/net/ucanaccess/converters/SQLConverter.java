@@ -1,6 +1,6 @@
 package net.ucanaccess.converters;
 
-import com.healthmarketscience.jackcess.TableBuilder;
+import io.github.spannm.jackcess.TableBuilder;
 import net.ucanaccess.exception.InvalidCreateStatementException;
 import net.ucanaccess.jdbc.NormalizedSQL;
 import net.ucanaccess.jdbc.UcanaccessConnection;

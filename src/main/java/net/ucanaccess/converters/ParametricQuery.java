@@ -1,8 +1,8 @@
 package net.ucanaccess.converters;
 
-import com.healthmarketscience.jackcess.impl.query.AppendQueryImpl;
-import com.healthmarketscience.jackcess.impl.query.QueryImpl;
-import com.healthmarketscience.jackcess.query.Query;
+import io.github.spannm.jackcess.impl.query.AppendQueryImpl;
+import io.github.spannm.jackcess.impl.query.QueryImpl;
+import io.github.spannm.jackcess.query.Query;
 
 import java.sql.*;
 import java.util.*;

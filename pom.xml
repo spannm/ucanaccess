@@ -92,7 +92,7 @@
 
         <developerId>spannm</developerId>
 
-        <dep.jackcess.version>4.0.5</dep.jackcess.version>
+        <dep.jackcess.version>5.0.0-SNAPSHOT</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
         <dep.hsqldb.classifier/>
@@ -139,16 +139,11 @@
             <version>${dep.hsqldb.version}</version>
             <classifier>${dep.hsqldb.classifier}</classifier>
         </dependency>
+
         <dependency>
-            <groupId>com.healthmarketscience.jackcess</groupId>
+            <groupId>io.github.spannm</groupId>
             <artifactId>jackcess</artifactId>
             <version>${dep.jackcess.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -162,14 +157,6 @@
             <artifactId>slf4j-simple</artifactId>
             <version>${dep.slf4j.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- replaces the dependency on commons-logging brought by jackcess -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${dep.slf4j.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <dependency>

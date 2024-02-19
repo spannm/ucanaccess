@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.util.OleBlob;
-import com.healthmarketscience.jackcess.util.OleBlob.Content;
+import io.github.spannm.jackcess.util.OleBlob;
+import io.github.spannm.jackcess.util.OleBlob.Content;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
@@ -28,7 +28,7 @@ public class UcanaccessBlob implements Blob {
 
     public static Blob createBlob(File fl, UcanaccessConnection _conn) throws UcanaccessSQLException {
         return Try.catching(() -> {
-            Blob oleBlob = new OleBlob.Builder().setPackagePrettyName(fl.getName()).setSimplePackage(fl).toBlob();
+            Blob oleBlob = new OleBlob.Builder().withPackagePrettyName(fl.getName()).withSimplePackage(fl).toBlob();
             return new UcanaccessBlob(oleBlob, _conn);
         }).orThrow(UcanaccessSQLException::new);
     }

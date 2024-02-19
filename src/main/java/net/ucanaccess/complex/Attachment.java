@@ -1,6 +1,6 @@
 package net.ucanaccess.complex;
 
-import com.healthmarketscience.jackcess.complex.ComplexValue;
+import io.github.spannm.jackcess.complex.ComplexValue;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ public class Attachment extends ComplexBase {
     private LocalDateTime     timeStamp;
     private Integer           flags;
 
-    public Attachment(com.healthmarketscience.jackcess.complex.Attachment atc) throws IOException {
+    public Attachment(io.github.spannm.jackcess.complex.Attachment atc) throws IOException {
         super(atc);
         url = atc.getFileUrl();
         name = atc.getFileName();

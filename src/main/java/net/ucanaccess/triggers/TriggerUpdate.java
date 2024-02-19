@@ -1,6 +1,6 @@
 package net.ucanaccess.triggers;
 
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.commands.UpdateCommand;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.jdbc.BlobKey;

@@ -1,6 +1,6 @@
 package net.ucanaccess.converters;
 
-import com.healthmarketscience.jackcess.DataType;
+import io.github.spannm.jackcess.DataType;
 import net.ucanaccess.type.SqlConstants;
 
 import java.util.*;

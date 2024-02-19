@@ -1,6 +1,6 @@
 package net.ucanaccess.complex;
 
-import com.healthmarketscience.jackcess.complex.ComplexValue;
+import io.github.spannm.jackcess.complex.ComplexValue;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,7 @@ public class Version extends ComplexBase {
     private String            value;
     private LocalDateTime     modifiedDate;
 
-    public Version(com.healthmarketscience.jackcess.complex.Version cv) {
+    public Version(io.github.spannm.jackcess.complex.Version cv) {
         super(cv);
         value = cv.getValue();
         modifiedDate = cv.getModifiedLocalDate();

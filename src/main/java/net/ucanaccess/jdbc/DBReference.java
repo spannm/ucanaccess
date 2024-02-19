@@ -1,8 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.Table.ColumnOrder;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class DBReference {
         memoryTimer = new MemoryTimer(this);
         if (!fl.exists() && ff != null) {
             DatabaseBuilder dbb = new DatabaseBuilder();
-            dbIO = dbb.setAutoSync(false).setFileFormat(ff).setFile(fl).create();
+            dbIO = dbb.withAutoSync(false).withFileFormat(ff).withFile(fl).create();
         } else {
             dbIO = _jko.open(fl, _pwd);
             try {

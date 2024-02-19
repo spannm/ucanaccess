@@ -1,6 +1,6 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.Database.FileFormat;
 
 import java.io.File;
 import java.io.IOException;

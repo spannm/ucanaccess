@@ -3,8 +3,8 @@ package net.ucanaccess.console;
 import static net.ucanaccess.type.SqlConstants.FROM;
 import static net.ucanaccess.type.SqlConstants.SELECT;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.DatabaseBuilder;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.util.Sql;
@@ -35,8 +35,8 @@ public class Main {
     private static boolean hasPassword(File _f) throws IOException {
         try (Database db = Try.catching(() -> DatabaseBuilder.open(_f))
             .orElseGet(() -> Try.catching(() -> new DatabaseBuilder()
-                .setReadOnly(true)
-                .setFile(_f).open()).orThrow())) {
+                .withReadOnly(true)
+                .withFile(_f).open()).orThrow())) {
             return db.getDatabasePassword() != null;
         }
     }

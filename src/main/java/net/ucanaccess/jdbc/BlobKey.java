@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import com.healthmarketscience.jackcess.*;
-import com.healthmarketscience.jackcess.util.OleBlob;
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.util.OleBlob;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 

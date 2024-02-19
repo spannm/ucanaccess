@@ -1,7 +1,7 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 

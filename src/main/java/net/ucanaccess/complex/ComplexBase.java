@@ -1,9 +1,9 @@
 package net.ucanaccess.complex;
 
-import com.healthmarketscience.jackcess.complex.ComplexDataType;
-import com.healthmarketscience.jackcess.complex.ComplexValue;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.impl.complex.ComplexColumnInfoImpl;
+import io.github.spannm.jackcess.complex.ComplexDataType;
+import io.github.spannm.jackcess.complex.ComplexValue;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.impl.complex.ComplexColumnInfoImpl;
 import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.IOException;
@@ -82,7 +82,7 @@ public abstract class ComplexBase implements Serializable {
 
     public static Object[] convert(ComplexValueForeignKey fk) throws IOException, UcanaccessSQLException {
         if (fk.getComplexType().equals(ComplexDataType.ATTACHMENT)) {
-            List<com.healthmarketscience.jackcess.complex.Attachment> lst = fk.getAttachments();
+            List<io.github.spannm.jackcess.complex.Attachment> lst = fk.getAttachments();
             Attachment[] lat = new Attachment[lst.size()];
             for (int i = 0; i < lat.length; i++) {
                 lat[i] = new Attachment(lst.get(i));
@@ -90,7 +90,7 @@ public abstract class ComplexBase implements Serializable {
             return lat;
         }
         if (fk.getComplexType().equals(ComplexDataType.MULTI_VALUE)) {
-            List<com.healthmarketscience.jackcess.complex.SingleValue> lst = fk.getMultiValues();
+            List<io.github.spannm.jackcess.complex.SingleValue> lst = fk.getMultiValues();
             SingleValue[] lat = new SingleValue[lst.size()];
             for (int i = 0; i < lat.length; i++) {
                 lat[i] = new SingleValue(lst.get(i));
@@ -99,7 +99,7 @@ public abstract class ComplexBase implements Serializable {
         }
 
         if (fk.getComplexType().equals(ComplexDataType.VERSION_HISTORY)) {
-            List<com.healthmarketscience.jackcess.complex.Version> lst = fk.getVersions();
+            List<io.github.spannm.jackcess.complex.Version> lst = fk.getVersions();
             Version[] lat = new Version[lst.size()];
             for (int i = 0; i < lat.length; i++) {
                 lat[i] = new Version(lst.get(i));
@@ -107,7 +107,7 @@ public abstract class ComplexBase implements Serializable {
             return lat;
         }
         if (fk.getComplexType().equals(ComplexDataType.UNSUPPORTED)) {
-            List<com.healthmarketscience.jackcess.complex.UnsupportedValue> lst = fk.getUnsupportedValues();
+            List<io.github.spannm.jackcess.complex.UnsupportedValue> lst = fk.getUnsupportedValues();
             UnsupportedValue[] lat = new UnsupportedValue[lst.size()];
             for (int i = 0; i < lat.length; i++) {
                 lat[i] = new UnsupportedValue(lst.get(i));

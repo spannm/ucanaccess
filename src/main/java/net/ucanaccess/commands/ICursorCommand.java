@@ -1,6 +1,6 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Cursor;
+import io.github.spannm.jackcess.Cursor;
 
 import java.io.IOException;
 import java.util.Map;

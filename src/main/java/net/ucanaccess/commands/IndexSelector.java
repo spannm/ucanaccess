@@ -1,11 +1,11 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.CursorBuilder;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Table;
-import com.healthmarketscience.jackcess.complex.ComplexValueForeignKey;
-import com.healthmarketscience.jackcess.util.SimpleColumnMatcher;
+import io.github.spannm.jackcess.Cursor;
+import io.github.spannm.jackcess.CursorBuilder;
+import io.github.spannm.jackcess.Index;
+import io.github.spannm.jackcess.Table;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.util.SimpleColumnMatcher;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
@@ -59,7 +59,7 @@ public final class IndexSelector {
         if (idx == null) {
             cursor = cb.toCursor();
         } else {
-            cursor = cb.setIndex(idx).toCursor();
+            cursor = cb.withIndex(idx).toCursor();
         }
         cursor.setColumnMatcher(new ColumnMatcher());
         return cursor;

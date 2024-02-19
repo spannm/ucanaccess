@@ -1,7 +1,7 @@
 package net.ucanaccess.commands;
 
-import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.Table;
+import io.github.spannm.jackcess.Cursor;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
