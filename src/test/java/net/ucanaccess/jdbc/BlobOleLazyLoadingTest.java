@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -31,7 +32,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
 
         final long binaryFileSize = 32718;
         byte[] initialBlobBytes = getBlobBytes();
-        getLogger().info("BLOB size in backing database before retrieval: {} bytes", initialBlobBytes.length);
+        getLogger().log(Level.INFO, "BLOB size in backing database before retrieval: {0} bytes", initialBlobBytes.length);
         assertThat((long) initialBlobBytes.length).isLessThan(binaryFileSize);
         UcanaccessStatement st = ucanaccess.createStatement();
         ResultSet rs = st.executeQuery("SELECT Ole FROM OleTable ORDER BY ID");
@@ -43,11 +44,11 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
             copyFile(isFromDb, file).deleteOnExit();
         }
         assertEquals(file.length(), binaryFileSize);
-        getLogger().info("File was created in {}, size: {} bytes", file.getAbsolutePath(), file.length());
+        getLogger().log(Level.INFO, "File was created in {0}, size: {1} bytes", file.getAbsolutePath(), file.length());
         byte[] finalBlobBytes = getBlobBytes();
-        getLogger().info("BLOB size in backing database after retrieval: {} bytes", finalBlobBytes.length);
+        getLogger().log(Level.INFO, "BLOB size in backing database after retrieval: {0} bytes", finalBlobBytes.length);
         if (!Arrays.equals(initialBlobBytes, finalBlobBytes)) {
-            getLogger().warn("Simply retrieving BLOB changed byte data in backing database. Problem?");
+            getLogger().log(Level.WARNING, "Simply retrieving BLOB changed byte data in backing database. Problem?");
         }
     }
 

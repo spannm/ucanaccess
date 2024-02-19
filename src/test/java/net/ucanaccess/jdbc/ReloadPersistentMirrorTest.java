@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
+import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
 
 class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
@@ -38,7 +39,7 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
             .withProp(Property.keepMirror, mirrorFile.getAbsolutePath())
             .withoutUserPass();
         try (UcanaccessConnection conn = mirrorBuilder.build()) {
-            getLogger().debug("Openend and closed mirror connection");
+            getLogger().log(Level.DEBUG, "Openend and closed mirror connection");
         }
 
         // do an update without the mirror involved

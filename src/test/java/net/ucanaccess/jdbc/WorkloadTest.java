@@ -5,6 +5,7 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +35,13 @@ class WorkloadTest extends UcanaccessBaseTest {
         ucanaccess.commit();
 
         long midTime = System.currentTimeMillis();
-        getLogger().info("Autoincrement insert performance test, {} records inserted in {} seconds.", nbRecords,
+        getLogger().log(Level.INFO, "Autoincrement insert performance test, {0} records inserted in {1} seconds.", nbRecords,
                 TimeUnit.MILLISECONDS.toSeconds(midTime - startTime));
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("update aaAB set c='yessssss'&a");
             ucanaccess.commit();
-            getLogger().info("Update performance test, all {} table records updated in {} seconds.", nbRecords,
+            getLogger().log(Level.INFO, "Update performance test, all {0} table records updated in {1} seconds.", nbRecords,
                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - midTime));
         }
     }

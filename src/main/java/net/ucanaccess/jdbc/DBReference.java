@@ -5,12 +5,12 @@ import io.github.spannm.jackcess.Database.FileFormat;
 import io.github.spannm.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.exception.UcanaccessSQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.sql.*;
@@ -22,7 +22,7 @@ public class DBReference {
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
     private static String                           version;
 
-    private final Logger                            logger            = LoggerFactory.getLogger(getClass());
+    private final Logger                            logger            = System.getLogger(getClass().getName());
     private final File                              dbFile;
     private Database                                dbIO;
     private FileLock                                fileLock          = null;
@@ -84,7 +84,7 @@ public class DBReference {
                     linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
                 }
                 if (!linkeeFile.exists()) {
-                    logger.warn("External file {} does not exist", linkeeFile.getAbsolutePath());
+                    logger.log(Level.WARNING, "External file {0} does not exist", linkeeFile.getAbsolutePath());
                 } else {
                     links.add(linkeeFile);
                 }
@@ -245,7 +245,7 @@ public class DBReference {
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
                 Files.delete(toKeepHsql.toPath());
                 if (!toKeepHsql.createNewFile()) {
-                    logger.warn("Could not create file {}", toKeepHsql);
+                    logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
@@ -301,7 +301,7 @@ public class DBReference {
             }
 
         } catch (Exception _ex) {
-            logger.warn(_ex.toString());
+            logger.log(Level.WARNING, _ex.toString());
         }
     }
 
@@ -363,7 +363,7 @@ public class DBReference {
             if (!inMemory && tempHsql == null) {
                 if (toKeepHsql != null) {
                     if (!toKeepHsql.exists() && !toKeepHsql.createNewFile()) {
-                        logger.warn("Could not create file " + toKeepHsql);
+                        logger.log(Level.WARNING, "Could not create file " + toKeepHsql);
                     }
                     tempHsql = toKeepHsql;
                 } else {
@@ -373,7 +373,7 @@ public class DBReference {
                     tempHsql = new File(hbase, id);
 
                     if (!tempHsql.createNewFile()) {
-                        logger.warn("Could not create file " + tempHsql);
+                        logger.log(Level.WARNING, "Could not create file " + tempHsql);
                     }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -384,7 +384,7 @@ public class DBReference {
                             finalizeHsqlDb(_session);
                         }
                     } catch (Exception _ex) {
-                        logger.warn(_ex.toString());
+                        logger.log(Level.WARNING, _ex.toString());
                     }
                 }));
             }
@@ -439,7 +439,7 @@ public class DBReference {
         try {
             File flLock = fileLock();
             if (!flLock.createNewFile()) {
-                logger.warn("Could not create file " + flLock);
+                logger.log(Level.WARNING, "Could not create file " + flLock);
             }
 
             // suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess
@@ -608,7 +608,7 @@ public class DBReference {
                 try {
                     dbReference.shutdown(_session);
                 } catch (Exception _ex) {
-                    LoggerFactory.getLogger(MemoryTimer.class).warn("Error shutting down db " + dbReference + ": " + _ex);
+                    System.getLogger(MemoryTimer.class.getName()).log(Level.WARNING, "Error shutting down db " + dbReference + ": " + _ex);
                 }
                 timer.cancel();
 

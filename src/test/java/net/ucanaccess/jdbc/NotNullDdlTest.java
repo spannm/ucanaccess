@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
@@ -40,7 +41,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
             "conn.Close"), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
         if (!System.getProperty("os.name").startsWith("Windows")) {
-            getLogger().warn("Not Windows, aborting test");
+            getLogger().log(Level.WARNING, "Not Windows, aborting test");
             return;
         }
 

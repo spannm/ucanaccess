@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
+import java.lang.System.Logger.Level;
 
 class CreateDatabaseTest extends UcanaccessBaseTest {
 
@@ -22,14 +23,14 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
             .withoutUserPass()
             .withImmediatelyReleaseResources()
             .withNewDatabaseVersionProp(getFileFormat().name());
-        getLogger().debug("Database url: {}", bldr.getUrl());
+        getLogger().log(Level.DEBUG, "Database url: {0}", bldr.getUrl());
         UcanaccessConnection conn = bldr.build();
 
         assertNotNull(conn);
         ucanaccess.close();
         ucanaccess = conn;
 
-        getLogger().info("Database file successfully created: {}", fileMdb.getAbsolutePath());
+        getLogger().log(Level.INFO, "Database file successfully created: {0}", fileMdb.getAbsolutePath());
 
         try (UcanaccessStatement st = conn.createStatement()) {
             executeStatements(st,

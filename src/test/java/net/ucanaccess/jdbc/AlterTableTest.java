@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +50,7 @@ class AlterTableTest extends UcanaccessBaseTest {
                 .hasMessageContaining("object name already exists");
             checkQuery(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
             dumpQueryResult(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
-            getLogger().debug("After having renamed a few tables ...");
+            getLogger().log(Level.DEBUG, "After having renamed a few tables ...");
             dumpQueryResult(Sql.of(SELECT, "*", FROM, "UCA_METADATA.TABLES"));
         }
     }

@@ -10,6 +10,7 @@ import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.System.Logger.Level;
 import java.util.Locale;
 
 class AddFunctionTest extends UcanaccessBaseTest {
@@ -24,7 +25,7 @@ class AddFunctionTest extends UcanaccessBaseTest {
          * `-Duser.language=tr` (for Turkish) can be used for an individual test but does does not seem to affect an
          * entire suite
          */
-        getLogger().info("Locale language is {}", Locale.getDefault().getLanguage());
+        getLogger().log(Level.INFO, "Locale language is {0}", Locale.getDefault().getLanguage());
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE t_add_function (id INTEGER) ");

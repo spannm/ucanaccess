@@ -11,11 +11,11 @@ import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.*;
@@ -25,8 +25,8 @@ public final class UcanaccessDriver implements Driver {
 
     public static final String  URL_PREFIX = "jdbc:ucanaccess://";
 
-    private static final Logger LOGGER     = LoggerFactory.getLogger(UcanaccessDriver.class);
-    private final Logger        logger     = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER     = System.getLogger(UcanaccessDriver.class.getName());
+    private final Logger        logger     = System.getLogger(getClass().getName());
 
     static {
         try {
@@ -38,7 +38,7 @@ public final class UcanaccessDriver implements Driver {
             System.setProperty("hsqldb.method_class_names", "net.ucanaccess.converters.*");
 
         } catch (ClassNotFoundException _ex) {
-            LOGGER.warn("Unable to find hsqldb driver (version 2.x.x. or later) on your classpath");
+            LOGGER.log(Level.WARNING, "Unable to find hsqldb driver (version 2.x.x. or later) on your classpath");
             throw new UcanaccessRuntimeException(_ex.getMessage());
         } catch (SQLException _ex) {
             throw new UcanaccessRuntimeException(_ex.getMessage());
@@ -60,7 +60,7 @@ public final class UcanaccessDriver implements Driver {
         Map<Property, String> props = readProperties(_props, _url,
             (k, v) -> {
                 unknownProps.put(k, v);
-                logger.warn("Unknown driver property {} with value {}", k, v);
+                logger.log(Level.WARNING, "Unknown driver property {0} with value {1}", k, v);
             });
 
         int idxSemicolon = _url.indexOf(';');
@@ -108,7 +108,7 @@ public final class UcanaccessDriver implements Driver {
                     if (props.containsKey(keepMirror)) {
                         dbRef.setInMemory(false);
                         if (dbRef.isEncryptHSQLDB()) {
-                            logger.warn("{} parameter cannot be combined with parameters {} or {}, {} skipped",
+                            logger.log(Level.WARNING, "{0} parameter cannot be combined with parameters {1} or {2}, {3} skipped",
                                 keepMirror, jackcessOpener, encrypt, keepMirror);
                         } else {
                             File dbMirror =
@@ -172,7 +172,7 @@ public final class UcanaccessDriver implements Driver {
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
-                            logger.warn("Invalid textual value in table {}, column {}: it might look like {}",
+                            logger.log(Level.WARNING, "Invalid textual value in table {0}, column {1}: it might look like {2}",
                                 cl.getTable().getName(), cl.getName(), new String(bt));
                         }
                         throw new IOException(ex);
@@ -248,7 +248,7 @@ public final class UcanaccessDriver implements Driver {
             }
         } catch (Exception _ignored) {
         }
-        logger.warn("Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
+        logger.log(Level.WARNING, "Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
         return null;
     }
 

@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
@@ -52,7 +53,7 @@ class BlobOleTest extends UcanaccessBaseTest {
 
                 File imgFileTemp = createTempFileName(imgFileName, null);
                 copyFile(isFromDb, imgFileTemp).deleteOnExit();
-                getLogger().info("Image file was created in {}", imgFileTemp.getAbsolutePath());
+                getLogger().log(Level.INFO, "Image file was created in {0}", imgFileTemp.getAbsolutePath());
 
                 byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
 
@@ -78,7 +79,7 @@ class BlobOleTest extends UcanaccessBaseTest {
             ps.setObject(1, file);
             ps.setString(2, descr + "_OK");
             ps.executeUpdate();
-            getLogger().info("Binary file was created in {}", getFileAccDb());
+            getLogger().log(Level.INFO, "Binary file was created in {0}", getFileAccDb());
             checkQuery("SELECT * FROM t_ole_test");
         }
 
@@ -123,7 +124,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         ps.setBlob(2, blob);
 
         ps.execute();
-        getLogger().info("Binary file was created in {}", getFileAccDb());
+        getLogger().log(Level.INFO, "Binary file was created in {0}", getFileAccDb());
         checkQuery("SELECT * FROM t_ole_test");
         UcanaccessStatement st = ucanaccess.createStatement();
         st.execute("DELETE FROM t_ole_test");

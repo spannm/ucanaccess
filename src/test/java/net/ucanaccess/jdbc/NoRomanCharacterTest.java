@@ -5,6 +5,7 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
 
 class NoRomanCharacterTest extends UcanaccessBaseTest {
@@ -25,7 +26,7 @@ class NoRomanCharacterTest extends UcanaccessBaseTest {
             st.execute("UPDATE t_noroman SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
             ResultSet rs = st.executeQuery("SELECT * FROM t_noroman");
             while (rs.next()) {
-                getLogger().debug(rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));
+                getLogger().log(Level.DEBUG, rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));
             }
         }
         checkQuery("SELECT * FROM t_noroman");

@@ -148,8 +148,9 @@
 
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>slf4j-jdk-platform-logging</artifactId>
             <version>${dep.slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

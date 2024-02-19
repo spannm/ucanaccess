@@ -16,6 +16,7 @@ import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 
 import java.io.*;
+import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.sql.*;
@@ -211,7 +212,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(baos, true)) {
             new Main(ucanaccess, null).consoleDump(_supplier.get(), ps);
-            getLogger().info("dumpQueryResult: {}", baos);
+            getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos);
         }
     }
 
@@ -221,7 +222,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (PrintStream ps = new PrintStream(baos, true)) {
                 new Main(ucanaccess, null).consoleDump(resultSet, ps);
-                getLogger().info("dumpQueryResult: {}", baos);
+                getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos);
             }
         }
     }
@@ -328,7 +329,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
         Try.withResources(() -> DatabaseBuilder.create(_fileFormat, _dbFile), Database::flush).orThrow(UncheckedIOException::new);
-        getLogger().info("Access {} file created: {}", _fileFormat.name(), _dbFile.getAbsolutePath());
+        getLogger().log(Level.INFO, "Access {0} file created: {1}", _fileFormat.name(), _dbFile.getAbsolutePath());
     }
 
     protected File copyResourceToTempFile(String _resourcePath) {
@@ -336,11 +337,11 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath)) {
             if (is == null) {
-                getLogger().warn("Resource {} not found in classpath", _resourcePath);
+                getLogger().log(Level.WARNING, "Resource {0} not found in classpath", _resourcePath);
                 return null;
             }
             File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
-            getLogger().debug("Copying resource '{}' to '{}'", _resourcePath, tempFile.getAbsolutePath());
+            getLogger().log(Level.DEBUG, "Copying resource '{0}' to '{1}'", _resourcePath, tempFile.getAbsolutePath());
             return copyFile(is, tempFile);
         } catch (IOException _ex) {
             throw new UncheckedIOException(_ex);
@@ -423,7 +424,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     protected final void executeStatements(Statement _statement, CharSequence... _sqls) throws SQLException {
         for (CharSequence s : _sqls) {
             String sql = s == null ? null : s.toString();
-            getLogger().info("Executing sql: {}", sql.length() > 500 ? sql.substring(0, 500) + "..." : sql);
+            getLogger().log(Level.INFO, "Executing sql: {0}", sql.length() > 500 ? sql.substring(0, 500) + "..." : sql);
             _statement.execute(sql);
         }
     }
@@ -467,7 +468,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (!ucanaccess.isClosed()) {
                     ucanaccess.close();
                 }
-            }).orElse(e -> getLogger().warn("Database {} already closed: {}", fileAccDb, e));
+            }).orElse(e -> getLogger().log(Level.WARNING, "Database {0} already closed: {1}", fileAccDb, e));
         }
 
         if (verifyConnection != null) {
@@ -475,7 +476,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (!verifyConnection.isClosed()) {
                     verifyConnection.close();
                 }
-            }).orElse(e -> getLogger().warn("Verify connection {} already closed: {}", verifyConnection, e));
+            }).orElse(e -> getLogger().log(Level.WARNING, "Verify connection {0} already closed: {1}", verifyConnection, e));
         }
     }
 }

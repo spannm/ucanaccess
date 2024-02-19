@@ -8,6 +8,7 @@ import net.ucanaccess.test.UcanaccessBaseTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.lang.System.Logger.Level;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -55,7 +56,7 @@ class DataSourceTest extends UcanaccessBaseTest {
 
         try (Connection conn = uds.getConnection()) {
             assertThat(fileMdb).exists();
-            getLogger().info("DataSource connection successfully created, file {}", uds.getAccessPath());
+            getLogger().log(Level.INFO, "DataSource connection successfully created, file {0}", uds.getAccessPath());
         }
 
         Boolean irrEffective = uds.getImmediatelyReleaseResources();
@@ -65,7 +66,7 @@ class DataSourceTest extends UcanaccessBaseTest {
             assertTrue(fileMdb.delete());
             assertThat(fileMdb).doesNotExist();
         } else {
-            getLogger().info("(Test database remains on disk)");
+            getLogger().log(Level.INFO, "(Test database remains on disk)");
         }
     }
 }

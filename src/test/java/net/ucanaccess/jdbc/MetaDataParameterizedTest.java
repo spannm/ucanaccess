@@ -9,6 +9,7 @@ import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.System.Logger.Level;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,7 +44,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         rs.updateString("Sometime I wonder who I am ", "Growing old without emotions");
         rs.updateString("11q3 ¹²³¼½¾ß€", "康");
         rs.insertRow();
-        getLogger().debug("Crazy names in create table with updatable resultset...");
+        getLogger().log(Level.DEBUG, "Crazy names in create table with updatable resultset...");
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
 
         assertThatThrownBy(() -> st.execute(
@@ -85,39 +86,39 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
             .satisfies(x -> assertThat(x.isCurrency(7)).isFalse());
         DatabaseMetaData dbmd = ucanaccess.getMetaData();
 
-        getLogger().info("Noroman characters:");
+        getLogger().log(Level.INFO, "Noroman characters:");
         dumpQueryResult(() -> dbmd.getTables(null, null, "NOROMAn", null));
         dumpQueryResult(() -> dbmd.getColumns(null, null, "NOROMAn", null));
         dumpQueryResult(() -> dbmd.getColumns(null, null, "%ROMAn", null));
-        getLogger().info("getColumns:");
+        getLogger().log(Level.INFO, "getColumns:");
         dumpQueryResult(() -> dbmd.getColumns(null, null, "Πλήθ%", null));
         dumpQueryResult(() -> dbmd.getColumns(null, null, "%健康", null));
         dumpQueryResult(() -> dbmd.getColumns(null, null, "TAbELLA1", "%e"));
-        getLogger().info("getColumnPrivileges:");
+        getLogger().log(Level.INFO, "getColumnPrivileges:");
         dumpQueryResult(() -> dbmd.getColumnPrivileges(null, null, "NOROMAn", null));
-        getLogger().info("getExportedKeys:");
+        getLogger().log(Level.INFO, "getExportedKeys:");
         dumpQueryResult(() -> dbmd.getExportedKeys(null, null, "??###"));
-        getLogger().info("getImportedKeys:");
+        getLogger().log(Level.INFO, "getImportedKeys:");
         dumpQueryResult(() -> dbmd.getImportedKeys(null, null, "Tabella1"));
-        getLogger().info("getPrimaryKeys:");
+        getLogger().log(Level.INFO, "getPrimaryKeys:");
         dumpQueryResult(() -> dbmd.getPrimaryKeys(null, null, "Tabella1"));
-        getLogger().info("getIndexInfo:");
+        getLogger().log(Level.INFO, "getIndexInfo:");
         dumpQueryResult(() -> dbmd.getIndexInfo(null, null, "Tabella1", false, false));
-        getLogger().info("getCrossReference:");
+        getLogger().log(Level.INFO, "getCrossReference:");
         dumpQueryResult(() -> dbmd.getCrossReference(null, null, "??###", null, null, "Tabella1"));
-        getLogger().info("getVersionColumns:");
+        getLogger().log(Level.INFO, "getVersionColumns:");
         dumpQueryResult(() -> dbmd.getVersionColumns(null, null, "Πλήθος"));
-        getLogger().info("getClientInfoProperties:");
+        getLogger().log(Level.INFO, "getClientInfoProperties:");
         dumpQueryResult(dbmd::getClientInfoProperties);
-        getLogger().info("getTablePrivileges:");
+        getLogger().log(Level.INFO, "getTablePrivileges:");
         dumpQueryResult(() -> dbmd.getTablePrivileges(null, null, "??###"));
-        getLogger().info("getTables:");
+        getLogger().log(Level.INFO, "getTables:");
         dumpQueryResult(() -> dbmd.getTables(null, null, "??###", new String[] {"TABLE"}));
         dumpQueryResult(() -> dbmd.getTables(null, null, null, new String[] {"VIEW"}));
-        getLogger().info("getBestRowIdentifier:");
+        getLogger().log(Level.INFO, "getBestRowIdentifier:");
         dumpQueryResult(() -> dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowTemporary, true));
         dumpQueryResult(() -> dbmd.getBestRowIdentifier(null, null, "??###", DatabaseMetaData.bestRowSession, true));
-        getLogger().info("getTypeInfo:");
+        getLogger().log(Level.INFO, "getTypeInfo:");
         dumpQueryResult(dbmd::getTypeInfo);
     }
 }

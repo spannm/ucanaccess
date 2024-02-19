@@ -10,11 +10,11 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -24,7 +24,7 @@ public class UcanaccessConnection implements Connection {
 
     private static final ThreadLocal<Context> CTX           = new ThreadLocal<>();
 
-    private final transient Logger            logger        = LoggerFactory.getLogger(getClass());
+    private final transient Logger            logger        = System.getLogger(getClass().getName());
     private boolean                           feedbackState;
     private final LinkedList<ICommand>        commands      = new LinkedList<>();
     private Connection                        hsqlDBConnection;
@@ -274,7 +274,7 @@ public class UcanaccessConnection implements Connection {
             afterFlushIoHook();
 
         } catch (Throwable _ex) {
-            logger.warn(_ex.toString());
+            logger.log(Level.WARNING, _ex.toString());
             hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -294,7 +294,7 @@ public class UcanaccessConnection implements Connection {
                 ref.getDbIO().flush();
                 unloadDB();
             } catch (IOException _ex2) {
-                logger.warn(_ex2.toString());
+                logger.log(Level.WARNING, _ex2.toString());
             }
             if (UcanaccessSQLException.class.isInstance(_ex)) {
                 throw UcanaccessSQLException.class.cast(_ex);
@@ -505,7 +505,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     void logStatementWarning() {
-        logger.warn("Please use a simple statement (not a PreparedStatement)to execute DDL (e.g.,CREATE TABLE)");
+        logger.log(Level.WARNING, "Please use a simple statement (not a PreparedStatement)to execute DDL (e.g.,CREATE TABLE)");
     }
 
     @Override

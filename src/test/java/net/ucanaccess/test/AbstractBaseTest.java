@@ -5,13 +5,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ import java.util.Optional;
  */
 public abstract class AbstractBaseTest extends Assertions {
 
-    /** The slf4j logger. */
+    /** The jpl logger. */
     private Logger   logger;
 
     /** Holds information about the current test. */
@@ -37,7 +37,7 @@ public abstract class AbstractBaseTest extends Assertions {
 
     protected final Logger getLogger() {
         if (null == logger) {
-            logger = LoggerFactory.getLogger(getClass());
+            logger = System.getLogger(getClass().getName());
         }
         return logger;
     }
@@ -71,9 +71,9 @@ public abstract class AbstractBaseTest extends Assertions {
 
     protected void logTestBeginEnd(CharSequence _prefix, TestInfo _testInfo) {
         if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
-            getLogger().info(">>>>>>>>>> {} Test: {} <<<<<<<<<<", _prefix, _testInfo.getDisplayName());
+            getLogger().log(Level.INFO, ">>>>>>>>>> {0} Test: {1} <<<<<<<<<<", _prefix, _testInfo.getDisplayName());
         } else {
-            getLogger().info(">>>>>>>>>> {} Test: {} ({}) <<<<<<<<<<",
+            getLogger().log(Level.INFO, ">>>>>>>>>> {0} Test: {1} ({2}) <<<<<<<<<<",
                 _prefix, _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
         }
     }

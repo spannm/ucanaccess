@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
+import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
@@ -27,9 +28,9 @@ class FolderTest extends UcanaccessBaseTest {
                 .withDbPath(fl.getAbsolutePath())
                 .build();
             SQLWarning sqlw = conn.getWarnings();
-            getLogger().info("open {}", fl.getAbsolutePath());
+            getLogger().log(Level.INFO, "open {0}", fl.getAbsolutePath());
             while (sqlw != null) {
-                getLogger().info(sqlw.getMessage());
+                getLogger().log(Level.INFO, sqlw.getMessage());
                 sqlw = sqlw.getNextWarning();
             }
         }

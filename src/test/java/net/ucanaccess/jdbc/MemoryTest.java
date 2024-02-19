@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 
 @Disabled
@@ -14,7 +15,7 @@ class MemoryTest extends UcanaccessBaseTest {
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
-        getLogger().debug("Thread.activeCount (setup): {}", Thread.activeCount());
+        getLogger().log(Level.DEBUG, "Thread.activeCount (setup): {0}", Thread.activeCount());
 
         executeStatements("CREATE TABLE t_mem(id LONG PRIMARY KEY, a LONG, c TEXT, d TEXT)");
     }
@@ -32,8 +33,8 @@ class MemoryTest extends UcanaccessBaseTest {
         ucanaccess.setAutoCommit(false);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            getLogger().debug("Total memory 0= {}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("Free memory 0= {}", Runtime.getRuntime().freeMemory());
+            getLogger().log(Level.DEBUG, "Total memory 0= {0}", Runtime.getRuntime().totalMemory());
+            getLogger().log(Level.DEBUG, "Free memory 0= {0}", Runtime.getRuntime().freeMemory());
             int nbRecords = 100000;
             for (int i = 0; i <= nbRecords; i++) {
                 st.execute("INSERT INTO t_mem(id, a, c, d) VALUES ("
@@ -43,19 +44,19 @@ class MemoryTest extends UcanaccessBaseTest {
 
             long occ = Runtime.getRuntime().freeMemory();
             int ac = Thread.activeCount();
-            getLogger().debug("Thread.activeCount {}", Thread.activeCount());
-            getLogger().debug("total memory 1 = {}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("free memory 1 = {}", occ);
+            getLogger().log(Level.DEBUG, "Thread.activeCount {0}", Thread.activeCount());
+            getLogger().log(Level.DEBUG, "total memory 1 = {0}", Runtime.getRuntime().totalMemory());
+            getLogger().log(Level.DEBUG, "free memory 1 = {0}", occ);
 
             Thread.sleep(2000L);
 
-            getLogger().debug("Thread.activeCount() diff {}", Thread.activeCount() - ac);
-            getLogger().debug("Total memory 2 = {}", Runtime.getRuntime().totalMemory());
-            getLogger().debug("Tree memory 2 = {}", Runtime.getRuntime().freeMemory());
-            getLogger().debug("Tree memory diff = {}", Runtime.getRuntime().freeMemory() - occ);
+            getLogger().log(Level.DEBUG, "Thread.activeCount() diff {0}", Thread.activeCount() - ac);
+            getLogger().log(Level.DEBUG, "Total memory 2 = {0}", Runtime.getRuntime().totalMemory());
+            getLogger().log(Level.DEBUG, "Tree memory 2 = {0}", Runtime.getRuntime().freeMemory());
+            getLogger().log(Level.DEBUG, "Tree memory diff = {0}", Runtime.getRuntime().freeMemory() - occ);
 
             dumpQueryResult("SELECT * FROM t_mem LIMIT 10");
-            getLogger().info("Thread.activeCount() diff {}", Thread.activeCount() - ac);
+            getLogger().log(Level.INFO, "Thread.activeCount() diff {0}", Thread.activeCount() - ac);
         }
     }
 
