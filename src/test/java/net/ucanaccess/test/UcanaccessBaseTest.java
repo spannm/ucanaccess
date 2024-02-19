@@ -2,9 +2,9 @@ package net.ucanaccess.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Database.FileFormat;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.DatabaseBuilder;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.console.Main;
 import net.ucanaccess.jdbc.UcanaccessConnection;
