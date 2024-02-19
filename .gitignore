@@ -9,7 +9,8 @@
 **/NOTES.txt
 *.iml
 .checkstyle
-.idea/
+.idea
+.mvn
 .project
 .~lock*
 *.kate-swp
