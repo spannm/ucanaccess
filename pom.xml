@@ -15,7 +15,7 @@
 
     <name>UCanAccess</name>
     <description>Open-source pure Java JDBC driver for Access databases. Allows Java developers and client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write various versions of Microsoft Access databases.</description>
-    <url>https://github.com/spannm/${project.artifactId}</url>
+    <url>https://github.com/${developerId}/${project.artifactId}</url>
     <inceptionYear>2012</inceptionYear>
 
     <organization>
@@ -219,7 +219,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <systemPropertyVariables combine.children="append">
-                            <user.timezone/>
+                            <user.timezone />
                         </systemPropertyVariables>
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
