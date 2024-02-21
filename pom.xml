@@ -103,7 +103,7 @@
         <dep.assertj.version>3.25.3</dep.assertj.version>
         <dep.mockito.version>5.10.0</dep.mockito.version>
 
-        <dep.plugin.sortpom.version>3.3.0</dep.plugin.sortpom.version>
+        <dep.plugin.sortpom.version>3.4.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
 
         <dep.checkstyle.version>10.12.6</dep.checkstyle.version>
