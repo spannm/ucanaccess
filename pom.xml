@@ -84,6 +84,17 @@
         </site>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>github-jackcess</id>
+            <name>${developerId} github packages</name>
+            <url>https://maven.pkg.github.com/${developerId}/${dep.jackcess.artifcactId}</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -92,6 +103,7 @@
 
         <developerId>spannm</developerId>
 
+        <dep.jackcess.artifcactId>jackcess</dep.jackcess.artifcactId>
         <dep.jackcess.version>5.0.0-SNAPSHOT</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
@@ -142,7 +154,7 @@
 
         <dependency>
             <groupId>io.github.spannm</groupId>
-            <artifactId>jackcess</artifactId>
+            <artifactId>${dep.jackcess.artifcactId}</artifactId>
             <version>${dep.jackcess.version}</version>
         </dependency>
 
