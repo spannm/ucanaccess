@@ -26,7 +26,7 @@ jobs:
                 server-username: SONATYPE_OSSRH_USERNAME
                 server-password: SONATYPE_OSSRH_PASSWORD
         -   name: Build with Maven/JDK 11
-            run: mvn -B clean deploy --file pom.xml
+            run: mvn --batch-mode --file pom.xml clean deploy
             env:
                 SONATYPE_OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
                 SONATYPE_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}

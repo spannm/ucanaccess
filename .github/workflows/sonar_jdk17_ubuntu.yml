@@ -24,8 +24,8 @@ jobs:
                 java-version: '17'
                 distribution: temurin
                 cache: maven
-        -   name: Build with Maven, Test with SonarCloud
+        -   name: Build with Maven/JDK 17, test with SonarCloud
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            run: mvn -B verify -Psonarcloud --file pom.xml
+            run: mvn --batch-mode --file pom.xml -P sonarcloud clean verify
