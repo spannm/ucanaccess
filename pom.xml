@@ -80,6 +80,7 @@
         </repository>
         <site>
             <id>local</id>
+            <name>Local Maven site</name>
             <url>file://${java.io.tmpdir}/${project.artifactId}/site-prepared</url>
         </site>
     </distributionManagement>
@@ -206,6 +207,7 @@
         <defaultGoal>clean verify</defaultGoal>
 
         <pluginManagement>
+
             <plugins>
 
                 <plugin>
@@ -279,6 +281,17 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <basepom.check.skip-extended>true</basepom.check.skip-extended>
             </properties>
+        </profile>
+
+        <profile>
+            <id>github-deploy-snapshot-package</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>github</id>
+                    <name>${developerId} github packages</name>
+                    <url>https://maven.pkg.github.com/${developerId}/${project.artifactId}</url>
+                </snapshotRepository>
+            </distributionManagement>
         </profile>
 
         <profile>
