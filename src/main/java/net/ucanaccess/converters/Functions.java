@@ -959,7 +959,7 @@ public final class Functions {
     }
 
     /**
-     * Returns the sign of a number. If number > 0, it returns 1. If number = 0, it returns 0.
+     * Returns the sign of a number. If number &gt; 0, it returns 1. If number = 0, it returns 0.
      */
     @FunctionType(functionName = "Sgn", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
     public static short sgn(double _n) {
