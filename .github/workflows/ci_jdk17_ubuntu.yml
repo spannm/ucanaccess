@@ -24,5 +24,6 @@ jobs:
                 java-version: '17'
                 distribution: 'temurin'
                 cache: maven
+
         -   name: Build with Maven/JDK 17 on Ubuntu
-            run: mvn --batch-mode --file pom.xml clean verify
+            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo clean verify

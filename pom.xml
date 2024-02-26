@@ -329,12 +329,12 @@
         </profile>
 
         <profile>
-            <id>github-package-repo-jackcess</id>
+            <id>add-sonatype-snapshots-repo</id>
             <repositories>
                 <repository>
-                    <id>github-jackcess</id>
-                    <name>${developerId} github packages</name>
-                    <url>https://maven.pkg.github.com/${developerId}/${dep.jackcess.artifcactId}</url>
+                    <id>sonatype-nexus-snapshots</id>
+                    <name>Sonatype Nexus Snapshots</name>
+                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>

@@ -24,15 +24,9 @@ jobs:
                 java-version: '11'
                 distribution: 'temurin'
                 cache: maven
-                server-id: github-jackcess                # value of repository/id field of the pom.xml
-                server-username: GH_PACKAGE_REPO_USERNAME # env variable name for username
-                server-password: GH_PACKAGE_REPO_PASSWORD # env variable name for GitHub Personal Access Token
 
         -   name: Build with Maven/JDK 11 on Ubuntu
-            run: mvn --batch-mode --file pom.xml --activate-profiles github-package-repo-jackcess clean package
-            env:
-                GH_PACKAGE_REPO_USERNAME: ${{ secrets.GH_PACKAGE_REPO_USERNAME }}
-                GH_PACKAGE_REPO_PASSWORD: ${{ secrets.GH_PACKAGE_REPO_PASSWORD }}}
+            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo clean package
 
     deploy:
         needs: build
@@ -55,17 +49,8 @@ jobs:
                 server-password: SONATYPE_OSSRH_PASSWORD
 
         -   name: Deploy to Sonatype snapshot repo
-            run: mvn --batch-mode --file pom.xml --activate-profiles fast deploy
+            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo,fast deploy
             env:
                 SONATYPE_OSSRH_USERNAME:  ${{ secrets.SONATYPE_OSSRH_USERNAME }}
                 SONATYPE_OSSRH_PASSWORD:  ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
 
-        -   name: Set up Java for deployment to GitHub Packages
-            uses: actions/setup-java@v3
-            with:
-                java-version: '11'
-                distribution: 'temurin'
-        -   name: Deploy snapshot to Github packages
-            run: mvn -X --batch-mode --file pom.xml --activate-profiles fast,github-deploy-snapshot-package deploy
-            env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

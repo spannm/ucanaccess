@@ -24,5 +24,6 @@ jobs:
                 java-version: '21'
                 distribution: 'temurin'
                 cache: maven
+
         -   name: Build with Maven/JDK 21 on Ubuntu
-            run: mvn --batch-mode --file pom.xml clean verify
+            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo clean verify
