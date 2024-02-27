@@ -26,7 +26,7 @@ jobs:
                 cache: maven
 
         -   name: Build with Maven/JDK 11 on Ubuntu
-            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo clean package
+            run: mvn --batch-mode --file pom.xml clean package
 
     deploy:
         needs: build
@@ -49,7 +49,7 @@ jobs:
                 server-password: SONATYPE_OSSRH_PASSWORD
 
         -   name: Deploy to Sonatype snapshot repo
-            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo,fast deploy
+            run: mvn --batch-mode --file pom.xml --activate-profiles fast deploy
             env:
                 SONATYPE_OSSRH_USERNAME:  ${{ secrets.SONATYPE_OSSRH_USERNAME }}
                 SONATYPE_OSSRH_PASSWORD:  ${{ secrets.SONATYPE_OSSRH_PASSWORD }}

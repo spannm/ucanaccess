@@ -330,6 +330,12 @@
 
         <profile>
             <id>add-sonatype-snapshots-repo</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
             <repositories>
                 <repository>
                     <id>sonatype-nexus-snapshots</id>

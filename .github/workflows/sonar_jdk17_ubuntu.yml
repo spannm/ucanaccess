@@ -32,4 +32,4 @@ jobs:
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            run: mvn --batch-mode --file pom.xml --activate-profiles add-sonatype-snapshots-repo,sonarcloud clean verify
+            run: mvn --batch-mode --file pom.xml --activate-profiles sonarcloud clean verify
