@@ -2,12 +2,14 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.converters.Metadata.Property.*;
 
+import io.github.spannm.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
 
+import java.io.File;
 import java.sql.DriverManager;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +30,11 @@ public final class UcanaccessConnectionBuilder {
         return this;
     }
 
+    public UcanaccessConnectionBuilder withDbPath(File _dbPath) {
+        dbPath = Optional.ofNullable(_dbPath).map(File::getAbsolutePath).orElse(null);
+        return this;
+    }
+
     public UcanaccessConnectionBuilder withUser(String _user) {
         return withProp(user, _user);
     }
@@ -37,7 +44,7 @@ public final class UcanaccessConnectionBuilder {
     }
 
     public UcanaccessConnectionBuilder withoutUserPass() {
-        props.remove(ignoreCase);
+        props.remove(user);
         props.remove(password);
         return this;
     }
@@ -70,8 +77,19 @@ public final class UcanaccessConnectionBuilder {
         return withProp(memory, true);
     }
 
-    public UcanaccessConnectionBuilder withNewDatabaseVersionProp(String _name) {
-        return withProp(newDatabaseVersion, _name);
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(FileFormat _version) {
+        return withProp(newDatabaseVersion, _version == null ? null : _version.name());
+    }
+
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(String _version) {
+        FileFormat version = null;
+        if (_version != null) {
+            version = FileFormat.parse(_version);
+            if (version == null) {
+                throw new UcanaccessRuntimeException("Version required");
+            }
+        }
+        return withProp(newDatabaseVersion, version);
     }
 
     public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {

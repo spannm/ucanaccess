@@ -22,7 +22,7 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
             .withDbPath(fileMdb.getAbsolutePath())
             .withoutUserPass()
             .withImmediatelyReleaseResources()
-            .withNewDatabaseVersionProp(getFileFormat().name());
+            .withNewDatabaseVersion(getFileFormat());
         getLogger().log(Level.DEBUG, "Database url: {0}", bldr.getUrl());
         UcanaccessConnection conn = bldr.build();
 

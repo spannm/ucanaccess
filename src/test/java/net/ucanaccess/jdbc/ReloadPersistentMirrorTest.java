@@ -27,7 +27,7 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
                 .withDbPath(dbFile.getAbsolutePath())
                 .withoutUserPass()
                 .withMemory()
-                .withNewDatabaseVersionProp(getFileFormat().name())
+                .withNewDatabaseVersion(getFileFormat())
                 .build();
              UcanaccessStatement stCreate = conn.createStatement()) {
             stCreate.execute("CREATE TABLE Table1 (ID COUNTER PRIMARY KEY, TextField TEXT(50))");
