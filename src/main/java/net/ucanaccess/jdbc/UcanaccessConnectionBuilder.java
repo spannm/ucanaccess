@@ -86,14 +86,14 @@ public final class UcanaccessConnectionBuilder {
         if (_version != null) {
             version = FileFormat.parse(_version);
             if (version == null) {
-                throw new UcanaccessRuntimeException("Version required");
+                UcanaccessRuntimeException.throwNow("Valid version required: " + _version);
             }
         }
         return withProp(newDatabaseVersion, version);
     }
 
     public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {
-        Objects.requireNonNull(_prop, "Property required");
+        UcanaccessRuntimeException.requireNonNull(_prop, "Property required");
 
         String val = Optional.ofNullable(_value).map(Object::toString).orElse("");
         props.put(_prop, val);
@@ -102,7 +102,7 @@ public final class UcanaccessConnectionBuilder {
     }
 
     public String getUrl() {
-        Objects.requireNonNull(dbPath, "Database path required");
+        UcanaccessRuntimeException.requireNonNull(dbPath, "Database path required");
 
         String url = UcanaccessDriver.URL_PREFIX + dbPath;
 

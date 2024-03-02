@@ -1,5 +1,6 @@
 package net.ucanaccess.test;
 
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +17,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -110,16 +110,16 @@ public abstract class AbstractBaseTest extends Assertions {
     }
 
     protected static File copyFile(Path _source, File _target) {
-        Objects.requireNonNull(_source, "Source file required");
-        Objects.requireNonNull(_target, "Target file required");
+        UcanaccessRuntimeException.requireNonNull(_source, "Source file required");
+        UcanaccessRuntimeException.requireNonNull(_target, "Target file required");
         Try.catching(() -> Files.copy(_source, _target.toPath(), StandardCopyOption.REPLACE_EXISTING))
             .orThrow(e -> new UncheckedIOException("Failed to copy '" + _source + "' to '" + _target + "'", e));
         return _target;
     }
 
     protected static File copyFile(InputStream _in, File _target) {
-        Objects.requireNonNull(_in, "Input stream required");
-        Objects.requireNonNull(_target, "Target file required");
+        UcanaccessRuntimeException.requireNonNull(_in, "Input stream required");
+        UcanaccessRuntimeException.requireNonNull(_target, "Target file required");
         Try.catching(() -> Files.copy(_in, _target.toPath(), StandardCopyOption.REPLACE_EXISTING))
             .orThrow(e -> new UncheckedIOException("Failed to copy to '" + _target + "'", e));
         return _target;

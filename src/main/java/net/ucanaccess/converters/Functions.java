@@ -508,7 +508,7 @@ public final class Functions {
         if (mtc.find()) {
             gc.set(Integer.parseInt(mtc.group(1)), Integer.parseInt(mtc.group(2)) - 1, Integer.parseInt(mtc.group(3)));
         } else {
-            throw new UcanaccessRuntimeException("internal error in parsing timestamp");
+            UcanaccessRuntimeException.throwNow("internal error in parsing timestamp");
         }
         mtc = pth.matcher(_dt);
         if (mtc.find()) {
@@ -516,7 +516,7 @@ public final class Functions {
             gc.set(Calendar.MINUTE, Integer.parseInt(mtc.group(2)));
             gc.set(Calendar.SECOND, Integer.parseInt(mtc.group(3)));
         } else {
-            throw new UcanaccessRuntimeException("internal error in parsing timestamp");
+            UcanaccessRuntimeException.throwNow("internal error in parsing timestamp");
         }
         gc.set(Calendar.MILLISECOND, 0);
         return new Timestamp(gc.getTime().getTime());
@@ -870,7 +870,7 @@ public final class Functions {
         }
         int len = start - 1 + length;
         if (start < 1) {
-            throw new UcanaccessRuntimeException("Invalid function call");
+            UcanaccessRuntimeException.throwNow("Invalid function call");
         }
         if (len > _value.length()) {
             len = _value.length();
