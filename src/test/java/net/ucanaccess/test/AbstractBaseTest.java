@@ -2,7 +2,6 @@ package net.ucanaccess.test;
 
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.util.Try;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -29,7 +28,7 @@ import java.util.Optional;
  */
 public abstract class AbstractBaseTest extends Assertions {
 
-    /** The jpl logger. */
+    /** The java platform/system logger. */
     private Logger   logger;
 
     /** Holds information about the current test. */
@@ -61,20 +60,11 @@ public abstract class AbstractBaseTest extends Assertions {
 
     @BeforeEach
     public final void logTestBegin(TestInfo _testInfo) {
-        logTestBeginEnd("BGN", _testInfo);
-    }
-
-    @AfterEach
-    public final void logTestEnd(TestInfo _testInfo) {
-        logTestBeginEnd("END", _testInfo);
-    }
-
-    protected void logTestBeginEnd(CharSequence _prefix, TestInfo _testInfo) {
         if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
-            getLogger().log(Level.INFO, ">>>>>>>>>> {0} Test: {1} <<<<<<<<<<", _prefix, _testInfo.getDisplayName());
+            getLogger().log(Level.INFO, ">>>>>>>>>> TEST: {0} <<<<<<<<<<", _testInfo.getDisplayName());
         } else {
-            getLogger().log(Level.INFO, ">>>>>>>>>> {0} Test: {1} ({2}) <<<<<<<<<<",
-                _prefix, _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
+            getLogger().log(Level.INFO, ">>>>>>>>>> TEST: {0} ({1}) <<<<<<<<<<",
+                _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
         }
     }
 
