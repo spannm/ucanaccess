@@ -76,7 +76,7 @@ public final class UcanaccessDriver implements Driver {
                 FileFormat ff = null;
                 if (props.containsKey(newDatabaseVersion)) {
                     if (!fileDb.exists()) {
-                        ff = FileFormat.valueOf(props.get(newDatabaseVersion).toUpperCase());
+                        ff = FileFormat.parse(props.get(newDatabaseVersion));
                     }
 
                 }

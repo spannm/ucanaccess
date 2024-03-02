@@ -2,16 +2,19 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.converters.Metadata.Property.*;
 
-import io.github.spannm.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
 
 import java.io.File;
 import java.sql.DriverManager;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -77,19 +80,19 @@ public final class UcanaccessConnectionBuilder {
         return withProp(memory, true);
     }
 
-    public UcanaccessConnectionBuilder withNewDatabaseVersion(FileFormat _version) {
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(AccessVersion _version) {
         return withProp(newDatabaseVersion, _version == null ? null : _version.name());
     }
 
     public UcanaccessConnectionBuilder withNewDatabaseVersion(String _version) {
-        FileFormat version = null;
+        AccessVersion accVersion = null;
         if (_version != null) {
-            version = FileFormat.parse(_version);
-            if (version == null) {
+            accVersion = AccessVersion.parse(_version);
+            if (accVersion == null) {
                 UcanaccessRuntimeException.throwNow("Valid version required: " + _version);
             }
         }
-        return withProp(newDatabaseVersion, version);
+        return withProp(newDatabaseVersion, accVersion);
     }
 
     public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {

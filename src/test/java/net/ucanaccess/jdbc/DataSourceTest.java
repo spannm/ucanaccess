@@ -5,7 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.lang.System.Logger.Level;
@@ -21,12 +25,13 @@ class DataSourceTest extends UcanaccessBaseTest {
             .isInstanceOf(UcanaccessRuntimeException.class);
     }
 
-    @Test
-    void setNewDatabaseVersionGood() {
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(strings = {"V2003", "v2003", "V2016"})
+    @NullSource
+    void setNewDatabaseVersionGood(String _ver) {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        String ver = "V2003";
-        uds.setNewDatabaseVersion(ver);
-        assertEquals(ver, uds.getNewDatabaseVersion());
+        uds.setNewDatabaseVersion(_ver);
+        assertThat(uds.getNewDatabaseVersion()).isEqualToIgnoringCase(_ver);
     }
 
     @Test
@@ -51,7 +56,7 @@ class DataSourceTest extends UcanaccessBaseTest {
 
         UcanaccessDataSource uds = new UcanaccessDataSource();
         uds.setAccessPath(fileMdb.getAbsolutePath());
-        uds.setNewDatabaseVersion("V2003");
+        uds.setNewDatabaseVersion(AccessVersion.V2003);
         uds.setImmediatelyReleaseResources(true); // so we can delete it immediately after close
 
         try (Connection conn = uds.getConnection()) {

@@ -5,6 +5,7 @@ import static net.ucanaccess.converters.Metadata.Property.*;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.type.AccessVersion;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -404,13 +405,24 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     }
 
     /**
-     * Creates a new, empty Access database in this format if the database specified by {@link #setAccessPath(String)}
-     * does not exist.
+     * Creates a new, empty Access database in the specified format
+     * if the database specified by {@link #setAccessPath(String)} does not exist.
      *
-     * @param _value Valid values for this parameter are: "V2000", "V2003", "V2007", "V2010", or "V2016".
+     * @param _version database versions, valid values are defined in enum {@link AccessVersion} ("V2000", "V2003", "V2007" etc.).
      */
-    public void setNewDatabaseVersion(String _value) {
-        setProp(newDatabaseVersion, _value);
+    public void setNewDatabaseVersion(String _version) {
+        AccessVersion accVersion = null;
+        if (_version != null && !_version.isEmpty()) {
+            accVersion = AccessVersion.parse(_version);
+            if (accVersion == null) {
+                UcanaccessRuntimeException.throwNow("Valid version required: " + _version);
+            }
+        }
+        setNewDatabaseVersion(accVersion);
+    }
+
+    public void setNewDatabaseVersion(AccessVersion _version) {
+        setProp(newDatabaseVersion, _version == null ? null : _version.name());
     }
 
     /**

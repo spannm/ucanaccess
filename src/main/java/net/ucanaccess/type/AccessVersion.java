@@ -36,13 +36,13 @@ public enum AccessVersion {
         return List.of(DEFAULT_ACCESS_VERSION);
     }
 
-    public static AccessVersion parse(String _val) {
-        if (_val == null) {
+    public static AccessVersion parse(String _str) {
+        if (_str == null) {
             return null;
         }
-        String val = _val.strip().toLowerCase();
+        String val = _str.strip();
         for (AccessVersion ver : values()) {
-            if (val.equals(ver.name())) {
+            if (val.equalsIgnoreCase(ver.name())) {
                 return ver;
             }
         }
