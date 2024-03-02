@@ -244,7 +244,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         } else {
             fileAccDb = copyResourceToTempFile(accessPath);
             if (fileAccDb == null) {
-                fileAccDb = new File(TEST_TEMP_DIR, accessPath);
+                fileAccDb = new File(getTestTempDir(), accessPath);
                 if (!fileAccDb.exists()) {
                     createNewDatabase(getFileFormat(), fileAccDb);
                     fileAccDb.deleteOnExit();
@@ -257,6 +257,10 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected static final String getTestDbDir() {
         return "testdbs/";
+    }
+
+    protected static final File getTestTempDir() {
+        return TEST_TEMP_DIR;
     }
 
     /**
@@ -299,7 +303,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
         }
         name += new TempFileNameString() + suffix;
-        return new File(TEST_TEMP_DIR, name);
+        return new File(getTestTempDir(), name);
     }
 
     /**
