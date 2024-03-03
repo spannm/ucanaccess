@@ -40,8 +40,12 @@ public class UcanaccessConnection implements Connection {
     private Object                            lastGeneratedKey;
     private String                            refId;
 
+    /**
+     * Returns the current database connection or {@code null} from the context.
+     * @return connection
+     */
     public static synchronized UcanaccessConnection getCtxConnection() {
-        return Optional.ofNullable(CTX).map(tl -> tl.get().getCurrentConnection()).orElse(null);
+        return Optional.ofNullable(CTX.get()).map(Context::getCurrentConnection).orElse(null);
     }
 
     public static synchronized boolean hasContext() {
@@ -49,7 +53,7 @@ public class UcanaccessConnection implements Connection {
     }
 
     public static synchronized String getCtxExcId() {
-        return CTX.get().getCurrentExecId();
+        return Optional.ofNullable(CTX.get()).map(Context::getCurrentExecId).orElse(null);
     }
 
     public static synchronized void setCtxConnection(UcanaccessConnection conn) {
@@ -57,11 +61,10 @@ public class UcanaccessConnection implements Connection {
     }
 
     public static synchronized void setCtxExecId(String id) {
-        CTX.get().setCurrentExecId(id);
+        Optional.ofNullable(CTX.get()).ifPresent(ctx -> ctx.setCurrentExecId(id));
     }
 
-    public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session)
-            throws UcanaccessSQLException {
+    public UcanaccessConnection(DBReference _ref, Properties _clientInfo, Session _session) throws UcanaccessSQLException {
         try {
             ref = _ref;
             refId = _ref.getId();
