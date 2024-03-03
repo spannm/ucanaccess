@@ -21,13 +21,19 @@ import org.hsqldb.types.BlobData;
 import org.hsqldb.types.JavaObjectData;
 import org.hsqldb.types.TimestampData;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Persist2Jet {
-    private static final Map<String, List<String>> COL_NAMES_CACHE = new HashMap<>();
+
+    /**
+     * Cache of columns names per table name and database file.
+     */
+    private static final Map<File, Map<String, List<String>>> COL_NAMES_CACHE = new LinkedHashMap<>();
     static {
         DBReference.addOnReloadRefListener(COL_NAMES_CACHE::clear);
     }
@@ -36,11 +42,11 @@ public class Persist2Jet {
         String ntn = SQLConverter.basicEscapingIdentifier(t.getName()).toUpperCase();
         Map<String, Object> vl = new LinkedHashMap<>();
         int i = 0;
-        for (String s : getColumnNames(ntn)) {
+        for (String s : getCreateColumnNamesCache(ntn)) {
             vl.put(s, varr[i++]);
         }
         if (i == 0) {
-            throw new SQLException("Cannot read table's metadata");
+            throw new SQLException("Could not read metadata of table " + t.getName());
         }
         return escapeIdentifiers(vl, t);
     }
@@ -54,25 +60,24 @@ public class Persist2Jet {
         return values;
     }
 
-    private List<String> getColumnNames(String ntn) throws SQLException {
+    public List<String> getCreateColumnNamesCache(String tableName) throws SQLException {
+        String nname = SQLConverter.basicEscapingIdentifier(tableName).toUpperCase();
+        nname = UcanaccessDatabaseMetadata.normalizeName(nname);
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        ntn = UcanaccessDatabaseMetadata.normalizeName(ntn);
-        String pref = conn.getDbIO().getFile().getAbsolutePath();
-        Connection conq = conn.getHSQLDBConnection();
-        String key = pref + ntn;
-        if (!COL_NAMES_CACHE.containsKey(key)) {
-            ResultSet rs = conq.getMetaData().getColumns(null, PUBLIC, ntn, null);
-            Map<Integer, String> tm = new TreeMap<>();
-            while (rs.next()) {
-                String cbase = rs.getString(COLUMN_NAME);
-                Integer i = rs.getInt(ORDINAL_POSITION);
-                tm.put(i, cbase.toUpperCase());
-
+        Map<String, List<String>> dbFileObjMap = COL_NAMES_CACHE.computeIfAbsent(conn.getDbIO().getFile(), k -> new LinkedHashMap<>());
+        if (!dbFileObjMap.containsKey(nname)) {
+            try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, nname, null)) {
+                Map<Integer, String> colsByPos = new TreeMap<>();
+                while (rs.next()) {
+                    Integer pos = rs.getInt(ORDINAL_POSITION);
+                    String name = rs.getString(COLUMN_NAME);
+                    colsByPos.put(pos, name.toUpperCase());
+                }
+                List<String> colList = colsByPos.values().stream().collect(Collectors.toUnmodifiableList());
+                dbFileObjMap.put(nname, colList);
             }
-            List<String> ar = new ArrayList<>(tm.values());
-            COL_NAMES_CACHE.put(key, ar);
         }
-        return COL_NAMES_CACHE.get(key);
+        return dbFileObjMap.get(nname);
     }
 
     private List<String> getColumnNamesCreate(String ntn) throws SQLException {
