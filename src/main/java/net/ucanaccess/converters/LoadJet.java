@@ -17,6 +17,7 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.triggers.*;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
 import org.hsqldb.error.ErrorCode;
@@ -323,22 +324,24 @@ public class LoadJet {
                 DataType.COMPLEX_TYPE, DataType.MEMO);
 
             for (DataType dtype : dtypes) {
-                String type = " " + TypesMap.map2hsqldb(dtype) + " ";
+                String type = TypesMap.map2hsqldb(dtype);
 
                 for (int i = 1; i < 10; i++) {
-                    StringBuilder header = new StringBuilder("CREATE FUNCTION SWITCH(  ");
-                    StringBuilder body = new StringBuilder("(CASE ");
+                    StringBuilder header = new StringBuilder("CREATE FUNCTION SWITCH(");
+                    StringBuilder body = new StringBuilder(" (CASE");
                     String comma = "";
                     for (int j = 0; j < i; j++) {
-                        body.append("  WHEN B").append(j).append(" THEN V").append(j);
-                        header.append(comma).append("B").append(j).append(" BOOLEAN ,").append("V").append(j).append(type);
-                        comma = ",";
+                        body.append(" WHEN B").append(j).append(" THEN V").append(j);
+                        header.append(comma);
+                        comma = ", ";
+                        header.append("B").append(j).append(" BOOLEAN").append(comma)
+                              .append("V").append(j).append(" ").append(type);
                     }
                     body.append(" END)");
-                    header.append(") RETURNS").append(type).append(" RETURN").append(body);
+                    header.append(") RETURNS ").append(type).append(" RETURN").append(body);
 
                     Try.catching(() -> exec(header.toString(), true))
-                        .orElse(e -> logger.log(Level.WARNING, "Failed to create function '{0}': {1}", header, e.toString()));
+                        .orElse(ex -> logger.log(Level.WARNING, "Failed to create function '{0}': {1}", header, ex.toString()));
                 }
             }
 
@@ -1247,32 +1250,24 @@ public class LoadJet {
     }
 
     private final class TriggersLoader {
-        private static final String DEFAULT_TRIGGERS_PACKAGE = "net.ucanaccess.triggers";
-
-        void loadTrigger(String tableName, String namePrefix, String when, String className) throws SQLException {
-            String q0 = DBReference.is2xx() ? "" : " QUEUE 0  ";
-            String triggerName = namePrefix + "_" + tableName;
-            // .replaceAll(" ", "_"));
-            triggerName = escapeIdentifier(triggerName);
-            exec("CREATE TRIGGER " + triggerName + "  " + when + " ON " + tableName + " FOR EACH ROW " + q0
-                    + " CALL \"" + className + "\" ", true);
-        }
-
-        void loadTriggerNP(String tableName, String namePrefix, String when, String className) throws SQLException {
-            loadTrigger(tableName, namePrefix, when, DEFAULT_TRIGGERS_PACKAGE + "." + className);
+        void loadTrigger(String tableName, String namePrefix, String when, Class<? extends TriggerBase> clazz) throws SQLException {
+            String triggerName = escapeIdentifier(namePrefix + "_" + tableName);
+            String q0 = DBReference.is2xx() ? "" : "QUEUE 0 ";
+            exec("CREATE TRIGGER " + triggerName + " " + when + " ON " + tableName + " FOR EACH ROW " + q0
+                + "CALL \"" + clazz.getName() + "\"", true);
         }
 
         void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAutoAppendOnly) throws SQLException {
-            loadTriggerNP(tableName, "genericInsert", "AFTER INSERT", "TriggerInsert");
-            loadTriggerNP(tableName, "genericUpdate", "AFTER UPDATE", "TriggerUpdate");
-            loadTriggerNP(tableName, "genericDelete", "AFTER DELETE", "TriggerDelete");
+            loadTrigger(tableName, "genericInsert", "AFTER INSERT", TriggerInsert.class);
+            loadTrigger(tableName, "genericUpdate", "AFTER UPDATE", TriggerUpdate.class);
+            loadTrigger(tableName, "genericDelete", "AFTER DELETE", TriggerDelete.class);
             if (hasAutoAppendOnly) {
-                loadTriggerNP(tableName, "appendOnly", "BEFORE INSERT", "TriggerAppendOnly");
-                loadTriggerNP(tableName, "appendOnly_upd", "BEFORE UPDATE", "TriggerAppendOnly");
+                loadTrigger(tableName, "appendOnly", "BEFORE INSERT", TriggerAppendOnly.class);
+                loadTrigger(tableName, "appendOnly_upd", "BEFORE UPDATE", TriggerAppendOnly.class);
             }
             if (hasAutoNumberColumn) {
-                loadTriggerNP(tableName, "autonumber", "BEFORE INSERT", "TriggerAutoNumber");
-                loadTriggerNP(tableName, "autonumber_validate", "BEFORE UPDATE", "TriggerAutoNumber");
+                loadTrigger(tableName, "autonumber", "BEFORE INSERT", TriggerAutoNumber.class);
+                loadTrigger(tableName, "autonumber_validate", "BEFORE UPDATE", TriggerAutoNumber.class);
             }
         }
     }
