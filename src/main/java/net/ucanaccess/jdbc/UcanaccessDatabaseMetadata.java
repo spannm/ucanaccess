@@ -6,7 +6,6 @@ import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
 import net.ucanaccess.exception.InvalidParameterException;
 import net.ucanaccess.exception.UcanaccessSQLException;
-import net.ucanaccess.util.Try;
 
 import java.io.IOException;
 import java.sql.*;
@@ -135,9 +134,9 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     private ResultSet executeQuery(String _sql) throws SQLException {
         connection.checkLastModified();
-        return Try.withResources(() -> connection.getHSQLDBConnection().createStatement(), st -> {
+        try (Statement st = connection.getHSQLDBConnection().createStatement()) {
             return st.executeQuery(_sql);
-        }).orThrow();
+        }
     }
 
     @Override
