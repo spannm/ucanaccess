@@ -3,13 +3,13 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.hsqldb.error.ErrorCode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -34,7 +34,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testVUKException(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -51,7 +51,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testGenException(AccessVersion _accessVersion) {
         UcanaccessSQLException ex = new UcanaccessSQLException("foo", "ko", 11111);
         assertEquals(11111, ex.getErrorCode());
@@ -59,7 +59,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testGException(AccessVersion _accessVersion) {
         assertThatThrownBy(() -> buildConnection()
             .withDbPath("kuso_yaro")

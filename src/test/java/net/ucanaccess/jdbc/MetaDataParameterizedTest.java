@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.System.Logger.Level;
 import java.sql.DatabaseMetaData;
@@ -22,7 +22,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCreateBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         UcanaccessStatement st = ucanaccess.createStatement();
@@ -67,15 +67,16 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         UcanaccessStatement st = ucanaccess.createStatement();
         assertEquals("Ciao", st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1));
     }
 
+    @SuppressWarnings("resource")
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testBadMetadata(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM NOROMAN");

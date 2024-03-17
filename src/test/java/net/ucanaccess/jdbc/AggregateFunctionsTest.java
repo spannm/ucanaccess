@@ -1,11 +1,11 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -34,7 +34,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDCount(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -45,35 +45,35 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDSum(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DSum('id', 't_aggrfunc', '1=1')", singleRec(13578));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDMax(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DMax('id', 't_aggrfunc')", singleRec(12344));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDMin(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DMin('id', 't_aggrfunc')", singleRec(1234));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDAvg(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DAvg('id', 't_aggrfunc')", singleRec(6789));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testLast(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT last(descr) FROM t_aggrfunc", singleRec("Show must go up and down"));
@@ -82,7 +82,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testFirst(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT first(descr) FROM t_aggrfunc", singleRec("Show must go off"));
@@ -91,14 +91,14 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDLast(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DLast('descr', 't_aggrfunc')", singleRec("Show must go up and down"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDFirst(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery("SELECT DFirst('descr', 't_aggrfunc') ", singleRec("Show must go off"));

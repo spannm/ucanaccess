@@ -3,10 +3,10 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 
@@ -20,7 +20,7 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testGuid(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -33,7 +33,7 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testDisable(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

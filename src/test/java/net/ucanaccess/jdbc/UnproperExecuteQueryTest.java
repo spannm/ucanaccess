@@ -3,10 +3,10 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 
@@ -18,7 +18,7 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");

@@ -4,11 +4,11 @@ import static net.ucanaccess.type.SqlConstants.FROM;
 import static net.ucanaccess.type.SqlConstants.SELECT;
 
 import net.ucanaccess.converters.AddFunctions;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.System.Logger.Level;
 import java.util.Locale;
@@ -16,7 +16,7 @@ import java.util.Locale;
 class AddFunctionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testAddFunction(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

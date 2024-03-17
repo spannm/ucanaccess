@@ -2,10 +2,10 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 class NotNullDdlTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void confirmNotNullColumnUsingJet(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         // future-proofing in case default file version changes

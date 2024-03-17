@@ -2,11 +2,11 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.type.SqlConstants.*;
 
+import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -19,14 +19,14 @@ class AccessLikeTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testLike(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         checkQuery(Sql.of(SELECT, "*", FROM, "q_like2", ORDER_BY, "campo2"), singleRec("dd1"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testLikeExternal(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -61,7 +61,7 @@ class AccessLikeTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testNotLikeExternal(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 

@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 class WeirdObjectNamesTest extends UcanaccessBaseTest {
 
@@ -13,7 +13,7 @@ class WeirdObjectNamesTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testTableNameEndsInQuestionMarks(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

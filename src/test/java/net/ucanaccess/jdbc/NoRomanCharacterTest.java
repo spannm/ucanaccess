@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
@@ -16,7 +16,7 @@ class NoRomanCharacterTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT * FROM t_noroman");

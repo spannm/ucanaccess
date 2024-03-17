@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
@@ -18,7 +18,7 @@ class AliasTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testBig(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -32,7 +32,7 @@ class AliasTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testAccent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -45,7 +45,7 @@ class AliasTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testAsin(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

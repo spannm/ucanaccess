@@ -2,10 +2,10 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +21,7 @@ class InsertBigTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testBig(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 

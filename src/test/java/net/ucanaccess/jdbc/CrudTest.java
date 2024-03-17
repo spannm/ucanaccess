@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +18,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCrud(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -37,7 +37,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCrudPS(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -68,7 +68,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCrudPSBatch(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -95,7 +95,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testUpdatableResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -114,7 +114,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDeleteResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -135,7 +135,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testInsertResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
@@ -159,7 +159,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testInsertResultSetNoAllSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
@@ -189,7 +189,7 @@ class CrudTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testPartialInsertResultSet(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);

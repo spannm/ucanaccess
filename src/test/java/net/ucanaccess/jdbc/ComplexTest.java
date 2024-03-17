@@ -6,11 +6,10 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.Mockito;
 
 import java.sql.PreparedStatement;
@@ -26,7 +25,7 @@ class ComplexTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testComplex(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
@@ -115,7 +114,7 @@ class ComplexTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testComplexRollback(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 

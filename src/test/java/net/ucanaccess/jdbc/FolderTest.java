@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.lang.System.Logger.Level;
@@ -13,7 +13,7 @@ import java.sql.SQLWarning;
 class FolderTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("net.ucanaccess.type.AccessVersion#getDefaultAccessVersion()")
+    @AccessDefaultVersionSource
     void testFolderContent(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 

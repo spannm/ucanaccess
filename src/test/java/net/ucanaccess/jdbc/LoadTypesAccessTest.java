@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -21,7 +21,7 @@ class LoadTypesAccessTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDate(AccessVersion _accessVersion) throws SQLException, ParseException {
         init(_accessVersion);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -32,7 +32,7 @@ class LoadTypesAccessTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testQuery(AccessVersion _accessVersion) throws SQLException, ParseException {
         init(_accessVersion);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");

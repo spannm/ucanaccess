@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -17,7 +17,7 @@ class TransactionTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCommit(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         ucanaccess.setAutoCommit(false);
@@ -31,7 +31,7 @@ class TransactionTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSavepoint(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         int count = getVerifyCount("SELECT COUNT(*) FROM T4");
@@ -49,7 +49,7 @@ class TransactionTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSavepoint2(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         int count = getVerifyCount("SELECT COUNT(*) FROM T4");

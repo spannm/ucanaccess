@@ -2,11 +2,11 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.type.SqlConstants.*;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -22,7 +22,7 @@ class BatchTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testBatch(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -34,7 +34,7 @@ class BatchTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testBatchPreparedStatement(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
         try (PreparedStatement st = ucanaccess.prepareStatement("UPDATE t_batch SET [name]=?,age=? ")) {

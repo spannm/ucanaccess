@@ -2,8 +2,6 @@ package net.ucanaccess.type;
 
 import io.github.spannm.jackcess.Database.FileFormat;
 
-import java.util.List;
-
 /**
  * Enum of MS Access versions to encapsulate Jackcess {@link FileFormat}.
  */
@@ -15,7 +13,7 @@ public enum AccessVersion {
     V2010(FileFormat.V2010),
     V2016(FileFormat.V2016);
 
-    static final AccessVersion DEFAULT_ACCESS_VERSION = AccessVersion.V2003;
+    private static final AccessVersion DEFAULT_ACCESS_VERSION = AccessVersion.V2003;
 
     private final FileFormat fileFormat;
 
@@ -32,8 +30,8 @@ public enum AccessVersion {
         return name().toLowerCase();
     }
 
-    public static List<AccessVersion> getDefaultAccessVersion() {
-        return List.of(DEFAULT_ACCESS_VERSION);
+    public static AccessVersion getDefaultAccessVersion() {
+        return DEFAULT_ACCESS_VERSION;
     }
 
     public static AccessVersion parse(String _str) {

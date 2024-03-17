@@ -1,10 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -21,7 +20,7 @@ class CorruptedTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2007"})
+    @AccessVersionSource(include = "V2007")
     void testCorrupted(AccessVersion _accessVersion) throws SQLException {
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
         try (PrintStream out = new PrintStream(errContent)) {

@@ -1,9 +1,9 @@
 package net.ucanaccess.jdbc;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.File;
 import java.lang.System.Logger.Level;
@@ -11,7 +11,7 @@ import java.lang.System.Logger.Level;
 class CreateDatabaseTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testNewDatabase(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

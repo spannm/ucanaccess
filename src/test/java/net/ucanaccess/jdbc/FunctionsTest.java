@@ -1,12 +1,12 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.converters.Functions;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -44,7 +44,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testASC(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Asc('A') FROM t_funcs", singleRec(65));
@@ -53,21 +53,21 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSwitch(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Switch('1'='1', 1, false, 2, true, 1) FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testATN(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Atn(3) FROM t_funcs", singleRec(1.2490457723982544));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testNz(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Nz(null,'lampredotto'), Nz('turtelaz','lampredotto'), Nz(null, 1.5), Nz(2, 2) FROM t_funcs",
@@ -75,7 +75,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCBoolean(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CBool(id), CBool(1=2), CBool('true'), CBool('false'), CBool(0), CBool(-3) FROM t_funcs",
@@ -83,14 +83,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCVar(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CVAR(8), CVAR(8.44) FROM t_funcs", singleRec("8", "8.44"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCstr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CStr(date0) FROM t_funcs", singleRec("11/22/2003 10:42:58 PM"));
@@ -100,14 +100,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCsign(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CSign(8.53453543) FROM t_funcs", singleRec(8.534535));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -116,28 +116,28 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCLong(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CLong(8.52), CLong(8.49), CLong(5.5) FROM t_funcs", singleRec(9, 8, 6));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCLng(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CLng(8.52), CLng(8.49), CLng(5.5) FROM t_funcs", singleRec(9, 8, 6));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCDec(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CDec(8.45 * 0.005 * 0.01) FROM t_funcs", singleRec(0.0004225));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCcur(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CCur(123.4567812), CCur(123.4547812) FROM t_funcs", singleRec(123.4568, 123.4548));
@@ -145,35 +145,35 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCint(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CInt(8.51), CInt(4.5) FROM t_funcs", singleRec(9, 4));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testChr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Chr(65) FROM t_funcs", singleRec("A"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCos(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Cos(1) FROM t_funcs", singleRec(0.5403023058681398));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testCurrentUser(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT CurrentUser() FROM t_funcs", singleRec("ucanaccess"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDateAdd(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -195,35 +195,35 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Date() FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDay(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Day(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(22));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testExp(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Exp(3.1), exp(0.4) FROM t_funcs", singleRec(22.197951281441636, 1.4918246976412703d));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testHour(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Hour(#10:42:58 pM#), Hour(#10:42:58 AM#), Hour(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(22, 10, 22));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testIIf(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'), IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc') "
@@ -233,7 +233,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testInstr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT InStr('Found on the Net', 'the') FROM t_funcs", singleRec(10));
@@ -245,7 +245,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testInstrrev(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT InstrRev('alphabet', 'a') FROM t_funcs", singleRec(5));
@@ -254,7 +254,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testIsDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT IsDate(#1/2/2003 10:42:58 PM#) FROM t_funcs", singleRec(true));
@@ -280,7 +280,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSimpleDateFormatLenientTrue(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         // format taken from:
@@ -293,7 +293,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testIsNumber(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT IsNumeric(33) FROM t_funcs", singleRec(true));
@@ -305,56 +305,56 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testLcase(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT LCASE(' SAAxxxx   ') FROM t_funcs", singleRec(" saaxxxx   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testLeft(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Left('Found on the Net', 4), Left(null, 4) FROM t_funcs", singleRec("Foun", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testLen(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT len('1222sssss.3hhh'), len(null) FROM t_funcs", singleRec(14, null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testLTrim(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT LTRIM(' SSS   ') FROM t_funcs", singleRec("SSS   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testMid(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Mid ('Found on the Net', 2, 4), Mid ('Found on the Net', 1, 555),Mid(null, 1, 555) FROM t_funcs", singleRec("ound", "Found on the Net", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testMinute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Minute(#10:42:58 pM#),Minute(#10:42:58 AM#),Minute(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(42, 42, 42));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testMonth(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT month(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(11));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testNow(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         sleepUntilStartOfNewSecond();
@@ -365,7 +365,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testTime(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         sleepUntilStartOfNewSecond();
@@ -390,63 +390,63 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testReplace(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Replace('alphabet', 'bet', 'hydr') FROM t_funcs", singleRec("alphahydr"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testRight(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Right('Tech on the Net', 3), Right(null,12) FROM t_funcs", singleRec("Net", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testRtrim(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT RTRIM(' SSS   ') FROM t_funcs", singleRec(" SSS"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSecond(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Second(#10:42:58 pM#), Second(#10:42:58 AM#), Second(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(58, 58, 58));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSin(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT sin(1) FROM t_funcs", singleRec(0.8414709848078965));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSpace(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT space(5) FROM t_funcs", singleRec("     "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testTrim(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT TRIM(' SSS   ') FROM t_funcs", singleRec("SSS"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testUcase(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT UCASE(' SAAxxxx   ') FROM t_funcs", singleRec(" SAAXXXX   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testVal(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT val('0.'), Val('hhh'), val('.a'), val('.'), val('.44'), Val('1222.3hhh'), Val('12 22.3hhh'), VAL('-'), VAL('-2,3') "
@@ -454,14 +454,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testYear(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT YEAR(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(2003));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDateDiff(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT DateDiff('yyyy',#11/22/1992 10:42:58 PM#,#11/22/2007 10:42:58 AM#) FROM t_funcs", singleRec(15));
@@ -487,7 +487,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDatePart(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT DatePart('yyyy',#11/22/1992 10:42:58 PM#) FROM t_funcs", singleRec(1992));
@@ -504,7 +504,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDateSerial(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -514,7 +514,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testFormatNumber(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Format(number, 'percent') FROM t_format", singleRec(""));
@@ -532,7 +532,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testTimestamp(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT #2006-12-11#=timestamp '2006-12-11 00:00:00' FROM dual", singleRec(true));
@@ -546,7 +546,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testFormatDate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Format(date, 'Short date') FROM t_format", singleRec(""));
@@ -560,14 +560,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testSign(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Sign(0), Sign(-20.4), Sign(4) FROM t_funcs", singleRec(0, -1, 1));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testWeekDayName(AccessVersion _accessVersion) throws Exception {
         assertEquals("Sunday", Functions.weekdayName(1, false, 1));
         assertEquals("Monday", Functions.weekdayName(2, false, 1));
@@ -583,7 +583,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testMonthName(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT MonthName(3) FROM t_funcs", singleRec("March"));
@@ -591,14 +591,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testStr(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Str(id), Str(num), Str(4.5555555) FROM t_funcs", singleRec(" 1234", "-1110.554", " 4.5555555"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testDateValue(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -608,7 +608,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testFormatString(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Format(text,'Long date') FROM t_format", singleRec(""));
@@ -620,56 +620,56 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testInt(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT int(1111112.5), int(-2.5) FROM t_funcs", singleRec(1111112, -3));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testRnd(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         dumpQueryResult("SELECT rnd() FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testStrComp(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT StrComp('Cia','Cia') FROM t_funcs", singleRec(0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testStrConv(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT StrConv('Cia',1) FROM t_funcs", singleRec("CIA"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testStrReverse(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT StrReverse('ylatI') FROM t_funcs", singleRec("Italy"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testString(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT String(4,'c') FROM t_funcs", singleRec("cccc"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testWeekday(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT Weekday(#06/27/2013 10:42:58 PM#,1) FROM t_funcs", singleRec(5));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class)
+    @AccessVersionSource
     void testFinancial(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         checkQuery("SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), "

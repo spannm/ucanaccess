@@ -2,11 +2,10 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +25,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 

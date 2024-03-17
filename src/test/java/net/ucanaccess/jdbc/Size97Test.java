@@ -2,11 +2,10 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.type.SqlConstants.COLUMN_SIZE;
 
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -19,7 +18,7 @@ class Size97Test extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testSize(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 

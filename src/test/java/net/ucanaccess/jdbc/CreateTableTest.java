@@ -9,11 +9,10 @@ import io.github.spannm.jackcess.Index.Column;
 import io.github.spannm.jackcess.PropertyMap;
 import io.github.spannm.jackcess.Table;
 import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.EnumSource.Mode;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -150,7 +149,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testCreate(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
@@ -171,7 +170,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testNaming(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -190,7 +189,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testCreateWithFK(AccessVersion _accessVersion) throws SQLException, IOException {
         init(_accessVersion);
 
@@ -208,7 +207,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testPs(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -222,7 +221,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testPsHyphen(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -233,7 +232,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void testCreateHyperlink(AccessVersion _accessVersion) throws SQLException {
         init(_accessVersion);
 
@@ -265,7 +264,7 @@ class CreateTableTest extends UcanaccessBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = AccessVersion.class, mode = Mode.INCLUDE, names = {"V2010"})
+    @AccessVersionSource(include = "V2010")
     void tableNameWithUnderscore(AccessVersion _accessVersion) throws SQLException {
         // Ticket #19
         init(_accessVersion);
