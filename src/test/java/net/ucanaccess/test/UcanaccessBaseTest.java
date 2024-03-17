@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  */
 public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
-    private static final File     TEST_TEMP_DIR = createTempDir("ucanaccess-test");
+    private static final File     TEST_TEMP_DIR = createTempDir("test-ucanaccess-" + getCurrentUser());
 
     static {
         Main.setBatchMode(true);
@@ -257,6 +257,18 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected static final String getTestDbDir() {
         return "testdbs/";
+    }
+
+    /**
+     * Determines the current logged on user.
+     *
+     * @return logged on user
+     */
+    static String getCurrentUser() {
+        return Stream.of("user.name", "USER", "USERNAME")
+            .map(System::getProperty)
+            .filter(s -> !s.isBlank())
+            .findFirst().orElse(null);
     }
 
     protected static final File getTestTempDir() {
