@@ -5,6 +5,7 @@ import io.github.spannm.jackcess.Cursor;
 import java.util.Map;
 
 public abstract class AbstractCursorCommand implements ICursorCommand {
+
     @Override
     public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) {
         Map<String, Object> rowPattern = getRowPattern();
@@ -23,4 +24,5 @@ public abstract class AbstractCursorCommand implements ICursorCommand {
     public void replaceAutoincrement(Map<String, Object> map) {
         getRowPattern().putAll(map);
     }
+
 }

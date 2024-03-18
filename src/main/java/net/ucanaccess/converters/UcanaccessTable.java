@@ -184,4 +184,9 @@ public class UcanaccessTable implements Table {
         return wrapped.getUpdatedDate();
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s[%s, wrapped=%s]", getClass().getSimpleName(), tableName, wrapped);
+    }
+
 }

@@ -108,6 +108,16 @@ public class UpdateCommand extends AbstractCursorCommand {
         return new BlobAction(table, modifiedRow);
     }
 
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+        Persist2Jet p2a = new Persist2Jet();
+
+        UpdateCommand urev = new UpdateCommand(table, p2a.getRowPattern(modifiedRow, table),
+                p2a.getValues(getRowPattern(), table), execId);
+        urev.isRollbacking = true;
+        return urev.persist();
+    }
+
     private void updateComplex(Cursor cur) throws IOException {
         int j = 0;
 
@@ -152,16 +162,6 @@ public class UpdateCommand extends AbstractCursorCommand {
         }
     }
 
-    @Override
-    public IFeedbackAction rollback() throws SQLException {
-        Persist2Jet p2a = new Persist2Jet();
-
-        UpdateCommand urev = new UpdateCommand(table, p2a.getRowPattern(modifiedRow, table),
-                p2a.getValues(getRowPattern(), table), execId);
-        urev.isRollbacking = true;
-        return urev.persist();
-    }
-
     private void persist(Cursor cur) throws IOException {
         Object[] mr = modifiedRow;
         if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
@@ -174,6 +174,12 @@ public class UpdateCommand extends AbstractCursorCommand {
             mr = newRowReorded;
         }
         cur.updateCurrentRow(mr);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[execId=%s, table=%s, tableColumns=%s]",
+            getClass().getSimpleName(), execId, table, tableColumns);
     }
 
 }
