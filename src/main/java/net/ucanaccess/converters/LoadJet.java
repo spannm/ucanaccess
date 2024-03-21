@@ -1401,8 +1401,8 @@ public class LoadJet {
         private String solveAmbiguous(String sql) {
             try {
                 sql = sql.replaceAll("[\n\r]", " ");
-                Pattern pt = Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
-                Matcher mtc = pt.matcher(sql);
+                Pattern pat = Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
+                Matcher mtc = pat.matcher(sql);
                 if (mtc.find()) {
                     String select = mtc.group(2);
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
@@ -1413,8 +1413,8 @@ public class LoadJet {
                     for (String s : splitted) {
                         int j = s.lastIndexOf('.');
 
-                        Pattern aliasPt = Pattern.compile("[\\s\n\r]+(?i)AS[\\s\n\r]+");
-                        boolean alias = aliasPt.matcher(s).find();
+                        Pattern patAlias = Pattern.compile("\\s+(?i)AS\\s+");
+                        boolean alias = patAlias.matcher(s).find();
                         if (j < 0 || alias) {
                             lkl.add(s);
                         } else {

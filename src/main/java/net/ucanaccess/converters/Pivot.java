@@ -17,14 +17,14 @@ import java.util.regex.Pattern;
 
 public class Pivot {
     @SuppressWarnings("java:S5852")
-    private static final Pattern                   PIVOT_PATT       = Pattern.compile("TRANSFORM(.*\\W)SELECT(.*\\W)FROM(.*\\W)PIVOT(.*)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern                   PIVOT_EXPR_PATT  = Pattern.compile("(.*)IN\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern                   PIVOT_AGGR_PATT  = Pattern.compile("(SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern                   PIVOT_CN_PATT    = Pattern.compile("[\"'#](.*)[\"'#]");
-    private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
+    private static final Pattern                   PAT_PIVOT          = Pattern.compile("TRANSFORM(.*\\W)SELECT(.*\\W)FROM(.*\\W)PIVOT(.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern                   PAT_PIVOT_EXPR     = Pattern.compile("(.*)IN\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern                   PAT_PIVOT_AGGR     = Pattern.compile("(SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern                   PAT_PIVOT_CN       = Pattern.compile("[\"'#](.*)[\"'#]");
+    private static final String                    PAT_PIVOT_GROUP_BY = "(?i)GROUP\\s*(?i)BY";
 
-    private static final Map<String, String>       PIVOT_MAP        = new HashMap<>();
-    private static final Map<String, List<String>> PREPARE_MAP      = new HashMap<>();
+    private static final Map<String, String>       PIVOT_MAP          = new HashMap<>();
+    private static final Map<String, List<String>> PREPARE_MAP        = new HashMap<>();
 
     private String                                 transform;
     private String                                 select;
@@ -34,7 +34,7 @@ public class Pivot {
     private List<String>                           pivotIn;
     private String                                 aggregateFun;
     private final Connection                       conn;
-    private boolean                                pivotInCondition = true;
+    private boolean                                pivotInCondition   = true;
     private String                                 originalQuery;
 
     public Pivot(Connection _conn) {
@@ -63,8 +63,8 @@ public class Pivot {
     public static void checkAndRefreshPivot(String _currSql, UcanaccessConnection _conn) {
 
         for (String name : PIVOT_MAP.keySet()) {
-            Pattern ptrn = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
-            Matcher mtc = ptrn.matcher(_currSql);
+            Pattern pat = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
+            Matcher mtc = pat.matcher(_currSql);
             if (mtc.find()) {
                 try {
                     if (_conn == null && UcanaccessConnection.hasContext()) {
@@ -115,13 +115,13 @@ public class Pivot {
         if (_originalQuery.endsWith(";")) {
             _originalQuery = _originalQuery.substring(0, _originalQuery.length() - 1);
         }
-        Matcher mtc = PIVOT_PATT.matcher(_originalQuery);
+        Matcher mtc = PAT_PIVOT.matcher(_originalQuery);
         if (mtc.groupCount() < 4) {
             return false;
         }
         if (mtc.matches()) {
             transform = mtc.group(1);
-            Matcher aggr = PIVOT_AGGR_PATT.matcher(transform);
+            Matcher aggr = PAT_PIVOT_AGGR.matcher(transform);
             if (aggr.find()) {
                 if (aggr.groupCount() < 2) {
                     return false;
@@ -134,7 +134,7 @@ public class Pivot {
             select = mtc.group(2);
             from = mtc.group(3);
             String pe = mtc.group(4);
-            Matcher matcher = PIVOT_EXPR_PATT.matcher(pe);
+            Matcher matcher = PAT_PIVOT_EXPR.matcher(pe);
             if (matcher.find()) {
                 if (matcher.groupCount() < 2) {
                     return false;
@@ -157,7 +157,7 @@ public class Pivot {
 
     public String verifySQL() {
         StringBuilder sb = new StringBuilder();
-        String[] fromS = from.split(PIVOT_GROUP_BY);
+        String[] fromS = from.split(PAT_PIVOT_GROUP_BY);
         sb.append("SELECT DISTINCT ").append(pivotStr).append(" AS PIVOT ")
           .append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivotStr).append(",").append(fromS[1]);
         return SQLConverter.convertSQL(sb.toString()).getSql();
@@ -202,7 +202,7 @@ public class Pivot {
 
     private String replaceQuotation(String cn) {
         cn = cn.replaceAll("[\n\\r]", " ");
-        Matcher dcm = PIVOT_CN_PATT.matcher(cn);
+        Matcher dcm = PAT_PIVOT_CN.matcher(cn);
 
         if (dcm.matches()) {
             cn = dcm.group(1);

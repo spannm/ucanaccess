@@ -12,72 +12,65 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
 public final class SQLConverter {
-    private static final Pattern QUOTE_S_PATTERN           = Pattern.compile("(')+");
-    private static final Pattern DOUBLE_QUOTE_S_PATTERN    = Pattern.compile("(\")+");
 
-    private static final Pattern SELECT_FROM_PATTERN_START = Pattern.compile("\\s*SELECT\\s+", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SELECT_FROM_PATTERN_END   = Pattern.compile("\\s*FROM[\\s\\[]+", Pattern.CASE_INSENSITIVE);
-    private static final Pattern UNESCAPED_ALIAS           = Pattern.compile("\\s*AS\\s*", Pattern.CASE_INSENSITIVE);
+    @SuppressWarnings({"java:S5842", "java:S5852", "java:S5998"})
+    public static final class Patterns {
+        private static final Pattern       SELECT_FROM_PATTERN_START  = Pattern.compile("\\s*SELECT\\s+", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       SELECT_FROM_PATTERN_END    = Pattern.compile("\\s*FROM[\\s\\[]+", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       UNESCAPED_ALIAS            = Pattern.compile("\\s*AS\\s*", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       QUOTE_S                    = Pattern.compile("(')+");
+        private static final Pattern       DOUBLE_QUOTE_S             = Pattern.compile("(\")+");
+        private static final Pattern       QUOTE_M                    = Pattern.compile("'(([^'])*)'");
+        private static final Pattern       DOUBLE_QUOTE_M             = Pattern.compile("\"(([^\"])*)\"");
+        private static final Pattern       FIND_LIKE                  = Pattern.compile(
+            "[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(NOT\\s*)*LIKE\\s*'([^']*(?:'')*)'", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       ACCESS_LIKE_CHARINTERVAL   = Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
+        private static final Pattern       ACCESS_LIKE_ESCAPE_PATTERN = Pattern.compile("\\[[\\*|_|#]\\]");
+        private static final Pattern       CHECK_DDL                  = Pattern.compile("^(\\s*(create|alter|drop|enable|disable))\\s+.*", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       KIND_OF_SUBQUERY           = Pattern.compile("(\\[)(( FROM )*(SELECT )*([^\\]])*)(\\]\\.\\s)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
+        private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       SELECT_IDENTITY            = Pattern.compile("select\\s+@@identity.*", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       HAS_FROM                   = Pattern.compile("\\s+from\\s+", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       FORMULA_DEPS               = Pattern.compile("\\[([^\\]]*)\\]");
+        private static final Pattern       EXCLAM_POINT               = Pattern.compile("(\\!)(\\s*)([^\\=])");
+        private static final Pattern       YES                        = Pattern.compile("(\\W)YES(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       NO                         = Pattern.compile("(\\W)NO(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       WITH_OWNERACCESS_OPTION    = Pattern.compile("(\\W)WITH\\s+OWNERACCESS\\s+OPTION(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)(([0-9])+(([_A-Z])+([0-9])*)+)(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile("(\\W)((_)+([_A-Z0-9])+)(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final List<Pattern> DEFAULT_CATCH              = List.of(
+            Pattern.compile("(\\s*(?i)DEFAULT\\s+)('(?:[^']*(?:'')*)*')([\\s\\)\\,])"),
+            Pattern.compile("(\\s*(?i)DEFAULT\\s+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\\)\\,])"),
+            Pattern.compile("(\\s*(?i)DEFAULT\\s+)([0-9\\.\\-\\+]+)([\\s\\)\\,])"),
+            Pattern.compile("(\\s*(?i)DEFAULT\\s+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\\)\\,])"));
+        private static final Pattern       DEFAULT_CATCH_0            = Pattern.compile("(\\s*DEFAULT\\s+)", Pattern.CASE_INSENSITIVE);
+        public static final Pattern        NOT_NULL                   = Pattern.compile("\\sNOT\\sNULL", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       QUOTED_ALIAS               = Pattern.compile(
+            "(\\s+AS\\s*)(\\[[^\\]]*\\])(\\W)", Pattern.CASE_INSENSITIVE);
 
-    private static final Pattern QUOTE_M_PATTERN           = Pattern.compile("'(([^'])*)'");
-    private static final Pattern DOUBLE_QUOTE_M_PATTERN    = Pattern.compile("\"(([^\"])*)\"");
-    private static final Pattern FIND_LIKE_PATTERN         = Pattern
-            .compile("[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(NOT\\s*)*LIKE\\s*'([^']*(?:'')*)'", Pattern.CASE_INSENSITIVE);
-    private static final Pattern ACCESS_LIKE_CHARINTERVAL_PATTERN =
-            Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
-    private static final Pattern ACCESS_LIKE_ESCAPE_PATTERN       = Pattern.compile("\\[[\\*|_|#]\\]");
-    private static final Pattern CHECK_DDL                        =
-            Pattern.compile("^([\n\r\\s]*(create|alter|drop|enable|disable))[\n\r\\s]+.*", Pattern.CASE_INSENSITIVE);
-    private static final Pattern KIND_OF_SUBQUERY                 =
-            Pattern.compile("(\\[)(( FROM )*(SELECT )*([^\\]])*)(\\]\\.\\s)", Pattern.CASE_INSENSITIVE);
+        private Patterns() {
+        }
+    }
 
-    private static final Pattern NO_DATA_PATTERN      = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
-    private static final Pattern NO_ALFANUMERIC       = Pattern.compile("\\W");
-    private static final String  IDENTITY             = "(\\W+)((?i)@@identity)(\\W*)";
-    private static final Pattern SELECT_IDENTITY      = Pattern.compile("select\\s+@@identity.*", Pattern.CASE_INSENSITIVE);
-    private static final Pattern HAS_FROM             = Pattern.compile("\\s+from\\s+", Pattern.CASE_INSENSITIVE);
-    private static final Pattern FORMULA_DEPENDENCIES = Pattern.compile("\\[([^\\]]*)\\]");
-    private static final String  EXCLAMATION_POINT    = "(\\!)([\n\r\\s]*)([^\\=])";
-
-    private static final String   YES                        = "(\\W)((?i)YES)(\\W)";
-    private static final String   NO                         = "(\\W)((?i)NO)(\\W)";
-    private static final String   WITH_OWNERACCESS_OPTION    = "(\\W)(?i)WITH\\s+(?i)OWNERACCESS\\s+(?i)OPTION(\\W)";
-    @SuppressWarnings({"java:S5852", "java:S5998"})
-    private static final Pattern  DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)(([0-9])+(([_a-zA-Z])+([0-9])*)+)(\\W)");
-    private static final String   UNDERSCORE_IDENTIFIERS     = "(\\W)((_)+([_a-zA-Z0-9])+)(\\W)";
-    private static final String   XESCAPED                   = "(\\W)((?i)X)((?i)_)(\\W)";
-    private static final String[] DEFAULT_CATCH              = new String[] {
-        "(\\s*(?i)DEFAULT\\s+)('(?:[^']*(?:'')*)*')([\\s\\)\\,])",
-        "(\\s*(?i)DEFAULT\\s+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\\)\\,])",
-        "(\\s*(?i)DEFAULT\\s+)([0-9\\.\\-\\+]+)([\\s\\)\\,])",
-        "(\\s*(?i)DEFAULT\\s+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\\)\\,])"};
-    @SuppressWarnings("java:S5852")
-    private static final Pattern  DEFAULT_CATCH_0            = Pattern.compile("(\\s*DEFAULT\\s+)", Pattern.CASE_INSENSITIVE);
-    public static final String    NOT_NULL                   = "\\s(?i)NOT\\s(?i)NULL";
-
-    private static final Pattern QUOTED_ALIAS       = Pattern.compile("(\\s+AS\\s*)(\\[[^\\]]*\\])(\\W)", Pattern.CASE_INSENSITIVE);
-    private static final String  TYPES_TRANSLATE    = "(?i)_(\\W)";
-    public static final String   DATE_ACCESS_FORMAT =
-            "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
-
-    public static final String  DATE_FORMAT          =
-            "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
-    public static final String  HHMMSS_ACCESS_FORMAT =
-            "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
-    public static final String  HHMMSS_FORMAT        =
-            "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
-    private static final String NAME_PATTERN         = "(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
-    private static final int    NAME_PATTERN_STEP    = 4;
-    private static final String UNION                = "(;)(\\s*)((?i)UNION)(\\s*)";
-    private static final String DISTINCT_ROW         = "\\s+(?i)DISTINCTROW\\s+";
-    private static final String DEFAULT_VARCHAR      = "(\\W)(?i)VARCHAR([\\s,\\)])";
+    public static final String               DATE_ACCESS_FORMAT             = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
+    public static final String               DATE_FORMAT                    = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
+    public static final String               HHMMSS_ACCESS_FORMAT           = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
+    public static final String               HHMMSS_FORMAT                  = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
+    private static final String              NAME_PATTERN                   = "(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
+    private static final int                 NAME_PATTERN_STEP              = 4;
+    private static final String              UNION                          = "(;)(\\s*)((?i)UNION)(\\s*)";
+    private static final Pattern             PAT_DISTINCT_ROW               = Pattern.compile("\\s+(?i)DISTINCTROW\\s+");
+    private static final Pattern             PAT_DEFAULT_VARCHAR            = Pattern.compile("(\\W)(?i)VARCHAR([\\s,\\)])");
 
     private static final String              DEFAULT_VARCHAR_0                = "(\\W)(?i)VARCHAR([^\\(])";
     private static final String              BACKTICK                         = "(`)([^`]*)(`)";
     private static final String              DELETE_ALL                       = "((?i)DELETE\\s+)(\\*)(\\s+(?i)FROM\\s+)";
     private static final String              PARAMETERS                       = "(?i)PARAMETERS([^;]*);";
-    private static final Pattern             ESPRESSION_DIGIT                 = Pattern.compile("([\\d]+)(?![\\.\\d])");
+    private static final Pattern             PAT_ESPRESSION_DIGIT             = Pattern.compile("([\\d]+)(?![\\.\\d])");
     private static final String              BIG_BANG                         = "1899-12-30";
     private static final List<String>        KEYWORDLIST                      = List.of("ALL", "AND", "ANY",
         "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
@@ -87,7 +80,7 @@ public final class SQLConverter {
         "ON", "ORDER", "OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "SOME", "STDDEV_POP",
         "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
         "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
-    private static final String              KEYWORD_ALIAS                    = createKeywordAliasRegex();
+    private static final Pattern             PAT_KEYWORD_ALIAS                = createKeywordAliasRegex();
     private static final List<String>        PROCEDURE_KEYWORD_LIST           = List.of("NEW", "ROW");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES         = new ArrayList<>();
     private static final Set<String>         ESCAPED_IDENTIFIERS              = new HashSet<>();
@@ -106,7 +99,7 @@ public final class SQLConverter {
         return sql.indexOf("@@") > 0 && sql.toUpperCase(java.util.Locale.US).indexOf("@@IDENTITY") > 0;
     }
 
-    private static String createKeywordAliasRegex() {
+    private static Pattern createKeywordAliasRegex() {
         List<String> keywordList = new ArrayList<>(KEYWORDLIST);
         keywordList.remove("SELECT");
         StringBuilder keywords = new StringBuilder();
@@ -115,22 +108,22 @@ public final class SQLConverter {
             keywords.append(sep).append(s);
             sep = "|";
         }
-        return "(\\s+AS\\s+)(" + keywords + ")(\\W)";
+        return Pattern.compile("(\\s+AS\\s+)(" + keywords + ")(\\W)", Pattern.CASE_INSENSITIVE);
     }
 
     private static void aliases(String sql, NormalizedSQL nsql) {
-        Matcher mtc = SELECT_FROM_PATTERN_START.matcher(sql);
-        if (mtc.find()) {
+        Matcher m = Patterns.SELECT_FROM_PATTERN_START.matcher(sql);
+        if (m.find()) {
 
-            int init = mtc.end();
+            int init = m.end();
             sql = sql.substring(init);
-            mtc = SELECT_FROM_PATTERN_END.matcher(sql);
-            if (mtc.find()) {
-                int end = mtc.start();
+            m = Patterns.SELECT_FROM_PATTERN_END.matcher(sql);
+            if (m.find()) {
+                int end = m.start();
                 sql = sql.substring(0, end);
 
-                for (mtc = UNESCAPED_ALIAS.matcher(sql); mtc.find(); mtc = UNESCAPED_ALIAS.matcher(sql)) {
-                    int e = mtc.end();
+                for (m = Patterns.UNESCAPED_ALIAS.matcher(sql); m.find(); m = Patterns.UNESCAPED_ALIAS.matcher(sql)) {
+                    int e = m.end();
 
                     sql = sql.substring(e) + " ";
                     char[] sqlc = sql.toCharArray();
@@ -154,14 +147,13 @@ public final class SQLConverter {
     }
 
     public static String preprocess(String sql, Object key) {
-
-        Matcher mtc = SELECT_IDENTITY.matcher(sql);
-        Matcher mtc1 = HAS_FROM.matcher(sql);
-        String end = mtc.matches() && !mtc1.find() ? " FROM DUAL" : "";
+        Matcher m1 = Patterns.SELECT_IDENTITY.matcher(sql);
+        Matcher m2 = Patterns.HAS_FROM.matcher(sql);
+        String end = m1.matches() && !m2.find() ? " FROM DUAL" : "";
         if (key instanceof String) {
             key = "'" + key + "'";
         }
-        return sql.replaceAll(IDENTITY, "$1" + key + "$3") + end;
+        return Patterns.IDENTITY.matcher(sql).replaceAll("$1" + key + "$3") + end;
     }
 
     public static boolean isListedAsKeyword(String s) {
@@ -170,23 +162,23 @@ public final class SQLConverter {
 
     private static int[] getQuoteGroup(String _s) {
         if (!_s.contains("''")) {
-            Matcher mtc = QUOTE_M_PATTERN.matcher(_s);
-            return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
+            Matcher m = Patterns.QUOTE_M.matcher(_s);
+            return m.find() ? new int[] {m.start(), m.end()} : null;
         } else {
             int[] ret = new int[] {-1, -1};
-            Matcher mc = QUOTE_S_PATTERN.matcher(_s);
-            while (mc.find()) {
-                int start = mc.start();
-                int end = mc.end();
+            Matcher m = Patterns.QUOTE_S.matcher(_s);
+            while (m.find()) {
+                int start = m.start();
+                int end = m.end();
                 if ((end - start) % 2 == 0) {
                     if (ret[0] == -1) {
-                        return new int[] {mc.start(), mc.end()};
+                        return new int[] {m.start(), m.end()};
                     }
                 } else {
                     if (ret[0] == -1) {
-                        ret[0] = mc.start();
+                        ret[0] = m.start();
                     } else {
-                        ret[1] = mc.end();
+                        ret[1] = m.end();
                         return ret;
                     }
                 }
@@ -197,11 +189,11 @@ public final class SQLConverter {
 
     private static int[] getDoubleQuoteGroup(String _s) {
         if (!_s.contains("\"\"")) {
-            Matcher mtc = DOUBLE_QUOTE_M_PATTERN.matcher(_s);
-            return mtc.find() ? new int[] {mtc.start(), mtc.end()} : null;
+            Matcher m = Patterns.DOUBLE_QUOTE_M.matcher(_s);
+            return m.find() ? new int[] {m.start(), m.end()} : null;
         } else {
             int[] ret = new int[] {-1, -1};
-            Matcher mc = DOUBLE_QUOTE_S_PATTERN.matcher(_s);
+            Matcher mc = Patterns.DOUBLE_QUOTE_S.matcher(_s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
@@ -404,11 +396,11 @@ public final class SQLConverter {
     }
 
     private static String replaceExclamationPoints(String sql) {
-        return sql.replaceAll(EXCLAMATION_POINT, ".$2$3");
+        return Patterns.EXCLAM_POINT.matcher(sql).replaceAll(".$2$3");
     }
 
     private static String convertOwnerAccess(String sql) {
-        return sql.replaceAll(WITH_OWNERACCESS_OPTION, "");
+        return Patterns.WITH_OWNERACCESS_OPTION.matcher(sql).replaceAll("");
     }
 
     private static String convertDeleteAll(String sql) {
@@ -420,36 +412,36 @@ public final class SQLConverter {
     }
 
     private static String convertYesNo(String sql) {
-        sql = sql.replaceAll(YES, "$1true$3");
-        Matcher mtc = NO_DATA_PATTERN.matcher(sql);
-        if (mtc.find()) {
-            sql = sql.substring(0, mtc.start()).replaceAll(NO, "$1false$3") + sql.substring(mtc.start());
+        sql = Patterns.YES.matcher(sql).replaceAll("$1true$2");
+        Matcher m = Patterns.NO_DATA.matcher(sql);
+        if (m.find()) {
+            sql = Patterns.NO.matcher(sql.substring(0, m.start())).replaceAll("$1false$2") + sql.substring(m.start());
         } else {
-            sql = sql.replaceAll(NO, "$1false$3");
+            sql = Patterns.NO.matcher(sql).replaceAll("$1false$2");
         }
         return sql;
     }
 
     private static String convertQuotedAliases(String sql, NormalizedSQL nsql) {
-        for (Matcher mtc = KIND_OF_SUBQUERY.matcher(sql); mtc.find(); mtc = KIND_OF_SUBQUERY.matcher(sql)) {
-            String g2 = mtc.group(2).trim();
+        for (Matcher m = Patterns.KIND_OF_SUBQUERY.matcher(sql); m.find(); m = Patterns.KIND_OF_SUBQUERY.matcher(sql)) {
+            String g2 = m.group(2).trim();
             if (g2.endsWith(";")) {
                 g2 = g2.substring(0, g2.length() - 1);
             }
-            sql = sql.substring(0, mtc.start()) + "(" + g2 + ")" + sql.substring(mtc.end());
+            sql = sql.substring(0, m.start()) + "(" + g2 + ")" + sql.substring(m.end());
         }
         Set<String> hs = new HashSet<>();
         String sqle = sql;
         String sqlN = "";
-        for (Matcher mtc = QUOTED_ALIAS.matcher(sqle); mtc.find(); mtc = QUOTED_ALIAS.matcher(sqle)) {
-            String g2 = mtc.group(2);
+        for (Matcher m = Patterns.QUOTED_ALIAS.matcher(sqle); m.find(); m = Patterns.QUOTED_ALIAS.matcher(sqle)) {
+            String g2 = m.group(2);
             if (g2.indexOf('\'') >= 0 || g2.indexOf('"') >= 0) {
                 hs.add(g2);
             }
             String value = g2.substring(1, g2.length() - 1);
             nsql.put(SQLConverter.preEscapingIdentifier(value), value);
-            sqlN += sqle.substring(0, mtc.start()) + mtc.group(1) + g2.replaceAll("['\"]", "") + mtc.group(3);
-            sqle = sqle.substring(mtc.end());
+            sqlN += sqle.substring(0, m.start()) + m.group(1) + g2.replaceAll("['\"]", "") + m.group(3);
+            sqle = sqle.substring(m.end());
         }
         sql = sqlN + sqle;
         for (String escaped : hs) {
@@ -460,7 +452,7 @@ public final class SQLConverter {
     }
 
     private static String replaceDistinctRow(String sql) {
-        return sql.replaceAll(DISTINCT_ROW, " DISTINCT ");
+        return PAT_DISTINCT_ROW.matcher(sql).replaceAll(" DISTINCT ");
     }
 
     static void addWhiteSpacedTableNames(String _name) {
@@ -559,7 +551,7 @@ public final class SQLConverter {
         if (init != -1) {
             int end = _sql.indexOf(']');
             if (end < init) {
-                return convertResidualSQL(_sql);
+                return convertResidualSql(_sql);
             }
             String content = _sql.substring(init + 1, end);
             if (content.indexOf(' ') > 0) {
@@ -573,24 +565,24 @@ public final class SQLConverter {
 
             content = basicEscapingIdentifier(content).toUpperCase();
             String subs = " ";
-            if (content != null && !isKeyword && (content.indexOf(' ') > 0 || NO_ALFANUMERIC.matcher(content).find())) {
+            if (content != null && !isKeyword && (content.indexOf(' ') > 0 || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {
                 subs = "\"";
             }
-            _sql = convertResidualSQL(_sql.substring(0, init)) + subs + content + subs
+            _sql = convertResidualSql(_sql.substring(0, init)) + subs + content + subs
                     + convertIdentifiers(_sql.substring(end + 1));
         } else {
-            _sql = convertResidualSQL(_sql);
+            _sql = convertResidualSql(_sql);
         }
         return _sql;
     }
 
-    private static String convertResidualSQL(String sql) {
+    private static String convertResidualSql(String sql) {
         sql = convertSQLTokens(sql);
         if ("!".equals(sql)) {
             return ".";
         }
         return replaceExclamationPoints(
-                replaceDigitStartingIdentifiers(sql.replaceAll(UNDERSCORE_IDENTIFIERS, "$1Z$2$5")));
+                replaceDigitStartingIdentifiers(Patterns.UNDERSCORE_IDENTIFIERS.matcher(sql).replaceAll("$1Z$2$5")));
     }
 
     private static String convertSQLTokens(String sql) {
@@ -600,16 +592,16 @@ public final class SQLConverter {
 
     private static String replaceDigitStartingIdentifiers(String sql) {
 
-        Matcher mtc = DIGIT_STARTING_IDENTIFIERS.matcher(sql);
-        if (mtc.find()) {
-            String grp0 = mtc.group(0);
+        Matcher m = Patterns.DIGIT_STARTING_IDENTIFIERS.matcher(sql);
+        if (m.find()) {
+            String grp0 = m.group(0);
             if (Character.isLetter(grp0.charAt(0))) {
                 return sql;
             }
             String prefix = grp0.matches("\\.([0-9])+[Ee]([0-9])+\\s") || grp0.matches("\\.([0-9])+[Ee][-+]") ? "" : "Z_";
-            String build = mtc.group(1) + prefix + mtc.group(2);
-            sql = sql.substring(0, mtc.start()) + build
-                    + replaceDigitStartingIdentifiers(mtc.group(7) + sql.substring(mtc.end()));
+            String build = m.group(1) + prefix + m.group(2);
+            sql = sql.substring(0, m.start()) + build
+                    + replaceDigitStartingIdentifiers(m.group(7) + sql.substring(m.end()));
         }
 
         return sql;
@@ -617,7 +609,7 @@ public final class SQLConverter {
 
     private static String convertXescaped(String sqlc) {
         for (String xidt : ESCAPED_IDENTIFIERS) {
-            sqlc = sqlc.replaceAll(XESCAPED.replace("_", xidt), "$1$3$4");
+            sqlc = sqlc.replaceAll("(\\W)((?i)X)((?i)_)(\\W)".replace("_", xidt), "$1$3$4");
         }
         return sqlc;
     }
@@ -628,7 +620,7 @@ public final class SQLConverter {
         for (Map.Entry<String, String> entry : IDENTIFIERS_CONTAINING_KEYWORD.entrySet()) {
             sqlc = sqlc.replaceAll("(?i)\"" + entry.getKey() + "\"", "\"" + entry.getValue() + "\"");
         }
-        sqlc = Pattern.compile(KEYWORD_ALIAS, Pattern.CASE_INSENSITIVE).matcher(sqlc).replaceAll("$1\"$2\"$3");
+        sqlc = PAT_KEYWORD_ALIAS.matcher(sqlc).replaceAll("$1\"$2\"$3");
         return sqlc;
     }
 
@@ -763,17 +755,17 @@ public final class SQLConverter {
     }
 
     public static boolean couldNeedDefault(String typeDeclaration) {
-        Matcher mtc = DEFAULT_CATCH_0.matcher(typeDeclaration);
-        return !mtc.find() && Pattern.compile(NOT_NULL).matcher(typeDeclaration).find();
+        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDeclaration);
+        return !m.find() && Patterns.NOT_NULL.matcher(typeDeclaration).find();
 
     }
 
-    public static String convertAddColumn(String tableName, String columnName, String typeDeclaration) {
-        typeDeclaration = convertTypeDeclaration(typeDeclaration);
-        typeDeclaration = typeDeclaration.replaceAll(NOT_NULL, "");
-        Matcher mtc = DEFAULT_CATCH_0.matcher(typeDeclaration);
-        if (mtc.find()) {
-            typeDeclaration = typeDeclaration.substring(0, mtc.start());
+    public static String convertAddColumn(String tableName, String columnName, String _typeDeclaration) {
+        String typeDeclaration = convertTypeDeclaration(_typeDeclaration);
+        typeDeclaration = Patterns.NOT_NULL.matcher(typeDeclaration).replaceAll("");
+        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDeclaration);
+        if (m.find()) {
+            typeDeclaration = typeDeclaration.substring(0, m.start());
         }
 
         return "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + typeDeclaration;
@@ -796,21 +788,22 @@ public final class SQLConverter {
         }
         String pre = sql.substring(0, sql.indexOf('('));
         sql = sql.substring(sql.indexOf('('));
+
+        String exprTypesTranslate = "(?i)_(\\W)";
         for (Map.Entry<String, String> entry : _types2Convert.entrySet()) {
-            sql = sql.replaceAll("([,\\(]\\s*)" + TYPES_TRANSLATE.replace("_", entry.getKey()), "$1___" + entry.getKey() + "___$2")
-                     .replaceAll("(\\W)" + TYPES_TRANSLATE.replace("_", entry.getKey()), "$1" + entry.getValue() + "$2")
-                     .replaceAll("(\\W)" + TYPES_TRANSLATE.replace("_", "___" + entry.getKey() + "___"), "$1" + entry.getKey() + "$2");
+            sql = sql.replaceAll("([,\\(]\\s*)" + exprTypesTranslate.replace("_", entry.getKey()), "$1___" + entry.getKey() + "___$2")
+                     .replaceAll("(\\W)" + exprTypesTranslate.replace("_", entry.getKey()), "$1" + entry.getValue() + "$2")
+                     .replaceAll("(\\W)" + exprTypesTranslate.replace("_", "___" + entry.getKey() + "___"), "$1" + entry.getKey() + "$2");
         }
-        sql = sql.replaceAll(DEFAULT_VARCHAR, "$1VARCHAR(255)$2");
+        sql = PAT_DEFAULT_VARCHAR.matcher(sql).replaceAll("$1VARCHAR(255)$2");
         return clearDefaultsCreateStatement(pre + sql);
     }
 
     public static String getDDLDefault(String ddlf) {
-        for (String pattern : DEFAULT_CATCH) {
-            Pattern pt = Pattern.compile(pattern);
-            Matcher mtch = pt.matcher(ddlf + " ");
-            if (mtch.find()) {
-                return mtch.group(2);
+        for (Pattern pat : Patterns.DEFAULT_CATCH) {
+            Matcher m = pat.matcher(ddlf + " ");
+            if (m.find()) {
+                return m.group(2);
             }
 
         }
@@ -826,8 +819,8 @@ public final class SQLConverter {
         if (startDecl >= endDecl) {
             throw new InvalidCreateStatementException(_sql);
         }
-        for (String pattern : DEFAULT_CATCH) {
-            _sql = _sql.replaceAll(pattern, "$3");
+        for (Pattern pat : Patterns.DEFAULT_CATCH) {
+            _sql = pat.matcher(_sql).replaceAll("$3");
         }
 
         return _sql;
@@ -841,11 +834,11 @@ public final class SQLConverter {
         if (sql == null) {
             return false;
         }
-        return CHECK_DDL.matcher(sql.replaceAll("[\n\r]", " ")).matches();
+        return Patterns.CHECK_DDL.matcher(sql.replaceAll("[\n\r]", " ")).matches();
     }
 
     private static String convertLike(String sql) {
-        Matcher matcher = FIND_LIKE_PATTERN.matcher(sql);
+        Matcher matcher = Patterns.FIND_LIKE.matcher(sql);
         if (matcher.find()) {
             return sql.substring(0, matcher.start(1))
                     + convertLike(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4))
@@ -856,7 +849,7 @@ public final class SQLConverter {
     }
 
     private static String convert2RegexMatches(String likeContent) {
-        Matcher mtc = ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
+        Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
         if (mtc.find()) {
             return convert2RegexMatches(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2RegexMatches(likeContent.substring(mtc.end(0)));
@@ -866,7 +859,7 @@ public final class SQLConverter {
     }
 
     private static String convert2LikeCondition(String likeContent) {
-        Matcher mtc = ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
+        Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE_PATTERN.matcher(likeContent);
         if (mtc.find()) {
             return convert2LikeCondition(likeContent.substring(0, mtc.start(0))) + mtc.group(0).charAt(1)
                     + convert2LikeCondition(likeContent.substring(mtc.end(0)));
@@ -877,7 +870,7 @@ public final class SQLConverter {
     private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
         int i = likeContent.replaceAll("\\[#\\]", "").indexOf('#');
         not = not == null ? "" : " NOT ";
-        if (i >= 0 || ACCESS_LIKE_CHARINTERVAL_PATTERN.matcher(likeContent).find()) {
+        if (i >= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {
             return not + "REGEXP_MATCHES(" + conditionField + ",'" + convert2RegexMatches(likeContent) + "')" + closePar
                     + " ";
         }
@@ -903,7 +896,7 @@ public final class SQLConverter {
     }
 
     private static String convertDigit(String sql) {
-        Matcher mtc = ESPRESSION_DIGIT.matcher(sql);
+        Matcher mtc = PAT_ESPRESSION_DIGIT.matcher(sql);
         char[] cq = sql.toCharArray();
         if (mtc.find()) {
             int idx = mtc.start();
@@ -1085,7 +1078,7 @@ public final class SQLConverter {
     }
 
     public static Set<String> getFormulaDependencies(String formula) {
-        Matcher mtc = FORMULA_DEPENDENCIES.matcher(formula);
+        Matcher mtc = Patterns.FORMULA_DEPS.matcher(formula);
         Set<String> fd = new HashSet<>();
         while (mtc.find()) {
             fd.add(escapeIdentifier(mtc.group(1)));
@@ -1116,9 +1109,9 @@ public final class SQLConverter {
     public static List<String> getParameters(String s) {
         List<String> ar = new ArrayList<>();
 
-        for (Matcher mtch = FORMULA_DEPENDENCIES.matcher(s); mtch.find(); mtch = FORMULA_DEPENDENCIES.matcher(s)) {
-            ar.add(mtch.group());
-            s = s.substring(mtch.end());
+        for (Matcher m = Patterns.FORMULA_DEPS.matcher(s); m.find(); m = Patterns.FORMULA_DEPS.matcher(s)) {
+            ar.add(m.group());
+            s = s.substring(m.end());
         }
         return ar;
     }

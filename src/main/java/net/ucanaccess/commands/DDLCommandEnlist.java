@@ -5,6 +5,7 @@ import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
+import net.ucanaccess.converters.SQLConverter.Patterns;
 import net.ucanaccess.exception.InvalidCreateStatementException;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.jdbc.UcanaccessStatement;
@@ -160,7 +161,7 @@ public class DDLCommandEnlist {
         List<Boolean> notNullList = new ArrayList<>();
         String tknt = columnName + columnDefinition;
         parseColumnTypes(typeList, defaultList, notNullList, tknt);
-        check4OutOfPlacedNotNull(sql);
+        checkForOutOfPlaceNotNull(sql);
         UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
         AddColumnCommand c4io = new AddColumnCommand(tableName, columnName, execId, columnMap, types,
                 defaults, notNulls);
@@ -170,8 +171,8 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void check4OutOfPlacedNotNull(String sql) {
-        if (Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()
+    private void checkForOutOfPlaceNotNull(String sql) {
+        if (Patterns.NOT_NULL.matcher(sql).find()
             && notNulls.length > 0 && (notNulls[0] == null || !notNulls[0])) {
             notNulls[0] = true;
         }
@@ -264,7 +265,8 @@ public class DDLCommandEnlist {
     // getting AUTOINCREMENT and GUID
     @SuppressWarnings("java:S5852")
     private void parseTypesFromCreateStatement(String _sql) throws SQLException {
-        String sql = _sql.replaceAll("(\\s+)(?:(?i)DECIMAL|(?i)NUMERIC)\\s*\\(", "$1NUMERIC(");
+        Pattern pat = Pattern.compile("(\\s+)(?:DECIMAL|NUMERIC)\\s*\\(", Pattern.CASE_INSENSITIVE);
+        String sql = pat.matcher(_sql).replaceAll("$1NUMERIC(");
         int startDecl = sql.indexOf('(');
         int endDecl = sql.lastIndexOf(')');
 

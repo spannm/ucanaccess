@@ -505,15 +505,15 @@ public final class Functions {
     public static Timestamp timestamp0(String _dt) {
         GregorianCalendar gc = new GregorianCalendar();
         gc.setGregorianChange(new Date(Long.MIN_VALUE));
-        Pattern ptdate = Pattern.compile(SQLConverter.DATE_FORMAT + "\\s");
-        Pattern pth = Pattern.compile(SQLConverter.HHMMSS_FORMAT);
-        Matcher mtc = ptdate.matcher(_dt);
+        Pattern patDate = Pattern.compile(SQLConverter.DATE_FORMAT + "\\s");
+        Pattern patTime = Pattern.compile(SQLConverter.HHMMSS_FORMAT);
+        Matcher mtc = patDate.matcher(_dt);
         if (mtc.find()) {
             gc.set(Integer.parseInt(mtc.group(1)), Integer.parseInt(mtc.group(2)) - 1, Integer.parseInt(mtc.group(3)));
         } else {
             UcanaccessRuntimeException.throwNow("internal error in parsing timestamp");
         }
-        mtc = pth.matcher(_dt);
+        mtc = patTime.matcher(_dt);
         if (mtc.find()) {
             gc.set(Calendar.HOUR_OF_DAY, Integer.parseInt(mtc.group(1)));
             gc.set(Calendar.MINUTE, Integer.parseInt(mtc.group(2)));

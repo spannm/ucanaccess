@@ -12,17 +12,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DFunction {
-    private static final Pattern      FROM_PATTERN             = Pattern.compile("\\w*(?i)FROM\\w*");
+    private static final Pattern      PAT_FROM                 = Pattern.compile("\\w*FROM\\w*", Pattern.CASE_INSENSITIVE);
     private static final String       SELECT_FROM              = "(?i)SELECT(.*\\W)(?i)FROM(.*)";
-    private static final String       DFUNCTIONS_WHERE         =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"][\\s\n\r]*\\)";
-    private static final String       DFUNCTIONS_WHERE_DYNAMIC =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"]\\,(.*)\\)";
-    private static final String       DFUNCTIONS_NO_WHERE      =
-            "(?i)_[\\s\n\r]*\\([\\s\n\r]*['\"](.*)['\"]\\,[\\s\n\r]*['\"](.*)['\"][\\s\n\r]*\\)";
+    private static final String       DFUNCTIONS_WHERE         = "(?i)_\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
+    private static final String       DFUNCTIONS_WHERE_DYNAMIC = "(?i)_\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,(.*)\\)";
+    private static final String       DFUNCTIONS_NO_WHERE      = "(?i)_\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
     private static final String       IDENTIFIER               = "(\\W)((?i)_)(\\W)";
-    private static final List<String> DFUNCTIONLIST            =
-            List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
+    private static final List<String> DFUNCTIONLIST            = List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
 
     private Connection                conn;
     private final String              sql;
@@ -35,7 +31,7 @@ public class DFunction {
     private String convertDFunctions() {
         String sql0 = sql;
         try {
-            boolean hasFrom = FROM_PATTERN.matcher(sql).find();
+            boolean hasFrom = PAT_FROM.matcher(sql).find();
             String init = hasFrom ? " (SELECT " : "";
             String end = hasFrom ? " ) " : "";
             for (String s : DFUNCTIONLIST) {
@@ -45,8 +41,8 @@ public class DFunction {
                 sql0 = sql0.replaceAll(DFUNCTIONS_WHERE.replaceFirst("_", fun),
                     init + s + "($1) FROM $2 WHERE $3     " + end);
                 sql0 = sql0.replaceAll(DFUNCTIONS_NO_WHERE.replaceFirst("_", fun), init + s + "($1) FROM $2    " + end);
-                Pattern dfd = Pattern.compile(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun));
-                for (Matcher mtc = dfd.matcher(sql0); mtc.find(); mtc = dfd.matcher(sql0)) {
+                Pattern patDfd = Pattern.compile(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", fun));
+                for (Matcher mtc = patDfd.matcher(sql0); mtc.find(); mtc = patDfd.matcher(sql0)) {
                     StringBuilder sb = new StringBuilder();
                     String g3 = mtc.group(3);
                     String tableN = mtc.group(2).trim();
@@ -68,8 +64,8 @@ public class DFunction {
                                 tkn += " ";
                                 for (String cln : getColumnNames(tn.toUpperCase())) {
                                     String oppn = IDENTIFIER.replaceFirst("_", cln);
-                                    Pattern op = Pattern.compile(oppn);
-                                    Matcher mtcop = op.matcher(tkn);
+                                    Pattern patOppn = Pattern.compile(oppn);
+                                    Matcher mtcop = patOppn.matcher(tkn);
                                     if (!mtcop.find()) {
                                         continue;
                                     }
