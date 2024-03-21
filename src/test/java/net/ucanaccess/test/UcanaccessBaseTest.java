@@ -356,7 +356,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 getLogger().log(Level.WARNING, "Resource {0} not found in classpath", _resourcePath);
                 return null;
             }
-            File tempFile = createTempFile(resourceFile.getName().replace(".", "_"));
+            File tempFile = createTempFile(resourceFile.getName().replace('.', '_'));
             getLogger().log(Level.DEBUG, "Copying resource '{0}' to '{1}'", _resourcePath, tempFile.getAbsolutePath());
             return copyFile(is, tempFile);
         } catch (IOException _ex) {
@@ -415,7 +415,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected void initVerifyConnection() throws SQLException {
-        File tempVerifyFile = createTempFile(fileAccDb.getName().replace(".", "_") + "_verify");
+        File tempVerifyFile = createTempFile(fileAccDb.getName().replace('.', '_') + "_verify");
         copyFile(fileAccDb.toPath(), tempVerifyFile);
 
         if (verifyConnection != null) {

@@ -671,6 +671,9 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
         });
     }
 
+    /**
+     * @deprecated Use {@code setCharacterStream}
+     */
     @Override
     @Deprecated
     public void setUnicodeStream(int _parmIdx, InputStream is, int length) throws UcanaccessSQLException {

@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -26,7 +25,6 @@ public final class UcanaccessDriver implements Driver {
     public static final String  URL_PREFIX = "jdbc:ucanaccess://";
 
     private static final Logger LOGGER     = System.getLogger(UcanaccessDriver.class.getName());
-    private final Logger        logger     = System.getLogger(getClass().getName());
 
     static {
         try {
@@ -60,7 +58,7 @@ public final class UcanaccessDriver implements Driver {
         Map<Property, String> props = readProperties(_props, _url,
             (k, v) -> {
                 unknownProps.put(k, v);
-                logger.log(Level.WARNING, "Unknown driver property {0} with value {1}", k, v);
+                LOGGER.log(Level.WARNING, "Unknown driver property {0} with value {1}", k, v);
             });
 
         int idxSemicolon = _url.indexOf(';');
@@ -74,11 +72,8 @@ public final class UcanaccessDriver implements Driver {
 
                 boolean alreadyLoaded = as.loaded(fileDb);
                 FileFormat ff = null;
-                if (props.containsKey(newDatabaseVersion)) {
-                    if (!fileDb.exists()) {
-                        ff = FileFormat.parse(props.get(newDatabaseVersion));
-                    }
-
+                if (props.containsKey(newDatabaseVersion) && !fileDb.exists()) {
+                    ff = FileFormat.parse(props.get(newDatabaseVersion));
                 }
                 boolean useCustomOpener = props.containsKey(jackcessOpener);
 
@@ -108,7 +103,7 @@ public final class UcanaccessDriver implements Driver {
                     if (props.containsKey(keepMirror)) {
                         dbRef.setInMemory(false);
                         if (dbRef.isEncryptHSQLDB()) {
-                            logger.log(Level.WARNING, "{0} parameter cannot be combined with parameters {1} or {2}, {3} skipped",
+                            LOGGER.log(Level.WARNING, "{0} parameter cannot be combined with parameters {1} or {2}, {3} skipped",
                                 keepMirror, jackcessOpener, encrypt, keepMirror);
                         } else {
                             File dbMirror =
@@ -172,7 +167,7 @@ public final class UcanaccessDriver implements Driver {
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
-                            logger.log(Level.WARNING, "Invalid textual value in table {0}, column {1}: it might look like {2}",
+                            LOGGER.log(Level.WARNING, "Invalid textual value in table {0}, column {1}: it might look like {2}",
                                 cl.getTable().getName(), cl.getName(), new String(bt));
                         }
                         throw new IOException(ex);
@@ -248,7 +243,7 @@ public final class UcanaccessDriver implements Driver {
             }
         } catch (Exception _ignored) {
         }
-        logger.log(Level.WARNING, "Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
+        LOGGER.log(Level.WARNING, "Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
         return null;
     }
 
@@ -290,14 +285,13 @@ public final class UcanaccessDriver implements Driver {
         return true;
     }
 
-    private IJackcessOpenerInterface newJackcessOpenerInstance(String className)
-        throws InstantiationException, IllegalAccessException, ClassNotFoundException, UcanaccessSQLException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        Object newInstance = Class.forName(className).getConstructor().newInstance();
+    private IJackcessOpenerInterface newJackcessOpenerInstance(String className) throws UcanaccessSQLException {
+        Object instance = Try.catching(() -> Class.forName(className).getConstructor().newInstance()).orThrow(ex -> new UcanaccessSQLException("Failed to instantiate " + className, ex));
 
-        if (!IJackcessOpenerInterface.class.isInstance(newInstance)) {
-            throw new UcanaccessSQLException("Jackess Opener class must implement " + IJackcessOpenerInterface.class.getName());
+        if (instance instanceof IJackcessOpenerInterface) {
+            return (IJackcessOpenerInterface) instance;
         }
-        return (IJackcessOpenerInterface) newInstance;
+        throw new UcanaccessSQLException("Jackess Opener class must implement " + IJackcessOpenerInterface.class.getName());
     }
 
     /**

@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"java:S1192", "java:S2692"}) // suppress sonarcloud warnings
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
@@ -99,7 +100,7 @@ public class LoadJet {
         return false;
     }
 
-    public void addFunctions(Class<?> _clazz) throws SQLException {
+    public void addFunctions(Class<?> _clazz) {
         functionsLoader.addFunctions(_clazz, false);
     }
 
@@ -181,7 +182,7 @@ public class LoadJet {
 
     public Object tryDefault(Object _default) {
         try (Statement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery("SELECT " + _default + " FROM DUAL");
+            ResultSet rs = st.executeQuery(String.format("SELECT %s FROM DUAL", _default));
             if (rs.next()) {
                 return rs.getObject(1);
             }
@@ -353,7 +354,7 @@ public class LoadJet {
                 + "EXTERNAL NAME 'CLASSPATH:net.ucanaccess.converters.FunctionsAggregate." + _functionName + "'";
         }
 
-        private void loadMappedFunctions() throws SQLException {
+        private void loadMappedFunctions() {
             addFunctions(Functions.class, true);
             addAggregates();
             createFunctions();
@@ -558,7 +559,7 @@ public class LoadJet {
 
                 PropertyMap pm = col.getProperties();
                 Object required = pm.getValue(PropertyMap.REQUIRED_PROP);
-                if (_constraints && required instanceof Boolean && (Boolean) required) {
+                if (_constraints && required instanceof Boolean && (boolean) required) {
                     sbC.append(" NOT NULL ");
                 }
                 comma = ",";
@@ -649,33 +650,33 @@ public class LoadJet {
         private void setDefaultValue(Column _col, String _ntn, List<String> _arTrigger) throws IOException, SQLException {
             PropertyMap pm = _col.getProperties();
             String ncn = procedureEscapingIdentifier(_col.getName());
-            Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-            if (defaulT != null) {
-                String default4SQL = defaultValue4SQL(defaulT, _col.getType());
+            Object defVal = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
+            if (defVal != null) {
+                String default4SQL = defaultValue4SQL(defVal, _col.getType());
                 String guidExp = "GenGUID()";
-                if (!guidExp.equals(defaulT)) {
-                    boolean defaultIsFunction =
-                        defaulT.toString().trim().endsWith(")") && defaulT.toString().indexOf('(') > 0;
-                    if (defaultIsFunction) {
-                        metadata.columnDef(_col.getTable().getName(), _col.getName(), defaulT.toString());
+                if (!guidExp.equals(defVal)) {
+                    boolean defIsFunction =
+                        defVal.toString().trim().endsWith(")") && defVal.toString().indexOf('(') > 0;
+                    if (defIsFunction) {
+                        metadata.columnDef(_col.getTable().getName(), _col.getName(), defVal.toString());
                     }
                     Object defFound = default4SQL;
                     boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                     if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})", "" + defaulT, _col.getName(),
+                        logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})", "" + defVal, _col.getName(),
                             _col.getTable().getName());
                     } else {
-                        if (defFound != null && !defaultIsFunction) {
+                        if (defFound != null && !defIsFunction) {
                             metadata.columnDef(_col.getTable().getName(), _col.getName(), defFound.toString());
                         }
-                        if (_col.getType() == DataType.TEXT && defaulT.toString().startsWith("'")
-                            && defaulT.toString().endsWith("'")
-                            && defaulT.toString().length() > _col.getLengthInUnits()) {
+                        if (_col.getType() == DataType.TEXT && defVal.toString().startsWith("'")
+                            && defVal.toString().endsWith("'")
+                            && defVal.toString().length() > _col.getLengthInUnits()) {
                             logger.log(Level.WARNING, "Default values should start and end with a double quote, "
                                 + "the single quote is considered as part of the default value {0} "
                                 + "(column {1},table {2}). It may result in a data truncation error at run-time due to max column size {3}",
-                                defaulT, _col.getName(), _col.getTable().getName(), _col.getLengthInUnits());
+                                defVal, _col.getName(), _col.getTable().getName(), _col.getLengthInUnits());
                         }
                         _arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + _ntn
                             + " REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "

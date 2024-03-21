@@ -11,6 +11,8 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.util.Try;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -27,7 +29,9 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S2447")
 public final class Functions {
+    private static final Logger LOGGER = System.getLogger(Functions.class.getName());
     private static Double       rnd;
     private static Double       lastRnd;
     private static final double APPROX = 0.00000001;
@@ -110,7 +114,7 @@ public final class Functions {
 
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.YESNO)
     public static boolean cbool(BigDecimal _value) {
-        return cbool((Object) _value);
+        return cboolImpl(_value);
     }
 
     /**
@@ -121,15 +125,15 @@ public final class Functions {
      */
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.YESNO}, returnType = AccessType.YESNO)
     public static boolean cbool(Boolean _value) {
-        return cbool((Object) _value);
+        return cboolImpl(_value);
     }
 
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
     public static boolean cbool(String _value) {
-        return cbool((Object) _value);
+        return cboolImpl(_value);
     }
 
-    private static boolean cbool(Object _obj) {
+    private static boolean cboolImpl(Object _obj) {
         if (_obj == null) {
             return false;
         } else if (_obj instanceof Boolean) {
@@ -214,7 +218,6 @@ public final class Functions {
         return _value ? -1 : 0;
     }
 
-    // TODO
     @FunctionType(functionName = "CSign", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.SINGLE)
     public static double csign(double _value) {
         MathContext mc = new MathContext(7);
@@ -226,7 +229,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.YESNO}, returnType = AccessType.MEMO)
     public static String cstr(Boolean _value) throws UcanaccessSQLException {
-        return cstr((Object) _value);
+        return cstrImpl(_value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.TEXT}, returnType = AccessType.MEMO)
@@ -236,12 +239,12 @@ public final class Functions {
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
     public static String cstr(double _value) throws UcanaccessSQLException {
-        return cstr((Object) _value);
+        return cstrImpl(_value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
     public static String cstr(int _value) throws UcanaccessSQLException {
-        return cstr((Object) _value);
+        return cstrImpl(_value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
@@ -249,7 +252,7 @@ public final class Functions {
         return _value == null ? null : format(_value, "general date");
     }
 
-    private static String cstr(Object _value) throws UcanaccessSQLException {
+    private static String cstrImpl(Object _value) throws UcanaccessSQLException {
         return _value == null ? null : format(_value.toString(), "", true);
     }
 
@@ -547,7 +550,9 @@ public final class Functions {
                     t = new Timestamp(cl.getTime().getTime());
                 }
                 return t;
-            } catch (ParseException _ignored) {}
+            } catch (ParseException _ignored) {
+                LOGGER.log(Level.DEBUG, "Ignoring {0}", _ignored.toString());
+            }
         }
         return null;
     }
@@ -658,8 +663,8 @@ public final class Functions {
             return String.valueOf(datePart(_par, _t));
         }
         return createSimpleDateFormat(_par
-            .replace("m", "M")
-            .replace("n", "m")
+            .replace('m', 'M')
+            .replace('n', 'm')
             .replace("(?i)AM/PM|A/P|AMPM", "a")
             .replace("dddd", "EEEE")).format(_t);
     }
@@ -668,33 +673,32 @@ public final class Functions {
      * Returns one of two parts, depending on the evaluation of an expression.
      */
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String iif(Boolean _b, String _o, String _o1) {
-        return (String) iif(_b, _o, (Object) _o1);
+    public static String iif(Boolean _b, String _o1, String _o2) {
+        return iifImpl(_b, _o1, _o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer iif(Boolean b, Integer o, Integer o1) {
-        return (Integer) iif(b, o, (Object) o1);
+    public static Integer iif(Boolean _b, Integer _o1, Integer _o2) {
+        return iifImpl(_b, _o1, _o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double iif(Boolean b, Double o, Double o1) {
-        return (Double) iif(b, o, (Object) o1);
+    public static Double iif(Boolean _b, Double _o1, Double _o2) {
+        return iifImpl(_b, _o1, _o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.YESNO, AccessType.YESNO}, returnType = AccessType.YESNO)
-    public static Boolean iif(Boolean b, Boolean o, Boolean o1) {
-
-        return (Boolean) iif(b, o, (Object) o1);
+    public static Boolean iif(Boolean _b, Boolean _o1, Boolean _o2) {
+        return iifImpl(_b, _o1, _o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
-    public static Timestamp iif(Boolean b, Timestamp o, Timestamp o1) {
-        return (Timestamp) iif(b, o, (Object) o1);
+    public static Timestamp iif(Boolean b, Timestamp _o1, Timestamp _o2) {
+        return iifImpl(b, _o1, _o2);
     }
 
-    private static Object iif(Boolean _b, Object _o1, Object _o2) {
-        return Objects.requireNonNullElse(_b, Boolean.FALSE) ? _o1 : _o2;
+    private static <T> T iifImpl(Boolean _b, T _o1, T _o2) {
+        return _b != null && _b ? _o1 : _o2;
     }
 
     /**
@@ -1064,19 +1068,13 @@ public final class Functions {
     public static String weekdayName(int _number, boolean _abbreviate, int _firstDayOfWeek) {
         // DayOfWeek starts with Monday, WeekdayName with Sunday (default)
         int firstDayOfWeek = Math.min(Math.max(1, _firstDayOfWeek), 7);
-        int offset = firstDayOfWeek == 1 ? -1
-            : firstDayOfWeek == 1 ? -1
-                : firstDayOfWeek - 2;
+        int offset = firstDayOfWeek == 1 ? -1 : firstDayOfWeek - 2;
         int number = _number;
         while (number > 7) {
             number -= 7;
         }
         return DayOfWeek.of(number).plus(offset)
             .getDisplayName(_abbreviate ? TextStyle.SHORT : TextStyle.FULL, Locale.getDefault());
-    }
-
-    public static void main(String[] args) {
-        System.out.println("WeekDayName(3): " + weekdayName(3));
     }
 
     /**
@@ -1485,16 +1483,12 @@ public final class Functions {
 
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.YESNO)
     public static Boolean formulaToBoolean(Double res, String datatype) {
-        if (res == null) {
-            return null;
-        }
-        return res != 0d;
+        return res == null ? null : res != 0d;
     }
 
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.YESNO)
     public static Boolean formulaToBoolean(Timestamp res, String datatype) {
         return null;
-
     }
 
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.YESNO)
@@ -1507,7 +1501,6 @@ public final class Functions {
             return false;
         }
         return null;
-
     }
 
     @FunctionType(functionName = "formulaToText", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)

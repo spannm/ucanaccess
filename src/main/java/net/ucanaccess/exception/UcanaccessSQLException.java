@@ -5,6 +5,7 @@ import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -100,13 +101,11 @@ public class UcanaccessSQLException extends SQLException {
      * @return wrapped exception or parameter if can be cast to {@link UcanaccessSQLException}
      */
     public static final <T extends Throwable> UcanaccessSQLException wrap(T _t) {
-        return UcanaccessSQLException.class.isInstance(_t)
-            ? UcanaccessSQLException.class.cast(_t)
-            : new UcanaccessSQLException(_t);
+        return _t instanceof UcanaccessSQLException ? (UcanaccessSQLException) _t : new UcanaccessSQLException(_t);
     }
 
-    public static final <T extends UcanaccessSQLException> void throwIf(Supplier<Boolean> _condition, Supplier<T> _exceptionSupplier) throws T {
-        if (_condition.get()) {
+    public static final <T extends UcanaccessSQLException> void throwIf(BooleanSupplier _condition, Supplier<T> _exceptionSupplier) throws T {
+        if (_condition.getAsBoolean()) {
             throw _exceptionSupplier.get();
         }
     }

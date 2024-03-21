@@ -21,8 +21,8 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
-        execute("UPDATE t_noroman SET [ENd]='BLeah'");
+        execute("INSERT INTO t_noroman ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
+        execute("UPDATE t_noroman SET [ENd] = 'BLeah'");
         execute("DELETE FROM t_noroman");
     }
 

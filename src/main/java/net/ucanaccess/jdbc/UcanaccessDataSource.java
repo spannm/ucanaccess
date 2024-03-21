@@ -27,7 +27,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     private String                      accessPath;
     private int                         loginTimeout     = 0;
     private transient PrintWriter       logWriter        = new PrintWriter(System.out);
-    private final Map<Property, String> userPass         = new HashMap<>();
+    private final Map<Property, String> userPass         = new EnumMap<>(Property.class);
 
     private final Map<Property, String> props            = new EnumMap<>(Property.class);
 

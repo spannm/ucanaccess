@@ -24,7 +24,7 @@ public class UcanaccessConnection implements Connection {
 
     private static final ThreadLocal<Context> CTX           = new ThreadLocal<>();
 
-    private final transient Logger            logger        = System.getLogger(getClass().getName());
+    private final Logger                      logger        = System.getLogger(getClass().getName());
     private boolean                           feedbackState;
     private final LinkedList<ICommand>        commands      = new LinkedList<>();
     private Connection                        hsqlDBConnection;
@@ -299,10 +299,7 @@ public class UcanaccessConnection implements Connection {
             } catch (IOException _ex2) {
                 logger.log(Level.WARNING, _ex2.toString());
             }
-            if (UcanaccessSQLException.class.isInstance(_ex)) {
-                throw UcanaccessSQLException.class.cast(_ex);
-            }
-            throw new UcanaccessSQLException(_ex);
+            throw _ex instanceof UcanaccessSQLException ? (UcanaccessSQLException) _ex : new UcanaccessSQLException(_ex);
         }
 
         try {

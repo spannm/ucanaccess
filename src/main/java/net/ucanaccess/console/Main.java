@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("java:S106") // suppress sonarcloud warning to not use System.out/err
 public class Main {
     private static final String  EXPORT_USAGE  = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
         + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";
@@ -277,7 +278,6 @@ public class Main {
 
         // Process the command line flags.
         int i = 1; // skip the first token which will always be "export"
-        label:
         for (; i < tokens.size(); i++) {
             String arg = tokens.get(i);
             if (!arg.startsWith("-")) {
@@ -322,7 +322,7 @@ public class Main {
                     return;
                 case "--":
                     ++i;
-                    break label;
+                    break;
                 default:
                     prompt("Unknown flag " + arg);
                     prompt(EXPORT_PROMPT);
@@ -429,7 +429,7 @@ public class Main {
         static final List<Integer>       NUMERIC_JDBC_TYPES =
             List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
                 Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
-        private final int                maxColWidth        = 50;
+        private static final int         MAX_COL_WIDTH      = 50;
         private final List<String>       colNames;
         private final List<Integer>      colWidths;
         private final List<Integer>      colTypes;
@@ -449,7 +449,7 @@ public class Main {
             for (int col = 1; col <= columnCount; ++col) {
                 String colLabel = meta.getColumnLabel(col);
                 colNames.add(colLabel);
-                colWidths.add(Math.min(colLabel.length(), maxColWidth));
+                colWidths.add(Math.min(colLabel.length(), MAX_COL_WIDTH));
                 colTypes.add(meta.getColumnType(col));
             }
 
@@ -467,7 +467,7 @@ public class Main {
                     rec.add(s);
 
                     int colWidth = colWidths.get(col - 1);
-                    if (colWidth < s.length() && colWidth < maxColWidth) {
+                    if (colWidth < s.length() && colWidth < MAX_COL_WIDTH) {
                         colWidths.set(col - 1, s.length());
                     }
                 }

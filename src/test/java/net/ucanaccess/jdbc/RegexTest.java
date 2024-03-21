@@ -29,8 +29,8 @@ class RegexTest extends UcanaccessBaseTest {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             for (String c : in) {
                 executeStatements(st,
-                    getStatement(c.replaceAll("'", "''"), "'"),
-                    getStatement(c.replaceAll("\"", "\"\""), "\""));
+                    getStatement(c.replace("'", "''"), "'"),
+                    getStatement(c.replace("\"", "\"\""), "\""));
             }
 
             int len = in.length * 2;

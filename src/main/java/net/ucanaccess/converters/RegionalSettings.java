@@ -118,7 +118,7 @@ public final class RegionalSettings {
 
     void addDateP(String _pattern, boolean _heuristic, boolean _yearOverride) {
         if (_heuristic && !_pattern.contains("a") && _pattern.indexOf('H') > 0) {
-            String chg = _pattern.replaceAll("H", "h") + " a";
+            String chg = _pattern.replace('H', 'h') + " a";
             addDateP(chg, false, false);
             addTogglePattern(chg);
         }
@@ -139,7 +139,7 @@ public final class RegionalSettings {
         if (_heuristic) {
             addTogglePattern(_pattern);
             if (_pattern.endsWith(" a") && _pattern.indexOf('h') > 0) {
-                String chg = _pattern.substring(0, _pattern.length() - 2).trim().replaceAll("h", "H");
+                String chg = _pattern.substring(0, _pattern.length() - 2).trim().replace('h', 'H');
                 addDateP(chg, false, false);
                 addTogglePattern(chg);
             }
@@ -150,9 +150,9 @@ public final class RegionalSettings {
     void addTogglePattern(String _p) {
 
         if (_p.indexOf('/') > 0) {
-            addDateP(_p.replaceAll("/", "-"), false, false);
+            addDateP(_p.replace('/', '-'), false, false);
             if (isPointDateSeparator()) {
-                addDateP(_p.replaceAll("/", "."), false, false);
+                addDateP(_p.replace('/', '.'), false, false);
             }
         } else if (_p.indexOf('-') > 0) {
             addDateP(_p.replaceAll(Pattern.quote("-"), "/"), false, false);
@@ -170,15 +170,8 @@ public final class RegionalSettings {
     }
 
     public static RegionalSettings getRegionalSettings(Locale _locale) {
-        if (_locale == null) {
-            _locale = Locale.getDefault();
-        }
-        RegionalSettings rs = REG_MAP.get(_locale);
-        if (rs == null) {
-            rs = new RegionalSettings(_locale);
-            REG_MAP.put(_locale, rs);
-        }
-        return rs;
+        Locale locale = Objects.requireNonNullElseGet(_locale, Locale::getDefault);
+        return REG_MAP.computeIfAbsent(locale, RegionalSettings::new);
     }
 
     @Override

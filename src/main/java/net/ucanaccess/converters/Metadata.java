@@ -7,6 +7,8 @@ import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class Metadata {
+
+    private static final Logger LOGGER  = System.getLogger(Metadata.class.getName());
 
     private static final String SCHEMA  = "CREATE SCHEMA UCA_METADATA AUTHORIZATION DBA";
 
@@ -33,6 +37,7 @@ public class Metadata {
      * @author Markus Spann
      * @since v5.1.0
      */
+    @SuppressWarnings("java:S115") // suppress sonarcloud warning regarding constant names
     public enum Property {
         user(String.class, null, 500),
         password(String.class, null, 500),
@@ -232,7 +237,7 @@ public class Metadata {
             ps.setInt(4, _idTable);
             ps.executeUpdate();
         } catch (SQLException _ignored) {
-
+            LOGGER.log(Level.DEBUG, "Ignoring {0}", _ignored.toString());
         }
     }
 
@@ -245,7 +250,7 @@ public class Metadata {
                 result.add(rs.getString(COLUMN_NAME));
             }
             return !SYSTEM_SUBQUERY.equals(_tableName) ? result : null;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public String getColumnName(String _escapedTableName, String _escapedColumnName) throws SQLException {
@@ -260,7 +265,7 @@ public class Metadata {
                 }
             }
             return null;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public String getEscapedColumnName(String _tableName, String _columnName) throws SQLException {
@@ -269,7 +274,7 @@ public class Metadata {
             ps.setString(2, _columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_COLUMN_NAME) : null;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public String getEscapedTableName(String _tableName) throws SQLException {
@@ -277,7 +282,7 @@ public class Metadata {
             ps.setString(1, _tableName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_TABLE_NAME) : null;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public boolean isAutoIncrement(String _tableName, String _columnName) throws SQLException {
@@ -286,7 +291,7 @@ public class Metadata {
             ps.setString(2, _columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_AUTOINCREMENT);
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public boolean isCurrency(String _tableName, String _columnName) throws SQLException {
@@ -295,7 +300,7 @@ public class Metadata {
             ps.setString(2, _columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_CURRENCY);
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public Integer getTableId(String _escapedName) throws SQLException {
@@ -303,7 +308,7 @@ public class Metadata {
             ps.setString(1, _escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt(TABLE_ID) : -1;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public String getTableName(String _escapedName) throws SQLException {
@@ -311,14 +316,14 @@ public class Metadata {
             ps.setString(1, _escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(TABLE_NAME) : null;
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public void dropTable(String _tableName) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(DROP_TABLE), ps -> {
             ps.setString(1, _tableName);
             ps.execute();
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public void columnDef(String _tableName, String _columnName, String _def) throws SQLException {
@@ -327,7 +332,7 @@ public class Metadata {
             ps.setString(2, _columnName);
             ps.setString(3, _tableName);
             ps.execute();
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public void calculatedField(String _tableName, String _columnName) throws SQLException {
@@ -335,7 +340,7 @@ public class Metadata {
             ps.setString(1, _columnName);
             ps.setString(2, _tableName);
             ps.execute();
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
     public void rename(String _oldTableName, String _newTableName, String _newEscapedTableName) throws SQLException {
@@ -344,7 +349,7 @@ public class Metadata {
             ps.setString(2, _newEscapedTableName);
             ps.setString(3, _oldTableName);
             ps.executeUpdate();
-        }).orThrow();
+        }).orThrow(ex -> ex);
     }
 
 }

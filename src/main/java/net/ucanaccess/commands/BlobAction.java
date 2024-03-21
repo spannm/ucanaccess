@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BlobAction implements IFeedbackAction {
     private final Table        table;
@@ -55,26 +56,23 @@ public class BlobAction implements IFeedbackAction {
             Connection connHsqldb = conn.getHSQLDBConnection();
 
             for (BlobKey bkey : keys) {
-                String sql = "UPDATE " + SQLConverter.escapeIdentifier(table.getName(), connHsqldb) + " SET "
-                        + SQLConverter.escapeIdentifier(bkey.getColumnName(), connHsqldb) + "=? WHERE ";
-                StringBuilder sb = new StringBuilder();
-                String and = "";
-                List<Object> values = new ArrayList<>();
-                for (Map.Entry<String, Object> me : bkey.getKey().entrySet()) {
-                    sb.append(and).append(SQLConverter.escapeIdentifier(me.getKey(), connHsqldb)).append(" = ?");
-                    values.add(me.getValue());
-                    and = " AND ";
-                }
-                sql += sb.toString();
+
+                List<Object> values = new ArrayList<>(bkey.getKey().values());
+
+                String sql = String.format("UPDATE %s SET %s=? WHERE %s",
+                    SQLConverter.escapeIdentifier(table.getName(), connHsqldb),
+                    SQLConverter.escapeIdentifier(bkey.getColumnName(), connHsqldb),
+                    bkey.getKey().keySet().stream().map(k -> SQLConverter.escapeIdentifier(k, connHsqldb) + " = ?").collect(Collectors.joining(" AND ")));
+
                 conn.setFeedbackState(true);
 
                 conn.setFeedbackState(true);
                 try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, bkey.getBytes());
-                    int j = 2;
+                    int i = 2;
                     for (Object value : values) {
-                        ps.setObject(j, value);
-                        ++j;
+                        ps.setObject(i, value);
+                        i++;
                     }
                     ps.executeUpdate();
                     conn.setFeedbackState(false);

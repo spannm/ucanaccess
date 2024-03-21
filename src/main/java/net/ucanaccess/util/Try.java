@@ -56,6 +56,7 @@ import java.util.function.Supplier;
  * @author Markus Spann
  * @since v5.1.0
  */
+@SuppressWarnings("java:S119")
 public final class Try<V, EC extends Throwable> {
 
     /** The immutable value or {@code null} if an exception occurred during retrieval. */
@@ -258,7 +259,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public V orElseGet(IThrowingSupplier<V, Throwable> _supplier) {
         if (hasThrown()) {
-            return Try.catching(_supplier).orThrow();
+            return Try.catching(_supplier::get).orThrow();
         }
         return val;
     }
@@ -296,7 +297,11 @@ public final class Try<V, EC extends Throwable> {
         Objects.requireNonNull(_function, "Function required");
         if (hasThrown()) {
             Throwable t2 = _function.apply(t);
-            doThrow(Objects.requireNonNullElseGet(t2, () -> new IllegalStateException("Function must provide a throwable")));
+            if (t2 == null) {
+                doThrow(new IllegalStateException("Function must provide a throwable"));
+            } else {
+                doThrow(t2);
+            }
         }
         return val;
     }

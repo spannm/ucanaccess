@@ -16,11 +16,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Pivot {
-    private static final Pattern                   PIVOT_PATT       =
-        Pattern.compile("(?i)TRANSFORM(.*\\W)(?i)SELECT(.*\\W)(?i)FROM(.*\\W)(?i)PIVOT(.*)");
-    private static final Pattern                   PIVOT_EXPR_PATT  = Pattern.compile("(.*)(?i)IN\\s*\\((.*)\\)");
-    private static final Pattern                   PIVOT_AGGR_PATT  =
-        Pattern.compile("((?i)SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)");
+    @SuppressWarnings("java:S5852")
+    private static final Pattern                   PIVOT_PATT       = Pattern.compile("TRANSFORM(.*\\W)SELECT(.*\\W)FROM(.*\\W)PIVOT(.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern                   PIVOT_EXPR_PATT  = Pattern.compile("(.*)IN\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern                   PIVOT_AGGR_PATT  = Pattern.compile("(SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PIVOT_CN_PATT    = Pattern.compile("[\"'#](.*)[\"'#]");
     private static final String                    PIVOT_GROUP_BY   = "(?i)GROUP\\s*(?i)BY";
 
@@ -31,7 +30,7 @@ public class Pivot {
     private String                                 select;
     private String                                 from;
     private String                                 expression;
-    private String                                 pivot;
+    private String                                 pivotStr;
     private List<String>                           pivotIn;
     private String                                 aggregateFun;
     private final Connection                       conn;
@@ -135,15 +134,15 @@ public class Pivot {
             select = mtc.group(2);
             from = mtc.group(3);
             String pe = mtc.group(4);
-            Matcher mtcExpr = PIVOT_EXPR_PATT.matcher(pe);
-            if (mtcExpr.find()) {
-                if (mtcExpr.groupCount() < 2) {
+            Matcher matcher = PIVOT_EXPR_PATT.matcher(pe);
+            if (matcher.find()) {
+                if (matcher.groupCount() < 2) {
                     return false;
                 }
-                pivot = mtcExpr.group(1);
-                pivotIn = Arrays.asList(mtcExpr.group(2).split(","));
+                pivotStr = matcher.group(1);
+                pivotIn = Arrays.asList(matcher.group(2).split(","));
             } else {
-                pivot = pe;
+                pivotStr = pe;
             }
             return true;
         } else {
@@ -159,8 +158,8 @@ public class Pivot {
     public String verifySQL() {
         StringBuilder sb = new StringBuilder();
         String[] fromS = from.split(PIVOT_GROUP_BY);
-        sb.append("SELECT DISTINCT ").append(pivot).append(" AS PIVOT ")
-          .append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivot).append(",").append(fromS[1]);
+        sb.append("SELECT DISTINCT ").append(pivotStr).append(" AS PIVOT ")
+          .append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivotStr).append(",").append(fromS[1]);
         return SQLConverter.convertSQL(sb.toString()).getSql();
     }
 
@@ -192,24 +191,24 @@ public class Pivot {
             SimpleDateFormat sdf = new SimpleDateFormat("#MM/dd/yyyy HH:mm:ss#");
             String clns = sdf.format((Date) cln);
             if (clns.endsWith(" 00:00:00#")) {
-                clns = clns.replaceAll(" 00:00:00", "");
+                clns = clns.replace(" 00:00:00", "");
             }
             return clns;
         } else if (cln instanceof String) {
-            return "'" + cln.toString().replaceAll("'", "''") + "'";
+            return "'" + cln.toString().replace("'", "''") + "'";
         }
         return cln.toString();
     }
 
     private String replaceQuotation(String cn) {
-        cn = cn.replaceAll("\n", " ").replaceAll("\r", " ");
+        cn = cn.replaceAll("[\n\\r]", " ");
         Matcher dcm = PIVOT_CN_PATT.matcher(cn);
 
         if (dcm.matches()) {
             cn = dcm.group(1);
         }
 
-        cn = cn.replaceAll("'", "").replaceAll("\"", "");
+        cn = cn.replace("'", "").replace("\"", "");
 
         return "[" + cn + "]";
     }
@@ -230,7 +229,7 @@ public class Pivot {
           .append(select);
         for (String s : pivotIn) {
             sb.append(",");
-            appendCaseWhen(sb, pivot + "=" + s, replaceQuotation(s));
+            appendCaseWhen(sb, pivotStr + "=" + s, replaceQuotation(s));
         }
         sb.append(" FROM ").append(from);
 

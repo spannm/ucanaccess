@@ -426,7 +426,7 @@ public class Persist2Jet {
         lj.loadDefaultValues(table);
         createForeignKeys(tableName);
         try (UcanaccessStatement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery("SELECT * FROM " + tableName);
+            ResultSet rs = st.executeQuery(String.format("SELECT * FROM %s", tableName));
             List<String> clns = getColumnNamesCreate(tn);
             while (rs.next()) {
                 Object[] rec = new Object[clns.size()];

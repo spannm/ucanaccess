@@ -53,7 +53,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
         Process proc = Runtime.getRuntime().exec(command);
         proc.waitFor(15, TimeUnit.SECONDS);
 
-        assertThat(proc.exitValue()).isEqualTo(0);
+        assertThat(proc.exitValue()).isZero();
 
         try (BufferedReader output = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
             String stderr = output.lines().collect(Collectors.joining(System.lineSeparator()));

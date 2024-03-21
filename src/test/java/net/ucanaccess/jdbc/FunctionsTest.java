@@ -611,10 +611,10 @@ class FunctionsTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testFormatString(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Format(text,'Long date') FROM t_format", singleRec(""));
-        checkQuery("SELECT Format('05/13/1994','Long date') FROM t_funcs", singleRec("Friday, May 13, 1994"));
-        checkQuery("SELECT Format(0.6,'percent') FROM t_funcs", singleRec("60.00%"));
-        checkQuery("SELECT Format('0,6','percent') FROM t_funcs", singleRec("600.00%"));
+        checkQuery("SELECT Format(text, 'Long date') FROM t_format", singleRec(""));
+        checkQuery("SELECT Format('05/13/1994', 'Long date') FROM t_funcs", singleRec("Friday, May 13, 1994"));
+        checkQuery("SELECT Format(0.6, 'percent') FROM t_funcs", singleRec("60.00%"));
+        checkQuery("SELECT Format('0,6', 'percent') FROM t_funcs", singleRec("600.00%"));
         // beware of bug http://bugs.java.com/view_bug.do?bug_id=7131459 !
         checkQuery("SELECT Format(48.14251, '.###') FROM t_funcs", singleRec("48.143"));
     }

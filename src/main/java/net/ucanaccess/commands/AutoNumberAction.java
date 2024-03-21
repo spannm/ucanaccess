@@ -33,9 +33,9 @@ public class AutoNumberAction implements IFeedbackAction {
                 oldAutoValues.put(col.getName(), cnOld);
                 newAutoValues.put(col.getName(), cnNew);
                 conn.setFeedbackState(true);
-                String stmt = "UPDATE " + SQLConverter.escapeIdentifier(_table.getName(), connHsqldb) + " SET " + cn
-                        + "=? WHERE " + cn + "=?";
-                try (PreparedStatement ps = connHsqldb.prepareStatement(stmt)) {
+                String sql = String.format("UPDATE %s SET %s=? WHERE %s=?",
+                    SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), cn, cn);
+                try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, cnNew);
                     ps.setObject(2, cnOld);
                     ps.executeUpdate();

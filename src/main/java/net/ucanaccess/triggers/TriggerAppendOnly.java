@@ -38,7 +38,7 @@ public class TriggerAppendOnly extends TriggerBase {
                             Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
 
                             Version[] newV = new Version[oldV.length + 1];
-                            if (oldV.length >= 0) {
+                            if (oldV.length > 0) {
                                 System.arraycopy(oldV, 0, newV, 1, oldV.length);
                             }
                             newV[0] = new Version(val, upTime);

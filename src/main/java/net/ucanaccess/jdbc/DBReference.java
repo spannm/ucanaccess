@@ -17,6 +17,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+@SuppressWarnings("java:S2077") // suppress sonarcloud warnings regarding dynamically formatted SQL
 public class DBReference {
     private static final String                     CIPHER_SPEC       = "AES";
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
@@ -148,7 +149,7 @@ public class DBReference {
             return _conn;
         }
         updateLastModified();
-        closeHSQLDB(_session);
+        closeHsqlDb(_session);
         dbIO.flush();
         dbIO.close();
         dbIO = open(dbFile, pwd);
@@ -226,7 +227,7 @@ public class DBReference {
         return lu;
     }
 
-    private void closeHSQLDB(Session session) throws IOException {
+    private void closeHsqlDb(Session session) throws IOException {
         closeHsqlDb(session, false);
     }
 
@@ -293,11 +294,11 @@ public class DBReference {
     private void initHSQLDB(Connection _conn) {
         try (Statement st = _conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
-            st.execute("SET DATABASE SQL CONCAT NULLS " + concatNulls);
+            st.execute(String.format("SET DATABASE SQL CONCAT NULLS %s", concatNulls));
             if (lobScale == null && inMemory) {
                 st.execute("SET FILES LOB SCALE 1");
             } else if (lobScale != null) {
-                st.execute("SET FILES LOB SCALE " + lobScale);
+                st.execute(String.format("SET FILES LOB SCALE %s", lobScale));
             }
 
         } catch (Exception _ex) {
@@ -305,6 +306,7 @@ public class DBReference {
         }
     }
 
+    @SuppressWarnings("java:S2095") // suppress sonarcloud warning regarding try-with-resources
     public Connection getHSQLDBConnection(Session _session) throws SQLException {
         boolean keptMirror = firstConnection && toKeepHsql != null && toKeepHsql.exists();
 
@@ -363,7 +365,7 @@ public class DBReference {
             if (!inMemory && tempHsql == null) {
                 if (toKeepHsql != null) {
                     if (!toKeepHsql.exists() && !toKeepHsql.createNewFile()) {
-                        logger.log(Level.WARNING, "Could not create file " + toKeepHsql);
+                        logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
                     }
                     tempHsql = toKeepHsql;
                 } else {
@@ -373,13 +375,13 @@ public class DBReference {
                     tempHsql = new File(hbase, id);
 
                     if (!tempHsql.createNewFile()) {
-                        logger.log(Level.WARNING, "Could not create file " + tempHsql);
+                        logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
                     }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
                         if (toKeepHsql == null) {
-                            closeHSQLDB(_session);
+                            closeHsqlDb(_session);
                         } else {
                             finalizeHsqlDb(_session);
                         }
@@ -439,7 +441,7 @@ public class DBReference {
         try {
             File flLock = fileLock();
             if (!flLock.createNewFile()) {
-                logger.log(Level.WARNING, "Could not create file " + flLock);
+                logger.log(Level.WARNING, "Could not create file {0}", flLock);
             }
 
             // suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess
@@ -500,7 +502,7 @@ public class DBReference {
         memoryTimer.timer.cancel();
         dbIO.flush();
         dbIO.close();
-        closeHSQLDB(_session);
+        closeHsqlDb(_session);
 
     }
 
@@ -591,6 +593,7 @@ public class DBReference {
     private static class MemoryTimer {
         private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
 
+        private final Logger      logger                     = System.getLogger(getClass().getName());
         private final DBReference dbReference;
         private final Timer       timer;
         private int               activeConnection;
@@ -608,7 +611,7 @@ public class DBReference {
                 try {
                     dbReference.shutdown(_session);
                 } catch (Exception _ex) {
-                    System.getLogger(MemoryTimer.class.getName()).log(Level.WARNING, "Error shutting down db " + dbReference + ": " + _ex);
+                    logger.log(Level.WARNING, "Error shutting down db {0}: {1}", dbReference, _ex.toString());
                 }
                 timer.cancel();
 
@@ -624,6 +627,7 @@ public class DBReference {
                                 try {
                                     dbReference.shutdown(_session);
                                 } catch (Exception _ignored) {
+                                    logger.log(Level.DEBUG, "Ignore {0}", _ignored.toString());
                                 }
                             }
                         }

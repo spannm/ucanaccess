@@ -217,8 +217,7 @@ public class DDLCommandEnlist {
     }
 
     private void parseColumnTypes(List<String> _typeList, List<String> _defaultList, List<Boolean> _notNullList, String _tknt) {
-
-        String[] colDecls = _tknt.split("[\\s\n\r]+");
+        String[] colDecls = _tknt.split("\\s+");
         colDecls = checkEscaped("[", "]", colDecls, _tknt);
         colDecls = checkEscaped("`", "`", colDecls, _tknt);
         String escaped = SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()) ? colDecls[0].toUpperCase()
@@ -226,10 +225,10 @@ public class DDLCommandEnlist {
         columnMap.put(escaped, colDecls[0]);
 
         boolean reset = false;
-        if (_tknt.matches("[\\s\n\r]*\\d+[\\s\n\r]*\\).*")) {
+        if (_tknt.matches("\\s*\\d+\\s*\\).*")) {
             reset = true;
             _tknt = _tknt.substring(_tknt.indexOf(')') + 1).trim();
-            colDecls = _tknt.split("[\\s\n\r]+");
+            colDecls = _tknt.split("\\s+");
         }
 
         if (!reset && colDecls.length < 2) {
@@ -263,16 +262,16 @@ public class DDLCommandEnlist {
     }
 
     // getting AUTOINCREMENT and GUID
+    @SuppressWarnings("java:S5852")
     private void parseTypesFromCreateStatement(String _sql) throws SQLException {
-        _sql = _sql.replaceAll("([\\s\n\r]+)((?i)DECIMAL)([\\s\n\r]*\\()", "$1NUMERIC(")
-                .replaceAll("([\\s\n\r]+)((?i)NUMERIC)([\\s\n\r]*\\()", "$1NUMERIC(");
-        int startDecl = _sql.indexOf('(');
-        int endDecl = _sql.lastIndexOf(')');
+        String sql = _sql.replaceAll("(\\s+)(?:(?i)DECIMAL|(?i)NUMERIC)\\s*\\(", "$1NUMERIC(");
+        int startDecl = sql.indexOf('(');
+        int endDecl = sql.lastIndexOf(')');
 
         if (startDecl >= endDecl) {
-            throw new InvalidCreateStatementException(_sql);
+            throw new InvalidCreateStatementException(sql);
         }
-        String decl = _sql.substring(startDecl + 1, endDecl);
+        String decl = sql.substring(startDecl + 1, endDecl);
         String[] tokens = decl.split(",");
 
         List<String> typeList = new ArrayList<>();
