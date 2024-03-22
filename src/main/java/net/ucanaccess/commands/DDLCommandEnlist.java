@@ -221,7 +221,7 @@ public class DDLCommandEnlist {
         String[] colDecls = _tknt.split("\\s+");
         colDecls = checkEscaped("[", "]", colDecls, _tknt);
         colDecls = checkEscaped("`", "`", colDecls, _tknt);
-        String escaped = SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()) ? colDecls[0].toUpperCase()
+        String escaped = SQLConverter.isListedAsKeyword(colDecls[0]) ? colDecls[0].toUpperCase()
                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
         columnMap.put(escaped, colDecls[0]);
 

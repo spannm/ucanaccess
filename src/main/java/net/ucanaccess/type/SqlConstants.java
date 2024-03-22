@@ -11,6 +11,7 @@ public final class SqlConstants {
     public static final String ALTER                 = "ALTER";
     public static final String AND                   = "AND";
     public static final String ASC_OR_DESC           = "ASC_OR_DESC";
+    public static final String COLUMNS_VIEW          = "COLUMNS_VIEW";
     public static final String COLUMN_NAME           = "COLUMN_NAME";
     public static final String COLUMN_SIZE           = "COLUMN_SIZE";
     public static final String COUNT_STAR            = "COUNT(*)";
@@ -55,9 +56,16 @@ public final class SqlConstants {
     public static final String SET                   = "SET";
     public static final String SMALLINT              = "SMALLINT";
     public static final String SYSTEM_SUBQUERY       = "SYSTEM_SUBQUERY";
+    public static final String SYSTEM_TABLES         = "SYSTEM_TABLES";
     public static final String TABLE                 = "TABLE";
+    public static final String TABLES                = "TABLES";
+    public static final String TABLE_CAT             = "TABLE_CAT";
+    public static final String TABLE_CATALOG         = "TABLE_CATALOG";
     public static final String TABLE_ID              = "TABLE_ID";
     public static final String TABLE_NAME            = "TABLE_NAME";
+    public static final String TABLE_PRIVILEGES      = "TABLE_PRIVILEGES";
+    public static final String TABLE_SCHEM           = "TABLE_SCHEM";
+    public static final String TABLE_SCHEMA          = "TABLE_SCHEMA";
     public static final String TRUNCATE              = "TRUNCATE";
     public static final String UNION                 = "UNION";
     public static final String UNION_ALL             = "UNION ALL";
