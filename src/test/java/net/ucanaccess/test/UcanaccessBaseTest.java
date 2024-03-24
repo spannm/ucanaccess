@@ -105,7 +105,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, CharSequence _expression) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
         if (!_expectedResults.isEmpty()) {
-            assertEquals(_expectedResults.get(0).size(), colCountActual);
+            assertEquals(_expectedResults.get(0).size(), colCountActual, "Unexpected column count");
         }
         int rowIdx = 0;
         while (_resultSet.next()) {
@@ -144,25 +144,25 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
             rowIdx++;
         }
-        assertEquals(_expectedResults.size(), rowIdx, "Matrix with different length was expected");
+        assertEquals(_expectedResults.size(), rowIdx, "Unexpected matrix length");
     }
 
     private void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, CharSequence _query) throws SQLException {
         int colCountActual = _resultSet.getMetaData().getColumnCount();
         int colCountExpected = _verifyResultSet.getMetaData().getColumnCount();
-        assertEquals(colCountExpected, colCountActual);
+        assertEquals(colCountExpected, colCountActual, "Unexpected column count");
 
-        StringBuilder log = new StringBuilder("{");
+        StringBuilder log = new StringBuilder('{');
         int row = 0;
         while (next(_verifyResultSet, _resultSet)) {
             row++;
             if (log.length() > 1) {
-                log.append(",");
+                log.append(',');
             }
-            log.append("{");
+            log.append('{');
             for (int col = 1; col <= colCountActual; col++) {
                 if (col > 1) {
-                    log.append(",");
+                    log.append(',');
                 }
                 Object objActual = _resultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
                     ? _resultSet.getBoolean(col)
@@ -174,16 +174,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (objActual == null && objExpected == null) {
                     continue;
                 } else if (objActual == null) {
-                    assertNull(objExpected, "Object in verify set at row:col " + row + ":" + col + " should be null, but was: "
-                        + objExpected + " in [" + _query + "]");
+                    assertNull(objExpected, "Object in verify set at row:col " + row + ':' + col + " should be null, but was: "
+                        + objExpected + " in [" + _query + ']');
                 } else {
                     if (objActual instanceof Blob) {
-                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes)
-                            .orThrow(UncheckedIOException::new);
-                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes)
-                            .orThrow(UncheckedIOException::new);
+                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
                         for (int y = 0; y < barrExpected.length; y++) {
-                            assertEquals(barrExpected[y], barrActual[y]);
+                            assertEquals(barrExpected[y], barrActual[y], "Byte mismatch at position " + y + " in column " + col + " in blob");
                         }
                     } else if (objActual instanceof ComplexBase[] && objExpected instanceof ComplexBase[]) {
                         assertArrayEquals((ComplexBase[]) objExpected, (ComplexBase[]) objActual);
@@ -198,13 +196,13 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                             objActual = ((Date) objActual).getTime();
                             objExpected = ((Date) objExpected).getTime();
                         }
-                        assertEquals(objExpected, objActual);
+                        assertEquals(objExpected, objActual, "Content mismatch in column " + col);
                     }
                 }
             }
-            log.append("}");
+            log.append('}');
         }
-        log.append("}");
+        log.append('}');
 
     }
 
