@@ -358,7 +358,7 @@ public final class SQLConverter {
         sql = convertUnion(sql);
         sql = convertAccessDate(sql);
         sql = convertQuotedAliases(sql, nsql);
-        sql = escape(sql); //TODO
+        sql = escape(sql);
         sql = convertLike(sql);
         sql = replaceWhiteSpacedTables(sql);
         // sql = replaceExclamationPoints(sql);
