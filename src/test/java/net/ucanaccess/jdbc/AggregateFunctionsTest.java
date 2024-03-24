@@ -3,34 +3,20 @@ package net.ucanaccess.jdbc;
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.SQLException;
-import java.util.Locale;
-import java.util.Objects;
 
 class AggregateFunctionsTest extends UcanaccessBaseTest {
-
-    @BeforeAll
-    static void setLocale() {
-        locale = Locale.getDefault();
-        Locale.setDefault(Locale.US);
-    }
-
-    @AfterAll
-    static void resetLocale() {
-        Locale.setDefault(Objects.requireNonNullElseGet(locale, Locale::getDefault));
-    }
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
         super.init(_accessVersion);
 
-        executeStatements("CREATE TABLE t_aggrfunc (id INTEGER, descr TEXT(400), num NUMERIC(12,3), date0 DATETIME)",
-            "INSERT INTO t_aggrfunc (id, descr, num, date0) VALUES(1234, 'Show must go off',-1110.55446,#11/22/2003 10:42:58 PM#)",
-            "INSERT INTO t_aggrfunc (id, descr, num, date0) VALUES(12344, 'Show must go up and down',-113.55446,#11/22/2006 10:42:58 PM#)");
+        executeStatements(
+            "CREATE TABLE t_aggrfunc (id INTEGER, descr TEXT(400), num NUMERIC(12,3), date0 DATETIME)",
+            "INSERT INTO t_aggrfunc (id, descr, num, date0) VALUES(1234, 'Show must go off', -1110.55446, #11/22/2003 10:42:58 PM#)",
+            "INSERT INTO t_aggrfunc (id, descr, num, date0) VALUES(12344, 'Show must go up and down', -113.55446, #11/22/2006 10:42:58 PM#)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -39,8 +25,7 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         checkQuery("SELECT id, DCount('*', 't_aggrfunc', '1=1') FROM [t_aggrfunc]", recs(rec(1234, 2), rec(12344, 2)));
-        checkQuery("SELECT id AS [WW \"SS], DCount('descr', 't_aggrfunc', '1=1') FROM t_aggrfunc",
-            recs(rec(1234, 2), rec(12344, 2)));
+        checkQuery("SELECT id AS [WW \"SS], DCount('descr', 't_aggrfunc', '1=1') FROM t_aggrfunc", recs(rec(1234, 2), rec(12344, 2)));
         checkQuery("SELECT DCount('*', 't_aggrfunc', '1=1') ", singleRec(2));
     }
 
