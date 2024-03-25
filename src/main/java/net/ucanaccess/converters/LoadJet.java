@@ -109,7 +109,7 @@ public class LoadJet {
             st.executeUpdate(_expression);
         } catch (SQLException _ex) {
             if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                logger.log(Level.WARNING, "Cannot execute: " + _expression + " " + _ex.getMessage());
+                logger.log(Level.WARNING, "Cannot execute: " + _expression + ' ' + _ex.getMessage());
             }
             throw _ex;
         }
@@ -125,7 +125,7 @@ public class LoadJet {
         }
         SQLWarning sqlw = null;
         for (String s : viewsLoader.notLoaded.keySet()) {
-            String message = s.length() > 0 ? "Cannot load view " + s + " " + viewsLoader.notLoaded.get(s)
+            String message = s.length() > 0 ? "Cannot load view " + s + ' ' + viewsLoader.notLoaded.get(s)
                     : "Cannot load views ";
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
@@ -135,7 +135,7 @@ public class LoadJet {
         }
         for (String s : viewsLoader.notLoadedProcedure.keySet()) {
             String message =
-                    s.length() > 0 ? "Cannot load procedure " + s + " " + viewsLoader.notLoadedProcedure.get(s)
+                    s.length() > 0 ? "Cannot load procedure " + s + ' ' + viewsLoader.notLoadedProcedure.get(s)
                             : "Cannot load procedures ";
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
@@ -233,9 +233,9 @@ public class LoadJet {
         private void addFunction(String _functionName, String _javaMethodName, String _returnType, String... _paramTypes) {
             StringBuilder code = new StringBuilder();
             if (DBReference.is2xx()) {
-                String parms = IntStream.rangeClosed(1, _paramTypes.length).mapToObj(i -> "par" + i + " " + _paramTypes[i - 1]).collect(Collectors.joining(", "));
+                String parms = IntStream.rangeClosed(1, _paramTypes.length).mapToObj(i -> "par" + i + ' ' + _paramTypes[i - 1]).collect(Collectors.joining(", "));
                 code.append("CREATE FUNCTION ").append(_functionName)
-                    .append("(").append(parms).append(")")
+                    .append('(').append(parms).append(')')
                     .append(" RETURNS ").append(_returnType)
                     .append(" LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME ")
                     .append("'CLASSPATH:").append(_javaMethodName).append("'");
@@ -258,7 +258,7 @@ public class LoadJet {
                     .collect(Collectors.toList());
 
                 for (FunctionType func : functionTypes) {
-                    String methodName = _clazz.getName() + "." + method.getName();
+                    String methodName = _clazz.getName() + '.' + method.getName();
                     String functionName = Objects.requireNonNullElse(func.functionName(), methodName);
                     AccessType[] acts = func.argumentTypes();
                     AccessType ret = func.returnType();
@@ -335,8 +335,8 @@ public class LoadJet {
                         body.append(" WHEN B").append(j).append(" THEN V").append(j);
                         header.append(comma);
                         comma = ", ";
-                        header.append("B").append(j).append(" BOOLEAN").append(comma)
-                              .append("V").append(j).append(" ").append(type);
+                        header.append('B').append(j).append(" BOOLEAN").append(comma)
+                              .append('V').append(j).append(' ').append(type);
                     }
                     body.append(" END)");
                     header.append(") RETURNS ").append(type).append(" RETURN").append(body);
@@ -389,7 +389,7 @@ public class LoadJet {
 
         private String schema(String name, boolean systemTable) {
             if (systemTable) {
-                return SYSTEM_SCHEMA + "." + name;
+                return SYSTEM_SCHEMA + '.' + name;
             }
             return name;
         }
@@ -415,16 +415,16 @@ public class LoadJet {
 
             if (dtyp.equals(DataType.TEXT)) {
                 int ln = ff1997 ? _col.getLength() : _col.getLengthInUnits();
-                htype = "VARCHAR(" + ln + ")";
+                htype = "VARCHAR(" + ln + ')';
             } else if (dtyp.equals(DataType.NUMERIC) && (_col.getScale() > 0 || calcType)) {
                 if (calcType) {
                     htype = "NUMERIC(100 ,4)";
                 } else {
-                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + _col.getScale() + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + ',' + _col.getScale() + ')';
                 }
             } else if (dtyp.equals(DataType.FLOAT)) {
                 if (calcType) {
-                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + 7 + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + ',' + 7 + ')';
                 } else {
                     Object dps = null;
                     Object dpso = _col.getProperties().get("DecimalPlaces");
@@ -433,7 +433,7 @@ public class LoadJet {
                     }
                     byte dp = dps == null ? 7 : (Byte) dps < 0 ? 7 : (Byte) dps;
 
-                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + "," + dp + ")";
+                    htype = "NUMERIC(" + (_col.getPrecision() > 0 ? _col.getPrecision() : 100) + ',' + dp + ')';
                 }
             } else {
                 htype = TypesMap.map2hsqldb(dtyp);
@@ -512,7 +512,7 @@ public class LoadJet {
             ntn = SQLConverter.checkLang(ntn, conn);
             ntn = schema(ntn, _systemTable);
 
-            StringBuilder sbC = new StringBuilder("CREATE CACHED TABLE ").append(ntn).append("(");
+            StringBuilder sbC = new StringBuilder("CREATE CACHED TABLE ").append(ntn).append('(');
 
             String comma = "";
             for (Column col : _t.getColumns()) {
@@ -551,7 +551,7 @@ public class LoadJet {
                 }
                 cn = SQLConverter.completeEscaping(cn);
                 cn = SQLConverter.checkLang(cn, conn);
-                sbC.append(comma).append(cn).append(" ").append(getHsqldbColumnType(col));
+                sbC.append(comma).append(cn).append(' ').append(getHsqldbColumnType(col));
                 if (DataType.FLOAT.equals(col.getType())) {
                     check.append(", check (3.4028235E+38>=").append(cn).append(" AND -3.4028235E+38<=").append(cn)
                             .append(")");
@@ -768,7 +768,7 @@ public class LoadJet {
             if (ntn == null) {
                 return;
             }
-            String nin = escapeIdentifier(ctn + "_" + idx.getName());
+            String nin = escapeIdentifier(ctn + '_' + idx.getName());
             String colsIdx = commaSeparated(cls, true);
             String colsIdxRef = commaSeparated(idx.getReferencedIndex().getColumns(), true);
 
@@ -806,7 +806,7 @@ public class LoadJet {
                 return;
             }
             String nin = idx.getName();
-            nin = escapeIdentifier(tn + "_" + nin);
+            nin = escapeIdentifier(tn + '_' + nin);
             boolean uk = idx.isUnique();
             boolean pk = idx.isPrimaryKey();
             if (!uk && !pk && idx.getColumns().size() == 1) {
@@ -1202,7 +1202,7 @@ public class LoadJet {
                 comma = ",";
             }
             sbI.append(") ");
-            sbE.append(")");
+            sbE.append(')');
             sbI.append(sbE);
 
             return conn.prepareStatement(sbI.toString());
@@ -1252,9 +1252,9 @@ public class LoadJet {
 
     private final class TriggersLoader {
         void loadTrigger(String tableName, String namePrefix, String when, Class<? extends TriggerBase> clazz) throws SQLException {
-            String triggerName = escapeIdentifier(namePrefix + "_" + tableName);
+            String triggerName = escapeIdentifier(namePrefix + '_' + tableName);
             String q0 = DBReference.is2xx() ? "" : "QUEUE 0 ";
-            exec("CREATE TRIGGER " + triggerName + " " + when + " ON " + tableName + " FOR EACH ROW " + q0
+            exec("CREATE TRIGGER " + triggerName + ' ' + when + " ON " + tableName + " FOR EACH ROW " + q0
                 + "CALL \"" + clazz.getName() + "\"", true);
         }
 
@@ -1400,31 +1400,30 @@ public class LoadJet {
 
         private String solveAmbiguous(String sql) {
             try {
-                sql = sql.replaceAll("[\n\r]", " ");
-                Pattern pat = Pattern.compile("(.*)[\n\r\\s]*(?i)SELECT([\n\r\\s].*[\n\r\\s])(?i)FROM([\n\r\\s])(.*)");
+                sql = sql.replaceAll("\\s+", " ");
+                Pattern pat = Pattern.compile("(.*)\\s+SELECT(\\s.*\\s)FROM(\\s)(.*)", Pattern.CASE_INSENSITIVE);
                 Matcher mtc = pat.matcher(sql);
                 if (mtc.find()) {
                     String select = mtc.group(2);
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
-                    String[] splitted = select.split(",", -1);
+                    String[] split = select.split(",", -1);
                     StringBuilder sb = new StringBuilder(pre).append(" select ");
                     List<String> lkl = new LinkedList<>();
 
-                    for (String s : splitted) {
-                        int j = s.lastIndexOf('.');
-
-                        Pattern patAlias = Pattern.compile("\\s+(?i)AS\\s+");
+                    Pattern patAlias = Pattern.compile("\\s+AS\\s+", Pattern.CASE_INSENSITIVE);
+                    for (String s : split) {
+                        int i = s.lastIndexOf('.');
                         boolean alias = patAlias.matcher(s).find();
-                        if (j < 0 || alias) {
+                        if (i < 0 || alias) {
                             lkl.add(s);
                         } else {
-                            String k = s.substring(j + 1);
+                            String k = s.substring(i + 1);
                             if (lkl.contains(k)) {
                                 int idx = lkl.indexOf(k);
                                 String old = lkl.get(lkl.indexOf(k));
                                 lkl.remove(old);
-                                lkl.add(idx, splitted[idx] + " AS [" + splitted[idx].trim() + "]");
-                                lkl.add(s + " AS [" + s.trim() + "]");
+                                lkl.add(idx, split[idx] + " AS [" + split[idx].trim() + ']');
+                                lkl.add(s + " AS [" + s.trim() + ']');
                             } else {
                                 lkl.add(k);
                             }
