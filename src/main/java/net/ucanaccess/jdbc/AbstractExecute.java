@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public abstract class AbstractExecute {
     protected enum CommandType {
@@ -154,9 +155,8 @@ public abstract class AbstractExecute {
                     if (tableName == null) {
                         throw new TableNotFoundException(tableName);
                     }
-                    ddlExpr = sql0.replaceFirst("(?i)\\s+ADD\\s+CONSTRAINT\\s+.*\\s+FOREIGN\\s+KEY\\s+",
-                        " ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US)
-                            + "\" FOREIGN KEY ");
+                    Pattern pat = Pattern.compile("\\s+ADD\\s+CONSTRAINT\\s+.*?\\s+FOREIGN\\s+KEY\\s+", Pattern.CASE_INSENSITIVE);
+                    ddlExpr = pat.matcher(sql0).replaceFirst(" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\" FOREIGN KEY ");
                 }
             } else if (ddlType.equals(DDLType.DROP_FOREIGN_KEY)) {
                 String constraintName = ddlType.getSecondDBObjectName();
@@ -176,8 +176,8 @@ public abstract class AbstractExecute {
                     if (tableName == null) {
                         throw new TableNotFoundException(tableName);
                     }
-                    ddlExpr = sql0.replaceFirst("(?i)\\s+DROP\\s+CONSTRAINT\\s+.*",
-                        " DROP CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\"");
+                    Pattern pat = Pattern.compile("\\s+DROP\\s+CONSTRAINT\\s+.*", Pattern.CASE_INSENSITIVE);
+                    ddlExpr = pat.matcher(sql0).replaceFirst(" DROP CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\"");
                 }
             } else {
                 ddlExpr = sql0;
