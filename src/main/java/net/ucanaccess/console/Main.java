@@ -285,7 +285,7 @@ public class Main {
             }
             switch (arg) {
                 case "-d":
-                    ++i;
+                    i++;
                     if (i >= tokens.size()) {
                         prompt("Missing parameter for -d flag");
                         prompt(EXPORT_PROMPT);
@@ -294,7 +294,7 @@ public class Main {
                     exporterBuilder.withDelimiter(tokens.get(i));
                     break;
                 case "-t":
-                    ++i;
+                    i++;
                     if (i >= tokens.size()) {
                         prompt("Missing parameter for -t flag");
                         prompt(EXPORT_PROMPT);
@@ -309,7 +309,7 @@ public class Main {
                     exporterBuilder.preserveNewlines(true);
                     break;
                 case "--big_query_schema":
-                    ++i;
+                    i++;
                     if (i >= tokens.size()) {
                         prompt("Missing parameter for --big_query_schema flag");
                         prompt(EXPORT_PROMPT);
@@ -321,7 +321,7 @@ public class Main {
                     printExportHelp();
                     return;
                 case "--":
-                    ++i;
+                    i++;
                     break;
                 default:
                     prompt("Unknown flag " + arg);
@@ -364,8 +364,7 @@ public class Main {
      * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export
      * operations.
      */
-    private void exportCsvAndSchema(CharSequence _sqlQuery, String _csvFileName, String _schemaFileName, Exporter _exporter)
-        throws SQLException, IOException {
+    private void exportCsvAndSchema(CharSequence _sqlQuery, String _csvFileName, String _schemaFileName, Exporter _exporter) throws SQLException, IOException {
         Objects.requireNonNull(_sqlQuery, "Sql required");
         try (Statement statement = conn.createStatement()) {
             ResultSet rs = statement.executeQuery(_sqlQuery.toString());

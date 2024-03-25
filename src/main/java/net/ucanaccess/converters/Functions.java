@@ -16,6 +16,7 @@ import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.text.*;
 import java.time.DayOfWeek;
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("java:S2447")
 public final class Functions {
     private static final Logger LOGGER = System.getLogger(Functions.class.getName());
+    private static SecureRandom random;
     private static Double       rnd;
     private static Double       lastRnd;
     private static final double APPROX = 0.00000001;
@@ -1090,16 +1092,18 @@ public final class Functions {
         return datePart("w", _date, _firstDayOfWeek);
     }
 
+    /**
+     * Returns a Variant (String) containing a repeating character string of the length specified.
+     */
     @FunctionType(functionName = "String", argumentTypes = {AccessType.LONG, AccessType.MEMO}, returnType = AccessType.MEMO)
     public static String string(Integer _nr, String _str) {
         if (_str == null) {
             return null;
+        } else if (_str.isEmpty()) {
+            return "";
         }
-        String ret = "";
-        for (int i = 0; i < _nr; i++) {
-            ret += _str.charAt(0);
-        }
-        return ret;
+
+        return _str.substring(0, 1).repeat(_nr);
     }
 
     /**
@@ -1124,8 +1128,11 @@ public final class Functions {
 
     @FunctionType(functionName = "Rnd", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static Double rnd(Double _d) {
+        if (random == null) {
+            random = new SecureRandom();
+        }
         if (_d == null || _d > 0) {
-            lastRnd = Math.random();
+            lastRnd = random.nextDouble();
             return lastRnd;
         }
         if (_d < 0) {
@@ -1136,7 +1143,7 @@ public final class Functions {
         }
         if (_d == 0) {
             if (lastRnd == null) {
-                lastRnd = Math.random();
+                lastRnd = random.nextDouble();
             }
             return lastRnd;
         }

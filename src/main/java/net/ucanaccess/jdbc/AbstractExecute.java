@@ -155,6 +155,7 @@ public abstract class AbstractExecute {
                     if (tableName == null) {
                         throw new TableNotFoundException(tableName);
                     }
+                    @SuppressWarnings("java:S5852")
                     Pattern pat = Pattern.compile("\\s+ADD\\s+CONSTRAINT\\s+.*?\\s+FOREIGN\\s+KEY\\s+", Pattern.CASE_INSENSITIVE);
                     ddlExpr = pat.matcher(sql0).replaceFirst(" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\" FOREIGN KEY ");
                 }
@@ -198,6 +199,7 @@ public abstract class AbstractExecute {
         return SQLConverter.checkDDL(sql);
     }
 
+    @SuppressWarnings("java:S2245")
     public Object executeBase() throws SQLException {
         UcanaccessConnection conn = statement.getConnection();
         UcanaccessConnection.setCtxConnection(conn);

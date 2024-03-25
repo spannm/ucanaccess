@@ -115,7 +115,7 @@ public class LoadJet {
         }
     }
 
-    private String escapeIdentifier(String tn) throws SQLException {
+    private String escapeIdentifier(String tn) {
         return SQLConverter.escapeIdentifier(tn, conn);
     }
 
@@ -1398,6 +1398,7 @@ public class LoadJet {
             }
         }
 
+        @SuppressWarnings("java:S5852")
         private String solveAmbiguous(String sql) {
             try {
                 sql = sql.replaceAll("\\s+", " ");

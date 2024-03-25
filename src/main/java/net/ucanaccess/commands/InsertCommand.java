@@ -75,7 +75,7 @@ public class InsertCommand implements ICommand {
         }
     }
 
-    public void insertRow(Table _table, Object[] _row) throws IOException {
+    public void insertRow(Table _table) throws IOException {
         try {
             _table.addRow(newRow);
         } catch (ConstraintViolationException _ex) {
@@ -125,7 +125,7 @@ public class InsertCommand implements ICommand {
                 colList = Arrays.asList(cllReorded);
             }
 
-            insertRow(table, newRow);
+            insertRow(table);
             j = 0;
             for (Column col : colList) {
                 ColumnImpl colImpl = (ColumnImpl) col;

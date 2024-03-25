@@ -17,6 +17,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("java:S1192")
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
 
     private PreparedStatement                  wrapped;

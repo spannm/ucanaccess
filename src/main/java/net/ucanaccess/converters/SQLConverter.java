@@ -13,10 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "java:S1192"})
+@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "java:S1192", "java:S6353"})
 public final class SQLConverter {
 
-    @SuppressWarnings({"java:S5842", "java:S5852", "java:S5998", "java:S6353"})
+    @SuppressWarnings({"java:S5842", "java:S5852", "java:S5998"})
     public static final class Patterns {
         private static final Pattern       SELECT_FROM_START          = Pattern.compile("\\s*SELECT\\s+", Pattern.CASE_INSENSITIVE);
         private static final Pattern       SELECT_FROM_END            = Pattern.compile("\\s*FROM[\\s\\[]+", Pattern.CASE_INSENSITIVE);
@@ -54,6 +54,7 @@ public final class SQLConverter {
             "(\\s+AS\\s*)(\\[[^\\]]*\\])(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       DISTINCT_ROW               = Pattern.compile("\\s+DISTINCTROW\\s+", Pattern.CASE_INSENSITIVE);
         private static final Pattern       DEFAULT_VARCHAR            = Pattern.compile("(\\W)VARCHAR([\\s,\\)])", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       DEFAULT_VARCHAR_0          = Pattern.compile("(\\W)VARCHAR([^\\(])", Pattern.CASE_INSENSITIVE);
         private static final Pattern       ESPRESSION_DIGIT           = Pattern.compile("([\\d]+)(?![\\.\\d])");
 
         private Patterns() {
@@ -63,7 +64,6 @@ public final class SQLConverter {
     private static final String              NAME_PAT                       = "(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)";
     private static final int                 NAME_PAT_STEP                  = 4;
     private static final String              UNION                          = "(;)(\\s*)((?i)UNION)(\\s*)";
-    private static final String              DEFAULT_VARCHAR_0              = "(\\W)(?i)VARCHAR([^\\(])";
     private static final String              BACKTICK                       = "(`)([^`]*)(`)";
     private static final String              DELETE_ALL                     = "((?i)DELETE\\s+)(\\*)(\\s+(?i)FROM\\s+)";
     private static final String              PARAMETERS                     = "(?i)PARAMETERS([^;]*);";
@@ -158,7 +158,9 @@ public final class SQLConverter {
     private static int[] getQuoteGroup(String _s) {
         if (!_s.contains("''")) {
             Matcher m = Patterns.QUOTE_M.matcher(_s);
-            return m.find() ? new int[] {m.start(), m.end()} : null;
+            if (m.find()) {
+                return new int[] {m.start(), m.end()};
+            }
         } else {
             int[] ret = new int[] {-1, -1};
             Matcher m = Patterns.QUOTE_S.matcher(_s);
@@ -178,14 +180,16 @@ public final class SQLConverter {
                     }
                 }
             }
-            return null;
         }
+        return new int[0];
     }
 
     private static int[] getDoubleQuoteGroup(String _s) {
         if (!_s.contains("\"\"")) {
             Matcher m = Patterns.DOUBLE_QUOTE_M.matcher(_s);
-            return m.find() ? new int[] {m.start(), m.end()} : null;
+            if (m.find()) {
+                return new int[] {m.start(), m.end()};
+            }
         } else {
             int[] ret = new int[] {-1, -1};
             Matcher mc = Patterns.DOUBLE_QUOTE_S.matcher(_s);
@@ -206,8 +210,8 @@ public final class SQLConverter {
                     }
                 }
             }
-            return null;
         }
+        return new int[0];
     }
 
     public enum DDLType {
@@ -516,7 +520,7 @@ public final class SQLConverter {
         }
         // workaround o.o. and l.o.
         for (String bst : WHITE_SPACED_TABLE_NAMES) {
-            String dw = bst.replaceAll(" ", "  ");
+            String dw = bst.replace(" ", "  ");
             sql = sql.replaceAll(Pattern.quote(dw), bst);
         }
         sb.append(")");
@@ -565,7 +569,7 @@ public final class SQLConverter {
 
     private static String convertSQLTokens(String sql) {
         return convertDeleteAll(replaceWorkAroundFunctions(
-                convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replaceAll("&", "||"))))));
+                convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replace("&", "||"))))));
     }
 
     private static String replaceDigitStartingIdentifiers(String sql) {
@@ -610,14 +614,14 @@ public final class SQLConverter {
         String tsql = enddq ? sql : sql.substring(0, li + 1);
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
-        if (fd != null || fs != null) {
-            boolean inid = fs == null || fd != null && fd[0] < fs[0];
+        if (fd.length > 0 || fs.length > 0) {
+            boolean inid = fs.length == 0 || fd.length > 0 && fd[0] < fs[0];
             String group;
             String str;
             int[] mcr = inid ? fd : fs;
             group = tsql.substring(mcr[0] + 1, mcr[1] - 1);
             if (inid) {
-                group = group.replaceAll("'", "''").replaceAll("\"\"", "\"");
+                group = group.replace("'", "''").replace("\"\"", "\"");
             }
             str = tsql.substring(0, mcr[0]);
             str = convertPartIdentifiers(str);
@@ -755,7 +759,7 @@ public final class SQLConverter {
             typeDecl = typeDecl.replaceAll("(\\s+)((?i)" + entry.getKey() + ")([\\s\\(]+)",
                     "$1" + entry.getValue() + "$3");
         }
-        return typeDecl.replaceAll(DEFAULT_VARCHAR_0, "$1VARCHAR(255)$2");
+        return Patterns.DEFAULT_VARCHAR_0.matcher(typeDecl).replaceAll("$1VARCHAR(255)$2");
     }
 
     private static String convertCreateTable(String sql, Map<String, String> _types2Convert) throws SQLException {
@@ -812,7 +816,7 @@ public final class SQLConverter {
         if (sql == null) {
             return false;
         }
-        return Patterns.CHECK_DDL.matcher(sql.replaceAll("[\n\r]", " ")).matches();
+        return Patterns.CHECK_DDL.matcher(sql.replaceAll("\\s+", " ")).matches();
     }
 
     private static String convertLike(String sql) {
@@ -911,8 +915,8 @@ public final class SQLConverter {
         String tsql = enddq ? sql : sql.substring(0, li + 1);
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
-        if (fd != null || fs != null) {
-            boolean inid = fs == null || fd != null && fd[0] < fs[0];
+        if (fd.length > 0 || fs.length > 0) {
+            boolean inid = fs.length == 0 || fd.length > 0 && fd[0] < fs[0];
             String group;
             String str;
             int[] mcr = inid ? fd : fs;

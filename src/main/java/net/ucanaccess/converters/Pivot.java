@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,9 @@ public class Pivot {
 
     public static void checkAndRefreshPivot(String _currSql, UcanaccessConnection _conn) {
 
-        for (String name : PIVOT_MAP.keySet()) {
+        for (Entry<String, String> e : PIVOT_MAP.entrySet()) {
+            String name = e.getKey();
+            String val = e.getValue();
             Pattern pat = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
             Matcher mtc = pat.matcher(_currSql);
             if (mtc.find()) {
@@ -76,7 +79,7 @@ public class Pivot {
                     Connection connHsql = _conn.getHSQLDBConnection();
                     Pivot pivot = new Pivot(connHsql);
 
-                    if (!pivot.parsePivot(PIVOT_MAP.get(name))) {
+                    if (!pivot.parsePivot(val)) {
                         return;
                     }
                     String sqlh = pivot.toSQL(null);

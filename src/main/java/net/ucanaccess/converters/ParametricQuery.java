@@ -218,10 +218,15 @@ public class ParametricQuery {
         return sqlContent;
     }
 
-    private static String transalteFormFields(String sqlString) {
-        return sqlString.replaceAll("\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]", "[$1_$2_$3]")
-                .replaceAll("\\[(\\w*)\\]\\!\\[(\\w*)\\]\\!\\[(\\w*)\\]", "[$1_$2_$3]")
-                .replaceAll("((?i)FORMS)\\.(\\w*)\\.(\\w*)", "[$1_$2_$3]");
+    private static String transalteFormFields(String _sql) {
+        String sql = _sql;
+        for (String pat : new String[] {
+            "\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]",
+            "\\[(\\w*)\\]\\!\\[(\\w*)\\]\\!\\[(\\w*)\\]",
+            "((?i)FORMS)\\.(\\w*)\\.(\\w*)"}) {
+            sql = sql.replaceAll(pat, "[$1_$2_$3]");
+        }
+        return sql;
     }
 
     private void parametersEmpiric() {
@@ -248,7 +253,7 @@ public class ParametricQuery {
         List<String> ls = queryParameters();
         StringBuilder args = new StringBuilder();
         String comma = "";
-        List<String> ar = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (String par : ls) {
             par = par.trim();
             int index = Math.max(Math.max(par.lastIndexOf(' '), par.lastIndexOf('\n')), par.lastIndexOf('\r'));
@@ -258,7 +263,7 @@ public class ParametricQuery {
             if (!decl.startsWith("[")) {
                 decl = "[" + decl + "]";
             }
-            ar.add(decl);
+            list.add(decl);
             String type0 = type.indexOf('(') > 0 ? type.substring(0, type.indexOf('(')) : type;
             String typeS = type.indexOf('(') > 0 ? type.substring(type.indexOf('(')) : "";
             Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
@@ -275,8 +280,8 @@ public class ParametricQuery {
         String sql = getSQL();
         sql = convertApos(SQLConverter.removeParameters(sql));
 
-        for (String var : ar) {
-            sql = sql.replaceAll("(?i)" + Pattern.quote(var), "?");
+        for (String s : list) {
+            sql = sql.replaceAll("(?i)" + Pattern.quote(s), "?");
         }
 
         try {
