@@ -16,13 +16,13 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S5852")
 public class Pivot {
-    @SuppressWarnings("java:S5852")
     private static final Pattern                   PAT_PIVOT          = Pattern.compile("TRANSFORM(.*\\W)SELECT(.*\\W)FROM(.*\\W)PIVOT(.*)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PAT_PIVOT_EXPR     = Pattern.compile("(.*)IN\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PAT_PIVOT_AGGR     = Pattern.compile("(SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PAT_PIVOT_CN       = Pattern.compile("[\"'#](.*)[\"'#]");
-    private static final String                    PAT_PIVOT_GROUP_BY = "(?i)GROUP\\s*(?i)BY";
+    private static final Pattern                   PAT_PIVOT_GROUP_BY = Pattern.compile("(.+)GROUP\\s+BY(.+)", Pattern.CASE_INSENSITIVE);
 
     private static final Map<String, String>       PIVOT_MAP          = new HashMap<>();
     private static final Map<String, List<String>> PREPARE_MAP        = new HashMap<>();
@@ -154,16 +154,20 @@ public class Pivot {
     }
 
     private void appendCaseWhen(StringBuilder _sb, String _condition, String _cn) {
-        _sb.append(aggregateFun).append("(CASE WHEN ").append(_condition).append(" THEN ").append(expression)
-                .append(" END) AS ").append(_cn);
+        _sb.append(aggregateFun).append("(CASE WHEN ").append(_condition)
+           .append(" THEN ").append(expression)
+           .append(" END) AS ").append(_cn);
     }
 
     public String verifySQL() {
-        StringBuilder sb = new StringBuilder();
-        String[] fromS = from.split(PAT_PIVOT_GROUP_BY);
-        sb.append("SELECT DISTINCT ").append(pivotStr).append(" AS PIVOT ")
-          .append(" FROM ").append(fromS[0]).append(" GROUP BY ").append(pivotStr).append(",").append(fromS[1]);
-        return SQLConverter.convertSQL(sb.toString()).getSql();
+        Matcher m = PAT_PIVOT_GROUP_BY.matcher(from);
+        if (m.matches()) {
+            String sql = new StringBuilder()
+              .append("SELECT DISTINCT ").append(pivotStr).append(" AS PIVOT")
+              .append(" FROM ").append(m.group(1)).append(" GROUP BY ").append(pivotStr).append(",").append(m.group(2)).toString();
+            return SQLConverter.convertSQL(sql).getSql();
+        }
+        return null;
     }
 
     public boolean prepare() {
