@@ -1,3 +1,4 @@
+#!/bin/sh
 
 UCANACCESS_HOME=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 echo $UCANACCESS_HOME
