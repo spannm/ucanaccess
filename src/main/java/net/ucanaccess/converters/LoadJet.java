@@ -109,7 +109,7 @@ public class LoadJet {
             st.executeUpdate(_expression);
         } catch (SQLException _ex) {
             if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                logger.log(Level.WARNING, "Cannot execute: " + _expression + ' ' + _ex.getMessage());
+                logger.log(Level.WARNING, "Cannot execute {0}: {1}", _expression, _ex.getMessage());
             }
             throw _ex;
         }
@@ -664,8 +664,8 @@ public class LoadJet {
                     boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                     if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})", "" + defVal, _col.getName(),
-                            _col.getTable().getName());
+                        logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})",
+                            defVal, _col.getName(), _col.getTable().getName());
                     } else {
                         if (defFound != null && !defIsFunction) {
                             metadata.columnDef(_col.getTable().getName(), _col.getName(), defFound.toString());
