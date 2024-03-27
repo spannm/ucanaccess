@@ -36,6 +36,20 @@
             <outputDirectory>lib</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
+            <excludes>
+                <exclude>io.github.spannm:${dep.jackcess.artifactId}</exclude>
+            </excludes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <includes>
+                <include>io.github.spannm:${dep.jackcess.artifactId}</include>
+            </includes>
+            <outputFileNameMapping>${artifact.artifactId}-${dep.jackcess.version}.${artifact.extension}
+            </outputFileNameMapping>
         </dependencySet>
     </dependencySets>
 
