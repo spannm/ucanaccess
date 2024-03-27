@@ -312,7 +312,7 @@ public class LoadJet {
         private void createFunctions() {
             for (String functionDef : functionDefinitions) {
                 Try.catching(() -> exec(functionDef, true))
-                    .orElse(e -> logger.log(Level.WARNING, "Failed to create function '{0}': {1}", functionDef, e.toString()));
+                    .orElse(e -> logger.log(Level.WARNING, "Failed to create function {0}: {1}", functionDef, e.toString()));
             }
 
             functionDefinitions.clear();
@@ -342,7 +342,7 @@ public class LoadJet {
                     header.append(") RETURNS ").append(type).append(" RETURN").append(body);
 
                     Try.catching(() -> exec(header.toString(), true))
-                        .orElse(ex -> logger.log(Level.WARNING, "Failed to create function '{0}': {1}", header, ex.toString()));
+                        .orElse(ex -> logger.log(Level.WARNING, "Failed to create function {0}: {1}", header, ex.toString()));
                 }
             }
 
