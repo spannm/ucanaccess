@@ -270,20 +270,38 @@
             </plugins>
         </pluginManagement>
 
-        <!-- mvn org.apache.maven.plugins:maven-assembly-plugin:single@distrib-zip-assembly -->
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/distrib-zip-assembly.xml</descriptor>
-                    </descriptors>
-                    <finalName>${project.artifactId}-${project.version}-bin</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
                 <executions>
                     <execution>
+                        <!-- mvn org.apache.maven.plugins:maven-assembly-plugin:single@distrib-zip-assembly -->
                         <id>distrib-zip-assembly</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/distrib-zip-assembly.xml</descriptor>
+                            </descriptors>
+                            <appendAssemblyId>true</appendAssemblyId>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                    <execution>
+                        <!-- mvn org.apache.maven.plugins:maven-assembly-plugin:single@fat-jar-assembly -->
+                        <id>fat-jar-assembly</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/fat-jar-assembly.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${ucanaccess.console.main}</mainClass>
+                                </manifest>
+                            </archive>
+                            <appendAssemblyId>true</appendAssemblyId>
+                        </configuration>
                         <goals>
                             <goal>single</goal>
                         </goals>
