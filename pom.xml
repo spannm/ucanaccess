@@ -95,7 +95,7 @@
 
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
 
-        <dep.jackcess.artifcactId>jackcess</dep.jackcess.artifcactId>
+        <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
         <dep.jackcess.version>5.0.0-SNAPSHOT</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
@@ -146,7 +146,7 @@
 
         <dependency>
             <groupId>io.github.spannm</groupId>
-            <artifactId>${dep.jackcess.artifcactId}</artifactId>
+            <artifactId>${dep.jackcess.artifactId}</artifactId>
             <version>${dep.jackcess.version}</version>
         </dependency>
 
