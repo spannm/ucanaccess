@@ -18,8 +18,16 @@
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>true</unpack>
             <scope>runtime</scope>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <unpack>true</unpack>
+            <scope>provided</scope>
             <excludes>
-                <exclude>org.apache.poi:poi</exclude>
+                <exclude>com.healthmarketscience.jackcess:jackcess</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
