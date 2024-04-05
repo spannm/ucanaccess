@@ -54,6 +54,16 @@
             <outputFileNameMapping>${artifact.artifactId}-${dep.jackcess.version}.${artifact.extension}
             </outputFileNameMapping>
         </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <scope>provided</scope>
+            <excludes>
+                <exclude>com.healthmarketscience.jackcess:jackcess</exclude>
+            </excludes>
+        </dependencySet>
     </dependencySets>
 
 </assembly>
