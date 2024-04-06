@@ -70,7 +70,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testNz(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT Nz(null,'lampredotto'), Nz('turtelaz','lampredotto'), Nz(null, 1.5), Nz(2, 2) FROM t_funcs",
+        checkQuery("SELECT Nz(null,'lampredotto'), Nz('turtelaz', 'lampredotto'), Nz(null, 1.5), Nz(2, 2) FROM t_funcs",
             singleRec("lampredotto", "turtelaz", 1.5, 2));
     }
 
@@ -637,7 +637,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testStrComp(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        checkQuery("SELECT StrComp('Cia','Cia') FROM t_funcs", singleRec(0));
+        checkQuery("SELECT StrComp('Cia', 'Cia') FROM t_funcs", singleRec(0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -23,8 +23,8 @@ class MetaDataTest extends UcanaccessBaseTest {
 
     void createSimple(String _a, List<List<Object>> _ver) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO t_metadata VALUES ('33A', 11, '" + _a + "' )");
-            st.execute("INSERT INTO t_metadata VALUES ('33B', 111, '" + _a + "' )");
+            st.execute("INSERT INTO t_metadata VALUES ('33A', 11, '" + _a + "')");
+            st.execute("INSERT INTO t_metadata VALUES ('33B', 111, '" + _a + "')");
         }
         checkQuery("SELECT * FROM t_metadata", _ver);
     }

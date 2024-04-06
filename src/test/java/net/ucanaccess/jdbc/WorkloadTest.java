@@ -28,7 +28,7 @@ class WorkloadTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             for (int i = 0; i <= nbRecords; i++) {
-                st.execute("INSERT INTO AAAB(id,a,c,d) VALUES (" + i + ",'33','booo','ddddddddddddddddddddd' )");
+                st.execute("INSERT INTO AAAB(id,a,c,d) VALUES (" + i + ",'33', 'booo', 'ddddddddddddddddddddd')");
             }
         }
 

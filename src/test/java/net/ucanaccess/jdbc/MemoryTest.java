@@ -38,7 +38,7 @@ class MemoryTest extends UcanaccessBaseTest {
             int nbRecords = 100000;
             for (int i = 0; i <= nbRecords; i++) {
                 st.execute("INSERT INTO t_mem(id, a, c, d) VALUES ("
-                    + i + ",'33','booddddddddddddddddddddddddddddddo','dddddddddddddddddsssssssssssssssdddd' )");
+                    + i + ",'33', 'booddddddddddddddddddddddddddddddo', 'dddddddddddddddddsssssssssssssssdddd')");
             }
             ucanaccess.commit();
 

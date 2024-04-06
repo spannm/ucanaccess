@@ -23,7 +23,7 @@ class NoRomanCharacterTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_noroman ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
-            st.execute("UPDATE t_noroman SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end' ");
+            st.execute("UPDATE t_noroman SET [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]='NOOOp' WHERE [end]='the end'");
             ResultSet rs = st.executeQuery("SELECT * FROM t_noroman");
             while (rs.next()) {
                 getLogger().log(Level.DEBUG, rs.getString("q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß"));
