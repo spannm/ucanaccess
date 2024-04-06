@@ -407,6 +407,28 @@
         </profile>
 
         <profile>
+            <id>add-project-local-maven-repo</id>
+            <!-- Profile to activate a local Maven repository in .m2-local-repo under the project's base dir.
+                 You must ensure the desired artificat(s) do not exist in the 'main' local m2 repository i.e. $HOME/.m2/repository/ -->
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>project-local-maven-repo-defined-in-pom</id>
+                    <name>Local file system Maven Repo for debugging</name>
+                    <url>file://${project.basedir}/.m2-local-repo/</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+
+        <profile>
             <id>release</id>
             <activation>
                 <property>
