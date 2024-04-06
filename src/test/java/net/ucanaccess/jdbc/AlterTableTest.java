@@ -49,7 +49,7 @@ class AlterTableTest extends UcanaccessBaseTest {
                 .hasMessageContaining("object name already exists");
             checkQuery(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
             dumpQueryResult(Sql.of(SELECT, "*", FROM, "[1GIà GIà]"));
-            getLogger().log(Level.DEBUG, "After having renamed a few tables ...");
+            getLogger().log(Level.DEBUG, "After having renamed a few tables");
             dumpQueryResult(Sql.of(SELECT, "*", FROM, "UCA_METADATA.TABLES"));
         }
     }

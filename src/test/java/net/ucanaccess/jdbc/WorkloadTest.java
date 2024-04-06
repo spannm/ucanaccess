@@ -35,13 +35,13 @@ class WorkloadTest extends UcanaccessBaseTest {
         ucanaccess.commit();
 
         long midTime = System.currentTimeMillis();
-        getLogger().log(Level.INFO, "Autoincrement insert performance test, {0} records inserted in {1} seconds.", nbRecords,
+        getLogger().log(Level.INFO, "Autoincrement insert performance test, {0} records inserted in {1} seconds", nbRecords,
                 TimeUnit.MILLISECONDS.toSeconds(midTime - startTime));
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("update aaAB set c='yessssss'&a");
             ucanaccess.commit();
-            getLogger().log(Level.INFO, "Update performance test, all {0} table records updated in {1} seconds.", nbRecords,
+            getLogger().log(Level.INFO, "Update performance test, all {0} table records updated in {1} seconds", nbRecords,
                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - midTime));
         }
     }

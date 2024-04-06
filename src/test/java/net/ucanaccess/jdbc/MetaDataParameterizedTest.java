@@ -44,7 +44,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
         rs.updateString("Sometime I wonder who I am ", "Growing old without emotions");
         rs.updateString("11q3 ¹²³¼½¾ß€", "康");
         rs.insertRow();
-        getLogger().log(Level.DEBUG, "Crazy names in create table with updatable resultset...");
+        getLogger().log(Level.DEBUG, "Crazy names in create table with updatable resultset");
         dumpQueryResult("SELECT * FROM [123456 nn%&/健康]");
 
         assertThatThrownBy(() -> st.execute(
