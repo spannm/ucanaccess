@@ -1,11 +1,14 @@
 package net.ucanaccess.jdbc;
 
+import static net.ucanaccess.type.SqlConstants.CREATE;
+import static net.ucanaccess.type.SqlConstants.TABLE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
+import net.ucanaccess.util.Sql;
 import org.hsqldb.error.ErrorCode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,8 +32,9 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
     }
 
     @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "boolean.accdb";
+    protected void init(AccessVersion _accessVersion) throws SQLException {
+        super.init(_accessVersion);
+        executeStatements(Sql.of(CREATE, TABLE, "t (pk VARCHAR(10) PRIMARY KEY)"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -40,9 +44,10 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
 
-            st.execute("INSERT INTO T(pk, b) VALUES('pippo', true)");
+            String sql = "INSERT INTO t(pk) VALUES('apk')";
+            st.execute(sql);
 
-            assertThatThrownBy(() -> st.execute("INSERT INTO T(pk, b) VALUES('pippo', true)"))
+            assertThatThrownBy(() -> st.execute(sql))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageContaining("integrity constraint violation: unique constraint or index violation")
                 .hasFieldOrPropertyWithValue("ErrorCode", -ErrorCode.X_23505)

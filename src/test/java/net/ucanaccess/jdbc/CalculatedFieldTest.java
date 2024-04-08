@@ -4,18 +4,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.ResultSet;
 
-class CalculatedFieldTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "calculatedField.accdb";
-    }
+class CalculatedFieldTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")

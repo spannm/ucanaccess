@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.AccessDefaultVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -9,12 +9,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 
-class ColumnOrderTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "columnOrder.accdb";
-    }
+class ColumnOrderTest extends UcanaccessBaseFileTest {
 
     @Override
     protected UcanaccessConnectionBuilder buildConnection() {

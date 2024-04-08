@@ -15,7 +15,7 @@ public enum AccessVersion {
 
     private static final AccessVersion DEFAULT_ACCESS_VERSION = AccessVersion.V2003;
 
-    private final FileFormat fileFormat;
+    private final FileFormat           fileFormat;
 
     AccessVersion(FileFormat _fileFormat) {
         fileFormat = _fileFormat;

@@ -12,7 +12,7 @@ class MetaDataTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return getTestDbDir() + "noroman.mdb";
+        return getTestDbDir() + "noRoman.mdb";
     }
 
     @Override

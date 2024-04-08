@@ -8,7 +8,7 @@ import io.github.spannm.jackcess.*;
 import io.github.spannm.jackcess.Index.Column;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.HibernateSupport;
 import net.ucanaccess.util.Sql;
@@ -22,12 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-class AlterTableTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "badDb.accdb";
-    }
+class AlterTableTest extends UcanaccessBaseFileTest {
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {

@@ -7,7 +7,7 @@ import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.Mockito;
@@ -17,12 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-class ComplexTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "complex.accdb";
-    }
+class ComplexTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")

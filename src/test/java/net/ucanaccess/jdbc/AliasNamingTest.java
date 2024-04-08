@@ -1,18 +1,13 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.AccessDefaultVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.SQLException;
 
-class AliasNamingTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "aliasNaming.accdb";
-    }
+class AliasNamingTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource

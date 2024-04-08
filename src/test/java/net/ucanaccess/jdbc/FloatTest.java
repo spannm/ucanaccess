@@ -1,7 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Objects;
 
-class FloatTest extends UcanaccessBaseTest {
+class FloatTest extends UcanaccessBaseFileTest {
 
     @BeforeAll
     static void setLocale() {
@@ -23,11 +23,6 @@ class FloatTest extends UcanaccessBaseTest {
     @AfterAll
     static void resetLocale() {
         Locale.setDefault(Objects.requireNonNullElseGet(locale, Locale::getDefault));
-    }
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "float.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -14,12 +14,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-class MetaDataParameterizedTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "badDb.accdb";
-    }
+class MetaDataParameterizedTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
@@ -71,7 +66,7 @@ class MetaDataParameterizedTest extends UcanaccessBaseTest {
     void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         UcanaccessStatement st = ucanaccess.createStatement();
-        assertEquals("Ciao", st.executeQuery("SELECT * FROM Query1").getMetaData().getColumnLabel(1));
+        assertEquals("Ciao", st.executeQuery("SELECT * FROM query1").getMetaData().getColumnLabel(1));
     }
 
     @SuppressWarnings("resource")

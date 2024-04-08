@@ -335,6 +335,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     protected File createTempFile(String _prefix) {
         File f = createTempFileName(_prefix);
 
+        getLogger().log(Level.DEBUG, "Creating temp file {0}", f);
         Try.catching(() -> Files.createFile(f.toPath())).orThrow(UncheckedIOException::new);
 
         f.deleteOnExit();
@@ -343,7 +344,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
         Try.withResources(() -> DatabaseBuilder.create(_fileFormat, _dbFile), Database::flush).orThrow(UncheckedIOException::new);
-        getLogger().log(Level.INFO, "Access {0} file created: {1}", _fileFormat.name(), _dbFile.getAbsolutePath());
+        getLogger().log(Level.INFO, "Access {0} database created: {1}", _fileFormat.name(), _dbFile.getAbsolutePath());
     }
 
     protected File copyResourceToTempFile(String _resourcePath) {

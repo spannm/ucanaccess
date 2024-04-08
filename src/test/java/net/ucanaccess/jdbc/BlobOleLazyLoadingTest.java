@@ -3,7 +3,7 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -16,12 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
-class BlobOleLazyLoadingTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "blobOleLazyLoading.accdb";
-    }
+class BlobOleLazyLoadingTest extends UcanaccessBaseFileTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")

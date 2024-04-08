@@ -22,24 +22,19 @@ import java.util.List;
 
 class CreateTableTest extends UcanaccessBaseTest {
 
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "badDb.accdb";
-    }
-
     private void createAsSelect() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa,a,c FROM AAA) WITH DATA");
+            st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa, a, c FROM AAA) WITH DATA");
             checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
-            st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa,AAA_BIS.baaaa as xxx FROM AAA,AAA_BIS) WITH DATA");
+            st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa, AAA_BIS.baaaa as xxx FROM AAA, AAA_BIS) WITH DATA");
             dumpQueryResult("SELECT * FROM AAA_quadris ORDER BY baaaa");
         }
     }
 
     private void createAsSelect2() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa,a,c FROM AAA) WITH NO DATA");
+            st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa, a, c FROM AAA) WITH NO DATA");
             st.execute("INSERT INTO AAA_TRIS SELECT * FROM AAA_bis");
             checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
@@ -108,8 +103,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "INSERT INTO dtrx VALUES('Hi all',444.3)",
-                "INSERT INTO dtrx VALUES('Hi all',4454.3)");
+                "INSERT INTO dtrx VALUES('Hi all', 444.3)",
+                "INSERT INTO dtrx VALUES('Hi all', 4454.3)");
         }
 
         dumpQueryResult("SELECT * FROM dtrx");

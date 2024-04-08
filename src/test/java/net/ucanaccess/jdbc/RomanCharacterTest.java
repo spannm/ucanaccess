@@ -9,7 +9,7 @@ class RomanCharacterTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return getTestDbDir() + "noroman.mdb";
+        return getTestDbDir() + "noRoman.mdb";
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

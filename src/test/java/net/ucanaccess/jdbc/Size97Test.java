@@ -3,19 +3,14 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.type.SqlConstants.COLUMN_SIZE;
 
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
-class Size97Test extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "size97.mdb";
-    }
+class Size97Test extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
@@ -29,4 +24,5 @@ class Size97Test extends UcanaccessBaseTest {
         rs.next();
         assertEquals(10, rs.getInt(COLUMN_SIZE));
     }
+
 }

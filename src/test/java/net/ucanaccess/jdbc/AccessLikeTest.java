@@ -3,7 +3,7 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.type.SqlConstants.*;
 
 import net.ucanaccess.test.AccessDefaultVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,12 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import java.sql.SQLException;
 import java.util.List;
 
-class AccessLikeTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "accessLike.mdb"; // Access 2000
-    }
+class AccessLikeTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
@@ -77,4 +72,5 @@ class AccessLikeTest extends UcanaccessBaseTest {
             st.execute("DROP TABLE t_like4");
         }
     }
+
 }

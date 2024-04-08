@@ -5,7 +5,7 @@ import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Row;
 import io.github.spannm.jackcess.Table;
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +19,7 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 
-class UtcTimezoneTest extends UcanaccessBaseTest {
+class UtcTimezoneTest extends UcanaccessBaseFileTest {
 
     private static TimeZone prevTimeZone;
 
@@ -32,11 +32,6 @@ class UtcTimezoneTest extends UcanaccessBaseTest {
     @AfterAll
     static void resetLocalAndTimezone() {
         TimeZone.setDefault(prevTimeZone);
-    }
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "utcTimezoneTest.accdb"; // Access 2007
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

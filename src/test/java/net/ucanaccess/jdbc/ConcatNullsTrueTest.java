@@ -8,17 +8,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 class ConcatNullsTrueTest extends UcanaccessBaseTest {
 
     @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "badDb.accdb";
-    }
-
-    @Override
     protected UcanaccessConnectionBuilder buildConnection() {
         // By default, any null value will cause the function to return null.
         // If the property is set false, then NULL values are replaced with empty strings.
         // see: http://hsqldb.org/doc/guide/builtinfunctions-chapt.html
-        return super.buildConnection()
-            .withConcatNulls(true);
+        return super.buildConnection().withConcatNulls(true);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
