@@ -8,7 +8,7 @@ import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
-import java.sql.SQLException;
+import java.util.List;
 
 class UnproperExecuteQueryTest extends UcanaccessBaseTest {
 
@@ -21,17 +21,17 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
-        execute("INSERT INTO t_noroman ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");
-        execute("UPDATE t_noroman SET [ENd] = 'BLeah'");
-        execute("DELETE FROM t_noroman");
-    }
-
-    private void execute(String _sql) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            assertThatThrownBy(() -> st.executeQuery(_sql))
-                .isInstanceOf(UcanaccessSQLException.class)
-                .hasMessageMatching("UCAExc:::[0-9\\.]+ General error");
-            st.execute(_sql);
+            for (String sql : List.of(
+                "INSERT INTO t_noroman ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')",
+                "UPDATE t_noroman SET [ENd] = 'BLeah'",
+                "DELETE FROM t_noroman")) {
+                    assertThatThrownBy(() -> st.executeQuery(sql))
+                        .isInstanceOf(UcanaccessSQLException.class)
+                        .hasMessageMatching("UCAExc:::[0-9\\.]+ General error");
+                    st.execute(sql);
+            }
         }
     }
+
 }

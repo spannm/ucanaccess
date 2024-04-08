@@ -25,7 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -46,9 +45,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     private AccessVersion          accessVersion;
     @SuppressWarnings("checkstyle:VisibilityModifierCheck")
     protected UcanaccessConnection ucanaccess;
-    /** The previous locale. */
-    @SuppressWarnings("checkstyle:VisibilityModifierCheck")
-    protected static Locale        locale;
     private UcanaccessConnection   verifyConnection;
 
     protected UcanaccessBaseTest() {

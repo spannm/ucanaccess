@@ -19,6 +19,8 @@ import java.util.Objects;
 
 class FunctionsTest extends UcanaccessBaseTest {
 
+    private static Locale locale;
+
     @BeforeAll
     static void setLocale() {
         locale = Locale.getDefault();
@@ -274,9 +276,9 @@ class FunctionsTest extends UcanaccessBaseTest {
         // fails in JDK8: checkQuery("SELECT isDate('Fri Feb 10 00:25:09') FROM " + TBL, false);
         // fails in JDK8: checkQuery("SELECT isDate('jan 35,2015') FROM " + TBL, false);
         checkQuery("SELECT IsDate('Feb 20 01:25:09 PM') FROM t_funcs", singleRec(true));
-        // fails in JDK8: checkQuery("SELECT isDate('Feb 10 00:25:09') FROM " + TBL, true);
-        // fails in JDK8: checkQuery("SELECT isDate('02 10 00:25:09') FROM " + TBL, true);
-        // fails in JDK8: checkQuery("SELECT isDate('Feb 35 00:25:09') FROM " + TBL, true);
+        // fails in JDK8: checkQuery("SELECT isDate('Feb 10 00:25:09') FROM t_funcs", singleRec(true));
+        // fails in JDK8: checkQuery("SELECT isDate('02 10 00:25:09') FROM t_funcs", singleRec(true));
+        // fails in JDK8: checkQuery("SELECT isDate('Feb 35 00:25:09') FROM t_funcs", singleRec(true));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

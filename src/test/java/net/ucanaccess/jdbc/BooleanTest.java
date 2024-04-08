@@ -3,26 +3,11 @@ package net.ucanaccess.jdbc;
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.SQLException;
-import java.util.Locale;
-import java.util.Objects;
 
 class BooleanTest extends UcanaccessBaseFileTest {
-
-    @BeforeAll
-    static void setLocale() {
-        locale = Locale.getDefault();
-        Locale.setDefault(Locale.US);
-    }
-
-    @AfterAll
-    static void resetLocale() {
-        Locale.setDefault(Objects.requireNonNullElseGet(locale, Locale::getDefault));
-    }
 
     @Override
     protected void init(AccessVersion _accessVersion) throws SQLException {
