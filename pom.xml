@@ -94,6 +94,7 @@
         <developerId>spannm</developerId>
 
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
+        <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
         <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
         <dep.jackcess.version>5.0.0-SNAPSHOT</dep.jackcess.version>
@@ -280,6 +281,68 @@
         </pluginManagement>
 
         <plugins>
+
+            <plugin>
+                <!-- Create a shaded jar in system temp for inclusion in the distrib-zip assembly -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>uber-jar</id>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <outputDirectory>${java.io.tmpdir}</outputDirectory>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>${uber.jar.classifier.name}</shadedClassifierName>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>false</minimizeJar>
+
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${ucanaccess.console.main}</mainClass>
+                                </transformer>
+                            </transformers>
+
+                            <!-- exclude selected Jars to reduce size of the Uber jar -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <!-- special handling for the META-INF directory -->
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.apache.poi:poi</exclude>
+                                    <exclude>commons-codec:commons-codec</exclude>
+                                    <exclude>org.apache.commons:commons-collections4</exclude>
+                                    <exclude>org.apache.commons:commons-math3</exclude>
+                                    <exclude>com.zaxxer</exclude>
+                                </excludes>
+                            </artifactSet>
+
+                            <relocations>
+                                <relocation>
+                                    <pattern>${project.groupId}</pattern>
+                                    <shadedPattern>shaded.${project.groupId}</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.hsqldb</pattern>
+                                    <shadedPattern>shaded.org.hsqldb</shadedPattern>
+                                </relocation>
+                            </relocations>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -297,27 +360,9 @@
                         </goals>
                         <phase>package</phase>
                     </execution>
-                    <execution>
-                        <!-- mvn org.apache.maven.plugins:maven-assembly-plugin:single@fat-jar-assembly -->
-                        <id>fat-jar-assembly</id>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/fat-jar-assembly.xml</descriptor>
-                            </descriptors>
-                            <archive>
-                                <manifest>
-                                    <mainClass>${ucanaccess.console.main}</mainClass>
-                                </manifest>
-                            </archive>
-                            <appendAssemblyId>true</appendAssemblyId>
-                        </configuration>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
                 </executions>
             </plugin>
+
         </plugins>
 
     </build>

@@ -18,7 +18,7 @@ IF EXIST %LOCAL_HOME_JAVA%\bin\java.exe (
 %LOCAL_JAVA% -version
 @ECHO.
 
-SET CLASSPATH="%UCANACCESS_HOME%\ucanaccess-${project.version}.jar;%UCANACCESS_HOME%\lib\hsqldb-${dep.hsqldb.version}.jar;%UCANACCESS_HOME%\lib\jackcess-${dep.jackcess.version}.jar"
+SET CLASSPATH="%UCANACCESS_HOME%\${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar"
 
-%LOCAL_JAVA% -classpath %CLASSPATH% ${ucanaccess.console.main}
+%LOCAL_JAVA% -jar %CLASSPATH%
 PAUSE
