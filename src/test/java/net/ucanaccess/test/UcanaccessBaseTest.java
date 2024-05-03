@@ -344,14 +344,12 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected File copyResourceToTempFile(String _resourcePath) {
-        File resourceFile = new File(_resourcePath);
-
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath)) {
             if (is == null) {
                 getLogger().log(Level.WARNING, "Resource {0} not found in classpath", _resourcePath);
                 return null;
             }
-            File tempFile = createTempFile(resourceFile.getName().replace('.', '_'));
+            File tempFile = createTempFile(new File(_resourcePath).getName().replace('.', '_'));
             getLogger().log(Level.DEBUG, "Copying resource {0} to {1}", _resourcePath, tempFile.getAbsolutePath());
             return copyFile(is, tempFile);
         } catch (IOException _ex) {

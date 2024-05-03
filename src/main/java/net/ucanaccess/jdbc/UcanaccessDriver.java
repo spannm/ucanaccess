@@ -19,6 +19,7 @@ import java.lang.System.Logger.Level;
 import java.sql.*;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public final class UcanaccessDriver implements Driver {
 
@@ -144,7 +145,9 @@ public final class UcanaccessDriver implements Driver {
                         dbRef.setPreventReloading(Boolean.parseBoolean(props.get(preventReloading)));
                     }
                     if (props.containsKey(reMap)) {
-                        dbRef.setExternalResourcesMapping(toMap(props.get(reMap)));
+                        Map<String, String> map = Arrays.stream(props.get(reMap).split("&")).map(s -> s.split("\\|")).filter(arr -> arr.length == 2)
+                            .collect(Collectors.toMap(k1 -> k1[0], v1 -> v1[1], (v1, v2) -> v1, LinkedHashMap::new));
+                        dbRef.setExternalResourcesMapping(map);
                     }
                     if (props.containsKey(supportsAccessLike)) {
                         SQLConverter.setSupportsAccessLike(Boolean.parseBoolean(props.get(supportsAccessLike)));
@@ -245,19 +248,6 @@ public final class UcanaccessDriver implements Driver {
         }
         LOGGER.log(Level.WARNING, "Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
         return null;
-    }
-
-    private Map<String, String> toMap(String property) {
-        Map<String, String> hm = new HashMap<>();
-        StringTokenizer st = new StringTokenizer(property, "&");
-        while (st.hasMoreTokens()) {
-            String entry = st.nextToken();
-            if (!entry.contains("|")) {
-                continue;
-            }
-            hm.put(entry.substring(0, entry.indexOf('|')).toLowerCase(), entry.substring(entry.indexOf('|') + 1));
-        }
-        return hm;
     }
 
     @Override
