@@ -8,7 +8,6 @@ import net.ucanaccess.commands.ICursorCommand;
 import net.ucanaccess.commands.IFeedbackAction;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.File;
@@ -209,17 +208,17 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public Clob createClob() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("Clob");
+        throw new SQLFeatureNotSupportedException("Clob");
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("NClob");
+        throw new SQLFeatureNotSupportedException("NClob");
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("SQLXML");
+        throw new SQLFeatureNotSupportedException("SQLXML");
     }
 
     @Override
@@ -656,7 +655,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("setCatalog");
+        throw new SQLFeatureNotSupportedException("setCatalog");
     }
 
     @Override
