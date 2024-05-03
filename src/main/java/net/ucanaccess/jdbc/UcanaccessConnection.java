@@ -209,17 +209,17 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public Clob createClob() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("Clob");
+        throw new SQLFeatureNotSupportedException("Clob");
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("NClob");
+        throw new SQLFeatureNotSupportedException("NClob");
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("SQLXML");
+        throw new SQLFeatureNotSupportedException("SQLXML");
     }
 
     @Override
