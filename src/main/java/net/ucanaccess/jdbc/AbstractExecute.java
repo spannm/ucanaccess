@@ -4,16 +4,12 @@ import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.converters.SQLConverter.DDLType;
-import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
 import net.ucanaccess.exception.TableNotFoundException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.HibernateSupport;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -90,7 +86,7 @@ public abstract class AbstractExecute {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {
             // hsqldb as parser by using an unexecuted PreparedStatement: my latest trick
-            throw new FeatureNotSupportedRuntimeException();
+            throw new SQLFeatureNotSupportedException("Feature not supported");
         } catch (SQLException _ex) {
             return _ex;
         }

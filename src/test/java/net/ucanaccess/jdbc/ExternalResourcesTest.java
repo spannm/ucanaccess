@@ -6,26 +6,32 @@ import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
-import java.io.File;
 import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 
 class ExternalResourcesTest extends UcanaccessBaseTest {
 
+    @Override
+    protected String getAccessPath() {
+        return getTestDbDir() + "linked.mdb";
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
     void testLinks(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+        setAccessVersion(_accessVersion);
 
-        File main = copyResourceToTempFile(getTestDbDir() + "main.mdb");
-        File linkee1 = copyResourceToTempFile(getTestDbDir() + "linkee1.mdb");
-        File linkee2 = copyResourceToTempFile(getTestDbDir() + "linkee2.mdb");
+        String dbLinked = getAccessTempPath();
+        String dbLinkee1 = copyResourceToTempFile(getTestDbDir() + "linkee1.mdb").getAbsolutePath();
+        String dbLinkee2 = copyResourceToTempFile(getTestDbDir() + "linkee2.mdb").getAbsolutePath();
+        String origPath = "c:\\db\\";
 
         UcanaccessConnectionBuilder bldr = buildConnection()
-            .withDbPath(main.getAbsolutePath())
+            .withDbPath(dbLinked)
             .withoutUserPass()
             .withImmediatelyReleaseResources()
-            .withProp(Property.reMap, "c:\\db\\linkee1.mdb|" + linkee1.getAbsolutePath() + "&c:\\db\\linkee2.mdb|" + linkee2.getAbsolutePath());
+            .withProp(Property.reMap, origPath + "linkee1.mdb" + '|' + dbLinkee1
+                              + '&' + origPath + "linkee2.mdb" + '|' + dbLinkee2);
         getLogger().log(Level.DEBUG, "Database url: {0}", bldr.getUrl());
 
         try (UcanaccessConnection conn = bldr.build();

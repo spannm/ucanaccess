@@ -1055,20 +1055,32 @@ public class LoadJet {
         private void createTables() throws SQLException, IOException {
 
             metadata.createMetadata();
+
             for (String tn : dbIO.getTableNames()) {
-                UcanaccessTable t = null;
-                Table t2 = null;
+                if (tn.startsWith("~")) {
+                    logger.log(Level.DEBUG, "Skipping table '{0}'", tn);
+                    continue;
+                }
+
                 try {
-                    t2 = dbIO.getTable(tn);
-                    t = new UcanaccessTable(t2, tn);
+                    Table jt = dbIO.getTable(tn);
+                    UcanaccessTable ut = new UcanaccessTable(jt, tn);
+
+                    if (TableMetaData.Type.LINKED_ODBC == jt.getDatabase().getTableMetaData(tn).getType()) {
+                        logger.log(Level.WARNING, "Skipping table '{0}' (linked to an ODBC table)", tn);
+                        unresolvedTables.add(tn);
+                        continue;
+                    }
+
+                    createTable(ut);
+                    loadingOrder.add(ut.getName());
+
                 } catch (Exception _ex) {
-                    logger.log(Level.WARNING, _ex.getMessage());
+                    logger.log(Level.WARNING, "Failed to create table '{0}': {1}", tn, _ex.getMessage());
                     unresolvedTables.add(tn);
+                    continue;
                 }
-                if (t2 != null && t != null && !tn.startsWith("~")) {
-                    createTable(t);
-                    loadingOrder.add(t.getName());
-                }
+
             }
         }
 

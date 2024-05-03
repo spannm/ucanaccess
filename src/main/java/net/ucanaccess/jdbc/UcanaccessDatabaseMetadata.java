@@ -3,7 +3,6 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.type.SqlConstants.*;
 
 import net.ucanaccess.converters.SQLConverter;
-import net.ucanaccess.exception.FeatureNotSupportedRuntimeException;
 import net.ucanaccess.exception.InvalidParameterException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 
@@ -252,7 +251,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedRuntimeException();
+        throw new SQLFeatureNotSupportedException("Catalogs");
     }
 
     @Override
@@ -863,7 +862,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw new FeatureNotSupportedRuntimeException("RowIdLifetime");
+        throw new SQLFeatureNotSupportedException("RowIdLifetime");
     }
 
     @Override
@@ -875,7 +874,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedRuntimeException();
+        throw new SQLFeatureNotSupportedException("Schemas");
     }
 
     @Override
@@ -887,7 +886,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 throw new UcanaccessSQLException(_ex);
             }
         }
-        throw new FeatureNotSupportedRuntimeException();
+        throw new SQLFeatureNotSupportedException("Schemas");
     }
 
     @Override
