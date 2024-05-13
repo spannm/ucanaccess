@@ -49,7 +49,7 @@ public class DFunction {
                 String alias = tableN.startsWith("[") && tableN.endsWith("]") ? "[" + unpad(tableN) + "_DALIAS]" : tableN + "_DALIAS";
                 String tn = tableN.startsWith("[") && tableN.endsWith("]") ? unpad(tableN) : tableN;
                 sb.append(init).append(f).append("(").append(mtc.group(1)).append(") FROM ").append(tableN)
-                    .append(" AS ").append(alias).append(" WHERE ");
+                  .append(" AS ").append(alias).append(" WHERE ");
                 boolean accessConcat = g3.indexOf('&') > 0;
                 boolean sqlConcat = g3.indexOf("||") > 0;
                 if (accessConcat || sqlConcat) {

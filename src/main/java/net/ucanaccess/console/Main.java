@@ -251,7 +251,7 @@ public class Main {
                    connected = false;
                    break;
                 }
-                sb = new StringBuilder();
+                sb.setLength(0);
                 prompt();
             }
         }

@@ -38,7 +38,7 @@ public @interface AccessVersionSource {
      */
     String[] exclude() default {};
 
-    static class AccessVersionArgumentsProvider implements ArgumentsProvider {
+    class AccessVersionArgumentsProvider implements ArgumentsProvider {
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext _context) throws Exception {

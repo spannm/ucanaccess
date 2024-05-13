@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @ArgumentsSource(DefaultAccessVersionArgumentsProvider.class)
 public @interface AccessDefaultVersionSource {
 
-    static class DefaultAccessVersionArgumentsProvider implements ArgumentsProvider {
+    class DefaultAccessVersionArgumentsProvider implements ArgumentsProvider {
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext _context) throws Exception {

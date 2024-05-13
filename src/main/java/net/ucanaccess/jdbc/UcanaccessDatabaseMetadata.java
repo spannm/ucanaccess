@@ -84,7 +84,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             return "";
         }
         StringBuilder sb = new StringBuilder(and);
-        if (right.length() == 0) {
+        if (right.isEmpty()) {
             return sb.append(left).append(" IS NULL ").toString();
         }
         String exp = apos ? "'" + right + "'" : right;

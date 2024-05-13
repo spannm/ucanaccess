@@ -871,7 +871,7 @@ public class UcanaccessResultSet implements ResultSet {
                 StringBuilder url = new StringBuilder();
                 if (parts.length > 1) {
                     url.append(parts[1]);
-                    if (parts.length > 2 && parts[2].length() > 0) {
+                    if (parts.length > 2 && !parts[2].isEmpty()) {
                         url.append("#")
                            .append(parts[2]);
                     }

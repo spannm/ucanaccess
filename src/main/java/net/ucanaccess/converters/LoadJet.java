@@ -125,8 +125,7 @@ public class LoadJet {
         }
         SQLWarning sqlw = null;
         for (String s : viewsLoader.notLoaded.keySet()) {
-            String message = s.length() > 0 ? "Cannot load view " + s + ' ' + viewsLoader.notLoaded.get(s)
-                    : "Cannot load views ";
+            String message = s.isEmpty() ? "Cannot load views" : "Cannot load view " + s + ' ' + viewsLoader.notLoaded.get(s);
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
             } else {
@@ -134,9 +133,7 @@ public class LoadJet {
             }
         }
         for (String s : viewsLoader.notLoadedProcedure.keySet()) {
-            String message =
-                    s.length() > 0 ? "Cannot load procedure " + s + ' ' + viewsLoader.notLoadedProcedure.get(s)
-                            : "Cannot load procedures ";
+            String message = s.isEmpty() ? "Cannot load procedures" : "Cannot load procedure " + s + ' ' + viewsLoader.notLoadedProcedure.get(s);
             if (sqlw == null) {
                 sqlw = new SQLWarning(message);
             } else {
@@ -527,7 +524,7 @@ public class LoadJet {
                     String tgrU = getCalculatedFieldTrigger(ntn, col, false);
                     calculatedFieldsTriggers.add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
                     String uc = getUpdateConditions(col);
-                    if (uc.length() > 0) {
+                    if (!uc.isEmpty()) {
                         calculatedFieldsTriggers.add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
                     }
 

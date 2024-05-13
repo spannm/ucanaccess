@@ -645,7 +645,7 @@ public final class SQLConverter {
     }
 
     public static String preEscapingIdentifier(String _name) {
-        if (_name.length() == 0) {
+        if (_name.isEmpty()) {
             return _name;
         }
         if (_name.startsWith("~")) {
@@ -666,10 +666,10 @@ public final class SQLConverter {
         String escaped = _name;
         escaped = _name.replace("'", "").replace("\"", "").replaceAll(Pattern.quote("\\"), "_");
 
-        if (escaped.length() > 0 && Character.isDigit(escaped.trim().charAt(0))) {
+        if (!escaped.isEmpty() && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
         }
-        if (escaped.length() > 0 && escaped.charAt(0) == '_') {
+        if (!escaped.isEmpty() && escaped.charAt(0) == '_') {
             escaped = "Z" + escaped;
         }
         if (dualUsedAsTableName && "DUAL".equalsIgnoreCase(escaped)) {
