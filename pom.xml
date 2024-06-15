@@ -103,11 +103,11 @@
         <dep.hsqldb.version>2.7.1</dep.hsqldb.version>
         <dep.hsqldb.classifier/>
 
-        <dep.slf4j.version>2.0.12</dep.slf4j.version>
+        <dep.slf4j.version>2.0.13</dep.slf4j.version>
 
         <dep.junit.version>5.10.2</dep.junit.version>
-        <dep.assertj.version>3.25.3</dep.assertj.version>
-        <dep.mockito.version>5.11.0</dep.mockito.version>
+        <dep.assertj.version>3.26.0</dep.assertj.version>
+        <dep.mockito.version>5.12.0</dep.mockito.version>
 
         <dep.plugin.sortpom.version>3.4.1</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
