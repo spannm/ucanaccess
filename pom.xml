@@ -68,16 +68,16 @@
     </issueManagement>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
             <id>sonatype-nexus-staging</id>
             <name>Nexus Release Repository</name>
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <site>
             <id>local</id>
             <name>Local Maven site</name>
@@ -109,7 +109,7 @@
         <dep.assertj.version>3.26.0</dep.assertj.version>
         <dep.mockito.version>5.12.0</dep.mockito.version>
 
-        <dep.plugin.sortpom.version>3.4.1</dep.plugin.sortpom.version>
+        <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
 
         <dep.checkstyle.version>10.12.6</dep.checkstyle.version>
@@ -240,7 +240,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <systemPropertyVariables combine.children="append">
-                            <user.timezone />
+                            <user.timezone/>
                         </systemPropertyVariables>
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
@@ -349,16 +349,16 @@
                     <execution>
                         <!-- mvn org.apache.maven.plugins:maven-assembly-plugin:single@distrib-zip-assembly -->
                         <id>distrib-zip-assembly</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/distrib-zip-assembly.xml</descriptor>
                             </descriptors>
                             <appendAssemblyId>true</appendAssemblyId>
                         </configuration>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -441,12 +441,12 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>sonatype-nexus-snapshots</id>
-                    <name>Sonatype Nexus Snapshots</name>
-                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>
+                    <id>sonatype-nexus-snapshots</id>
+                    <name>Sonatype Nexus Snapshots</name>
+                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
                 </repository>
             </repositories>
         </profile>
@@ -463,12 +463,12 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>project-local-maven-repo-defined-in-pom</id>
-                    <name>Local file system Maven Repo for debugging</name>
-                    <url>file://${project.basedir}/.m2-local-repo/</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>
+                    <id>project-local-maven-repo-defined-in-pom</id>
+                    <name>Local file system Maven Repo for debugging</name>
+                    <url>file://${project.basedir}/.m2-local-repo/</url>
                 </repository>
             </repositories>
         </profile>
