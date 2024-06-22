@@ -50,6 +50,7 @@ class DataSourceTest extends UcanaccessBaseTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.UnusedLocalVariable")
     void createNewDatabase() throws SQLException {
         File fileMdb = createTempFileName("ucaDataSourceTest", ".mdb");
         assertThat(fileMdb).doesNotExist();

@@ -13,7 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "java:S1192", "java:S6353"})
+@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "PMD.UnnecessaryFullyQualifiedName",
+                   "java:S1192", "java:S6353"})
 public final class SQLConverter {
 
     @SuppressWarnings({"java:S5842", "java:S5852", "java:S5998"})
@@ -103,7 +104,7 @@ public final class SQLConverter {
     }
 
     public static boolean hasIdentity(String sql) {
-        return sql.indexOf("@@") > 0 && sql.toUpperCase(java.util.Locale.US).indexOf("@@IDENTITY") > 0;
+        return sql.indexOf("@@") > 0 && sql.toUpperCase(Locale.US).indexOf("@@IDENTITY") > 0;
     }
 
     private static void aliases(String sql, NormalizedSQL nsql) {
@@ -128,7 +129,7 @@ public final class SQLConverter {
                     StringBuilder sb = new StringBuilder();
                     for (char c : sqlc) {
                         if (c == ' ' || c == '\n' || c == '\r' || c == ',') {
-                            String key = SQLConverter.preEscapingIdentifier(sb.toString());
+                            String key = preEscapingIdentifier(sb.toString());
                             nsql.put(key, sb.toString());
                             break;
                         } else {
@@ -343,8 +344,7 @@ public final class SQLConverter {
 
     private static String replaceAposNames(String sql) {
         for (String an : APOSTROPHISED_NAMES) {
-            sql = sql.replaceAll("(?i)" + Pattern.quote('[' + an + ']'),
-                    '[' + SQLConverter.basicEscapingIdentifier(an) + ']');
+            sql = sql.replaceAll("(?i)" + Pattern.quote('[' + an + ']'), '[' + basicEscapingIdentifier(an) + ']');
         }
         return sql;
     }
@@ -421,7 +421,7 @@ public final class SQLConverter {
                 hs.add(g2);
             }
             String value = g2.substring(1, g2.length() - 1);
-            nsql.put(SQLConverter.preEscapingIdentifier(value), value);
+            nsql.put(preEscapingIdentifier(value), value);
             sqlN += sqle.substring(0, m.start()) + m.group(1) + g2.replaceAll("['\"]", "") + m.group(3);
             sqle = sqle.substring(m.end());
         }
@@ -813,10 +813,7 @@ public final class SQLConverter {
     }
 
     public static boolean checkDDL(String sql) {
-        if (sql == null) {
-            return false;
-        }
-        return Patterns.CHECK_DDL.matcher(sql.replaceAll("\\s+", " ")).matches();
+        return sql != null && Patterns.CHECK_DDL.matcher(sql.replaceAll("\\s+", " ")).matches();
     }
 
     private static String convertLike(String sql) {
@@ -866,7 +863,7 @@ public final class SQLConverter {
     }
 
     public static void setSupportsAccessLike(boolean _supportsAccessLike) {
-        SQLConverter.supportsAccessLike = _supportsAccessLike;
+        supportsAccessLike = _supportsAccessLike;
     }
 
     public static boolean isXescaped(String identifier) {
@@ -1075,7 +1072,7 @@ public final class SQLConverter {
     }
 
     static void setDualUsedAsTableName(boolean _dualUsedAsTableName) {
-        SQLConverter.dualUsedAsTableName = _dualUsedAsTableName;
+        dualUsedAsTableName = _dualUsedAsTableName;
     }
 
     public static String removeParameters(String qtxt) {

@@ -43,7 +43,7 @@ public class TriggerAutoNumber extends TriggerBase {
                 } else
 
                 if (cl.isAutoNumber()) {
-                    if (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {
+                    if (INSERT_BEFORE_ROW == type) {
 
                         if (t.isAllowAutoNumberInsert()) {
                             if (cl.getAutoNumberGenerator().getType().equals(DataType.LONG) && newR[i] != null) {
@@ -62,7 +62,7 @@ public class TriggerAutoNumber extends TriggerBase {
                                 conn.setGeneratedKey(newR[i]);
                             }
                         }
-                    } else if (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW
+                    } else if (UPDATE_BEFORE_ROW == type
                             && cl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {
                         if (!oldR[i].equals(newR[i])) {
                             throw new UcanaccessRuntimeException("Cannot update autoincrement column");

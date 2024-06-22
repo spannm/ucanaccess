@@ -30,9 +30,9 @@ public class TriggerAppendOnly extends TriggerBase {
                     ColumnImpl verCol = (ColumnImpl) col.getVersionHistoryColumn();
                     LocalDateTime upTime = LocalDateTime.now();
                     String val = newR[i] == null ? null : newR[i].toString();
-                    if (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {
+                    if (INSERT_BEFORE_ROW == type) {
                         newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] {new Version(val, upTime)});
-                    } else if (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW && (oldR[i] != null || newR[i] != null)) {
+                    } else if (UPDATE_BEFORE_ROW == type && (oldR[i] != null || newR[i] != null)) {
                         if (oldR[i] == null && newR[i] != null || oldR[i] != null && newR[i] == null
                             || !oldR[i].equals(newR[i])) {
                             Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();

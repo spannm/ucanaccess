@@ -186,7 +186,7 @@ public final class Try<V, EC extends Throwable> {
             E1 e1 = (E1) t;
             return new Try<>((V1) null, e1);
         }
-        return Try.catching((IThrowingSupplier<V1, E1>) () -> _mapper.apply(val));
+        return catching((IThrowingSupplier<V1, E1>) () -> _mapper.apply(val));
     }
 
     /**
@@ -235,7 +235,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public void orElse(IThrowingConsumer<EC, Throwable> _consumer) {
         if (hasThrown()) {
-            Try.catching(() -> _consumer.accept(t)).orThrow();
+            catching(() -> _consumer.accept(t)).orThrow();
         }
     }
 
@@ -247,7 +247,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public V orElseApply(IThrowingFunction<EC, V, Throwable> _function) {
         if (hasThrown()) {
-            return Try.catching(() -> _function.apply(t)).orThrow();
+            return catching(() -> _function.apply(t)).orThrow();
         }
         return val;
     }
@@ -259,7 +259,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public V orElseGet(IThrowingSupplier<V, Throwable> _supplier) {
         if (hasThrown()) {
-            return Try.catching(_supplier::get).orThrow();
+            return catching(_supplier::get).orThrow();
         }
         return val;
     }

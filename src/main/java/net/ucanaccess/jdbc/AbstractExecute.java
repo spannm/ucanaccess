@@ -82,6 +82,7 @@ public abstract class AbstractExecute {
         }
     }
 
+    @SuppressWarnings("PMD.UnusedLocalVariable")
     private SQLException checkDdlException() {
         UcanaccessConnection conn = statement.getConnection();
         try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(SQLConverter.convertSQL(sql).getSql())) {

@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 
 class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
+    @Override
     protected UcanaccessConnectionBuilder buildConnection() {
         return super.buildConnection().withConcatNulls(false);
     }

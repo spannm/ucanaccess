@@ -16,10 +16,7 @@ public class CompositeFeedbackAction implements IFeedbackAction {
     }
 
     public boolean add(IFeedbackAction ifa) {
-        if (ifa == null) {
-            return false;
-        }
-        return actions.add(ifa);
+        return ifa != null && actions.add(ifa);
     }
 
 }
