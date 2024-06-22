@@ -68,16 +68,16 @@
     </issueManagement>
 
     <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
         <snapshotRepository>
             <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
         <site>
             <id>local</id>
             <name>Local Maven site</name>
@@ -111,9 +111,6 @@
 
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
-
-        <dep.checkstyle.version>10.12.6</dep.checkstyle.version>
-        <dep.spotbugs.version>4.8.3</dep.spotbugs.version>
 
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
