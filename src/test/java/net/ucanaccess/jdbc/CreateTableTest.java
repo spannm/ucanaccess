@@ -24,19 +24,20 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     private void createAsSelect() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.executeUpdate("CREATE TABLE AAA_BIS as (SELECT baaaa, a, c FROM AAA) WITH DATA");
-            checkQuery("SELECT * FROM AAA_bis ORDER BY baaaa",
+            st.executeUpdate("CREATE TABLE tbl_bis as (SELECT baaaa, a, c FROM tbl1) WITH DATA");
+            checkQuery("SELECT * FROM tbl_bis ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
-            st.executeUpdate("CREATE TABLE AAA_quadris as (SELECT AAA.baaaa, AAA_BIS.baaaa as xxx FROM AAA, AAA_BIS) WITH DATA");
-            dumpQueryResult("SELECT * FROM AAA_quadris ORDER BY baaaa");
+
+            st.executeUpdate("CREATE TABLE tbl_quadris as (SELECT tbl1.baaaa, tbl_bis.baaaa as xxx FROM tbl1, tbl_bis) WITH DATA");
+            dumpQueryResult("SELECT * FROM tbl_quadris ORDER BY baaaa");
         }
     }
 
     private void createAsSelect2() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.executeUpdate("CREATE TABLE AAA_TRIS as (SELECT baaaa, a, c FROM AAA) WITH NO DATA");
-            st.execute("INSERT INTO AAA_TRIS SELECT * FROM AAA_bis");
-            checkQuery("SELECT * FROM AAA_tris ORDER BY baaaa",
+            st.executeUpdate("CREATE TABLE tbl_tris as (SELECT baaaa, a, c FROM tbl1) WITH NO DATA");
+            st.execute("INSERT INTO tbl_tris SELECT * FROM tbl_bis");
+            checkQuery("SELECT * FROM tbl_tris ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
         }
     }
@@ -53,22 +54,22 @@ class CreateTableTest extends UcanaccessBaseTest {
     private void createSimple() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "INSERT INTO AAA(baaaa, c) VALUES ('33A', 'G')",
-                "INSERT INTO AAA(baaaa, a, c) VALUES ('33B', 111, 'G')");
-            checkQuery("SELECT baaaa, a, c FROM AAA ORDER BY baaaa",
+                "INSERT INTO tbl1(baaaa, c) VALUES ('33A', 'G')",
+                "INSERT INTO tbl1(baaaa, a, c) VALUES ('33B', 111, 'G')");
+            checkQuery("SELECT baaaa, a, c FROM tbl1 ORDER BY baaaa",
                 recs(rec("33A", 3, "G"), rec("33B", 111, "G")));
         }
     }
 
     void defaults() throws Exception {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            ResultSet rs = st.executeQuery("SELECT D, E FROM AAA");
+            ResultSet rs = st.executeQuery("SELECT D, E FROM tbl1");
             while (rs.next()) {
                 assertNotNull(rs.getObject(1));
                 assertNotNull(rs.getObject(2));
             }
             Database db = ucanaccess.getDbIO();
-            Table tb = db.getTable("AAA");
+            Table tb = db.getTable("tbl1");
             PropertyMap pm = tb.getColumn("d").getProperties();
             assertEquals("now()", pm.getValue(PropertyMap.DEFAULT_VALUE_PROP));
             PropertyMap pm1 = tb.getColumn("a").getProperties();
@@ -85,40 +86,42 @@ class CreateTableTest extends UcanaccessBaseTest {
     void setDPK() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "CREATE TABLE dkey(c COUNTER, number NUMERIC(23,5), PRIMARY KEY (c, number))",
-                "CREATE TABLE dunique(c TEXT, number NUMERIC(23,5), UNIQUE (c, number))");
+                "CREATE TABLE tbl_dkey(c COUNTER, number NUMERIC(23,5), PRIMARY KEY (c, number))",
+                "CREATE TABLE tbl_dunique(c TEXT, number NUMERIC(23,5), UNIQUE (c, number))");
         }
 
         ucanaccess.setAutoCommit(false);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "INSERT INTO dunique VALUES('ddl forces commit', 2.3)",
-                "CREATE TABLE dtrx(c TEXT, number NUMERIC(23,5), UNIQUE(c, number))",
-                "INSERT INTO dtrx VALUES('I''ll be forgotten sob sob', 55555.3)",
-                "ALTER TABLE dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c, number)");
+                "INSERT INTO tbl_dunique VALUES('ddl forces commit', 2.3)",
+                "CREATE TABLE tbl_dtrx(c TEXT, number NUMERIC(23,5), UNIQUE(c, number))",
+                "INSERT INTO tbl_dtrx VALUES('I''ll be forgotten sob sob', 55555.3)",
+                "ALTER TABLE tbl_dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c, number)");
         } catch (Exception _ex) {
             ucanaccess.rollback();
         }
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
-                "INSERT INTO dtrx VALUES('Hi all', 444.3)",
-                "INSERT INTO dtrx VALUES('Hi all', 4454.3)");
+                "INSERT INTO tbl_dtrx VALUES('Hi all', 444.3)",
+                "INSERT INTO tbl_dtrx VALUES('Hi all', 4454.3)");
         }
 
-        dumpQueryResult("SELECT * FROM dtrx");
-        dumpQueryResult("SELECT * FROM dunique");
+        dumpQueryResult("SELECT * FROM tbl_dtrx");
+        dumpQueryResult("SELECT * FROM tbl_dunique");
         ucanaccess.commit();
-        checkQuery("SELECT * FROM dunique");
-        checkQuery("SELECT * FROM dtrx");
+        checkQuery("SELECT * FROM tbl_dunique");
+        checkQuery("SELECT * FROM tbl_dtrx");
     }
 
     void setTableProperties() throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("CREATE TABLE tbl(c COUNTER PRIMARY KEY, " + "number NUMERIC(23,5) DEFAULT -4.6 NOT NULL, "
-                    + "txt1 TEXT(23) DEFAULT 'ciao', blank TEXT DEFAULT ' ', dt DATE DEFAULT date(), txt2 TEXT(33),"
-                    + "txt3 TEXT)");
+            st.execute("CREATE TABLE tbl(c COUNTER PRIMARY KEY, "
+                + "number NUMERIC(23,5) DEFAULT -4.6 NOT NULL, "
+                + "txt1 TEXT(23) DEFAULT 'ciao', blank TEXT DEFAULT ' ', "
+                + "dt DATE DEFAULT date(), txt2 TEXT(33),"
+                + "txt3 TEXT)");
         }
     }
 
@@ -149,7 +152,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         init(_accessVersion);
 
         executeStatements(
-            "CREATE \nTABLE AAA( baaaa \nTEXT PRIMARY KEY, A LONG DEFAULT 3 NOT NULL, C TEXT(255) NOT NULL, "
+            "CREATE \nTABLE tbl1( baaaa \nTEXT PRIMARY KEY, A LONG DEFAULT 3 NOT NULL, C TEXT(255) NOT NULL, "
                 + "d DATETIME DEFAULT now(), e TEXT DEFAULT 'l''aria')");
 
         createSimple();
@@ -161,7 +164,7 @@ class CreateTableTest extends UcanaccessBaseTest {
         defaults();
         notNullBug();
 
-        executeStatements("DROP TABLE AAA");
+        executeStatements("DROP TABLE tbl1");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

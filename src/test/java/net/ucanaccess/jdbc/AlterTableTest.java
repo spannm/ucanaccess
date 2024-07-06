@@ -66,8 +66,8 @@ class AlterTableTest extends UcanaccessBaseFileTest {
             executeStatements(st,
                 "ALTER TABLE [22 alterTableTest123] ADD COLUMN [ci ci] TEXT(100) NOT NULL DEFAULT 'PIPPO'",
                 "ALTER TABLE [22 alterTableTest123] ADD COLUMN [健康] decimal (23,5) ",
-                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) default 13.031955 NOT NULL");
-            assertThatThrownBy(() -> st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN defaultwwwdefault numeric (23,6) NOT NULL"))
+                "ALTER TABLE [22 alterTableTest123] ADD COLUMN [£健康] numeric (23,6) DEFAULT 13.031955 NOT NULL");
+            assertThatThrownBy(() -> st.execute("ALTER TABLE [22 alterTableTest123] ADD COLUMN defaultwwwdefault NUMERIC(23,6) NOT NULL"))
                 .isInstanceOf(UcanaccessSQLException.class)
                 .hasMessageContaining("When adding a new column");
             executeStatements(st,
@@ -251,7 +251,7 @@ class AlterTableTest extends UcanaccessBaseFileTest {
             st.execute("DROP TABLE tx ");
             st.execute("DROP TABLE tx1 ");
 
-            st.execute("CREATE TABLE tx (id COUNTER PRIMARY KEY, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), [Is not Pippo] TEXT default \"what's this?\")");
+            st.execute("CREATE TABLE tx (id COUNTER PRIMARY KEY, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), [Is not Pippo] TEXT DEFAULT \"what's this?\")");
             st.execute("CREATE TABLE tx1 (n1 LONG, [n 2] TEXT)");
             st.execute("ALTER TABLE tx1 ADD PRIMARY KEY (n1, [n 2])");
             st.execute("ALTER TABLE tx ADD FOREIGN KEY ([my best friend], [Is Pippo]) REFERENCES tx1(n1, [n 2]) ON DELETE SET NULL");
