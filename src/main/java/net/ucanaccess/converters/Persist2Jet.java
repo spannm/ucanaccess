@@ -640,20 +640,21 @@ public class Persist2Jet {
 
     public void createPrimaryKey(String tableName) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        Database db = conn.getDbIO();
         String ntn = escape4Hsqldb(tableName);
-        String tn = escape4Access(tableName);
-        Table t = db.getTable(tn);
-        ResultSet pkrs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase());
-        List<String> cols = new ArrayList<>();
-        IndexBuilder ib = new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME).withPrimaryKey();
-        while (pkrs.next()) {
-            String colName = pkrs.getString(COLUMN_NAME);
-            Metadata mt = new Metadata(conn);
-            colName = mt.getColumnName(ntn, colName);
-            cols.add(colName);
+        Table t = conn.getDbIO().getTable(escape4Access(tableName));
+        Metadata md = new Metadata(conn);
+
+        Map<Short, String> cols = new TreeMap<>();
+        try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase())) {
+            while (rs.next()) {
+                cols.put(rs.getShort(KEY_SEQ), md.getColumnName(ntn, rs.getString(COLUMN_NAME)));
+            }
         }
-        ib.withColumns(cols).addToTable(t);
+
+        new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME)
+            .withPrimaryKey()
+            .withColumns(cols.values())
+            .addToTable(t);
     }
 
     public void createForeignKey(String tableName, String referencedTable) throws IOException, SQLException {

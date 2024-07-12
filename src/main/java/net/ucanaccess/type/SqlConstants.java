@@ -39,6 +39,7 @@ public final class SqlConstants {
     public static final String IS_CURRENCY           = "IS_CURRENCY";
     public static final String IS_NOT_NULL           = "IS NOT NULL";
     public static final String IS_NULL               = "IS NULL";
+    public static final String KEY_SEQ               = "KEY_SEQ";
     public static final String LIKE                  = "LIKE";
     public static final String LONGVARCHAR           = "LONGVARCHAR";
     public static final String NON_UNIQUE            = "NON_UNIQUE";
@@ -50,6 +51,7 @@ public final class SqlConstants {
     public static final String PIVOT                 = "PIVOT";
     public static final String PKCOLUMN_NAME         = "PKCOLUMN_NAME";
     public static final String PKTABLE_NAME          = "PKTABLE_NAME";
+    public static final String PK_NAME               = "PK_NAME";
     public static final String PUBLIC                = "PUBLIC";
     public static final String SELECT                = "SELECT";
     public static final String SELECT_COLUMN_ESCAPED = "SELECT_COLUMN_ESCAPED";

@@ -108,26 +108,25 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         StringBuilder sb = new StringBuilder("SELECT ");
 
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            String cn = rsmd.getColumnName(i);
-            if (exclude.contains(cn)) {
-                String es = replace.get(exclude.indexOf(cn));
+            String colName = rsmd.getColumnName(i);
+            if (exclude.contains(colName)) {
+                String es = replace.get(exclude.indexOf(colName));
                 sb.append(comma);
 
                 if (es == null) {
-                    sb.append(CAST_EXPR).append(cn);
+                    sb.append(CAST_EXPR).append(colName);
                 } else if (PUBLIC.equals(es)) {
-                    sb.append("'PUBLIC' AS ").append(cn);
+                    sb.append("'PUBLIC' AS ").append(colName);
                 } else if (es.startsWith(CAST_EXPR)) {
                     sb.append(es);
                 } else {
                     String suffix = es.indexOf('.') > 0 ? "" : "r.";
-                    sb.append(suffix).append(es).append(" AS ").append(cn);
+                    sb.append(suffix).append(es).append(" AS ").append(colName);
                 }
             } else {
-                sb.append(comma).append("l.").append(cn);
-
+                sb.append(comma).append("l.").append(colName);
             }
-            comma = ",";
+            comma = ", ";
         }
         return sb.toString();
     }
@@ -379,7 +378,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 + and("FKTABLE_CAT", "=", PUBLIC)
                 + and("FKTABLE_SCHEM", "=", PUBLIC)
                 + and("FKTABLE_NAME", "=", foreignTable)
-                + " ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ";
+                + " " + ORDER_BY + " FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, " + KEY_SEQ;
 
             return executeQuery(select);
         } catch (SQLException _ex) {
@@ -477,7 +476,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 + "ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)"
                 + and("PKTABLE_CAT", "=", PUBLIC, " WHERE ")
                 + and("PKTABLE_SCHEM", "=", PUBLIC) + and("PKTABLE_NAME", "=", table)
-                + " ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ";
+                + " " + ORDER_BY + " FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ";
 
             return executeQuery(select);
         } catch (SQLException _ex) {
@@ -542,7 +541,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                 + "ON( l.PKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.PKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)"
                 + and("FKTABLE_CAT", "=", PUBLIC, " WHERE ")
                 + and("FKTABLE_SCHEM", "=", PUBLIC) + and("FKTABLE_NAME", "=", table)
-                + " ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ";
+                + " " + ORDER_BY + " PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, " + KEY_SEQ;
             return executeQuery(select);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);
@@ -786,14 +785,14 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+    public ResultSet getPrimaryKeys(String _catalog, String _schema, String _table) throws SQLException {
+        if (_table == null) {
+            throw new InvalidParameterException("table", _table);
+        }
         try {
-            if (table == null) {
-                throw new InvalidParameterException("table", table);
-            }
-            table = normalizeName(table);
-            if (invokeWrapper(catalog, schema)) {
-                return wrapped.getPrimaryKeys(catalog, schema, table);
+            String tn = normalizeName(_table);
+            if (invokeWrapper(_catalog, _schema)) {
+                return wrapped.getPrimaryKeys(_catalog, _schema, tn);
             }
             String cat = connection.isShowSchema() ? PUBLIC : null;
             String schem = connection.isShowSchema() ? PUBLIC : null;
@@ -803,7 +802,8 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
                     + on(List.of(TABLE_NAME, COLUMN_NAME),
                             List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))
                     + and(TABLE_CAT, "=", PUBLIC, " WHERE ")
-                    + and(TABLE_SCHEM, "=", PUBLIC) + and(TABLE_NAME, "=", table);
+                    + and(TABLE_SCHEM, "=", PUBLIC) + and(TABLE_NAME, "=", tn)
+                    + " " + ORDER_BY + " " + COLUMN_NAME;
             return executeQuery(select);
         } catch (SQLException _ex) {
             throw new UcanaccessSQLException(_ex);

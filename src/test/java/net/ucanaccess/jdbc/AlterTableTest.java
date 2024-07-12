@@ -141,10 +141,10 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         init(_accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            String tbl = "AAA n";
-            st.execute("ALTER TABLE [" + tbl + "] ADD PRIMARY KEY (baaaa, a)");
+            st.execute("ALTER TABLE [AAA n] ADD PRIMARY KEY (baaaa, a)");
             Database db = ucanaccess.getDbIO();
-            assertThat(db.getTable(tbl).getPrimaryKeyIndex().getColumns().stream().map(Column::getName))
+            Table tbl = db.getTable("AAA n");
+            assertThat(tbl.getPrimaryKeyIndex().getColumns().stream().map(Column::getName))
                 .containsExactly("baaaa", "A");
 
             st.execute("ALTER TABLE Sample ADD PRIMARY KEY (RegionId)");
