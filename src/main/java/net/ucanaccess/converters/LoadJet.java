@@ -74,30 +74,20 @@ public class LoadJet {
     }
 
     public void loadDefaultValues(Table _t) throws SQLException, IOException {
-        tablesLoader.setDefaultValues(_t);
+        tablesLoader.addTriggersColumnDefault(_t);
     }
 
     public void loadDefaultValues(Column _cl) throws SQLException, IOException {
-        tablesLoader.setDefaultValue(_cl);
+        tablesLoader.addTriggerColumnDefault(_cl);
     }
 
     public String defaultValue4SQL(Column _cl) throws IOException {
-        PropertyMap pm = _cl.getProperties();
-        Object defaulT = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-        if (defaulT == null) {
-            return null;
-        }
-        return tablesLoader.defaultValue4SQL(defaulT, _cl.getType());
+        Object defVal = _cl.getProperties().getValue(PropertyMap.DEFAULT_VALUE_PROP);
+        return defVal == null ? null : tablesLoader.defaultValue4SQL(defVal, _cl.getType());
     }
 
     private static boolean hasAutoNumberColumn(Table t) {
-        List<? extends Column> cols = t.getColumns();
-        for (Column col : cols) {
-            if (col.isAutoNumber() || DataType.BOOLEAN.equals(col.getType())) {
-                return true;
-            }
-        }
-        return false;
+        return t.getColumns().stream().anyMatch(col -> col.isAutoNumber() || DataType.BOOLEAN.equals(col.getType()));
     }
 
     public void addFunctions(Class<?> _clazz) {
@@ -106,6 +96,9 @@ public class LoadJet {
 
     private void exec(String _expression, boolean _logging) throws SQLException {
         try (Statement st = conn.createStatement()) {
+            if (_logging) {
+                logger.log(Level.DEBUG, "Executing {0}", _expression);
+            }
             st.executeUpdate(_expression);
         } catch (SQLException _ex) {
             if (_logging && _ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
@@ -224,7 +217,7 @@ public class LoadJet {
             return "CREATE AGGREGATE FUNCTION First(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP , INOUT counter INT) "
                  + "RETURNS TIMESTAMP CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
                  + "ELSE IF counter IS NULL THEN SET counter = 0; END IF; SET counter = counter + 1; "
-                 + " IF counter = 1 THEN SET ts = val; END IF; RETURN NULL; END IF; END ";
+                 + "IF counter = 1 THEN SET ts = val; END IF; RETURN NULL; END IF; END";
         }
 
         private void addFunction(String _functionName, String _javaMethodName, String _returnType, String... _paramTypes) {
@@ -455,14 +448,14 @@ public class LoadJet {
             String ecl = procedureEscapingIdentifier(_col.getName()).replace("%", "%%");
 
             return _isCreate
-                ? "CREATE TRIGGER expr%d before insert ON " + _ntn + " REFERENCING NEW AS newrow FOR EACH ROW "
-                    + " BEGIN  ATOMIC  SET newrow." + ecl + " = " + call + "; END "
-                : "CREATE TRIGGER expr%d before update ON " + _ntn
-                    + " REFERENCING NEW  AS newrow OLD AS OLDROW FOR EACH ROW BEGIN ATOMIC IF %s THEN "
+                ? "CREATE TRIGGER expr%d BEFORE INSERT ON " + _ntn + " REFERENCING NEW AS newrow FOR EACH ROW "
+                    + " BEGIN ATOMIC SET newrow." + ecl + " = " + call + "; END "
+                : "CREATE TRIGGER expr%d BEFORE UPDATE ON " + _ntn
+                    + " REFERENCING NEW AS newrow OLD AS OLDROW FOR EACH ROW BEGIN ATOMIC IF %s THEN "
                     + " SET newrow." + ecl + " = " + call + "; ELSEIF newrow." + ecl + " <> oldrow." + ecl
                     + " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '"
                     + "The following column is not updatable: " + _col.getName().replace("%", "%%")
-                    + "';  END IF ; END ";
+                    + "'; END IF; END ";
         }
 
         private boolean isNumeric(DataType dt) {
@@ -609,16 +602,6 @@ public class LoadJet {
             return SQLConverter.procedureEscapingIdentifier(escapeIdentifier(name));
         }
 
-        private void setDefaultValue(Column _col) throws SQLException, IOException {
-            String tn = _col.getTable().getName();
-            String ntn = escapeIdentifier(tn);
-            List<String> arTrigger = new ArrayList<>();
-            setDefaultValue(_col, ntn, arTrigger);
-            for (String trigger : arTrigger) {
-                exec(trigger, true);
-            }
-        }
-
         private String defaultValue4SQL(Object defaulT, DataType dt) {
             if (defaulT == null) {
                 return null;
@@ -644,55 +627,59 @@ public class LoadJet {
             return default4SQL;
         }
 
-        private void setDefaultValue(Column _col, String _ntn, List<String> _arTrigger) throws IOException, SQLException {
+        private String createTriggerColumnDefault(Column _col, String _ntn) throws IOException, SQLException {
             PropertyMap pm = _col.getProperties();
             String ncn = procedureEscapingIdentifier(_col.getName());
             Object defVal = pm.getValue(PropertyMap.DEFAULT_VALUE_PROP);
-            if (defVal != null) {
-                String default4SQL = defaultValue4SQL(defVal, _col.getType());
-                String guidExp = "GenGUID()";
-                if (!guidExp.equals(defVal)) {
-                    boolean defIsFunction =
-                        defVal.toString().trim().endsWith(")") && defVal.toString().indexOf('(') > 0;
-                    if (defIsFunction) {
-                        metadata.columnDef(_col.getTable().getName(), _col.getName(), defVal.toString());
-                    }
-                    Object defFound = default4SQL;
-                    boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
-                    if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                        logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})",
-                            defVal, _col.getName(), _col.getTable().getName());
-                    } else {
-                        if (defFound != null && !defIsFunction) {
-                            metadata.columnDef(_col.getTable().getName(), _col.getName(), defFound.toString());
-                        }
-                        if (_col.getType() == DataType.TEXT && defVal.toString().startsWith("'")
-                            && defVal.toString().endsWith("'")
-                            && defVal.toString().length() > _col.getLengthInUnits()) {
-                            logger.log(Level.WARNING, "Default values should start and end with a double quote, "
-                                + "the single quote is considered as part of the default value {0} "
-                                + "(column {1},table {2}). It may result in a data truncation error at run-time due to max column size {3}",
-                                defVal, _col.getName(), _col.getTable().getName(), _col.getLengthInUnits());
-                        }
-                        _arTrigger.add("CREATE TRIGGER DEFAULT_TRIGGER" + NAMING_COUNTER.getAndIncrement() + " BEFORE INSERT ON " + _ntn
-                            + " REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN "
-                            + "SET NEW." + ncn + "= " + default4SQL + " ; END IF");
+            if (defVal != null && !"GenGUID()".equals(defVal)) {
+                String default4SQL = defaultValue4SQL(defVal, _col.getType());
+                boolean defIsFunction = defVal.toString().trim().endsWith(")") && defVal.toString().indexOf('(') > 0;
+                if (defIsFunction) {
+                    metadata.columnDef(_col.getTable().getName(), _col.getName(), defVal.toString());
+                }
+                Object defFound = default4SQL;
+                boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
+                if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
+
+                    logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})",
+                        defVal, _col.getName(), _col.getTable().getName());
+                } else {
+                    if (defFound != null && !defIsFunction) {
+                        metadata.columnDef(_col.getTable().getName(), _col.getName(), defFound.toString());
                     }
+                    if (_col.getType() == DataType.TEXT && defVal.toString().startsWith("'")
+                        && defVal.toString().endsWith("'")
+                        && defVal.toString().length() > _col.getLengthInUnits()) {
+                        logger.log(Level.WARNING, "Default values should start and end with a double quote, "
+                            + "the single quote is considered as part of the default value {0} "
+                            + "(column {1}, table {2}). It may result in a data truncation error at run-time due to max column size {3}",
+                            defVal, _col.getName(), _col.getTable().getName(), _col.getLengthInUnits());
+                    }
+                    String triggerName = escapeIdentifier("tr_" + _ntn + "_default" + NAMING_COUNTER.getAndIncrement());
+                    return "CREATE TRIGGER " + triggerName + " BEFORE INSERT ON " + _ntn
+                        + " REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN"
+                        + " SET NEW." + ncn + " = " + default4SQL + "; END IF";
                 }
             }
-
+            return null;
         }
 
-        private void setDefaultValues(Table t) throws SQLException, IOException {
-            String tn = t.getName();
-            String ntn = escapeIdentifier(tn);
-            List<String> arTrigger = new ArrayList<>();
-            for (Column col : t.getColumns()) {
-                setDefaultValue(col, ntn, arTrigger);
-            }
-            for (String trigger : arTrigger) {
+        private void addTriggerColumnDefault(Column _col) throws SQLException, IOException {
+            String tn = escapeIdentifier(_col.getTable().getName());
+            String trigger = createTriggerColumnDefault(_col, tn);
+            if (trigger != null) {
                 exec(trigger, true);
+            }
+        }
+
+        private void addTriggersColumnDefault(Table _table) throws SQLException, IOException {
+            String tn = escapeIdentifier(_table.getName());
+            for (Column col : _table.getColumns()) {
+                String trigger = createTriggerColumnDefault(col, tn);
+                if (trigger != null) {
+                    exec(trigger, true);
+                }
             }
         }
 
@@ -864,7 +851,7 @@ public class LoadJet {
             String tn = t.getName();
 
             String ntn = schema(escapeIdentifier(tn), systemTable);
-            exec("DROP TABLE " + ntn + " CASCADE ", false);
+            exec("DROP TABLE " + ntn + " CASCADE", false);
             metadata.dropTable(tn);
         }
 
@@ -872,7 +859,7 @@ public class LoadJet {
             String tn = t.getName();
             readOnlyTables.add(t.getName());
             String ntn = schema(escapeIdentifier(tn), systemTable);
-            exec("SET TABLE " + ntn + " READONLY TRUE ", false);
+            exec("SET TABLE " + ntn + " READONLY TRUE", false);
             loadedTables.add(tn + " READONLY");
         }
 
@@ -1158,9 +1145,9 @@ public class LoadJet {
                             createTable(t, true);
                             loadTableData(t, true);
                             exec("SET TABLE " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
-                                    + " READONLY TRUE ", false);
-                            exec("GRANT SELECT  ON " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
-                                    + " TO PUBLIC ", false);
+                                    + " READONLY TRUE", false);
+                            exec("GRANT SELECT ON " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
+                                    + " TO PUBLIC", false);
                         }
                     } catch (Exception _ignored) {
                     }
@@ -1190,7 +1177,7 @@ public class LoadJet {
         }
 
         private void createSyncrTriggers(Table t) throws SQLException, IOException {
-            setDefaultValues(t);
+            addTriggersColumnDefault(t);
             String ntn = escapeIdentifier(t.getName());
             triggersGenerator.synchronisationTriggers(ntn, hasAutoNumberColumn(t), hasAppendOnly(t));
             loadedTables.add(t.getName());
@@ -1260,20 +1247,24 @@ public class LoadJet {
     }
 
     private final class TriggersLoader {
-        void loadTrigger(String tableName, String namePrefix, String when, Class<? extends TriggerBase> clazz) throws SQLException {
-            String triggerName = escapeIdentifier(namePrefix + '_' + tableName);
+        void loadTrigger(String tableName, String nameSuffix, String when, Class<? extends TriggerBase> clazz) throws SQLException {
+            String triggerName = escapeIdentifier("tr_" + tableName + '_' + nameSuffix);
             String q0 = DBReference.is2xx() ? "" : "QUEUE 0 ";
             exec("CREATE TRIGGER " + triggerName + ' ' + when + " ON " + tableName + " FOR EACH ROW " + q0
                 + "CALL \"" + clazz.getName() + "\"", true);
         }
 
         void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAutoAppendOnly) throws SQLException {
-            loadTrigger(tableName, "genericInsert", "AFTER INSERT", TriggerInsert.class);
-            loadTrigger(tableName, "genericUpdate", "AFTER UPDATE", TriggerUpdate.class);
-            loadTrigger(tableName, "genericDelete", "AFTER DELETE", TriggerDelete.class);
+            // loadTrigger(tableName, "beforeInsColCache", "BEFORE INSERT", TriggerColumCache.class);
+            // loadTrigger(tableName, "beforeUpdColCache", "BEFORE UPDATE", TriggerColumCache.class);
+            // loadTrigger(tableName, "beforeDelColCache", "BEFORE DELETE", TriggerColumCache.class);
+
+            loadTrigger(tableName, "generic_insert", "AFTER INSERT", TriggerInsert.class);
+            loadTrigger(tableName, "generic_update", "AFTER UPDATE", TriggerUpdate.class);
+            loadTrigger(tableName, "generic_delete", "AFTER DELETE", TriggerDelete.class);
             if (hasAutoAppendOnly) {
-                loadTrigger(tableName, "appendOnly", "BEFORE INSERT", TriggerAppendOnly.class);
-                loadTrigger(tableName, "appendOnly_upd", "BEFORE UPDATE", TriggerAppendOnly.class);
+                loadTrigger(tableName, "append_only", "BEFORE INSERT", TriggerAppendOnly.class);
+                loadTrigger(tableName, "append_only_upd", "BEFORE UPDATE", TriggerAppendOnly.class);
             }
             if (hasAutoNumberColumn) {
                 loadTrigger(tableName, "autonumber", "BEFORE INSERT", TriggerAutoNumber.class);

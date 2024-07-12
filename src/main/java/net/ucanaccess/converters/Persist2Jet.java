@@ -557,7 +557,7 @@ public class Persist2Jet {
         mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),
             getUcaMetadataTypeName(0, cb, _types), idTable);
         saveColumnsDefaults(_defaults, _notNulls, col, 0);
-        updateNewColumn2Defaut(_tableName, _columnName, t, col);
+        updateNewColumnToDefault(_tableName, _columnName, t, col);
         setHsqldbNotNull(_tableName, _columnName, col);
         conn.reloadDbIO();
     }
@@ -574,7 +574,7 @@ public class Persist2Jet {
         }
     }
 
-    private void updateNewColumn2Defaut(String _tableName, String _columnName, Table t, Column _col)
+    private void updateNewColumnToDefault(String _tableName, String _columnName, Table t, Column _col)
         throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());

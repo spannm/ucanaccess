@@ -9,6 +9,7 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import org.hsqldb.types.JavaObjectData;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class TriggerAppendOnly extends TriggerBase {
 
@@ -20,10 +21,7 @@ public class TriggerAppendOnly extends TriggerBase {
             return;
         }
         try {
-            Table t = getTable(tableName, conn);
-            if (t == null) {
-                throw new TableNotFoundException(tableName);
-            }
+            Table t = Optional.ofNullable(getTable(tableName, conn)).orElseThrow(() -> new TableNotFoundException(tableName));
             int i = 0;
             for (Column col : t.getColumns()) {
                 if (col.isAppendOnly()) {

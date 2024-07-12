@@ -12,10 +12,14 @@ import java.io.RandomAccessFile;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("java:S2077") // suppress sonarcloud warnings regarding dynamically formatted SQL
 public class DBReference {
@@ -27,7 +31,7 @@ public class DBReference {
     private final File                              dbFile;
     private Database                                dbIO;
     private FileLock                                fileLock          = null;
-    private String                                  id                = id();
+    private String                                  id                = createId();
     private boolean                                 inMemory          = true;
     private long                                    lastModified;
     private boolean                                 openExclusive     = false;
@@ -153,7 +157,7 @@ public class DBReference {
         dbIO.flush();
         dbIO.close();
         dbIO = open(dbFile, pwd);
-        id = id();
+        id = createId();
         firstConnection = true;
         LoadJet lj = new LoadJet(getHSQLDBConnection(_session), dbIO);
         lj.setSkipIndexes(skipIndexes);
@@ -204,14 +208,14 @@ public class DBReference {
         return false;
     }
 
-    private File[] getHSQLDBFiles() {
+    private List<File> getHSQLDBFiles() {
         if (toKeepHsql == null) {
-            return new File[] {};
+            return List.of();
         }
         File folder = toKeepHsql.getParentFile();
         String name = toKeepHsql.getName();
-        return new File[] {new File(folder, name + ".data"), new File(folder, name + ".script"), new File(folder, name + ".properties"), new File(folder, name + ".log"), new File(folder,
-            name + ".lck"), new File(folder, name + ".lobs")};
+        return Stream.of("data", "lck", "lobs", "log", "properties", "script")
+            .map(ext -> new File(folder, name + "." + ext)).collect(Collectors.toList());
     }
 
     private long getLastUpdateHSQLDB() {
@@ -236,21 +240,21 @@ public class DBReference {
         if (!inMemory) {
             if (toKeepHsql == null) {
                 File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
-                File hbase = new File(folder, "Ucanaccess_" + this);
+                File hbase = new File(folder, "UCanAccess_" + id);
                 if (hbase.exists()) {
-                    for (File hsqlF : hbase.listFiles()) {
-                        Files.delete(hsqlF.toPath());
-                    }
+                    Arrays.stream(Optional.ofNullable(hbase.listFiles()).orElse(new File[0]))
+                        .filter(f -> !f.delete())
+                        .forEach(f -> logger.log(Level.WARNING, "Could not delete file {0}", f));
                 }
-                Files.delete(hbase.toPath());
+                hbase.delete();
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
-                Files.delete(toKeepHsql.toPath());
+                toKeepHsql.delete();
                 if (!toKeepHsql.createNewFile()) {
                     logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists()) {
-                        Files.delete(hsqlf.toPath());
+                        hsqlf.delete();
                     }
                 }
                 mirrorRecreated = true;
@@ -370,12 +374,14 @@ public class DBReference {
                     tempHsql = toKeepHsql;
                 } else {
                     File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
-                    File hbase = new File(folder, "Ucanaccess_" + this);
+                    File hbase = new File(folder, "UCanAccess_" + id);
                     hbase.mkdir();
                     tempHsql = new File(hbase, id);
 
                     if (!tempHsql.createNewFile()) {
                         logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
+                    } else {
+                        tempHsql.delete();
                     }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -401,8 +407,8 @@ public class DBReference {
         return memoryTimer.inactivityTimeout;
     }
 
-    private String id() {
-        return UUID.randomUUID() + toString();
+    private String createId() {
+        return UUID.randomUUID() + "-" + new UniqueString();
     }
 
     public void incrementActiveConnection() {
@@ -547,7 +553,6 @@ public class DBReference {
 
     public void setMirrorFolder(File _mirrorFolder) {
         mirrorFolder = _mirrorFolder;
-
     }
 
     public boolean isIgnoreCase() {
@@ -588,6 +593,24 @@ public class DBReference {
 
     public void setConcatNulls(boolean _concatNulls) {
         concatNulls = _concatNulls;
+    }
+
+    /**
+     * Unique string based on current date/time and a unique id.
+     */
+    private static final class UniqueString {
+        private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+        private static final AtomicInteger     COUNTER   = new AtomicInteger(1);
+        private final String                   name;
+
+        private UniqueString() {
+            name = LocalDateTime.now().format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     private static class MemoryTimer {
