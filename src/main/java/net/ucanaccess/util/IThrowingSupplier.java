@@ -56,6 +56,7 @@ public interface IThrowingSupplier<R, T extends Throwable> {
      * Returns a {@link Supplier} for this throwing supplier.
      * @return supplier
      */
+    @SuppressWarnings("PMD.UseDiamondOperator")
     default Supplier<R> toSupplier() {
         return new Supplier<R>() {
             @Override

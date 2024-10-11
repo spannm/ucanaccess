@@ -1630,6 +1630,7 @@ public final class Functions {
      * @param _number a double or any valid numeric expression, if {@code null}, {@code null} is returned
      * @return integer portion
      */
+    @SuppressWarnings("PMD.UnnecessaryCast")
     @FunctionType(namingConflict = true, functionName = "Fix", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static Double fix(Double _number) {
         return _number == null
