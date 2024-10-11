@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>59</version>
+        <version>60</version>
     </parent>
 
     <groupId>io.github.spannm</groupId>
@@ -103,11 +103,15 @@
         <dep.hsqldb.version>2.7.3</dep.hsqldb.version>
         <dep.hsqldb.classifier/>
 
-        <dep.slf4j.version>2.0.13</dep.slf4j.version>
+        <dep.slf4j.version>2.0.16</dep.slf4j.version>
 
-        <dep.junit.version>5.10.2</dep.junit.version>
-        <dep.assertj.version>3.26.0</dep.assertj.version>
-        <dep.mockito.version>5.12.0</dep.mockito.version>
+        <dep.junit.version>5.11.2</dep.junit.version>
+        <dep.assertj.version>3.26.3</dep.assertj.version>
+        <dep.mockito.version>5.14.1</dep.mockito.version>
+
+        <!-- override basepom versions -->
+        <dep.checkstyle.version>10.18.2</dep.checkstyle.version>
+        <dep.pmd.version>7.6.0</dep.pmd.version>
 
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
