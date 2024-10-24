@@ -59,12 +59,20 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         ucanaccess = createUcanaccessConnection();
     }
 
+    protected void init() throws SQLException {
+        init(null);
+    }
+
     protected final AccessVersion getAccessVersion() {
         return accessVersion;
     }
 
     protected final FileFormat getFileFormat() {
         return accessVersion.getFileFormat();
+    }
+
+    protected String getFileExtension() {
+        return getFileFormat().getFileExtension();
     }
 
     protected final File getFileAccDb() {
@@ -318,7 +326,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      * @return temporary file object
      */
     protected File createTempFileName(String _prefix) {
-        return createTempFileName(_prefix, getFileFormat().getFileExtension());
+        return createTempFileName(_prefix, getFileExtension());
     }
 
     /**

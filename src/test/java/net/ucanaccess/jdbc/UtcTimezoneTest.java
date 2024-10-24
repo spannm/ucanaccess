@@ -4,12 +4,10 @@ import io.github.spannm.jackcess.CursorBuilder;
 import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Row;
 import io.github.spannm.jackcess.Table;
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -34,10 +32,9 @@ class UtcTimezoneTest extends UcanaccessBaseFileTest {
         TimeZone.setDefault(prevTimeZone);
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testForLostHour(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    @Test
+    void testForLostHour() throws SQLException, IOException {
+        init();
 
         /*
          * ensure that #2017-03-26 02:00:00# doesn't "magically"

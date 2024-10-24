@@ -3,18 +3,14 @@ package net.ucanaccess.jdbc;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 class PasswordTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testPassword(AccessVersion _accessVersion) throws Exception {
-
-        assertThatThrownBy(() -> init(_accessVersion))
+    @Test
+    void testPassword() throws Exception {
+        assertThatThrownBy(() -> init())
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageContaining("Authentication failed");
 
@@ -25,4 +21,5 @@ class PasswordTest extends UcanaccessBaseFileTest {
             assertNotNull(conn);
         }
     }
+
 }

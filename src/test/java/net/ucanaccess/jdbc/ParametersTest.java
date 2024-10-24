@@ -1,9 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -13,10 +11,9 @@ import java.time.LocalTime;
 
 class ParametersTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testParameters(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testParameters() throws SQLException {
+        init();
 
         dumpQueryResult("SELECT * FROM tq");
         dumpQueryResult("SELECT * FROM z");
@@ -72,10 +69,9 @@ class ParametersTest extends UcanaccessBaseFileTest {
         dumpQueryResult("SELECT * FROM [table 1]");
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testLocalTimeParameters(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testLocalTimeParameters() throws SQLException {
+        init();
 
         LocalTime desiredTime = LocalTime.of(12, 0, 1);
         String expectedText = "one second past noon";

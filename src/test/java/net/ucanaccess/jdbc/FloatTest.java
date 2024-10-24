@@ -1,19 +1,16 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 class FloatTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testCreate(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testCreate() throws SQLException {
+        init();
 
         checkQuery("SELECT [row] FROM t_float ORDER BY pk");
         PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_float (row) VALUES(?)");

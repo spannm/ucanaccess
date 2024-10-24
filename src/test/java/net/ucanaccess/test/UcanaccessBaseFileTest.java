@@ -32,4 +32,11 @@ public abstract class UcanaccessBaseFileTest extends UcanaccessBaseTest {
         return null;
     }
 
+    @Override
+    protected String getFileExtension() {
+        String path = getAccessPath();
+        String ext = path.substring(path.lastIndexOf('.'));
+        return ext;
+    }
+
 }

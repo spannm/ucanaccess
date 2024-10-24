@@ -1,9 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -16,15 +14,14 @@ import java.util.stream.Collectors;
 
 class CorruptedTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testCorrupted(AccessVersion _accessVersion) throws SQLException {
+    @Test
+    void testCorrupted() throws SQLException {
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(errContent)) {
 
             PrintStream prevSysOut = System.out;
             System.setOut(ps);
-            init(_accessVersion);
+            init();
             System.setOut(prevSysOut);
         }
 

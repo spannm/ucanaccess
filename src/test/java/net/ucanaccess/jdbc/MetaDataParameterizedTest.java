@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.exception.UcanaccessSQLException;
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.lang.System.Logger.Level;
 import java.sql.DatabaseMetaData;
@@ -16,10 +14,9 @@ import java.sql.ResultSet;
 
 class MetaDataParameterizedTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testCreateBadMetadata(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testCreateBadMetadata() throws Exception {
+        init();
         UcanaccessStatement st = ucanaccess.createStatement();
         st.execute("CREATE TABLE [健康] ([q3¹²³¼½¾ß€ Ð×ÝÞðýþäüöß] guiD PRIMARY KEY, [Sometime I wonder who I am ] TEXT )");
         st.execute("INSERT INTO [健康] ([Sometime I wonder who I am ] ) VALUES ('I''m a crazy man')");
@@ -61,19 +58,17 @@ class MetaDataParameterizedTest extends UcanaccessBaseFileTest {
         checkQuery("SELECT * FROM noroman ORDER BY [किआओ]");
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testRightCaseQuery(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testRightCaseQuery() throws Exception {
+        init();
         UcanaccessStatement st = ucanaccess.createStatement();
         assertEquals("Ciao", st.executeQuery("SELECT * FROM query1").getMetaData().getColumnLabel(1));
     }
 
     @SuppressWarnings("resource")
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testBadMetadata(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testBadMetadata() throws Exception {
+        init();
         dumpQueryResult("SELECT * FROM NOROMAN");
         UcanaccessStatement st = ucanaccess.createStatement();
         assertThat(st.executeQuery("SELECT * FROM NOROMAN").getMetaData())

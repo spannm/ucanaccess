@@ -6,10 +6,8 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.PreparedStatement;
@@ -19,10 +17,9 @@ import java.time.LocalDateTime;
 
 class ComplexTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2010")
-    void testComplex(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testComplex() throws Exception {
+        init();
 
         complex0();
         complex1();
@@ -108,10 +105,9 @@ class ComplexTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2010")
-    void testComplexRollback(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testComplexRollback() throws SQLException {
+        init();
 
         ucanaccess = Mockito.spy(ucanaccess);
         Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))

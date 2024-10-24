@@ -1,9 +1,7 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -17,10 +15,9 @@ class ColumnOrderTest extends UcanaccessBaseFileTest {
             .withColumnOrderDisplay();
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessDefaultVersionSource
-    void testColumnOrder1(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testColumnOrder1() throws Exception {
+        init();
 
         try (Connection uca = createUcanaccessConnection();
             PreparedStatement ps = uca.prepareStatement("INSERT INTO t_columnorder values (?, ?, ?)")) {

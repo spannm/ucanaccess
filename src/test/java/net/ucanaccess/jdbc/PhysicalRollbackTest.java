@@ -16,7 +16,7 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
     @Override
     protected String getAccessPath() {
         // this db does not exist!
-        return getClass().getSimpleName() + getFileFormat().getFileExtension();
+        return getClass().getSimpleName() + getFileExtension();
     }
 
     @Override

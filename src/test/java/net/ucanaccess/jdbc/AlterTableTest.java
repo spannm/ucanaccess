@@ -7,12 +7,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.spannm.jackcess.*;
 import io.github.spannm.jackcess.Index.Column;
 import net.ucanaccess.exception.UcanaccessSQLException;
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.HibernateSupport;
 import net.ucanaccess.util.Sql;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.System.Logger.Level;
@@ -25,17 +23,16 @@ import java.util.Map;
 class AlterTableTest extends UcanaccessBaseFileTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init() throws SQLException {
+        super.init();
         executeStatements(
             Sql.of(CREATE, TABLE, "AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))"),
             Sql.of(CREATE, TABLE, "[AAA n] (baaaa TEXT(3), A INTEGER, C TEXT(4), b YESNO, d DATETIME DEFAULT NOW(), e NUMERIC(8,3), [f f] TEXT)"));
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testRename(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testRename() throws SQLException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE [??###] RENAME TO [1GIà GIà]");
@@ -49,10 +46,9 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testAddColumn(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    @Test
+    void testAddColumn() throws SQLException, IOException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
@@ -102,10 +98,9 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testCreateIndex(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    @Test
+    void testCreateIndex() throws SQLException, IOException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String tbl = "AAA n";
@@ -135,10 +130,10 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testCreatePk(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    @Test
+
+    void testCreatePk() throws SQLException, IOException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE [AAA n] ADD PRIMARY KEY (baaaa, a)");
@@ -197,10 +192,9 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testDoubleRelationship(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testDoubleRelationship() throws SQLException {
+        init();
 
         // repro code from https://stackoverflow.com/q/49160150/2144390
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -227,10 +221,9 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testMiscellaneous(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testMiscellaneous() throws SQLException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("ALTER TABLE tx ADD CONSTRAINT pk PRIMARY KEY ([i d]) ");
@@ -269,10 +262,9 @@ class AlterTableTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2007")
-    void testSqlErrors(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testSqlErrors() throws SQLException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE tx2 (id COUNTER, [my best friend] LONG, [my worst friend] SINGLE, [Is Pippo] TEXT(100), "

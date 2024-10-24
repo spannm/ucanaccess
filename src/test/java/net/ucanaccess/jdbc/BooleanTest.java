@@ -1,9 +1,8 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 
@@ -19,10 +18,9 @@ class BooleanTest extends UcanaccessBaseFileTest {
             "INSERT INTO t (pk) VALUES('pippo')");
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testCreate(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testCreate() throws SQLException {
+        init();
         dumpQueryResult("SELECT * FROM tblMain");
         dumpQueryResult("SELECT * FROM t");
         checkQuery("SELECT * FROM tblMain");

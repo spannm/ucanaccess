@@ -2,28 +2,25 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.type.SqlConstants.*;
 
-import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
 import net.ucanaccess.util.Sql;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.List;
 
 class AccessLikeTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessDefaultVersionSource
-    void testLike(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testLike() throws SQLException {
+        init();
+
         checkQuery(Sql.of(SELECT, "*", FROM, "q_like2", ORDER_BY, "campo2"), singleRec("dd1"));
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessDefaultVersionSource
-    void testLikeExternal(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testLikeExternal() throws SQLException {
+        init();
 
         String tbl = "t_like3";
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -56,10 +53,9 @@ class AccessLikeTest extends UcanaccessBaseFileTest {
         }
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessDefaultVersionSource
-    void testNotLikeExternal(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testNotLikeExternal() throws SQLException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("CREATE TABLE " + "t_like4" + " (id COUNTER PRIMARY KEY, descr MEMO)");

@@ -1,18 +1,15 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 
 class PivotTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testPivot(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    @Test
+    void testPivot() throws SQLException {
+        init();
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             dumpQueryResult("SELECT * FROM q_trim");

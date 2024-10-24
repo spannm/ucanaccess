@@ -18,7 +18,7 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
     void testReloadMirror(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
 
-        File dbFile = createTempFileName(getClass().getSimpleName(), getFileFormat().getFileExtension());
+        File dbFile = createTempFileName(getClass().getSimpleName(), getFileExtension());
         dbFile.deleteOnExit();
         File mirrorFile = createTempFileName(getClass().getSimpleName(), "");
         mirrorFile.deleteOnExit();

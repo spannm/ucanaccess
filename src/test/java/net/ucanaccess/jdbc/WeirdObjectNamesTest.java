@@ -1,16 +1,13 @@
 package net.ucanaccess.jdbc;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 class WeirdObjectNamesTest extends UcanaccessBaseFileTest {
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource
-    void testTableNameEndsInQuestionMarks(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    @Test
+    void testTableNameEndsInQuestionMarks() throws Exception {
+        init();
 
         checkQuery("SELECT * FROM [19 MB 01 BEZAHLT ???]");
     }

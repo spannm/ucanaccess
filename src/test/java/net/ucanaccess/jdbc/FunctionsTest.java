@@ -34,7 +34,7 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @Override
     protected String getAccessPath() {
-        return getTestDbDir() + "functions" + getFileFormat().name() + getFileFormat().getFileExtension();
+        return getTestDbDir() + "functions" + getFileFormat().name() + getFileExtension();
     }
 
     @Override

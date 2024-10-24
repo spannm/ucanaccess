@@ -2,10 +2,8 @@ package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
-import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,10 +17,9 @@ import java.util.Arrays;
 class BlobOleLazyLoadingTest extends UcanaccessBaseFileTest {
 
     // It only works with JRE 1.6 and later (JDBC 3)
-    @ParameterizedTest(name = "[{index}] {0}")
-    @AccessVersionSource(include = "V2010")
-    void testBlobOLE(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    @Test
+    void testBlobOLE() throws SQLException, IOException {
+        init();
 
         final long binaryFileSize = 32718;
         byte[] initialBlobBytes = getBlobBytes();
