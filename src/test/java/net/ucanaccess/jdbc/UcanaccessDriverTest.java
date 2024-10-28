@@ -34,4 +34,12 @@ class UcanaccessDriverTest extends UcanaccessBaseTest {
             .containsEntry("withoutVal2", null);
     }
 
+    @Test
+    void testVersion() {
+        UcanaccessDriver driver = new UcanaccessDriver();
+
+        assertThat(driver.getMajorVersion()).isGreaterThanOrEqualTo(5);
+        assertThat(driver.getMinorVersion()).isGreaterThanOrEqualTo(1);
+    }
+
 }

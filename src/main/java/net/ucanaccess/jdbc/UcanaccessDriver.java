@@ -11,6 +11,7 @@ import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.type.ColumnOrder;
 import net.ucanaccess.util.Try;
+import net.ucanaccess.util.VersionInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -252,12 +253,12 @@ public final class UcanaccessDriver implements Driver {
 
     @Override
     public int getMajorVersion() {
-        return 0;
+        return VersionInfo.find(getClass()).getMajorVersion();
     }
 
     @Override
     public int getMinorVersion() {
-        return 0;
+        return VersionInfo.find(getClass()).getMinorVersion();
     }
 
     @Override

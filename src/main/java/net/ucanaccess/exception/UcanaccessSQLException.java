@@ -1,6 +1,7 @@
 package net.ucanaccess.exception;
 
 import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
+import net.ucanaccess.util.VersionInfo;
 import org.hsqldb.error.ErrorCode;
 
 import java.sql.SQLException;
@@ -75,11 +76,13 @@ public class UcanaccessSQLException extends SQLException {
         if (_message != null && _message.startsWith(MSG_PREFIX)) {
             return _message;
         }
-        return MSG_PREFIX
+
+        String ver = VersionInfo.find(getClass()).getVersion();
+        return (MSG_PREFIX
             + "::"
-            + Optional.ofNullable(getClass().getPackage().getImplementationVersion()).orElse("5.1.0")
+            + Optional.ofNullable(ver).orElse("x.y.z")
             + " "
-            + (_message == null || _message.isBlank() ? "(n/a)" : _message.trim());
+            + (_message == null || _message.isBlank() ? "(n/a)" : _message)).trim();
     }
 
     @Override
