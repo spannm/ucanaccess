@@ -105,13 +105,14 @@
 
         <dep.slf4j.version>2.0.16</dep.slf4j.version>
 
-        <dep.junit.version>5.10.2</dep.junit.version>
+        <!-- test dependencies -->
+        <dep.junit.version>5.11.3</dep.junit.version>
         <dep.assertj.version>3.26.3</dep.assertj.version>
         <dep.mockito.version>5.14.1</dep.mockito.version>
 
         <!-- override basepom versions -->
-        <dep.checkstyle.version>10.18.2</dep.checkstyle.version>
-        <dep.pmd.version>7.6.0</dep.pmd.version>
+        <dep.checkstyle.version>10.19.0</dep.checkstyle.version>
+        <dep.pmd.version>7.7.0</dep.pmd.version>
 
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
