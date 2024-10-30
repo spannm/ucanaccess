@@ -42,9 +42,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <scope>provided</scope>
-            <excludes>
-                <exclude>com.healthmarketscience.jackcess:jackcess</exclude>
-            </excludes>
         </dependencySet>
     </dependencySets>
 

@@ -98,7 +98,6 @@
 
         <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
         <dep.jackcess.version>5.0.0-SNAPSHOT</dep.jackcess.version>
-        <dep.jackcess-encrypt.version>4.0.2</dep.jackcess-encrypt.version>
 
         <dep.hsqldb.version>2.7.3</dep.hsqldb.version>
         <dep.hsqldb.classifier/>
@@ -152,14 +151,6 @@
             <groupId>io.github.spannm</groupId>
             <artifactId>${dep.jackcess.artifactId}</artifactId>
             <version>${dep.jackcess.version}</version>
-        </dependency>
-
-        <!-- for inclusion in assemblies -->
-        <dependency>
-            <groupId>com.healthmarketscience.jackcess</groupId>
-            <artifactId>jackcess-encrypt</artifactId>
-            <version>${dep.jackcess-encrypt.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
