@@ -9,14 +9,14 @@
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> net.ucanaccess.commands;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.Persist2Jet;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.exception.UcanaccessSQLException;
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> java.io.IOException;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> java.sql.SQLException;
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DropTableCommand" href="../../../net/ucanaccess/commands/DropTableCommand.html#DropTableCommand">DropTableCommand</a> <strong class="jxr_keyword">implements</strong> <a name="ICommand" href="../../../net/ucanaccess/commands/ICommand.html#ICommand">ICommand</a> {
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>      <strong class="jxr_keyword">private</strong> String execId;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> String tableName;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String execId;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String tableName;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">public</strong> <a name="DropTableCommand" href="../../../net/ucanaccess/commands/DropTableCommand.html#DropTableCommand">DropTableCommand</a>(String _tableName, String _execId) {
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>          tableName = _tableName;
@@ -44,7 +44,7 @@
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>              <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a> p2a = <strong class="jxr_keyword">new</strong> <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a>();
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>              p2a.dropTable(tableName);
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>          } <strong class="jxr_keyword">catch</strong> (IOException _ex) {
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/jdbc/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>          }
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>      }
@@ -56,6 +56,6 @@
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

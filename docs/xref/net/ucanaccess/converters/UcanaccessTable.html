@@ -20,8 +20,8 @@
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="UcanaccessTable" href="../../../net/ucanaccess/converters/UcanaccessTable.html#UcanaccessTable">UcanaccessTable</a> <strong class="jxr_keyword">implements</strong> Table {
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>      <strong class="jxr_keyword">private</strong> Table  wrapped;
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>      <strong class="jxr_keyword">private</strong> String tableName;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Table  wrapped;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String tableName;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">public</strong> <a name="UcanaccessTable" href="../../../net/ucanaccess/converters/UcanaccessTable.html#UcanaccessTable">UcanaccessTable</a>(Table _table, String _tableName) {
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>          wrapped = _table;
@@ -192,9 +192,14 @@
 <a class="jxr_linenumber" name="L184" href="#L184">184</a>         <strong class="jxr_keyword">return</strong> wrapped.getUpdatedDate();
 <a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     @Override
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <strong class="jxr_keyword">return</strong> String.format(<span class="jxr_string">"%s[%s, wrapped=%s]"</span>, getClass().getSimpleName(), tableName, wrapped);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

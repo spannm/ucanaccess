@@ -7,12 +7,12 @@
         <title>Getting Started</title>
     </head>
     <body>
-        <h3>Getting Started</h3>
+        <h1>Getting Started</h1>
         <p>
             Note that the distribution comes with a large number of JUnit test cases
             which illustrate how UCanAccess may be used.
         </p>
-        <h3>Adding UCanAccess to your Java project</h3>
+        <h2>Adding UCanAccess to your Java project</h2>
         <p>
             If your project uses <a href="https://maven.apache.org/index.html">Maven</a> you can simply include UCanAccess
             via the following dependency in your Maven POM:
@@ -21,70 +21,70 @@
 &lt;dependency&gt;
     &lt;groupId&gt;io.github.spannm&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
-    &lt;version&gt;5.1.0&lt;/version&gt;
+    &lt;version&gt;5.1.2&lt;/version&gt;
 &lt;/dependency&gt;</pre>
         <p>
             Otherwise, see <a href="https://stackoverflow.com/a/21955257/2144390">this Stack Overflow answer</a> for details
             on how to configure your Java project.
         </p>
-        <h3>Establishing a UCanAccess connection</h3>
+        <h2>Establishing a UCanAccess connection</h2>
         <pre>
 Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);
 Connection connTemplate = DriverManager.getConnection(&quot;jdbc:ucanaccess://&lt;mdb or accdb file path&gt;&quot;, user, password);
 
 // for example:
 Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/data/myaccessdb.mdb;memory=true&quot;);</pre>
-        <h3>Connection Properties</h3>
+        <h2>Connection Properties</h2>
         <p>
-            <b>memory</b>: set if HSQLDB will store its backing database only in memory. Default is
+            <strong>memory</strong>: set if HSQLDB will store its backing database only in memory. Default is
             <code>memory=true</code>
             .
         </p>
         <p>
-            <b>lobScale</b>: to optimize memory occupation when a relevant percent of memory occupation is for OLE (BLOB)
+            <strong>lobScale</strong>: to optimize memory occupation when a relevant percent of memory occupation is for OLE (BLOB)
             data. This may also allow, in many cases, to use the memory=true setting, whilst it was impossible before. It
             should be set to a value close to the average size of OLE instances. According with the HSQLDB documentation,
             the values allowed are 1, 2, 4, 8, 16, 32 (the unit is Kb). Default is 2 if memory=true, 32 (HSQLDB default)
             otherwise.
         </p>
         <p>
-            <b>skipIndexes</b>: in order to minimize memory occupation, it allows skipping the creation of simple (untied to
+            <strong>skipIndexes</strong>: in order to minimize memory occupation, it allows skipping the creation of simple (untied to
             contraints) indexes. It doesn't have effect on referential integrity constraints (i.e., Index Unique, Foreign
             Key or Primary Key).
         </p>
         <p>
-            <b>newDatabaseVersion</b>: UCanAccess will create a new Access database file in the specified version if this
+            <strong>newDatabaseVersion</strong>: UCanAccess will create a new Access database file in the specified version if this
             parameter is set and the file specified in the JDBC connection URL does not exist. Valid values for this
             parameter are: V2000, V2003, V2007, V2010.
         </p>
         <p>
-            <b>openExclusive</b> (replaces the deprecated <i>lockMdb</i>): if openExclusive is enabled (
+            <strong>openExclusive</strong> (replaces the deprecated <i>lockMdb</i>): if openExclusive is enabled (
             <code>openExclusive=true</code>
-            ), UCanAccess locks the mdb/accdb file to prevent updates from other processes. Default=false.<br/> <br/> <b>showSchema</b>:
+            ), UCanAccess locks the mdb/accdb file to prevent updates from other processes. Default=false.<br/> <br/> <strong>showSchema</strong>:
             if true, catalog "PUBLIC" and schema "PUBLIC" and other HSQLDB schemas are shown in the DatabaseMetadata
             implementation. Default=false. Using <i>showSchema=true</i> is recommended with Squirrel SQL.
         </p>
         <p>
-            <b>inactivityTimeout</b> (since UcanAccess 0.1.1): it is used only with the default memory mode (memory=true).
+            <strong>inactivityTimeout</strong> (since UcanAccess 0.1.1): it is used only with the default memory mode (memory=true).
             If there are no active connections for the inactivityTimeout period (in minutes) HSQLDB will be temporarily shut
             down and any file system resources will be released. It will be restarted at the next connection. Setting
             <code>inactivityTimeout=0</code>
             can be used for avoiding this behavior. Default = 2 minutes.
         </p>
         <p>
-            <b>immediatelyReleaseResources</b> (replaces <i>singleConnection</i> which has been deprecated since UCanAccess
+            <strong>immediatelyReleaseResources</strong> (replaces <i>singleConnection</i> which has been deprecated since UCanAccess
             3.0.6): it is used for for ETL jobs, scheduled tasks, or "one-shot" use of UCanAccess with only one connection
             open. All resources (memory and file system) will be released at the closing of the connection. Default=false.
         </p>
         <p>
-            <b>encrypt</b>: it allows HSQLDB files encryption. You can use it in conjunction with memory=false.
+            <strong>encrypt</strong>: it allows HSQLDB files encryption. You can use it in conjunction with memory=false.
             Default=false.
         </p>
         <p>
-            <b>sysSchema</b>: if true the Access system tables will be loaded in the "sys" readonly schema. Default=false.
+            <strong>sysSchema</strong>: if true the Access system tables will be loaded in the "sys" readonly schema. Default=false.
         </p>
         <p>
-            <b>ignoreCase</b>: Disables (ignoreCase=true) or enables (ignoreCase=false) the case sensitivity of text
+            <strong>ignoreCase</strong>: Disables (ignoreCase=true) or enables (ignoreCase=false) the case sensitivity of text
             comparison. Default is true.<br/>
             For example:<br/>
             <code>
@@ -92,7 +92,7 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             </code>
         </p>
         <p>
-            <b>remap</b>: it allows to remap the paths to one or more external linked databases.<br/>
+            <strong>remap</strong>: it allows to remap the paths to one or more external linked databases.<br/>
             The syntax is:<br/>
             <code>
             jdbc:ucanaccess://c:/data/&lt;main db&gt;;remap=&lt;original db1 path&gt;|&lt;new db1
@@ -105,13 +105,13 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             <br/>Original path and new path must be separated by '|', different pairs must be separated by '&amp;'.
         </p>
         <p>
-            <b>mirrorFolder</b>: it allows users to set the directory in which the mirror db will be created.<br/> It
+            <strong>mirrorFolder</strong>: it allows users to set the directory in which the mirror db will be created.<br/> It
             forces <i>memory=false</i>.<br/> Simply use
             <code>mirrorFolder=java.io.tmpdir</code>
             in order to specify the system temp folder for that.
         </p>
         <p>
-            <b>keepMirror</b>: keeps the HSQLDB mirror database after the VM ends so it can be reused by subsequent VM
+            <strong>keepMirror</strong>: keeps the HSQLDB mirror database after the VM ends so it can be reused by subsequent VM
             processes. <br/> It forces <i>memory=false</i>. <br/> In other words, using this parameter, the
             time-expensive process of creating and populating the database hsqldb (with memory=false), is executed only
             once. <br/>
@@ -137,14 +137,14 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             unchecked misalignments.
         </p>
         <p>
-            <b>columnOrder</b>: use the "DISPLAY" order of columns with
+            <strong>columnOrder</strong>: use the "DISPLAY" order of columns with
             <code>SELECT *</code> statements. ("DATA" order is still the default).<br/>
             <code>jdbc:ucanaccess://c:/data/myaccessdb.mdb;columnOrder=DISPLAY</code><br/>
             Note that once a column order has been set on the first connection to a given database, that setting will be the
             same for all the following connections to that database, in the whole VM life.
         </p>
         <p>
-            <b>concatNulls</b>: controls the behavior of all concatenation operators (
+            <strong>concatNulls</strong>: controls the behavior of all concatenation operators (
             <code>&amp;</code>
             ,
             <code>+</code>
@@ -168,18 +168,18 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             .
         </p>
         <p>
-            <b>preventReloading</b>: optimize the reloading of db instances. If and only if you're sure that your db can be
+            <strong>preventReloading</strong>: optimize the reloading of db instances. If and only if you're sure that your db can be
             accessed by the MS Access GUI and just one JVM instance (using UCanAccess), you can use the connection parameter
             <code>preventReloading=true</code>
             . It avoids the data being reloaded when they aren't actually changed by the GUI.
         </p>
         <p>
-            <b>jackcessOpener</b>: in order to use <i>Jackcess Encrypt</i> extension, you can specify a class that
+            <strong>jackcessOpener</strong>: in order to use <i>Jackcess Encrypt</i> extension, you can specify a class that
             implements the <i>net.ucanaccess.jdbc.IJackcessOpenerInterface</i> interface (in that case you need additional
             jar files in your classpath: a version of jackcess-encrypt.jar and all related dependencies).<br/> The
-            following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file: <b>Example
+            following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file: <strong>Example
             for UCanAccess2. Notice that you must use UCanAccess 2.x.x with jackcess-encrypt-2.x.x and all related
-            dependencies</b><br/>
+            dependencies</strong><br/>
         </p>
         <pre>
 package yourPackage.example;
@@ -214,8 +214,8 @@ Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);
 Connection conn = DriverManager.getConnection(&quot;jdbc:ucanaccess:///opt/prova1.mny;jackcessOpener=yourPackage.example.CryptCodecOpener&quot;, &quot;sa&quot;, password);
 ...</pre>
         <p>
-            <b>For old UCanAccess versions (0.x.x, 1.x.x) JackcessOpenerInterface should be implemented in a different
-            way, because of the jackcess API changes from jackcess1 to jackcess2.</b>
+            <strong>For old UCanAccess versions (0.x.x, 1.x.x) JackcessOpenerInterface should be implemented in a different
+            way, because of the jackcess API changes from jackcess1 to jackcess2.</strong>
             </p>
             <pre>
 package yourPackage.example;
@@ -249,7 +249,7 @@ public class CryptCodecOpener implements JackcessOpenerInterface {
         </p>
 
         <h2>Examples</h2>
-        <h3>Creating tables with DDL</h3>
+        <h2>Creating tables with DDL</h2>
         <pre>
 Statement st = conn.createStatement();
 st.execute("CREATE TABLE example1 (id COUNTER PRIMARY KEY, descr TEXT(400), number NUMERIC(12,3), date0 DATETIME)");
@@ -261,14 +261,14 @@ st.execute("CREATE TABLE Babe (k LONG, y LONG, PRIMARY KEY(k,y), FOREIGN KEY (y)
             Also UCanAccess supports create table as (&lt;sql select&gt;) syntax:
         </p>
         <pre>st.executeUpdate("CREATE TABLE copy AS (SELECT * FROM example1) WITH DATA ");</pre>
-        <h3>Executing queries</h3>
+        <h2>Executing queries</h2>
         <p>
-            The following example shows a <b>full outer join</b><b>:</b> <br/>
+            The following example shows a <strong>full outer join</strong><strong>:</strong> <br/>
         </p>
         <pre>
 Statement st = conn.createStatement();
 ResultSet rs = st.executeQuery("SELECT * FROM example3 FULL OUTER JOIN example4 ON (example3.id = example4.id)");</pre>
-        <h3>Using Access functions</h3>
+        <h2>Using Access functions</h2>
         <pre>
 ResultSet rs1 = st.executeQuery(&quot;SELECT IIf(descr='Show must go off', 'tizio', 'caio&amp;sempronio'&amp;'&amp;M A'&amp;' '&amp; Now() &amp; RTrim(' I''m proud of you ')) FROM example1&quot;);
 
@@ -310,7 +310,7 @@ ResultSet rs2 = st.executeQuery(&quot;select id, DCount('*','t234','1=1') from t
             COUNT, AVG, SUM, MAX, MIN, STDEV, STDEVP, VAR, VARP
         </p>
 
-        <h3>User-defined Functions</h3>
+        <h2>User-defined Functions</h2>
         <p>
             Step 1: implementation of a new function:
         </p>
@@ -333,7 +333,7 @@ uc.addFunctions(XXX.class);</pre>
         <pre>
 ResultSet rs=st.executeQuery("SELECT justConcat(descr,''&amp;now()) FROM example1");</pre>
 
-        <h3>Using Criteria in LIKE Clause</h3>
+        <h2>Using Criteria in LIKE Clause</h2>
         <pre>
 ResultSet rs = st.executeQuery(&quot;SELECT descr FROM example2 WHERE descr LIKE 'P%'&quot;);
 // access * jolly
@@ -343,12 +343,12 @@ rs = st.executeQuery(&quot;SELECT descr FROM example2 WHERE descr LIKE 'P[A-F]##
 // number pattern
 rs = st.executeQuery(&quot;SELECT descr FROM example2 WHERE descr LIKE 'C#V##'&quot;);</pre>
 
-        <h3>Limit and offset SQL pagination</h3>
+        <h2>Limit and offset SQL pagination</h2>
         <pre>
 rs = st.executeQuery("SELECT * FROM example2 order by id desc LIMIT 5 OFFSET 1");
 rs = st.executeQuery("SELECT TOP 10 * FROM example2 order by id");</pre>
 
-        <h3>Performing transactions</h3>
+        <h2>Performing transactions</h2>
         <pre>
 conn.setAutoCommit(false);
 st = this.ucaConn.createStatement();
@@ -356,7 +356,7 @@ st.executeUpdate("UPDATE example4 SET descr='Lugo di Romagna'");
 st.execute("INSERT INTO example4 (ID, descr) VALUES(5,'DALLAS')");
 conn.commit();</pre>
 
-        <h3>Using updatable ResultSet</h3>
+        <h2>Using updatable ResultSet</h2>
         <pre>
 PreparedStatement ps = super.ucanaccess.prepareStatement(
     "SELECT * FROM T1", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -365,12 +365,12 @@ rs.next();
 rs.updateString(2, "show must go off");
 rs.updateRow();</pre>
 
-        <h3>Working with date type</h3>
+        <h2>Working with date type</h2>
         <pre>
 st.execute("INSERT INTO example1 (descr, number, date0) "
     + "VALUES(\"Show must go up and down\" ,-113.55446, #11/22/2003 10:42:58 PM#)");</pre>
 
-        <h3>Working with OLE type</h3>
+        <h2>Working with OLE type</h2>
         <pre>
 InputStream isDB = rs.getBinaryStream(&quot;OleColumn&quot;);
 File file = new File(&quot;mypic.jpg&quot;);
@@ -383,7 +383,7 @@ out.flush();
 out.close();
 System.out.println(&quot;mypic.jpg was created in &quot; + file.getAbsolutePath());</pre>
 
-        <h3>About ' and " escaping</h3>
+        <h2>About ' and " escaping</h2>
         <p>
             Both ' and " are valid string delimiters.<br/>
             So the following SQL statements are correct:
@@ -393,7 +393,7 @@ UPDATE TABLE1 SET SURN='D''Ambrogio';(value saved=D'Ambrogio)</pre>
         <pre>
 UPDATE TABLE1 SET SURN="""D'Ambrogio""";(value saved="D'Ambrogio")</pre>
 
-        <h3>Working with Complex Types</h3>
+        <h2>Working with Complex Types</h2>
         <pre>
 ...
 PreparedStatement ps = conn.prepareStatement(&quot;INSERT INTO TABLE1(ID , MEMO_DATA , APPEND_MEMO_DATA , MULTI_VALUE_DATA , ATTACH_DATA) VALUES (?,?,?,?,?)&quot;);
@@ -439,7 +439,7 @@ while (rs.next()) {
 }
 ...</pre>
 
-        <h3>Filtering on Complex Type Columns (since v2.0.9)</h3>
+        <h2>Filtering on Complex Type Columns (since v2.0.9)</h2>
         <p>
             The equality operator (=) can't be used on complex type columns, use the following functions instead.
         </p>
@@ -476,11 +476,11 @@ ps.setObject(1, SingleValue.multipleValue("value1", "value3"));
 ResultSet rs = ps.executeQuery();
 ...</pre>
 
-        <h3>Table renaming (since v4.0.0)</h3>
+        <h2>Table renaming (since v4.0.0)</h2>
         <pre>
 st.execute("ALTER TABLE [My old name] RENAME TO [My new name]");</pre>
 
-        <h3>Add new Column to Existing Table (since v4.0.0)</h3>
+        <h2>Add new Column to Existing Table (since v4.0.0)</h2>
         <pre>
 st.execute("ALTER TABLE xxx ADD COLUMN yyy TEXT");</pre>
         <pre>
@@ -489,23 +489,23 @@ st.execute("ALTER TABLE zzz ADD COLUMN kkk DATETIME NOT NULL DEFAULT now()");</p
         <pre>
 st.execute("ALTER TABLE [222 crazy name] ADD COLUMN [another crazy name] numeric (23,6) default 13.031955 not null");</pre>
 
-        <h3>Add new Index to Existing Table (since v4.0.0)</h3>
+        <h2>Add new Index to Existing Table (since v4.0.0)</h2>
         <pre>
 st.execute("CREATE unique INDEX [index name] on [table name] (a ASC,c ASC )");</pre>
         <pre>
 st.execute("CREATE INDEX [index name] on bbb (a ASC,c ASC )");</pre>
 
-        <h3>Add Primary Key to Existing Table (since v4.0.0)</h3>
+        <h2>Add Primary Key to Existing Table (since v4.0.0)</h2>
         <pre>
 st.execute("ALTER TABLE xxx ADD PRIMARY KEY (column1,column2)");</pre>
 
-        <h3>Foreign Key creation (since v4.0.0)</h3>
+        <h2>Foreign Key creation (since v4.0.0)</h2>
         <pre>
 st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE CASCADE");
 // or
 st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE SET NULL");</pre>
 
-        <h3>Counters handling (since v3.0.0)</h3>
+        <h2>Counters handling (since v3.0.0)</h2>
         <pre>
 st.execute("DISABLE AUTOINCREMENT ON TABLE_NAME");
 st.execute("ENABLE AUTOINCREMENT ON TABLE_NAME");</pre>

@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.complex.SingleValue;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.complex.Version;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.Persist2Jet;
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.DBReference;
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.DBReferenceSingleton;
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.exception.UcanaccessSQLException;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.DBReference;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.DBReferenceSingleton;
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.triggers.AutoNumberManager;
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> java.io.File;
@@ -29,11 +29,11 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a> <strong class="jxr_keyword">implements</strong> <a name="ICommand" href="../../../net/ucanaccess/commands/ICommand.html#ICommand">ICommand</a> {
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">private</strong> Database dbIO;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">private</strong> String   execId;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">private</strong> Object[] newRow;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">private</strong> Table    table;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">private</strong> String   tableName;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String tableName;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">private</strong> Database     dbIO;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">private</strong> Object[]     newRow;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String execId;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">private</strong> Table        table;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>      <strong class="jxr_keyword">public</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a>(String _tableName, Database _dbIo, Object[] _newRow, String _execId) {
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>          tableName = _tableName;
@@ -83,7 +83,7 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>          }
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>      }
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> insertRow(Table _table, Object[] _row) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> insertRow(Table _table) <strong class="jxr_keyword">throws</strong> IOException {
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>          <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>              _table.addRow(newRow);
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>          } <strong class="jxr_keyword">catch</strong> (ConstraintViolationException _ex) {
@@ -133,7 +133,7 @@
 <a class="jxr_linenumber" name="L125" href="#L125">125</a>                 colList = Arrays.asList(cllReorded);
 <a class="jxr_linenumber" name="L126" href="#L126">126</a>             }
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 
-<a class="jxr_linenumber" name="L128" href="#L128">128</a>             insertRow(table, newRow);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>             insertRow(table);
 <a class="jxr_linenumber" name="L129" href="#L129">129</a>             j = 0;
 <a class="jxr_linenumber" name="L130" href="#L130">130</a>             <strong class="jxr_keyword">for</strong> (Column col : colList) {
 <a class="jxr_linenumber" name="L131" href="#L131">131</a>                 ColumnImpl colImpl = (ColumnImpl) col;
@@ -174,7 +174,7 @@
 <a class="jxr_linenumber" name="L166" href="#L166">166</a>             ba.doAction(<strong class="jxr_keyword">this</strong>);
 <a class="jxr_linenumber" name="L167" href="#L167">167</a>             <strong class="jxr_keyword">return</strong> ana;
 <a class="jxr_linenumber" name="L168" href="#L168">168</a>         } <strong class="jxr_keyword">catch</strong> (IOException _ex) {
-<a class="jxr_linenumber" name="L169" href="#L169">169</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/jdbc/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
 <a class="jxr_linenumber" name="L170" href="#L170">170</a>         }
 <a class="jxr_linenumber" name="L171" href="#L171">171</a>     }
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 
@@ -192,6 +192,6 @@
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

@@ -41,9 +41,9 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>                  oldAutoValues.put(col.getName(), cnOld);
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>                  newAutoValues.put(col.getName(), cnNew);
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>                  conn.setFeedbackState(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>                  String stmt = <span class="jxr_string">"UPDATE "</span> + SQLConverter.escapeIdentifier(_table.getName(), connHsqldb) + <span class="jxr_string">" SET "</span> + cn
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>                          + <span class="jxr_string">"=? WHERE "</span> + cn + <span class="jxr_string">"=?"</span>;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>                  <strong class="jxr_keyword">try</strong> (PreparedStatement ps = connHsqldb.prepareStatement(stmt)) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>                  String sql = String.format(<span class="jxr_string">"UPDATE %s SET %s=? WHERE %s=?"</span>,
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>                      SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), cn, cn);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>                  <strong class="jxr_keyword">try</strong> (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>                      ps.setObject(1, cnNew);
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>                      ps.setObject(2, cnOld);
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>                      ps.executeUpdate();
@@ -85,6 +85,6 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

@@ -12,12 +12,12 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> io.github.spannm.jackcess.Table;
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> io.github.spannm.jackcess.impl.ColumnImpl;
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.complex.Version;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessConnection;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.hsqldb.types.JavaObjectData;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.time.LocalDateTime;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.exception.TableNotFoundException;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessConnection;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.hsqldb.types.JavaObjectData;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> java.time.LocalDateTime;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.util.Optional;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="TriggerAppendOnly" href="../../../net/ucanaccess/triggers/TriggerAppendOnly.html#TriggerAppendOnly">TriggerAppendOnly</a> <strong class="jxr_keyword">extends</strong> <a name="TriggerBase" href="../../../net/ucanaccess/triggers/TriggerBase.html#TriggerBase">TriggerBase</a> {
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  
@@ -29,41 +29,38 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>              <strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>          }
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>          <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>              Table t = getTable(tableName, conn);
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>              <strong class="jxr_keyword">if</strong> (t == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>                  <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/jdbc/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(ExceptionMessages.TABLE_DOES_NOT_EXIST, tableName);
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>              }
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>              <strong class="jxr_keyword">int</strong> i = 0;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>              <strong class="jxr_keyword">for</strong> (Column col : t.getColumns()) {
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>                  <strong class="jxr_keyword">if</strong> (col.isAppendOnly()) {
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>                      ColumnImpl verCol = (ColumnImpl) col.getVersionHistoryColumn();
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>                      LocalDateTime upTime = LocalDateTime.now();
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>                      String val = newR[i] == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : newR[i].toString();
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>                      <strong class="jxr_keyword">if</strong> (type == org.hsqldb.trigger.Trigger.INSERT_BEFORE_ROW) {
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>                          newR[verCol.getColumnNumber()] = <strong class="jxr_keyword">new</strong> JavaObjectData(<strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] {<strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>(val, upTime)});
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>                      } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (type == org.hsqldb.trigger.Trigger.UPDATE_BEFORE_ROW &amp;&amp; (oldR[i] != <strong class="jxr_keyword">null</strong> || newR[i] != <strong class="jxr_keyword">null</strong>)) {
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>                          <strong class="jxr_keyword">if</strong> (oldR[i] == <strong class="jxr_keyword">null</strong> &amp;&amp; newR[i] != <strong class="jxr_keyword">null</strong> || oldR[i] != <strong class="jxr_keyword">null</strong> &amp;&amp; newR[i] == <strong class="jxr_keyword">null</strong>
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>                              || !oldR[i].equals(newR[i])) {
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>                              <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] oldV = (<a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>                              <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] newV = <strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[oldV.length + 1];
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>                              <strong class="jxr_keyword">if</strong> (oldV.length &gt;= 0) {
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>                                  System.arraycopy(oldV, 0, newV, 1, oldV.length);
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>                              }
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>                              newV[0] = <strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>(val, upTime);
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>                              newR[verCol.getColumnNumber()] = <strong class="jxr_keyword">new</strong> JavaObjectData(newV);
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>                          }
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>                      }
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>                  }
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>                  ++i;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>              }
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>          } <strong class="jxr_keyword">catch</strong> (Exception _ex) {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="TriggerException" href="../../../net/ucanaccess/triggers/TriggerException.html#TriggerException">TriggerException</a>(_ex.getMessage());
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>          }
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>      }
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  }
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>              Table t = Optional.ofNullable(getTable(tableName, conn)).orElseThrow(() -&gt; <strong class="jxr_keyword">new</strong> <a name="TableNotFoundException" href="../../../net/ucanaccess/exception/TableNotFoundException.html#TableNotFoundException">TableNotFoundException</a>(tableName));
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>              <strong class="jxr_keyword">int</strong> i = 0;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>              <strong class="jxr_keyword">for</strong> (Column col : t.getColumns()) {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>                  <strong class="jxr_keyword">if</strong> (col.isAppendOnly()) {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>                      ColumnImpl verCol = (ColumnImpl) col.getVersionHistoryColumn();
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>                      LocalDateTime upTime = LocalDateTime.now();
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>                      String val = newR[i] == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : newR[i].toString();
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>                      <strong class="jxr_keyword">if</strong> (INSERT_BEFORE_ROW == type) {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>                          newR[verCol.getColumnNumber()] = <strong class="jxr_keyword">new</strong> JavaObjectData(<strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] {<strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>(val, upTime)});
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>                      } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (UPDATE_BEFORE_ROW == type &amp;&amp; (oldR[i] != <strong class="jxr_keyword">null</strong> || newR[i] != <strong class="jxr_keyword">null</strong>)) {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>                          <strong class="jxr_keyword">if</strong> (oldR[i] == <strong class="jxr_keyword">null</strong> &amp;&amp; newR[i] != <strong class="jxr_keyword">null</strong> || oldR[i] != <strong class="jxr_keyword">null</strong> &amp;&amp; newR[i] == <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>                              || !oldR[i].equals(newR[i])) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>                              <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] oldV = (<a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>                              <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[] newV = <strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>[oldV.length + 1];
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>                              <strong class="jxr_keyword">if</strong> (oldV.length &gt; 0) {
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>                                  System.arraycopy(oldV, 0, newV, 1, oldV.length);
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>                              }
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>                              newV[0] = <strong class="jxr_keyword">new</strong> <a name="Version" href="../../../net/ucanaccess/complex/Version.html#Version">Version</a>(val, upTime);
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>                              newR[verCol.getColumnNumber()] = <strong class="jxr_keyword">new</strong> JavaObjectData(newV);
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>                          }
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>                      }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>                  }
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>                  ++i;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>              }
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>          } <strong class="jxr_keyword">catch</strong> (Exception _ex) {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="TriggerException" href="../../../net/ucanaccess/triggers/TriggerException.html#TriggerException">TriggerException</a>(_ex.getMessage());
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          }
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      }
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

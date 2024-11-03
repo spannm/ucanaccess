@@ -13,9 +13,9 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.Metadata;
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.SQLConverter;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.SQLConverter.DDLType;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessConnection;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessSQLException.ExceptionMessages;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.converters.SQLConverter.Patterns;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> net.ucanaccess.exception.InvalidCreateStatementException;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessConnection;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> net.ucanaccess.jdbc.UcanaccessStatement;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> java.sql.Connection;
@@ -40,7 +40,7 @@
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>          String execId = UcanaccessConnection.getCtxExcId();
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>          Connection hsqlConn = ac.getHSQLDBConnection();
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>          Database db = ac.getDbIO();
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>          <a name="LoadJet" href="../../../net/ucanaccess/converters/LoadJet.html#LoadJet">LoadJet</a> lfa = <strong class="jxr_keyword">new</strong> <a name="LoadJet" href="../../../net/ucanaccess/converters/LoadJet.html#LoadJet">LoadJet</a>(hsqlConn, db);
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>          LoadJet lfa = <strong class="jxr_keyword">new</strong> LoadJet(hsqlConn, db);
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>          String ntn = tn;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>          <strong class="jxr_keyword">if</strong> (tn.startsWith(<span class="jxr_string">"["</span>) &amp;&amp; tn.endsWith(<span class="jxr_string">"]"</span>) || tn.startsWith(<span class="jxr_string">"`"</span>) &amp;&amp; tn.endsWith(<span class="jxr_string">"`"</span>)) {
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>              ntn = SQLConverter.escapeIdentifier(tn.substring(1, tn.length() - 1));
@@ -169,7 +169,7 @@
 <a class="jxr_linenumber" name="L161" href="#L161">161</a>         List&lt;Boolean&gt; notNullList = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L162" href="#L162">162</a>         String tknt = columnName + columnDefinition;
 <a class="jxr_linenumber" name="L163" href="#L163">163</a>         parseColumnTypes(typeList, defaultList, notNullList, tknt);
-<a class="jxr_linenumber" name="L164" href="#L164">164</a>         check4OutOfPlacedNotNull(sql);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         checkForOutOfPlaceNotNull(sql);
 <a class="jxr_linenumber" name="L165" href="#L165">165</a>         <a name="UcanaccessConnection" href="../../../net/ucanaccess/jdbc/UcanaccessConnection.html#UcanaccessConnection">UcanaccessConnection</a> ac = UcanaccessConnection.getCtxConnection();
 <a class="jxr_linenumber" name="L166" href="#L166">166</a>         <a name="AddColumnCommand" href="../../../net/ucanaccess/commands/AddColumnCommand.html#AddColumnCommand">AddColumnCommand</a> c4io = <strong class="jxr_keyword">new</strong> <a name="AddColumnCommand" href="../../../net/ucanaccess/commands/AddColumnCommand.html#AddColumnCommand">AddColumnCommand</a>(tableName, columnName, execId, columnMap, types,
 <a class="jxr_linenumber" name="L167" href="#L167">167</a>                 defaults, notNulls);
@@ -179,8 +179,8 @@
 <a class="jxr_linenumber" name="L171" href="#L171">171</a>         }
 <a class="jxr_linenumber" name="L172" href="#L172">172</a>     }
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 
-<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> check4OutOfPlacedNotNull(String sql) {
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">if</strong> (Pattern.compile(SQLConverter.NOT_NULL).matcher(sql).find()
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> checkForOutOfPlaceNotNull(String sql) {
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">if</strong> (Patterns.NOT_NULL.matcher(sql).find()
 <a class="jxr_linenumber" name="L176" href="#L176">176</a>             &amp;&amp; notNulls.length &gt; 0 &amp;&amp; (notNulls[0] == <strong class="jxr_keyword">null</strong> || !notNulls[0])) {
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>             notNulls[0] = <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L178" href="#L178">178</a>         }
@@ -226,62 +226,62 @@
 <a class="jxr_linenumber" name="L218" href="#L218">218</a>     }
 <a class="jxr_linenumber" name="L219" href="#L219">219</a> 
 <a class="jxr_linenumber" name="L220" href="#L220">220</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> parseColumnTypes(List&lt;String&gt; _typeList, List&lt;String&gt; _defaultList, List&lt;Boolean&gt; _notNullList, String _tknt) {
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 
-<a class="jxr_linenumber" name="L222" href="#L222">222</a>         String[] colDecls = _tknt.split(<span class="jxr_string">"[&#92;&#92;s\n\r]+"</span>);
-<a class="jxr_linenumber" name="L223" href="#L223">223</a>         colDecls = checkEscaped(<span class="jxr_string">"["</span>, <span class="jxr_string">"]"</span>, colDecls, _tknt);
-<a class="jxr_linenumber" name="L224" href="#L224">224</a>         colDecls = checkEscaped(<span class="jxr_string">"`"</span>, <span class="jxr_string">"`"</span>, colDecls, _tknt);
-<a class="jxr_linenumber" name="L225" href="#L225">225</a>         String escaped = SQLConverter.isListedAsKeyword(colDecls[0].toUpperCase()) ? colDecls[0].toUpperCase()
-<a class="jxr_linenumber" name="L226" href="#L226">226</a>                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
-<a class="jxr_linenumber" name="L227" href="#L227">227</a>         columnMap.put(escaped, colDecls[0]);
-<a class="jxr_linenumber" name="L228" href="#L228">228</a> 
-<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">boolean</strong> reset = false;
-<a class="jxr_linenumber" name="L230" href="#L230">230</a>         <strong class="jxr_keyword">if</strong> (_tknt.matches(<span class="jxr_string">"[&#92;&#92;s\n\r]*&#92;&#92;d+[&#92;&#92;s\n\r]*&#92;&#92;).*"</span>)) {
-<a class="jxr_linenumber" name="L231" href="#L231">231</a>             reset = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L232" href="#L232">232</a>             _tknt = _tknt.substring(_tknt.indexOf(')') + 1).trim();
-<a class="jxr_linenumber" name="L233" href="#L233">233</a>             colDecls = _tknt.split(<span class="jxr_string">"[&#92;&#92;s\n\r]+"</span>);
-<a class="jxr_linenumber" name="L234" href="#L234">234</a>         }
-<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
-<a class="jxr_linenumber" name="L236" href="#L236">236</a>         <strong class="jxr_keyword">if</strong> (!reset &amp;&amp; colDecls.length &lt; 2) {
-<a class="jxr_linenumber" name="L237" href="#L237">237</a>             <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L238" href="#L238">238</a>         }
-<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">boolean</strong> decDef = false;
-<a class="jxr_linenumber" name="L240" href="#L240">240</a>         <strong class="jxr_keyword">if</strong> (!reset) {
-<a class="jxr_linenumber" name="L241" href="#L241">241</a>             <strong class="jxr_keyword">if</strong> (colDecls[1] != <strong class="jxr_keyword">null</strong> &amp;&amp; colDecls[1].toUpperCase().startsWith(<span class="jxr_string">"NUMERIC("</span>)) {
-<a class="jxr_linenumber" name="L242" href="#L242">242</a>                 colDecls[1] = <span class="jxr_string">"NUMERIC"</span>;
-<a class="jxr_linenumber" name="L243" href="#L243">243</a>                 decDef = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L244" href="#L244">244</a>             }
-<a class="jxr_linenumber" name="L245" href="#L245">245</a>             _typeList.add(colDecls[1]);
-<a class="jxr_linenumber" name="L246" href="#L246">246</a> 
-<a class="jxr_linenumber" name="L247" href="#L247">247</a>         }
-<a class="jxr_linenumber" name="L248" href="#L248">248</a> 
-<a class="jxr_linenumber" name="L249" href="#L249">249</a>         <strong class="jxr_keyword">if</strong> ((colDecls.length &gt; 2 || reset &amp;&amp; colDecls.length == 2)
-<a class="jxr_linenumber" name="L250" href="#L250">250</a>                 &amp;&amp; <span class="jxr_string">"not"</span>.equalsIgnoreCase(colDecls[colDecls.length - 2])
-<a class="jxr_linenumber" name="L251" href="#L251">251</a>                 &amp;&amp; <span class="jxr_string">"null"</span>.equalsIgnoreCase(colDecls[colDecls.length - 1])) {
-<a class="jxr_linenumber" name="L252" href="#L252">252</a>             _notNullList.add(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L253" href="#L253">253</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!decDef) {
-<a class="jxr_linenumber" name="L254" href="#L254">254</a>             _notNullList.add(false);
-<a class="jxr_linenumber" name="L255" href="#L255">255</a>         }
-<a class="jxr_linenumber" name="L256" href="#L256">256</a> 
-<a class="jxr_linenumber" name="L257" href="#L257">257</a>         <strong class="jxr_keyword">if</strong> (!decDef) {
-<a class="jxr_linenumber" name="L258" href="#L258">258</a>             _defaultList.add(value(SQLConverter.getDDLDefault(_tknt)));
-<a class="jxr_linenumber" name="L259" href="#L259">259</a>         }
-<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
-<a class="jxr_linenumber" name="L261" href="#L261">261</a>         types = _typeList.toArray(<strong class="jxr_keyword">new</strong> String[0]);
-<a class="jxr_linenumber" name="L262" href="#L262">262</a>         defaults = _defaultList.toArray(<strong class="jxr_keyword">new</strong> String[0]);
-<a class="jxr_linenumber" name="L263" href="#L263">263</a>         notNulls = _notNullList.toArray(<strong class="jxr_keyword">new</strong> Boolean[0]);
-<a class="jxr_linenumber" name="L264" href="#L264">264</a>     }
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 
-<a class="jxr_linenumber" name="L266" href="#L266">266</a>     <em class="jxr_comment">// getting AUTOINCREMENT and GUID</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         String[] colDecls = _tknt.split(<span class="jxr_string">"&#92;&#92;s+"</span>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         colDecls = checkEscaped(<span class="jxr_string">"["</span>, <span class="jxr_string">"]"</span>, colDecls, _tknt);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         colDecls = checkEscaped(<span class="jxr_string">"`"</span>, <span class="jxr_string">"`"</span>, colDecls, _tknt);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         String escaped = SQLConverter.isListedAsKeyword(colDecls[0]) ? colDecls[0].toUpperCase()
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         columnMap.put(escaped, colDecls[0]);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">boolean</strong> reset = false;
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">if</strong> (_tknt.matches(<span class="jxr_string">"&#92;&#92;s*&#92;&#92;d+&#92;&#92;s*&#92;&#92;).*"</span>)) {
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>             reset = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>             _tknt = _tknt.substring(_tknt.indexOf(')') + 1).trim();
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>             colDecls = _tknt.split(<span class="jxr_string">"&#92;&#92;s+"</span>);
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         }
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>         <strong class="jxr_keyword">if</strong> (!reset &amp;&amp; colDecls.length &lt; 2) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         }
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         <strong class="jxr_keyword">boolean</strong> decDef = false;
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">if</strong> (!reset) {
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             <strong class="jxr_keyword">if</strong> (colDecls[1] != <strong class="jxr_keyword">null</strong> &amp;&amp; colDecls[1].toUpperCase().startsWith(<span class="jxr_string">"NUMERIC("</span>)) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>                 colDecls[1] = <span class="jxr_string">"NUMERIC"</span>;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>                 decDef = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>             }
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>             _typeList.add(colDecls[1]);
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         }
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         <strong class="jxr_keyword">if</strong> ((colDecls.length &gt; 2 || reset &amp;&amp; colDecls.length == 2)
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>                 &amp;&amp; <span class="jxr_string">"not"</span>.equalsIgnoreCase(colDecls[colDecls.length - 2])
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>                 &amp;&amp; <span class="jxr_string">"null"</span>.equalsIgnoreCase(colDecls[colDecls.length - 1])) {
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>             _notNullList.add(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!decDef) {
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>             _notNullList.add(false);
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         }
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">if</strong> (!decDef) {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>             _defaultList.add(value(SQLConverter.getDDLDefault(_tknt)));
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>         }
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         types = _typeList.toArray(<strong class="jxr_keyword">new</strong> String[0]);
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>         defaults = _defaultList.toArray(<strong class="jxr_keyword">new</strong> String[0]);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         notNulls = _notNullList.toArray(<strong class="jxr_keyword">new</strong> Boolean[0]);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     }
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     <em class="jxr_comment">// getting AUTOINCREMENT and GUID</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>     @SuppressWarnings(<span class="jxr_string">"java:S5852"</span>)
 <a class="jxr_linenumber" name="L267" href="#L267">267</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> parseTypesFromCreateStatement(String _sql) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L268" href="#L268">268</a>         _sql = _sql.replaceAll(<span class="jxr_string">"([&#92;&#92;s\n\r]+)((?i)DECIMAL)([&#92;&#92;s\n\r]*&#92;&#92;()"</span>, <span class="jxr_string">"$1NUMERIC("</span>)
-<a class="jxr_linenumber" name="L269" href="#L269">269</a>                 .replaceAll(<span class="jxr_string">"([&#92;&#92;s\n\r]+)((?i)NUMERIC)([&#92;&#92;s\n\r]*&#92;&#92;()"</span>, <span class="jxr_string">"$1NUMERIC("</span>);
-<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">int</strong> startDecl = _sql.indexOf('(');
-<a class="jxr_linenumber" name="L271" href="#L271">271</a>         <strong class="jxr_keyword">int</strong> endDecl = _sql.lastIndexOf(')');
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         Pattern pat = Pattern.compile(<span class="jxr_string">"(&#92;&#92;s+)(?:DECIMAL|NUMERIC)&#92;&#92;s*&#92;&#92;("</span>, Pattern.CASE_INSENSITIVE);
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>         String sql = pat.matcher(_sql).replaceAll(<span class="jxr_string">"$1NUMERIC("</span>);
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">int</strong> startDecl = sql.indexOf('(');
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         <strong class="jxr_keyword">int</strong> endDecl = sql.lastIndexOf(')');
 <a class="jxr_linenumber" name="L272" href="#L272">272</a> 
 <a class="jxr_linenumber" name="L273" href="#L273">273</a>         <strong class="jxr_keyword">if</strong> (startDecl &gt;= endDecl) {
-<a class="jxr_linenumber" name="L274" href="#L274">274</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/jdbc/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(ExceptionMessages.INVALID_CREATE_STATEMENT);
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidCreateStatementException" href="../../../net/ucanaccess/exception/InvalidCreateStatementException.html#InvalidCreateStatementException">InvalidCreateStatementException</a>(sql);
 <a class="jxr_linenumber" name="L275" href="#L275">275</a>         }
-<a class="jxr_linenumber" name="L276" href="#L276">276</a>         String decl = _sql.substring(startDecl + 1, endDecl);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>         String decl = sql.substring(startDecl + 1, endDecl);
 <a class="jxr_linenumber" name="L277" href="#L277">277</a>         String[] tokens = decl.split(<span class="jxr_string">","</span>);
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> 
 <a class="jxr_linenumber" name="L279" href="#L279">279</a>         List&lt;String&gt; typeList = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
@@ -311,6 +311,6 @@
 <a class="jxr_linenumber" name="L303" href="#L303">303</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

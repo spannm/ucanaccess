@@ -16,16 +16,16 @@
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="TriggerInsert" href="../../../net/ucanaccess/triggers/TriggerInsert.html#TriggerInsert">TriggerInsert</a> <strong class="jxr_keyword">extends</strong> <a name="TriggerBase" href="../../../net/ucanaccess/triggers/TriggerBase.html#TriggerBase">TriggerBase</a> {
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>      @Override
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> fire(<strong class="jxr_keyword">int</strong> type, String name, String tableName, Object[] oldR, Object[] newR) {
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> fire(<strong class="jxr_keyword">int</strong> type, String name, String tableName, Object[] oldRow, Object[] newRow) {
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>          checkContext();
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>          <a name="UcanaccessConnection" href="../../../net/ucanaccess/jdbc/UcanaccessConnection.html#UcanaccessConnection">UcanaccessConnection</a> conn = UcanaccessConnection.getCtxConnection();
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>          String execId = UcanaccessConnection.getCtxExcId();
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>          Try.catching(() -&gt; {
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>              Table t = getTable(tableName, conn);
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>              <strong class="jxr_keyword">super</strong>.convertRowTypes(newR, t);
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>              <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a> c4j = t == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">new</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a>(tableName, conn.getDbIO(), newR, execId)
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>                      : <strong class="jxr_keyword">new</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a>(t, newR, execId);
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>              <strong class="jxr_keyword">super</strong>.convertRowTypes(newRow, t);
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>              <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a> c4j = t == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">new</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a>(tableName, conn.getDbIO(), newRow, execId)
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>                      : <strong class="jxr_keyword">new</strong> <a name="InsertCommand" href="../../../net/ucanaccess/commands/InsertCommand.html#InsertCommand">InsertCommand</a>(t, newRow, execId);
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>              conn.add(c4j);
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>          }).orThrow(ex -&gt; <strong class="jxr_keyword">new</strong> <a name="TriggerException" href="../../../net/ucanaccess/triggers/TriggerException.html#TriggerException">TriggerException</a>(ex.getMessage()));
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>      }
@@ -33,6 +33,6 @@
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2012&#x2013;2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a>. All rights reserved.</div>
+<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

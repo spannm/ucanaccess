@@ -22,19 +22,19 @@
         <breadcrumbs/>
 
         <links>
-            <item name="Project at GitHub" href="https://github.com/spannm/ucanaccess/" target="_blank"/>
-            <item name="GitHub Discussions" href="https://github.com/spannm/ucanaccess/discussions" target="_blank"/>
-            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess" target="_blank"/>
+            <item name="Project (GitHub)" href="https://github.com/spannm/ucanaccess/" target="_blank"/>
+            <item name="Discussions (GitHub)" href="https://github.com/spannm/ucanaccess/discussions/" target="_blank"/>
+            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess/" target="_blank"/>
             <item name="SourceForge" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
         </links>
 
         <menu name="Overview">
-            <item name="UCanAccess" href="/10-index.html" />
+            <item name="UCanAccess" href="/10-ucanaccess.html" />
             <item name="Getting Started" href="/20-getting-started.html" />
             <item name="JDBC Client Tools" href="/30-jdbc-client-tools.html" />
             <item name="Change Log" href="/40-change-log.html" />
-            <item name="Links/Licensing" href="/50-links-licensing.html" />
-            <item name="About" href="/60-about.html" />
+            <item name="Links/License Info" href="/50-links-license.html" />
+            <item name="About" href="60-about.html" />
         </menu>
         <menu ref="reports"/>
         <menu ref="modules"/>

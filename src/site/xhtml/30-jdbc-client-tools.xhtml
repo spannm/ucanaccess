@@ -5,7 +5,9 @@
         <title>JDBC Client Tools</title>
     </head>
     <body>
-        <h3>Using the UCanAccess command-line console</h3>
+        <h1>JDBC Client Tools</h1>
+
+        <h2>Using the UCanAccess command-line console</h2>
         <p>
             Execute <i>console.bat </i>(Windows) or <i>console.sh </i>(Linux/Unix) in the distribution to run the
             command-line tool (main class: <i>net.ucanaccess.console.Main</i>). It will prompt you to enter the path to
@@ -37,18 +39,18 @@ Single (') or double (&quot;) quoted strings are supported.
 Backslash (\) escaping (e.g. \n, \t) is enabled within quotes.
 Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\temp\\newfile.csv&quot;).</pre>
         <p>
-            <b>-d &lt;delimiter&gt;</b> By default the delimiter between columns in the CSV file is the semicolon (;)
+            <strong>-d &lt;delimiter&gt;</strong> By default the delimiter between columns in the CSV file is the semicolon (;)
             for historical reasons. If you want to change this to a comma, use this flag like this:
             <code>UCanAccess&gt;export -d , License.csv;</code>
         </p>
         <p>
-            <b>-t &lt;table&gt;</b> By default the export command uses the result set of the previous SQL command. This
+            <strong>-t &lt;table&gt;</strong> By default the export command uses the result set of the previous SQL command. This
             flag sends the given &lt;table&gt; to the CSV file by executing the SQL query <code>SELECT
             * FROM [table]</code>. For example,
             <code>UCanAccess&gt;export -t License License.csv;</code>
         </p>
         <p>
-            <b>-big_query_schema &lt;schemaFile&gt;</b> This flag generates the JSON formatted schema file which
+            <strong>-big_query_schema &lt;schemaFile&gt;</strong> This flag generates the JSON formatted schema file which
             contains the data type information (e.g. "string", "integer") of each column which are required by <a
                 href="https://cloud.google.com/bigquery/">Google BigQuery</a>. This schema file can be used by the <a
                 href="https://cloud.google.com/bigquery/bq-command-line-tool">BigQuery load tool</a>. For example,
@@ -60,13 +62,13 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             <code>$ bq load --skip_leading_rows=1 mydataset.License License.csv License.schema</code>
         </p>
         <p>
-            <b>--bom</b> The CSV file will be encoded in UTF-8 format. Microsoft Excel does not support UTF-8 encoding
+            <strong>--bom</strong> The CSV file will be encoded in UTF-8 format. Microsoft Excel does not support UTF-8 encoding
             unless the file contains a <a href="http://unicode.org/faq/utf_bom.html#BOM">Byte Order Mark</a>. This flag
             produces that byte order mark (EF BB BF).
             <code>UCanAccess&gt;export --bom -t License License.csv;</code>
         </p>
         <p>
-            <b>--newlines</b> By default any embedded newlines (\n or \r, in other words, ASCII characters 0x0A and 0x0D
+            <strong>--newlines</strong> By default any embedded newlines (\n or \r, in other words, ASCII characters 0x0A and 0x0D
             respectively) are converted into a space character in the CSV file. This is because many CSV readers are not
             able to read multi-line records. This flag preserves newline characters by enclosing them in double-quote
             characters.
@@ -78,7 +80,7 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             </code>
         </p>
         <p>
-            <b>Quotes</b> The export command supports single or double quotes in the arguments, which allows table names
+            <strong>Quotes</strong> The export command supports single or double quotes in the arguments, which allows table names
             and file names to contain embedded spaces and other special characters. For example, the command
             <code>UCanAccess&gt;export -d '\t' -t "License and Address" 'License and Address.csv';</code>
             exports the table named "License and Address" to a file named "License and Address.csv", using the TAB
@@ -106,19 +108,19 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             </code>
         </p>
 
-        <h3>DBeaver</h3>
+        <h2>DBeaver</h2>
         <p>
             DBeaver (Universal Database Manager) will automatically download and install UCanAccess as the default MS
             Access driver. <br/> <br/>DBeaver web site: <a href="https://dbeaver.io/">https://dbeaver.io/</a>
         </p>
 
-        <h3>SQLeo</h3>
+        <h2>SQLeo</h2>
         <p>
             UcanAccess 2.0.2 has been successfully tested with the SQLeo Visual Query Builder.<br/> <br/>SQLeo
             project: <a href="https://sourceforge.net/projects/sqleo/">https://sourceforge.net/projects/sqleo/</a>
         </p>
 
-        <h3>LibreOffice Base / OpenOffice Base</h3>
+        <h2>LibreOffice Base / OpenOffice Base</h2>
         <p>
             For detailed instructions on how to configure LibreOffice Base or OpenOffice Base with UCanAccess please see
             <a href="http://askubuntu.com/questions/187389/is-it-possible-to-open-an-access-2010-database-file-without-using-wine-or-virtua/519571#519571">this
@@ -126,9 +128,9 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             LibreOffice web site: <a href="http://www.libreoffice.org/">http://www.libreoffice.org/</a>
         </p>
 
-        <h3>
+        <h2>
             Using UCanAccess as NetBeans Service
-        </h3>
+        </h2>
         <p>
             Integration tested with UCanAccess 2.0.4.1. It doesn't work with previous UCanAccess versions.
         </p>
@@ -137,8 +139,8 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             &gt; New Driver...</i>
         </p>
         <p>
-            2) In the field <i>"Driver File(s)"</i> add "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>.jar" <b>and
-            all dependencies</b> (all jars in the <code>lib/</code> folder of the UCanAccess
+            2) In the field <i>"Driver File(s)"</i> add "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>.jar" <strong>and
+            all dependencies</strong> (all jars in the <code>lib/</code> folder of the UCanAccess
             distribution: "hsqldb.jar", "jackcess-<i>x</i>.<i>y</i>.<i>z</i>.jar").<br/><br/>
             Setting the field <i>Driver Class</i>: <code>net.ucanaccess.jdbc.UcanaccessDriver</code>
         </p>
@@ -158,9 +160,9 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             NetBeans web site: <a href="https://netbeans.org">https://netbeans.org</a>
         </p>
 
-        <h3>
+        <h2>
             Squirrel SQL
-        </h3>
+        </h2>
         <p>
             For detailed instructions on how to configure Squirrel SQL with UCanAccess please see <a
                 href="http://stackoverflow.com/a/36608661/2144390">this answer on Stack Overflow</a>.<br/>

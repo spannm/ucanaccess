@@ -2,9 +2,9 @@ net.ucanaccess.commands
 net.ucanaccess.complex
 net.ucanaccess.console
 net.ucanaccess.converters
+net.ucanaccess.exception
 net.ucanaccess.ext
 net.ucanaccess.jdbc
-net.ucanaccess.log
 net.ucanaccess.triggers
 net.ucanaccess.type
 net.ucanaccess.util
