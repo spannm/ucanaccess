@@ -20,7 +20,7 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
 
         File dbFile = createTempFileName(getClass().getSimpleName(), getFileExtension());
         dbFile.deleteOnExit();
-        File mirrorFile = createTempFileName(getClass().getSimpleName(), "");
+        File mirrorFile = new File(dbFile.getAbsolutePath().substring(0, dbFile.getAbsolutePath().lastIndexOf(getFileExtension())));
         mirrorFile.deleteOnExit();
 
         // create the database

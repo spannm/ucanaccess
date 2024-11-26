@@ -249,7 +249,9 @@ public class DBReference {
                 hbase.delete();
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
                 toKeepHsql.delete();
-                if (!toKeepHsql.createNewFile()) {
+                if (toKeepHsql.createNewFile()) {
+                    logger.log(Level.DEBUG, "Created file {0}", toKeepHsql);
+                } else {
                     logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
@@ -368,8 +370,12 @@ public class DBReference {
             }
             if (!inMemory && tempHsql == null) {
                 if (toKeepHsql != null) {
-                    if (!toKeepHsql.exists() && !toKeepHsql.createNewFile()) {
-                        logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
+                    if (!toKeepHsql.exists()) {
+                        if (toKeepHsql.createNewFile()) {
+                            logger.log(Level.DEBUG, "Created file {0}", toKeepHsql);
+                        } else {
+                            logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
+                        }
                     }
                     tempHsql = toKeepHsql;
                 } else {
@@ -378,10 +384,13 @@ public class DBReference {
                     hbase.mkdir();
                     tempHsql = new File(hbase, id);
 
-                    if (!tempHsql.createNewFile()) {
-                        logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
-                    } else {
-                        tempHsql.delete();
+                    if (!tempHsql.exists()) {
+                        if (tempHsql.createNewFile()) {
+                            logger.log(Level.DEBUG, "Created file {0}", tempHsql);
+                            tempHsql.delete();
+                        } else {
+                            logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
+                        }
                     }
                 }
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -446,7 +455,9 @@ public class DBReference {
     private void lockMdbFile() throws UcanaccessSQLException {
         try {
             File flLock = fileLock();
-            if (!flLock.createNewFile()) {
+            if (flLock.createNewFile()) {
+                logger.log(Level.DEBUG, "Created file {0}", flLock);
+            } else {
                 logger.log(Level.WARNING, "Could not create file {0}", flLock);
             }
 

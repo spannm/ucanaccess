@@ -108,8 +108,7 @@ public final class UcanaccessDriver implements Driver {
                             LOGGER.log(Level.WARNING, "{0} parameter cannot be combined with parameters {1} or {2}, {3} skipped",
                                 keepMirror, jackcessOpener, encrypt, keepMirror);
                         } else {
-                            File dbMirror =
-                                new File(props.get(keepMirror) + fileDb.getName().toUpperCase().hashCode());
+                            File dbMirror = new File(props.get(keepMirror));
                             dbRef.setToKeepHsql(dbMirror);
                             if (props.containsKey(readOnlyMirror)) {
                                 dbRef.setMirrorReadOnly(Boolean.parseBoolean(props.get(readOnlyMirror)));
