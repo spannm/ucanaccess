@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>60</version>
+        <version>61</version>
     </parent>
 
     <groupId>io.github.spannm</groupId>
@@ -60,7 +60,6 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-      <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
@@ -106,13 +105,13 @@
         <dep.slf4j.version>2.0.16</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.11.3</dep.junit.version>
-        <dep.assertj.version>3.26.3</dep.assertj.version>
-        <dep.mockito.version>5.14.1</dep.mockito.version>
+        <dep.junit.version>5.11.4</dep.junit.version>
+        <dep.assertj.version>3.27.3</dep.assertj.version>
+        <dep.mockito.version>5.14.2</dep.mockito.version>
 
         <!-- override basepom versions -->
-        <dep.checkstyle.version>10.19.0</dep.checkstyle.version>
-        <dep.pmd.version>7.7.0</dep.pmd.version>
+        <dep.checkstyle.version>10.21.2</dep.checkstyle.version>
+        <dep.pmd.version>7.9.0</dep.pmd.version>
 
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
