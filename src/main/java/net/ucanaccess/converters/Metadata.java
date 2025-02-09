@@ -49,7 +49,7 @@ public class Metadata {
         immediatelyReleaseResources(Boolean.class, false, 10),
         inactivityTimeout(Integer.class, 2, 10),
         jackcessOpener(String.class, null, 500),
-        keepMirror(String.class, "2", 500),
+        keepMirror(String.class, null, 500),
         lobScale(Integer.class, 2, 2, 1, 2, 4, 8, 16, 32),
         lockMdb(Boolean.class, false, 10),
         memory(Boolean.class, true, 10),
@@ -71,12 +71,20 @@ public class Metadata {
         private final List<Object> validValues;
         private final String       description;
 
+        /**
+         * Constructs a Property enum member.
+         * @param <T> property data type parameter
+         * @param _type data type
+         * @param _defaultValue default value
+         * @param _maxLen maximum length
+         * @param _validValues optional valid values
+         */
         <T> Property(Class<T> _type, T _defaultValue, int _maxLen, Object... _validValues) {
-            maxLen = _maxLen;
             type = _type;
+            maxLen = _maxLen;
             defaultValue = _defaultValue;
-            description = "see ucanaccess website";
             validValues = Arrays.asList(_validValues);
+            description = "see documentation";
         }
 
         public Class<?> getType() {
