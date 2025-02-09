@@ -9,24 +9,24 @@ import java.util.stream.Collectors;
 public final class TypesMap {
 
     public enum AccessType {
-        AUTOINCREMENT(SqlConstants.INTEGER),
         BYTE(SqlConstants.SMALLINT),
-        CHAR(SqlConstants.VARCHAR), // CHAR mapped into TEXT when used in CREATE TABLE.
-        COMPLEX("OBJECT"),
-        COUNTER(SqlConstants.INTEGER),
-        CURRENCY("DECIMAL(" + DataType.MONEY.getFixedSize() + ", 4)"),
-        DATETIME("TIMESTAMP"),
-        DOUBLE("DOUBLE"),
-        GUID("CHAR(38)"),
-        HYPERLINK(SqlConstants.LONGVARCHAR), // HYPERLINK is a special type of MEMO field
-        INTEGER("SMALLINT"),
+        INTEGER(SqlConstants.SMALLINT),
         LONG(SqlConstants.INTEGER),
-        MEMO(SqlConstants.LONGVARCHAR),
-        NUMERIC("DECIMAL"),
-        OLE("BLOB"),
-        SINGLE("FLOAT"),
         TEXT(SqlConstants.VARCHAR),
-        YESNO("BOOLEAN");
+        OLE("BLOB"),
+        MEMO(SqlConstants.LONGVARCHAR),
+        CURRENCY("DECIMAL(" + DataType.MONEY.getFixedSize() + ", 4)"),
+        GUID("CHAR(38)"),
+        COUNTER(SqlConstants.INTEGER),
+        AUTOINCREMENT(SqlConstants.INTEGER),
+        NUMERIC("DECIMAL"),
+        YESNO("BOOLEAN"),
+        DATETIME("TIMESTAMP"),
+        SINGLE("FLOAT"),
+        COMPLEX("OBJECT"),
+        CHAR(SqlConstants.VARCHAR), // CHAR mapped into TEXT when used in CREATE TABLE.
+        HYPERLINK(SqlConstants.LONGVARCHAR), // HYPERLINK is a special type of MEMO field
+        DOUBLE("DOUBLE");
 
         private final String hsqlType;
 
