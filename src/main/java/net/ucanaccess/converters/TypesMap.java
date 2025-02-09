@@ -13,20 +13,20 @@ public final class TypesMap {
         INTEGER(SqlConstants.SMALLINT),
         LONG(SqlConstants.INTEGER),
         TEXT(SqlConstants.VARCHAR),
-        OLE("BLOB"),
+        OLE(SqlConstants.BLOB),
         MEMO(SqlConstants.LONGVARCHAR),
         CURRENCY("DECIMAL(" + DataType.MONEY.getFixedSize() + ", 4)"),
         GUID("CHAR(38)"),
         COUNTER(SqlConstants.INTEGER),
         AUTOINCREMENT(SqlConstants.INTEGER),
-        NUMERIC("DECIMAL"),
-        YESNO("BOOLEAN"),
-        DATETIME("TIMESTAMP"),
-        SINGLE("FLOAT"),
+        NUMERIC(SqlConstants.DECIMAL),
+        YESNO(SqlConstants.BOOLEAN),
+        DATETIME(SqlConstants.TIMESTAMP),
+        SINGLE(SqlConstants.FLOAT),
         COMPLEX("OBJECT"),
         CHAR(SqlConstants.VARCHAR), // CHAR mapped into TEXT when used in CREATE TABLE.
         HYPERLINK(SqlConstants.LONGVARCHAR), // HYPERLINK is a special type of MEMO field
-        DOUBLE("DOUBLE");
+        DOUBLE(SqlConstants.DOUBLE);
 
         private final String hsqlType;
 

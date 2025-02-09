@@ -762,9 +762,13 @@ public final class SQLConverter {
         return Patterns.DEFAULT_VARCHAR_0.matcher(typeDecl).replaceAll("$1VARCHAR(255)$2");
     }
 
-    private static String convertCreateTable(String sql, Map<String, String> _types2Convert) throws SQLException {
+    private static String convertCreateTable(String _sql, Map<String, String> _types2Convert) throws SQLException {
+        if (_sql == null || _sql.isBlank()) {
+            return _sql;
+        }
+
         // padding for detecting the right exception
-        sql += " ";
+        String sql = _sql + " ";
         if (!sql.contains("(")) {
             return sql;
         }
@@ -778,7 +782,9 @@ public final class SQLConverter {
                      .replaceAll("(\\W)" + exprTypesTranslate.replace("_", "___" + entry.getKey() + "___"), "$1" + entry.getKey() + "$2");
         }
         sql = Patterns.DEFAULT_VARCHAR.matcher(sql).replaceAll("$1VARCHAR(255)$2");
-        return clearDefaultsCreateStatement(pre + sql);
+
+        sql = clearDefaultsCreateStatement(pre + sql);
+        return sql;
     }
 
     public static String getDDLDefault(String ddlf) {
