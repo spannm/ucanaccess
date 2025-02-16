@@ -5,10 +5,10 @@
     <skin>
         <groupId>org.apache.maven.skins</groupId>
         <artifactId>maven-fluido-skin</artifactId>
-        <version>2.0.0-M11</version>
+        <version>2.0.1</version>
     </skin>
 
-    <bannerLeft name="UCanAccess"/>
+    <bannerLeft name="${project.name}"/>
 
     <custom>
         <fluidoSkin/>
@@ -25,7 +25,7 @@
             <item name="Project (GitHub)" href="https://github.com/spannm/ucanaccess/" target="_blank"/>
             <item name="Discussions (GitHub)" href="https://github.com/spannm/ucanaccess/discussions/" target="_blank"/>
             <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess/" target="_blank"/>
-            <item name="SourceForge" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
+            <item name="SourceForge (deprecated)" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
         </links>
 
         <menu name="Overview">
@@ -36,8 +36,10 @@
             <item name="Links/License Info" href="/50-links-license.html" />
             <item name="About" href="60-about.html" />
         </menu>
+
         <menu ref="reports"/>
         <menu ref="modules"/>
+
     </body>
 
 </site>
