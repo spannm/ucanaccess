@@ -25,7 +25,7 @@
     <rule ref="category/java/codestyle.xml/ClassNamingConventions">
         <properties>
             <property name="abstractClassPattern" value="[A-Z][a-zA-Z0-9]*" />
-            <property name="interfacePattern" value="(?:IF?[A-Z][a-zA-Z0-9]*)|(?:[A-Z][a-zA-Z0-9]+Constants[0-9]*)" />
+            <property name="interfacePattern" value="(?:(?:I|IF)?[A-Z][a-zA-Z0-9]*)|(?:[A-Z][a-zA-Z0-9]+Constants[0-9]*)" />
             <property name="testClassPattern" value="^[A-Z][a-zA-Z0-9]*Test[0-9]*$" />
         </properties>
     </rule>

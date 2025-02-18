@@ -42,9 +42,9 @@
     <module name="TreeWalker">
         <module name="ArrayTypeStyle"/>
         <module name="AvoidNestedBlocks"/>
-        <!--module name="CatchParameterName">
-            <property name="format" value="(^_ex[a-zA-Z0-9]*$)|(^_[a-z][a-zA-Z0-9]*Exception$)"/>
-        </module-->
+        <module name="CatchParameterName">
+            <property name="format" value="^_(ex[a-zA-Z0-9]*)|([a-z][a-zA-Z0-9]*Exception|ignored)$"/>
+        </module>
         <module name="ConstantName"/>
         <!--module name="DeclarationOrder" /-->
         <module name="EmptyBlock"/>
@@ -81,7 +81,9 @@
         <module name="LocalVariableName">
             <property name="format" value="(^[a-z][a-zA-Z0-9]*$)|(^[ijk]$)"/>
         </module>
-        <module name="MemberName"/>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$" />
+        </module>
         <module name="MethodLength">
             <property name="max" value="400"/>
             <property name="countEmpty" value="false"/>
