@@ -97,7 +97,7 @@
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
         <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
-        <dep.jackcess.version>5.0.0</dep.jackcess.version>
+        <dep.jackcess.version>5.1.0</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
         <dep.hsqldb.classifier />
@@ -105,12 +105,12 @@
         <dep.slf4j.version>2.0.16</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.12.0-RC2</dep.junit.version>
+        <dep.junit.version>5.12.0</dep.junit.version>
         <dep.assertj.version>3.27.3</dep.assertj.version>
         <dep.mockito.version>5.15.2</dep.mockito.version>
 
         <!-- override basepom versions -->
-        <dep.checkstyle.version>10.21.2</dep.checkstyle.version>
+        <dep.checkstyle.version>10.21.3</dep.checkstyle.version>
         <dep.pmd.version>7.10.0</dep.pmd.version>
         <dep.spotbugs.version>4.9.1</dep.spotbugs.version>
 
