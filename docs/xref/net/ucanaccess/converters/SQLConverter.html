@@ -770,343 +770,349 @@
 <a class="jxr_linenumber" name="L762" href="#L762">762</a>         <strong class="jxr_keyword">return</strong> Patterns.DEFAULT_VARCHAR_0.matcher(typeDecl).replaceAll(<span class="jxr_string">"$1VARCHAR(255)$2"</span>);
 <a class="jxr_linenumber" name="L763" href="#L763">763</a>     }
 <a class="jxr_linenumber" name="L764" href="#L764">764</a> 
-<a class="jxr_linenumber" name="L765" href="#L765">765</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertCreateTable(String sql, Map&lt;String, String&gt; _types2Convert) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L766" href="#L766">766</a>         <em class="jxr_comment">// padding for detecting the right exception</em>
-<a class="jxr_linenumber" name="L767" href="#L767">767</a>         sql += <span class="jxr_string">" "</span>;
-<a class="jxr_linenumber" name="L768" href="#L768">768</a>         <strong class="jxr_keyword">if</strong> (!sql.contains(<span class="jxr_string">"("</span>)) {
-<a class="jxr_linenumber" name="L769" href="#L769">769</a>             <strong class="jxr_keyword">return</strong> sql;
-<a class="jxr_linenumber" name="L770" href="#L770">770</a>         }
-<a class="jxr_linenumber" name="L771" href="#L771">771</a>         String pre = sql.substring(0, sql.indexOf('('));
-<a class="jxr_linenumber" name="L772" href="#L772">772</a>         sql = sql.substring(sql.indexOf('('));
-<a class="jxr_linenumber" name="L773" href="#L773">773</a> 
-<a class="jxr_linenumber" name="L774" href="#L774">774</a>         String exprTypesTranslate = <span class="jxr_string">"(?i)_(&#92;&#92;W)"</span>;
-<a class="jxr_linenumber" name="L775" href="#L775">775</a>         <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : _types2Convert.entrySet()) {
-<a class="jxr_linenumber" name="L776" href="#L776">776</a>             sql = sql.replaceAll(<span class="jxr_string">"([,&#92;&#92;(]&#92;&#92;s*)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, entry.getKey()), <span class="jxr_string">"$1___"</span> + entry.getKey() + <span class="jxr_string">"___$2"</span>)
-<a class="jxr_linenumber" name="L777" href="#L777">777</a>                      .replaceAll(<span class="jxr_string">"(&#92;&#92;W)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, entry.getKey()), <span class="jxr_string">"$1"</span> + entry.getValue() + <span class="jxr_string">"$2"</span>)
-<a class="jxr_linenumber" name="L778" href="#L778">778</a>                      .replaceAll(<span class="jxr_string">"(&#92;&#92;W)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, <span class="jxr_string">"___"</span> + entry.getKey() + <span class="jxr_string">"___"</span>), <span class="jxr_string">"$1"</span> + entry.getKey() + <span class="jxr_string">"$2"</span>);
-<a class="jxr_linenumber" name="L779" href="#L779">779</a>         }
-<a class="jxr_linenumber" name="L780" href="#L780">780</a>         sql = Patterns.DEFAULT_VARCHAR.matcher(sql).replaceAll(<span class="jxr_string">"$1VARCHAR(255)$2"</span>);
-<a class="jxr_linenumber" name="L781" href="#L781">781</a>         <strong class="jxr_keyword">return</strong> clearDefaultsCreateStatement(pre + sql);
-<a class="jxr_linenumber" name="L782" href="#L782">782</a>     }
-<a class="jxr_linenumber" name="L783" href="#L783">783</a> 
-<a class="jxr_linenumber" name="L784" href="#L784">784</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getDDLDefault(String ddlf) {
-<a class="jxr_linenumber" name="L785" href="#L785">785</a>         <strong class="jxr_keyword">for</strong> (Pattern pat : Patterns.DEFAULT_CATCH) {
-<a class="jxr_linenumber" name="L786" href="#L786">786</a>             Matcher m = pat.matcher(ddlf + <span class="jxr_string">" "</span>);
-<a class="jxr_linenumber" name="L787" href="#L787">787</a>             <strong class="jxr_keyword">if</strong> (m.find()) {
-<a class="jxr_linenumber" name="L788" href="#L788">788</a>                 <strong class="jxr_keyword">return</strong> m.group(2);
-<a class="jxr_linenumber" name="L789" href="#L789">789</a>             }
-<a class="jxr_linenumber" name="L790" href="#L790">790</a> 
-<a class="jxr_linenumber" name="L791" href="#L791">791</a>         }
-<a class="jxr_linenumber" name="L792" href="#L792">792</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L793" href="#L793">793</a>     }
-<a class="jxr_linenumber" name="L794" href="#L794">794</a> 
-<a class="jxr_linenumber" name="L795" href="#L795">795</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String clearDefaultsCreateStatement(String _sql) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L796" href="#L796">796</a>         <strong class="jxr_keyword">if</strong> (!_sql.toUpperCase().contains(<span class="jxr_string">"DEFAULT"</span>)) {
-<a class="jxr_linenumber" name="L797" href="#L797">797</a>             <strong class="jxr_keyword">return</strong> _sql;
-<a class="jxr_linenumber" name="L798" href="#L798">798</a>         }
-<a class="jxr_linenumber" name="L799" href="#L799">799</a>         <strong class="jxr_keyword">int</strong> startDecl = _sql.indexOf('(');
-<a class="jxr_linenumber" name="L800" href="#L800">800</a>         <strong class="jxr_keyword">int</strong> endDecl = _sql.lastIndexOf(')');
-<a class="jxr_linenumber" name="L801" href="#L801">801</a>         <strong class="jxr_keyword">if</strong> (startDecl &gt;= endDecl) {
-<a class="jxr_linenumber" name="L802" href="#L802">802</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidCreateStatementException" href="../../../net/ucanaccess/exception/InvalidCreateStatementException.html#InvalidCreateStatementException">InvalidCreateStatementException</a>(_sql);
-<a class="jxr_linenumber" name="L803" href="#L803">803</a>         }
-<a class="jxr_linenumber" name="L804" href="#L804">804</a>         <strong class="jxr_keyword">for</strong> (Pattern pat : Patterns.DEFAULT_CATCH) {
-<a class="jxr_linenumber" name="L805" href="#L805">805</a>             _sql = pat.matcher(_sql).replaceAll(<span class="jxr_string">"$3"</span>);
-<a class="jxr_linenumber" name="L806" href="#L806">806</a>         }
-<a class="jxr_linenumber" name="L807" href="#L807">807</a> 
-<a class="jxr_linenumber" name="L808" href="#L808">808</a>         <strong class="jxr_keyword">return</strong> _sql;
-<a class="jxr_linenumber" name="L809" href="#L809">809</a>     }
-<a class="jxr_linenumber" name="L810" href="#L810">810</a> 
-<a class="jxr_linenumber" name="L811" href="#L811">811</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertCreateTable(String sql) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L812" href="#L812">812</a>         <strong class="jxr_keyword">return</strong> convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());
-<a class="jxr_linenumber" name="L813" href="#L813">813</a>     }
-<a class="jxr_linenumber" name="L814" href="#L814">814</a> 
-<a class="jxr_linenumber" name="L815" href="#L815">815</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> checkDDL(String sql) {
-<a class="jxr_linenumber" name="L816" href="#L816">816</a>         <strong class="jxr_keyword">return</strong> sql != <strong class="jxr_keyword">null</strong> &amp;&amp; Patterns.CHECK_DDL.matcher(sql.replaceAll(<span class="jxr_string">"&#92;&#92;s+"</span>, <span class="jxr_string">" "</span>)).matches();
-<a class="jxr_linenumber" name="L817" href="#L817">817</a>     }
-<a class="jxr_linenumber" name="L818" href="#L818">818</a> 
-<a class="jxr_linenumber" name="L819" href="#L819">819</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertLike(String sql) {
-<a class="jxr_linenumber" name="L820" href="#L820">820</a>         Matcher matcher = Patterns.FIND_LIKE.matcher(sql);
-<a class="jxr_linenumber" name="L821" href="#L821">821</a>         <strong class="jxr_keyword">if</strong> (matcher.find()) {
-<a class="jxr_linenumber" name="L822" href="#L822">822</a>             <strong class="jxr_keyword">return</strong> sql.substring(0, matcher.start(1))
-<a class="jxr_linenumber" name="L823" href="#L823">823</a>                     + convertLike(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4))
-<a class="jxr_linenumber" name="L824" href="#L824">824</a>                     + convertLike(sql.substring(matcher.end(0)));
-<a class="jxr_linenumber" name="L825" href="#L825">825</a>         } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L826" href="#L826">826</a>             <strong class="jxr_keyword">return</strong> sql;
-<a class="jxr_linenumber" name="L827" href="#L827">827</a>         }
-<a class="jxr_linenumber" name="L828" href="#L828">828</a>     }
-<a class="jxr_linenumber" name="L829" href="#L829">829</a> 
-<a class="jxr_linenumber" name="L830" href="#L830">830</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertToRegexMatches(String likeContent) {
-<a class="jxr_linenumber" name="L831" href="#L831">831</a>         Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
-<a class="jxr_linenumber" name="L832" href="#L832">832</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
-<a class="jxr_linenumber" name="L833" href="#L833">833</a>             <strong class="jxr_keyword">return</strong> convertToRegexMatches(likeContent.substring(0, mtc.start(0)))
-<a class="jxr_linenumber" name="L834" href="#L834">834</a>                 + mtc.group(0).charAt(1)
-<a class="jxr_linenumber" name="L835" href="#L835">835</a>                 + convertToRegexMatches(likeContent.substring(mtc.end(0)));
-<a class="jxr_linenumber" name="L836" href="#L836">836</a>         }
-<a class="jxr_linenumber" name="L837" href="#L837">837</a>         <strong class="jxr_keyword">return</strong> likeContent.replaceAll(<span class="jxr_string">"#"</span>, <span class="jxr_string">"&#92;&#92;&#92;&#92;d"</span>).replaceAll(<span class="jxr_string">"&#92;&#92;*"</span>, <span class="jxr_string">".*"</span>).replace('_', '.')
-<a class="jxr_linenumber" name="L838" href="#L838">838</a>                 .replaceAll(<span class="jxr_string">"(&#92;&#92;[)&#92;&#92;!(&#92;&#92;w&#92;&#92;-&#92;&#92;w&#92;&#92;])"</span>, <span class="jxr_string">"$1^$2"</span>);
-<a class="jxr_linenumber" name="L839" href="#L839">839</a>     }
-<a class="jxr_linenumber" name="L840" href="#L840">840</a> 
-<a class="jxr_linenumber" name="L841" href="#L841">841</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertToLikeCondition(String likeContent) {
-<a class="jxr_linenumber" name="L842" href="#L842">842</a>         Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
-<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
-<a class="jxr_linenumber" name="L844" href="#L844">844</a>             <strong class="jxr_keyword">return</strong> convertToLikeCondition(likeContent.substring(0, mtc.start(0)))
-<a class="jxr_linenumber" name="L845" href="#L845">845</a>                 + mtc.group(0).charAt(1)
-<a class="jxr_linenumber" name="L846" href="#L846">846</a>                 + convertToLikeCondition(likeContent.substring(mtc.end(0)));
-<a class="jxr_linenumber" name="L847" href="#L847">847</a>         }
-<a class="jxr_linenumber" name="L848" href="#L848">848</a>         <strong class="jxr_keyword">return</strong> likeContent.replaceAll(<span class="jxr_string">"&#92;&#92;*"</span>, <span class="jxr_string">"%"</span>).replaceAll(<span class="jxr_string">"&#92;&#92;?"</span>, <span class="jxr_string">"_"</span>);
-<a class="jxr_linenumber" name="L849" href="#L849">849</a>     }
-<a class="jxr_linenumber" name="L850" href="#L850">850</a> 
-<a class="jxr_linenumber" name="L851" href="#L851">851</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertLike(String conditionField, String closePar, String not, String likeContent) {
-<a class="jxr_linenumber" name="L852" href="#L852">852</a>         <strong class="jxr_keyword">int</strong> i = likeContent.replaceAll(<span class="jxr_string">"&#92;&#92;[#&#92;&#92;]"</span>, <span class="jxr_string">""</span>).indexOf('#');
-<a class="jxr_linenumber" name="L853" href="#L853">853</a>         not = not == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">""</span> : <span class="jxr_string">" NOT "</span>;
-<a class="jxr_linenumber" name="L854" href="#L854">854</a>         <strong class="jxr_keyword">if</strong> (i &gt;= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {
-<a class="jxr_linenumber" name="L855" href="#L855">855</a>             <strong class="jxr_keyword">return</strong> not + <span class="jxr_string">"REGEXP_MATCHES("</span> + conditionField + <span class="jxr_string">",'"</span> + convertToRegexMatches(likeContent) + <span class="jxr_string">"')"</span> + closePar
-<a class="jxr_linenumber" name="L856" href="#L856">856</a>                     + <span class="jxr_string">" "</span>;
-<a class="jxr_linenumber" name="L857" href="#L857">857</a>         }
-<a class="jxr_linenumber" name="L858" href="#L858">858</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">" "</span> + conditionField + closePar + not + <span class="jxr_string">" like '"</span> + convertToLikeCondition(likeContent) + <span class="jxr_string">"'"</span>;
-<a class="jxr_linenumber" name="L859" href="#L859">859</a>     }
-<a class="jxr_linenumber" name="L860" href="#L860">860</a> 
-<a class="jxr_linenumber" name="L861" href="#L861">861</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isSupportsAccessLike() {
-<a class="jxr_linenumber" name="L862" href="#L862">862</a>         <strong class="jxr_keyword">return</strong> supportsAccessLike;
-<a class="jxr_linenumber" name="L863" href="#L863">863</a>     }
-<a class="jxr_linenumber" name="L864" href="#L864">864</a> 
-<a class="jxr_linenumber" name="L865" href="#L865">865</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setSupportsAccessLike(<strong class="jxr_keyword">boolean</strong> _supportsAccessLike) {
-<a class="jxr_linenumber" name="L866" href="#L866">866</a>         supportsAccessLike = _supportsAccessLike;
-<a class="jxr_linenumber" name="L867" href="#L867">867</a>     }
-<a class="jxr_linenumber" name="L868" href="#L868">868</a> 
-<a class="jxr_linenumber" name="L869" href="#L869">869</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isXescaped(String identifier) {
-<a class="jxr_linenumber" name="L870" href="#L870">870</a>         <strong class="jxr_keyword">return</strong> ESCAPED_IDENTIFIERS.contains(identifier);
-<a class="jxr_linenumber" name="L871" href="#L871">871</a>     }
-<a class="jxr_linenumber" name="L872" href="#L872">872</a> 
-<a class="jxr_linenumber" name="L873" href="#L873">873</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertFormula(String sql) {
-<a class="jxr_linenumber" name="L874" href="#L874">874</a>         <em class="jxr_comment">// white space to allow replaceWorkAroundFunction pattern to work fine</em>
-<a class="jxr_linenumber" name="L875" href="#L875">875</a>         sql = convertFormula0(convertSQL(<span class="jxr_string">" "</span> + sql).getSql());
-<a class="jxr_linenumber" name="L876" href="#L876">876</a>         <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertCreateTable(String _sql, Map&lt;String, String&gt; _types2Convert) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>         <strong class="jxr_keyword">if</strong> (_sql == <strong class="jxr_keyword">null</strong> || _sql.isBlank()) {
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>             <strong class="jxr_keyword">return</strong> _sql;
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>         }
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> 
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>         <em class="jxr_comment">// padding for detecting the right exception</em>
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>         String sql = _sql + <span class="jxr_string">" "</span>;
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>         <strong class="jxr_keyword">if</strong> (!sql.contains(<span class="jxr_string">"("</span>)) {
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>             <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>         }
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>         String pre = sql.substring(0, sql.indexOf('('));
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>         sql = sql.substring(sql.indexOf('('));
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> 
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>         String exprTypesTranslate = <span class="jxr_string">"(?i)_(&#92;&#92;W)"</span>;
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>         <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : _types2Convert.entrySet()) {
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>             sql = sql.replaceAll(<span class="jxr_string">"([,&#92;&#92;(]&#92;&#92;s*)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, entry.getKey()), <span class="jxr_string">"$1___"</span> + entry.getKey() + <span class="jxr_string">"___$2"</span>)
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>                      .replaceAll(<span class="jxr_string">"(&#92;&#92;W)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, entry.getKey()), <span class="jxr_string">"$1"</span> + entry.getValue() + <span class="jxr_string">"$2"</span>)
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>                      .replaceAll(<span class="jxr_string">"(&#92;&#92;W)"</span> + exprTypesTranslate.replace(<span class="jxr_string">"_"</span>, <span class="jxr_string">"___"</span> + entry.getKey() + <span class="jxr_string">"___"</span>), <span class="jxr_string">"$1"</span> + entry.getKey() + <span class="jxr_string">"$2"</span>);
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>         }
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>         sql = Patterns.DEFAULT_VARCHAR.matcher(sql).replaceAll(<span class="jxr_string">"$1VARCHAR(255)$2"</span>);
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> 
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>         sql = clearDefaultsCreateStatement(pre + sql);
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>         <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>     }
+<a class="jxr_linenumber" name="L789" href="#L789">789</a> 
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getDDLDefault(String ddlf) {
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>         <strong class="jxr_keyword">for</strong> (Pattern pat : Patterns.DEFAULT_CATCH) {
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>             Matcher m = pat.matcher(ddlf + <span class="jxr_string">" "</span>);
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>             <strong class="jxr_keyword">if</strong> (m.find()) {
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>                 <strong class="jxr_keyword">return</strong> m.group(2);
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>             }
+<a class="jxr_linenumber" name="L796" href="#L796">796</a> 
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>         }
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>     }
+<a class="jxr_linenumber" name="L800" href="#L800">800</a> 
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String clearDefaultsCreateStatement(String _sql) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>         <strong class="jxr_keyword">if</strong> (!_sql.toUpperCase().contains(<span class="jxr_string">"DEFAULT"</span>)) {
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>             <strong class="jxr_keyword">return</strong> _sql;
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>         }
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>         <strong class="jxr_keyword">int</strong> startDecl = _sql.indexOf('(');
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>         <strong class="jxr_keyword">int</strong> endDecl = _sql.lastIndexOf(')');
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>         <strong class="jxr_keyword">if</strong> (startDecl &gt;= endDecl) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidCreateStatementException" href="../../../net/ucanaccess/exception/InvalidCreateStatementException.html#InvalidCreateStatementException">InvalidCreateStatementException</a>(_sql);
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>         }
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>         <strong class="jxr_keyword">for</strong> (Pattern pat : Patterns.DEFAULT_CATCH) {
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>             _sql = pat.matcher(_sql).replaceAll(<span class="jxr_string">"$3"</span>);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>         }
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> 
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>         <strong class="jxr_keyword">return</strong> _sql;
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>     }
+<a class="jxr_linenumber" name="L816" href="#L816">816</a> 
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertCreateTable(String sql) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>         <strong class="jxr_keyword">return</strong> convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>     }
+<a class="jxr_linenumber" name="L820" href="#L820">820</a> 
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> checkDDL(String sql) {
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>         <strong class="jxr_keyword">return</strong> sql != <strong class="jxr_keyword">null</strong> &amp;&amp; Patterns.CHECK_DDL.matcher(sql.replaceAll(<span class="jxr_string">"&#92;&#92;s+"</span>, <span class="jxr_string">" "</span>)).matches();
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>     }
+<a class="jxr_linenumber" name="L824" href="#L824">824</a> 
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertLike(String sql) {
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>         Matcher matcher = Patterns.FIND_LIKE.matcher(sql);
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>         <strong class="jxr_keyword">if</strong> (matcher.find()) {
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>             <strong class="jxr_keyword">return</strong> sql.substring(0, matcher.start(1))
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>                     + convertLike(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4))
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>                     + convertLike(sql.substring(matcher.end(0)));
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>             <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>         }
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>     }
+<a class="jxr_linenumber" name="L835" href="#L835">835</a> 
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertToRegexMatches(String likeContent) {
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>         Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>             <strong class="jxr_keyword">return</strong> convertToRegexMatches(likeContent.substring(0, mtc.start(0)))
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>                 + mtc.group(0).charAt(1)
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>                 + convertToRegexMatches(likeContent.substring(mtc.end(0)));
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>         }
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <strong class="jxr_keyword">return</strong> likeContent.replaceAll(<span class="jxr_string">"#"</span>, <span class="jxr_string">"&#92;&#92;&#92;&#92;d"</span>).replaceAll(<span class="jxr_string">"&#92;&#92;*"</span>, <span class="jxr_string">".*"</span>).replace('_', '.')
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>                 .replaceAll(<span class="jxr_string">"(&#92;&#92;[)&#92;&#92;!(&#92;&#92;w&#92;&#92;-&#92;&#92;w&#92;&#92;])"</span>, <span class="jxr_string">"$1^$2"</span>);
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>     }
+<a class="jxr_linenumber" name="L846" href="#L846">846</a> 
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertToLikeCondition(String likeContent) {
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>         Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
+<a class="jxr_linenumber" name="L849" href="#L849">849</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>             <strong class="jxr_keyword">return</strong> convertToLikeCondition(likeContent.substring(0, mtc.start(0)))
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>                 + mtc.group(0).charAt(1)
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>                 + convertToLikeCondition(likeContent.substring(mtc.end(0)));
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>         }
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>         <strong class="jxr_keyword">return</strong> likeContent.replaceAll(<span class="jxr_string">"&#92;&#92;*"</span>, <span class="jxr_string">"%"</span>).replaceAll(<span class="jxr_string">"&#92;&#92;?"</span>, <span class="jxr_string">"_"</span>);
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>     }
+<a class="jxr_linenumber" name="L856" href="#L856">856</a> 
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertLike(String conditionField, String closePar, String not, String likeContent) {
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>         <strong class="jxr_keyword">int</strong> i = likeContent.replaceAll(<span class="jxr_string">"&#92;&#92;[#&#92;&#92;]"</span>, <span class="jxr_string">""</span>).indexOf('#');
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>         not = not == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">""</span> : <span class="jxr_string">" NOT "</span>;
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>         <strong class="jxr_keyword">if</strong> (i &gt;= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>             <strong class="jxr_keyword">return</strong> not + <span class="jxr_string">"REGEXP_MATCHES("</span> + conditionField + <span class="jxr_string">",'"</span> + convertToRegexMatches(likeContent) + <span class="jxr_string">"')"</span> + closePar
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>                     + <span class="jxr_string">" "</span>;
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>         }
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">" "</span> + conditionField + closePar + not + <span class="jxr_string">" like '"</span> + convertToLikeCondition(likeContent) + <span class="jxr_string">"'"</span>;
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>     }
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> 
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isSupportsAccessLike() {
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>         <strong class="jxr_keyword">return</strong> supportsAccessLike;
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>     }
+<a class="jxr_linenumber" name="L870" href="#L870">870</a> 
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setSupportsAccessLike(<strong class="jxr_keyword">boolean</strong> _supportsAccessLike) {
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>         supportsAccessLike = _supportsAccessLike;
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>     }
+<a class="jxr_linenumber" name="L874" href="#L874">874</a> 
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isXescaped(String identifier) {
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>         <strong class="jxr_keyword">return</strong> ESCAPED_IDENTIFIERS.contains(identifier);
 <a class="jxr_linenumber" name="L877" href="#L877">877</a>     }
 <a class="jxr_linenumber" name="L878" href="#L878">878</a> 
-<a class="jxr_linenumber" name="L879" href="#L879">879</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertDigit(String sql) {
-<a class="jxr_linenumber" name="L880" href="#L880">880</a>         Matcher mtc = Patterns.ESPRESSION_DIGIT.matcher(sql);
-<a class="jxr_linenumber" name="L881" href="#L881">881</a>         <strong class="jxr_keyword">char</strong>[] cq = sql.toCharArray();
-<a class="jxr_linenumber" name="L882" href="#L882">882</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
-<a class="jxr_linenumber" name="L883" href="#L883">883</a>             <strong class="jxr_keyword">int</strong> idx = mtc.start();
-<a class="jxr_linenumber" name="L884" href="#L884">884</a>             <strong class="jxr_keyword">int</strong> idxe = mtc.end();
-<a class="jxr_linenumber" name="L885" href="#L885">885</a>             <strong class="jxr_keyword">boolean</strong> replace = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L886" href="#L886">886</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> j = idx; j &gt;= 0; j--) {
-<a class="jxr_linenumber" name="L887" href="#L887">887</a>                 <strong class="jxr_keyword">if</strong> (Character.isDigit(cq[j])) {
-<a class="jxr_linenumber" name="L888" href="#L888">888</a>                     <strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L889" href="#L889">889</a>                 } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L890" href="#L890">890</a>                     <strong class="jxr_keyword">if</strong> (Character.isLetter(cq[j])) {
-<a class="jxr_linenumber" name="L891" href="#L891">891</a>                         replace = false;
-<a class="jxr_linenumber" name="L892" href="#L892">892</a>                     }
-<a class="jxr_linenumber" name="L893" href="#L893">893</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L894" href="#L894">894</a>                 }
-<a class="jxr_linenumber" name="L895" href="#L895">895</a>             }
-<a class="jxr_linenumber" name="L896" href="#L896">896</a>             <strong class="jxr_keyword">if</strong> (replace) {
-<a class="jxr_linenumber" name="L897" href="#L897">897</a>                 <strong class="jxr_keyword">return</strong> sql.substring(0, idx) + mtc.group(1) + <span class="jxr_string">"E0"</span> + convertDigit(sql.substring(idxe));
-<a class="jxr_linenumber" name="L898" href="#L898">898</a>             } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L899" href="#L899">899</a>                 <strong class="jxr_keyword">return</strong> sql.substring(0, idxe) + convertDigit(sql.substring(idxe));
-<a class="jxr_linenumber" name="L900" href="#L900">900</a>             }
-<a class="jxr_linenumber" name="L901" href="#L901">901</a>         } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L902" href="#L902">902</a>             <strong class="jxr_keyword">return</strong> sql;
-<a class="jxr_linenumber" name="L903" href="#L903">903</a>         }
-<a class="jxr_linenumber" name="L904" href="#L904">904</a> 
-<a class="jxr_linenumber" name="L905" href="#L905">905</a>     }
-<a class="jxr_linenumber" name="L906" href="#L906">906</a> 
-<a class="jxr_linenumber" name="L907" href="#L907">907</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertFormula0(String sql) {
-<a class="jxr_linenumber" name="L908" href="#L908">908</a>         <strong class="jxr_keyword">int</strong> li = Math.max(sql.lastIndexOf('\&quot;'), sql.lastIndexOf('\''));
-<a class="jxr_linenumber" name="L909" href="#L909">909</a>         <strong class="jxr_keyword">boolean</strong> enddq = sql.endsWith(<span class="jxr_string">"\&quot;"</span>) || sql.endsWith(<span class="jxr_string">"'"</span>);
-<a class="jxr_linenumber" name="L910" href="#L910">910</a>         String suff = enddq ? <span class="jxr_string">""</span> : sql.substring(li + 1);
-<a class="jxr_linenumber" name="L911" href="#L911">911</a>         suff = convertDigit(suff);
-<a class="jxr_linenumber" name="L912" href="#L912">912</a>         String tsql = enddq ? sql : sql.substring(0, li + 1);
-<a class="jxr_linenumber" name="L913" href="#L913">913</a>         <strong class="jxr_keyword">int</strong>[] fd = getDoubleQuoteGroup(tsql);
-<a class="jxr_linenumber" name="L914" href="#L914">914</a>         <strong class="jxr_keyword">int</strong>[] fs = getQuoteGroup(tsql);
-<a class="jxr_linenumber" name="L915" href="#L915">915</a>         <strong class="jxr_keyword">if</strong> (fd.length &gt; 0 || fs.length &gt; 0) {
-<a class="jxr_linenumber" name="L916" href="#L916">916</a>             <strong class="jxr_keyword">boolean</strong> inid = fs.length == 0 || fd.length &gt; 0 &amp;&amp; fd[0] &lt; fs[0];
-<a class="jxr_linenumber" name="L917" href="#L917">917</a>             String group;
-<a class="jxr_linenumber" name="L918" href="#L918">918</a>             String str;
-<a class="jxr_linenumber" name="L919" href="#L919">919</a>             <strong class="jxr_keyword">int</strong>[] mcr = inid ? fd : fs;
-<a class="jxr_linenumber" name="L920" href="#L920">920</a>             group = tsql.substring(mcr[0], mcr[1]);
-<a class="jxr_linenumber" name="L921" href="#L921">921</a>             str = tsql.substring(0, mcr[0]);
-<a class="jxr_linenumber" name="L922" href="#L922">922</a>             str = convertDigit(str);
-<a class="jxr_linenumber" name="L923" href="#L923">923</a>             tsql = str + group + convertFormula0(tsql.substring(mcr[1]));
-<a class="jxr_linenumber" name="L924" href="#L924">924</a>         } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L925" href="#L925">925</a>             tsql = convertDigit(tsql);
-<a class="jxr_linenumber" name="L926" href="#L926">926</a>         }
-<a class="jxr_linenumber" name="L927" href="#L927">927</a>         <strong class="jxr_keyword">return</strong> tsql + suff;
-<a class="jxr_linenumber" name="L928" href="#L928">928</a>     }
-<a class="jxr_linenumber" name="L929" href="#L929">929</a> 
-<a class="jxr_linenumber" name="L930" href="#L930">930</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertPowOperator(String sql) {
-<a class="jxr_linenumber" name="L931" href="#L931">931</a>         <strong class="jxr_keyword">int</strong> i = sql.indexOf('^');
-<a class="jxr_linenumber" name="L932" href="#L932">932</a>         <strong class="jxr_keyword">if</strong> (i &lt; 0) {
-<a class="jxr_linenumber" name="L933" href="#L933">933</a>             <strong class="jxr_keyword">return</strong> sql;
-<a class="jxr_linenumber" name="L934" href="#L934">934</a>         }
-<a class="jxr_linenumber" name="L935" href="#L935">935</a>         <strong class="jxr_keyword">while</strong> ((i = sql.indexOf('^')) &gt;= 0) {
-<a class="jxr_linenumber" name="L936" href="#L936">936</a>             <strong class="jxr_keyword">int</strong> foi = firstOperandIndex(sql, i);
-<a class="jxr_linenumber" name="L937" href="#L937">937</a>             <strong class="jxr_keyword">int</strong> loi = i + secondOperandIndex(sql, i) + 1;
-<a class="jxr_linenumber" name="L938" href="#L938">938</a>             sql = sql.substring(0, foi) + <span class="jxr_string">" (power("</span> + sql.substring(foi, i) + <span class="jxr_string">","</span> + sql.substring(i + 1, loi + 1)
-<a class="jxr_linenumber" name="L939" href="#L939">939</a>                     + <span class="jxr_string">"))"</span> + sql.substring(loi + 1);
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertFormula(String sql) {
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>         <em class="jxr_comment">// white space to allow replaceWorkAroundFunction pattern to work fine</em>
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>         sql = convertFormula0(convertSQL(<span class="jxr_string">" "</span> + sql).getSql());
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>         <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>     }
+<a class="jxr_linenumber" name="L884" href="#L884">884</a> 
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertDigit(String sql) {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>         Matcher mtc = Patterns.ESPRESSION_DIGIT.matcher(sql);
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>         <strong class="jxr_keyword">char</strong>[] cq = sql.toCharArray();
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>         <strong class="jxr_keyword">if</strong> (mtc.find()) {
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>             <strong class="jxr_keyword">int</strong> idx = mtc.start();
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>             <strong class="jxr_keyword">int</strong> idxe = mtc.end();
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>             <strong class="jxr_keyword">boolean</strong> replace = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> j = idx; j &gt;= 0; j--) {
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>                 <strong class="jxr_keyword">if</strong> (Character.isDigit(cq[j])) {
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>                     <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>                     <strong class="jxr_keyword">if</strong> (Character.isLetter(cq[j])) {
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>                         replace = false;
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>                     }
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>                 }
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>             }
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>             <strong class="jxr_keyword">if</strong> (replace) {
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>                 <strong class="jxr_keyword">return</strong> sql.substring(0, idx) + mtc.group(1) + <span class="jxr_string">"E0"</span> + convertDigit(sql.substring(idxe));
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>                 <strong class="jxr_keyword">return</strong> sql.substring(0, idxe) + convertDigit(sql.substring(idxe));
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>             }
+<a class="jxr_linenumber" name="L907" href="#L907">907</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>             <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L909" href="#L909">909</a>         }
+<a class="jxr_linenumber" name="L910" href="#L910">910</a> 
+<a class="jxr_linenumber" name="L911" href="#L911">911</a>     }
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> 
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String convertFormula0(String sql) {
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>         <strong class="jxr_keyword">int</strong> li = Math.max(sql.lastIndexOf('\&quot;'), sql.lastIndexOf('\''));
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>         <strong class="jxr_keyword">boolean</strong> enddq = sql.endsWith(<span class="jxr_string">"\&quot;"</span>) || sql.endsWith(<span class="jxr_string">"'"</span>);
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>         String suff = enddq ? <span class="jxr_string">""</span> : sql.substring(li + 1);
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>         suff = convertDigit(suff);
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>         String tsql = enddq ? sql : sql.substring(0, li + 1);
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>         <strong class="jxr_keyword">int</strong>[] fd = getDoubleQuoteGroup(tsql);
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>         <strong class="jxr_keyword">int</strong>[] fs = getQuoteGroup(tsql);
+<a class="jxr_linenumber" name="L921" href="#L921">921</a>         <strong class="jxr_keyword">if</strong> (fd.length &gt; 0 || fs.length &gt; 0) {
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>             <strong class="jxr_keyword">boolean</strong> inid = fs.length == 0 || fd.length &gt; 0 &amp;&amp; fd[0] &lt; fs[0];
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>             String group;
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>             String str;
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>             <strong class="jxr_keyword">int</strong>[] mcr = inid ? fd : fs;
+<a class="jxr_linenumber" name="L926" href="#L926">926</a>             group = tsql.substring(mcr[0], mcr[1]);
+<a class="jxr_linenumber" name="L927" href="#L927">927</a>             str = tsql.substring(0, mcr[0]);
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>             str = convertDigit(str);
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>             tsql = str + group + convertFormula0(tsql.substring(mcr[1]));
+<a class="jxr_linenumber" name="L930" href="#L930">930</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L931" href="#L931">931</a>             tsql = convertDigit(tsql);
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>         }
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>         <strong class="jxr_keyword">return</strong> tsql + suff;
+<a class="jxr_linenumber" name="L934" href="#L934">934</a>     }
+<a class="jxr_linenumber" name="L935" href="#L935">935</a> 
+<a class="jxr_linenumber" name="L936" href="#L936">936</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String convertPowOperator(String sql) {
+<a class="jxr_linenumber" name="L937" href="#L937">937</a>         <strong class="jxr_keyword">int</strong> i = sql.indexOf('^');
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>         <strong class="jxr_keyword">if</strong> (i &lt; 0) {
+<a class="jxr_linenumber" name="L939" href="#L939">939</a>             <strong class="jxr_keyword">return</strong> sql;
 <a class="jxr_linenumber" name="L940" href="#L940">940</a>         }
-<a class="jxr_linenumber" name="L941" href="#L941">941</a> 
-<a class="jxr_linenumber" name="L942" href="#L942">942</a>         <strong class="jxr_keyword">return</strong> sql;
-<a class="jxr_linenumber" name="L943" href="#L943">943</a>     }
-<a class="jxr_linenumber" name="L944" href="#L944">944</a> 
-<a class="jxr_linenumber" name="L945" href="#L945">945</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> secondOperandIndex(String sql, <strong class="jxr_keyword">int</strong> i) {
-<a class="jxr_linenumber" name="L946" href="#L946">946</a>         sql = sql.substring(i + 1);
-<a class="jxr_linenumber" name="L947" href="#L947">947</a>         <strong class="jxr_keyword">char</strong>[] ca = sql.toCharArray();
-<a class="jxr_linenumber" name="L948" href="#L948">948</a>         <strong class="jxr_keyword">boolean</strong> foundType = false;
-<a class="jxr_linenumber" name="L949" href="#L949">949</a>         <strong class="jxr_keyword">boolean</strong> field = false;
-<a class="jxr_linenumber" name="L950" href="#L950">950</a>         <strong class="jxr_keyword">boolean</strong> group = false;
-<a class="jxr_linenumber" name="L951" href="#L951">951</a>         <strong class="jxr_keyword">boolean</strong> digit = false;
-<a class="jxr_linenumber" name="L952" href="#L952">952</a>         <strong class="jxr_keyword">int</strong> countPar = 0;
-<a class="jxr_linenumber" name="L953" href="#L953">953</a>         <strong class="jxr_keyword">int</strong> j;
-<a class="jxr_linenumber" name="L954" href="#L954">954</a> 
-<a class="jxr_linenumber" name="L955" href="#L955">955</a>         <strong class="jxr_keyword">for</strong> (j = 0; j &lt; ca.length; j++) {
-<a class="jxr_linenumber" name="L956" href="#L956">956</a>             <strong class="jxr_keyword">char</strong> c = ca[j];
-<a class="jxr_linenumber" name="L957" href="#L957">957</a>             <strong class="jxr_keyword">if</strong> (c == ' ') {
-<a class="jxr_linenumber" name="L958" href="#L958">958</a>                 <strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L959" href="#L959">959</a>             }
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>         <strong class="jxr_keyword">while</strong> ((i = sql.indexOf('^')) &gt;= 0) {
+<a class="jxr_linenumber" name="L942" href="#L942">942</a>             <strong class="jxr_keyword">int</strong> foi = firstOperandIndex(sql, i);
+<a class="jxr_linenumber" name="L943" href="#L943">943</a>             <strong class="jxr_keyword">int</strong> loi = i + secondOperandIndex(sql, i) + 1;
+<a class="jxr_linenumber" name="L944" href="#L944">944</a>             sql = sql.substring(0, foi) + <span class="jxr_string">" (power("</span> + sql.substring(foi, i) + <span class="jxr_string">","</span> + sql.substring(i + 1, loi + 1)
+<a class="jxr_linenumber" name="L945" href="#L945">945</a>                     + <span class="jxr_string">"))"</span> + sql.substring(loi + 1);
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>         }
+<a class="jxr_linenumber" name="L947" href="#L947">947</a> 
+<a class="jxr_linenumber" name="L948" href="#L948">948</a>         <strong class="jxr_keyword">return</strong> sql;
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>     }
+<a class="jxr_linenumber" name="L950" href="#L950">950</a> 
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> secondOperandIndex(String sql, <strong class="jxr_keyword">int</strong> i) {
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>         sql = sql.substring(i + 1);
+<a class="jxr_linenumber" name="L953" href="#L953">953</a>         <strong class="jxr_keyword">char</strong>[] ca = sql.toCharArray();
+<a class="jxr_linenumber" name="L954" href="#L954">954</a>         <strong class="jxr_keyword">boolean</strong> foundType = false;
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>         <strong class="jxr_keyword">boolean</strong> field = false;
+<a class="jxr_linenumber" name="L956" href="#L956">956</a>         <strong class="jxr_keyword">boolean</strong> group = false;
+<a class="jxr_linenumber" name="L957" href="#L957">957</a>         <strong class="jxr_keyword">boolean</strong> digit = false;
+<a class="jxr_linenumber" name="L958" href="#L958">958</a>         <strong class="jxr_keyword">int</strong> countPar = 0;
+<a class="jxr_linenumber" name="L959" href="#L959">959</a>         <strong class="jxr_keyword">int</strong> j;
 <a class="jxr_linenumber" name="L960" href="#L960">960</a> 
-<a class="jxr_linenumber" name="L961" href="#L961">961</a>             <strong class="jxr_keyword">if</strong> (foundType) {
-<a class="jxr_linenumber" name="L962" href="#L962">962</a>                 <strong class="jxr_keyword">if</strong> (field &amp;&amp; c == ']') {
-<a class="jxr_linenumber" name="L963" href="#L963">963</a>                     <strong class="jxr_keyword">return</strong> j;
-<a class="jxr_linenumber" name="L964" href="#L964">964</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {
-<a class="jxr_linenumber" name="L965" href="#L965">965</a>                     <strong class="jxr_keyword">return</strong> j - 1;
-<a class="jxr_linenumber" name="L966" href="#L966">966</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (group) {
-<a class="jxr_linenumber" name="L967" href="#L967">967</a>                     <strong class="jxr_keyword">if</strong> (c == '(') {
-<a class="jxr_linenumber" name="L968" href="#L968">968</a>                         countPar++;
-<a class="jxr_linenumber" name="L969" href="#L969">969</a>                     }
-<a class="jxr_linenumber" name="L970" href="#L970">970</a>                     <strong class="jxr_keyword">if</strong> (c == ')') {
-<a class="jxr_linenumber" name="L971" href="#L971">971</a>                         countPar--;
-<a class="jxr_linenumber" name="L972" href="#L972">972</a>                         <strong class="jxr_keyword">if</strong> (countPar == 0) {
-<a class="jxr_linenumber" name="L973" href="#L973">973</a>                             <strong class="jxr_keyword">return</strong> j;
-<a class="jxr_linenumber" name="L974" href="#L974">974</a>                         }
+<a class="jxr_linenumber" name="L961" href="#L961">961</a>         <strong class="jxr_keyword">for</strong> (j = 0; j &lt; ca.length; j++) {
+<a class="jxr_linenumber" name="L962" href="#L962">962</a>             <strong class="jxr_keyword">char</strong> c = ca[j];
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>             <strong class="jxr_keyword">if</strong> (c == ' ') {
+<a class="jxr_linenumber" name="L964" href="#L964">964</a>                 <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>             }
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> 
+<a class="jxr_linenumber" name="L967" href="#L967">967</a>             <strong class="jxr_keyword">if</strong> (foundType) {
+<a class="jxr_linenumber" name="L968" href="#L968">968</a>                 <strong class="jxr_keyword">if</strong> (field &amp;&amp; c == ']') {
+<a class="jxr_linenumber" name="L969" href="#L969">969</a>                     <strong class="jxr_keyword">return</strong> j;
+<a class="jxr_linenumber" name="L970" href="#L970">970</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {
+<a class="jxr_linenumber" name="L971" href="#L971">971</a>                     <strong class="jxr_keyword">return</strong> j - 1;
+<a class="jxr_linenumber" name="L972" href="#L972">972</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (group) {
+<a class="jxr_linenumber" name="L973" href="#L973">973</a>                     <strong class="jxr_keyword">if</strong> (c == '(') {
+<a class="jxr_linenumber" name="L974" href="#L974">974</a>                         countPar++;
 <a class="jxr_linenumber" name="L975" href="#L975">975</a>                     }
-<a class="jxr_linenumber" name="L976" href="#L976">976</a>                 }
-<a class="jxr_linenumber" name="L977" href="#L977">977</a>             } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L978" href="#L978">978</a>                 <strong class="jxr_keyword">if</strong> (c == '[') {
-<a class="jxr_linenumber" name="L979" href="#L979">979</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L980" href="#L980">980</a>                     field = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L981" href="#L981">981</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == '(') {
-<a class="jxr_linenumber" name="L982" href="#L982">982</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L983" href="#L983">983</a>                     group = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L984" href="#L984">984</a>                     countPar++;
-<a class="jxr_linenumber" name="L985" href="#L985">985</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Character.isDigit(c)) {
-<a class="jxr_linenumber" name="L986" href="#L986">986</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L987" href="#L987">987</a>                     digit = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L988" href="#L988">988</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == '+' || c == '-') {
-<a class="jxr_linenumber" name="L989" href="#L989">989</a>                     <strong class="jxr_keyword">if</strong> (j + 1 &lt; ca.length &amp;&amp; ca[j + 1] != '(' &amp;&amp; ca[j + 1] != '[') {
-<a class="jxr_linenumber" name="L990" href="#L990">990</a>                         foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L991" href="#L991">991</a>                         digit = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L992" href="#L992">992</a>                     }
-<a class="jxr_linenumber" name="L993" href="#L993">993</a>                 }
-<a class="jxr_linenumber" name="L994" href="#L994">994</a> 
-<a class="jxr_linenumber" name="L995" href="#L995">995</a>             }
-<a class="jxr_linenumber" name="L996" href="#L996">996</a> 
-<a class="jxr_linenumber" name="L997" href="#L997">997</a>         }
-<a class="jxr_linenumber" name="L998" href="#L998">998</a>         <strong class="jxr_keyword">return</strong> j - 1;
-<a class="jxr_linenumber" name="L999" href="#L999">999</a>     }
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>                     <strong class="jxr_keyword">if</strong> (c == ')') {
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>                         countPar--;
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>                         <strong class="jxr_keyword">if</strong> (countPar == 0) {
+<a class="jxr_linenumber" name="L979" href="#L979">979</a>                             <strong class="jxr_keyword">return</strong> j;
+<a class="jxr_linenumber" name="L980" href="#L980">980</a>                         }
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>                     }
+<a class="jxr_linenumber" name="L982" href="#L982">982</a>                 }
+<a class="jxr_linenumber" name="L983" href="#L983">983</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L984" href="#L984">984</a>                 <strong class="jxr_keyword">if</strong> (c == '[') {
+<a class="jxr_linenumber" name="L985" href="#L985">985</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L986" href="#L986">986</a>                     field = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L987" href="#L987">987</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == '(') {
+<a class="jxr_linenumber" name="L988" href="#L988">988</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L989" href="#L989">989</a>                     group = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L990" href="#L990">990</a>                     countPar++;
+<a class="jxr_linenumber" name="L991" href="#L991">991</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Character.isDigit(c)) {
+<a class="jxr_linenumber" name="L992" href="#L992">992</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L993" href="#L993">993</a>                     digit = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L994" href="#L994">994</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == '+' || c == '-') {
+<a class="jxr_linenumber" name="L995" href="#L995">995</a>                     <strong class="jxr_keyword">if</strong> (j + 1 &lt; ca.length &amp;&amp; ca[j + 1] != '(' &amp;&amp; ca[j + 1] != '[') {
+<a class="jxr_linenumber" name="L996" href="#L996">996</a>                         foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L997" href="#L997">997</a>                         digit = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L998" href="#L998">998</a>                     }
+<a class="jxr_linenumber" name="L999" href="#L999">999</a>                 }
 <a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> 
-<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> firstOperandIndex(String sql, <strong class="jxr_keyword">int</strong> i) {
-<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a>         sql = sql.substring(0, i);
-<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> 
-<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a>         <strong class="jxr_keyword">char</strong>[] ca = sql.toCharArray();
-<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>         <strong class="jxr_keyword">boolean</strong> foundType = false;
-<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a>         <strong class="jxr_keyword">boolean</strong> field = false;
-<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a>         <strong class="jxr_keyword">boolean</strong> group = false;
-<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>         <strong class="jxr_keyword">boolean</strong> digit = false;
-<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a>         <strong class="jxr_keyword">int</strong> countPar = 0;
-<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a>         <strong class="jxr_keyword">int</strong> j;
-<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>         <strong class="jxr_keyword">for</strong> (j = ca.length - 1; j &gt;= 0; j--) {
-<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a>             <strong class="jxr_keyword">char</strong> c = ca[j];
-<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 
-<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a>             <strong class="jxr_keyword">if</strong> (c == ' ') {
-<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a>                 <strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a>             }
-<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a>             <strong class="jxr_keyword">if</strong> (foundType) {
-<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a>                 <strong class="jxr_keyword">if</strong> (field &amp;&amp; c == '[') {
-<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a>                     <strong class="jxr_keyword">return</strong> j;
-<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {
-<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a>                     <strong class="jxr_keyword">if</strong> ((c == '+' || c == '-') &amp;&amp; j &gt; 0 &amp;&amp; (ca[j - 1] == '+' || ca[j - 1] == '-')) {
-<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a>                         <strong class="jxr_keyword">return</strong> j;
-<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a>                     }
-<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> 
-<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a>                     <strong class="jxr_keyword">return</strong> j + 1;
-<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (group) {
-<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a>                     <strong class="jxr_keyword">if</strong> (c == ')') {
-<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a>                         countPar++;
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>             }
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> 
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a>         }
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a>         <strong class="jxr_keyword">return</strong> j - 1;
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>     }
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a> 
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> firstOperandIndex(String sql, <strong class="jxr_keyword">int</strong> i) {
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>         sql = sql.substring(0, i);
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> 
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a>         <strong class="jxr_keyword">char</strong>[] ca = sql.toCharArray();
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>         <strong class="jxr_keyword">boolean</strong> foundType = false;
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a>         <strong class="jxr_keyword">boolean</strong> field = false;
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a>         <strong class="jxr_keyword">boolean</strong> group = false;
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a>         <strong class="jxr_keyword">boolean</strong> digit = false;
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a>         <strong class="jxr_keyword">int</strong> countPar = 0;
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a>         <strong class="jxr_keyword">int</strong> j;
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a>         <strong class="jxr_keyword">for</strong> (j = ca.length - 1; j &gt;= 0; j--) {
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a>             <strong class="jxr_keyword">char</strong> c = ca[j];
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> 
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a>             <strong class="jxr_keyword">if</strong> (c == ' ') {
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a>                 <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a>             }
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a>             <strong class="jxr_keyword">if</strong> (foundType) {
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a>                 <strong class="jxr_keyword">if</strong> (field &amp;&amp; c == '[') {
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a>                     <strong class="jxr_keyword">return</strong> j;
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a>                     <strong class="jxr_keyword">if</strong> ((c == '+' || c == '-') &amp;&amp; j &gt; 0 &amp;&amp; (ca[j - 1] == '+' || ca[j - 1] == '-')) {
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a>                         <strong class="jxr_keyword">return</strong> j;
 <a class="jxr_linenumber" name="L1029" href="#L1029">1029</a>                     }
 <a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 
-<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>                     <strong class="jxr_keyword">if</strong> (c == '(') {
-<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a>                         countPar--;
-<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a>                         <strong class="jxr_keyword">if</strong> (countPar == 0) {
-<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a>                             <strong class="jxr_keyword">return</strong> j;
-<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a>                         }
-<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a>                     }
-<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a>                 }
-<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>             } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a>                 <strong class="jxr_keyword">if</strong> (c == ']') {
-<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a>                     field = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == ')') {
-<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a>                     group = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>                     countPar++;
-<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Character.isDigit(c)) {
-<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a>                     foundType = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a>                     digit = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a>                 }
-<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> 
-<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a>             }
-<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> 
-<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a>         }
-<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>         <strong class="jxr_keyword">return</strong> j + 1;
-<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>     }
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>                     <strong class="jxr_keyword">return</strong> j + 1;
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (group) {
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a>                     <strong class="jxr_keyword">if</strong> (c == ')') {
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a>                         countPar++;
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a>                     }
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> 
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a>                     <strong class="jxr_keyword">if</strong> (c == '(') {
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>                         countPar--;
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a>                         <strong class="jxr_keyword">if</strong> (countPar == 0) {
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>                             <strong class="jxr_keyword">return</strong> j;
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a>                         }
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>                     }
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>                 }
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>                 <strong class="jxr_keyword">if</strong> (c == ']') {
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a>                     field = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c == ')') {
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a>                     group = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a>                     countPar++;
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Character.isDigit(c)) {
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a>                     foundType = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>                     digit = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>                 }
 <a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> 
-<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> asUnsigned(byte _a) {
-<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a>         <strong class="jxr_keyword">return</strong> _a &amp; 0xFF;
-<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>     }
-<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 
-<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Set&lt;String&gt; getFormulaDependencies(String formula) {
-<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>         Matcher mtc = Patterns.FORMULA_DEPS.matcher(formula);
-<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>         Set&lt;String&gt; fd = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
-<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>         <strong class="jxr_keyword">while</strong> (mtc.find()) {
-<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>             fd.add(escapeIdentifier(mtc.group(1)));
-<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a>         }
-<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>         <strong class="jxr_keyword">return</strong> fd;
-<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>     }
-<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 
-<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isDualUsedAsTableName() {
-<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>         <strong class="jxr_keyword">return</strong> dualUsedAsTableName;
-<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a>     }
-<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 
-<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setDualUsedAsTableName(<strong class="jxr_keyword">boolean</strong> _dualUsedAsTableName) {
-<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a>         dualUsedAsTableName = _dualUsedAsTableName;
-<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a>     }
-<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> 
-<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String removeParameters(String qtxt) {
-<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>         <strong class="jxr_keyword">return</strong> qtxt.replaceAll(PARAMETERS, <span class="jxr_string">""</span>);
-<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>     }
-<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 
-<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getPreparedStatement(String qtxt, List&lt;String&gt; l) {
-<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a>         String s = qtxt;
-<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>         <strong class="jxr_keyword">for</strong> (String p : l) {
-<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a>             s = s.replaceAll(<span class="jxr_string">"(&#92;&#92;W)((?i)"</span> + Pattern.quote(p) + <span class="jxr_string">")(&#92;&#92;W)"</span>, <span class="jxr_string">"$1?$3"</span>);
-<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>         }
-<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a>         <strong class="jxr_keyword">return</strong> s.replaceAll(Pattern.quote(<span class="jxr_string">"[?]"</span>), <span class="jxr_string">"?"</span>);
-<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a>     }
-<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> 
-<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;String&gt; getParameters(String s) {
-<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a>         List&lt;String&gt; ar = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 
-<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a>         <strong class="jxr_keyword">for</strong> (Matcher m = Patterns.FORMULA_DEPS.matcher(s); m.find(); m = Patterns.FORMULA_DEPS.matcher(s)) {
-<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a>             ar.add(m.group());
-<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a>             s = s.substring(m.end());
-<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a>         }
-<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a>         <strong class="jxr_keyword">return</strong> ar;
-<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a>     }
-<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> }
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>             }
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> 
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>         }
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a>         <strong class="jxr_keyword">return</strong> j + 1;
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a>     }
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a> 
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> asUnsigned(byte _a) {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>         <strong class="jxr_keyword">return</strong> _a &amp; 0xFF;
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>     }
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Set&lt;String&gt; getFormulaDependencies(String formula) {
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>         Matcher mtc = Patterns.FORMULA_DEPS.matcher(formula);
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a>         Set&lt;String&gt; fd = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>         <strong class="jxr_keyword">while</strong> (mtc.find()) {
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>             fd.add(escapeIdentifier(mtc.group(1)));
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a>         }
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a>         <strong class="jxr_keyword">return</strong> fd;
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a>     }
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> 
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isDualUsedAsTableName() {
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a>         <strong class="jxr_keyword">return</strong> dualUsedAsTableName;
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>     }
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setDualUsedAsTableName(<strong class="jxr_keyword">boolean</strong> _dualUsedAsTableName) {
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a>         dualUsedAsTableName = _dualUsedAsTableName;
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>     }
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String removeParameters(String qtxt) {
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a>         <strong class="jxr_keyword">return</strong> qtxt.replaceAll(PARAMETERS, <span class="jxr_string">""</span>);
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>     }
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> 
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String getPreparedStatement(String qtxt, List&lt;String&gt; l) {
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a>         String s = qtxt;
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a>         <strong class="jxr_keyword">for</strong> (String p : l) {
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a>             s = s.replaceAll(<span class="jxr_string">"(&#92;&#92;W)((?i)"</span> + Pattern.quote(p) + <span class="jxr_string">")(&#92;&#92;W)"</span>, <span class="jxr_string">"$1?$3"</span>);
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a>         }
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a>         <strong class="jxr_keyword">return</strong> s.replaceAll(Pattern.quote(<span class="jxr_string">"[?]"</span>), <span class="jxr_string">"?"</span>);
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a>     }
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;String&gt; getParameters(String s) {
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a>         List&lt;String&gt; ar = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> 
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a>         <strong class="jxr_keyword">for</strong> (Matcher m = Patterns.FORMULA_DEPS.matcher(s); m.find(); m = Patterns.FORMULA_DEPS.matcher(s)) {
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a>             ar.add(m.group());
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a>             s = s.substring(m.end());
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a>         }
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a>         <strong class="jxr_keyword">return</strong> ar;
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a>     }
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> }
 </pre>
 <hr/>
-<div id="footer">© 2012–2024 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
+<div id="footer">© 2012–2025 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

@@ -1,11 +1,11 @@
 <site xmlns="http://maven.apache.org/SITE/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
-  name="UCanAccess">
+  name="${project.name}">
 
     <skin>
         <groupId>org.apache.maven.skins</groupId>
         <artifactId>maven-fluido-skin</artifactId>
-        <version>2.0.1</version>
+        <version>${dep.plugin.maven-fluido-skin.version}</version>
     </skin>
 
     <bannerLeft name="${project.name}"/>
@@ -22,10 +22,11 @@
         <breadcrumbs/>
 
         <links>
-            <item name="Project (GitHub)" href="https://github.com/spannm/ucanaccess/" target="_blank"/>
+            <item name="About ${project.name}" href="https://github.com/spannm/ucanaccess/" target="_blank"/>
             <item name="Discussions (GitHub)" href="https://github.com/spannm/ucanaccess/discussions/" target="_blank"/>
-            <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess/" target="_blank"/>
-            <item name="SourceForge (deprecated)" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
+            <item name="Maven Central" href="https://central.sonatype.com/artifact/${project.groupId}/${project.artifactId}/" target="_blank"/>
+            <item name="Jackcess (Github)" href="${githubBaseUrl}jackcess/" target="_blank"/>
+            <item name="Legacy project (SourceForge)" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
         </links>
 
         <menu name="Overview">
