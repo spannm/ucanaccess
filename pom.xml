@@ -10,7 +10,7 @@
 
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.1.3-SNAPSHOT</version>
+    <version>5.1.3</version>
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
@@ -60,7 +60,8 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-    </scm>
+      <tag>ucanaccess-5.1.3</tag>
+  </scm>
 
     <issueManagement>
         <system>Github</system>
