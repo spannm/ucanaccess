@@ -4,6 +4,7 @@ import io.github.spannm.jackcess.Database.FileFormat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +31,8 @@ public final class DBReferenceSingleton {
         return dbRegistry.containsKey(fl.getAbsolutePath());
     }
 
-    public DBReference loadReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, String pwd) throws IOException {
-        return new DBReference(fl, ff, jko, pwd);
+    public DBReference loadReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, String pwd, Charset charset) throws IOException {
+        return new DBReference(fl, ff, jko, pwd, charset);
     }
 
     public DBReference put(String _path, DBReference _dbr) {
