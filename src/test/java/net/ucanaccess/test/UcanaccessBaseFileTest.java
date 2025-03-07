@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A base test using an existing database file derived from test class name.
@@ -29,14 +30,13 @@ public abstract class UcanaccessBaseFileTest extends UcanaccessBaseTest {
                 continue;
             }
         }
+        fail("Test " + getShortTestMethodName() + " requires a database file");
         return null;
     }
 
     @Override
     protected String getFileExtension() {
-        String path = getAccessPath();
-        String ext = path.substring(path.lastIndexOf('.'));
-        return ext;
+        return Optional.ofNullable(getAccessPath()).map(p -> p.substring(p.lastIndexOf('.'))).orElse(null);
     }
 
 }
