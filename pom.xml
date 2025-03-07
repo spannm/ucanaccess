@@ -109,12 +109,12 @@
         <!-- test dependencies -->
         <dep.junit.version>5.12.0</dep.junit.version>
         <dep.assertj.version>3.27.3</dep.assertj.version>
-        <dep.mockito.version>5.15.2</dep.mockito.version>
+        <dep.mockito.version>5.16.0</dep.mockito.version>
 
         <!-- override basepom versions -->
-        <dep.checkstyle.version>10.21.3</dep.checkstyle.version>
-        <dep.pmd.version>7.10.0</dep.pmd.version>
-        <dep.spotbugs.version>4.9.1</dep.spotbugs.version>
+        <dep.checkstyle.version>10.21.4</dep.checkstyle.version>
+        <dep.pmd.version>7.11.0</dep.pmd.version>
+        <dep.spotbugs.version>4.9.2</dep.spotbugs.version>
 
         <!-- downgrade site plugin to work with site skin -->
         <dep.plugin.site.version>3.21.0</dep.plugin.site.version>
