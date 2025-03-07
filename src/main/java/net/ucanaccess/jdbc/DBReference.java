@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.channels.FileLock;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,19 +62,21 @@ public class DBReference {
     private boolean                                 preventReloading;
     private boolean                                 concatNulls;
     private boolean                                 mirrorRecreated;
+    private Charset                                 charset;
 
-    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd)
+    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd, Charset _charset)
         throws IOException {
         dbFile = fl;
         pwd = _pwd;
         jko = _jko;
+        charset = _charset;
         lastModified = System.currentTimeMillis();
         memoryTimer = new MemoryTimer(this);
         if (!fl.exists() && ff != null) {
             DatabaseBuilder dbb = new DatabaseBuilder();
             dbIO = dbb.withAutoSync(false).withFileFormat(ff).withFile(fl).create();
         } else {
-            dbIO = _jko.open(fl, _pwd);
+            dbIO = _jko.open(fl, _pwd, _charset);
             try {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
@@ -103,7 +106,7 @@ public class DBReference {
     }
 
     public Database open(File _dbfl, String _pwd) throws IOException {
-        Database ret = jko.open(_dbfl, _pwd);
+        Database ret = jko.open(_dbfl, _pwd, charset);
         if (columnOrderDisplay) {
             ret.setColumnOrder(ColumnOrder.DISPLAY);
         }
