@@ -67,11 +67,11 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     protected final FileFormat getFileFormat() {
-        return accessVersion.getFileFormat();
+        return accessVersion == null ? null : accessVersion.getFileFormat();
     }
 
     protected String getFileExtension() {
-        return getFileFormat().getFileExtension();
+        return Optional.ofNullable(getFileFormat()).map(FileFormat::getFileExtension).orElse(null);
     }
 
     protected final File getFileAccDb() {
@@ -311,7 +311,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             if (idxLastDot > -1) {
                 suffix = _prefix.substring(idxLastDot);
             }
-            if (suffix.isEmpty() || suffix.length() > 6) {
+            if (suffix == null || suffix.isEmpty() || suffix.length() > 6) {
                 suffix = ".tmp";
             }
         }
