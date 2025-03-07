@@ -69,14 +69,13 @@ public final class SQLConverter {
     private static final String              DELETE_ALL                     = "((?i)DELETE\\s+)(\\*)(\\s+(?i)FROM\\s+)";
     private static final String              PARAMETERS                     = "(?i)PARAMETERS([^;]*);";
     private static final String              BIG_BANG                       = "1899-12-30";
-    private static final List<String>        KEYWORDS_LIST                  = List.of("ALL", "AND", "ANY",
-        "ALTER", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE",
-        "CORRESPONDING", "CONVERT", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DROP", "ELSE", "EVERY",
-        "EXISTS", "EXCEPT", "FOR", "FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN", "INNER",
-        "INTERSECT", "INTO", "IS", "JOIN", "LEFT", "LEADING", "LIKE", "MAX", "MIN", "NATURAL", "NOT", "NULLIF",
-        "ON", "ORDER", "OR", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "SOME", "STDDEV_POP",
-        "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE", "USING", "VALUES",
-        "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH", "END", "DO", "CONSTRAINT", "USER", "ROW");
+    private static final List<String>        KEYWORDS_LIST                  = List.of(
+        "ALL", "ALTER", "AND", "ANY", "AS", "AT", "AVG", "BETWEEN", "BOTH", "BY", "CALL", "CASE", "CAST", "CHECK", "COALESCE", "CONSTRAINT",
+        "CONVERT", "CORRESPONDING", "COUNT", "CREATE", "CROSS", "DEFAULT", "DISTINCT", "DO", "DROP", "ELSE", "END", "EVERY", "EXCEPT", "EXISTS",
+        "FOR", "FOREIGN", "FROM", "FULL", "GRANT", "GROUP", "HAVING", "IN", "INNER", "INTERSECT", "INTO", "IS", "JOIN", "LEADING", "LEAVE",
+        "LEFT", "LIKE", "MAX", "MIN", "NATURAL", "NOT", "NULLIF", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "ROW",
+        "SELECT", "SET", "SOME", "STDDEV_POP", "STDDEV_SAMP", "SUM", "TABLE", "THEN", "TO", "TRAILING", "TRIGGER", "UNION", "UNIQUE",
+        "USER", "USING", "VALUES", "VAR_POP", "VAR_SAMP", "WHEN", "WHERE", "WITH");
     private static final Pattern             PAT_KEYWORD_ALIAS              = Pattern.compile(
         "(\\s+AS\\s+)("
         + KEYWORDS_LIST.stream()

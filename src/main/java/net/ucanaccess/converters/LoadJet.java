@@ -1278,8 +1278,8 @@ public class LoadJet {
         private static final int          OBJECT_NOT_FOUND      = -ErrorCode.X_42501;
         private static final int          UNEXPECTED_TOKEN      = -ErrorCode.X_42581;
 
-        private final Map<String, String> notLoaded             = new HashMap<>();
-        private final Map<String, String> notLoadedProcedure    = new HashMap<>();
+        private final Map<String, String> notLoaded             = new LinkedHashMap<>();
+        private final Map<String, String> notLoadedProcedure    = new LinkedHashMap<>();
 
         private boolean loadView(Query _q) throws SQLException {
             return loadView(_q, null);
@@ -1322,34 +1322,34 @@ public class LoadJet {
             }
         }
 
-        private boolean loadView(Query q, String queryWKT) throws SQLException {
-            String qnn = SQLConverter.preEscapingIdentifier(q.getName());
+        private boolean loadView(Query _query, String queryWkt) throws SQLException {
+            String qnn = SQLConverter.preEscapingIdentifier(_query.getName());
             if (qnn == null) {
                 return false;
             }
-            int seq = metadata.newTable(q.getName(), qnn, ObjectType.VIEW);
-            registerQueryColumns(q, seq);
+            int seq = metadata.newTable(_query.getName(), qnn, ObjectType.VIEW);
+            registerQueryColumns(_query, seq);
             qnn = SQLConverter.completeEscaping(qnn, false);
             qnn = SQLConverter.checkLang(qnn, conn, false);
             if (qnn.indexOf(' ') > 0) {
-                SQLConverter.addWhiteSpacedTableNames(q.getName());
+                SQLConverter.addWhiteSpacedTableNames(_query.getName());
             }
 
-            String querySQL = queryWKT == null ? q.toSQLString() : queryWKT;
+            String querySql = Optional.ofNullable(queryWkt).orElse(_query.toSQLString());
             Pivot pivot = null;
-            boolean isPivot = q.getType().equals(Query.Type.CROSS_TAB);
+            boolean isPivot = _query.getType().equals(Query.Type.CROSS_TAB);
             if (isPivot) {
                 pivot = new Pivot(conn);
 
-                if (!pivot.parsePivot(querySQL) || (querySQL = pivot.toSQL(q.getName())) == null) {
-                    notLoaded.put(q.getName(), "cannot load this query");
+                if (!pivot.parsePivot(querySql) || (querySql = pivot.toSQL(_query.getName())) == null) {
+                    notLoaded.put(_query.getName(), "cannot load this query");
 
                     return false;
                 }
 
             }
-            querySQL = new DFunction(conn, querySQL).toSQL();
-            StringBuilder sb = new StringBuilder("CREATE VIEW ").append(qnn).append(" AS ").append(querySQL);
+            querySql = new DFunction(conn, querySql).toSQL();
+            StringBuilder sb = new StringBuilder("CREATE VIEW ").append(qnn).append(" AS ").append(querySql);
             String v = null;
             try {
                 v = SQLConverter.convertSQL(sb.toString(), true).getSql();
@@ -1358,25 +1358,25 @@ public class LoadJet {
                     v = v.trim().substring(0, v.length() - 1);
                 }
                 exec(v, false);
-                loadedQueries.add(q.getName());
-                notLoaded.remove(q.getName());
+                loadedQueries.add(_query.getName());
+                notLoaded.remove(_query.getName());
                 if (pivot != null) {
-                    pivot.registerPivot(SQLConverter.preEscapingIdentifier(q.getName()));
+                    pivot.registerPivot(SQLConverter.preEscapingIdentifier(_query.getName()));
                 }
                 return true;
             } catch (Exception _ex) {
                 if (_ex instanceof SQLSyntaxErrorException) {
-                    if (queryWKT == null && ((SQLSyntaxErrorException) _ex).getErrorCode() == OBJECT_ALREADY_EXISTS) {
-                        return loadView(q, solveAmbiguous(querySQL));
+                    if (queryWkt == null && OBJECT_ALREADY_EXISTS == ((SQLSyntaxErrorException) _ex).getErrorCode()) {
+                        return loadView(_query, solveAmbiguous(querySql));
                     } else {
                         SQLSyntaxErrorException sqle = (SQLSyntaxErrorException) _ex;
-                        if (sqle.getErrorCode() == OBJECT_NOT_FOUND || sqle.getErrorCode() == UNEXPECTED_TOKEN) {
-                            ParametricQuery pq = new ParametricQuery(conn, (QueryImpl) q);
+                        if (sqle.getErrorCode() == OBJECT_NOT_FOUND || UNEXPECTED_TOKEN == sqle.getErrorCode()) {
+                            ParametricQuery pq = new ParametricQuery(conn, (QueryImpl) _query);
                             pq.setIssueWithParameterName(sqle.getErrorCode() == UNEXPECTED_TOKEN);
                             pq.createSelect();
                             if (pq.loaded()) {
-                                loadedQueries.add(q.getName());
-                                notLoaded.remove(q.getName());
+                                loadedQueries.add(_query.getName());
+                                notLoaded.remove(_query.getName());
                                 return true;
                             }
 
@@ -1386,12 +1386,11 @@ public class LoadJet {
 
                 String cause = UcanaccessSQLException.explainCause(_ex);
 
-                notLoaded.put(q.getName(), ": " + cause);
+                notLoaded.put(_query.getName(), ": " + cause);
 
                 if (!err) {
-                    logger.log(Level.WARNING, "Error occured at the first loading attempt of {0}", q.getName());
-                    logger.log(Level.WARNING, "Converted view was: {0}", v);
-                    logger.log(Level.WARNING, "Error message was: {0}", _ex.getMessage());
+                    logger.log(Level.WARNING, "Error at first loading attempt of view \''{0}\'', converted view \''{1}\'', error {2}",
+                        _query.getName(), v, _ex.toString());
                     err = true;
                 }
                 return false;
