@@ -3,7 +3,6 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.converters.Metadata.Property.*;
 
 import io.github.spannm.jackcess.Database.FileFormat;
-import io.github.spannm.jackcess.util.StringUtil;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.converters.SQLConverter;
@@ -20,6 +19,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.sql.*;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -84,7 +84,10 @@ public final class UcanaccessDriver implements Driver {
                 IJackcessOpenerInterface jko = useCustomOpener
                     ? newJackcessOpenerInstance(props.get(jackcessOpener))
                     : new DefaultJackcessOpener();
-               Charset charsetArg =  StringUtil.isEmpty(props.get(charset)) ? null : Charset.forName(props.get(charset));
+
+                Charset charsetArg = Try.catching(() -> Optional.ofNullable(props.get(charset)).map(String::trim).map(Charset::forName).orElse(null))
+                    .orThrow(ex -> new UcanaccessRuntimeException(MessageFormat.format("Unsupported charset in parameter {0}: {1}", charset, props.get(charset)), ex));
+
                 DBReference dbRef = alreadyLoaded ? as.getReference(fileDb) : as.loadReference(fileDb, ff, jko, props.get(password), charsetArg);
 
                 if (!alreadyLoaded) {
