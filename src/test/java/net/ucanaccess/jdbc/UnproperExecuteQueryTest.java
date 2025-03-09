@@ -22,10 +22,11 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
     void testExecute(AccessVersion _accessVersion) throws Exception {
         init(_accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
+            String tableName = "t_noroman";
             for (String sql : List.of(
-                "INSERT INTO t_noroman ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')",
-                "UPDATE t_noroman SET [ENd] = 'BLeah'",
-                "DELETE FROM t_noroman")) {
+                "INSERT INTO " + tableName + " ([end], [q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')",
+                "UPDATE " + tableName + " SET [ENd] = 'BLeah'",
+                "DELETE FROM " + tableName)) {
                     assertThatThrownBy(() -> st.executeQuery(sql))
                         .isInstanceOf(UcanaccessSQLException.class)
                         .hasMessageMatching("UCAExc:::[0-9]\\.[0-9][0-9\\.]*(?:-SNAPSHOT)? General error");
