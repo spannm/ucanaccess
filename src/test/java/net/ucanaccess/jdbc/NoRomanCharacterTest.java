@@ -1,19 +1,14 @@
 package net.ucanaccess.jdbc;
 
 import net.ucanaccess.test.AccessVersionSource;
-import net.ucanaccess.test.UcanaccessBaseTest;
+import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
 
-class NoRomanCharacterTest extends UcanaccessBaseTest {
-
-    @Override
-    protected String getAccessPath() {
-        return getTestDbDir() + "noRoman.mdb";
-    }
+class NoRomanCharacterTest extends UcanaccessBaseFileTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
