@@ -3,6 +3,7 @@ package net.ucanaccess.jdbc;
 import static net.ucanaccess.converters.Metadata.Property.*;
 
 import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.util.StringUtil;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.converters.SQLConverter;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -82,8 +84,8 @@ public final class UcanaccessDriver implements Driver {
                 IJackcessOpenerInterface jko = useCustomOpener
                     ? newJackcessOpenerInstance(props.get(jackcessOpener))
                     : new DefaultJackcessOpener();
-                DBReference dbRef = alreadyLoaded ? as.getReference(fileDb)
-                    : as.loadReference(fileDb, ff, jko, props.get(password));
+               Charset charsetArg =  StringUtil.isEmpty(props.get(charset)) ? null : Charset.forName(props.get(charset));
+                DBReference dbRef = alreadyLoaded ? as.getReference(fileDb) : as.loadReference(fileDb, ff, jko, props.get(password), charsetArg);
 
                 if (!alreadyLoaded) {
                     if ((useCustomOpener

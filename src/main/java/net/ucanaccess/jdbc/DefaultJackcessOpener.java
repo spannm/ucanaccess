@@ -6,12 +6,16 @@ import io.github.spannm.jackcess.DateTimeType;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class DefaultJackcessOpener implements IJackcessOpenerInterface {
 
     @Override
-    public Database open(File fl, String pwd) throws IOException {
+    public Database open(File fl, String pwd, Charset charset) throws IOException {
         DatabaseBuilder dbd = new DatabaseBuilder().withFile(fl).withAutoSync(false);
+        if (charset != null) {
+            dbd.withCharset(charset);
+        }
         Database db;
         try {
             db = dbd.withReadOnly(false).open();

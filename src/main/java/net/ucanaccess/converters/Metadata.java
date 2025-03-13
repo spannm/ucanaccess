@@ -63,6 +63,7 @@ public class Metadata {
         singleConnection(Boolean.class, false, 10),
         skipIndexes(Boolean.class, false, 10),
         supportsAccessLike(Boolean.class, false, 10),
+        charset(String.class, null, 20),
         sysSchema(Boolean.class, false, 10);
 
         private final Class<?>     type;
