@@ -106,7 +106,7 @@
         <dep.slf4j.version>2.0.17</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.13.0</dep.junit.version>
+        <dep.junit.version>5.13.2</dep.junit.version>
         <dep.assertj.version>3.27.3</dep.assertj.version>
         <dep.mockito.version>5.18.0</dep.mockito.version>
 
@@ -117,7 +117,7 @@
 
         <!-- downgrade site plugin to work with site skin -->
         <dep.plugin.site.version>3.21.0</dep.plugin.site.version>
-        <dep.plugin.maven-fluido-skin.version>2.0.1</dep.plugin.maven-fluido-skin.version>
+        <dep.plugin.maven-fluido-skin.version>2.1.0</dep.plugin.maven-fluido-skin.version>
 
         <!-- additional plugins not defined in parent -->
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
