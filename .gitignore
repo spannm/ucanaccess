@@ -16,3 +16,4 @@
 *.kate-swp
 .m2-local-repo/**/*.jar
 .m2-local-repo/**/*.pom
+src/test/eclipse/
