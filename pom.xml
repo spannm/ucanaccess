@@ -106,7 +106,10 @@
         <dep.slf4j.version>2.0.17</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.13.2</dep.junit.version>
+        <dep.junit.version>5.13.4</dep.junit.version>
+        <!-- With Eclipse IDE Version: 2025-06 (4.36.0) due to incompatible JUnit stack in M2E:
+        <dep.junit.version>5.10.0</dep.junit.version>
+         -->
         <dep.assertj.version>3.27.3</dep.assertj.version>
         <dep.mockito.version>5.18.0</dep.mockito.version>
 
@@ -197,6 +200,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
 
