@@ -96,15 +96,47 @@ public class UcanaccessSQLException extends SQLException {
     }
 
     /**
-     * Wraps the specified exception into a {@link UcanaccessSQLException}
-     * unless its type can be cast to {@link UcanaccessSQLException}.
+     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException}.
+     * <p>
+     * If the throwable is already a {@link UcanaccessSQLException}, it's returned as is.
+     * This is a convenience method calling {@link #wrap(String, Throwable)} without a reason prefix.
+     * </p>
      *
-     * @param <T> the type of exception to wrap
-     * @param _t the exception to wrap
-     * @return wrapped exception or parameter if can be cast to {@link UcanaccessSQLException}
+     * @param <T> the type of the {@link Throwable} to wrap.
+     * @param _t the {@link Throwable} to wrap.
+     * @return a {@link UcanaccessSQLException} instance.
      */
     public static final <T extends Throwable> UcanaccessSQLException wrap(T _t) {
-        return _t instanceof UcanaccessSQLException ? (UcanaccessSQLException) _t : new UcanaccessSQLException(_t);
+        return wrap(null, _t);
+    }
+
+    /**
+     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException},
+     * prepending an optional reason message.
+     * <p>
+     * Preserves original SQLState, ErrorCode, and Cause when wrapping {@link SQLException} types.
+     * If {@code _reason} is null or blank, the message is derived solely from {@code _t}.
+     * </p>
+     *
+     * @param <T> the type of the {@link Throwable} to wrap
+     * @param _reason an optional custom message prefix
+     * @param _t the {@link Throwable} to wrap
+     * @return a {@link UcanaccessSQLException} instance
+     */
+    public static final <T extends Throwable> UcanaccessSQLException wrap(String _reason, T _t) {
+        String reason = _reason == null || _reason.isBlank() ? null : _reason.trim();
+        if (_t instanceof UcanaccessSQLException) {
+            UcanaccessSQLException ex = (UcanaccessSQLException) _t;
+            if (reason == null) {
+                return ex;
+            }
+            return new UcanaccessSQLException(reason + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+        } else if (_t instanceof SQLException) {
+            SQLException ex = (SQLException) _t;
+            return new UcanaccessSQLException(reason == null ? ex.getMessage() : reason + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+        } else {
+            return new UcanaccessSQLException(reason == null ? _t.getMessage() : reason + ": " + _t.getMessage(), _t);
+        }
     }
 
     public static final <T extends UcanaccessSQLException> void throwIf(BooleanSupplier _condition, Supplier<T> _exceptionSupplier) throws T {

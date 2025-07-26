@@ -29,7 +29,7 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
                 "DELETE FROM " + tableName)) {
                     assertThatThrownBy(() -> st.executeQuery(sql))
                         .isInstanceOf(UcanaccessSQLException.class)
-                        .hasMessageMatching("UCAExc:::[0-9]\\.[0-9][0-9\\.]*(?:-SNAPSHOT)? General error");
+                        .hasMessageMatching("UCAExc:::[0-9]\\.[0-9][0-9\\.]*(?:-SNAPSHOT)? .*General error");
                     st.execute(sql);
             }
         }
