@@ -557,6 +557,22 @@
             </build>
         </profile>
 
+        <!-- Profile activated automatically when building inside Eclipse IDE via m2e plugin.
+             It sets properties specific to the Eclipse development environment,
+             such as HSQLDB debug classifier and a compatible JUnit version. -->
+        <profile>
+            <id>eclipse-ide</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <properties>
+                <dep.hsqldb.classifier>debug</dep.hsqldb.classifier>
+                <dep.junit.version>5.10.0</dep.junit.version>
+            </properties>
+        </profile>
+
     </profiles>
 
 </project>

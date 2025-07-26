@@ -1,7 +1,5 @@
 package net.ucanaccess.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Database.FileFormat;
 import io.github.spannm.jackcess.DatabaseBuilder;
@@ -15,11 +13,22 @@ import net.ucanaccess.util.IThrowingSupplier;
 import net.ucanaccess.util.Try;
 import org.junit.jupiter.api.AfterEach;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -106,48 +115,141 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     }
 
     private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, CharSequence _expression) throws SQLException {
-        int colCountActual = _resultSet.getMetaData().getColumnCount();
+        String expressionContext = (_expression != null ? " for expression [" + _expression + "]" : "");
+
+        // 1. read the entire ResultSet into memory
+        List<List<Object>> actualResults = new ArrayList<>();
+        int actualColumnCount;
+
+        // get column count from ResultSet metadata
+        ResultSetMetaData rsmd = _resultSet.getMetaData();
+        actualColumnCount = rsmd.getColumnCount();
+
+        // check the column count of expected results, if not empty
         if (!_expectedResults.isEmpty()) {
-            assertEquals(_expectedResults.get(0).size(), colCountActual, "Unexpected column count");
+            assertEquals(_expectedResults.get(0).size(), actualColumnCount,
+                "Unexpected column count in result set metadata" + expressionContext);
         }
-        int rowIdx = 0;
+
+        // read all rows from the ResultSet
         while (_resultSet.next()) {
-            for (int col = 1; col <= colCountActual; col++) {
-                assertThat(rowIdx)
-                    .withFailMessage("Matrix with different length was expected: " + _expectedResults.size() + " not " + rowIdx)
-                    .isLessThan(_expectedResults.size());
-                Object actualObj = _resultSet.getObject(col);
-                Object expectedObj = _expectedResults.get(rowIdx).get(col - 1);
+            List<Object> actualRow = new ArrayList<>(actualColumnCount);
+            for (int col = 1; col <= actualColumnCount; col++) {
+                actualRow.add(_resultSet.getObject(col));
+            }
+            actualResults.add(actualRow);
+        }
+
+        // 2. early exit if the number of rows differs
+        assertEquals(_expectedResults.size(), actualResults.size(),
+            String.format("Result set size mismatch%s. Expected %d rows, but got %d rows.",
+                expressionContext, _expectedResults.size(), actualResults.size()));
+
+        // 3. perform row-by-row and column-by-column comparisons
+        for (int rowIdx = 0; rowIdx < _expectedResults.size(); rowIdx++) {
+            List<Object> expectedRow = _expectedResults.get(rowIdx);
+            List<Object> actualRow = actualResults.get(rowIdx);
+
+            // check column count of the current row
+            assertEquals(expectedRow.size(), actualRow.size(),
+                String.format("Column count mismatch at row %d%s. Expected %d columns, but got %d columns.%nExpected Row: %s%nActual Row:   %s",
+                    rowIdx + 1, expressionContext, expectedRow.size(), actualRow.size(), expectedRow, actualRow));
+
+            for (int colIdx = 0; colIdx < expectedRow.size(); colIdx++) { // 0-based for List indexing
+                // column number for error messages is 1-based
+                int displayCol = colIdx + 1;
+                Object expectedObj = expectedRow.get(colIdx);
+                Object actualObj = actualRow.get(colIdx);
+
                 if (expectedObj == null) {
-                    assertNull(actualObj);
+                    assertNull(actualObj,
+                        String.format("Expected null at row %d, col %d%s, but got %s (type: %s).",
+                            rowIdx + 1, displayCol, expressionContext, actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
                 } else {
                     if (actualObj instanceof Blob) {
+                        byte[] barrActual;
+                        try (InputStream is = ((Blob) actualObj).getBinaryStream()) {
+                            barrActual = is.readAllBytes();
+                        } catch (IOException e) {
+                            throw new SQLException("Failed to read Blob content at row " + (rowIdx + 1) + ", col " + displayCol + expressionContext, e);
+                        }
+                        byte[] barrExpected = (byte[]) expectedObj; // Casting to byte[] as expectedObj for Blob must be byte[]
 
-                        byte[] barrActual = Try.withResources(Blob.class.cast(actualObj)::getBinaryStream,
-                            InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        byte[] barrExpected = (byte[]) expectedObj;
+                        assertEquals(barrExpected.length, barrActual.length,
+                            String.format("Blob length mismatch at row %d, col %d%s.%nExpected length: %d%nActual length:   %d",
+                                rowIdx + 1, displayCol, expressionContext, barrExpected.length, barrActual.length));
+
                         for (int y = 0; y < barrExpected.length; y++) {
-                            assertEquals(barrExpected[y], barrActual[y]);
+                            assertEquals(barrExpected[y], barrActual[y],
+                                String.format("Blob content mismatch at row %d, col %d, byte position %d%s.%nExpected: %d%nActual:   %d",
+                                    rowIdx + 1, displayCol, y, expressionContext, barrExpected[y], barrActual[y]));
                         }
+                    } else if (actualObj instanceof Double || actualObj instanceof Float ||
+                               actualObj instanceof BigDecimal || expectedObj instanceof Double ||
+                               expectedObj instanceof Float || expectedObj instanceof BigDecimal) {
+
+                        BigDecimal bdActual;
+                        BigDecimal bdExpected;
+
+                        // create BigDecimal from the actual value
+                        if (actualObj instanceof BigDecimal) {
+                            bdActual = (BigDecimal) actualObj;
+                        } else if (actualObj instanceof Number) {
+                            bdActual = new BigDecimal(actualObj.toString());
+                        } else {
+                            fail(String.format("Actual object of unexpected type for numeric comparison at row %d, col %d%s: %s (type: %s)",
+                                rowIdx + 1, displayCol, expressionContext, actualObj, (actualObj != null ? actualObj.getClass().getName() : "null")));
+                            continue;
+                        }
+
+                        // create BigDecimal from the expected value
+                        if (expectedObj instanceof BigDecimal) {
+                            bdExpected = (BigDecimal) expectedObj;
+                        } else if (expectedObj instanceof Number) {
+                            bdExpected = new BigDecimal(expectedObj.toString());
+                        } else {
+                            fail(String.format("Expected object of unexpected type for numeric comparison at row %d, col %d%s: %s (type: %s)",
+                                rowIdx + 1, displayCol, expressionContext, expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null")));
+                            continue;
+                        }
+
+                        final int SCALE = 3;
+                        final double DELTA = 0.001; // small tolerance for rounding errors
+
+                        double roundedActual = bdActual.setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+                        double roundedExpected = bdExpected.setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+
+                        assertEquals(roundedExpected, roundedActual, DELTA,
+                            String.format("Expected floating-point value to be equal with tolerance at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
+                                rowIdx + 1, displayCol, expressionContext,
+                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
+
+                    } else if (actualObj instanceof Number && expectedObj instanceof Number) {
+                        // handle integral number types (e.g., Integer vs. Long)
+                        // This block should come *before* the generic else, but *after* the floating-point/BigDecimal specific one.
+                        // It specifically targets situations like Integer vs Long, Short vs Integer etc.
+                        assertEquals(((Number) expectedObj).longValue(), ((Number) actualObj).longValue(),
+                            String.format("Expected integral number to be equal (converted to long) at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
+                                rowIdx + 1, displayCol, expressionContext,
+                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
+
+                    } else if (actualObj instanceof Date && expectedObj instanceof Date) {
+                        assertEquals(((Date) expectedObj).getTime(), ((Date) actualObj).getTime(),
+                            String.format("Expected Date objects to be equal at row %d, col %d%s.%nExpected: %s%nActual:   %s",
+                                rowIdx + 1, displayCol, expressionContext, expectedObj, actualObj));
                     } else {
-                        if (actualObj instanceof Number && expectedObj instanceof Number) {
-                            BigDecimal ob1b = new BigDecimal(actualObj.toString());
-                            BigDecimal ob2b = new BigDecimal(expectedObj.toString());
-                            actualObj = ob1b.doubleValue();
-                            expectedObj = ob2b.doubleValue();
-                        }
-                        if (actualObj instanceof Date && expectedObj instanceof Date) {
-                            actualObj = ((Date) actualObj).getTime();
-                            expectedObj = ((Date) expectedObj).getTime();
-                        }
-                        assertEquals(expectedObj, actualObj, "Expected ob2 and ob1 to be equal at row "
-                            + rowIdx + ", col " + col + " in '" + _expression + "'");
+                        // For all other types (e.g., Integer, Long, String, Boolean)
+                        assertEquals(expectedObj, actualObj,
+                            String.format("Expected objects to be equal at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
+                                rowIdx + 1, displayCol, expressionContext,
+                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
                     }
                 }
             }
-            rowIdx++;
         }
-        assertEquals(_expectedResults.size(), rowIdx, "Unexpected matrix length");
     }
 
     private void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, CharSequence _query) throws SQLException {

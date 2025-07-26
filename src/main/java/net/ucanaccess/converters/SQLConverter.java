@@ -58,6 +58,21 @@ public final class SQLConverter {
         private static final Pattern       DEFAULT_VARCHAR_0          = Pattern.compile("(\\W)VARCHAR([^\\(])", Pattern.CASE_INSENSITIVE);
         private static final Pattern       ESPRESSION_DIGIT           = Pattern.compile("([\\d]+)(?![\\.\\d])");
 
+        private static final String        POWER_OPERAND_REGEX        =
+                "(?:"
+              + "\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b" // column name/identifier
+              + "|"
+              + "[+-]?\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?" // numeric term
+              + "|"
+              + "\\([^()]+?\\)" // simple parenthesized expressions WITHOUT nested parentheses
+              + ")";
+
+        // the main pattern to find "operand1 ^ operand2"
+        private static final Pattern         POWER_OPERATION            = Pattern.compile(
+            "(" + POWER_OPERAND_REGEX + ")\\s*\\^\\s*(" + POWER_OPERAND_REGEX + ")",
+            // match case-insensitively for keywords/identifiers if they were part of regex
+            Pattern.CASE_INSENSITIVE);
+
         private Patterns() {
         }
     }
@@ -364,6 +379,7 @@ public final class SQLConverter {
         sql = escape(sql);
         sql = convertLike(sql);
         sql = replaceWhiteSpacedTables(sql);
+        sql = translateAccessPowerOperators(sql);
         // sql = replaceExclamationPoints(sql);
         if (!_creatingQuery) {
             Pivot.checkAndRefreshPivot(sql, _conn);
@@ -525,6 +541,56 @@ public final class SQLConverter {
         sb.append(")");
         sql = sql.replaceAll("([^A-Za-z0-9\"])" + sb + "([^A-Za-z0-9\"])", " $1\"$2\"$3");
         return sql;
+    }
+
+    /**
+     * Translates MS Access SQL expressions using the '^' (power) operator
+     * into the standard SQL POWER(base, exponent) function.
+     * <p>
+     * This is a simplified implementation based on regular expressions and might not
+     * cover all edge cases or complex SQL constructs. For robust parsing and
+     * modification of SQL, we should  use a dedicated SQL parser library e.g. JSqlParser.
+     *
+     * <p>The current implementation's {@code POWER_OPERAND_REGEX} is designed to identify:</p>
+     * <ul>
+     *   <li>Simple column names or identifiers (e.g., {@code myColumn}, {@code Table.Column}).</li>
+     *   <li>Numeric literals (integers, decimals, scientific notation, with optional sign).</li>
+     *   <li>Simple parenthesized expressions without nested parentheses (e.g., {@code (num + 1)}).</li>
+     * </ul>
+     * <p>It explicitly **does NOT reliably handle** operands that are:</p>
+     * <ul>
+     *   <li>Complex parenthesized expressions with nested parentheses (e.g., {@code (num + (val - 2))})</li>
+     *   <li>Function calls (e.g., {@code ABS(value)})</li>
+     *   <li>Subqueries</li>
+     *   <li>String literals containing the {@code ^} character</li>
+     *   <li>SQL comments containing the {@code ^} character</li>
+     * </ul>
+     * <p>It specifically targets patterns like {@code "operand ^ exponent"} where both operands
+     * strictly conform to the defined {@code POWER_OPERAND_REGEX}.</p>
+     *
+     * @param _sql the SQL string containing MS Access power operators.
+     * @return the translated SQL string using the POWER function.
+     */
+    static String translateAccessPowerOperators(String _sql) {
+        if (_sql == null || !_sql.contains("^")) {
+            return _sql;
+        }
+
+        Matcher matcher = Patterns.POWER_OPERATION.matcher(_sql);
+        StringBuffer translatedSql = new StringBuffer();
+
+        while (matcher.find()) {
+            String base = matcher.group(1);     // extract base operand
+            String exponent = matcher.group(2); // extract exponent operand
+
+            // replace the matched "base ^ exponent" with "POWER(base, exponent)"
+            // appendReplacement is crucial for correctly handling multiple matches and non-matched parts
+            matcher.appendReplacement(translatedSql, "POWER(" + base + ", " + exponent + ")");
+        }
+        // append any remaining portion of the string after the last match
+        matcher.appendTail(translatedSql);
+
+        return translatedSql.toString();
     }
 
     private static String convertIdentifiers(String _sql) {
