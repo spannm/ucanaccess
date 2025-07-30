@@ -61,10 +61,12 @@ public final class SQLConverter {
         private static final String        POWER_OPERAND_REGEX        =
                 "(?:"
               + "\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b" // column name/identifier
-              + "|"
+              + '|'
               + "[+-]?\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?" // numeric term
-              + "|"
+              + '|'
               + "\\([^()]+?\\)" // simple parenthesized expressions WITHOUT nested parentheses
+              + '|'
+              + "\\?" // parameter marker for PreparedStatements
               + ")";
 
         // the main pattern to find "operand1 ^ operand2"
@@ -549,13 +551,14 @@ public final class SQLConverter {
      * <p>
      * This is a simplified implementation based on regular expressions and might not
      * cover all edge cases or complex SQL constructs. For robust parsing and
-     * modification of SQL, we should  use a dedicated SQL parser library e.g. JSqlParser.
+     * modification of SQL, we should use a dedicated SQL parser library e.g. JSqlParser.
      *
      * <p>The current implementation's {@code POWER_OPERAND_REGEX} is designed to identify:</p>
      * <ul>
      *   <li>Simple column names or identifiers (e.g., {@code myColumn}, {@code Table.Column}).</li>
      *   <li>Numeric literals (integers, decimals, scientific notation, with optional sign).</li>
      *   <li>Simple parenthesized expressions without nested parentheses (e.g., {@code (num + 1)}).</li>
+     *   <li>Parameter markers ({@code ?}) for use in {@code PreparedStatement} scenarios.</li>
      * </ul>
      * <p>It explicitly **does NOT reliably handle** operands that are:</p>
      * <ul>
