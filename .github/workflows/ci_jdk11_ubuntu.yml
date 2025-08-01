@@ -43,14 +43,15 @@ jobs:
                 java-version: '11'
                 distribution: 'temurin'
                 cache: maven
+                # Sonatype Central Snapshots
                 # must match distributionManagement/snapshotRepository/id in pom:
-                server-id: sonatype-nexus-snapshots
-                server-username: SONATYPE_OSSRH_USERNAME
-                server-password: SONATYPE_OSSRH_PASSWORD
+                server-id: central
+                server-username: SONATYPE_CENTRAL_USERNAME
+                server-password: SONATYPE_CENTRAL_PASSWORD
 
-        -   name: Deploy to Sonatype snapshot repo
+        -   name: Deploy to Sonatype Central snapshot repo
             run: mvn --batch-mode --file pom.xml --activate-profiles fast deploy
             env:
-                SONATYPE_OSSRH_USERNAME:  ${{ secrets.SONATYPE_OSSRH_USERNAME }}
-                SONATYPE_OSSRH_PASSWORD:  ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
+                SONATYPE_CENTRAL_USERNAME:  ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+                SONATYPE_CENTRAL_PASSWORD:  ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
 
