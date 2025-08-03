@@ -1,12 +1,14 @@
 package net.ucanaccess.util;
 
 /**
- * Utilities for interoperability with the UCanAccess Hibernate dialect.
+ * A utility class providing methods for interoperability with the UCanAccess Hibernate dialect.
+ * <p>
+ * This class is designed to check for the presence of the Hibernate dialect at runtime.
+ * <p>
+ * For more information on the Hibernate dialect, see the project page:
+ * <a href="https://sourceforge.net/projects/ucanaccess-hibernate-dialect/">UCanAccess Hibernate dialect</a>
  *
- * https://sourceforge.net/projects/ucanaccess-hibernate-dialect/
- *
- * @author Gord
- *
+ * @author Gord Thompson
  */
 public final class HibernateSupport {
 
@@ -21,10 +23,10 @@ public final class HibernateSupport {
     }
 
     /**
-     * Checks the Java system property set by the constructor of the UCanAccessDialect class, indicating that we are
-     * running under a Hibernate process.
+     * Checks a Java system property to determine if the application is running with the UCanAccess Hibernate dialect.
+     * The property is set by the constructor of the {@code UCanAccessDialect} class.
      *
-     * @return whether the property was found and its value was "true"
+     * @return {@code true} if the property was found and its value is "true", otherwise {@code false}.
      */
     public static boolean isActive() {
         if (active == null) {
@@ -34,7 +36,10 @@ public final class HibernateSupport {
     }
 
     /**
-     * Sets the Hibernate "active" status so tests can validate the Hibernate-specific code.
+     * Sets the Hibernate "active" status for the current process.
+     * This method is primarily intended for use in test environments to simulate the presence of the Hibernate dialect.
+     *
+     * @param value The new active status.
      */
     public static void setActive(Boolean value) {
         active = value;
