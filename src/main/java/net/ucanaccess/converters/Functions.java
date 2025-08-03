@@ -38,6 +38,8 @@ public final class Functions {
     private static Double       lastRnd;
     private static final double APPROX = 0.00000001;
 
+    private static final String GENERAL_DATE = "general date";
+
     private Functions() {
     }
 
@@ -251,7 +253,7 @@ public final class Functions {
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
     public static String cstr(Timestamp _value) throws UcanaccessSQLException {
-        return _value == null ? null : format(_value, "general date");
+        return _value == null ? null : format(_value, GENERAL_DATE);
     }
 
     private static String cstrImpl(Object _value) throws UcanaccessSQLException {
@@ -653,7 +655,7 @@ public final class Functions {
             return formatDate(_t, reg.getMediumDatePattern());
         } else if ("short date".equalsIgnoreCase(_par)) {
             return formatDate(_t, reg.getShortDatePattern());
-        } else if ("general date".equalsIgnoreCase(_par)) {
+        } else if (GENERAL_DATE.equalsIgnoreCase(_par)) {
             return formatDate(_t, reg.getGeneralPattern());
         } else if ("long time".equalsIgnoreCase(_par)) {
             return formatDate(_t, reg.getLongTimePattern());
@@ -1542,7 +1544,7 @@ public final class Functions {
         if (cl.get(Calendar.HOUR) == 0 && cl.get(Calendar.MINUTE) == 0 && cl.get(Calendar.SECOND) == 0) {
             return format(res, "short date");
         } else {
-            return format(res, "general date");
+            return format(res, GENERAL_DATE);
         }
     }
 

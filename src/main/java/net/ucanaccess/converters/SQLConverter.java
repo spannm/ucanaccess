@@ -29,7 +29,7 @@ public final class SQLConverter {
         private static final Pattern       FIND_LIKE                  = Pattern.compile(
             "[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(NOT\\s*)*LIKE\\s*'([^']*(?:'')*)'", Pattern.CASE_INSENSITIVE);
         private static final Pattern       ACCESS_LIKE_CHARINTERVAL   = Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
-        private static final Pattern       ACCESS_LIKE_ESCAPE         = Pattern.compile("\\[[\\*|_|#]\\]");
+        private static final Pattern       ACCESS_LIKE_ESCAPE         = Pattern.compile("\\[[\\*_#]\\]");
         private static final Pattern       CHECK_DDL                  = Pattern.compile("^(\\s*(CREATE|ALTER|DROP|ENABLE|DISABLE))\\s+.*", Pattern.CASE_INSENSITIVE);
         private static final Pattern       KIND_OF_SUBQUERY           = Pattern.compile("(\\[)(( FROM )*(SELECT )*([^\\]])*)(\\]\\.\\s)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
@@ -48,7 +48,7 @@ public final class SQLConverter {
             Pattern.compile("(\\s*DEFAULT\\s+)('(?:[^']*(?:'')*)*')([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(\\s*DEFAULT\\s+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(\\s*DEFAULT\\s+)([0-9\\.\\-\\+]+)([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("(\\s*DEFAULT\\s+)([_0-9a-zA-Z]*\\([^\\)]*\\))([\\s\\)\\,])", Pattern.CASE_INSENSITIVE));
+            Pattern.compile("(\\s*DEFAULT\\s+)([_0-9A-Z]*\\([^\\)]*\\))([\\s\\)\\,])", Pattern.CASE_INSENSITIVE));
         private static final Pattern       DEFAULT_CATCH_0            = Pattern.compile("(\\s*DEFAULT\\s+)", Pattern.CASE_INSENSITIVE);
         public static final Pattern        NOT_NULL                   = Pattern.compile("\\sNOT\\sNULL", Pattern.CASE_INSENSITIVE);
         private static final Pattern       QUOTED_ALIAS               = Pattern.compile(
@@ -120,7 +120,7 @@ public final class SQLConverter {
     }
 
     public static boolean hasIdentity(String sql) {
-        return sql.indexOf("@@") > 0 && sql.toUpperCase(Locale.US).indexOf("@@IDENTITY") > 0;
+        return sql.contains("@@") && sql.toUpperCase(Locale.US).contains("@@IDENTITY");
     }
 
     private static void aliases(String sql, NormalizedSQL nsql) {
@@ -787,7 +787,7 @@ public final class SQLConverter {
         if (!_quote) {
             name = _name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
         }
-        try (Statement st = _conn.createStatement()) {
+        try (@SuppressWarnings("java:S2077") Statement st = _conn.createStatement()) {
             st.execute(String.format("SELECT 1 AS %s FROM dual", name));
             return _name;
         } catch (SQLException _ex) {
@@ -901,15 +901,36 @@ public final class SQLConverter {
         }
     }
 
-    private static String convertToRegexMatches(String likeContent) {
-        Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
-        if (mtc.find()) {
-            return convertToRegexMatches(likeContent.substring(0, mtc.start(0)))
-                + mtc.group(0).charAt(1)
-                + convertToRegexMatches(likeContent.substring(mtc.end(0)));
+    static String convertToRegexMatches(String likeContent) {
+        if (likeContent == null || likeContent.isEmpty()) {
+            return likeContent;
         }
-        return likeContent.replaceAll("#", "\\\\d").replaceAll("\\*", ".*").replace('_', '.')
-                .replaceAll("(\\[)\\!(\\w\\-\\w\\])", "$1^$2");
+
+        Matcher m = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);
+        if (m.find()) {
+            String p1 = likeContent.substring(0, m.start(0));
+            char p2 = m.group(0).charAt(1);
+            String p3 = likeContent.substring(m.end(0));
+            return convertToRegexMatches(p1)
+                + p2
+                + convertToRegexMatches(p3);
+        }
+
+        String result = likeContent
+
+        // 1. Handle Access-specific escapes with tilde (~)
+            .replace("~*", "*").replace("~#", "#").replace("~_", "_")
+            .replace("~[", "\\[")
+
+        // 2. Handle standard wildcards, but only if not escaped
+            .replace("#", "\\d")
+            .replace("*", ".*")
+            .replace('_', '.')
+
+        // 3. Handle character classes and negation
+            .replaceAll("\\[\\!([^\\]]+)\\]", "[^$1]"); // handles [!abc], [!1-9] etc.
+
+        return result;
     }
 
     private static String convertToLikeCondition(String likeContent) {

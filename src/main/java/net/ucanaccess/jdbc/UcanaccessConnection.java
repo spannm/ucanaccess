@@ -760,7 +760,7 @@ public class UcanaccessConnection implements Connection {
             refId = ref.getId();
 
         } catch (Exception _ex) {
-            throw new UcanaccessSQLException(_ex);
+            throw UcanaccessSQLException.wrap(_ex);
         }
 
     }

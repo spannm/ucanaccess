@@ -172,6 +172,7 @@ public class LoadJet {
 
     public Object tryDefault(Object _default) {
         try (Statement st = conn.createStatement()) {
+            @SuppressWarnings("java:S2077")
             ResultSet rs = st.executeQuery(String.format("SELECT %s FROM DUAL", _default));
             if (rs.next()) {
                 return rs.getObject(1);
@@ -366,7 +367,7 @@ public class LoadJet {
         private final Set<Column>   alreadyIndexed           = new LinkedHashSet<>();
         private final Set<String>   readOnlyTables           = new LinkedHashSet<>();
 
-        private String commaSeparated(List<? extends Index.Column> columns, boolean escape) throws SQLException {
+        private String commaSeparated(List<? extends Index.Column> columns, boolean escape) {
             String comma = "";
             StringBuilder sb = new StringBuilder(" (");
             for (Index.Column cd : columns) {
@@ -575,7 +576,7 @@ public class LoadJet {
             return null;
         }
 
-        private String getUpdateConditions(Column _col) throws IOException, SQLException {
+        private String getUpdateConditions(Column _col) throws IOException {
             PropertyMap map = _col.getProperties();
             Property exprp = map.get(PropertyMap.EXPRESSION_PROP);
 
@@ -598,7 +599,7 @@ public class LoadJet {
             return " FALSE ";
         }
 
-        private String procedureEscapingIdentifier(String name) throws SQLException {
+        private String procedureEscapingIdentifier(String name) {
             return SQLConverter.procedureEscapingIdentifier(escapeIdentifier(name));
         }
 
@@ -1062,7 +1063,6 @@ public class LoadJet {
                 } catch (Exception _ex) {
                     logger.log(Level.WARNING, "Failed to create table '{0}': {1}", tn, _ex.getMessage());
                     unresolvedTables.add(tn);
-                    continue;
                 }
 
             }

@@ -24,7 +24,7 @@ public class AutoNumberAction implements IFeedbackAction {
             if (col.isAutoNumber()) {
                 UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
                 Connection connHsqldb = conn.getHSQLDBConnection();
-                String cn = SQLConverter.escapeIdentifier(col.getName(), connHsqldb);
+                String hsqlColName = SQLConverter.escapeIdentifier(col.getName(), connHsqldb);
                 Object cnOld = memento[i];
                 Object cnNew = byAccess[i];
                 if (cnNew instanceof String) {
@@ -34,8 +34,9 @@ public class AutoNumberAction implements IFeedbackAction {
                 newAutoValues.put(col.getName(), cnNew);
                 conn.setFeedbackState(true);
                 String sql = String.format("UPDATE %s SET %s=? WHERE %s=?",
-                    SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), cn, cn);
-                try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
+                    SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), hsqlColName, hsqlColName);
+
+                try (@SuppressWarnings("java:S2077") PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, cnNew);
                     ps.setObject(2, cnOld);
                     ps.executeUpdate();

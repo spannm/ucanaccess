@@ -1,7 +1,11 @@
 package net.ucanaccess.jdbc;
 
-import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.DatabaseBuilder;
+import io.github.spannm.jackcess.DateTimeType;
+import io.github.spannm.jackcess.Row;
+import io.github.spannm.jackcess.Table;
 import io.github.spannm.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.exception.UcanaccessSQLException;
@@ -13,16 +17,28 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("java:S2077") // suppress sonarcloud warnings regarding dynamically formatted SQL
 public class DBReference {
     private static final String                     CIPHER_SPEC       = "AES";
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
@@ -149,25 +165,29 @@ public class DBReference {
         return lm;
     }
 
-    Connection checkLastModified(Connection _conn, Session _session) throws Exception {
+    Connection checkLastModified(Connection _conn, Session _session) throws UcanaccessSQLException {
         // I'm detecting if another process(and not another thread) is writing
 
-        if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
-            return _conn;
-        }
-        updateLastModified();
-        closeHsqlDb(_session);
-        dbIO.flush();
-        dbIO.close();
-        dbIO = open(dbFile, pwd);
-        id = createId();
-        firstConnection = true;
-        LoadJet lj = new LoadJet(getHSQLDBConnection(_session), dbIO);
-        lj.setSkipIndexes(skipIndexes);
-        lj.setSysSchema(sysSchema);
-        lj.loadDB();
+        try {
+            if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
+                return _conn;
+            }
+            updateLastModified();
+            closeHsqlDb(_session);
+            dbIO.flush();
+            dbIO.close();
+            dbIO = open(dbFile, pwd);
+            id = createId();
+            firstConnection = true;
+            LoadJet lj = new LoadJet(getHSQLDBConnection(_session), dbIO);
+            lj.setSkipIndexes(skipIndexes);
+            lj.setSysSchema(sysSchema);
+            lj.loadDB();
 
-        return getHSQLDBConnection(_session);
+            return getHSQLDBConnection(_session);
+        } catch (SQLException | IOException _ex) {
+            throw UcanaccessSQLException.wrap(_ex);
+        }
     }
 
     private boolean checkInside(Database db) throws IOException {
@@ -247,19 +267,26 @@ public class DBReference {
                 if (hbase.exists()) {
                     Arrays.stream(Optional.ofNullable(hbase.listFiles()).orElse(new File[0]))
                         .filter(f -> !f.delete())
-                        .forEach(f -> logger.log(Level.WARNING, "Could not delete file {0}", f));
+                        .forEach(f -> logger.log(Level.WARNING, "Could not delete {0}", f));
                 }
-                hbase.delete();
+                boolean deleted = hbase.delete();
+                if (!deleted) {
+                    logger.log(Level.INFO, "Could not delete {0}", hbase);
+                }
+
             } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
-                toKeepHsql.delete();
+                boolean deleted = toKeepHsql.delete();
+                if (!deleted) {
+                    logger.log(Level.INFO, "Could not delete {0}", toKeepHsql);
+                }
                 if (toKeepHsql.createNewFile()) {
                     logger.log(Level.DEBUG, "Created file {0}", toKeepHsql);
                 } else {
                     logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
-                    if (hsqlf.exists()) {
-                        hsqlf.delete();
+                    if (hsqlf.exists() && !hsqlf.delete()) {
+                        logger.log(Level.INFO, "Could not delete {0}", hsqlf);
                     }
                 }
                 mirrorRecreated = true;
@@ -350,6 +377,7 @@ public class DBReference {
             String url = "jdbc:hsqldb:mem:" + id + "_tmp";
             try (Connection conn = DriverManager.getConnection(url);
                 Statement stmt = conn.createStatement();
+                @SuppressWarnings("java:S2077")
                 ResultSet rs = stmt.executeQuery("CALL CRYPT_KEY('" + CIPHER_SPEC + "', null) ")) {
                 rs.next();
                 encryptionKey = rs.getString(1);
@@ -390,7 +418,9 @@ public class DBReference {
                     if (!tempHsql.exists()) {
                         if (tempHsql.createNewFile()) {
                             logger.log(Level.DEBUG, "Created file {0}", tempHsql);
-                            tempHsql.delete();
+                            if (!tempHsql.delete()) {
+                                logger.log(Level.INFO, "Could not delete {0}", tempHsql);
+                            }
                         } else {
                             logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
                         }

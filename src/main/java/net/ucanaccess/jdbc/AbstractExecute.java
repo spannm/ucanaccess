@@ -76,6 +76,7 @@ public abstract class AbstractExecute {
     private int count(String tableName) throws SQLException {
         UcanaccessConnection conn = statement.getConnection();
         try (UcanaccessStatement st = conn.createStatement();
+            @SuppressWarnings("java:S2077")
             ResultSet rs = st.executeQuery(String.format("SELECT COUNT(*) FROM %s", tableName))) {
             rs.next();
             return rs.getInt(1);

@@ -424,6 +424,7 @@ public class Persist2Jet {
         lj.loadDefaultValues(table);
         createForeignKeys(tableName);
         try (UcanaccessStatement st = conn.createStatement()) {
+            @SuppressWarnings("java:S2077")
             ResultSet rs = st.executeQuery(String.format("SELECT * FROM %s", tableName));
             List<String> clns = getColumnNamesCreate(tn);
             while (rs.next()) {

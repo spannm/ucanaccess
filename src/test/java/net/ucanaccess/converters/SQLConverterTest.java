@@ -13,9 +13,9 @@ class SQLConverterTest extends AbstractBaseTest {
 
     @Nested
     @DisplayName("Translate Access Power Operators (^ to POWER())")
-    static class TranslateAccessPowerOperatorsTests {
+    class TranslateAccessPowerOperatorsTests {
 
-        @ParameterizedTest(name = "{2}: {0}")
+        @ParameterizedTest(name = "{index}: {2}: {0}")
         @CsvSource(
             delimiter = '|',
             nullValues = {"(null)"},
@@ -89,6 +89,53 @@ class SQLConverterTest extends AbstractBaseTest {
             assertEquals(expectedSql, SQLConverter.translateAccessPowerOperators(inputSql), "Failed for: " + description);
         }
 
+    }
+
+    @Nested
+    @DisplayName("Convert Access LIKE clauses to Regex patterns")
+    class ConvertToRegexMatchesTests {
+
+        @ParameterizedTest(name = "{index}: input=\"{0}\", expected=\"{1}\"")
+        @CsvSource(
+            delimiter = '|',
+            nullValues = {"(null)"},
+            value = {
+                // inputLikeClause | expectedRegex
+                "a*c | a.*c",
+                "a_c | a.c",
+                "a#c | a\\dc",
+                "a*_# | a.*.\\d",
+
+                // escape sequences
+                "a[#]c | a#c",
+                "a[*]c | a*c",
+                "a[_]c | a_c",
+
+                // combinations of escape and standard wildcards
+                "a[#]b*c | a#b.*c",
+                "a[#]b*c_d | a#b.*c.d",
+                "a#b[*]c | a\\db*c",
+                "a_*b[#]c | a..*b#c",
+
+                // more complex patterns
+                "[!a-z]*c | [^a-z].*c",
+                "test[!a-zA-Z]c | test[^a-zA-Z]c",
+                // currently unsupported: "'test[\\*|_|#]' | 'test[\\*|_|#]'",
+
+                // null and empty strings
+                "(null) | (null)",
+                "|",
+                "abc | abc"
+            }
+        )
+        void testConvertToRegexMatches(String inputLikeClause, String expectedRegex) {
+            // Null-Eingabe wird separat behandelt, da assertEquals() bei null-Werten scheitert
+            if (inputLikeClause == null) {
+                assertNull(SQLConverter.convertToRegexMatches(null));
+            } else {
+                assertEquals(expectedRegex, SQLConverter.convertToRegexMatches(inputLikeClause));
+            }
+        }
     }
 
 }
