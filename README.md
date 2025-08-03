@@ -2,6 +2,13 @@
 
 **UCanAccess** is an open-source pure Java JDBC driver capable of reading and writing Microsoft Access databases.
 
+![Maven Central Version](https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central)
+![Maven Central Last Update](https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Last%20Update)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux))
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win))
+![GitHub License](https://img.shields.io/github/license/spannm/ucanaccess)
+![GitHub Repo stars](https://img.shields.io/github/stars/spannm/ucanaccess?logoColor=%233a82c2)
+
 ---
 
 The project was originally developed by Marco Amadei, Gord Thompson and others and hosted at Sourceforge until version 5.0.1 when development ceased in 2020 and activity on the project sadly died down.
