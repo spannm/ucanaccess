@@ -257,7 +257,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         int colCountExpected = _verifyResultSet.getMetaData().getColumnCount();
         assertEquals(colCountExpected, colCountActual, "Unexpected column count");
 
-        StringBuilder log = new StringBuilder('{');
+        StringBuilder log = new StringBuilder("{");
         int row = 0;
         while (next(_verifyResultSet, _resultSet)) {
             row++;

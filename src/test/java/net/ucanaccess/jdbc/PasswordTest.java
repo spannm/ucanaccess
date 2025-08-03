@@ -10,7 +10,7 @@ class PasswordTest extends UcanaccessBaseFileTest {
 
     @Test
     void testPassword() throws Exception {
-        assertThatThrownBy(() -> init())
+        assertThatThrownBy(this::init)
             .isInstanceOf(UcanaccessSQLException.class)
             .hasMessageContaining("Authentication failed");
 

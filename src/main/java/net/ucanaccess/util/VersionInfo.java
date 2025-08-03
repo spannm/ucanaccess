@@ -33,7 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
  *     <li>while running Maven lifecycle goals or</li>
  *     <li>while executing or referencing the project at run-time, whether packaged or not.</li>
  * </ul>.
- *
+ * <p>
  * First this class attempts to read version information from key {@code Attributes.Name.IMPLEMENTATION_VERSION}
  * in the Java manifest by using the Java api.
  * <p>

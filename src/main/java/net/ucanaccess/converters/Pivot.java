@@ -162,9 +162,8 @@ public class Pivot {
     public String verifySQL() {
         Matcher m = PAT_PIVOT_GROUP_BY.matcher(from);
         if (m.matches()) {
-            String sql = new StringBuilder()
-              .append("SELECT DISTINCT ").append(pivotStr).append(" AS PIVOT")
-              .append(" FROM ").append(m.group(1)).append(" GROUP BY ").append(pivotStr).append(",").append(m.group(2)).toString();
+            String sql = "SELECT DISTINCT " + pivotStr + " AS PIVOT"
+                       + " FROM " + m.group(1) + " GROUP BY " + pivotStr + "," + m.group(2);
             return SQLConverter.convertSQL(sql).getSql();
         }
         return null;
