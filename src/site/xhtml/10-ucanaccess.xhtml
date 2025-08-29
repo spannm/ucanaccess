@@ -95,6 +95,15 @@
             Otherwise it will be necessary to set the driver's "memory" property to "false":</b><br/>
             <br/> <code>Connection conn = DriverManager.getConnection("jdbc:ucanaccess://c:/data/myaccessdb.mdb;memory=false");</code><br/>
         </p>
+        <p>
+            <strong>Note:</strong> If you're working with especially large files
+            or in memory-constrained environments, and performance
+            with <code>memory=false</code> is not acceptable, consider using
+            the <a href="https://github.com/spannm/jackcess/">Jackcess</a>
+            library directly for low-level access. This bypasses the in-memory
+            HSQLDB layer and can significantly reduce memory usage while
+            improving performance.
+        </p>
         <h2>Dependencies</h2>
         <p>
             UCanAccess depends on Jackcess and HSQLDB. If you are using
