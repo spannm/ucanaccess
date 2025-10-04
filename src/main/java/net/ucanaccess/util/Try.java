@@ -146,14 +146,28 @@ public final class Try<V, EC extends Throwable> {
             try {
                 locVal = _catchable.apply(r);
             } catch (Throwable _ex) {
+                // this block catches exceptions thrown by the 'catchable' function
+                // tf it's an InterruptedException, restore the interrupt status
+                if (_ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 @SuppressWarnings("unchecked")
                 EC castEx = (EC) _ex;
                 locEx = castEx;
             }
             return new Try<>(locVal, locEx);
         } catch (Throwable _ex) {
+            // this block catches exceptions from two sources:
+            // 1. The 'resourceSupplier.get()' call (exceptions of type ES)
+            // 2. The implicit 'r.close()' call of the AutoCloseable resource
+
+            // If an InterruptedException occurs here (e.g., during resource closing),
+            // it's crucial to restore the thread's interrupted status
+            if (_ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             doThrow(_ex);
-            return null;
+            return null; // technically unreachable due to doThrow(_ex)
         }
     }
 
