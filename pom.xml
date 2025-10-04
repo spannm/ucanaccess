@@ -110,8 +110,8 @@
         <!-- With Eclipse IDE Version: 2025-06 (4.36.0) due to incompatible JUnit stack in M2E:
         <dep.junit.version>5.10.0</dep.junit.version>
          -->
-        <dep.assertj.version>3.27.3</dep.assertj.version>
-        <dep.mockito.version>5.18.0</dep.mockito.version>
+        <dep.assertj.version>3.27.6</dep.assertj.version>
+        <dep.mockito.version>5.20.0</dep.mockito.version>
 
         <!-- override basepom versions -->
         <dep.plugin.central-publishing.version>0.8.0</dep.plugin.central-publishing.version>
