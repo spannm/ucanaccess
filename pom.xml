@@ -98,7 +98,7 @@
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
         <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
-        <dep.jackcess.version>5.1.0</dep.jackcess.version>
+        <dep.jackcess.version>5.1.1</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
         <dep.hsqldb.classifier />
