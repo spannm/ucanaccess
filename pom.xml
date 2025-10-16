@@ -121,6 +121,7 @@
         <!-- additional plugins not defined in parent -->
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
+        <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
 
         <basepom.deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</basepom.deploy.snapshot.url>
 
@@ -286,6 +287,29 @@
                     </configuration>
                 </plugin>
 
+                <plugin>
+                    <!-- CycloneDX Maven Plugin
+                         https://cyclonedx.github.io/cyclonedx-maven-plugin -->
+                    <groupId>org.cyclonedx</groupId>
+                    <artifactId>cyclonedx-maven-plugin</artifactId>
+                    <version>${dep.plugin.cyclonedx.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>makeBom</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <projectType>library</projectType>
+                        <skipNotDeployed>false</skipNotDeployed>
+                        <outputFormat>xml</outputFormat>
+                        <outputName>sbom</outputName>
+                        <verbose>false</verbose>
+                    </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 
@@ -402,6 +426,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
             </plugin>
 
         </plugins>
