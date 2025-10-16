@@ -107,10 +107,7 @@
         <dep.slf4j.version>2.0.17</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.13.4</dep.junit.version>
-        <!-- With Eclipse IDE Version: 2025-06 (4.36.0) due to incompatible JUnit stack in M2E:
-        <dep.junit.version>5.10.0</dep.junit.version>
-         -->
+        <dep.junit.version>5.14.0</dep.junit.version>
         <dep.assertj.version>3.27.6</dep.assertj.version>
         <dep.mockito.version>5.20.0</dep.mockito.version>
 
