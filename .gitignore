@@ -11,7 +11,7 @@
 .checkstyle
 .idea
 .mvn
-.project
+
 .~lock*
 *.kate-swp
 .m2-local-repo/**/*.jar

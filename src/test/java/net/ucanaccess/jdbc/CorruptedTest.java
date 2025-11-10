@@ -25,7 +25,7 @@ class CorruptedTest extends UcanaccessBaseFileTest {
             System.setOut(prevSysOut);
         }
 
-        Pattern pat = Pattern.compile("^[0-9\\-]{10} [0-9\\:]{8}\\.?[0-9]* WARN LoadJet[ \\-]+");
+        Pattern pat = Pattern.compile("^[0-9\\-]{10} .+? WARN LoadJet[ \\-]+");
         List<String> actual = Arrays.stream(errContent.toString().split(System.lineSeparator()))
             .map(pat::matcher)
             .filter(Matcher::find)

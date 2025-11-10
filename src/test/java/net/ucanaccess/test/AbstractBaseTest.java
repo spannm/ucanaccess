@@ -41,6 +41,10 @@ public abstract class AbstractBaseTest extends Assertions {
         return logger;
     }
 
+    protected static final Logger getStaticLogger() {
+        return System.getLogger(AbstractBaseTest.class.getName());
+    }
+
     @BeforeEach
     public final void setTestMethodName(TestInfo _testInfo) {
         lastTestInfo = _testInfo;
@@ -61,9 +65,9 @@ public abstract class AbstractBaseTest extends Assertions {
     @BeforeEach
     public final void logTestBegin(TestInfo _testInfo) {
         if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
-            getLogger().log(Level.INFO, ">>>>>>>>>> TEST: {0} <<<<<<<<<<", _testInfo.getDisplayName());
+            getLogger().log(Level.DEBUG, ">>>> TEST: {0} <<<<", _testInfo.getDisplayName());
         } else {
-            getLogger().log(Level.INFO, ">>>>>>>>>> TEST: {0} ({1}) <<<<<<<<<<",
+            getLogger().log(Level.DEBUG, ">>>> TEST: {0} ({1}) <<<<",
                 _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
         }
     }

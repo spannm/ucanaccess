@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>65</version>
+        <version>66</version>
     </parent>
 
     <groupId>io.github.spannm</groupId>
@@ -60,8 +62,7 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-      <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <issueManagement>
         <system>Github</system>
@@ -88,8 +89,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <!-- The minimum JDK version required to build. -->
         <project.build.systemJdk>11</project.build.systemJdk>
+        <!-- The default build target. -->
         <project.build.targetJdk>11</project.build.targetJdk>
 
         <developerId>spannm</developerId>
@@ -107,12 +111,10 @@
         <dep.slf4j.version>2.0.17</dep.slf4j.version>
 
         <!-- test dependencies -->
-        <dep.junit.version>5.14.0</dep.junit.version>
+        <dep.junit.version>5.14.1</dep.junit.version>
         <dep.assertj.version>3.27.6</dep.assertj.version>
         <dep.mockito.version>5.20.0</dep.mockito.version>
-
-        <!-- override basepom versions -->
-        <dep.plugin.central-publishing.version>0.8.0</dep.plugin.central-publishing.version>
+        <dep.log4j-to-slf4j.version>2.24.3</dep.log4j-to-slf4j.version>
 
         <!-- downgrade site plugin to work with site skin -->
         <dep.plugin.site.version>3.21.0</dep.plugin.site.version>
@@ -127,8 +129,10 @@
 
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
+        <dep.checkstyle.version>10.26.1</dep.checkstyle.version>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
+        <basepom.check.fail-dependency>false</basepom.check.fail-dependency>
 
         <basepom.javadoc.skip>false</basepom.javadoc.skip>
         <basepom.javadoc.show>protected</basepom.javadoc.show>
@@ -136,18 +140,6 @@
         <basepom.site.scm.branch>master</basepom.site.scm.branch>
         <basepom.site.skip-deploy>false</basepom.site.skip-deploy>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${dep.junit.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
 
@@ -162,6 +154,13 @@
             <groupId>io.github.spannm</groupId>
             <artifactId>${dep.jackcess.artifactId}</artifactId>
             <version>${dep.jackcess.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>${dep.log4j-to-slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -180,37 +179,8 @@
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-commons</artifactId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${dep.junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -249,13 +219,20 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <systemPropertyVariables combine.children="append">
+                        <systemPropertyVariables>
                             <user.timezone />
                         </systemPropertyVariables>
+
+                        <failIfNoTests>true</failIfNoTests>
+                        <trimStackTrace>true</trimStackTrace>
+                        <printSummary>true</printSummary>
+                        <testFailureIgnore>false</testFailureIgnore>
+
                         <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
                         <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-                        <argLine>@{basepom.coverage.test-args} -Xmx1024m -Dfile.encoding=UTF-8</argLine>
+
+                        <argLine>@{basepom.coverage.test-args} -Xmx2048m -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
 
@@ -264,6 +241,13 @@
                     <configuration>
                         <configLocation>src/test/resources/team/checkstyle-rules.xml</configLocation>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${dep.checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
 
                 <plugin>
@@ -311,6 +295,7 @@
                 </plugin>
 
             </plugins>
+
         </pluginManagement>
 
         <plugins>
