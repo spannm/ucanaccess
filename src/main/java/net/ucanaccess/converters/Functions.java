@@ -755,6 +755,7 @@ public final class Functions {
     public static Integer instrrev(String text, String search, Integer start, Integer compare) {
         if (compare != 0) {
             text = text.toLowerCase();
+            search = search.toLowerCase();
         }
         if (text.length() <= start) {
             return 0;
