@@ -11,6 +11,7 @@ public final class TypesMap {
     public enum AccessType {
         BYTE(SqlConstants.SMALLINT),
         INTEGER(SqlConstants.SMALLINT),
+        SHORT(SqlConstants.SMALLINT),
         LONG(SqlConstants.INTEGER),
         TEXT(SqlConstants.VARCHAR),
         OLE(SqlConstants.BLOB),
@@ -57,6 +58,7 @@ public final class TypesMap {
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.GUID, DataType.GUID);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.HYPERLINK, DataType.MEMO);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.INTEGER, DataType.INT);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.SHORT, DataType.INT);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.LONG, DataType.LONG);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.MEMO, DataType.MEMO);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.NUMERIC, DataType.NUMERIC);
