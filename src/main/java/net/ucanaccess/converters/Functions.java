@@ -718,6 +718,7 @@ public final class Functions {
         start--;
         if (compare != 0) {
             text = text.toLowerCase();
+            start = start.toLowerCase();
         }
         if (text.length() <= start) {
             return 0;
