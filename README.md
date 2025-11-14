@@ -1,3 +1,11 @@
+### Non-official fork 
+
+![The official version is currently maintained by spannm](https://spannm.github.io/ucanaccess/)
+
+This fork is purly for debugging and contrubution purposes.
+
+---
+
 ### Welcome to (the new home of) UCanAccess
 
 **UCanAccess** is an open-source pure Java JDBC driver capable of reading and writing Microsoft Access databases.
