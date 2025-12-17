@@ -373,7 +373,9 @@
                                     <exclude>commons-codec:commons-codec</exclude>
                                     <exclude>org.apache.commons:commons-collections4</exclude>
                                     <exclude>org.apache.commons:commons-math3</exclude>
-                                    <exclude>com.zaxxer</exclude>
+                                    <exclude>commons-io:commons-io</exclude>
+                                    <exclude>com.zaxxer:SparseBitSet</exclude>
+                                    <exclude>org.apache.logging.log4j</exclude>
                                 </excludes>
                             </artifactSet>
 
