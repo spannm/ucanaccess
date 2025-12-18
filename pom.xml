@@ -132,6 +132,7 @@
         <dep.checkstyle.version>10.26.1</dep.checkstyle.version>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
+        <basepom.check.skip-dependency>false</basepom.check.skip-dependency>
         <basepom.check.fail-dependency>false</basepom.check.fail-dependency>
 
         <basepom.javadoc.skip>false</basepom.javadoc.skip>
