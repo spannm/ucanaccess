@@ -120,7 +120,7 @@
 
         <!-- additional plugins not defined in parent -->
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
-        <dep.plugin.sonar.version>3.10.0.2594</dep.plugin.sonar.version>
+        <dep.plugin.sonar.version>5.5.0.6356</dep.plugin.sonar.version>
         <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
 
         <basepom.deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</basepom.deploy.snapshot.url>
@@ -462,7 +462,9 @@
             <properties>
                 <sonar.skip>false</sonar.skip>
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.organization>spannm</sonar.organization>
+                <sonar.organization>${developerId}</sonar.organization>
+                <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
+
                 <!-- sonar.token>YOUR_TOKEN_HERE</sonar.token -->
 
                 <basepom.test.skip>true</basepom.test.skip>
