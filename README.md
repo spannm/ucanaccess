@@ -1,45 +1,140 @@
-### Welcome to (the new home of) UCanAccess
+<div style="text-align: center;">
+  <p>
+    <a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess">
+      <img src="https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central" alt="Maven Central Version">
+    </a>
+    <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Last%20Update" alt="Maven Central Last Update">
+    <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_ubuntu.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)" alt="GitHub Actions Workflow Status">
+    </a>
+    <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_win.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)" alt="GitHub Actions Workflow Status">
+    </a>
+    <a href="https://github.com/spannm/ucanaccess/stargazers">
+      <img src="https://img.shields.io/github/stars/spannm/ucanaccess?logoColor=%233a82c2" alt="GitHub Repo stars">
+    </a>
+  </p>
 
-**UCanAccess** is an open-source pure Java JDBC driver capable of reading and writing Microsoft Access databases.
+  <h1>UCanAccess</h1>
+  <h3>The modern bridge between Java and Microsoft Access</h3>
 
-![Maven Central Version](https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central)
-![Maven Central Last Update](https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Last%20Update)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux))
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win))
-![GitHub License](https://img.shields.io/github/license/spannm/ucanaccess)
-![GitHub Repo stars](https://img.shields.io/github/stars/spannm/ucanaccess?logoColor=%233a82c2)
+</div>
 
----
+**UCanAccess** is a high-performance, open-source Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb` and `.accdb`) without needing any native Windows libraries (R-I-P `OdbcJdbcBridge` 🪦).
 
-The project was originally developed by Marco Amadei, Gord Thompson and others and hosted at Sourceforge until version 5.0.1 when development ceased in 2020 and activity on the project sadly died down.
+Whether you are building a modern Spring Boot application or using classic tools like LibreOffice or SQuirreL SQL, UCanAccess provides a reliable, pure-Java way to read and write your data.
 
-UCanAccess is a very useful piece of software. It would be a shame to see it disappear.
-As for myself, I have contributed to UCanAccess in the past and continue to use it to the present day.
-I have reached out to my fellow developers but could not reestablish contact.
-Therefore, I have forked the latest code base from [Sourceforge](http://ucanaccess.sourceforge.net/site.html) and
-make it available at [Github](https://github.com/spannm/ucanaccess).
-My fork is intended as a drop-in replacement. It maintains runtime compatibility to prior versions, and is published at [Maven Central](https://central.sonatype.com/artifact/io.github.spannm/ucanaccess) (under groupId io.github.spannm).
-The minimum required Java version is now Java 11.
-The only compile-time dependencies continue to be Jackcess and HSQLDB/HyperSQL (both have been upgraded to recent CVE-free versions).
+<div align="center"> ──────────────────── </div>
 
-I hope to keep on maintaining and releasing UCanAccess, so it can continue to be useful and usable for all of us.
+## ✨ Key Features
 
-Your feedback, thoughts and contributions are very welcome.
+* **Pure Java Power**: Zero native dependencies. Runs anywhere Java 11+ is supported.
 
-&nbsp;
+* **Drop-in Replacement**: Fully compatible with previous UCanAccess versions.
 
-&nbsp;
+* **Modern Core**: Built on top of the latest **Jackcess 5.1.2** and **HSQLDB 2.7.4** for maximum stability and security.
 
----
+* **Comprehensive SQL Support**: Supports SELECT, INSERT, UPDATE, DELETE, and even complex DDL operations like `ALTER TABLE`.
 
-UCanAccess is licensed under the Apache License, Version 2.0. Please see here for detailed [license info](LICENSE.txt).
+* **Access-like Logic**: Includes built-in Access functions (like `IIf`, `Nz`, and financial functions like `PMT` or `PV`).
 
-Most of the financial functions (PMT, NPER, IPMT, PPMT, RATE, PV) have been originally copied from the Apache Software Foundation's POI project.
-They have been then modified and adapted so that they are integrated with UCanAccess in a consistent manner.
-The Apache POI project is licensed under Apache License, Version 2.0
+* **Security Conscious**: Regularly updated to be free of known CVEs.
 
-Some of the UcanaccessDatabaseMetadata methods have been originally inspired by the hsqldb DatabaseMetaData implementation.
-They have been then modified and adapted so that they are integrated with UCanAccess in a consistent manner.
-The Hsqldb project is licensed under a BSD-based license.
+<p style="height: 20px;">&nbsp;</p>
 
-Microsoft, Access, Microsoft Office, Microsoft Access are trademarks of Microsoft Corporation.
+## 🛠 Tech Stack & Requirements
+
+* **Java Version**: 11 or higher (LTS versions like Java 17 and 21 are fully supported and tested).
+
+* **Build Tool**: [Maven](https://maven.apache.org/)
+
+* **Main Dependencies**:
+
+  * [Jackcess](https://github.com/spannm/jackcess/)
+
+  * [HyperSQL Database (HSQLDB)](http://hsqldb.org/)
+
+<p style="height: 20px;">&nbsp;</p>
+
+## 📦 Installation
+
+To use UCanAccess in your project, add the following dependency.
+
+### Maven (`pom.xml`)
+
+```xml
+<dependency>
+    <groupId>io.github.spannm</groupId>
+    <artifactId>ucanaccess</artifactId>
+    <version>5.1.5</version>
+</dependency>
+```
+
+### Gradle (Groovy / `build.gradle`)
+
+```groovy
+implementation 'io.github.spannm:ucanaccess:5.1.5'
+```
+
+### Gradle (Kotlin DSL / `build.gradle.kts`)
+
+```kotlin
+implementation("io.github.spannm:ucanaccess:5.1.5")
+```
+
+<p style="height: 20px;">&nbsp;</p>
+
+## 🚦 Quick Start
+
+Connecting to your database is as simple as:
+
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+String url = "jdbc:ucanaccess://C:/path/to/your/database.accdb";
+try (Connection conn = DriverManager.getConnection(url)) {
+    // your code here
+}
+```
+
+<p style="height: 20px;">&nbsp;</p>
+
+## ❤️ Why this Fork?
+
+The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020.
+As a long-time contributor and Java enthusiast, I decided to give UCanAccess a **new home**.
+
+My goal is to keep this essential tool alive, maintain a **high test coverage** (JUnit 5), and ensure it meets modern **Clean Code** and **SOLID** standards.
+
+<p style="height: 20px;">&nbsp;</p>
+
+## 🤝 Contributions welcome!
+
+Got a bug to fix or a feature to add?
+
+1. Check out the [Issues](https://github.com/spannm/ucanaccess/issues)
+2. [Fork](https://github.com/spannm/ucanaccess/fork) the Repo
+3. Submit a [Pull Request](https://github.com/spannm/ucanaccess/pulls)
+
+*Note: Please ensure your code follows the project's quality standards (Checkstyle, PMD are enforced in the build)*.
+
+<div align="center"> ─────────────── </div>
+
+### ⚖️ License
+
+UCanAccess is licensed under the **Apache License, Version 2.0**.
+
+<p style="height: 40px;">&nbsp;</p>
+
+<div align="center">
+<table style="border-collapse: collapse;">
+  <tr>
+    <td style="padding: 40px; border: 2px solid #3a82c2;">
+      <strong>Enjoying UCanAccess? Please leave a 🌟 to support the project!</strong><br>
+      <small>Your stars help to keep the bridge between Java and Access alive and visible.</small>
+    </td>
+  </tr>
+</table>
+</div>
+

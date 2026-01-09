@@ -12,13 +12,19 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> java.io.File;
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> java.io.IOException;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IJackcessOpenerInterface" href="../../../net/ucanaccess/jdbc/IJackcessOpenerInterface.html#IJackcessOpenerInterface">IJackcessOpenerInterface</a> {
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>       Database open(File fl, String pwd) <strong class="jxr_keyword">throws</strong> IOException;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> java.nio.charset.Charset;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IJackcessOpenerInterface" href="../../../net/ucanaccess/jdbc/IJackcessOpenerInterface.html#IJackcessOpenerInterface">IJackcessOpenerInterface</a> {
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  }
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>      Database open(File fl, String pwd) <strong class="jxr_keyword">throws</strong> IOException;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">default</strong> Database open(File fl, String pwd, Charset charset) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>          <strong class="jxr_keyword">return</strong> open(fl, pwd);
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>      }
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  }
 </pre>
 <hr/>
-<div id="footer">© 2012–2025 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
+<div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

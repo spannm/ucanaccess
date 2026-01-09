@@ -5,7 +5,32 @@
         <title>Change Log</title>
     </head>
     <body>
-        <h1>Change Log</h1>
+      <h1>Change Log</h1>
+
+        <h2>5.1.5 Release</h2>
+        <ul>
+            <li>Upgrade Jackcess dependency to io.github.spannm:jackcess:jar:5.1.2</li>
+            <li>Upgrade Mockito dependency to 5.21.0</li>
+            <li>Upgrade parent pom basepom-oss from 66 to 67 </li>
+            <li>Upgrade Sonarcloud version and profile</li>
+            <li>Remove eclipse-ide profile</li>
+            <li>Refine shaded jar exclusions for Apache POI dependencies to keep classpath clean and reduce uber-jar size</li>
+            <li>Enable basepom dependency checks</li>
+        </ul>
+
+        <h2>5.1.4 Release</h2>
+        <ul>
+            <li>Upgrade Jackcess dependency to io.github.spannm:jackcess:jar:5.1.1</li>
+            <li>Upgrade JUnit from 5.13.4 to 5.14.0</li>
+            <li>Upgrade AssertJ to 3.27.6 and Mockito to 5.20.0</li>
+            <li>Introduce CycloneDX SBOM generation for enhanced supply chain security </li>
+            <li>Fix: Correctly handle InterruptedException in Try-with-Resources block</li>
+            <li>Feature: Improve Maven POM parsing with XPath in VersionInfo</li>
+            <li>Code hygiene based on SonarCube findings</li>
+            <li>New driver parameter 'charset' to support encoding selection via URL (e.g., CHARSET=GBK)</li>
+            <li>Migrate to central-publishing-maven-plugin (new Sonatype Central Portal API)</li>
+            <li>Add reserved word 'LEAVE' to fix view issues</li>
+        </ul>
 
         <h2>5.1.3 Release</h2>
         <ul>

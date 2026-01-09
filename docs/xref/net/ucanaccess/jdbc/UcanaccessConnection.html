@@ -768,7 +768,7 @@
 <a class="jxr_linenumber" name="L760" href="#L760">760</a>             refId = ref.getId();
 <a class="jxr_linenumber" name="L761" href="#L761">761</a> 
 <a class="jxr_linenumber" name="L762" href="#L762">762</a>         } <strong class="jxr_keyword">catch</strong> (Exception _ex) {
-<a class="jxr_linenumber" name="L763" href="#L763">763</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>             <strong class="jxr_keyword">throw</strong> UcanaccessSQLException.wrap(_ex);
 <a class="jxr_linenumber" name="L764" href="#L764">764</a>         }
 <a class="jxr_linenumber" name="L765" href="#L765">765</a> 
 <a class="jxr_linenumber" name="L766" href="#L766">766</a>     }
@@ -831,6 +831,6 @@
 <a class="jxr_linenumber" name="L823" href="#L823">823</a> }
 </pre>
 <hr/>
-<div id="footer">© 2012–2025 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
+<div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

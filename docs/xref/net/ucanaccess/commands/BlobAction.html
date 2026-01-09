@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>                  conn.setFeedbackState(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>                  conn.setFeedbackState(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>                  <strong class="jxr_keyword">try</strong> (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>                  <strong class="jxr_keyword">try</strong> (@SuppressWarnings(<span class="jxr_string">"java:S2077"</span>) PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>                      ps.setObject(1, bkey.getBytes());
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>                      <strong class="jxr_keyword">int</strong> i = 2;
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>                      <strong class="jxr_keyword">for</strong> (Object value : values) {
@@ -92,6 +92,6 @@
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  }
 </pre>
 <hr/>
-<div id="footer">© 2012–2025 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
+<div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>

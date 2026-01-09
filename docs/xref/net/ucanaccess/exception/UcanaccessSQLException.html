@@ -104,26 +104,58 @@
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>      }
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>      <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * Wraps the specified exception into a {@link UcanaccessSQLException}</em>
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     * unless its type can be cast to {@link UcanaccessSQLException}.</em>
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     * @param &lt;T&gt; the type of exception to wrap</em>
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">     * @param _t the exception to wrap</em>
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     * @return wrapped exception or parameter if can be cast to {@link UcanaccessSQLException}</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> &lt;T <strong class="jxr_keyword">extends</strong> Throwable&gt; <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> wrap(T _t) {
-<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <strong class="jxr_keyword">return</strong> _t instanceof <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> ? (<a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>) _t : <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_t);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a>     }
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> &lt;T <strong class="jxr_keyword">extends</strong> UcanaccessSQLException&gt; <strong class="jxr_keyword">void</strong> throwIf(BooleanSupplier _condition, Supplier&lt;T&gt; _exceptionSupplier) <strong class="jxr_keyword">throws</strong> T {
-<a class="jxr_linenumber" name="L111" href="#L111">111</a>         <strong class="jxr_keyword">if</strong> (_condition.getAsBoolean()) {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>             <strong class="jxr_keyword">throw</strong> _exceptionSupplier.get();
-<a class="jxr_linenumber" name="L113" href="#L113">113</a>         }
-<a class="jxr_linenumber" name="L114" href="#L114">114</a>     }
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> }
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException}.</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     * If the throwable is already a {@link UcanaccessSQLException}, it's returned as is.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     * This is a convenience method calling {@link #wrap(String, Throwable)} without a reason prefix.</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     * @param &lt;T&gt; the type of the {@link Throwable} to wrap.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * @param _t the {@link Throwable} to wrap.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     * @return a {@link UcanaccessSQLException} instance.</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> &lt;T <strong class="jxr_keyword">extends</strong> Throwable&gt; <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> wrap(T _t) {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         <strong class="jxr_keyword">return</strong> wrap(<strong class="jxr_keyword">null</strong>, _t);
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     }
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException},</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">     * prepending an optional reason message.</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment">     * Preserves original SQLState, ErrorCode, and Cause when wrapping {@link SQLException} types.</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">     * If {@code _reason} is null or blank, the message is derived solely from {@code _t}.</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">     * @param &lt;T&gt; the type of the {@link Throwable} to wrap</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * @param _reason an optional custom message prefix</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * @param _t the {@link Throwable} to wrap</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * @return a {@link UcanaccessSQLException} instance</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> &lt;T <strong class="jxr_keyword">extends</strong> Throwable&gt; <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> wrap(String _reason, T _t) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         String reason = _reason == <strong class="jxr_keyword">null</strong> || _reason.isBlank() ? <strong class="jxr_keyword">null</strong> : _reason.trim();
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         <strong class="jxr_keyword">if</strong> (_t instanceof <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>) {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>             <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> ex = (<a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>) _t;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>             <strong class="jxr_keyword">if</strong> (reason == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>                 <strong class="jxr_keyword">return</strong> ex;
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>             }
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(reason + <span class="jxr_string">": "</span> + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_t instanceof SQLException) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>             SQLException ex = (SQLException) _t;
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(reason == <strong class="jxr_keyword">null</strong> ? ex.getMessage() : reason + <span class="jxr_string">": "</span> + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(reason == <strong class="jxr_keyword">null</strong> ? _t.getMessage() : reason + <span class="jxr_string">": "</span> + _t.getMessage(), _t);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>         }
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>     }
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> &lt;T <strong class="jxr_keyword">extends</strong> UcanaccessSQLException&gt; <strong class="jxr_keyword">void</strong> throwIf(BooleanSupplier _condition, Supplier&lt;T&gt; _exceptionSupplier) <strong class="jxr_keyword">throws</strong> T {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">if</strong> (_condition.getAsBoolean()) {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>             <strong class="jxr_keyword">throw</strong> _exceptionSupplier.get();
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         }
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> }
 </pre>
 <hr/>
-<div id="footer">© 2012–2025 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
+<div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>
 </body>
 </html>
