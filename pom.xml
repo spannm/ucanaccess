@@ -60,7 +60,7 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-      <tag>HEAD</tag>
+        <tag></tag>
   </scm>
 
     <issueManagement>
@@ -113,7 +113,7 @@
         <dep.junit.version>5.14.1</dep.junit.version>
         <dep.assertj.version>3.27.6</dep.assertj.version>
         <dep.mockito.version>5.21.0</dep.mockito.version>
-        <dep.log4j-to-slf4j.version>2.24.3</dep.log4j-to-slf4j.version>
+        <dep.log4j-to-slf4j.version>2.25.3</dep.log4j-to-slf4j.version>
 
         <dep.plugin.maven-fluido-skin.version>2.1.0</dep.plugin.maven-fluido-skin.version>
 
@@ -121,8 +121,12 @@
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.sonar.version>5.5.0.6356</dep.plugin.sonar.version>
         <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
+        <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
 
         <basepom.deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</basepom.deploy.snapshot.url>
+
+        <!-- the current "minimal" version of maven -->
+        <basepom.maven.version>3.9.0</basepom.maven.version>
 
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
@@ -207,6 +211,7 @@
             <plugins>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
                         <compilerArgument>-Xlint:all</compilerArgument>
@@ -235,6 +240,7 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
                         <configLocation>src/test/resources/team/checkstyle-rules.xml</configLocation>
@@ -277,10 +283,11 @@
                     <version>${dep.plugin.cyclonedx.version}</version>
                     <executions>
                         <execution>
-                            <phase>package</phase>
+                            <id>cyclonedx-makebom</id>
                             <goals>
                                 <goal>makeBom</goal>
                             </goals>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                     <configuration>
@@ -414,6 +421,22 @@
             </plugin>
 
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${dep.plugin.versions.version}</version>
+                <configuration>
+                    <ruleSet>
+                        <ignoreVersions>
+                            <ignoreVersion>
+                                <type>regex</type>
+                                <version>.*(?i)(alpha|beta|rc|cr|preview|milestone|[mb][0-9]+).*</version>
+                            </ignoreVersion>
+                        </ignoreVersions>
+                    </ruleSet>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
             </plugin>
@@ -426,7 +449,7 @@
 
         <profile>
             <id>fast</id>
-            <!-- Profile to skip time-consuming steps. -->
+            <!-- profile to skip time-consuming steps -->
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -477,6 +500,7 @@
                         <version>${dep.plugin.sonar.version}</version>
                         <executions>
                             <execution>
+                                <id>sonar-verify</id>
                                 <goals>
                                     <goal>sonar</goal>
                                 </goals>
