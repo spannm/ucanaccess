@@ -111,7 +111,7 @@
 
         <!-- test dependencies -->
         <dep.junit.version>5.14.1</dep.junit.version>
-        <dep.assertj.version>3.27.6</dep.assertj.version>
+        <dep.assertj.version>3.27.7</dep.assertj.version>
         <dep.mockito.version>5.21.0</dep.mockito.version>
         <dep.log4j-to-slf4j.version>2.25.3</dep.log4j-to-slf4j.version>
 
