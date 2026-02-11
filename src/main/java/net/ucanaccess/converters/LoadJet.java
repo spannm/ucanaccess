@@ -1043,16 +1043,21 @@ public class LoadJet {
 
             for (String tn : dbIO.getTableNames()) {
                 if (tn.startsWith("~")) {
-                    logger.log(Level.DEBUG, "Skipping table '{0}'", tn);
+                    logger.log(Level.DEBUG, "Skipping table ''{0}''", tn);
                     continue;
                 }
 
                 try {
                     Table jt = dbIO.getTable(tn);
+                    if (jt == null) {
+                        logger.log(Level.WARNING, "No table ''{0}'' in database ''{1}''", tn, dbIO);
+                        continue;
+                    }
+
                     UcanaccessTable ut = new UcanaccessTable(jt, tn);
 
                     if (TableMetaData.Type.LINKED_ODBC == jt.getDatabase().getTableMetaData(tn).getType()) {
-                        logger.log(Level.WARNING, "Skipping table '{0}' (linked to an ODBC table)", tn);
+                        logger.log(Level.WARNING, "Skipping table ''{0}'' (linked to an ODBC table)", tn);
                         unresolvedTables.add(tn);
                         continue;
                     }
@@ -1061,7 +1066,7 @@ public class LoadJet {
                     loadingOrder.add(ut.getName());
 
                 } catch (Exception _ex) {
-                    logger.log(Level.WARNING, "Failed to create table '{0}': {1}", tn, _ex.getMessage());
+                    logger.log(Level.WARNING, "Failed to create table ''{0}'': {1}", tn, _ex.getMessage());
                     unresolvedTables.add(tn);
                 }
 
