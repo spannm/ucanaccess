@@ -14,6 +14,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class to inspect Microsoft Access database files using the Jackcess library.
+ * <p>
+ * This tool iterates through a list of database file paths provided via command-line arguments,
+ * opens each valid database, and prints its file format along with a summary of all contained tables.
+ * <p>
+ * For each table found, it outputs the table name and the total row count. If a table cannot
+ * be loaded or an error occurs during inspection, an error message is printed to the standard error stream.
+ */
 public class JackcessPrintTables {
 
     public static void main(String[] args) throws IOException {
@@ -23,8 +32,6 @@ public class JackcessPrintTables {
             .filter(Files::exists)
             .filter(Files::isReadable)
             .collect(Collectors.toList());
-
-        dbFiles = List.of(Paths.get("/home/spannm/projects/github/spannm/ucanaccess/src/test/resources/testdbs/linkee1.mdb"));
 
         if (dbFiles.isEmpty()) {
             System.err.println("No readable database files provided in arguments");
