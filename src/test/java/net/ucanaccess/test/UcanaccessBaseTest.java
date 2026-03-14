@@ -52,6 +52,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     private File                   fileAccDb;
     private AccessVersion          accessVersion;
+    @SuppressWarnings("checkstyle:VisibilityModifier")
     protected UcanaccessConnection ucanaccess;
     private UcanaccessConnection   verifyConnection;
 
@@ -170,8 +171,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                         byte[] barrActual;
                         try (InputStream is = ((Blob) actualObj).getBinaryStream()) {
                             barrActual = is.readAllBytes();
-                        } catch (IOException e) {
-                            throw new SQLException("Failed to read Blob content at row " + (rowIdx + 1) + ", col " + displayCol + expressionContext, e);
+                        } catch (IOException ex) {
+                            throw new SQLException("Failed to read Blob content at row " + (rowIdx + 1) + ", col " + displayCol + expressionContext, ex);
                         }
                         byte[] barrExpected = (byte[]) expectedObj; // Casting to byte[] as expectedObj for Blob must be byte[]
 
@@ -184,9 +185,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                                 String.format("Blob content mismatch at row %d, col %d, byte position %d%s.%nExpected: %d%nActual:   %d",
                                     rowIdx + 1, displayCol, y, expressionContext, barrExpected[y], barrActual[y]));
                         }
-                    } else if (actualObj instanceof Double || actualObj instanceof Float ||
-                               actualObj instanceof BigDecimal || expectedObj instanceof Double ||
-                               expectedObj instanceof Float || expectedObj instanceof BigDecimal) {
+                    } else if (actualObj instanceof Double || actualObj instanceof Float
+                               || actualObj instanceof BigDecimal || expectedObj instanceof Double
+                               || expectedObj instanceof Float || expectedObj instanceof BigDecimal) {
 
                         BigDecimal bdActual;
                         BigDecimal bdExpected;
@@ -213,13 +214,13 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                             continue;
                         }
 
-                        final int SCALE = 3;
-                        final double DELTA = 0.001; // small tolerance for rounding errors
+                        final int scale = 3;
+                        final double delta = 0.001; // small tolerance for rounding errors
 
-                        double roundedActual = bdActual.setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
-                        double roundedExpected = bdExpected.setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+                        double roundedActual = bdActual.setScale(scale, RoundingMode.HALF_UP).doubleValue();
+                        double roundedExpected = bdExpected.setScale(scale, RoundingMode.HALF_UP).doubleValue();
 
-                        assertEquals(roundedExpected, roundedActual, DELTA,
+                        assertEquals(roundedExpected, roundedActual, delta,
                             String.format("Expected floating-point value to be equal with tolerance at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
                                 rowIdx + 1, displayCol, expressionContext,
                                 expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),

@@ -78,10 +78,10 @@ class PowerOperationsTest extends UcanaccessBaseTest {
 
         // column as exponent (POWER(num, exp_val))
         checkQuery("SELECT num, exp_val, POWER(num, exp_val) FROM t_powerop ORDER BY num", recs(
-            rec(-2.0, 2.0, 4),      // POWER(-2.0, 2.0) = 4.0
-            rec(4.5, 2.0, 20.25),   // POWER(4.5, 2.0) = 20.25
-            rec(8.0, 1.0/3.0, 2.0), // POWER(8.0, 1.0/3.0) = 2.0
-            rec(10.0, -1.0, 0.1)    // POWER(10.0, -1.0) = 0.1
+            rec(-2.0, 2.0, 4),        // POWER(-2.0, 2.0) = 4.0
+            rec(4.5, 2.0, 20.25),     // POWER(4.5, 2.0) = 20.25
+            rec(8.0, 1.0 / 3.0, 2.0), // POWER(8.0, 1.0/3.0) = 2.0
+            rec(10.0, -1.0, 0.1)      // POWER(10.0, -1.0) = 0.1
         ));
 
         // mixed constant and column in POWER function

@@ -14,7 +14,7 @@ class CharsetGBKTest extends UcanaccessBaseFileTest {
         init();
 
         ucanaccess = buildConnection().withDbPath(getAccessTempPath()).withProp(Metadata.Property.charset, "GBK").build();
-        String testSql ="SELECT * FROM table1";
+        String testSql = "SELECT * FROM table1";
         dumpQueryResult(testSql);
 
         try (PreparedStatement ps = ucanaccess.prepareStatement(testSql);

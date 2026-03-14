@@ -8,8 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import java.sql.ResultSet;
 
 /**
- * Test to verify fix for <a href="https://github.com/spannm/ucanaccess/issues/22">issue #22</a> (Github) "The SQL Type of the AutoNumber column is different when loading an existing table and immediately after executing the CREATE TABLE statement".
- * </p>
+ * Test to verify fix for <a href="https://github.com/spannm/ucanaccess/issues/22">issue #22</a> (Github) "The SQL Type of the AutoNumber column
+ * is different when loading an existing table and immediately after executing the CREATE TABLE statement".
+ * <p>
  * Thanks to <a href="https://github.com/Takumi-Inoue-hulft">Takumi-Inoue-hulft</a> for reporting.
  */
 class AutoNumberDataTypeTest extends UcanaccessBaseTest {

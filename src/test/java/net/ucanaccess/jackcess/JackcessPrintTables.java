@@ -23,7 +23,12 @@ import java.util.stream.Collectors;
  * For each table found, it outputs the table name and the total row count. If a table cannot
  * be loaded or an error occurs during inspection, an error message is printed to the standard error stream.
  */
-public class JackcessPrintTables {
+public final class JackcessPrintTables {
+
+    private JackcessPrintTables() {
+        throw new UnsupportedOperationException(
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+    }
 
     public static void main(String[] args) throws IOException {
         List<Path> dbFiles = Arrays.stream(args)

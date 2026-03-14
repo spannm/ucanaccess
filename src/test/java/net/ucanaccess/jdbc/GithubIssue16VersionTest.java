@@ -24,15 +24,15 @@ class GithubIssue16VersionTest extends UcanaccessBaseTest {
         Date sqlDt = Date.valueOf(LocalDate.now());
         BigDecimal amt = new BigDecimal(0.01);
 
-        executeStatements(String.join(" ", "CREATE TABLE", tbl, "("
-                , "Donor_ID INTEGER,"
-                , "Batch INTEGER, "
-                , "[Donation Date] DATETIME,"
-                , "[Deposit Date] DATETIME, "
-                , "[Donation Type] TEXT(64),"
-                , "[Amount] NUMERIC(12,3),"
-                , "[Designation] TEXT(64)"
-                , ")"));
+        executeStatements(String.join(" ", "CREATE TABLE", tbl, "(",
+                "Donor_ID INTEGER,",
+                "Batch INTEGER, ",
+                "[Donation Date] DATETIME,",
+                "[Deposit Date] DATETIME, ",
+                "[Donation Type] TEXT(64),",
+                "[Amount] NUMERIC(12,3),",
+                "[Designation] TEXT(64)",
+                ")"));
 
         try (PreparedStatement ps = ucanaccess.prepareStatement(
             "INSERT INTO " + tbl + " (`Donor_ID`, `Batch`, `Donation Date`, `Deposit Date`, `Donation Type`, `Amount`, `Designation`) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
