@@ -10,7 +10,6 @@
 *.iml
 .checkstyle
 .idea
-.mvn
 
 .~lock*
 *.kate-swp
