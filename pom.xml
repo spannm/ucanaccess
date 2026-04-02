@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>68</version>
+        <version>69</version>
     </parent>
 
     <groupId>io.github.spannm</groupId>
@@ -60,8 +60,8 @@
         <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-        <tag></tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <issueManagement>
         <system>Github</system>
@@ -113,7 +113,7 @@
         <dep.junit.version>5.14.3</dep.junit.version>
         <dep.assertj.version>3.27.7</dep.assertj.version>
         <dep.mockito.version>5.23.0</dep.mockito.version>
-        <dep.log4j-to-slf4j.version>2.25.3</dep.log4j-to-slf4j.version>
+        <dep.log4j-to-slf4j.version>2.25.4</dep.log4j-to-slf4j.version>
 
         <dep.plugin.maven-fluido-skin.version>2.1.0</dep.plugin.maven-fluido-skin.version>
 
