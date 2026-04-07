@@ -69,6 +69,8 @@ public class CompositeCommand implements ICommand {
                     }
                 }
             }
+            // if cfa is empty, we should at least say somthing here (i.e. log a warning) if
+            // not doing something (i.e. throw an exception). quietly skipping an update is bad.
             return cfa;
         }).orThrow(UcanaccessSQLException::new);
     }

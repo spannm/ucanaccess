@@ -102,9 +102,10 @@ public class Persist2Jet {
                 if (value != null) {
                     if (value instanceof TimestampData && column.getType().equals(DataType.SHORT_DATE_TIME)) {
                         TimestampData ts = (TimestampData) value;
+                        long millisNanos = ts.getNanos() / 1_000_000L * 1_000_000L;
                         LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
                                 .plusSeconds(ts.getSeconds())
-                                .plusNanos(ts.getNanos());
+                                .plusNanos(millisNanos);
                         values[i] = val;
                     }
                     if (value instanceof BlobData) {
