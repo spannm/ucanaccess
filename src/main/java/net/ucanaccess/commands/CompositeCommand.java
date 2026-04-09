@@ -5,10 +5,14 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 import java.util.*;
 
 public class CompositeCommand implements ICommand {
+    private final Logger               logger        = System.getLogger(getClass().getName());
+
     private final List<ICursorCommand> composite     = new ArrayList<>();
     private Map<String, Object>        currentRow;
     private String                     execId;
@@ -50,6 +54,16 @@ public class CompositeCommand implements ICommand {
         return hasNext;
     }
 
+    /**
+     * Persists the composite commands by iterating over the table cursor and matching rows.
+     * <p>
+     * For each row in the table, it checks if any command in the composite list matches
+     * the current row's data pattern. If a match is found, the command is executed
+     * against the current row.
+     *
+     * @return a composite feedback action containing all individual feedback actions
+     * @throws SQLException if a critical persistence mismatch occurs or database access fails
+     */
     @Override
     public IFeedbackAction persist() throws SQLException {
         return Try.catching(() -> {
@@ -69,6 +83,14 @@ public class CompositeCommand implements ICommand {
                     }
                 }
             }
+
+            // log warning for commands that could not be synchronized with the physical file
+            if (!composite.isEmpty()) {
+                logger.log(Level.WARNING,
+                    "Persistence mismatch for table {0}: {1} commands (Type: {2}) could not be matched in the Access file",
+                    new Object[] {getTableName(), composite.size(), composite.get(0).getType()});
+            }
+
             return cfa;
         }).orThrow(UcanaccessSQLException::new);
     }
@@ -80,4 +102,10 @@ public class CompositeCommand implements ICommand {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return toIdentString();
+    }
+
 }

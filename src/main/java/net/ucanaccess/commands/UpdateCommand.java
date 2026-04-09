@@ -14,6 +14,8 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.util.Try;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UpdateCommand extends AbstractCursorCommand {
+    private static final Logger          LOGGER = System.getLogger(UpdateCommand.class.getName());
     private final List<? extends Column> tableColumns;
     private final IndexSelector          indexSelector;
     private final Map<String, Object>    rowPattern;
@@ -89,6 +92,9 @@ public class UpdateCommand extends AbstractCursorCommand {
                 }
                 updateComplex(cur);
                 persist(cur);
+            } else {
+                LOGGER.log(Level.WARNING, "Update failed: record not found in table {0} for pattern {1}",
+                    new Object[] {getTableName(), rowPattern});
             }
         }).orThrow(UcanaccessSQLException::new);
         return new BlobAction(table, modifiedRow);
@@ -96,6 +102,10 @@ public class UpdateCommand extends AbstractCursorCommand {
 
     @Override
     public IFeedbackAction persistCurrentRow(Cursor cur) throws IOException {
+        if (!currentRowMatches(cur, cur.getCurrentRow())) {
+            LOGGER.log(Level.WARNING, "Current row does not match pattern in table {0}: {1}", getTableName(), cur.getCurrentRow());
+        }
+
         if (blobColumns != null) {
             for (Column col : blobColumns) {
                 Object val = cur.getCurrentRowValue(col);
@@ -163,15 +173,16 @@ public class UpdateCommand extends AbstractCursorCommand {
     }
 
     private void persist(Cursor cur) throws IOException {
+        LOGGER.log(Level.DEBUG, "Persisting update to table {0}", getTableName());
         Object[] mr = modifiedRow;
         if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {
-            Object[] newRowReorded = new Object[modifiedRow.length];
+            Object[] newRowReordered = new Object[modifiedRow.length];
             int j = 0;
             for (Column col : table.getColumns()) {
-                newRowReorded[col.getColumnIndex()] = modifiedRow[j];
+                newRowReordered[col.getColumnIndex()] = modifiedRow[j];
                 j++;
             }
-            mr = newRowReorded;
+            mr = newRowReordered;
         }
         cur.updateCurrentRow(mr);
     }

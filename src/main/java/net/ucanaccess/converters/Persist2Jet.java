@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,16 @@ public class Persist2Jet {
         return ar;
     }
 
+    /**
+     * Converts HSQLDB-specific data types to types compatible with the Jackcess persistence layer.
+     * <p>
+     * This method iterates through all columns of a table and transforms values (e.g., {@link TimestampData},
+     * {@link BlobData}) into their corresponding Java types (e.g., {@link LocalDateTime}, {@code byte[]}).
+     *
+     * @param values the array of values to be converted, modified in place
+     * @param t the target Access {@link Table}
+     * @throws SQLException if a type conversion fails or a value is out of range
+     */
     public void convertRowTypes(Object[] values, Table t) throws SQLException {
         try {
             List<? extends Column> columns = t.getColumns();
@@ -99,37 +110,43 @@ public class Persist2Jet {
                 Object value = values[i];
                 Column column = it.next();
 
-                if (value != null) {
-                    if (value instanceof TimestampData && column.getType().equals(DataType.SHORT_DATE_TIME)) {
-                        TimestampData ts = (TimestampData) value;
-                        LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
-                                .plusSeconds(ts.getSeconds())
-                                .plusNanos(ts.getNanos());
-                        values[i] = val;
-                    }
-                    if (value instanceof BlobData) {
-                        BlobData bd = (BlobData) value;
-                        JDBCConnection hsqlConn =
-                                (JDBCConnection) UcanaccessConnection.getCtxConnection().getHSQLDBConnection();
-                        SessionInterface si = hsqlConn.getSession();
-                        long length = bd.length(si);
-                        values[i] = ((BlobData) value).getBytes(si, 0, (int) length);
-                    }
-                    if (value instanceof JavaObjectData) {
-                        JavaObjectData jod = (JavaObjectData) value;
-                        Object obj = jod.getObject();
-                        if (obj instanceof ComplexBase[] && !(obj instanceof UnsupportedValue[])) {
-                            values[i] = obj;
-                        } else {
-                            throw new UnsupportedTypeException(Optional.ofNullable(obj).map(o -> o.getClass().getName()).orElse("null"));
-                        }
-                    }
+                if (value == null) {
+                    continue;
+                }
 
-                    if (column.getType().equals(DataType.BYTE)) {
-                        int vl = (Integer) value;
-                        if (vl < 0 || vl > 256) {
-                            throw new SQLException("Data out of range");
-                        }
+                if (value instanceof TimestampData && column.getType().equals(DataType.SHORT_DATE_TIME)) {
+                    TimestampData ts = (TimestampData) value;
+
+                    // Access supports only millisecond precision for Date/Time.
+                    // Truncating to millis ensures that the row pattern match
+                    // in UpdateCommand/CompositeCommand does not fail due to nano-precision
+
+                    LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)
+                            .plusSeconds(ts.getSeconds())
+                            .plusNanos(ts.getNanos())
+                            .truncatedTo(ChronoUnit.MILLIS);
+                    values[i] = val;
+                } else if (value instanceof BlobData) {
+                    BlobData bd = (BlobData) value;
+                    JDBCConnection hsqlConn =
+                            (JDBCConnection) UcanaccessConnection.getCtxConnection().getHSQLDBConnection();
+                    SessionInterface si = hsqlConn.getSession();
+                    long length = bd.length(si);
+                    values[i] = ((BlobData) value).getBytes(si, 0, (int) length);
+                }  else if (value instanceof JavaObjectData) {
+                    JavaObjectData jod = (JavaObjectData) value;
+                    Object obj = jod.getObject();
+                    if (obj instanceof ComplexBase[] && !(obj instanceof UnsupportedValue[])) {
+                        values[i] = obj;
+                    } else {
+                        throw new UnsupportedTypeException(Optional.ofNullable(obj).map(o -> o.getClass().getName()).orElse("null"));
+                    }
+                }
+
+                if (column.getType().equals(DataType.BYTE)) {
+                    int vl = (Integer) value;
+                    if (vl < 0 || vl > 256) {
+                        throw new SQLException("Data out of range");
                     }
                 }
             }
