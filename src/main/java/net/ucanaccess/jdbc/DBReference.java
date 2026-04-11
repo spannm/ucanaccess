@@ -24,17 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,6 +69,8 @@ public class DBReference {
     private boolean                                 concatNulls;
     private boolean                                 mirrorRecreated;
     private Charset                                 charset;
+    private Integer                                 hsqldbCacheSize;
+    private Integer                                 hsqldbCacheRows;
 
     public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd, Charset _charset)
         throws IOException {
@@ -331,6 +323,13 @@ public class DBReference {
         try (Statement st = _conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute(String.format("SET DATABASE SQL CONCAT NULLS %s", concatNulls));
+            if (hsqldbCacheSize != null) {
+                // HSQLDB command to set the row cache size
+                st.execute(String.format("SET FILES CACHE SIZE %d", hsqldbCacheSize));
+            }
+            if (hsqldbCacheRows != null) {
+                st.execute(String.format("SET FILES CACHE ROWS %d", hsqldbCacheRows));
+            }
             if (lobScale == null && inMemory) {
                 st.execute("SET FILES LOB SCALE 1");
             } else if (lobScale != null) {
@@ -346,7 +345,12 @@ public class DBReference {
     public Connection getHSQLDBConnection(Session _session) throws SQLException {
         boolean keptMirror = firstConnection && toKeepHsql != null && toKeepHsql.exists();
 
-        Connection conn = DriverManager.getConnection(getHsqlUrl(_session),
+        String url = getHsqlUrl(_session);
+        if (firstConnection) {
+            logger.log(Level.INFO, "HSQLDB driver url: {0}", url);
+        }
+
+        Connection conn = DriverManager.getConnection(url,
             Optional.ofNullable(_session.getUser()).orElse("Admin"), _session.getPassword());
 
         if (version == null) {
@@ -438,8 +442,20 @@ public class DBReference {
                     }
                 }));
             }
+
             String mro = mirrorReadOnly ? ";readonly=true" : "";
-            return "jdbc:hsqldb:" + (inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
+
+            String url = new StringBuilder("jdbc:hsqldb:")
+                .append(inMemory ? "mem:" + id : tempHsql.getAbsolutePath())
+                .append(enc)
+                .append(log)
+                .append(mro)
+                .append(";hsqldb.cache_size=1000")
+                .append(";hsqldb.cache_rows=100")
+                .toString();
+
+            return url;
+
         } catch (IOException _ex) {
             throw new UcanaccessSQLException(_ex);
         }
@@ -637,6 +653,14 @@ public class DBReference {
 
     public void setConcatNulls(boolean _concatNulls) {
         concatNulls = _concatNulls;
+    }
+
+    public void setHsqldbCacheSize(Integer _hsqldbCacheSize) {
+        hsqldbCacheSize = _hsqldbCacheSize;
+    }
+
+    public void setHsqldbCacheRows(Integer _hsqldbCacheRows) {
+        hsqldbCacheRows = _hsqldbCacheRows;
     }
 
     /**
