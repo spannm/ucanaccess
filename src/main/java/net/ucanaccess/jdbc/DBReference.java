@@ -102,6 +102,8 @@ public final class DBReference {
      * {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}.
      */
     private boolean                                 allowRemoteLinks;
+    private Integer                                 hsqldbCacheSize;
+    private Integer                                 hsqldbCacheRows;
 
     public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, final String pwd, Charset charset)
         throws IOException {
@@ -392,6 +394,13 @@ public final class DBReference {
         try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute(String.format("SET DATABASE SQL CONCAT NULLS %s", concatNulls));
+            if (hsqldbCacheSize != null) {
+                // HSQLDB command to set the row cache size
+                st.execute(String.format("SET FILES CACHE SIZE %d", hsqldbCacheSize));
+            }
+            if (hsqldbCacheRows != null) {
+                st.execute(String.format("SET FILES CACHE ROWS %d", hsqldbCacheRows));
+            }
             if (lobScale == null && inMemory) {
                 st.execute("SET FILES LOB SCALE 1");
             } else if (lobScale != null) {
@@ -495,6 +504,7 @@ public final class DBReference {
                     }
                 }));
             }
+
             String mro = mirrorReadOnly ? ";readonly=true" : "";
             return "jdbc:hsqldb:" + (inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
         } catch (IOException ex) {
@@ -716,6 +726,20 @@ public final class DBReference {
 
     public void setConcatNulls(boolean concatNulls) {
         this.concatNulls = concatNulls;
+    }
+
+    /**
+     * Sets the HSQLDB row cache size in KB, applied with {@code SET FILES CACHE SIZE}.
+     */
+    public void setHsqldbCacheSize(Integer hsqldbCacheSize) {
+        this.hsqldbCacheSize = hsqldbCacheSize;
+    }
+
+    /**
+     * Sets the maximum number of rows in the HSQLDB row cache, applied with {@code SET FILES CACHE ROWS}.
+     */
+    public void setHsqldbCacheRows(Integer hsqldbCacheRows) {
+        this.hsqldbCacheRows = hsqldbCacheRows;
     }
 
     /**
