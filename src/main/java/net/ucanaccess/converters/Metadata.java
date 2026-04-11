@@ -64,7 +64,9 @@ public class Metadata {
         skipIndexes(Boolean.class, false, 10),
         supportsAccessLike(Boolean.class, false, 10),
         charset(String.class, null, 20),
-        sysSchema(Boolean.class, false, 10);
+        sysSchema(Boolean.class, false, 10),
+        hsqldbCacheSize(Integer.class, null, 10),
+        hsqldbCacheRows(Integer.class, null, 10);
 
         private final Class<?>     type;
         private final int          maxLen;

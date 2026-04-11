@@ -42,6 +42,22 @@ public class Main {
         }
     }
 
+    /**
+     * Main entry point for the UCanAccess console application.
+     * <p>
+     * This method handles the initial setup, including parsing command-line arguments,
+     * loading connection properties, and managing the database connection process.
+     * It supports passing a .properties file or a direct path to an Access database.
+     * If required information like the file path or password is missing, it will
+     * interactively prompt the user for input.
+     * <p>
+     * The method also implements an automatic memory management heuristic: for files
+     * exceeding 30MB, it disables the in-memory backing store to preserve heap space
+     * unless a custom Jackcess opener is provided.
+     *
+     * @param _args command-line arguments (optional: path to .properties or database file)
+     * @throws Exception if system resources are unavailable or database access fails
+     */
     public static void main(String[] _args) throws Exception {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info

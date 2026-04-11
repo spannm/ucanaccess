@@ -19,4 +19,10 @@ public class Session {
     public void setUser(String _user) {
         user = _user;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[user=" + user + "]";
+    }
+
 }

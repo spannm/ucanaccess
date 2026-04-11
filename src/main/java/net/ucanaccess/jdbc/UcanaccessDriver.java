@@ -18,9 +18,21 @@ import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -105,6 +117,14 @@ public final class UcanaccessDriver implements Driver {
                     if (props.containsKey(lobScale)) {
                         Integer vl = validateLobScale(props.get(lobScale));
                         dbRef.setLobScale(vl);
+                    }
+
+                    if (props.containsKey(hsqldbCacheSize)) {
+                        dbRef.setHsqldbCacheSize(Integer.parseInt(props.get(hsqldbCacheSize)));
+                    }
+
+                    if (props.containsKey(hsqldbCacheRows)) {
+                        dbRef.setHsqldbCacheRows(Integer.parseInt(props.get(hsqldbCacheRows)));
                     }
 
                     if (props.containsKey(keepMirror)) {

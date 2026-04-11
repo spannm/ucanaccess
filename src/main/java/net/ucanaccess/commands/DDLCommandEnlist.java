@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -24,7 +24,7 @@ public class DDLCommandEnlist {
     private String[]            types;
     private String[]            defaults;
     private Boolean[]           notNulls;
-    private Map<String, String> columnMap = new HashMap<>();
+    private Map<String, String> columnMap = new LinkedHashMap<>();
 
     private void enlistCreateTable(String _sql, DDLType _ddlType) throws SQLException {
         String tn = _ddlType.getDBObjectName();
@@ -157,7 +157,7 @@ public class DDLCommandEnlist {
         String execId = UcanaccessConnection.getCtxExcId();
         List<String> typeList = new ArrayList<>();
         List<String> defaultList = new ArrayList<>();
-        columnMap = new HashMap<>();
+        columnMap = new LinkedHashMap<>();
         List<Boolean> notNullList = new ArrayList<>();
         String tknt = columnName + columnDefinition;
         parseColumnTypes(typeList, defaultList, notNullList, tknt);
@@ -278,7 +278,7 @@ public class DDLCommandEnlist {
 
         List<String> typeList = new ArrayList<>();
         List<String> defaultList = new ArrayList<>();
-        columnMap = new HashMap<>();
+        columnMap = new LinkedHashMap<>();
         List<Boolean> notNullList = new ArrayList<>();
         for (String token : tokens) {
             String tknt = token.trim();
