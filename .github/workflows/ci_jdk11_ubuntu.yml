@@ -25,11 +25,13 @@ jobs:
                 distribution: 'temurin'
                 cache: maven
 
-        -   name: Build with Maven/JDK 11 on Ubuntu
+        -   name: Build with Maven/JDK 11
             run: mvn --batch-mode --file pom.xml clean package
 
     deploy:
         needs: build
+        # skip the deploy job for contributors/forks who lack the required secrets
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
