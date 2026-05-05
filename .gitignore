@@ -1,0 +1,9 @@
+**/.classpath
+**/.eclipse-pmd
+**/.idea
+**/.pmd
+**/.pmdruleset.xml
+**/.project
+**/.settings
+**/bin/
+**/target/
