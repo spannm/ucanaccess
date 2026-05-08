@@ -1,28 +1,35 @@
 <div style="text-align: center;">
   <p>
     <a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess">
-      <img src="https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central" alt="Maven Central Version">
+      <img src="https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central&style=flat-square" alt="Maven Central Version">
     </a>
-    <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Last%20Update" alt="Maven Central Last Update">
+    <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
+    <a href="https://github.com/spannm/ucanaccess/stargazers">
+      <img src="https://img.shields.io/github/stars/spannm/ucanaccess?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars">
+    </a>
+    <br>
     <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_ubuntu.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)" alt="GitHub Actions Workflow Status">
+      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status">
     </a>
     <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_win.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)" alt="GitHub Actions Workflow Status">
+      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status">
     </a>
-    <a href="https://github.com/spannm/ucanaccess/stargazers">
-      <img src="https://img.shields.io/github/stars/spannm/ucanaccess?logoColor=%233a82c2" alt="GitHub Repo stars">
+    <a href="https://javadoc.io/doc/io.github.spannm/ucanaccess">
+      <img src="https://javadoc.io/badge2/io.github.spannm/ucanaccess/javadoc.svg?style=flat-square" alt="Javadoc">
     </a>
-  </p>
+</p>
 
   <h1>UCanAccess</h1>
   <h3>The modern bridge between Java and Microsoft Access</h3>
 
 </div>
 
-**UCanAccess** is a high-performance, open-source Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb` and `.accdb`) without needing any native Windows libraries (R-I-P `OdbcJdbcBridge` 🪦).
+**UCanAccess** is a open-source pure-Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb`, `.accdb`) without needing any native Windows libraries - R.I.P. `OdbcJdbcBridge` 🪦.
 
-Whether you are building a modern Spring Boot application or using classic tools like LibreOffice or SQuirreL SQL, UCanAccess provides a reliable, pure-Java way to read and write your data.
+<p>
+  <strong>New to UCanAccess?</strong> Check out the introduction guide on 
+  <a href="https://foojay.io/today/ucanaccess-java-ms-access-jdbc-guide/">Foojay.io: UCanAccess – Java MS Access JDBC Guide</a>
+</p>
 
 <div align="center"> ──────────────────── </div>
 
@@ -32,7 +39,7 @@ Whether you are building a modern Spring Boot application or using classic tools
 
 * **Drop-in Replacement**: Fully compatible with previous UCanAccess versions.
 
-* **Modern Core**: Built on top of the latest **Jackcess 5.1.2** and **HSQLDB 2.7.4** for maximum stability and security.
+* **Modern Core**: Built on top of the latest **Jackcess 5.1.4** and **HSQLDB 2.7.4** for maximum stability and security.
 
 * **Comprehensive SQL Support**: Supports SELECT, INSERT, UPDATE, DELETE, and even complex DDL operations like `ALTER TABLE`.
 
