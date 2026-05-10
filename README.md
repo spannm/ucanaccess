@@ -1,28 +1,15 @@
-<div style="text-align: center;">
-  <p>
-    <a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess">
-      <img src="https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central&style=flat-square" alt="Maven Central Version">
-    </a>
-    <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
-    <a href="https://github.com/spannm/ucanaccess/stargazers">
-      <img src="https://img.shields.io/github/stars/spannm/ucanaccess?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars">
-    </a>
-    <br>
-    <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_ubuntu.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status">
-    </a>
-    <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_win.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status">
-    </a>
-    <a href="https://javadoc.io/doc/io.github.spannm/ucanaccess">
-      <img src="https://javadoc.io/badge2/io.github.spannm/ucanaccess/javadoc.svg?style=flat-square" alt="Javadoc">
-    </a>
-</p>
-
-  <h1>UCanAccess</h1>
-  <h3>The modern bridge between Java and Microsoft Access</h3>
-
+<div align="center">
+  <a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess"><img src="https://img.shields.io/maven-central/v/io.github.spannm/ucanaccess?label=Maven%20Central&style=flat-square" alt="Maven Central Version"></a>
+  <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
+  <a href="https://github.com/spannm/ucanaccess/stargazers"><img src="https://img.shields.io/github/stars/spannm/ucanaccess?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
+  <br>
+  <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_ubuntu.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_win.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://javadoc.io/doc/io.github.spannm/ucanaccess"><img src="https://javadoc.io/badge2/io.github.spannm/ucanaccess/javadoc.svg?style=flat-square" alt="Javadoc"></a>
 </div>
+
+<h1 align="center">UCanAccess</h1>
+<h3 align="center">The modern bridge between Java and Microsoft Access</h3>
 
 **UCanAccess** is a open-source pure-Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb`, `.accdb`) without needing any native Windows libraries - R.I.P. `OdbcJdbcBridge` 🪦.
 
@@ -57,9 +44,9 @@
 
 * **Main Dependencies**:
 
-  * [Jackcess](https://github.com/spannm/jackcess/)
+    * [Jackcess](https://github.com/spannm/jackcess/)
 
-  * [HyperSQL Database (HSQLDB)](http://hsqldb.org/)
+    * [HyperSQL Database (HSQLDB)](http://hsqldb.org/)
 
 <p style="height: 20px;">&nbsp;</p>
 
@@ -144,4 +131,3 @@ UCanAccess is licensed under the **Apache License, Version 2.0**.
   </tr>
 </table>
 </div>
-
