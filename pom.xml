@@ -57,7 +57,7 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh//git@github.com/${developerId}/${project.artifactId}.git</connection>
+        <connection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
         <tag>HEAD</tag>
@@ -101,7 +101,6 @@
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
-        <dep.jackcess.artifactId>jackcess</dep.jackcess.artifactId>
         <dep.jackcess.version>5.1.4</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
@@ -154,7 +153,7 @@
 
         <dependency>
             <groupId>io.github.spannm</groupId>
-            <artifactId>${dep.jackcess.artifactId}</artifactId>
+            <artifactId>jackcess</artifactId>
             <version>${dep.jackcess.version}</version>
         </dependency>
 
@@ -368,6 +367,9 @@
                                     <excludes>
                                         <!-- special handling for the META-INF directory -->
                                         <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
