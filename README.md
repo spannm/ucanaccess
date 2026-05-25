@@ -18,7 +18,9 @@
   <a href="https://foojay.io/today/ucanaccess-java-ms-access-jdbc-guide/">Foojay.io: UCanAccess – Java MS Access JDBC Guide</a>
 </p>
 
-<div align="center"> ──────────────────── </div>
+<div align="center">
+  <img src="docs/images/ucanaccess-logo.svg" alt="UCanAccess Logo" width="360">
+</div>
 
 ## ✨ Key Features
 
