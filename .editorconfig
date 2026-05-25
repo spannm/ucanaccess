@@ -15,8 +15,7 @@ insert_final_newline     = true
 max_line_length = 200
 
 # ── Build & Config (XML / POM) ────────────────────────────────────────────────
-[{pom.xml,*.xml,*.xsd}]
-indent_size     = 4
+[{*.xml,*.xsd}]
 max_line_length = 200
 
 # ── Web / Cloud Config ────────────────────────────────────────────────────────
@@ -32,10 +31,7 @@ max_line_length          = off
 # ── Shell scripts ─────────────────────────────────────────────────────────────
 [*.sh]
 indent_size = 2
-end_of_line = lf
 
 # ── Git Metadata ──────────────────────────────────────────────────────────────
 # Ensure consistent line endings for git-related files
 [{.gitignore,.gitattributes}]
-end_of_line = lf
-
