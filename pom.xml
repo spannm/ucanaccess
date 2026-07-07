@@ -463,6 +463,7 @@
 
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <basepom.check.skip-extended>true</basepom.check.skip-extended>
+                <cyclonedx.skip>true</cyclonedx.skip>
             </properties>
         </profile>
 
