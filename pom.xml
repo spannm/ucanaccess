@@ -98,6 +98,8 @@
         <developerId>spannm</developerId>
         <githubBaseUrl>https://github.com/${developerId}/</githubBaseUrl>
 
+        <module.name>${project.groupId}.${project.artifactId}</module.name>
+
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
@@ -271,6 +273,33 @@
                         <createBackupFile>false</createBackupFile>
                         <expandEmptyElements>false</expandEmptyElements>
                         <nrOfIndentSpace>4</nrOfIndentSpace>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestEntries combine.children="append">
+                                <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <additionalOptions combine.children="append">
+                            <additionalOption>--add-exports</additionalOption>
+                            <additionalOption>org.hsqldb/org.hsqldb=${module.name}</additionalOption>
+                            <additionalOption>--add-exports</additionalOption>
+                            <additionalOption>org.hsqldb/org.hsqldb.error=${module.name}</additionalOption>
+                            <additionalOption>--add-exports</additionalOption>
+                            <additionalOption>org.hsqldb/org.hsqldb.types=${module.name}</additionalOption>
+                        </additionalOptions>
                     </configuration>
                 </plugin>
 
