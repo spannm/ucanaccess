@@ -103,7 +103,7 @@
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
-        <dep.jackcess.version>5.1.4</dep.jackcess.version>
+        <dep.jackcess.version>5.1.5</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
         <dep.hsqldb.classifier />

@@ -29,7 +29,7 @@
 
 * **Drop-in Replacement**: Fully compatible with previous UCanAccess versions.
 
-* **Modern Core**: Built on top of the latest **Jackcess 5.1.4** and **HSQLDB 2.7.4** for maximum stability and security.
+* **Modern Core**: Built on top of the latest **Jackcess 5.1.5** and **HSQLDB 2.7.4** for maximum stability and security.
 
 * **Comprehensive SQL Support**: Supports SELECT, INSERT, UPDATE, DELETE, and even complex DDL operations like `ALTER TABLE`.
 
