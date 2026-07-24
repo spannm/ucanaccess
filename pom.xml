@@ -120,7 +120,6 @@
 
         <!-- additional plugins not defined in parent -->
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
-        <dep.plugin.sonar.version>5.5.0.6356</dep.plugin.sonar.version>
         <dep.plugin.cyclonedx.version>2.9.2</dep.plugin.cyclonedx.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
 
@@ -505,43 +504,6 @@
                     <url>https://maven.pkg.github.com/${developerId}/${project.artifactId}</url>
                 </snapshotRepository>
             </distributionManagement>
-        </profile>
-
-        <profile>
-            <!-- mvn verify -P sonarcloud -->
-            <id>sonarcloud</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <sonar.skip>false</sonar.skip>
-                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.organization>${developerId}</sonar.organization>
-                <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
-
-                <!-- sonar.token>YOUR_TOKEN_HERE</sonar.token -->
-
-                <basepom.test.skip>true</basepom.test.skip>
-                <basepom.check.skip-all>true</basepom.check.skip-all>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <version>${dep.plugin.sonar.version}</version>
-                        <executions>
-                            <execution>
-                                <id>sonar-verify</id>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                                <phase>verify</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <profile>
