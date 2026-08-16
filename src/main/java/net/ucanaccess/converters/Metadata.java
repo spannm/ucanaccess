@@ -48,6 +48,18 @@ public class Metadata {
         ignoreCase(Boolean.class, true, 10),
         immediatelyReleaseResources(Boolean.class, false, 10),
         inactivityTimeout(Integer.class, 2, 10),
+        /**
+         * Fully qualified class name of a custom {@code IJackcessOpenerInterface} implementation
+         * to use for opening/decrypting the database file.
+         * <p>
+         * <strong>Security note:</strong> the value of this property is instantiated via reflection
+         * using its public no-arg constructor. It must therefore only ever be set from trusted,
+         * static application configuration. Never populate this property from untrusted or
+         * user-supplied input (e.g. HTTP request parameters, values forwarded unchecked from an
+         * external system), as doing so allows an attacker to trigger the construction of an
+         * arbitrary class implementing {@code IJackcessOpenerInterface} that is reachable on the
+         * application's classpath.
+         */
         jackcessOpener(String.class, null, 500),
         keepMirror(String.class, null, 500),
         lobScale(Integer.class, 2, 2, 1, 2, 4, 8, 16, 32),

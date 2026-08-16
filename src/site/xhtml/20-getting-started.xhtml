@@ -21,7 +21,7 @@
 &lt;dependency&gt;
     &lt;groupId&gt;io.github.spannm&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
-    &lt;version&gt;5.1.3&lt;/version&gt;
+    &lt;version&gt;5.1.7&lt;/version&gt;
 &lt;/dependency&gt;</pre>
 
         <h2>Establishing a UCanAccess connection</h2>
@@ -177,6 +177,15 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file: <strong>Example
             for UCanAccess2. Notice that you must use UCanAccess 2.x.x with jackcess-encrypt-2.x.x and all related
             dependencies</strong><br/>
+        </p>
+        <p>
+            <strong>Security note:</strong> the class name passed to <code>jackcessOpener</code> is loaded and
+            instantiated via reflection using its public no-arg constructor. This parameter must therefore only ever
+            be set from trusted, static application configuration &#8211; never from untrusted or user-supplied input
+            (e.g. values taken from an HTTP request, or forwarded unchecked from an external system). Populating
+            <code>jackcessOpener</code> from untrusted input could allow an attacker to trigger the construction of
+            an arbitrary class implementing <i>IJackcessOpenerInterface</i> that is reachable on the application's
+            classpath.
         </p>
         <pre>
 package yourPackage.example;

@@ -280,13 +280,31 @@ public final class UcanaccessDriver implements Driver {
         return true;
     }
 
+    /**
+     * Loads the class with the given name and instantiates it via its public no-arg constructor,
+     * provided it implements {@link IJackcessOpenerInterface}.
+     * <p>
+     * <strong>Security note:</strong> {@code className} must only ever originate from trusted,
+     * static application configuration (see the {@code jackcessOpener} connection property).
+     * It must never be built from untrusted or user-supplied input, since this method executes
+     * the no-arg constructor of whatever class is named, and any class implementing
+     * {@link IJackcessOpenerInterface} that is reachable on the classpath will pass the type
+     * check regardless of what its constructor does.
+     *
+     * @param className fully qualified name of a class implementing {@link IJackcessOpenerInterface}
+     * @return a new instance of the given class
+     * @throws UcanaccessSQLException if the class cannot be loaded, does not implement
+     *         {@link IJackcessOpenerInterface}, or cannot be instantiated via its no-arg constructor
+     */
     private IJackcessOpenerInterface newJackcessOpenerInstance(String className) throws UcanaccessSQLException {
-        Object instance = Try.catching(() -> Class.forName(className).getConstructor().newInstance()).orThrow(ex -> new UcanaccessSQLException("Failed to instantiate " + className, ex));
-
-        if (instance instanceof IJackcessOpenerInterface) {
-            return (IJackcessOpenerInterface) instance;
+        Class<?> clazz = Try.catching(() -> Class.forName(className))
+            .orThrow(ex -> new UcanaccessSQLException("Failed to load class " + className, ex));
+        if (!IJackcessOpenerInterface.class.isAssignableFrom(clazz)) {
+            throw new UcanaccessSQLException("Jackess Opener class must implement " + IJackcessOpenerInterface.class.getName());
         }
-        throw new UcanaccessSQLException("Jackess Opener class must implement " + IJackcessOpenerInterface.class.getName());
+        Object instance = Try.catching(() -> clazz.getConstructor().newInstance())
+            .orThrow(ex -> new UcanaccessSQLException("Failed to instantiate " + className, ex));
+        return (IJackcessOpenerInterface) instance;
     }
 
     /**
