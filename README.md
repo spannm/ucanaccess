@@ -63,20 +63,20 @@ To use UCanAccess in your project, add the following dependency.
 <dependency>
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.1.6</version>
+    <version>5.1.7</version>
 </dependency>
 ```
 
 ### Gradle (Groovy / `build.gradle`)
 
 ```groovy
-implementation 'io.github.spannm:ucanaccess:5.1.6'
+implementation 'io.github.spannm:ucanaccess:5.1.7'
 ```
 
 ### Gradle (Kotlin DSL / `build.gradle.kts`)
 
 ```kotlin
-implementation("io.github.spannm:ucanaccess:5.1.6")
+implementation("io.github.spannm:ucanaccess:5.1.7")
 ```
 
 <p style="height: 20px;">&nbsp;</p>
