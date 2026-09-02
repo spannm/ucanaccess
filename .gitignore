@@ -9,8 +9,8 @@
 **/NOTES.txt
 *.iml
 .checkstyle
-.idea
-
+.idea/*
+!.idea/icon.svg
 .~lock*
 *.kate-swp
 .m2-local-repo/**/*.jar
