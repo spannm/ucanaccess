@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
-    <description>Open-source pure Java JDBC driver for Access databases. Allows Java developers and client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write various versions of Microsoft Access databases.</description>
+    <description>Actively maintained, pure Java JDBC driver for Microsoft Access databases (.mdb, .accdb) requiring no native libraries. A maintained fork of the unmaintained net.sf.ucanaccess project, built on current Jackcess and HSQLDB versions with Java 11/17/21 support. Used by Java applications and JDBC client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write Microsoft Access databases.</description>
     <url>${githubBaseUrl}${project.artifactId}</url>
     <inceptionYear>2012</inceptionYear>
 

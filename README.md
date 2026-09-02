@@ -3,8 +3,8 @@
   <img src="https://img.shields.io/maven-central/last-update/io.github.spannm/ucanaccess?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
   <a href="https://github.com/spannm/ucanaccess/stargazers"><img src="https://img.shields.io/github/stars/spannm/ucanaccess?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
   <br>
-  <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_ubuntu.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
-  <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci_jdk11_win.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://github.com/spannm/ucanaccess/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/ci.yml?label=Build&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://github.com/spannm/ucanaccess/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/spannm/ucanaccess/codeql.yml?label=CodeQL&style=flat-square" alt="CodeQL Workflow Status"></a>
   <a href="https://javadoc.io/doc/io.github.spannm/ucanaccess"><img src="https://javadoc.io/badge2/io.github.spannm/ucanaccess/javadoc.svg?style=flat-square" alt="Javadoc"></a>
   <a href="https://apidia.net/mvn/io.github.spannm/ucanaccess"><img src="https://apidia.net/mvn/io.github.spannm/ucanaccess/badge_flat_square.svg" alt="APIdia"></a>
 </div>
@@ -81,6 +81,22 @@ implementation("io.github.spannm:ucanaccess:5.1.7")
 
 <p style="height: 20px;">&nbsp;</p>
 
+## 🔁 Migrating from `net.sf.ucanaccess`
+
+Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has had no release since 2020 and no longer receives security or compatibility updates. Switching to this fork is a **drop-in, API-compatible change** — no code changes required, just update your dependency coordinates:
+
+```diff
+- <groupId>net.sf.ucanaccess</groupId>
++ <groupId>io.github.spannm</groupId>
+  <artifactId>ucanaccess</artifactId>
+- <version>5.0.1</version>
++ <version>5.1.7</version>
+```
+
+You get current Jackcess/HSQLDB versions (with their CVE fixes), tested Java 11/17/21 support on Linux and Windows, and active maintenance — with the same JDBC driver class and connection URL you already use.
+
+<p style="height: 20px;">&nbsp;</p>
+
 ## 🚦 Quick Start
 
 Connecting to your database is as simple as:
@@ -99,10 +115,10 @@ try (Connection conn = DriverManager.getConnection(url)) {
 
 ## ❤️ Why this Fork?
 
-The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020.
+The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020, leaving `net.sf.ucanaccess:ucanaccess` unmaintained at version 5.0.1.
 As a long-time contributor and Java enthusiast, I decided to give UCanAccess a **new home**.
 
-My goal is to keep this essential tool alive, maintain a **high test coverage** (JUnit 5), and ensure it meets modern **Clean Code** and **SOLID** standards.
+My goal is to keep this essential tool alive, maintain a **high test coverage** (JUnit 5), and ensure it meets modern **Clean Code** and **SOLID** standards. If you maintain a project that still depends on `net.sf.ucanaccess`, see [Migrating from `net.sf.ucanaccess`](#-migrating-from-netsfucanaccess) above — a PR bumping the dependency is very welcome.
 
 <p style="height: 20px;">&nbsp;</p>
 
