@@ -380,7 +380,6 @@ public class DBReference {
         }
     }
 
-    @SuppressWarnings("java:S2095") // suppress sonarcloud warning regarding try-with-resources
     public Connection getHSQLDBConnection(Session _session) throws SQLException {
         boolean keptMirror = firstConnection && toKeepHsql != null && toKeepHsql.exists();
 
@@ -415,7 +414,6 @@ public class DBReference {
             String url = "jdbc:hsqldb:mem:" + id + "_tmp";
             try (Connection conn = DriverManager.getConnection(url);
                 Statement stmt = conn.createStatement();
-                @SuppressWarnings("java:S2077")
                 ResultSet rs = stmt.executeQuery("CALL CRYPT_KEY('" + CIPHER_SPEC + "', null) ")) {
                 rs.next();
                 encryptionKey = rs.getString(1);

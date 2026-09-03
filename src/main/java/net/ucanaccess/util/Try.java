@@ -56,7 +56,6 @@ import java.util.function.Supplier;
  * @author Markus Spann
  * @since v5.1.0
  */
-@SuppressWarnings("java:S119")
 public final class Try<V, EC extends Throwable> {
 
     /** The immutable value or {@code null} if an exception occurred during retrieval. */

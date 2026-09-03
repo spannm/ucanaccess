@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("java:S2447")
 public final class Functions {
     private static final Logger LOGGER = System.getLogger(Functions.class.getName());
     private static SecureRandom random;

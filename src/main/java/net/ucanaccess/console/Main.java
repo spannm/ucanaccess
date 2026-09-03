@@ -15,7 +15,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("java:S106") // suppress sonarcloud warning to not use System.out/err
 public class Main {
     private static final String  EXPORT_USAGE  = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
         + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";

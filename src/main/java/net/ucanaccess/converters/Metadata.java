@@ -37,7 +37,6 @@ public class Metadata {
      * @author Markus Spann
      * @since v5.1.0
      */
-    @SuppressWarnings("java:S115") // suppress sonarcloud warning regarding constant names
     public enum Property {
         user(String.class, null, 500),
         password(String.class, null, 500),

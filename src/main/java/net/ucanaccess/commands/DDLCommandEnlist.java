@@ -263,7 +263,6 @@ public class DDLCommandEnlist {
     }
 
     // getting AUTOINCREMENT and GUID
-    @SuppressWarnings("java:S5852")
     private void parseTypesFromCreateStatement(String _sql) throws SQLException {
         Pattern pat = Pattern.compile("(\\s+)(?:DECIMAL|NUMERIC)\\s*\\(", Pattern.CASE_INSENSITIVE);
         String sql = pat.matcher(_sql).replaceAll("$1NUMERIC(");

@@ -36,7 +36,7 @@ public class AutoNumberAction implements IFeedbackAction {
                 String sql = String.format("UPDATE %s SET %s=? WHERE %s=?",
                     SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), hsqlColName, hsqlColName);
 
-                try (@SuppressWarnings("java:S2077") PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
+                try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, cnNew);
                     ps.setObject(2, cnOld);
                     ps.executeUpdate();

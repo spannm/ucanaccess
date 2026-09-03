@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"java:S1192", "java:S2692"}) // suppress sonarcloud warnings
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
@@ -172,7 +171,6 @@ public class LoadJet {
 
     public Object tryDefault(Object _default) {
         try (Statement st = conn.createStatement()) {
-            @SuppressWarnings("java:S2077")
             ResultSet rs = st.executeQuery(String.format("SELECT %s FROM DUAL", _default));
             if (rs.next()) {
                 return rs.getObject(1);
@@ -1402,7 +1400,6 @@ public class LoadJet {
             }
         }
 
-        @SuppressWarnings("java:S5852")
         private String solveAmbiguous(String sql) {
             try {
                 sql = sql.replaceAll("\\s+", " ");

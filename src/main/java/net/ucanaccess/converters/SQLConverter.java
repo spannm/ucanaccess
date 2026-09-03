@@ -13,11 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "PMD.UnnecessaryFullyQualifiedName",
-                   "java:S1192", "java:S6353"})
+@SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "PMD.UnnecessaryFullyQualifiedName"})
 public final class SQLConverter {
 
-    @SuppressWarnings({"java:S5842", "java:S5852", "java:S5998"})
     public static final class Patterns {
         private static final Pattern       SELECT_FROM_START          = Pattern.compile("\\s*SELECT\\s+", Pattern.CASE_INSENSITIVE);
         private static final Pattern       SELECT_FROM_END            = Pattern.compile("\\s*FROM[\\s\\[]+", Pattern.CASE_INSENSITIVE);
@@ -787,7 +785,7 @@ public final class SQLConverter {
         if (!_quote) {
             name = _name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
         }
-        try (@SuppressWarnings("java:S2077") Statement st = _conn.createStatement()) {
+        try (Statement st = _conn.createStatement()) {
             st.execute(String.format("SELECT 1 AS %s FROM dual", name));
             return _name;
         } catch (SQLException _ex) {

@@ -8,7 +8,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("java:S2692") // suppress sonarcloud warnings
 public class ParametricQuery {
     private final Connection    hsqldb;
     private final QueryImpl     qi;

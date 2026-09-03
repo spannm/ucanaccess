@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("java:S1192")
 public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private static final String        SELECT_BASE  = "SELECT * FROM INFORMATION_SCHEMA.";
     private static final String        NATIVE_ALIAS = " l.";
