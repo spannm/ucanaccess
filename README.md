@@ -113,6 +113,23 @@ try (Connection conn = DriverManager.getConnection(url)) {
 
 <p style="height: 20px;">&nbsp;</p>
 
+## 🔗 Linked Tables & Untrusted Databases
+
+If the `.accdb`/`.mdb` file you open contains linked tables, UCanAccess automatically opens the linked database files
+so those tables can be read. Local linked paths are resolved as before, but a linked table pointing to a
+**network/UNC path** (e.g. `\\server\share\linked.accdb`) is rejected by default with an `AccessDeniedException` —
+such a path is taken verbatim from the database file, so a database from an untrusted source could otherwise make
+your JVM reach out to an arbitrary host as soon as the linked table is touched.
+
+If you trust the linked network paths in a given database, opt back in explicitly via the `allowRemoteLinks`
+connection property:
+
+```java
+String url = "jdbc:ucanaccess://C:/path/to/your/database.accdb;allowRemoteLinks=true";
+```
+
+<p style="height: 20px;">&nbsp;</p>
+
 ## ❤️ Why this Fork?
 
 The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020, leaving `net.sf.ucanaccess:ucanaccess` unmaintained at version 5.0.1.

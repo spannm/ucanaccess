@@ -8,6 +8,7 @@ import io.github.spannm.jackcess.Row;
 import io.github.spannm.jackcess.Table;
 import io.github.spannm.jackcess.Table.ColumnOrder;
 import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
+import java.nio.file.AccessDeniedException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -79,6 +81,12 @@ public class DBReference {
     private boolean                                 concatNulls;
     private boolean                                 mirrorRecreated;
     private Charset                                 charset;
+    /**
+     * Whether the {@link io.github.spannm.jackcess.util.LinkResolver} registered below may automatically resolve
+     * linked tables that point to a network/UNC path. {@code false} by default; see
+     * {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}.
+     */
+    private boolean                                 allowRemoteLinks;
 
     public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd, Charset _charset)
         throws IOException {
@@ -102,10 +110,25 @@ public class DBReference {
                 if (linkeeFileName == null) {
                     throw new IOException("Cannot resolve db link");
                 }
-                File linkeeFile = new File(linkeeFileName);
                 Map<String, String> emr = externalResourcesMapping;
-                if (!linkeeFile.exists() && emr != null && emr.containsKey(linkeeFileName.toLowerCase())) {
-                    linkeeFile = new File(emr.get(linkeeFileName.toLowerCase()));
+                String remapped = emr == null ? null : emr.get(linkeeFileName.toLowerCase());
+                // an explicit remapping via the "reMap" connection property is trusted application configuration
+                // and therefore bypasses the network-path guard below; the raw (untrusted) path stored in the
+                // database file itself is not probed or opened in that case
+                if (remapped == null && !allowRemoteLinks && isNetworkPath(linkeeFileName)) {
+                    throw new AccessDeniedException(linkeeFileName, null,
+                        "Linked database points to a network/UNC path; automatic resolution of such paths is "
+                            + "disabled by default because the linked path is taken verbatim from the (possibly "
+                            + "untrusted) Access database file. Set the '" + Metadata.Property.allowRemoteLinks
+                            + "' connection property to true only if linked network paths are trusted.");
+                }
+                // for a network path with an explicit remapping, use the remapped (trusted) path directly without
+                // probing the raw network path first
+                File linkeeFile = remapped != null && isNetworkPath(linkeeFileName)
+                    ? new File(remapped)
+                    : new File(linkeeFileName);
+                if (!linkeeFile.exists() && remapped != null) {
+                    linkeeFile = new File(remapped);
                 }
                 if (!linkeeFile.exists()) {
                     logger.log(Level.WARNING, "External file {0} does not exist", linkeeFile.getAbsolutePath());
@@ -119,6 +142,21 @@ public class DBReference {
             dbIO.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
             dbIO.setEnforceForeignKeys(false);
         }
+    }
+
+    /**
+     * Determines whether the given linked database path is a network/UNC path, e.g. {@code \\server\share\db.accdb},
+     * {@code //server/share/db.accdb} or a device-style UNC path such as {@code \\?\UNC\server\share\db.accdb}.
+     * <p>
+     * Such paths are excluded from automatic resolution by default since they let an untrusted Access database
+     * file trigger an outbound network connection (see {@link #allowRemoteLinks}).
+     *
+     * @param  _fileName the linked database path as stored in the Access database file
+     * @return           {@code true} if the path is a network/UNC path, {@code false} otherwise
+     */
+    static boolean isNetworkPath(String _fileName) {
+        String normalized = _fileName.replace('/', '\\');
+        return normalized.startsWith("\\\\");
     }
 
     public Database open(File _dbfl, String _pwd) throws IOException {
@@ -570,6 +608,18 @@ public class DBReference {
 
     public void setExternalResourcesMapping(Map<String, String> _externalResourcesMapping) {
         externalResourcesMapping = _externalResourcesMapping;
+    }
+
+    /**
+     * Enables or disables automatic resolution of linked tables that point to a network/UNC path.
+     * <p>
+     * Disabled by default; see the security note on {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}
+     * for why this matters when opening database files from an untrusted source.
+     *
+     * @param _allowRemoteLinks {@code true} to allow automatic resolution of network/UNC linked paths
+     */
+    public void setAllowRemoteLinks(boolean _allowRemoteLinks) {
+        allowRemoteLinks = _allowRemoteLinks;
     }
 
     public File getToKeepHsql() {

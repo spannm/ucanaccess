@@ -42,6 +42,18 @@ public class Metadata {
         user(String.class, null, 500),
         password(String.class, null, 500),
 
+        /**
+         * Whether linked tables that point to a network/UNC path (e.g. {@code \\server\share\db.accdb}) may be
+         * resolved automatically.
+         * <p>
+         * <strong>Security note:</strong> the path of a linked table is taken verbatim from the Access database
+         * file being opened. If that file is not fully trusted, an attacker-controlled link could otherwise make
+         * the JVM open an arbitrary network/UNC path as soon as the linked table is accessed (e.g. to reach an
+         * internal host or trigger an outbound credential-relay attempt). Automatic resolution of such paths is
+         * therefore denied by default; enable this property only when linked network paths are known to be
+         * trusted. Local (non-UNC) linked paths are not affected by this property.
+         */
+        allowRemoteLinks(Boolean.class, false, 10),
         columnOrder(ColumnOrder.class, ColumnOrder.DATA, 10),
         concatNulls(Boolean.class, false, 10),
         encrypt(Boolean.class, false, 10),

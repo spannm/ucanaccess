@@ -149,6 +149,9 @@ public final class UcanaccessDriver implements Driver {
                     if (props.containsKey(preventReloading)) {
                         dbRef.setPreventReloading(Boolean.parseBoolean(props.get(preventReloading)));
                     }
+                    if (props.containsKey(allowRemoteLinks)) {
+                        dbRef.setAllowRemoteLinks(Boolean.parseBoolean(props.get(allowRemoteLinks)));
+                    }
                     if (props.containsKey(reMap)) {
                         Map<String, String> map = Arrays.stream(props.get(reMap).split("&")).map(s -> s.split("\\|")).filter(arr -> arr.length == 2)
                             .collect(Collectors.toMap(k1 -> k1[0], v1 -> v1[1], (v1, v2) -> v1, LinkedHashMap::new));
