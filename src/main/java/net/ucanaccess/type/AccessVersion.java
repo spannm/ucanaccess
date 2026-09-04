@@ -17,8 +17,8 @@ public enum AccessVersion {
 
     private final FileFormat           fileFormat;
 
-    AccessVersion(FileFormat _fileFormat) {
-        fileFormat = _fileFormat;
+    AccessVersion(FileFormat fileFormat) {
+        this.fileFormat = fileFormat;
     }
 
     public FileFormat getFileFormat() {
@@ -34,11 +34,11 @@ public enum AccessVersion {
         return DEFAULT_ACCESS_VERSION;
     }
 
-    public static AccessVersion parse(String _str) {
-        if (_str == null) {
+    public static AccessVersion parse(String str) {
+        if (str == null) {
             return null;
         }
-        String val = _str.strip();
+        String val = str.strip();
         for (AccessVersion ver : values()) {
             if (val.equalsIgnoreCase(ver.name())) {
                 return ver;

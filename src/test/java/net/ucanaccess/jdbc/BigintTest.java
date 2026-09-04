@@ -11,8 +11,8 @@ class BigintTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2016")
-    void testBigintInsert(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testBigintInsert(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         String accdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
         Long expected = 3000000000L;

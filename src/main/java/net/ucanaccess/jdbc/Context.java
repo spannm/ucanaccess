@@ -4,8 +4,8 @@ public class Context {
     private UcanaccessConnection currentConnection;
     private String               currentExecId;
 
-    public Context(UcanaccessConnection _currentConnection) {
-        currentConnection = _currentConnection;
+    public Context(UcanaccessConnection currentConnection) {
+        this.currentConnection = currentConnection;
     }
 
     public UcanaccessConnection getCurrentConnection() {
@@ -16,12 +16,12 @@ public class Context {
         return currentExecId;
     }
 
-    public void setCurrentConnection(UcanaccessConnection _currentConnection) {
-        currentConnection = _currentConnection;
+    public void setCurrentConnection(UcanaccessConnection currentConnection) {
+        this.currentConnection = currentConnection;
     }
 
-    public void setCurrentExecId(String _currentExecId) {
-        currentExecId = _currentExecId;
+    public void setCurrentExecId(String currentExecId) {
+        this.currentExecId = currentExecId;
     }
 
 }

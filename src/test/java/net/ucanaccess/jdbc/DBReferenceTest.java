@@ -16,8 +16,8 @@ class DBReferenceTest {
         "\\\\.\\linked.accdb",
         "\\/server/share/linked.accdb"
     })
-    void testIsNetworkPathDetectsUncAndNetworkPaths(String _linkedDbName) {
-        assertTrue(DBReference.isNetworkPath(_linkedDbName));
+    void testIsNetworkPathDetectsUncAndNetworkPaths(String linkedDbName) {
+        assertTrue(DBReference.isNetworkPath(linkedDbName));
     }
 
     @ParameterizedTest
@@ -28,8 +28,8 @@ class DBReferenceTest {
         "c:\\db\\linked.accdb",
         "/home/user/db/linked.accdb"
     })
-    void testIsNetworkPathAllowsLocalPaths(String _linkedDbName) {
-        assertFalse(DBReference.isNetworkPath(_linkedDbName));
+    void testIsNetworkPathAllowsLocalPaths(String linkedDbName) {
+        assertFalse(DBReference.isNetworkPath(linkedDbName));
     }
 
 }

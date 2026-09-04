@@ -10,9 +10,9 @@ public class DropTableCommand implements ICommand {
     private final String execId;
     private final String tableName;
 
-    public DropTableCommand(String _tableName, String _execId) {
-        tableName = _tableName;
-        execId = _execId;
+    public DropTableCommand(String tableName, String execId) {
+        this.tableName = tableName;
+        this.execId = execId;
     }
 
     @Override
@@ -35,8 +35,8 @@ public class DropTableCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.dropTable(tableName);
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
         return null;
     }

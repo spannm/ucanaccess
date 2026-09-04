@@ -12,15 +12,15 @@ import java.util.concurrent.TimeUnit;
 class WorkloadTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE AAAB (id COUNTER PRIMARY KEY, A LONG, C TEXT, D TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testLoadMany(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testLoadMany(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         final int nbRecords = 30000;
         ucanaccess.setAutoCommit(false);
 

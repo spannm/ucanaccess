@@ -16,12 +16,12 @@ public class UcanaccessResultSetMetaData implements ResultSetMetaData {
 
     private final Map<String, String> aliases;
 
-    public UcanaccessResultSetMetaData(ResultSetMetaData _wrapped, Map<String, String> _aliases,
-            UcanaccessResultSet _resultSet) throws SQLException {
-        wrapped = _wrapped;
+    public UcanaccessResultSetMetaData(ResultSetMetaData wrapped, Map<String, String> aliases,
+            UcanaccessResultSet resultSet) throws SQLException {
+        this.wrapped = wrapped;
 
-        metadata = new Metadata(_resultSet.getStatement().getConnection());
-        aliases = _aliases;
+        metadata = new Metadata(resultSet.getStatement().getConnection());
+        this.aliases = aliases;
     }
 
     @Override

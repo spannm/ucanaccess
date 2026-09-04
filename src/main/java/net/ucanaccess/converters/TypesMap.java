@@ -30,8 +30,8 @@ public final class TypesMap {
 
         private final String hsqlType;
 
-        AccessType(String _hsqlType) {
-            hsqlType = _hsqlType;
+        AccessType(String hsqlType) {
+            this.hsqlType = hsqlType;
         }
 
         String getHsqlType() {
@@ -94,11 +94,11 @@ public final class TypesMap {
         return Collections.unmodifiableMap(ACCESS_TO_HSQL_TYPES_MAP);
     }
 
-    public static String map2hsqldb(DataType _type) {
-        return JACKCESS_TO_HSQLDB_TYPES_MAP.getOrDefault(_type, _type.name());
+    public static String map2hsqldb(DataType type) {
+        return JACKCESS_TO_HSQLDB_TYPES_MAP.getOrDefault(type, type.name());
     }
 
-    public static DataType map2Jackcess(AccessType _type) {
-        return ACCESS_TO_JACKCESS_TYPES_MAP.get(_type);
+    public static DataType map2Jackcess(AccessType type) {
+        return ACCESS_TO_JACKCESS_TYPES_MAP.get(type);
     }
 }

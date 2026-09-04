@@ -14,19 +14,19 @@ public class UnsupportedValue extends ComplexBase {
         values = cv.getValues();
     }
 
-    public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> _values) {
+    public UnsupportedValue(ComplexValue.Id id, String tableName, String columnName, Map<String, Object> values) {
         super(id, tableName, columnName);
-        values = _values;
+        this.values = values;
     }
 
     @Override
-    public boolean equals(Object _obj) {
-        if (this == _obj) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
-        } else if (_obj == null || getClass() != _obj.getClass()) {
+        } else if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        UnsupportedValue other = (UnsupportedValue) _obj;
+        UnsupportedValue other = (UnsupportedValue) obj;
         if (values == null) {
             return other.values == null;
         } else {
@@ -46,8 +46,8 @@ public class UnsupportedValue extends ComplexBase {
         return values;
     }
 
-    public void setValues(Map<String, Object> _values) {
-        values = _values;
+    public void setValues(Map<String, Object> values) {
+        this.values = values;
     }
 
 }

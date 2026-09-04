@@ -8,8 +8,8 @@ import java.sql.Savepoint;
 public class UcanaccessSavepoint implements Savepoint {
     private final Savepoint wrapped;
 
-    public UcanaccessSavepoint(Savepoint _wrapped) {
-        wrapped = _wrapped;
+    public UcanaccessSavepoint(Savepoint wrapped) {
+        this.wrapped = wrapped;
     }
 
     @Override

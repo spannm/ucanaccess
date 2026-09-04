@@ -26,7 +26,7 @@ public abstract class UcanaccessBaseFileTest extends UcanaccessBaseTest {
                 if (is != null) {
                     return resource;
                 }
-            } catch (IOException _ex) {
+            } catch (IOException ex) {
                 continue;
             }
         }

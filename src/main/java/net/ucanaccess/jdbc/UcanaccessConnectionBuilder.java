@@ -28,22 +28,22 @@ public final class UcanaccessConnectionBuilder {
     private String                      dbPath;
     private final Map<Property, Object> props = new EnumMap<>(Property.class);
 
-    public UcanaccessConnectionBuilder withDbPath(String _dbPath) {
-        dbPath = _dbPath;
+    public UcanaccessConnectionBuilder withDbPath(String path) {
+        dbPath = path;
         return this;
     }
 
-    public UcanaccessConnectionBuilder withDbPath(File _dbPath) {
-        dbPath = Optional.ofNullable(_dbPath).map(File::getAbsolutePath).orElse(null);
+    public UcanaccessConnectionBuilder withDbPath(File path) {
+        dbPath = Optional.ofNullable(path).map(File::getAbsolutePath).orElse(null);
         return this;
     }
 
-    public UcanaccessConnectionBuilder withUser(String _user) {
-        return withProp(user, _user);
+    public UcanaccessConnectionBuilder withUser(String user) {
+        return withProp(Property.user, user);
     }
 
-    public UcanaccessConnectionBuilder withPassword(String _pass) {
-        return withProp(password, _pass);
+    public UcanaccessConnectionBuilder withPassword(String pass) {
+        return withProp(password, pass);
     }
 
     public UcanaccessConnectionBuilder withoutUserPass() {
@@ -60,46 +60,46 @@ public final class UcanaccessConnectionBuilder {
         return withProp(columnOrder, ColumnOrder.DISPLAY);
     }
 
-    public UcanaccessConnectionBuilder withConcatNulls(boolean _concatNulls) {
-        return withProp(concatNulls, _concatNulls);
+    public UcanaccessConnectionBuilder withConcatNulls(boolean concatNulls) {
+        return withProp(Property.concatNulls, concatNulls);
     }
 
-    public UcanaccessConnectionBuilder withIgnoreCase(boolean _ignoreCase) {
-        return withProp(ignoreCase, _ignoreCase);
+    public UcanaccessConnectionBuilder withIgnoreCase(boolean ignoreCase) {
+        return withProp(Property.ignoreCase, ignoreCase);
     }
 
     public UcanaccessConnectionBuilder withImmediatelyReleaseResources() {
         return withProp(immediatelyReleaseResources, true);
     }
 
-    public UcanaccessConnectionBuilder withInactivityTimeout(int _inactivityTimeout) {
-        return withProp(inactivityTimeout, _inactivityTimeout);
+    public UcanaccessConnectionBuilder withInactivityTimeout(int inactivityTimeout) {
+        return withProp(Property.inactivityTimeout, inactivityTimeout);
     }
 
     public UcanaccessConnectionBuilder withMemory() {
         return withProp(memory, true);
     }
 
-    public UcanaccessConnectionBuilder withNewDatabaseVersion(AccessVersion _version) {
-        return withProp(newDatabaseVersion, _version == null ? null : _version.name());
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(AccessVersion version) {
+        return withProp(newDatabaseVersion, version == null ? null : version.name());
     }
 
-    public UcanaccessConnectionBuilder withNewDatabaseVersion(String _version) {
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(String version) {
         AccessVersion accVersion = null;
-        if (_version != null) {
-            accVersion = AccessVersion.parse(_version);
+        if (version != null) {
+            accVersion = AccessVersion.parse(version);
             if (accVersion == null) {
-                UcanaccessRuntimeException.throwNow("Valid version required: " + _version);
+                UcanaccessRuntimeException.throwNow("Valid version required: " + version);
             }
         }
         return withProp(newDatabaseVersion, accVersion);
     }
 
-    public UcanaccessConnectionBuilder withProp(Metadata.Property _prop, Object _value) {
-        UcanaccessRuntimeException.requireNonNull(_prop, "Property required");
+    public UcanaccessConnectionBuilder withProp(Metadata.Property prop, Object value) {
+        UcanaccessRuntimeException.requireNonNull(prop, "Property required");
 
-        String val = Optional.ofNullable(_value).map(Object::toString).orElse("");
-        props.put(_prop, val);
+        String val = Optional.ofNullable(value).map(Object::toString).orElse("");
+        props.put(prop, val);
 
         return this;
     }
@@ -136,10 +136,10 @@ public final class UcanaccessConnectionBuilder {
      * Creates a semicolon-delimited string of all properties and their values, without properties {@code user} and {@code password},
      * and performing special handling on certain properties.
      *
-     * @param _delimiter delimiter
+     * @param delimiter delimiter
      * @return property string
      */
-    String propsToString(CharSequence _delimiter) {
+    String propsToString(CharSequence delimiter) {
         Map<Property, Object> copy = new LinkedHashMap<>(props);
 
         copy.remove(user);
@@ -154,7 +154,7 @@ public final class UcanaccessConnectionBuilder {
 
         return copy.entrySet().stream()
             .map(e -> e.getKey().name() + '=' + e.getValue())
-            .collect(Collectors.joining(_delimiter));
+            .collect(Collectors.joining(delimiter));
     }
 
     @Override

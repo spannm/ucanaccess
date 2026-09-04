@@ -14,8 +14,8 @@ class ConcatNullsFalseTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testConcat(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testConcat(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT 'aa2'& null FROM dual", singleRec("aa2"));
     }
 

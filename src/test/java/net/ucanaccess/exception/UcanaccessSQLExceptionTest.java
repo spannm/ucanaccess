@@ -15,9 +15,9 @@ class UcanaccessSQLExceptionTest extends AbstractBaseTest {
         "''| UCAExc:::[0-9]\\.[0-9][0-9\\.]*(?:-SNAPSHOT)? \\(n\\/a\\)",
         "| UCAExc:::[0-9]\\.[0-9][0-9\\.]*(?:-SNAPSHOT)? \\(n\\/a\\)"
     })
-    void testAddVersionInfo(String _message, CharSequence _expectedPattern) {
-        assertThat(new UcanaccessSQLException().addVersionInfo(_message))
-            .matches(_expectedPattern);
+    void testAddVersionInfo(String message, CharSequence expectedPattern) {
+        assertThat(new UcanaccessSQLException().addVersionInfo(message))
+            .matches(expectedPattern);
     }
 
 }

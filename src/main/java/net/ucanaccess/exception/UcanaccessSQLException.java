@@ -22,59 +22,59 @@ public class UcanaccessSQLException extends SQLException {
     public UcanaccessSQLException() {
     }
 
-    public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode, Throwable _cause) {
-        super(_reason, _sqlState, _vendorCode, _cause);
+    public UcanaccessSQLException(String reason, String sqlState, int vendorCode, Throwable cause) {
+        super(reason, sqlState, vendorCode, cause);
     }
 
-    public UcanaccessSQLException(String _reason) {
-        this(_reason, UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+    public UcanaccessSQLException(String reason) {
+        this(reason, UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
-    public UcanaccessSQLException(String _reason, Object... _args) {
-        this(String.format(_reason, _args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+    public UcanaccessSQLException(String reason, Object... args) {
+        this(String.format(reason, args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
-    public UcanaccessSQLException(String _reason, String _sqlState, int _vendorCode) {
-        super(_reason, _sqlState, _vendorCode, null);
+    public UcanaccessSQLException(String reason, String sqlState, int vendorCode) {
+        super(reason, sqlState, vendorCode, null);
     }
 
-    public UcanaccessSQLException(String _reason, String _sqlState, Throwable _cause) {
-        super(_reason, _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+    public UcanaccessSQLException(String reason, String sqlState, Throwable cause) {
+        super(reason, sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, cause);
     }
 
-    public UcanaccessSQLException(String _reason, Throwable _cause) {
-        super(_reason, UCANACCESS_GENERIC_ERROR_STR,
-            IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, _cause);
+    public UcanaccessSQLException(String reason, Throwable cause) {
+        super(reason, UCANACCESS_GENERIC_ERROR_STR,
+            IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, cause);
     }
 
-    public UcanaccessSQLException(String _reason, String _sqlState) {
-        super(_reason, _sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
+    public UcanaccessSQLException(String reason, String sqlState) {
+        super(reason, sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
-    public UcanaccessSQLException(Throwable _cause) {
-        super(explainCause(_cause),
-            _cause instanceof SQLException ? ((SQLException) _cause).getSQLState() : UCANACCESS_GENERIC_ERROR_STR,
-            _cause instanceof SQLException ? ((SQLException) _cause).getErrorCode() : IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR,
-            _cause);
+    public UcanaccessSQLException(Throwable cause) {
+        super(explainCause(cause),
+            cause instanceof SQLException ? ((SQLException) cause).getSQLState() : UCANACCESS_GENERIC_ERROR_STR,
+            cause instanceof SQLException ? ((SQLException) cause).getErrorCode() : IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR,
+            cause);
     }
 
-    public static String explainCause(Throwable _cause) {
-        if (_cause instanceof SQLException) {
-            SQLException se = (SQLException) _cause;
+    public static String explainCause(Throwable cause) {
+        if (cause instanceof SQLException) {
+            SQLException se = (SQLException) cause;
             if (se.getErrorCode() == -ErrorCode.X_42562) {
-                return _cause.getMessage()
+                return cause.getMessage()
                     + " This exception may happen if you add integers representing units of time directly to datetime values "
                     + "using the arithmetic plus operator but without specifying the unit of date."
                     + System.lineSeparator()
                     + "In this specific case you have to use, for example, <dateColumn> + 1 DAY.";
             }
         }
-        return _cause.getMessage();
+        return cause.getMessage();
     }
 
-    String addVersionInfo(String _message) {
-        if (_message != null && _message.startsWith(MSG_PREFIX)) {
-            return _message;
+    String addVersionInfo(String message) {
+        if (message != null && message.startsWith(MSG_PREFIX)) {
+            return message;
         }
 
         String ver = VersionInfo.find(getClass()).getVersion();
@@ -82,7 +82,7 @@ public class UcanaccessSQLException extends SQLException {
             + "::"
             + Optional.ofNullable(ver).orElse("x.y.z")
             + " "
-            + (_message == null || _message.isBlank() ? "(n/a)" : _message)).trim();
+            + (message == null || message.isBlank() ? "(n/a)" : message)).trim();
     }
 
     @Override
@@ -103,11 +103,11 @@ public class UcanaccessSQLException extends SQLException {
      * </p>
      *
      * @param <T> the type of the {@link Throwable} to wrap.
-     * @param _t the {@link Throwable} to wrap.
+     * @param t the {@link Throwable} to wrap.
      * @return a {@link UcanaccessSQLException} instance.
      */
-    public static final <T extends Throwable> UcanaccessSQLException wrap(T _t) {
-        return wrap(null, _t);
+    public static final <T extends Throwable> UcanaccessSQLException wrap(T t) {
+        return wrap(null, t);
     }
 
     /**
@@ -115,33 +115,33 @@ public class UcanaccessSQLException extends SQLException {
      * prepending an optional reason message.
      * <p>
      * Preserves original SQLState, ErrorCode, and Cause when wrapping {@link SQLException} types.
-     * If {@code _reason} is null or blank, the message is derived solely from {@code _t}.
+     * If {@code reason} is null or blank, the message is derived solely from {@code t}.
      * </p>
      *
      * @param <T> the type of the {@link Throwable} to wrap
-     * @param _reason an optional custom message prefix
-     * @param _t the {@link Throwable} to wrap
+     * @param reason an optional custom message prefix
+     * @param t the {@link Throwable} to wrap
      * @return a {@link UcanaccessSQLException} instance
      */
-    public static final <T extends Throwable> UcanaccessSQLException wrap(String _reason, T _t) {
-        String reason = _reason == null || _reason.isBlank() ? null : _reason.trim();
-        if (_t instanceof UcanaccessSQLException) {
-            UcanaccessSQLException ex = (UcanaccessSQLException) _t;
-            if (reason == null) {
+    public static final <T extends Throwable> UcanaccessSQLException wrap(String reason, T t) {
+        String r = reason == null || reason.isBlank() ? null : reason.trim();
+        if (t instanceof UcanaccessSQLException) {
+            UcanaccessSQLException ex = (UcanaccessSQLException) t;
+            if (r == null) {
                 return ex;
             }
-            return new UcanaccessSQLException(reason + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
-        } else if (_t instanceof SQLException) {
-            SQLException ex = (SQLException) _t;
-            return new UcanaccessSQLException(reason == null ? ex.getMessage() : reason + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+            return new UcanaccessSQLException(r + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
+        } else if (t instanceof SQLException) {
+            SQLException ex = (SQLException) t;
+            return new UcanaccessSQLException(r == null ? ex.getMessage() : r + ": " + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());
         } else {
-            return new UcanaccessSQLException(reason == null ? _t.getMessage() : reason + ": " + _t.getMessage(), _t);
+            return new UcanaccessSQLException(r == null ? t.getMessage() : r + ": " + t.getMessage(), t);
         }
     }
 
-    public static final <T extends UcanaccessSQLException> void throwIf(BooleanSupplier _condition, Supplier<T> _exceptionSupplier) throws T {
-        if (_condition.getAsBoolean()) {
-            throw _exceptionSupplier.get();
+    public static final <T extends UcanaccessSQLException> void throwIf(BooleanSupplier condition, Supplier<T> exceptionSupplier) throws T {
+        if (condition.getAsBoolean()) {
+            throw exceptionSupplier.get();
         }
     }
 

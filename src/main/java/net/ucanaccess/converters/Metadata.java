@@ -98,16 +98,16 @@ public class Metadata {
         /**
          * Constructs a Property enum member.
          * @param <T> property data type parameter
-         * @param _type data type
-         * @param _defaultValue default value
-         * @param _maxLen maximum length
-         * @param _validValues optional valid values
+         * @param type data type
+         * @param defaultValue default value
+         * @param maxLen maximum length
+         * @param validValues optional valid values
          */
-        <T> Property(Class<T> _type, T _defaultValue, int _maxLen, Object... _validValues) {
-            type = _type;
-            maxLen = _maxLen;
-            defaultValue = _defaultValue;
-            validValues = Arrays.asList(_validValues);
+        <T> Property(Class<T> type, T defaultValue, int maxLen, Object... validValues) {
+            this.type = type;
+            this.maxLen = maxLen;
+            this.defaultValue = defaultValue;
+            this.validValues = Arrays.asList(validValues);
             description = "see documentation";
         }
 
@@ -127,37 +127,37 @@ public class Metadata {
             return description;
         }
 
-        public boolean isValidValue(Object _val) {
-            if (_val == null) {
+        public boolean isValidValue(Object val) {
+            if (val == null) {
                 return false;
             } else if (type.isEnum()) {
                 for (Object en : type.getEnumConstants()) {
-                    if (en == _val || en.toString().equalsIgnoreCase(_val.toString())) {
+                    if (en == val || en.toString().equalsIgnoreCase(val.toString())) {
                         return true;
                     }
                 }
                 return false;
             } else if (validValues.isEmpty()) {
                 if (type == Boolean.class) {
-                    return "true".equalsIgnoreCase(_val.toString()) || "false".equalsIgnoreCase(_val.toString());
+                    return "true".equalsIgnoreCase(val.toString()) || "false".equalsIgnoreCase(val.toString());
                 } else if (type == Integer.class) {
-                    return Try.catching(() -> Integer.parseInt(_val.toString())).map(i -> true).orElse(false);
+                    return Try.catching(() -> Integer.parseInt(val.toString())).map(i -> true).orElse(false);
                 }
                 return true;
-            } else if (_val instanceof CharSequence) {
-                return validValues.contains(_val.toString().toUpperCase());
+            } else if (val instanceof CharSequence) {
+                return validValues.contains(val.toString().toUpperCase());
             } else {
-                return validValues.contains(_val);
+                return validValues.contains(val);
             }
         }
 
-        public static Property parse(Object _val) {
-            if (_val == null) {
+        public static Property parse(Object val) {
+            if (val == null) {
                 return null;
             }
-            String val = _val.toString().strip().toLowerCase();
+            String value = val.toString().strip().toLowerCase();
             for (Property prop : values()) {
-                if (val.equalsIgnoreCase(prop.name())) {
+                if (value.equalsIgnoreCase(prop.name())) {
                     return prop;
                 }
             }
@@ -214,8 +214,8 @@ public class Metadata {
 
     private final Connection    conn;
 
-    public Metadata(Connection _conn) {
-        conn = _conn;
+    public Metadata(Connection conn) {
+        this.conn = conn;
     }
 
     public void createMetadata() throws SQLException {
@@ -243,56 +243,56 @@ public class Metadata {
         }
     }
 
-    public Integer newTable(String _name, String _escaped, ObjectType _type) throws SQLException {
+    public Integer newTable(String name, String escaped, ObjectType type) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(TABLE_RECORD, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, _name);
-            ps.setString(2, _escaped);
-            ps.setString(3, _type.name());
+            ps.setString(1, name);
+            ps.setString(2, escaped);
+            ps.setString(3, type.name());
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             rs.next();
 
             return rs.getInt(1);
-        } catch (SQLException _ex) {
-            return getTableId(_escaped);
+        } catch (SQLException ex) {
+            return getTableId(escaped);
         }
     }
 
-    public void newColumn(String _name, String _escaped, String _originalType, Integer _idTable) {
-        if (_idTable < 0) {
+    public void newColumn(String name, String escaped, String originalType, Integer idTable) {
+        if (idTable < 0) {
             return;
         }
         try (PreparedStatement ps = conn.prepareStatement(COLUMN_RECORD)) {
-            ps.setString(1, _name);
-            ps.setString(2, _escaped);
-            ps.setString(3, _originalType);
-            ps.setInt(4, _idTable);
+            ps.setString(1, name);
+            ps.setString(2, escaped);
+            ps.setString(3, originalType);
+            ps.setInt(4, idTable);
             ps.executeUpdate();
-        } catch (SQLException _ignored) {
-            LOGGER.log(Level.DEBUG, "Ignoring {0}", _ignored.toString());
+        } catch (SQLException ignored) {
+            LOGGER.log(Level.DEBUG, "Ignoring {0}", ignored.toString());
         }
     }
 
-    public List<String> getColumnNames(String _tableName) throws SQLException {
+    public List<String> getColumnNames(String tableName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_COLUMNS), ps -> {
-            ps.setString(1, SYSTEM_SUBQUERY.equals(_tableName) ? null : _tableName);
+            ps.setString(1, SYSTEM_SUBQUERY.equals(tableName) ? null : tableName);
             ResultSet rs = ps.executeQuery();
             List<String> result = new ArrayList<>();
             while (rs.next()) {
                 result.add(rs.getString(COLUMN_NAME));
             }
-            return !SYSTEM_SUBQUERY.equals(_tableName) ? result : null;
+            return !SYSTEM_SUBQUERY.equals(tableName) ? result : null;
         }).orThrow(ex -> ex);
     }
 
-    public String getColumnName(String _escapedTableName, String _escapedColumnName) throws SQLException {
+    public String getColumnName(String escapedTableName, String escapedColumnName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_COLUMN), ps -> {
-            ps.setString(1, SYSTEM_SUBQUERY.equals(_escapedTableName) ? null : _escapedTableName);
-            ps.setString(2, _escapedColumnName);
+            ps.setString(1, SYSTEM_SUBQUERY.equals(escapedTableName) ? null : escapedTableName);
+            ps.setString(2, escapedColumnName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String res = rs.getString(COLUMN_NAME);
-                if (!SYSTEM_SUBQUERY.equals(_escapedTableName) || !rs.next()) {
+                if (!SYSTEM_SUBQUERY.equals(escapedTableName) || !rs.next()) {
                     return res;
                 }
             }
@@ -300,86 +300,86 @@ public class Metadata {
         }).orThrow(ex -> ex);
     }
 
-    public String getEscapedColumnName(String _tableName, String _columnName) throws SQLException {
+    public String getEscapedColumnName(String tableName, String columnName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_COLUMN_ESCAPED), ps -> {
-            ps.setString(1, SYSTEM_SUBQUERY.equals(_tableName) ? null : _tableName);
-            ps.setString(2, _columnName);
+            ps.setString(1, SYSTEM_SUBQUERY.equals(tableName) ? null : tableName);
+            ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_COLUMN_NAME) : null;
         }).orThrow(ex -> ex);
     }
 
-    public String getEscapedTableName(String _tableName) throws SQLException {
+    public String getEscapedTableName(String tableName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_TABLE_ESCAPED), ps -> {
-            ps.setString(1, _tableName);
+            ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_TABLE_NAME) : null;
         }).orThrow(ex -> ex);
     }
 
-    public boolean isAutoIncrement(String _tableName, String _columnName) throws SQLException {
+    public boolean isAutoIncrement(String tableName, String columnName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_COLUMN), ps -> {
-            ps.setString(1, SYSTEM_SUBQUERY.equals(_tableName) ? null : _tableName);
-            ps.setString(2, _columnName);
+            ps.setString(1, SYSTEM_SUBQUERY.equals(tableName) ? null : tableName);
+            ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_AUTOINCREMENT);
         }).orThrow(ex -> ex);
     }
 
-    public boolean isCurrency(String _tableName, String _columnName) throws SQLException {
+    public boolean isCurrency(String tableName, String columnName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_COLUMN), ps -> {
-            ps.setString(1, SYSTEM_SUBQUERY.equals(_tableName) ? null : _tableName);
-            ps.setString(2, _columnName);
+            ps.setString(1, SYSTEM_SUBQUERY.equals(tableName) ? null : tableName);
+            ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_CURRENCY);
         }).orThrow(ex -> ex);
     }
 
-    public Integer getTableId(String _escapedName) throws SQLException {
+    public Integer getTableId(String escapedName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_TABLE_METADATA), ps -> {
-            ps.setString(1, _escapedName);
+            ps.setString(1, escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt(TABLE_ID) : -1;
         }).orThrow(ex -> ex);
     }
 
-    public String getTableName(String _escapedName) throws SQLException {
+    public String getTableName(String escapedName) throws SQLException {
         return Try.withResources(() -> conn.prepareStatement(SELECT_TABLE_METADATA), ps -> {
-            ps.setString(1, _escapedName);
+            ps.setString(1, escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(TABLE_NAME) : null;
         }).orThrow(ex -> ex);
     }
 
-    public void dropTable(String _tableName) throws SQLException {
+    public void dropTable(String tableName) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(DROP_TABLE), ps -> {
-            ps.setString(1, _tableName);
+            ps.setString(1, tableName);
             ps.execute();
         }).orThrow(ex -> ex);
     }
 
-    public void columnDef(String _tableName, String _columnName, String _def) throws SQLException {
+    public void columnDef(String tableName, String columnName, String def) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(UPDATE_COLUMN_DEF), ps -> {
-            ps.setString(1, _def);
-            ps.setString(2, _columnName);
-            ps.setString(3, _tableName);
+            ps.setString(1, def);
+            ps.setString(2, columnName);
+            ps.setString(3, tableName);
             ps.execute();
         }).orThrow(ex -> ex);
     }
 
-    public void calculatedField(String _tableName, String _columnName) throws SQLException {
+    public void calculatedField(String tableName, String columnName) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(UPDATE_IS_GENERATEDCOLUMN), ps -> {
-            ps.setString(1, _columnName);
-            ps.setString(2, _tableName);
+            ps.setString(1, columnName);
+            ps.setString(2, tableName);
             ps.execute();
         }).orThrow(ex -> ex);
     }
 
-    public void rename(String _oldTableName, String _newTableName, String _newEscapedTableName) throws SQLException {
+    public void rename(String oldTableName, String newTableName, String newEscapedTableName) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(RENAME), ps -> {
-            ps.setString(1, _newTableName);
-            ps.setString(2, _newEscapedTableName);
-            ps.setString(3, _oldTableName);
+            ps.setString(1, newTableName);
+            ps.setString(2, newEscapedTableName);
+            ps.setString(3, oldTableName);
             ps.executeUpdate();
         }).orThrow(ex -> ex);
     }

@@ -14,35 +14,35 @@ public class UcanaccessBlob implements Blob {
     private boolean                    usingBlobKey;
     private final UcanaccessConnection conn;
 
-    public UcanaccessBlob(Blob _blob, UcanaccessConnection _conn) throws SQLException {
-        blob = _blob;
-        conn = _conn;
-        if (_blob.length() != 0) {
-            BlobKey bk = BlobKey.getBlobKey(_blob.getBinaryStream());
+    public UcanaccessBlob(Blob blob, UcanaccessConnection conn) throws SQLException {
+        this.blob = blob;
+        this.conn = conn;
+        if (blob.length() != 0) {
+            BlobKey bk = BlobKey.getBlobKey(blob.getBinaryStream());
             usingBlobKey = bk != null;
             if (usingBlobKey) {
-                blob = bk.getOleBlob(conn.getDbIO());
+                this.blob = bk.getOleBlob(this.conn.getDbIO());
             }
         }
     }
 
-    public static Blob createBlob(File fl, UcanaccessConnection _conn) throws UcanaccessSQLException {
+    public static Blob createBlob(File fl, UcanaccessConnection conn) throws UcanaccessSQLException {
         return Try.catching(() -> {
             Blob oleBlob = new OleBlob.Builder().withPackagePrettyName(fl.getName()).withSimplePackage(fl).toBlob();
-            return new UcanaccessBlob(oleBlob, _conn);
+            return new UcanaccessBlob(oleBlob, conn);
         }).orThrow(UcanaccessSQLException::new);
     }
 
-    public static Blob createBlob(UcanaccessConnection _conn) throws SQLException {
-        return new UcanaccessBlob(_conn.getHSQLDBConnection().createBlob(), _conn);
+    public static Blob createBlob(UcanaccessConnection conn) throws SQLException {
+        return new UcanaccessBlob(conn.getHSQLDBConnection().createBlob(), conn);
     }
 
     @Override
     public void free() throws SQLException {
         try {
             blob.free();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -56,8 +56,8 @@ public class UcanaccessBlob implements Blob {
                 }
             }
             return blob.getBinaryStream();
-        } catch (SQLException | IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException | IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -65,8 +65,8 @@ public class UcanaccessBlob implements Blob {
     public InputStream getBinaryStream(long pos, long length) throws SQLException {
         try {
             return blob.getBinaryStream(pos, length);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -74,8 +74,8 @@ public class UcanaccessBlob implements Blob {
     public byte[] getBytes(long pos, int length) throws SQLException {
         try {
             return blob.getBytes(pos, length);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -83,8 +83,8 @@ public class UcanaccessBlob implements Blob {
     public long length() throws SQLException {
         try {
             return blob.length();
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -92,8 +92,8 @@ public class UcanaccessBlob implements Blob {
     public long position(Blob pattern, long start) throws SQLException {
         try {
             return blob.position(pattern, start);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -101,8 +101,8 @@ public class UcanaccessBlob implements Blob {
     public long position(byte[] pattern, long start) throws SQLException {
         try {
             return blob.position(pattern, start);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -119,8 +119,8 @@ public class UcanaccessBlob implements Blob {
                 }
             }
             return blob.setBinaryStream(pos);
-        } catch (SQLException | IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException | IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -128,8 +128,8 @@ public class UcanaccessBlob implements Blob {
     public int setBytes(long pos, byte[] bytes) throws SQLException {
         try {
             return blob.setBytes(pos, bytes);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -137,8 +137,8 @@ public class UcanaccessBlob implements Blob {
     public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
         try {
             return blob.setBytes(pos, bytes, offset, len);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -146,8 +146,8 @@ public class UcanaccessBlob implements Blob {
     public void truncate(long len) throws SQLException {
         try {
             blob.truncate(len);
-        } catch (SQLException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 

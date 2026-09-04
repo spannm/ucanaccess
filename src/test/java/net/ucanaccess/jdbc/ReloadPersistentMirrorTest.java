@@ -15,8 +15,8 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
     @SuppressWarnings("PMD.UnusedLocalVariable")
-    void testReloadMirror(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testReloadMirror(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         File dbFile = createTempFileName(getClass().getSimpleName(), getFileExtension());
         dbFile.deleteOnExit();

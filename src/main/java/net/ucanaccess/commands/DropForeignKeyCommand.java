@@ -11,9 +11,9 @@ public class DropForeignKeyCommand implements ICommand {
     private final String execId;
     private final String relationshipName;
 
-    public DropForeignKeyCommand(String _execId, String _relationshipName) {
-        execId = _execId;
-        relationshipName = _relationshipName;
+    public DropForeignKeyCommand(String execId, String relationshipName) {
+        this.execId = execId;
+        this.relationshipName = relationshipName;
     }
 
     public String getRelationshipName() {

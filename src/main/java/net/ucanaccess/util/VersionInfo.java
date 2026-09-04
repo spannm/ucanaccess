@@ -61,13 +61,13 @@ public final class VersionInfo {
      * Finds and returns the version information for a given class.
      * The method uses a cache to avoid redundant lookups.
      *
-     * @param _class The class to find the version for. Cannot be null.
+     * @param clazz The class to find the version for. Cannot be null.
      * @return The VersionInfo instance for the given class.
-     * @throws NullPointerException if {@code _class} is null.
+     * @throws NullPointerException if {@code class} is null.
      */
-    public static VersionInfo find(Class<?> _class) {
-        Objects.requireNonNull(_class, "Class required");
-        return CACHE.computeIfAbsent(_class, c -> new VersionInfo().findVersion(c.getPackage()));
+    public static VersionInfo find(Class<?> clazz) {
+        Objects.requireNonNull(clazz, "Class required");
+        return CACHE.computeIfAbsent(clazz, c -> new VersionInfo().findVersion(c.getPackage()));
     }
 
     /**
@@ -87,12 +87,12 @@ public final class VersionInfo {
     /**
      * Finds the version information by checking the package, manifest, or Maven POM file.
      *
-     * @param _p The package of the class to find the version for.
+     * @param p The package of the class to find the version for.
      * @return This VersionInfo instance with the version details populated.
      */
-    VersionInfo findVersion(Package _p) {
-        if (_p != null) {
-            version = _p.getImplementationVersion();
+    VersionInfo findVersion(Package p) {
+        if (p != null) {
+            version = p.getImplementationVersion();
         }
         if (version != null) {
             LOGGER.log(Level.DEBUG, "Found version ''{0}'' in package", version);
@@ -111,7 +111,7 @@ public final class VersionInfo {
                     if (matcher.groupCount() > 1) {
                         minorVersion = Integer.parseInt(matcher.group(2));
                     }
-                } catch (NumberFormatException _ex) {
+                } catch (NumberFormatException ex) {
                     LOGGER.log(Level.WARNING, "Failed to parse major/minor version from: {0}", version);
                 }
             } else {
@@ -142,8 +142,8 @@ public final class VersionInfo {
                     return ver;
                 }
             }
-        } catch (IOException _ex) {
-            LOGGER.log(Level.WARNING, "Failed to find version info in manifest: {0}", _ex.getMessage());
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Failed to find version info in manifest: {0}", ex.getMessage());
         }
         return null;
     }
@@ -173,8 +173,8 @@ public final class VersionInfo {
                     return ver;
                 }
             }
-        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException _ex) {
-            LOGGER.log(Level.WARNING, "Failed to find version info in maven pom: {0}", _ex.getMessage());
+        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException ex) {
+            LOGGER.log(Level.WARNING, "Failed to find version info in maven pom: {0}", ex.getMessage());
         }
         return null;
     }

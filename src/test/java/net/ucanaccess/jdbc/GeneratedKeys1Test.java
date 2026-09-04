@@ -11,15 +11,15 @@ import java.sql.SQLException;
 
 class GeneratedKeys1Test extends UcanaccessBaseTest {
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_key (Z COUNTER PRIMARY KEY, B CHAR(4))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testGeneratedKeys(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testGeneratedKeys(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_key (B) VALUES (?)")) {
             ps.setString(1, "");

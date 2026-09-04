@@ -33,14 +33,14 @@ public class UpdateCommand extends AbstractCursorCommand {
     private final Table                  table;
     private boolean                      isRollbacking;
 
-    public UpdateCommand(Table _table, Map<String, Object> _rowPattern, Object[] _modifiedRow, String _execId) {
-        tableColumns = _table.getColumns();
-        indexSelector = new IndexSelector(_table);
-        rowPattern = _rowPattern;
-        modifiedRow = _modifiedRow;
-        execId = _execId;
-        checkBlob(_modifiedRow);
-        table = _table;
+    public UpdateCommand(Table table, Map<String, Object> rowPattern, Object[] modifiedRow, String execId) {
+        tableColumns = table.getColumns();
+        indexSelector = new IndexSelector(table);
+        this.rowPattern = rowPattern;
+        this.modifiedRow = modifiedRow;
+        this.execId = execId;
+        checkBlob(modifiedRow);
+        this.table = table;
     }
 
     private void checkBlob(Object[] newRow2) {

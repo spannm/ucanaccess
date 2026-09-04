@@ -98,7 +98,7 @@ class CreateTableTest extends UcanaccessBaseTest {
                 "CREATE TABLE tbl_dtrx(c TEXT, number NUMERIC(23,5), UNIQUE(c, number))",
                 "INSERT INTO tbl_dtrx VALUES('I''ll be forgotten sob sob', 55555.3)",
                 "ALTER TABLE tbl_dtrx ADD CONSTRAINT pk_dtrx PRIMARY KEY (c, number)");
-        } catch (Exception _ex) {
+        } catch (Exception ex) {
             ucanaccess.rollback();
         }
 
@@ -139,17 +139,17 @@ class CreateTableTest extends UcanaccessBaseTest {
         }
     }
 
-    private void assertNotNull(String _table, String _column, boolean _expectedNotNull) throws IOException {
+    private void assertNotNull(String table, String column, boolean expectedNotNull) throws IOException {
         Database db = ucanaccess.getDbIO();
-        Table tb = db.getTable(_table);
-        PropertyMap pm = tb.getColumn(_column).getProperties();
-        assertEquals(_expectedNotNull, pm.getValue(PropertyMap.REQUIRED_PROP));
+        Table tb = db.getTable(table);
+        PropertyMap pm = tb.getColumn(column).getProperties();
+        assertEquals(expectedNotNull, pm.getValue(PropertyMap.REQUIRED_PROP));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testCreate(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCreate(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         executeStatements(
             "CREATE \nTABLE tbl1( baaaa \nTEXT PRIMARY KEY, A LONG DEFAULT 3 NOT NULL, C TEXT(255) NOT NULL, "
@@ -169,8 +169,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testNaming(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testNaming(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
@@ -188,8 +188,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testCreateWithFK(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    void testCreateWithFK(AccessVersion accessVersion) throws SQLException, IOException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE Parent(x AUTOINCREMENT PRIMARY KEY, y TEXT(222))");
@@ -206,8 +206,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testPs(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testPs(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         for (PreparedStatement ps : List.of(
             ucanaccess.prepareStatement("CREATE TABLE PS0 (PS AUTOINCREMENT PRIMARY KEY)"),
@@ -220,8 +220,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testPsHyphen(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testPsHyphen(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // #9 hyphen in DDL column name confuses PreparedStatement
         try (PreparedStatement prepStmt = ucanaccess.prepareStatement("CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))")) {
@@ -231,8 +231,8 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void testCreateHyperlink(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCreateHyperlink(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
@@ -263,9 +263,9 @@ class CreateTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2010")
-    void tableNameWithUnderscore(AccessVersion _accessVersion) throws SQLException {
+    void tableNameWithUnderscore(AccessVersion accessVersion) throws SQLException {
         // Ticket #19
-        init(_accessVersion);
+        init(accessVersion);
 
         executeStatements(
             "CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)",

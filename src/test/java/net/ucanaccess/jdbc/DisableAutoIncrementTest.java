@@ -13,16 +13,16 @@ import java.sql.SQLException;
 class DisableAutoIncrementTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE CT (id COUNTER PRIMARY KEY, descr TEXT) ",
             "CREATE TABLE [C T] (id COUNTER PRIMARY KEY, descr TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testGuid(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testGuid(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
             "CREATE TABLE CT1 (id GUID PRIMARY KEY, descr TEXT)",
@@ -34,8 +34,8 @@ class DisableAutoIncrementTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testDisable(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testDisable(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             executeStatements(st,
                 "INSERT INTO CT (descr) VALUES ('CIAO')",

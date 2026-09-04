@@ -17,8 +17,8 @@ public interface IThrowingConsumer<I, T extends Throwable> {
     /**
      * Applies this operation to the given argument throwing an exception of type {@code T}.
      *
-     * @param _input the consumer argument
+     * @param input the consumer argument
      */
-    void accept(I _input) throws T;
+    void accept(I input) throws T;
 
 }

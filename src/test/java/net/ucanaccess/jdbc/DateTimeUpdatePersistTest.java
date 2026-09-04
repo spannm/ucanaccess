@@ -19,8 +19,8 @@ class DateTimeUpdatePersistTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2016")
-    void testUpdateDateTimePersisted(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testUpdateDateTimePersisted(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         // path to the physical file for the second connection
         String accdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();

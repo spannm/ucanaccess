@@ -28,10 +28,10 @@ class DataSourceTest extends UcanaccessBaseTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"V2003", "v2003", "V2016"})
     @NullSource
-    void setNewDatabaseVersionGood(String _ver) {
+    void setNewDatabaseVersionGood(String ver) {
         UcanaccessDataSource uds = new UcanaccessDataSource();
-        uds.setNewDatabaseVersion(_ver);
-        assertThat(uds.getNewDatabaseVersion()).isEqualToIgnoringCase(_ver);
+        uds.setNewDatabaseVersion(ver);
+        assertThat(uds.getNewDatabaseVersion()).isEqualToIgnoringCase(ver);
     }
 
     @Test

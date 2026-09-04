@@ -16,40 +16,40 @@ public class Version extends ComplexBase {
         modifiedDate = cv.getModifiedLocalDate();
     }
 
-    public Version(ComplexValue.Id id, String tableName, String columnName, String _value, LocalDateTime _modifiedDate) {
+    public Version(ComplexValue.Id id, String tableName, String columnName, String value, LocalDateTime modifiedDate) {
         super(id, tableName, columnName);
-        value = _value;
-        modifiedDate = handleJackcessLocalDateTimeResolution(_modifiedDate);
+        this.value = value;
+        this.modifiedDate = handleJackcessLocalDateTimeResolution(modifiedDate);
     }
 
-    public Version(String _value, LocalDateTime _modifiedDate) {
-        this(CREATE_ID, null, null, _value, _modifiedDate);
+    public Version(String value, LocalDateTime modifiedDate) {
+        this(CREATE_ID, null, null, value, modifiedDate);
     }
 
     public LocalDateTime getModifiedDate() {
         return modifiedDate;
     }
 
-    public void setModifiedDate(LocalDateTime _modifiedDate) {
-        modifiedDate = _modifiedDate;
+    public void setModifiedDate(LocalDateTime modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
     public String getValue() {
         return value;
     }
 
-    public void setValue(String _value) {
-        value = _value;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override
-    public boolean equals(Object _obj) {
-        if (this == _obj) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
-        } else if (_obj == null || getClass() != _obj.getClass()) {
+        } else if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Version other = (Version) _obj;
+        Version other = (Version) obj;
         if (modifiedDate == null) {
             if (other.modifiedDate != null) {
                 return false;

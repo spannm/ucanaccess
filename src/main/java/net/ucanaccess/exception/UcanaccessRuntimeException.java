@@ -7,21 +7,21 @@ public class UcanaccessRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public UcanaccessRuntimeException(String _message) {
-        this(_message, null);
+    public UcanaccessRuntimeException(String message) {
+        this(message, null);
     }
 
-    public UcanaccessRuntimeException(Throwable _cause) {
-        this(null, _cause);
+    public UcanaccessRuntimeException(Throwable cause) {
+        this(null, cause);
     }
 
-    public UcanaccessRuntimeException(String _message, Throwable _cause) {
-        super(_message, _cause);
+    public UcanaccessRuntimeException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public static <T> T requireNonNull(T obj, String _message) {
+    public static <T> T requireNonNull(T obj, String message) {
         if (obj == null) {
-            throw new UcanaccessRuntimeException(_message);
+            throw new UcanaccessRuntimeException(message);
         }
         return obj;
     }
@@ -29,14 +29,14 @@ public class UcanaccessRuntimeException extends RuntimeException {
     /**
      * Convenience method to throw a {@code UcanaccessRuntimeException} with the specified error message.<br> Using this method rather than {@code throw new} avoids blocks in lambdas.
      *
-     * @param _message exception message
+     * @param message exception message
      */
-    public static void throwNow(String _message) {
-        throw new UcanaccessRuntimeException(_message);
+    public static void throwNow(String message) {
+        throw new UcanaccessRuntimeException(message);
     }
 
-    public static void throwNow(String _message, Throwable _cause) {
-        throw new UcanaccessRuntimeException(_message, _cause);
+    public static void throwNow(String message, Throwable cause) {
+        throw new UcanaccessRuntimeException(message, cause);
     }
 
 }

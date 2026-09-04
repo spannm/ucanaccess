@@ -12,8 +12,8 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testNewDatabase(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testNewDatabase(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         File fileMdb = createTempFileName(getClass().getSimpleName());
         fileMdb.deleteOnExit();

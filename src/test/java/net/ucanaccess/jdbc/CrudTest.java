@@ -12,15 +12,15 @@ import java.sql.SQLException;
 class CrudTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_crud (id LONG, descr TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCrud(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCrud(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id1 = 1234;
@@ -38,8 +38,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCrudPS(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCrudPS(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         int id1 = 1234;
         int id2 = 5678;
@@ -69,8 +69,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCrudPSBatch(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCrudPSBatch(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         int id1 = 1234;
         int id2 = 5678;
@@ -96,8 +96,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testUpdatableResultSet(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testUpdatableResultSet(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("DELETE FROM t_crud");
@@ -115,8 +115,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDeleteResultSet(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testDeleteResultSet(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -136,8 +136,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testInsertResultSet(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testInsertResultSet(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
@@ -160,8 +160,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testInsertResultSetNoAllSet(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testInsertResultSetNoAllSet(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE t_crud2 (id AUTOINCREMENT, descr TEXT)");
@@ -190,8 +190,8 @@ class CrudTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testPartialInsertResultSet(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testPartialInsertResultSet(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE t_crud3 (id autoincrement, descr TEXT)");

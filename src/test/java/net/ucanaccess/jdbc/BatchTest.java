@@ -14,8 +14,8 @@ import java.sql.SQLException;
 class BatchTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements(
             Sql.of(CREATE, TABLE, "t_batch (id LONG, name TEXT, age LONG)"),
             Sql.of(INSERT,  INTO, "t_batch VALUES(1, 'Sophia', 33)"));
@@ -23,8 +23,8 @@ class BatchTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBatch(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testBatch(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.addBatch("UPDATE t_batch SET [name]='ccc'");
             st.addBatch("UPDATE t_batch SET age=95");
@@ -35,8 +35,8 @@ class BatchTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBatchPreparedStatement(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testBatchPreparedStatement(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (PreparedStatement st = ucanaccess.prepareStatement("UPDATE t_batch SET [name]=?,age=? ")) {
             st.setString(1, "ciao");
             st.setInt(2, 23);

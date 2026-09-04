@@ -170,15 +170,15 @@ public final class SQLConverter {
         return s != null && KEYWORDS_LIST.contains(s.toUpperCase());
     }
 
-    private static int[] getQuoteGroup(String _s) {
-        if (!_s.contains("''")) {
-            Matcher m = Patterns.QUOTE_M.matcher(_s);
+    private static int[] getQuoteGroup(String s) {
+        if (!s.contains("''")) {
+            Matcher m = Patterns.QUOTE_M.matcher(s);
             if (m.find()) {
                 return new int[] {m.start(), m.end()};
             }
         } else {
             int[] ret = new int[] {-1, -1};
-            Matcher m = Patterns.QUOTE_S.matcher(_s);
+            Matcher m = Patterns.QUOTE_S.matcher(s);
             while (m.find()) {
                 int start = m.start();
                 int end = m.end();
@@ -199,15 +199,15 @@ public final class SQLConverter {
         return new int[0];
     }
 
-    private static int[] getDoubleQuoteGroup(String _s) {
-        if (!_s.contains("\"\"")) {
-            Matcher m = Patterns.DOUBLE_QUOTE_M.matcher(_s);
+    private static int[] getDoubleQuoteGroup(String s) {
+        if (!s.contains("\"\"")) {
+            Matcher m = Patterns.DOUBLE_QUOTE_M.matcher(s);
             if (m.find()) {
                 return new int[] {m.start(), m.end()};
             }
         } else {
             int[] ret = new int[] {-1, -1};
-            Matcher mc = Patterns.DOUBLE_QUOTE_S.matcher(_s);
+            Matcher mc = Patterns.DOUBLE_QUOTE_S.matcher(s);
             while (mc.find()) {
                 int start = mc.start();
                 int end = mc.end();
@@ -247,8 +247,8 @@ public final class SQLConverter {
         private final Pattern pattern;
         private String        ddl;
 
-        DDLType(String _regex) {
-            pattern = Pattern.compile(_regex, Pattern.CASE_INSENSITIVE);
+        DDLType(String regex) {
+            pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         }
 
         public boolean in(DDLType... types) {
@@ -367,9 +367,9 @@ public final class SQLConverter {
         return convertSQL(sql, null, creatingQuery);
     }
 
-    public static NormalizedSQL convertSQL(String _sql, UcanaccessConnection _conn, boolean _creatingQuery) {
+    public static NormalizedSQL convertSQL(String inputSql, UcanaccessConnection conn, boolean creatingQuery) {
         NormalizedSQL nsql = new NormalizedSQL();
-        String sql = _sql + " ";
+        String sql = inputSql + " ";
         aliases(sql, nsql);
         sql = replaceBacktick(sql);
         sql = replaceAposNames(sql);
@@ -381,9 +381,9 @@ public final class SQLConverter {
         sql = replaceWhiteSpacedTables(sql);
         sql = translateAccessPowerOperators(sql);
         // sql = replaceExclamationPoints(sql);
-        if (!_creatingQuery) {
-            Pivot.checkAndRefreshPivot(sql, _conn);
-            sql = DFunction.convertDFunctions(sql, _conn);
+        if (!creatingQuery) {
+            Pivot.checkAndRefreshPivot(sql, conn);
+            sql = DFunction.convertDFunctions(sql, conn);
         }
         sql = sql.trim();
 
@@ -452,11 +452,11 @@ public final class SQLConverter {
         return Patterns.DISTINCT_ROW.matcher(sql).replaceAll(" DISTINCT ");
     }
 
-    static void addWhiteSpacedTableNames(String _name) {
-        if (_name == null) {
+    static void addWhiteSpacedTableNames(String input) {
+        if (input == null) {
             return;
         }
-        String name = basicEscapingIdentifier(_name);
+        String name = basicEscapingIdentifier(input);
         if (name == null || WHITE_SPACED_TABLE_NAMES.contains(name)) {
             return;
         }
@@ -569,15 +569,15 @@ public final class SQLConverter {
      * <p>It specifically targets patterns like {@code "operand ^ exponent"} where both operands
      * strictly conform to the defined {@code POWER_OPERAND_REGEX}.</p>
      *
-     * @param _sql the SQL string containing MS Access power operators.
+     * @param sql the SQL string containing MS Access power operators.
      * @return the translated SQL string using the POWER function.
      */
-    static String translateAccessPowerOperators(String _sql) {
-        if (_sql == null || !_sql.contains("^")) {
-            return _sql;
+    static String translateAccessPowerOperators(String sql) {
+        if (sql == null || !sql.contains("^")) {
+            return sql;
         }
 
-        Matcher matcher = Patterns.POWER_OPERATION.matcher(_sql);
+        Matcher matcher = Patterns.POWER_OPERATION.matcher(sql);
         StringBuffer translatedSql = new StringBuffer();
 
         while (matcher.find()) {
@@ -594,14 +594,14 @@ public final class SQLConverter {
         return translatedSql.toString();
     }
 
-    private static String convertIdentifiers(String _sql) {
-        int init = _sql.indexOf('[');
+    private static String convertIdentifiers(String sql) {
+        int init = sql.indexOf('[');
         if (init != -1) {
-            int end = _sql.indexOf(']');
+            int end = sql.indexOf(']');
             if (end < init) {
-                return convertResidualSql(_sql);
+                return convertResidualSql(sql);
             }
-            String content = _sql.substring(init + 1, end);
+            String content = sql.substring(init + 1, end);
             if (content.indexOf(' ') > 0) {
                 String tryContent = " " + content + " ";
                 String tryConversion = convertXescaped(tryContent);
@@ -616,12 +616,12 @@ public final class SQLConverter {
             if (content != null && !isKeyword && (content.indexOf(' ') > 0 || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {
                 subs = "\"";
             }
-            _sql = convertResidualSql(_sql.substring(0, init)) + subs + content + subs
-                    + convertIdentifiers(_sql.substring(end + 1));
+            sql = convertResidualSql(sql.substring(0, init)) + subs + content + subs
+                    + convertIdentifiers(sql.substring(end + 1));
         } else {
-            _sql = convertResidualSql(_sql);
+            sql = convertResidualSql(sql);
         }
-        return _sql;
+        return sql;
     }
 
     private static String convertResidualSql(String sql) {
@@ -710,27 +710,27 @@ public final class SQLConverter {
         return name;
     }
 
-    public static String preEscapingIdentifier(String _name) {
-        if (_name.isEmpty()) {
-            return _name;
+    public static String preEscapingIdentifier(String name) {
+        if (name.isEmpty()) {
+            return name;
         }
-        if (_name.startsWith("~")) {
+        if (name.startsWith("~")) {
             return null;
         }
-        String nl = _name.toUpperCase(Locale.US);
+        String nl = name.toUpperCase(Locale.US);
         if (TableBuilder.isReservedWord(nl)) {
             ESCAPED_IDENTIFIERS.add(nl);
         }
-        if (_name.contains("'") || _name.indexOf('"') > 0) {
-            APOSTROPHISED_NAMES.add(_name);
+        if (name.contains("'") || name.indexOf('"') > 0) {
+            APOSTROPHISED_NAMES.add(name);
         }
 
         if (nl.startsWith("X") && TableBuilder.isReservedWord(nl.substring(1))) {
             ALREADY_ESCAPED_IDENTIFIERS.add(nl.substring(1));
         }
 
-        String escaped = _name;
-        escaped = _name.replace("'", "").replace("\"", "").replaceAll(Pattern.quote("\\"), "_");
+        String escaped = name;
+        escaped = name.replace("'", "").replace("\"", "").replaceAll(Pattern.quote("\\"), "_");
 
         if (!escaped.isEmpty() && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
@@ -745,11 +745,11 @@ public final class SQLConverter {
         return escaped.toUpperCase(Locale.US);
     }
 
-    private static String escapeKeywordIdentifier(String _escaped, boolean _quote) {
-        if (isListedAsKeyword(_escaped)) {
-            return _quote ? '"' + _escaped + '"' : '[' + _escaped + ']';
+    private static String escapeKeywordIdentifier(String escaped, boolean quote) {
+        if (isListedAsKeyword(escaped)) {
+            return quote ? '"' + escaped + '"' : '[' + escaped + ']';
         }
-        return _escaped;
+        return escaped;
     }
 
     public static String basicEscapingIdentifier(String name) {
@@ -776,20 +776,20 @@ public final class SQLConverter {
         return escaped;
     }
 
-    public static String checkLang(String _name, Connection _conn) {
-        return checkLang(_name, _conn, true);
+    public static String checkLang(String name, Connection conn) {
+        return checkLang(name, conn, true);
     }
 
-    public static String checkLang(String _name, Connection _conn, boolean _quote) {
-        String name = _name;
-        if (!_quote) {
-            name = _name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
+    public static String checkLang(String name, Connection conn, boolean quote) {
+        String n = name;
+        if (!quote) {
+            n = name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
         }
-        try (Statement st = _conn.createStatement()) {
-            st.execute(String.format("SELECT 1 AS %s FROM dual", name));
-            return _name;
-        } catch (SQLException _ex) {
-            return _quote ? '"' + _name + '"' : '[' + _name + ']';
+        try (Statement st = conn.createStatement()) {
+            st.execute(String.format("SELECT 1 AS %s FROM dual", n));
+            return name;
+        } catch (SQLException ex) {
+            return quote ? '"' + name + '"' : '[' + name + ']';
         }
     }
 
@@ -808,15 +808,15 @@ public final class SQLConverter {
 
     }
 
-    public static String convertAddColumn(String tableName, String columnName, String _typeDeclaration) {
-        String typeDeclaration = convertTypeDeclaration(_typeDeclaration);
-        typeDeclaration = Patterns.NOT_NULL.matcher(typeDeclaration).replaceAll("");
-        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDeclaration);
+    public static String convertAddColumn(String tableName, String columnName, String typeDeclaration) {
+        String typeDecl = convertTypeDeclaration(typeDeclaration);
+        typeDecl = Patterns.NOT_NULL.matcher(typeDecl).replaceAll("");
+        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDecl);
         if (m.find()) {
-            typeDeclaration = typeDeclaration.substring(0, m.start());
+            typeDecl = typeDecl.substring(0, m.start());
         }
 
-        return "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + typeDeclaration;
+        return "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + typeDecl;
     }
 
     private static String convertTypeDeclaration(String typeDecl) {
@@ -828,13 +828,13 @@ public final class SQLConverter {
         return Patterns.DEFAULT_VARCHAR_0.matcher(typeDecl).replaceAll("$1VARCHAR(255)$2");
     }
 
-    private static String convertCreateTable(String _sql, Map<String, String> _types2Convert) throws SQLException {
-        if (_sql == null || _sql.isBlank()) {
-            return _sql;
+    private static String convertCreateTable(String inputSql, Map<String, String> types2Convert) throws SQLException {
+        if (inputSql == null || inputSql.isBlank()) {
+            return inputSql;
         }
 
         // padding for detecting the right exception
-        String sql = _sql + " ";
+        String sql = inputSql + " ";
         if (!sql.contains("(")) {
             return sql;
         }
@@ -842,7 +842,7 @@ public final class SQLConverter {
         sql = sql.substring(sql.indexOf('('));
 
         String exprTypesTranslate = "(?i)_(\\W)";
-        for (Map.Entry<String, String> entry : _types2Convert.entrySet()) {
+        for (Map.Entry<String, String> entry : types2Convert.entrySet()) {
             sql = sql.replaceAll("([,\\(]\\s*)" + exprTypesTranslate.replace("_", entry.getKey()), "$1___" + entry.getKey() + "___$2")
                      .replaceAll("(\\W)" + exprTypesTranslate.replace("_", entry.getKey()), "$1" + entry.getValue() + "$2")
                      .replaceAll("(\\W)" + exprTypesTranslate.replace("_", "___" + entry.getKey() + "___"), "$1" + entry.getKey() + "$2");
@@ -864,20 +864,20 @@ public final class SQLConverter {
         return null;
     }
 
-    private static String clearDefaultsCreateStatement(String _sql) throws SQLException {
-        if (!_sql.toUpperCase().contains("DEFAULT")) {
-            return _sql;
+    private static String clearDefaultsCreateStatement(String sql) throws SQLException {
+        if (!sql.toUpperCase().contains("DEFAULT")) {
+            return sql;
         }
-        int startDecl = _sql.indexOf('(');
-        int endDecl = _sql.lastIndexOf(')');
+        int startDecl = sql.indexOf('(');
+        int endDecl = sql.lastIndexOf(')');
         if (startDecl >= endDecl) {
-            throw new InvalidCreateStatementException(_sql);
+            throw new InvalidCreateStatementException(sql);
         }
         for (Pattern pat : Patterns.DEFAULT_CATCH) {
-            _sql = pat.matcher(_sql).replaceAll("$3");
+            sql = pat.matcher(sql).replaceAll("$3");
         }
 
-        return _sql;
+        return sql;
     }
 
     public static String convertCreateTable(String sql) throws SQLException {
@@ -955,8 +955,8 @@ public final class SQLConverter {
         return supportsAccessLike;
     }
 
-    public static void setSupportsAccessLike(boolean _supportsAccessLike) {
-        supportsAccessLike = _supportsAccessLike;
+    public static void setSupportsAccessLike(boolean supportsAccessLike) {
+        SQLConverter.supportsAccessLike = supportsAccessLike;
     }
 
     public static boolean isXescaped(String identifier) {
@@ -1147,8 +1147,8 @@ public final class SQLConverter {
         return j + 1;
     }
 
-    public static int asUnsigned(byte _a) {
-        return _a & 0xFF;
+    public static int asUnsigned(byte a) {
+        return a & 0xFF;
     }
 
     public static Set<String> getFormulaDependencies(String formula) {
@@ -1164,8 +1164,8 @@ public final class SQLConverter {
         return dualUsedAsTableName;
     }
 
-    static void setDualUsedAsTableName(boolean _dualUsedAsTableName) {
-        dualUsedAsTableName = _dualUsedAsTableName;
+    static void setDualUsedAsTableName(boolean dualUsedAsTableName) {
+        SQLConverter.dualUsedAsTableName = dualUsedAsTableName;
     }
 
     public static String removeParameters(String qtxt) {

@@ -49,11 +49,11 @@ public final class Exporter {
 
         /** * Sets the CSV column delimiter. The default is a semi-colon (";").
          *
-         * @param _delimiter The delimiter character to be used.
+         * @param value The delimiter character to be used.
          * @return The Builder instance for method chaining.
          */
-        public Builder withDelimiter(String _delimiter) {
-            delimiter = _delimiter;
+        public Builder withDelimiter(String value) {
+            delimiter = value;
             return this;
         }
 
@@ -62,11 +62,11 @@ public final class Exporter {
          * <p>
          * This is often needed by applications like Excel to correctly interpret UTF-8.
          *
-         * @param _includeBom If {@code true}, the BOM will be included.
+         * @param value If {@code true}, the BOM will be included.
          * @return The Builder instance for method chaining.
          */
-        public Builder includeBom(boolean _includeBom) {
-            includeBom = _includeBom;
+        public Builder includeBom(boolean value) {
+            includeBom = value;
             return this;
         }
 
@@ -75,11 +75,11 @@ public final class Exporter {
          * <p>
          * If this is set to {@code false}, newlines will be replaced by spaces.
          *
-         * @param _preverseNewlines If {@code true}, newlines are preserved.
+         * @param preverseNewlines If {@code true}, newlines are preserved.
          * @return The Builder instance for method chaining.
          */
-        public Builder preserveNewlines(boolean _preverseNewlines) {
-            preserveNewlines = _preverseNewlines;
+        public Builder preserveNewlines(boolean preverseNewlines) {
+            preserveNewlines = preverseNewlines;
             return this;
         }
 
@@ -88,38 +88,38 @@ public final class Exporter {
         }
     }
 
-    private Exporter(String _delimter, boolean _includeBom, boolean _preserveNewlines) {
-        delimiter = _delimter;
-        includeBom = _includeBom;
-        preserveNewlines = _preserveNewlines;
+    private Exporter(String delimter, boolean includeBom, boolean preserveNewlines) {
+        delimiter = delimter;
+        this.includeBom = includeBom;
+        this.preserveNewlines = preserveNewlines;
     }
 
     /**
-     * Prints the ResultSet {@code _rs} in CSV format to the output stream {@code _out}.
+     * Prints the ResultSet {@code rs} in CSV format to the output stream {@code out}.
      *
-     * @param _rs The ResultSet to be exported.
-     * @param _out The output stream to which the CSV data will be written.
+     * @param rs The ResultSet to be exported.
+     * @param out The output stream to which the CSV data will be written.
      * @throws SQLException if a database access error occurs.
      * @throws IOException if an I/O error occurs while writing to the stream.
      */
-    public void dumpCsv(ResultSet _rs, PrintStream _out) throws SQLException, IOException {
+    public void dumpCsv(ResultSet rs, PrintStream out) throws SQLException, IOException {
 
         // Print the UTF-8 byte order mark
         if (includeBom) {
-            _out.write(UTF8_BYTE_ORDER_MARK);
+            out.write(UTF8_BYTE_ORDER_MARK);
         }
 
-        ResultSetMetaData meta = _rs.getMetaData();
+        ResultSetMetaData meta = rs.getMetaData();
         int cols = meta.getColumnCount();
 
         // Print the CSV header row
         String comma = "";
         for (int i = 1; i <= cols; ++i) {
-            _out.print(comma);
-            _out.print(toCsv(meta.getColumnLabel(i), delimiter, preserveNewlines));
+            out.print(comma);
+            out.print(toCsv(meta.getColumnLabel(i), delimiter, preserveNewlines));
             comma = delimiter;
         }
-        _out.println();
+        out.println();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         DecimalFormat decimalFormat = new DecimalFormat("0.0########");
@@ -129,10 +129,10 @@ public final class Exporter {
         decimalFormat.setGroupingUsed(false);
 
         // print the resultset rows
-        while (_rs.next()) {
+        while (rs.next()) {
             comma = "";
             for (int i = 1; i <= cols; ++i) {
-                Object o = _rs.getObject(i);
+                Object o = rs.getObject(i);
                 String str;
                 if (o == null) {
                     str = "(null)";
@@ -145,86 +145,86 @@ public final class Exporter {
                 } else {
                     str = o.toString();
                 }
-                _out.print(comma);
-                _out.print(toCsv(str, delimiter, preserveNewlines));
+                out.print(comma);
+                out.print(toCsv(str, delimiter, preserveNewlines));
                 comma = delimiter;
             }
-            _out.println();
+            out.println();
         }
     }
 
     /**
-     * Prints the Google BigQuery schema of the table given by {@code _rs} in JSON format to the {@code _out} stream.<br/>
+     * Prints the Google BigQuery schema of the table given by {@code rs} in JSON format to the {@code out} stream.<br/>
      * See <a href="https://cloud.google.com/bigquery/bq-command-line-tool">bq command-line tool</a> for a description of the JSON schema format.
      *
-     * @param _rs The ResultSet whose metadata will be used to generate the schema.
-     * @param _out The output stream to which the schema will be written.
+     * @param rs The ResultSet whose metadata will be used to generate the schema.
+     * @param out The output stream to which the schema will be written.
      * @throws SQLException if a database access error occurs.
      */
-    public void dumpSchema(ResultSet _rs, PrintStream _out) throws SQLException {
-        ResultSetMetaData meta = _rs.getMetaData();
+    public void dumpSchema(ResultSet rs, PrintStream out) throws SQLException {
+        ResultSetMetaData meta = rs.getMetaData();
         int cols = meta.getColumnCount();
-        _out.println('[');
+        out.println('[');
 
         for (int i = 1; i <= cols; ++i) {
             String name = meta.getColumnName(i);
             int sqlType = meta.getColumnType(i);
             int nullable = meta.isNullable(i);
 
-            _out.print(toSchemaRow(name, sqlType, nullable));
-            _out.printf(i != cols ? ",%n" : "%n");
+            out.print(toSchemaRow(name, sqlType, nullable));
+            out.printf(i != cols ? ",%n" : "%n");
         }
-        _out.println(']');
+        out.println(']');
     }
 
     /**
-     * Returns the CSV representation of the given string {@code _str}.<br/>
+     * Returns the CSV representation of the given string.<br/>
      * This method handles quoting and delimiter escaping according to a simplified CSV standard.
      * <ul>
      *   <li>A double-quote character (") is escaped by replacing it with two double-quotes ("").</li>
      *   <li>If the string contains the delimiter, it is enclosed in double-quotes.</li>
-     *   <li>Newlines (`\r`, `\n`) are either preserved (if `_preserveNewlines` is `true`) or
+     *   <li>Newlines (`\r`, `\n`) are either preserved (if `preserveNewlines` is `true`) or
      *       replaced with a space character. Preserved newlines will also cause the string to be
      *       enclosed in double-quotes.</li>
      * </ul>
      *
-     * @param _str The string to be formatted as CSV.
-     * @param _delimiter The delimiter character used for the CSV output.
-     * @param _preserveNewlines If `true`, newline characters are kept; otherwise, they are replaced by spaces.
+     * @param str The string to be formatted as CSV.
+     * @param delimiter The delimiter character used for the CSV output.
+     * @param preserveNewlines If `true`, newline characters are kept; otherwise, they are replaced by spaces.
      * @return The CSV-formatted string.
      */
-    static String toCsv(String _str, String _delimiter, boolean _preserveNewlines) {
+    static String toCsv(String str, String delimiter, boolean preserveNewlines) {
         boolean needsTextQualifier = false;
 
         // A double-quote is replaced with 2 double-quotes
-        if (_str.contains(QUOTE)) {
-            _str = _str.replace(QUOTE, QUOTE + QUOTE);
+        if (str.contains(QUOTE)) {
+            str = str.replace(QUOTE, QUOTE + QUOTE);
             needsTextQualifier = true;
         }
 
         // If the string contains the delimiter, wrap it in quotes
-        if (_str.contains(_delimiter)) {
+        if (str.contains(delimiter)) {
             needsTextQualifier = true;
         }
 
         // Preserve or replace newlines
-        if (_preserveNewlines) {
+        if (preserveNewlines) {
             needsTextQualifier = true;
         } else {
-            _str = _str.replace('\n', ' ').replace('\r', ' ');
+            str = str.replace('\n', ' ').replace('\r', ' ');
         }
 
         if (needsTextQualifier) {
-            return QUOTE + _str + QUOTE;
+            return QUOTE + str + QUOTE;
         } else {
-            return _str;
+            return str;
         }
     }
 
     /** Returns one row of the BigQuery JSON schema file. */
-    static String toSchemaRow(String _name, int _sqlType, int _nullable) {
-        return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}", _name, toBigQueryType(_sqlType),
-            toBigQueryNullable(_nullable));
+    static String toSchemaRow(String name, int sqlType, int nullable) {
+        return String.format("{\"name\": \"%s\", \"type\": \"%s\", \"mode\": \"%s\"}", name, toBigQueryType(sqlType),
+            toBigQueryNullable(nullable));
     }
 
     /**
@@ -236,11 +236,11 @@ public final class Exporter {
      * <p>
      * Any JDBC type not explicitly defined will be mapped to a BigQuery "string" type.
      *
-     * @param _sqlType The {@code java.sql.Types} integer value.
+     * @param sqlType The {@code java.sql.Types} integer value.
      * @return The corresponding BigQuery data type as a string.
      */
-    static String toBigQueryType(int _sqlType) {
-        switch (_sqlType) {
+    static String toBigQueryType(int sqlType) {
+        switch (sqlType) {
         case Types.TINYINT:
         case Types.SMALLINT:
         case Types.INTEGER:
@@ -264,11 +264,11 @@ public final class Exporter {
      * Converts the {@code nullable} indicator from {@code ResultSetMetaData.isNullable()} to the equivalent BigQuery
      * schema value.
      *
-     * @param _nullable The {@code ResultSetMetaData.column*Nulls} value.
+     * @param nullable The {@code ResultSetMetaData.column*Nulls} value.
      * @return The corresponding BigQuery schema value ("required" or "nullable").
      */
-    static String toBigQueryNullable(int _nullable) {
-        switch (_nullable) {
+    static String toBigQueryNullable(int nullable) {
+        switch (nullable) {
         case ResultSetMetaData.columnNoNulls:
             return "required";
         case ResultSetMetaData.columnNullable:

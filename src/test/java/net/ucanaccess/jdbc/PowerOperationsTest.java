@@ -15,8 +15,8 @@ import java.sql.SQLException;
 class PowerOperationsTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
 
         executeStatements(
             "CREATE TABLE t_powerop (id COUNTER, num NUMERIC(12,3), exp_val NUMERIC(12,3))",
@@ -31,8 +31,8 @@ class PowerOperationsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testPowerOperatorTranslation(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testPowerOperatorTranslation(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // basic num^2 check
         checkQuery("SELECT num^2 FROM t_powerop ORDER BY num", recs(rec(4), rec(20.25), rec(64), rec(100)));
@@ -62,8 +62,8 @@ class PowerOperationsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testPowerFunction(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testPowerFunction(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // basic POWER(num, 2) check
         checkQuery("SELECT num, POWER(num, 2) FROM t_powerop ORDER BY num", recs(

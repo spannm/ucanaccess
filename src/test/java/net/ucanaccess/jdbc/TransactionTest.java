@@ -11,15 +11,15 @@ import java.sql.Savepoint;
 class TransactionTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE T4 (id LONG, descr TEXT(200))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCommit(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCommit(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int count = getVerifyCount("SELECT COUNT(*) FROM T4");
@@ -32,8 +32,8 @@ class TransactionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSavepoint(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testSavepoint(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         int count = getVerifyCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
@@ -50,8 +50,8 @@ class TransactionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSavepoint2(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testSavepoint2(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         int count = getVerifyCount("SELECT COUNT(*) FROM T4");
         ucanaccess.setAutoCommit(false);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

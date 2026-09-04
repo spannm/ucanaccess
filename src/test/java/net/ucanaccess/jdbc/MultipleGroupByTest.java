@@ -11,8 +11,8 @@ class MultipleGroupByTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testMultiple(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testMultiple(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         executeStatements(
             "CREATE TABLE t_xxx (f1 VARCHAR, f2 VARCHAR, f3 VARCHAR, f4 VARCHAR, val NUMBER)",

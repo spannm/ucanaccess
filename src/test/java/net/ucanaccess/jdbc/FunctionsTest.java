@@ -38,8 +38,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     }
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements(
             "CREATE TABLE t_format (id int NOT NULL PRIMARY KEY, text TEXT, date DATETIME, number NUMERIC)",
             "INSERT INTO t_format (id) VALUES(1)");
@@ -47,8 +47,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testASC(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testASC(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Asc('A') FROM t_funcs", singleRec(65));
         checkQuery("SELECT Asc('1') FROM t_funcs", singleRec(49));
         checkQuery("SELECT Asc('u') FROM t_funcs", singleRec(117));
@@ -56,45 +56,45 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSwitch(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSwitch(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Switch('1'='1', 1, false, 2, true, 1) FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testATN(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testATN(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Atn(3) FROM t_funcs", singleRec(1.2490457723982544));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testNz(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testNz(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Nz(null,'lampredotto'), Nz('turtelaz', 'lampredotto'), Nz(null, 1.5), Nz(2, 2) FROM t_funcs",
             singleRec("lampredotto", "turtelaz", 1.5, 2));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCBoolean(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCBoolean(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CBool(id), CBool(1=2), CBool('true'), CBool('false'), CBool(0), CBool(-3) FROM t_funcs",
             singleRec(true, false, true, false, false, true));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCVar(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCVar(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CVAR(8), CVAR(8.44) FROM t_funcs", singleRec("8", "8.44"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCstr(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCstr(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CStr(date0) FROM t_funcs", singleRec("11/22/2003 10:42:58 PM"));
         checkQuery("SELECT CStr(false) FROM t_funcs", singleRec("false"));
         checkQuery("SELECT CStr(8) FROM t_funcs", singleRec("8"));
@@ -103,15 +103,15 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCsign(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCsign(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CSign(8.53453543) FROM t_funcs", singleRec(8.534535));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCDate(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCDate(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT CDate('Apr 6, 2003') FROM t_funcs", recs(rec(sdf.parse("2003-04-06 00:00:00.0"))));
         checkQuery("SELECT CDate('1582-10-15') FROM t_funcs", recs(rec(sdf.parse("1582-10-15 00:00:00.0"))));
@@ -119,65 +119,65 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCLong(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCLong(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CLong(8.52), CLong(8.49), CLong(5.5) FROM t_funcs", singleRec(9, 8, 6));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCLng(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCLng(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CLng(8.52), CLng(8.49), CLng(5.5) FROM t_funcs", singleRec(9, 8, 6));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCDec(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCDec(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CDec(8.45 * 0.005 * 0.01) FROM t_funcs", singleRec(0.0004225));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCcur(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCcur(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CCur(123.4567812), CCur(123.4547812) FROM t_funcs", singleRec(123.4568, 123.4548));
         checkQuery("SELECT CCur(0.552222211) * 100 FROM t_funcs", singleRec(55.22));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCint(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCint(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CInt(8.51), CInt(4.5) FROM t_funcs", singleRec(9, 4));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testChr(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testChr(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Chr(65) FROM t_funcs", singleRec("A"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCos(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCos(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Cos(1) FROM t_funcs", singleRec(0.5403023058681398));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCurrentUser(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCurrentUser(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT CurrentUser() FROM t_funcs", singleRec("ucanaccess"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDateAdd(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDateAdd(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
         checkQuery("SELECT DateAdd('YYYY', 4, #11/22/2003 10:42:58 PM#) FROM t_funcs", recs(rec(sdf.parse("2007-11-22 22:42:58"))));
@@ -198,36 +198,36 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDate(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDate(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Date() FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDay(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDay(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Day(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(22));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testExp(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testExp(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Exp(3.1), exp(0.4) FROM t_funcs", singleRec(22.197951281441636, 1.4918246976412703d));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testHour(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testHour(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Hour(#10:42:58 pM#), Hour(#10:42:58 AM#), Hour(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(22, 10, 22));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testIIf(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testIIf(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc'), IIf(IsNull(descr)=true, 'pippo', 'pl''uto'&'\" \" cccc') "
             + "FROM t_funcs", singleRec("pl'uto\" \" cccc", "pl'uto\" \" cccc"));
         checkQuery("SELECT IIf(true, false, true) FROM t_funcs", singleRec(false));
@@ -236,8 +236,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testInstr(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testInstr(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT InStr('Found on the Net', 'the') FROM t_funcs", singleRec(10));
         checkQuery("SELECT InStr('Found on the Net', 'f') FROM t_funcs", singleRec(1));
         checkQuery("SELECT InStr(1, 'Found on the Net', 'f') FROM t_funcs", singleRec(1));
@@ -248,8 +248,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testInstrrev(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testInstrrev(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT InstrRev('alphabet', 'a') FROM t_funcs", singleRec(5));
         checkQuery("SELECT InstrRev('alphabet', 'a',-1) FROM t_funcs", singleRec(5));
         checkQuery("SELECT InstrRev('alphabet', 'a',1) FROM t_funcs", singleRec(1));
@@ -257,8 +257,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testIsDate(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testIsDate(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT IsDate(#1/2/2003 10:42:58 PM#) FROM t_funcs", singleRec(true));
 
         checkQuery("SELECT IsDate(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(true));
@@ -283,8 +283,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSimpleDateFormatLenientTrue(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSimpleDateFormatLenientTrue(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         // format taken from:
         // checkQuery("SELECT isDate('Feb 10 00:25:09') FROM " + TBL, true);
 
@@ -296,8 +296,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testIsNumber(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testIsNumber(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT IsNumeric(33) FROM t_funcs", singleRec(true));
         checkQuery("SELECT IsNumeric('33') FROM t_funcs", singleRec(true));
         checkQuery("SELECT IsNumeric('a') FROM t_funcs", singleRec(false));
@@ -308,57 +308,57 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testLcase(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testLcase(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT LCASE(' SAAxxxx   ') FROM t_funcs", singleRec(" saaxxxx   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testLeft(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testLeft(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Left('Found on the Net', 4), Left(null, 4) FROM t_funcs", singleRec("Foun", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testLen(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testLen(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT len('1222sssss.3hhh'), len(null) FROM t_funcs", singleRec(14, null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testLTrim(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testLTrim(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT LTRIM(' SSS   ') FROM t_funcs", singleRec("SSS   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testMid(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testMid(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Mid ('Found on the Net', 2, 4), Mid ('Found on the Net', 1, 555),Mid(null, 1, 555) FROM t_funcs", singleRec("ound", "Found on the Net", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testMinute(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testMinute(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Minute(#10:42:58 pM#),Minute(#10:42:58 AM#),Minute(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(42, 42, 42));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testMonth(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testMonth(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT month(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(11));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testNow(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testNow(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         sleepUntilStartOfNewSecond();
         Date now = Date.from(LocalDateTime.now()
             .truncatedTo(ChronoUnit.SECONDS)
@@ -368,8 +368,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testTime(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testTime(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         sleepUntilStartOfNewSecond();
         Date time = Date.from(LocalDateTime.now()
             .withYear(1899).withMonth(12).withDayOfMonth(30)
@@ -385,7 +385,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         while (System.currentTimeMillis() % 1000 > 900) {
             try {
                 Thread.sleep(25L);
-            } catch (InterruptedException _ex) {
+            } catch (InterruptedException ex) {
                 return;
             }
         }
@@ -393,79 +393,79 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testReplace(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testReplace(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Replace('alphabet', 'bet', 'hydr') FROM t_funcs", singleRec("alphahydr"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testRight(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testRight(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Right('Tech on the Net', 3), Right(null,12) FROM t_funcs", singleRec("Net", null));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testRtrim(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testRtrim(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT RTRIM(' SSS   ') FROM t_funcs", singleRec(" SSS"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSecond(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSecond(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Second(#10:42:58 pM#), Second(#10:42:58 AM#), Second(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(58, 58, 58));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSin(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSin(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT sin(1) FROM t_funcs", singleRec(0.8414709848078965));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSpace(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSpace(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT space(5) FROM t_funcs", singleRec("     "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testTrim(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testTrim(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT TRIM(' SSS   ') FROM t_funcs", singleRec("SSS"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testUcase(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testUcase(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT UCASE(' SAAxxxx   ') FROM t_funcs", singleRec(" SAAXXXX   "));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testVal(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testVal(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT val('0.'), Val('hhh'), val('.a'), val('.'), val('.44'), Val('1222.3hhh'), Val('12 22.3hhh'), VAL('-'), VAL('-2,3') "
             + "FROM t_funcs", singleRec(0.0, 0.0, 0.0, 0.0, 0.44, 1222.3, 1222.3, 0.0, -2.0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testYear(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testYear(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT YEAR(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(2003));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDateDiff(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDateDiff(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT DateDiff('yyyy',#11/22/1992 10:42:58 PM#,#11/22/2007 10:42:58 AM#) FROM t_funcs", singleRec(15));
         checkQuery("SELECT DateDiff('y',#11/22/1992 11:00:00 AM#,#11/22/2007 10:00:00 AM#) FROM t_funcs", singleRec(5478));
         checkQuery("SELECT DateDiff('y',#11/22/1992 11:00:00 AM#,#11/22/2007 12:00:00 AM#) FROM t_funcs", singleRec(5478));
@@ -490,8 +490,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDatePart(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDatePart(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT DatePart('yyyy',#11/22/1992 10:42:58 PM#) FROM t_funcs", singleRec(1992));
         checkQuery("SELECT DatePart('q',#11/22/1992 10:42:58 PM#) FROM t_funcs", singleRec(4));
         checkQuery("SELECT DatePart('d',#11/22/1992 10:42:58 PM#) FROM t_funcs", singleRec(22));
@@ -507,8 +507,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDateSerial(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDateSerial(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT DateSerial(1998,5, 10) FROM t_funcs", recs(rec(sdf.parse("1998-05-10 00:00:00"))));
         checkQuery("SELECT 'It works, I can''t believe it.' FROM t_funcs" + " WHERE #05/13/1992#=dateserial(1992,05,13)",
@@ -517,8 +517,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testFormatNumber(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testFormatNumber(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Format(number, 'percent') FROM t_format", singleRec(""));
         checkQuery("SELECT Format(0.981, 'percent') FROM t_funcs", singleRec("98.10%"));
         checkQuery("SELECT Format(num, 'fixed') FROM t_funcs", singleRec("-1110.55"));
@@ -535,8 +535,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testTimestamp(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testTimestamp(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT #2006-12-11#=timestamp '2006-12-11 00:00:00' FROM dual", singleRec(true));
         checkQuery("SELECT #2006-12-11 1:2:3#=timestamp '2006-12-11 01:02:03' FROM dual", singleRec(true));
         checkQuery("SELECT #2006-2-1 1:2:3#=timestamp '2006-02-01 01:02:03' FROM dual", singleRec(true));
@@ -549,8 +549,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testFormatDate(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testFormatDate(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Format(date, 'Short date') FROM t_format", singleRec(""));
         checkQuery("SELECT Format(#05/13/1994 10:42:58 PM#, 'Long date') FROM t_funcs", singleRec("Friday, May 13, 1994"));
         checkQuery("SELECT Format(#05/13/1994 10:42:58 PM#, 'Short date') FROM t_funcs", singleRec("5/13/1994"));
@@ -563,21 +563,21 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testSign(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testSign(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Sign(0), Sign(-20.4), Sign(4) FROM t_funcs", singleRec(0, -1, 1));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testWeekDayName(AccessVersion _accessVersion) throws Exception {
+    void testWeekDayName(AccessVersion accessVersion) throws Exception {
         assertEquals("Sunday", Functions.weekdayName(1, false, 1));
         assertEquals("Monday", Functions.weekdayName(2, false, 1));
         assertEquals("Monday", Functions.weekdayName(1, false, 2));
         assertEquals("Tuesday", Functions.weekdayName(2, false, 2));
         assertEquals("Sat", Functions.weekdayName(14, true, 1));
 
-        init(_accessVersion);
+        init(accessVersion);
         checkQuery("SELECT WeekDayName(3) FROM t_funcs", singleRec("Tuesday"));
         checkQuery("SELECT WeekDayName(3, true) FROM t_funcs", singleRec("Tue"));
         checkQuery("SELECT WeekdayName(3, true, 2) FROM t_funcs", singleRec("Wed"));
@@ -586,23 +586,23 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testMonthName(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testMonthName(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT MonthName(3) FROM t_funcs", singleRec("March"));
         checkQuery("SELECT MonthName(3, true) FROM t_funcs", singleRec("Mar"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testStr(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testStr(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Str(id), Str(num), Str(4.5555555) FROM t_funcs", singleRec(" 1234", "-1110.554", " 4.5555555"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDateValue(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDateValue(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT dateValue(#11/22/2003 10:42:58 PM#) FROM t_funcs", recs(rec(sdf.parse("2003-11-22 00:00:00.0"))));
         checkQuery("SELECT dateValue(#11/22/2003 21:42:58 AM#) FROM t_funcs", recs(rec(sdf.parse("2003-11-22 00:00:00.0"))));
@@ -611,8 +611,8 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testFormatString(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testFormatString(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Format(text, 'Long date') FROM t_format", singleRec(""));
         checkQuery("SELECT Format('05/13/1994', 'Long date') FROM t_funcs", singleRec("Friday, May 13, 1994"));
         checkQuery("SELECT Format(0.6, 'percent') FROM t_funcs", singleRec("60.00%"));
@@ -623,57 +623,57 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testInt(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testInt(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT int(1111112.5), int(-2.5) FROM t_funcs", singleRec(1111112, -3));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testRnd(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testRnd(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         dumpQueryResult("SELECT rnd() FROM t_funcs");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testStrComp(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testStrComp(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT StrComp('Cia', 'Cia') FROM t_funcs", singleRec(0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testStrConv(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testStrConv(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT StrConv('Cia',1) FROM t_funcs", singleRec("CIA"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testStrReverse(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testStrReverse(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT StrReverse('ylatI') FROM t_funcs", singleRec("Italy"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testString(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testString(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT String(4,'c') FROM t_funcs", singleRec("cccc"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testWeekday(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testWeekday(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT Weekday(#06/27/2013 10:42:58 PM#,1) FROM t_funcs", singleRec(5));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testFinancial(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testFinancial(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         checkQuery("SELECT FV(0,100,-100,-10000,-1), DDB(1001100,10020,111,62,5.5), NPer(0.0525,200,1500,233,0.1), "
             + "IPmt(0.5,4,8,10*1,10000,0.5), PV(0,4,-10000,1000,-1.55), PPmt(0.5,3,7,100000,15000.1), SLN(10000,110000,9), "
             + "SYD(10000,200,12,4), Pmt(0.08,30,5000,-15000,0.1) FROM t_funcs",

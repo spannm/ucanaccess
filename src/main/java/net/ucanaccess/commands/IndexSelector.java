@@ -23,8 +23,8 @@ public final class IndexSelector {
     private Index       bestIndex;
     private boolean     primaryCursor;
 
-    public IndexSelector(Table _table) {
-        table = _table;
+    public IndexSelector(Table table) {
+        this.table = table;
     }
 
     public Index getBestIndex() {
@@ -71,49 +71,49 @@ public final class IndexSelector {
 
     private static final class ColumnMatcher extends SimpleColumnMatcher {
         @Override
-        public boolean matches(Table _table, String _columnName, Object _currVal, Object _dbVal) {
+        public boolean matches(Table table, String columnName, Object currVal, Object dbVal) {
 
-            if (_currVal == null && _dbVal == null) {
+            if (currVal == null && dbVal == null) {
                 return true;
-            } else if (_currVal == null || _dbVal == null) {
+            } else if (currVal == null || dbVal == null) {
                 return false;
-            } else if (_currVal instanceof Date && _dbVal instanceof Date) {
-                return ((Date) _currVal).compareTo((Date) _dbVal) == 0;
-            } else if (_currVal instanceof BigDecimal && _dbVal instanceof BigDecimal) {
-                return ((BigDecimal) _currVal).compareTo((BigDecimal) _dbVal) == 0;
-            } else if (_dbVal instanceof BigDecimal && _currVal instanceof Number) {
-                return ((BigDecimal) _dbVal).compareTo(new BigDecimal(_currVal.toString())) == 0;
-            } else if (_currVal instanceof BigDecimal && _dbVal instanceof Number) {
-                return ((BigDecimal) _currVal).compareTo(new BigDecimal(_dbVal.toString())) == 0;
-            } else if (_currVal instanceof Integer && _dbVal instanceof Short) {
-                return (Integer) _currVal == ((Short) _dbVal).intValue();
-            } else if (_dbVal instanceof Integer && _currVal instanceof Short) {
-                return (Integer) _dbVal == ((Short) _currVal).intValue();
-            } else if (_currVal instanceof Integer && _dbVal instanceof Byte) {
-                return (Integer) _currVal == SQLConverter.asUnsigned((Byte) _dbVal);
-            } else if (_dbVal instanceof Integer && _currVal instanceof Byte) {
-                return (Integer) _dbVal == SQLConverter.asUnsigned((Byte) _currVal);
+            } else if (currVal instanceof Date && dbVal instanceof Date) {
+                return ((Date) currVal).compareTo((Date) dbVal) == 0;
+            } else if (currVal instanceof BigDecimal && dbVal instanceof BigDecimal) {
+                return ((BigDecimal) currVal).compareTo((BigDecimal) dbVal) == 0;
+            } else if (dbVal instanceof BigDecimal && currVal instanceof Number) {
+                return ((BigDecimal) dbVal).compareTo(new BigDecimal(currVal.toString())) == 0;
+            } else if (currVal instanceof BigDecimal && dbVal instanceof Number) {
+                return ((BigDecimal) currVal).compareTo(new BigDecimal(dbVal.toString())) == 0;
+            } else if (currVal instanceof Integer && dbVal instanceof Short) {
+                return (Integer) currVal == ((Short) dbVal).intValue();
+            } else if (dbVal instanceof Integer && currVal instanceof Short) {
+                return (Integer) dbVal == ((Short) currVal).intValue();
+            } else if (currVal instanceof Integer && dbVal instanceof Byte) {
+                return (Integer) currVal == SQLConverter.asUnsigned((Byte) dbVal);
+            } else if (dbVal instanceof Integer && currVal instanceof Byte) {
+                return (Integer) dbVal == SQLConverter.asUnsigned((Byte) currVal);
             }
 
-            if (_dbVal instanceof Float && _currVal instanceof Double
-                    || _dbVal instanceof Double && _currVal instanceof Float) {
-                if (new BigDecimal(_dbVal.toString()).compareTo(new BigDecimal(_currVal.toString())) == 0) {
+            if (dbVal instanceof Float && currVal instanceof Double
+                    || dbVal instanceof Double && currVal instanceof Float) {
+                if (new BigDecimal(dbVal.toString()).compareTo(new BigDecimal(currVal.toString())) == 0) {
                     return true;
                 }
-                if (_dbVal instanceof Float && _currVal instanceof Double) {
-                    return ((Float) _dbVal).doubleValue() == (Double) _currVal;
+                if (dbVal instanceof Float && currVal instanceof Double) {
+                    return ((Float) dbVal).doubleValue() == (Double) currVal;
                 }
             }
-            if (_currVal instanceof byte[] && _dbVal instanceof byte[]) {
+            if (currVal instanceof byte[] && dbVal instanceof byte[]) {
                 return true;
             }
 
-            if (_currVal instanceof ComplexBase[] && _dbVal instanceof ComplexValueForeignKey) {
-                return Try.catching(() -> Arrays.equals((ComplexBase[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal)))
+            if (currVal instanceof ComplexBase[] && dbVal instanceof ComplexValueForeignKey) {
+                return Try.catching(() -> Arrays.equals((ComplexBase[]) currVal, ComplexBase.convert((ComplexValueForeignKey) dbVal)))
                     .orThrow(UcanaccessRuntimeException::new);
             }
 
-            return super.matches(_table, _columnName, _currVal, _dbVal);
+            return super.matches(table, columnName, currVal, dbVal);
         }
     }
 }

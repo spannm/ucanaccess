@@ -14,8 +14,8 @@ class FolderTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testFolderContent(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testFolderContent(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         String folderPath = System.getProperty("accessFolder");
         if (folderPath == null) {

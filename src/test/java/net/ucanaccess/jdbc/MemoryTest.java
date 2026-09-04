@@ -13,8 +13,8 @@ import java.sql.SQLException;
 class MemoryTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         getLogger().log(Level.DEBUG, "Thread.activeCount (setup): {0}", Thread.activeCount());
 
         executeStatements("CREATE TABLE t_mem(id LONG PRIMARY KEY, a LONG, c TEXT, d TEXT)");
@@ -28,8 +28,8 @@ class MemoryTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testMemory(AccessVersion _accessVersion) throws SQLException, InterruptedException {
-        init(_accessVersion);
+    void testMemory(AccessVersion accessVersion) throws SQLException, InterruptedException {
+        init(accessVersion);
         ucanaccess.setAutoCommit(false);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

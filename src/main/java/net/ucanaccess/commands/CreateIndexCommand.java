@@ -11,10 +11,10 @@ public class CreateIndexCommand implements ICommand {
     private final String tableName;
     private final String execId;
 
-    public CreateIndexCommand(String _indexName, String _tableName, String _execId) {
-        indexName = _indexName;
-        tableName = _tableName;
-        execId = _execId;
+    public CreateIndexCommand(String indexName, String tableName, String execId) {
+        this.indexName = indexName;
+        this.tableName = tableName;
+        this.execId = execId;
     }
 
     @Override

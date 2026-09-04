@@ -59,12 +59,12 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     protected UcanaccessBaseTest() {
     }
 
-    protected final void setAccessVersion(AccessVersion _accessVersion) {
-        accessVersion = _accessVersion;
+    protected final void setAccessVersion(AccessVersion accessVersion) {
+        this.accessVersion = accessVersion;
     }
 
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        accessVersion = _accessVersion;
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        this.accessVersion = accessVersion;
         ucanaccess = createUcanaccessConnection();
     }
 
@@ -88,25 +88,25 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return fileAccDb;
     }
 
-    public void checkQuery(CharSequence _query, List<List<Object>> _expected) throws SQLException {
+    public void checkQuery(CharSequence query, List<List<Object>> expected) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement();
-            ResultSet rs = st.executeQuery(_query == null ? null : _query.toString())) {
-            diff(rs, _expected, _query);
+            ResultSet rs = st.executeQuery(query == null ? null : query.toString())) {
+            diff(rs, expected, query);
         }
     }
 
     @SuppressWarnings("PMD.UseTryWithResources")
-    public void checkQuery(CharSequence _query) throws SQLException {
+    public void checkQuery(CharSequence sequence) throws SQLException {
         initVerifyConnection();
 
         try (UcanaccessStatement st1 = ucanaccess.createStatement();
              UcanaccessStatement st2 = verifyConnection.createStatement()) {
 
-            String query = _query == null ? null : _query.toString();
+            String query = sequence == null ? null : sequence.toString();
             ResultSet firstRs = st1.executeQuery(query);
             ResultSet verifyRs = st2.executeQuery(query);
 
-            diffResultSets(firstRs, verifyRs, _query);
+            diffResultSets(firstRs, verifyRs, sequence);
         } finally {
             if (verifyConnection != null) {
                 verifyConnection.close();
@@ -115,40 +115,40 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    private void diff(ResultSet _resultSet, List<List<Object>> _expectedResults, CharSequence _expression) throws SQLException {
-        String expressionContext = (_expression != null ? " for expression [" + _expression + "]" : "");
+    private void diff(ResultSet resultSet, List<List<Object>> expectedResults, CharSequence expression) throws SQLException {
+        String expressionContext = (expression != null ? " for expression [" + expression + "]" : "");
 
         // 1. read the entire ResultSet into memory
         List<List<Object>> actualResults = new ArrayList<>();
         int actualColumnCount;
 
         // get column count from ResultSet metadata
-        ResultSetMetaData rsmd = _resultSet.getMetaData();
+        ResultSetMetaData rsmd = resultSet.getMetaData();
         actualColumnCount = rsmd.getColumnCount();
 
         // check the column count of expected results, if not empty
-        if (!_expectedResults.isEmpty()) {
-            assertEquals(_expectedResults.get(0).size(), actualColumnCount,
+        if (!expectedResults.isEmpty()) {
+            assertEquals(expectedResults.get(0).size(), actualColumnCount,
                 "Unexpected column count in result set metadata" + expressionContext);
         }
 
         // read all rows from the ResultSet
-        while (_resultSet.next()) {
+        while (resultSet.next()) {
             List<Object> actualRow = new ArrayList<>(actualColumnCount);
             for (int col = 1; col <= actualColumnCount; col++) {
-                actualRow.add(_resultSet.getObject(col));
+                actualRow.add(resultSet.getObject(col));
             }
             actualResults.add(actualRow);
         }
 
         // 2. early exit if the number of rows differs
-        assertEquals(_expectedResults.size(), actualResults.size(),
+        assertEquals(expectedResults.size(), actualResults.size(),
             String.format("Result set size mismatch%s. Expected %d rows, but got %d rows.",
-                expressionContext, _expectedResults.size(), actualResults.size()));
+                expressionContext, expectedResults.size(), actualResults.size()));
 
         // 3. perform row-by-row and column-by-column comparisons
-        for (int rowIdx = 0; rowIdx < _expectedResults.size(); rowIdx++) {
-            List<Object> expectedRow = _expectedResults.get(rowIdx);
+        for (int rowIdx = 0; rowIdx < expectedResults.size(); rowIdx++) {
+            List<Object> expectedRow = expectedResults.get(rowIdx);
             List<Object> actualRow = actualResults.get(rowIdx);
 
             // check column count of the current row
@@ -253,14 +253,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         }
     }
 
-    private void diffResultSets(ResultSet _resultSet, ResultSet _verifyResultSet, CharSequence _query) throws SQLException {
-        int colCountActual = _resultSet.getMetaData().getColumnCount();
-        int colCountExpected = _verifyResultSet.getMetaData().getColumnCount();
+    private void diffResultSets(ResultSet resultSet, ResultSet verifyResultSet, CharSequence query) throws SQLException {
+        int colCountActual = resultSet.getMetaData().getColumnCount();
+        int colCountExpected = verifyResultSet.getMetaData().getColumnCount();
         assertEquals(colCountExpected, colCountActual, "Unexpected column count");
 
         StringBuilder log = new StringBuilder("{");
         int row = 0;
-        while (next(_verifyResultSet, _resultSet)) {
+        while (next(verifyResultSet, resultSet)) {
             row++;
             if (log.length() > 1) {
                 log.append(',');
@@ -270,18 +270,18 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 if (col > 1) {
                     log.append(',');
                 }
-                Object objActual = _resultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
-                    ? _resultSet.getBoolean(col)
-                    : _resultSet.getObject(col);
-                Object objExpected = _verifyResultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
-                    ? _verifyResultSet.getBoolean(col)
-                    : _verifyResultSet.getObject(col);
+                Object objActual = resultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
+                    ? resultSet.getBoolean(col)
+                    : resultSet.getObject(col);
+                Object objExpected = verifyResultSet.getMetaData().getColumnType(col) == Types.BOOLEAN
+                    ? verifyResultSet.getBoolean(col)
+                    : verifyResultSet.getObject(col);
 
                 if (objActual == null && objExpected == null) {
                     continue;
                 } else if (objActual == null) {
                     assertNull(objExpected, "Object in verify set at row:col " + row + ':' + col + " should be null, but was: "
-                        + objExpected + " in [" + _query + ']');
+                        + objExpected + " in [" + query + ']');
                 } else {
                     if (objActual instanceof Blob) {
                         byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
@@ -312,17 +312,17 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     }
 
-    protected void dumpQueryResult(IThrowingSupplier<ResultSet, SQLException> _supplier) throws SQLException {
+    protected void dumpQueryResult(IThrowingSupplier<ResultSet, SQLException> supplier) throws SQLException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PrintStream ps = new PrintStream(baos, true)) {
-            new Main(ucanaccess, null).consoleDump(_supplier.get(), ps);
+            new Main(ucanaccess, null).consoleDump(supplier.get(), ps);
             getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos);
         }
     }
 
-    protected void dumpQueryResult(CharSequence _query) throws SQLException {
+    protected void dumpQueryResult(CharSequence query) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            ResultSet resultSet = st.executeQuery(_query == null ? null : _query.toString());
+            ResultSet resultSet = st.executeQuery(query == null ? null : query.toString());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (PrintStream ps = new PrintStream(baos, true)) {
                 new Main(ucanaccess, null).consoleDump(resultSet, ps);
@@ -399,20 +399,20 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     /**
      * Creates a unique temporary file name using the given prefix and suffix, but does not create the file.
-     * @param _prefix file name prefix
-     * @param _suffix file name suffix
+     * @param prefix file name prefix
+     * @param suffixArg file name suffix
      * @return temporary file object
      */
-    protected static File createTempFileName(String _prefix, String _suffix) {
-        String name = Optional.ofNullable(_prefix).map(p -> p.replace(File.separatorChar, '_')).orElse("");
+    protected static File createTempFileName(String prefix, String suffixArg) {
+        String name = Optional.ofNullable(prefix).map(p -> p.replace(File.separatorChar, '_')).orElse("");
         if (!name.isBlank() && !name.endsWith("-")) {
             name += "-";
         }
-        String suffix = _suffix;
+        String suffix = suffixArg;
         if (suffix == null || suffix.isBlank()) {
-            int idxLastDot = _prefix.lastIndexOf('.');
+            int idxLastDot = prefix.lastIndexOf('.');
             if (idxLastDot > -1) {
-                suffix = _prefix.substring(idxLastDot);
+                suffix = prefix.substring(idxLastDot);
             }
             if (suffix == null || suffix.isEmpty() || suffix.length() > 6) {
                 suffix = ".tmp";
@@ -424,22 +424,22 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     /**
      * Creates a unique temporary file name using the given prefix, but does not create the file.
-     * @param _prefix file name prefix
+     * @param prefix file name prefix
      * @return temporary file object
      */
-    protected File createTempFileName(String _prefix) {
-        return createTempFileName(_prefix, getFileExtension());
+    protected File createTempFileName(String prefix) {
+        return createTempFileName(prefix, getFileExtension());
     }
 
     /**
      * Creates a unique temporary file using the given prefix.<p>
      * The file is marked for deletion on JVM exit.
      *
-     * @param _prefix file name prefix
+     * @param prefix file name prefix
      * @return temporary file object
      */
-    protected File createTempFile(String _prefix) {
-        File f = createTempFileName(_prefix);
+    protected File createTempFile(String prefix) {
+        File f = createTempFileName(prefix);
 
         getLogger().log(Level.DEBUG, "Creating temp file {0}", f);
         Try.catching(() -> Files.createFile(f.toPath())).orThrow(UncheckedIOException::new);
@@ -448,31 +448,31 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         return f;
     }
 
-    void createNewDatabase(FileFormat _fileFormat, File _dbFile) {
-        Try.withResources(() -> DatabaseBuilder.create(_fileFormat, _dbFile), Database::flush).orThrow(UncheckedIOException::new);
-        getLogger().log(Level.INFO, "Access {0} database created: {1}", _fileFormat.name(), _dbFile.getAbsolutePath());
+    void createNewDatabase(FileFormat fileFormat, File dbFile) {
+        Try.withResources(() -> DatabaseBuilder.create(fileFormat, dbFile), Database::flush).orThrow(UncheckedIOException::new);
+        getLogger().log(Level.INFO, "Access {0} database created: {1}", fileFormat.name(), dbFile.getAbsolutePath());
     }
 
-    protected File copyResourceToTempFile(String _resourcePath) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(_resourcePath)) {
+    protected File copyResourceToTempFile(String resourcePath) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (is == null) {
-                getLogger().log(Level.WARNING, "Resource {0} not found in classpath", _resourcePath);
+                getLogger().log(Level.WARNING, "Resource {0} not found in classpath", resourcePath);
                 return null;
             }
-            File tempFile = createTempFile(new File(_resourcePath).getName().replace('.', '_'));
-            getLogger().log(Level.DEBUG, "Copying resource {0} to {1}", _resourcePath, tempFile.getAbsolutePath());
+            File tempFile = createTempFile(new File(resourcePath).getName().replace('.', '_'));
+            getLogger().log(Level.DEBUG, "Copying resource {0} to {1}", resourcePath, tempFile.getAbsolutePath());
             return copyFile(is, tempFile);
-        } catch (IOException _ex) {
-            throw new UncheckedIOException(_ex);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 
-    public int getVerifyCount(CharSequence _sql) throws SQLException {
-        return getVerifyCount(_sql, true);
+    public int getVerifyCount(CharSequence sql) throws SQLException {
+        return getVerifyCount(sql, true);
     }
 
-    public int getVerifyCount(CharSequence _sql, boolean _equals) throws SQLException {
-        String sql = _sql == null ? null : _sql.toString();
+    public int getVerifyCount(CharSequence sqlArg, boolean equals) throws SQLException {
+        String sql = sqlArg == null ? null : sqlArg.toString();
         initVerifyConnection();
 
         try (UcanaccessStatement stVerify = verifyConnection.createStatement();
@@ -485,7 +485,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             actualRs.next();
             int actualCount = actualRs.getInt(1);
 
-            if (_equals) {
+            if (equals) {
                 assertEquals(expectedCount, actualCount);
             } else {
                 assertNotEquals(expectedCount, actualCount);
@@ -527,33 +527,33 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         verifyConnection = buildConnection().withDbPath(tempVerifyFile.getAbsolutePath()).build();
     }
 
-    private boolean next(ResultSet _verifyResultSet, ResultSet _resultSet) throws SQLException {
-        boolean b1 = _verifyResultSet.next();
-        boolean b2 = _resultSet.next();
+    private boolean next(ResultSet verifyResultSet, ResultSet resultSet) throws SQLException {
+        boolean b1 = verifyResultSet.next();
+        boolean b2 = resultSet.next();
         assertEquals(b1, b2);
         return b1;
     }
 
-    protected final void executeStatements(CharSequence... _sqls) throws SQLException {
+    protected final void executeStatements(CharSequence... sqls) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            executeStatements(st, _sqls);
+            executeStatements(st, sqls);
         }
     }
 
-    protected final void executeStatements(Statement _statement, CharSequence... _sqls) throws SQLException {
-        for (CharSequence s : _sqls) {
+    protected final void executeStatements(Statement statement, CharSequence... sqls) throws SQLException {
+        for (CharSequence s : sqls) {
             String sql = s == null ? null : s.toString();
             getLogger().log(Level.INFO, "Executing sql: {0}", sql.length() > 500 ? sql.substring(0, 500) + "..." : sql);
-            _statement.execute(sql);
+            statement.execute(sql);
         }
     }
 
     /**
      * A single record made up of one column.
      */
-    protected static final List<Object> rec(Object _col) {
+    protected static final List<Object> rec(Object col) {
         List<Object> rec = new ArrayList<>();
-        rec.add(_col);
+        rec.add(col);
         return rec;
     }
 
@@ -561,23 +561,23 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      * A single record made up of one or more columns.
      */
     @SafeVarargs
-    protected static final List<Object> rec(Object... _cols) {
-        return Stream.of(_cols).collect(Collectors.toCollection(ArrayList::new));
+    protected static final List<Object> rec(Object... cols) {
+        return Stream.of(cols).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
      * A list of a single record made up of one or more columns.
      */
-    protected static List<List<Object>> singleRec(Object... _cols) {
-        return recs(rec(_cols));
+    protected static List<List<Object>> singleRec(Object... cols) {
+        return recs(rec(cols));
     }
 
     /**
      * A list of records.
      */
     @SafeVarargs
-    protected static final List<List<Object>> recs(List<Object>... _recs) {
-        return Stream.of(_recs).collect(Collectors.toCollection(ArrayList::new));
+    protected static final List<List<Object>> recs(List<Object>... recs) {
+        return Stream.of(recs).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @AfterEach

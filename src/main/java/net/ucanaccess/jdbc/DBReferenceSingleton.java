@@ -35,13 +35,13 @@ public final class DBReferenceSingleton {
         return new DBReference(fl, ff, jko, pwd, charset);
     }
 
-    public DBReference put(String _path, DBReference _dbr) {
-        return dbRegistry.put(_path, _dbr);
+    public DBReference put(String path, DBReference dbr) {
+        return dbRegistry.put(path, dbr);
     }
 
-    public DBReference remove(String _path) {
+    public DBReference remove(String path) {
         synchronized (UcanaccessDriver.class) {
-            return dbRegistry.remove(_path);
+            return dbRegistry.remove(path);
         }
     }
 

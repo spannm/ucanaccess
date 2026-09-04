@@ -46,8 +46,8 @@ public abstract class AbstractBaseTest extends Assertions {
     }
 
     @BeforeEach
-    public final void setTestMethodName(TestInfo _testInfo) {
-        lastTestInfo = _testInfo;
+    public final void setTestMethodName(TestInfo testInfo) {
+        lastTestInfo = testInfo;
     }
 
     protected final String getTestMethodName() {
@@ -63,25 +63,25 @@ public abstract class AbstractBaseTest extends Assertions {
     }
 
     @BeforeEach
-    public final void logTestBegin(TestInfo _testInfo) {
-        if (_testInfo.getTestMethod().isEmpty() || _testInfo.getDisplayName().startsWith(_testInfo.getTestMethod().get().getName())) {
-            getLogger().log(Level.DEBUG, ">>>> TEST: {0} <<<<", _testInfo.getDisplayName());
+    public final void logTestBegin(TestInfo testInfo) {
+        if (testInfo.getTestMethod().isEmpty() || testInfo.getDisplayName().startsWith(testInfo.getTestMethod().get().getName())) {
+            getLogger().log(Level.DEBUG, ">>>> TEST: {0} <<<<", testInfo.getDisplayName());
         } else {
             getLogger().log(Level.DEBUG, ">>>> TEST: {0} ({1}) <<<<",
-                _testInfo.getTestMethod().get().getName(), _testInfo.getDisplayName());
+                testInfo.getTestMethod().get().getName(), testInfo.getDisplayName());
         }
     }
 
     /**
      * Creates a subdirectory of the system's temp file directory.
-     * @param _dir subdirectory name
+     * @param dir subdirectory name
      * @return temp directory
      * @throws UncheckedIOException If the subdirectory could not be created
      */
-    protected static File createTempDir(String _dir) {
+    protected static File createTempDir(String dir) {
         File tempDir = new File(getTempDir());
-        if (null != _dir) {
-            tempDir = new File(tempDir, _dir);
+        if (null != dir) {
+            tempDir = new File(tempDir, dir);
         }
         if (!tempDir.exists() && !tempDir.mkdirs()) {
             throw new UncheckedIOException(new IOException("Could not create directory " + tempDir));
@@ -103,20 +103,20 @@ public abstract class AbstractBaseTest extends Assertions {
         return tmpDir;
     }
 
-    protected static File copyFile(Path _source, File _target) {
-        UcanaccessRuntimeException.requireNonNull(_source, "Source file required");
-        UcanaccessRuntimeException.requireNonNull(_target, "Target file required");
-        Try.catching(() -> Files.copy(_source, _target.toPath(), StandardCopyOption.REPLACE_EXISTING))
-            .orThrow(e -> new UncheckedIOException("Failed to copy '" + _source + "' to '" + _target + "'", e));
-        return _target;
+    protected static File copyFile(Path source, File target) {
+        UcanaccessRuntimeException.requireNonNull(source, "Source file required");
+        UcanaccessRuntimeException.requireNonNull(target, "Target file required");
+        Try.catching(() -> Files.copy(source, target.toPath(), StandardCopyOption.REPLACE_EXISTING))
+            .orThrow(e -> new UncheckedIOException("Failed to copy '" + source + "' to '" + target + "'", e));
+        return target;
     }
 
-    protected static File copyFile(InputStream _in, File _target) {
-        UcanaccessRuntimeException.requireNonNull(_in, "Input stream required");
-        UcanaccessRuntimeException.requireNonNull(_target, "Target file required");
-        Try.catching(() -> Files.copy(_in, _target.toPath(), StandardCopyOption.REPLACE_EXISTING))
-            .orThrow(e -> new UncheckedIOException("Failed to copy to '" + _target + "'", e));
-        return _target;
+    protected static File copyFile(InputStream in, File target) {
+        UcanaccessRuntimeException.requireNonNull(in, "Input stream required");
+        UcanaccessRuntimeException.requireNonNull(target, "Target file required");
+        Try.catching(() -> Files.copy(in, target.toPath(), StandardCopyOption.REPLACE_EXISTING))
+            .orThrow(e -> new UncheckedIOException("Failed to copy to '" + target + "'", e));
+        return target;
     }
 
 }

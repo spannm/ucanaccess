@@ -25,12 +25,12 @@ public class ParametricQuery {
     private String              signature;
     private StringBuilder       originalParameters = new StringBuilder();
 
-    public ParametricQuery(Connection _hsqldb, QueryImpl _qi) {
-        hsqldb = _hsqldb;
-        if (_qi.getType() == Query.Type.APPEND) {
-            qi = new AppendQueryTemp((AppendQueryImpl) _qi);
+    public ParametricQuery(Connection hsqldb, QueryImpl qi) {
+        this.hsqldb = hsqldb;
+        if (qi.getType() == Query.Type.APPEND) {
+            this.qi = new AppendQueryTemp((AppendQueryImpl) qi);
         } else {
-            qi = _qi;
+            this.qi = qi;
         }
     }
 
@@ -38,8 +38,8 @@ public class ParametricQuery {
         return issueWithParameterName;
     }
 
-    public void setIssueWithParameterName(boolean _issueWithParameterName) {
-        issueWithParameterName = _issueWithParameterName;
+    public void setIssueWithParameterName(boolean issueWithParameterName) {
+        this.issueWithParameterName = issueWithParameterName;
     }
 
     private List<String> queryParameters() {
@@ -106,8 +106,8 @@ public class ParametricQuery {
                 signature = qi.getName() + "(" + originalParameters + ")";
                 loaded = true;
             }
-        } catch (Exception _ex) {
-            exception = _ex;
+        } catch (Exception ex) {
+            exception = ex;
         }
     }
 
@@ -153,8 +153,8 @@ public class ParametricQuery {
                 return;
             }
             loaded = true;
-        } catch (Exception _ex) {
-            exception = _ex;
+        } catch (Exception ex) {
+            exception = ex;
         }
     }
 
@@ -196,16 +196,16 @@ public class ParametricQuery {
         return type;
     }
 
-    private String treatApos(String _s) {
-        return _s.replace("'", "").replace("\"", "").toUpperCase();
+    private String treatApos(String s) {
+        return s.replace("'", "").replace("\"", "").toUpperCase();
     }
 
     private boolean exec(String expression) {
         try (Statement st = hsqldb.createStatement()) {
             st.execute(expression);
             return true;
-        } catch (SQLException _ex) {
-            exception = _ex;
+        } catch (SQLException ex) {
+            exception = ex;
             return false;
         }
     }
@@ -217,8 +217,8 @@ public class ParametricQuery {
         return sqlContent;
     }
 
-    private static String transalteFormFields(String _sql) {
-        String sql = _sql;
+    private static String transalteFormFields(String input) {
+        String sql = input;
         for (String pat : new String[] {
             "\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]\\!\\[([^\\]]*)\\]",
             "\\[(\\w*)\\]\\!\\[(\\w*)\\]\\!\\[(\\w*)\\]",
@@ -303,8 +303,8 @@ public class ParametricQuery {
             parameters = SQLConverter.convertSQL(args.toString()).getSql();
 
             conversionOk = true;
-        } catch (SQLException _ex) {
-            exception = _ex;
+        } catch (SQLException ex) {
+            exception = ex;
         }
 
     }
@@ -338,21 +338,21 @@ public class ParametricQuery {
     }
 
     // now something truly naif, yeah! It was about time!!!
-    private void doParametersEmpiric(Map<String, Integer> _psmp, List<String> _parameters, Map<String, String> parem, String sql) {
+    private void doParametersEmpiric(Map<String, Integer> psmp, List<String> paramNames, Map<String, String> parem, String sql) {
         String psTxt = null;
         try {
-            psTxt = convertSQL(sql, _parameters);
+            psTxt = convertSQL(sql, paramNames);
 
             List<String> l = SQLConverter.getParameters(psTxt);
 
             // apostrophe treatment
             for (String s : l) {
                 String h = treatApos(s);
-                for (String modf : _parameters) {
+                for (String modf : paramNames) {
                     if (convertSQL(modf).equals(s)) {
                         h = treatApos(modf);
                         if (!aposMap.containsKey(h)) {
-                            _parameters.set(_parameters.indexOf(modf), h);
+                            paramNames.set(paramNames.indexOf(modf), h);
                             psTxt = psTxt.replaceAll("(?i)" + Pattern.quote(s), convertSQL(h));
                             sql = sql.replaceAll("(?i)" + Pattern.quote(modf), h);
                             h = h.substring(1, h.length() - 1);
@@ -365,8 +365,8 @@ public class ParametricQuery {
             ps = hsqldb.prepareStatement(psTxt);
 
             ParameterMetaData pmd = ps.getParameterMetaData();
-            _psmp = reorderIndexes(_psmp, parem);
-            List<String> ar = new ArrayList<>(_psmp.keySet());
+            psmp = reorderIndexes(psmp, parem);
+            List<String> ar = new ArrayList<>(psmp.keySet());
             List<Integer> pI = parIndexes(sql);
             StringBuilder parS = new StringBuilder();
             StringBuilder defPar = new StringBuilder();
@@ -381,7 +381,7 @@ public class ParametricQuery {
                     continue;
                 }
                 String key = ar.get(j);
-                int index = _psmp.get(key);
+                int index = psmp.get(key);
                 if (index == pI.get(i - 1)) {
                     defPar.append(comma).append("NULL");
                     String type =
@@ -392,30 +392,30 @@ public class ParametricQuery {
                 }
 
             }
-            parameters = parS.toString();
+            this.parameters = parS.toString();
             defaultParameterValues = defPar.toString();
             conversionOk = true;
 
-        } catch (SQLException _ex) {
+        } catch (SQLException ex) {
 
-            for (String par : _parameters) {
+            for (String par : paramNames) {
                 String par1 = SQLConverter.preEscapingIdentifier(par.substring(1, par.length() - 1));
                 int index = sql.toUpperCase().indexOf(par.toUpperCase());
-                if (index >= 0 && _ex.getMessage() != null && (_ex.getMessage().toUpperCase().endsWith(": " + par1)
-                        || _ex.getMessage().toUpperCase().contains(": " + par1 + " IN STATEMENT "))) {
+                if (index >= 0 && ex.getMessage() != null && (ex.getMessage().toUpperCase().endsWith(": " + par1)
+                        || ex.getMessage().toUpperCase().contains(": " + par1 + " IN STATEMENT "))) {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
-                    _psmp.put(par1, index);
+                    psmp.put(par1, index);
                     parem.put(par1, par);
                     String parname = originalParameters.length() == 0 ? par : "," + par;
                     originalParameters.append(parname);
-                    doParametersEmpiric(_psmp, _parameters, parem, sql);
+                    doParametersEmpiric(psmp, paramNames, parem, sql);
 
                 } else {
-                    exception = _ex;
+                    exception = ex;
                 }
             }
             if (exception == null) {
-                exception = _ex;
+                exception = ex;
 
             }
 

@@ -14,8 +14,8 @@ class RomanCharacterTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testNoRomanCharactersInColumnName(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         dumpQueryResult("SELECT * FROM t_noroman");
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_noroman ([end],[q3¹²³¼½¾ß€Ð×ÝÞðýþäüöß]) VALUES('the end', 'yeeep')");

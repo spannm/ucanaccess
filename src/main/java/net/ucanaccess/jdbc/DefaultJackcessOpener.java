@@ -11,8 +11,8 @@ import java.nio.charset.Charset;
 public class DefaultJackcessOpener implements IJackcessOpenerInterface {
 
     @Override
-    public Database open(File _fl, String _pwd) throws IOException {
-        return open(_fl, _pwd, null);
+    public Database open(File fl, String pwd) throws IOException {
+        return open(fl, pwd, null);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class DefaultJackcessOpener implements IJackcessOpenerInterface {
         Database db;
         try {
             db = dbd.withReadOnly(false).open();
-        } catch (Exception _ex) {
+        } catch (Exception ex) {
             db = dbd.withReadOnly(true).open();
         }
         db.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);

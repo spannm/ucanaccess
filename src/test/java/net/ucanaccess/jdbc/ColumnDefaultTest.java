@@ -24,25 +24,25 @@ class ColumnDefaultTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("getTestData")
-    void testColumnDefaults(TestData _testData) throws Exception {
+    void testColumnDefaults(TestData testData) throws Exception {
         init(AccessVersion.getDefaultAccessVersion());
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
 
-            String dataTypeName = _testData.dataType.replaceAll("[^a-zA-Z0-9]", "");
+            String dataTypeName = testData.dataType.replaceAll("[^a-zA-Z0-9]", "");
             String tblName = "tbl_" + dataTypeName;
             String colName = "col_" + dataTypeName;
 
             executeStatements(st,
                 "CREATE TABLE " + tblName + " (id TEXT(50) PRIMARY KEY, "
-                    + colName + ' ' + _testData.dataType + " NULL DEFAULT " + (_testData.quoteVal ? _testData.defValue : "'" + _testData.defValue + "'") + ")",
+                    + colName + ' ' + testData.dataType + " NULL DEFAULT " + (testData.quoteVal ? testData.defValue : "'" + testData.defValue + "'") + ")",
                 "INSERT INTO " + tblName + " (id) VALUES ('[1] " + colName + " omitted')",
                 "INSERT INTO " + tblName + " (id, " + colName + ") VALUES ('[2] " + colName + " explicit NULL', NULL)",
-                "INSERT INTO " + tblName + " (id, " + colName + ") VALUES ('[3] " + colName + " some value', " + (_testData.quoteVal ? _testData.insValue : "'" + _testData.insValue + "'") + ")");
+                "INSERT INTO " + tblName + " (id, " + colName + ") VALUES ('[3] " + colName + " some value', " + (testData.quoteVal ? testData.insValue : "'" + testData.insValue + "'") + ")");
 
-            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[1]%'", recs(rec("[1] " + colName + " omitted", _testData.defValue)));
+            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[1]%'", recs(rec("[1] " + colName + " omitted", testData.defValue)));
             checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[2]%'", recs(rec("[2] " + colName + " explicit NULL", null)));
-            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[3]%'", recs(rec("[3] " + colName + " some value", _testData.insValue)));
+            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[3]%'", recs(rec("[3] " + colName + " some value", testData.insValue)));
 
         }
     }
@@ -53,11 +53,11 @@ class ColumnDefaultTest extends UcanaccessBaseTest {
         private final Object  insValue;
         private final boolean quoteVal;
 
-        TestData(String _datatype, Object _defValue,  Object _insValue, boolean _quoteVal) {
-            dataType = _datatype;
-            defValue = _defValue;
-            insValue = _insValue;
-            quoteVal = _quoteVal;
+        TestData(String datatype, Object defValue,  Object insValue, boolean quoteVal) {
+            dataType = datatype;
+            this.defValue = defValue;
+            this.insValue = insValue;
+            this.quoteVal = quoteVal;
         }
 
         @Override

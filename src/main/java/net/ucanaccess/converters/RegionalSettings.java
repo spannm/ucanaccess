@@ -19,9 +19,9 @@ public final class RegionalSettings {
         this(Locale.getDefault());
     }
 
-    RegionalSettings(Locale _locale) {
-        dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat", _locale);
-        locale = _locale;
+    RegionalSettings(Locale locale) {
+        dateBundle = ResourceBundle.getBundle("net.ucanaccess.util.format.dateFormat", locale);
+        this.locale = locale;
         String[] dfsp = new String[] {getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(), getShortDatePattern()};
         for (String pattern : dfsp) {
             if (pattern.indexOf('.') > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
@@ -43,7 +43,7 @@ public final class RegionalSettings {
 
         addDateP(getShortDatePattern(), true, false);
 
-        if (!locale.equals(Locale.US)) {
+        if (!this.locale.equals(Locale.US)) {
             RegionalSettings regUs = new RegionalSettings(Locale.US);
             addDateP(regUs.getGeneralPattern(), false, false);
             addDateP(regUs.getLongDatePattern(), true, false);
@@ -116,14 +116,14 @@ public final class RegionalSettings {
         return Collections.unmodifiableMap(dateFormats);
     }
 
-    void addDateP(String _pattern, boolean _heuristic, boolean _yearOverride) {
-        if (_heuristic && !_pattern.contains("a") && _pattern.indexOf('H') > 0) {
-            String chg = _pattern.replace('H', 'h') + " a";
+    void addDateP(String pattern, boolean heuristic, boolean yearOverride) {
+        if (heuristic && !pattern.contains("a") && pattern.indexOf('H') > 0) {
+            String chg = pattern.replace('H', 'h') + " a";
             addDateP(chg, false, false);
             addTogglePattern(chg);
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(_pattern, locale);
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
         ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new Date(Long.MIN_VALUE));
         sdf.setLenient(false);
 
@@ -134,12 +134,12 @@ public final class RegionalSettings {
             sdf.setDateFormatSymbols(df);
         }
 
-        dateFormats.put(sdf, _yearOverride);
+        dateFormats.put(sdf, yearOverride);
 
-        if (_heuristic) {
-            addTogglePattern(_pattern);
-            if (_pattern.endsWith(" a") && _pattern.indexOf('h') > 0) {
-                String chg = _pattern.substring(0, _pattern.length() - 2).trim().replace('h', 'H');
+        if (heuristic) {
+            addTogglePattern(pattern);
+            if (pattern.endsWith(" a") && pattern.indexOf('h') > 0) {
+                String chg = pattern.substring(0, pattern.length() - 2).trim().replace('h', 'H');
                 addDateP(chg, false, false);
                 addTogglePattern(chg);
             }
@@ -147,21 +147,21 @@ public final class RegionalSettings {
 
     }
 
-    void addTogglePattern(String _p) {
+    void addTogglePattern(String p) {
 
-        if (_p.indexOf('/') > 0) {
-            addDateP(_p.replace('/', '-'), false, false);
+        if (p.indexOf('/') > 0) {
+            addDateP(p.replace('/', '-'), false, false);
             if (isPointDateSeparator()) {
-                addDateP(_p.replace('/', '.'), false, false);
+                addDateP(p.replace('/', '.'), false, false);
             }
-        } else if (_p.indexOf('-') > 0) {
-            addDateP(_p.replaceAll(Pattern.quote("-"), "/"), false, false);
+        } else if (p.indexOf('-') > 0) {
+            addDateP(p.replaceAll(Pattern.quote("-"), "/"), false, false);
             if (isPointDateSeparator()) {
-                addDateP(_p.replaceAll(Pattern.quote("-"), "."), false, false);
+                addDateP(p.replaceAll(Pattern.quote("-"), "."), false, false);
             }
 
-        } else if (_p.indexOf('.') > 0 && !_p.contains("h.") && !_p.contains("H.")) {
-            addDateP(_p.replaceAll(Pattern.quote("."), "/"), false, false);
+        } else if (p.indexOf('.') > 0 && !p.contains("h.") && !p.contains("H.")) {
+            addDateP(p.replaceAll(Pattern.quote("."), "/"), false, false);
         }
     }
 
@@ -169,9 +169,9 @@ public final class RegionalSettings {
         return getRegionalSettings(Locale.getDefault());
     }
 
-    public static RegionalSettings getRegionalSettings(Locale _locale) {
-        Locale locale = Objects.requireNonNullElseGet(_locale, Locale::getDefault);
-        return REG_MAP.computeIfAbsent(locale, RegionalSettings::new);
+    public static RegionalSettings getRegionalSettings(Locale input) {
+        Locale loc = Objects.requireNonNullElseGet(input, Locale::getDefault);
+        return REG_MAP.computeIfAbsent(loc, RegionalSettings::new);
     }
 
     @Override

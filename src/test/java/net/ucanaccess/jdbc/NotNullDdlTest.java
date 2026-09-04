@@ -21,8 +21,8 @@ class NotNullDdlTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void confirmNotNullColumnUsingJet(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void confirmNotNullColumnUsingJet(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         // future-proofing in case default file version changes
         assertEquals(getFileFormat().name(), "V2003");
 

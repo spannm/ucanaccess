@@ -17,8 +17,8 @@ class GithubIssue16VersionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testIssue16(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testIssue16(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         String tbl = "`Donation Detail`";
         Date sqlDt = Date.valueOf(LocalDate.now());

@@ -49,12 +49,12 @@ public final class Sql implements CharSequence {
         str = sql;
     }
 
-    public static Sql of(CharSequence... _tokens) {
-        return _tokens == null ? EMPTY_SQL : of(Arrays.asList(_tokens));
+    public static Sql of(CharSequence... tokens) {
+        return tokens == null ? EMPTY_SQL : of(Arrays.asList(tokens));
     }
 
-    public static Sql of(Iterable<? extends CharSequence> _tokens) {
-        return _tokens == null ? EMPTY_SQL : new Sql(format(_tokens));
+    public static Sql of(Iterable<? extends CharSequence> tokens) {
+        return tokens == null ? EMPTY_SQL : new Sql(format(tokens));
     }
 
     /**
@@ -63,11 +63,11 @@ public final class Sql implements CharSequence {
      * The tokens are joined using a single blank character to create the sql string.<br>
      * Finally, any trailing semicolons are removed from the resulting sql.
      *
-     * @param _tokens collection of tokens
+     * @param tokens collection of tokens
      * @return formatted sql string
      */
-    static String format(Iterable<? extends CharSequence> _tokens) {
-        String sql = StreamSupport.stream(Objects.requireNonNull(_tokens).spliterator(), false)
+    static String format(Iterable<? extends CharSequence> tokens) {
+        String sql = StreamSupport.stream(Objects.requireNonNull(tokens).spliterator(), false)
             .filter(Objects::nonNull)
             .map(CharSequence::toString)
             .map(String::trim)
@@ -85,13 +85,13 @@ public final class Sql implements CharSequence {
     }
 
     @Override
-    public char charAt(int _index) {
-        return str.charAt(_index);
+    public char charAt(int index) {
+        return str.charAt(index);
     }
 
     @Override
-    public CharSequence subSequence(int _start, int _end) {
-        return str.subSequence(_start, _end);
+    public CharSequence subSequence(int start, int end) {
+        return str.subSequence(start, end);
     }
 
     @Override
@@ -100,11 +100,11 @@ public final class Sql implements CharSequence {
     }
 
     @Override
-    public boolean equals(Object _obj) {
-        if (_obj == null || getClass() != _obj.getClass()) {
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        return str.equals(((Sql) _obj).str);
+        return str.equals(((Sql) obj).str);
     }
 
     @Override

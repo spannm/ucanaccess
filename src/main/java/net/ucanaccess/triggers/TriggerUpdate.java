@@ -52,9 +52,9 @@ public class TriggerUpdate extends TriggerBase {
         return false;
     }
 
-    private void fillBlobs(Object[] _values) throws UcanaccessSQLException {
-        for (int i = 0; i < _values.length; ++i) {
-            Object value = _values[i];
+    private void fillBlobs(Object[] values) throws UcanaccessSQLException {
+        for (int i = 0; i < values.length; ++i) {
+            Object value = values[i];
             if (value instanceof BlobData) {
                 BlobData bd = (BlobData) value;
                 JDBCConnection hsqlConn = (JDBCConnection) UcanaccessConnection.getCtxConnection()
@@ -63,13 +63,13 @@ public class TriggerUpdate extends TriggerBase {
                 long length = bd.length(si);
                 byte[] bt = ((BlobData) value).getBytes(si, 0, (int) length);
                 if (bt.length == 0) {
-                    _values[i] = bt;
+                    values[i] = bt;
                 } else {
                     BlobKey bk = BlobKey.getBlobKey(bt);
                     if (bk == null) {
-                        _values[i] = bt;
+                        values[i] = bt;
                     } else {
-                        _values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
+                        values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
                     }
                 }
 

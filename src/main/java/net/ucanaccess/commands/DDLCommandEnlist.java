@@ -26,8 +26,8 @@ public class DDLCommandEnlist {
     private Boolean[]           notNulls;
     private Map<String, String> columnMap = new HashMap<>();
 
-    private void enlistCreateTable(String _sql, DDLType _ddlType) throws SQLException {
-        String tn = _ddlType.getDBObjectName();
+    private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
+        String tn = ddlType.getDBObjectName();
         UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
         String execId = UcanaccessConnection.getCtxExcId();
         Connection hsqlConn = ac.getHSQLDBConnection();
@@ -40,12 +40,12 @@ public class DDLCommandEnlist {
 
         lfa.synchronisationTriggers(ntn, true, true);
         CreateTableCommand c4io;
-        if (_ddlType.equals(DDLType.CREATE_TABLE)) {
-            parseTypesFromCreateStatement(_sql);
+        if (ddlType.equals(DDLType.CREATE_TABLE)) {
+            parseTypesFromCreateStatement(sql);
             c4io = new CreateTableCommand(tn, execId, columnMap, types, defaults, notNulls);
         } else {
             try (UcanaccessStatement st = ac.createStatement()) {
-                ResultSet rs = st.executeQuery(_ddlType.getSelect(_sql));
+                ResultSet rs = st.executeQuery(ddlType.getSelect(sql));
                 ResultSetMetaData rsmd = rs.getMetaData();
                 Metadata mt = new Metadata(ac.getHSQLDBConnection());
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -58,7 +58,7 @@ public class DDLCommandEnlist {
                     }
                 }
                 c4io = new CreateTableCommand(tn, execId, columnMap);
-            } catch (Exception _ignored) {
+            } catch (Exception ignored) {
                 c4io = new CreateTableCommand(tn, execId);
             }
 
@@ -102,10 +102,10 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistCreateForeignKey(DDLType _ddlType) throws SQLException {
-        String tableName = _ddlType.getDBObjectName();
-        String relationshipName = _ddlType.getSecondDBObjectName();
-        String referencedTable = _ddlType.getThirdDBObjectName();
+    private void enlistCreateForeignKey(DDLType ddlType) throws SQLException {
+        String tableName = ddlType.getDBObjectName();
+        String relationshipName = ddlType.getSecondDBObjectName();
+        String referencedTable = ddlType.getThirdDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         CreateForeignKeyCommand c4io =
                 new CreateForeignKeyCommand(tableName, referencedTable, execId, relationshipName);
@@ -202,34 +202,34 @@ public class DDLCommandEnlist {
         }
     }
 
-    private String[] checkEscaped(String _ll, String _rl, String[] _colDecls, String _tknt) {
-        if (_colDecls[0].startsWith(_ll) && _tknt.indexOf(_rl, 1) > 0) {
-            for (int k = 0; k < _colDecls.length; k++) {
-                if (_colDecls[k].endsWith(_rl)) {
-                    String[] colDecls0 = new String[_colDecls.length - k];
-                    colDecls0[0] = _tknt.substring(1, _tknt.substring(1).indexOf(_rl) + 1);
-                    System.arraycopy(_colDecls, 1 + k, colDecls0, 1, colDecls0.length - 1);
-                    _colDecls = colDecls0;
+    private String[] checkEscaped(String ll, String rl, String[] colDecls, String tknt) {
+        if (colDecls[0].startsWith(ll) && tknt.indexOf(rl, 1) > 0) {
+            for (int k = 0; k < colDecls.length; k++) {
+                if (colDecls[k].endsWith(rl)) {
+                    String[] colDecls0 = new String[colDecls.length - k];
+                    colDecls0[0] = tknt.substring(1, tknt.substring(1).indexOf(rl) + 1);
+                    System.arraycopy(colDecls, 1 + k, colDecls0, 1, colDecls0.length - 1);
+                    colDecls = colDecls0;
                     break;
                 }
             }
         }
-        return _colDecls;
+        return colDecls;
     }
 
-    private void parseColumnTypes(List<String> _typeList, List<String> _defaultList, List<Boolean> _notNullList, String _tknt) {
-        String[] colDecls = _tknt.split("\\s+");
-        colDecls = checkEscaped("[", "]", colDecls, _tknt);
-        colDecls = checkEscaped("`", "`", colDecls, _tknt);
+    private void parseColumnTypes(List<String> typeList, List<String> defaultList, List<Boolean> notNullList, String tknt) {
+        String[] colDecls = tknt.split("\\s+");
+        colDecls = checkEscaped("[", "]", colDecls, tknt);
+        colDecls = checkEscaped("`", "`", colDecls, tknt);
         String escaped = SQLConverter.isListedAsKeyword(colDecls[0]) ? colDecls[0].toUpperCase()
                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
         columnMap.put(escaped, colDecls[0]);
 
         boolean reset = false;
-        if (_tknt.matches("\\s*\\d+\\s*\\).*")) {
+        if (tknt.matches("\\s*\\d+\\s*\\).*")) {
             reset = true;
-            _tknt = _tknt.substring(_tknt.indexOf(')') + 1).trim();
-            colDecls = _tknt.split("\\s+");
+            tknt = tknt.substring(tknt.indexOf(')') + 1).trim();
+            colDecls = tknt.split("\\s+");
         }
 
         if (!reset && colDecls.length < 2) {
@@ -241,31 +241,31 @@ public class DDLCommandEnlist {
                 colDecls[1] = "NUMERIC";
                 decDef = true;
             }
-            _typeList.add(colDecls[1]);
+            typeList.add(colDecls[1]);
 
         }
 
         if ((colDecls.length > 2 || reset && colDecls.length == 2)
                 && "not".equalsIgnoreCase(colDecls[colDecls.length - 2])
                 && "null".equalsIgnoreCase(colDecls[colDecls.length - 1])) {
-            _notNullList.add(true);
+            notNullList.add(true);
         } else if (!decDef) {
-            _notNullList.add(false);
+            notNullList.add(false);
         }
 
         if (!decDef) {
-            _defaultList.add(value(SQLConverter.getDDLDefault(_tknt)));
+            defaultList.add(value(SQLConverter.getDDLDefault(tknt)));
         }
 
-        types = _typeList.toArray(new String[0]);
-        defaults = _defaultList.toArray(new String[0]);
-        notNulls = _notNullList.toArray(new Boolean[0]);
+        types = typeList.toArray(new String[0]);
+        defaults = defaultList.toArray(new String[0]);
+        notNulls = notNullList.toArray(new Boolean[0]);
     }
 
     // getting AUTOINCREMENT and GUID
-    private void parseTypesFromCreateStatement(String _sql) throws SQLException {
+    private void parseTypesFromCreateStatement(String inputSql) throws SQLException {
         Pattern pat = Pattern.compile("(\\s+)(?:DECIMAL|NUMERIC)\\s*\\(", Pattern.CASE_INSENSITIVE);
-        String sql = pat.matcher(_sql).replaceAll("$1NUMERIC(");
+        String sql = pat.matcher(inputSql).replaceAll("$1NUMERIC(");
         int startDecl = sql.indexOf('(');
         int endDecl = sql.lastIndexOf(')');
 
@@ -286,17 +286,17 @@ public class DDLCommandEnlist {
         }
     }
 
-    private String value(String _value) {
-        if (_value == null) {
+    private String value(String value) {
+        if (value == null) {
             return null;
         }
-        if (_value.startsWith("\"") && _value.endsWith("\"")) {
-            return _value.substring(1, _value.length() - 1).replace("\"\"", "\"");
+        if (value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1, value.length() - 1).replace("\"\"", "\"");
         }
-        if (_value.startsWith("'") && _value.endsWith("'")) {
-            return _value.substring(1, _value.length() - 1).replace("''", "'");
+        if (value.startsWith("'") && value.endsWith("'")) {
+            return value.substring(1, value.length() - 1).replace("''", "'");
         }
-        return _value;
+        return value;
     }
 
 }

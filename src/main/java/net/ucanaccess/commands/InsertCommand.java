@@ -27,19 +27,19 @@ public class InsertCommand implements ICommand {
     private final String execId;
     private Table        table;
 
-    public InsertCommand(String _tableName, Database _dbIo, Object[] _newRow, String _execId) {
-        tableName = _tableName;
-        dbIO = _dbIo;
-        newRow = _newRow;
-        execId = _execId;
+    public InsertCommand(String tableName, Database dbIo, Object[] newRow, String execId) {
+        this.tableName = tableName;
+        dbIO = dbIo;
+        this.newRow = newRow;
+        this.execId = execId;
 
     }
 
-    public InsertCommand(Table _table, Object[] _newRow, String _execId) {
-        table = _table;
-        tableName = _table.getName();
-        newRow = _newRow;
-        execId = _execId;
+    public InsertCommand(Table table, Object[] newRow, String execId) {
+        this.table = table;
+        tableName = table.getName();
+        this.newRow = newRow;
+        this.execId = execId;
     }
 
     @Override
@@ -75,11 +75,11 @@ public class InsertCommand implements ICommand {
         }
     }
 
-    public void insertRow(Table _table) throws IOException {
+    public void insertRow(Table tbl) throws IOException {
         try {
-            _table.addRow(newRow);
-        } catch (ConstraintViolationException _ex) {
-            List<? extends Column> lc = _table.getColumns();
+            tbl.addRow(newRow);
+        } catch (ConstraintViolationException ex) {
+            List<? extends Column> lc = tbl.getColumns();
             boolean retry = false;
             for (Column col : lc) {
                 if (col.isAutoNumber()) {
@@ -88,16 +88,16 @@ public class InsertCommand implements ICommand {
                 }
             }
             if (!retry) {
-                throw _ex;
+                throw ex;
             }
-            Database db = _table.getDatabase();
+            Database db = tbl.getDatabase();
             File fl = db.getFile();
             DBReferenceSingleton dbsin = DBReferenceSingleton.getInstance();
             DBReference ref = dbsin.getReference(fl);
             ref.reloadDbIO();
             dbIO = ref.getDbIO();
-            _table = dbIO.getTable(tableName);
-            _table.addRow(newRow);
+            tbl = dbIO.getTable(tableName);
+            tbl.addRow(newRow);
         }
     }
 
@@ -165,8 +165,8 @@ public class InsertCommand implements ICommand {
             BlobAction ba = new BlobAction(table, newRow);
             ba.doAction(this);
             return ana;
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 

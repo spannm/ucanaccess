@@ -16,18 +16,18 @@ public class CreateTableCommand implements ICommand {
     private Boolean[]           notNulls;
     private Map<String, String> columnMap;
 
-    public CreateTableCommand(String _tableName, String _execId) {
-        tableName = _tableName;
-        execId = _execId;
+    public CreateTableCommand(String tableName, String execId) {
+        this.tableName = tableName;
+        this.execId = execId;
     }
 
-    public CreateTableCommand(String tn, String execId2, Map<String, String> _columnMap, String[] _types,
-            String[] _defaults, Boolean[] _notNulls) {
+    public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap, String[] types,
+            String[] defaults, Boolean[] notNulls) {
         this(tn, execId2);
-        types = _types;
-        defaults = _defaults;
-        notNulls = _notNulls;
-        columnMap = _columnMap;
+        this.types = types;
+        this.defaults = defaults;
+        this.notNulls = notNulls;
+        this.columnMap = columnMap;
     }
 
     public CreateTableCommand(String tn, String execId2, Map<String, String> columnMap2) {
@@ -74,8 +74,8 @@ public class CreateTableCommand implements ICommand {
         try {
             Persist2Jet p2a = new Persist2Jet();
             p2a.createTable(tableName, columnMap, types, defaults, notNulls);
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
         return null;
     }

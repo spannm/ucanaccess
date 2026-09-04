@@ -15,15 +15,15 @@ import java.util.stream.IntStream;
 class InsertBigTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_big (id LONG, descr MEMO)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBig(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testBig(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String s = IntStream.range(0, 100000).mapToObj(i -> String.format("%05d", i)).collect(Collectors.joining("\r\n"));

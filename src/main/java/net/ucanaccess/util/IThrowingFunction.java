@@ -17,9 +17,9 @@ public interface IThrowingFunction<I, R, T extends Throwable> {
     /**
      * Applies this function to the given argument possibly throwing an exception of type {@code T}.
      *
-     * @param _input the function argument
+     * @param input the function argument
      * @return the function result
      */
-    R apply(I _input) throws T;
+    R apply(I input) throws T;
 
 }

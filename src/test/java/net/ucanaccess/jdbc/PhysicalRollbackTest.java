@@ -20,15 +20,15 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
     }
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_pr (id LONG, descr VARCHAR(400))");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testCommit(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCommit(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         ucanaccess = Mockito.spy(ucanaccess);
         Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))

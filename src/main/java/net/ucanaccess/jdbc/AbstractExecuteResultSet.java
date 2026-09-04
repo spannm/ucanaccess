@@ -10,9 +10,9 @@ public abstract class AbstractExecuteResultSet extends AbstractExecute {
 
     private final IThrowingConsumer<ResultSet, SQLException> executeConsumer;
 
-    protected AbstractExecuteResultSet(UcanaccessResultSet _resultSet, IThrowingConsumer<ResultSet, SQLException> _executeConsumer) {
-        super(_resultSet);
-        executeConsumer = Objects.requireNonNull(_executeConsumer, "Consumer required");
+    protected AbstractExecuteResultSet(UcanaccessResultSet resultSet, IThrowingConsumer<ResultSet, SQLException> executeConsumer) {
+        super(resultSet);
+        this.executeConsumer = Objects.requireNonNull(executeConsumer, "Consumer required");
     }
 
     public final void execute() throws SQLException {

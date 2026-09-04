@@ -14,15 +14,15 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
 
     private CallableStatement hidden;
 
-    public UcanaccessCallableStatement(NormalizedSQL _nsql, CallableStatement _hidden, UcanaccessConnection _connection)
+    public UcanaccessCallableStatement(NormalizedSQL nsql, CallableStatement hidden, UcanaccessConnection connection)
             throws SQLException {
-        super(_nsql, _hidden, _connection);
-        hidden = _hidden;
+        super(nsql, hidden, connection);
+        this.hidden = hidden;
     }
 
     @Override
-    public void setShort(String _parmName, short x) throws SQLException {
-        hidden.setShort(_parmName, x);
+    public void setShort(String parmName, short x) throws SQLException {
+        hidden.setShort(parmName, x);
     }
 
     @Override
@@ -31,129 +31,129 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     }
 
     @Override
-    public Array getArray(int _parmIdx) throws SQLException {
-        return hidden.getArray(_parmIdx);
+    public Array getArray(int parmIdx) throws SQLException {
+        return hidden.getArray(parmIdx);
     }
 
     @Override
-    public Array getArray(String _parmName) throws SQLException {
-        return hidden.getArray(_parmName);
+    public Array getArray(String parmName) throws SQLException {
+        return hidden.getArray(parmName);
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public BigDecimal getBigDecimal(int _parmIdx, int scale) throws SQLException {
-        return hidden.getBigDecimal(_parmIdx, scale);
+    public BigDecimal getBigDecimal(int parmIdx, int scale) throws SQLException {
+        return hidden.getBigDecimal(parmIdx, scale);
     }
 
     @Override
-    public BigDecimal getBigDecimal(int _parmIdx) throws SQLException {
-        return hidden.getBigDecimal(_parmIdx);
+    public BigDecimal getBigDecimal(int parmIdx) throws SQLException {
+        return hidden.getBigDecimal(parmIdx);
     }
 
     @Override
-    public BigDecimal getBigDecimal(String _parmName) throws SQLException {
-        return hidden.getBigDecimal(_parmName);
+    public BigDecimal getBigDecimal(String parmName) throws SQLException {
+        return hidden.getBigDecimal(parmName);
     }
 
     @Override
-    public Blob getBlob(int _parmIdx) throws SQLException {
-        return hidden.getBlob(_parmIdx);
+    public Blob getBlob(int parmIdx) throws SQLException {
+        return hidden.getBlob(parmIdx);
     }
 
     @Override
-    public Blob getBlob(String _parmName) throws SQLException {
-        return hidden.getBlob(_parmName);
+    public Blob getBlob(String parmName) throws SQLException {
+        return hidden.getBlob(parmName);
     }
 
     @Override
-    public boolean getBoolean(int _parmIdx) throws SQLException {
-        return hidden.getBoolean(_parmIdx);
+    public boolean getBoolean(int parmIdx) throws SQLException {
+        return hidden.getBoolean(parmIdx);
     }
 
     @Override
-    public boolean getBoolean(String _parmName) throws SQLException {
-        return hidden.getBoolean(_parmName);
+    public boolean getBoolean(String parmName) throws SQLException {
+        return hidden.getBoolean(parmName);
     }
 
     @Override
-    public byte getByte(int _parmIdx) throws SQLException {
-        return hidden.getByte(_parmIdx);
+    public byte getByte(int parmIdx) throws SQLException {
+        return hidden.getByte(parmIdx);
     }
 
     @Override
-    public byte getByte(String _parmName) throws SQLException {
-        return hidden.getByte(_parmName);
+    public byte getByte(String parmName) throws SQLException {
+        return hidden.getByte(parmName);
     }
 
     @Override
-    public byte[] getBytes(int _parmIdx) throws SQLException {
-        return hidden.getBytes(_parmIdx);
+    public byte[] getBytes(int parmIdx) throws SQLException {
+        return hidden.getBytes(parmIdx);
     }
 
     @Override
-    public byte[] getBytes(String _parmName) throws SQLException {
-        return hidden.getBytes(_parmName);
+    public byte[] getBytes(String parmName) throws SQLException {
+        return hidden.getBytes(parmName);
     }
 
     @Override
-    public Reader getCharacterStream(int _parmIdx) throws SQLException {
-        return hidden.getCharacterStream(_parmIdx);
+    public Reader getCharacterStream(int parmIdx) throws SQLException {
+        return hidden.getCharacterStream(parmIdx);
     }
 
     @Override
-    public Reader getCharacterStream(String _parmName) throws SQLException {
-        return hidden.getCharacterStream(_parmName);
+    public Reader getCharacterStream(String parmName) throws SQLException {
+        return hidden.getCharacterStream(parmName);
     }
 
     @Override
-    public Clob getClob(int _parmIdx) throws SQLException {
-        return hidden.getClob(_parmIdx);
+    public Clob getClob(int parmIdx) throws SQLException {
+        return hidden.getClob(parmIdx);
     }
 
     @Override
-    public Clob getClob(String _parmName) throws SQLException {
-        return hidden.getClob(_parmName);
+    public Clob getClob(String parmName) throws SQLException {
+        return hidden.getClob(parmName);
     }
 
     @Override
-    public Date getDate(int _parmIdx, Calendar cal) throws SQLException {
-        return hidden.getDate(_parmIdx, cal);
+    public Date getDate(int parmIdx, Calendar cal) throws SQLException {
+        return hidden.getDate(parmIdx, cal);
     }
 
     @Override
-    public Date getDate(int _parmIdx) throws SQLException {
-        return hidden.getDate(_parmIdx);
+    public Date getDate(int parmIdx) throws SQLException {
+        return hidden.getDate(parmIdx);
     }
 
     @Override
-    public Date getDate(String _parmName, Calendar cal) throws SQLException {
-        return hidden.getDate(_parmName, cal);
+    public Date getDate(String parmName, Calendar cal) throws SQLException {
+        return hidden.getDate(parmName, cal);
     }
 
     @Override
-    public Date getDate(String _parmName) throws SQLException {
-        return hidden.getDate(_parmName);
+    public Date getDate(String parmName) throws SQLException {
+        return hidden.getDate(parmName);
     }
 
     @Override
-    public double getDouble(int _parmIdx) throws SQLException {
-        return hidden.getDouble(_parmIdx);
+    public double getDouble(int parmIdx) throws SQLException {
+        return hidden.getDouble(parmIdx);
     }
 
     @Override
-    public double getDouble(String _parmName) throws SQLException {
-        return hidden.getDouble(_parmName);
+    public double getDouble(String parmName) throws SQLException {
+        return hidden.getDouble(parmName);
     }
 
     @Override
-    public float getFloat(int _parmIdx) throws SQLException {
-        return hidden.getFloat(_parmIdx);
+    public float getFloat(int parmIdx) throws SQLException {
+        return hidden.getFloat(parmIdx);
     }
 
     @Override
-    public float getFloat(String _parmName) throws SQLException {
-        return hidden.getFloat(_parmName);
+    public float getFloat(String parmName) throws SQLException {
+        return hidden.getFloat(parmName);
     }
 
     @Override
@@ -162,23 +162,23 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     }
 
     @Override
-    public int getInt(int _parmIdx) throws SQLException {
-        return hidden.getInt(_parmIdx);
+    public int getInt(int parmIdx) throws SQLException {
+        return hidden.getInt(parmIdx);
     }
 
     @Override
-    public int getInt(String _parmName) throws SQLException {
-        return hidden.getInt(_parmName);
+    public int getInt(String parmName) throws SQLException {
+        return hidden.getInt(parmName);
     }
 
     @Override
-    public long getLong(int _parmIdx) throws SQLException {
-        return hidden.getLong(_parmIdx);
+    public long getLong(int parmIdx) throws SQLException {
+        return hidden.getLong(parmIdx);
     }
 
     @Override
-    public long getLong(String _parmName) throws SQLException {
-        return hidden.getLong(_parmName);
+    public long getLong(String parmName) throws SQLException {
+        return hidden.getLong(parmName);
     }
 
     @Override
@@ -202,78 +202,78 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     }
 
     @Override
-    public boolean getMoreResults(int _current) throws UcanaccessSQLException {
-        return tryCatch(() -> hidden.getMoreResults(_current));
+    public boolean getMoreResults(int current) throws UcanaccessSQLException {
+        return tryCatch(() -> hidden.getMoreResults(current));
     }
 
     @Override
-    public Reader getNCharacterStream(int _parmIdx) throws SQLException {
-        return hidden.getNCharacterStream(_parmIdx);
+    public Reader getNCharacterStream(int parmIdx) throws SQLException {
+        return hidden.getNCharacterStream(parmIdx);
     }
 
     @Override
-    public Reader getNCharacterStream(String _parmName) throws SQLException {
-        return hidden.getNCharacterStream(_parmName);
+    public Reader getNCharacterStream(String parmName) throws SQLException {
+        return hidden.getNCharacterStream(parmName);
     }
 
     @Override
-    public NClob getNClob(int _parmIdx) throws SQLException {
-        return hidden.getNClob(_parmIdx);
+    public NClob getNClob(int parmIdx) throws SQLException {
+        return hidden.getNClob(parmIdx);
     }
 
     @Override
-    public NClob getNClob(String _parmName) throws SQLException {
-        return hidden.getNClob(_parmName);
+    public NClob getNClob(String parmName) throws SQLException {
+        return hidden.getNClob(parmName);
     }
 
     @Override
-    public String getNString(int _parmIdx) throws SQLException {
-        return hidden.getNString(_parmIdx);
+    public String getNString(int parmIdx) throws SQLException {
+        return hidden.getNString(parmIdx);
     }
 
     @Override
-    public String getNString(String _parmName) throws SQLException {
-        return hidden.getNString(_parmName);
+    public String getNString(String parmName) throws SQLException {
+        return hidden.getNString(parmName);
     }
 
     @Override
-    public Object getObject(int _parmIdx, Map<String, Class<?>> map) throws SQLException {
-        return hidden.getObject(_parmIdx, map);
+    public Object getObject(int parmIdx, Map<String, Class<?>> map) throws SQLException {
+        return hidden.getObject(parmIdx, map);
     }
 
     @Override
-    public Object getObject(int _parmIdx) throws SQLException {
-        return hidden.getObject(_parmIdx);
+    public Object getObject(int parmIdx) throws SQLException {
+        return hidden.getObject(parmIdx);
     }
 
     @Override
-    public Object getObject(String _parmName, Map<String, Class<?>> map) throws SQLException {
-        return hidden.getObject(_parmName, map);
+    public Object getObject(String parmName, Map<String, Class<?>> map) throws SQLException {
+        return hidden.getObject(parmName, map);
     }
 
     @Override
-    public Object getObject(String _parmName) throws SQLException {
-        return hidden.getObject(_parmName);
+    public Object getObject(String parmName) throws SQLException {
+        return hidden.getObject(parmName);
     }
 
     @Override
-    public <T> T getObject(int _parmIdx, Class<T> type) throws SQLException {
-        return hidden.getObject(_parmIdx, type);
+    public <T> T getObject(int parmIdx, Class<T> type) throws SQLException {
+        return hidden.getObject(parmIdx, type);
     }
 
     @Override
-    public <T> T getObject(String _parmName, Class<T> type) throws SQLException {
-        return hidden.getObject(_parmName, type);
+    public <T> T getObject(String parmName, Class<T> type) throws SQLException {
+        return hidden.getObject(parmName, type);
     }
 
     @Override
-    public Ref getRef(int _parmIdx) throws SQLException {
-        return hidden.getRef(_parmIdx);
+    public Ref getRef(int parmIdx) throws SQLException {
+        return hidden.getRef(parmIdx);
     }
 
     @Override
-    public Ref getRef(String _parmName) throws SQLException {
-        return hidden.getRef(_parmName);
+    public Ref getRef(String parmName) throws SQLException {
+        return hidden.getRef(parmName);
     }
 
     @Override
@@ -282,348 +282,348 @@ public class UcanaccessCallableStatement extends UcanaccessPreparedStatement imp
     }
 
     @Override
-    public RowId getRowId(int _parmIdx) throws SQLException {
-        return hidden.getRowId(_parmIdx);
+    public RowId getRowId(int parmIdx) throws SQLException {
+        return hidden.getRowId(parmIdx);
     }
 
     @Override
-    public RowId getRowId(String _parmName) throws SQLException {
-        return hidden.getRowId(_parmName);
+    public RowId getRowId(String parmName) throws SQLException {
+        return hidden.getRowId(parmName);
     }
 
     @Override
-    public short getShort(int _parmIdx) throws SQLException {
-        return hidden.getShort(_parmIdx);
+    public short getShort(int parmIdx) throws SQLException {
+        return hidden.getShort(parmIdx);
     }
 
     @Override
-    public short getShort(String _parmName) throws SQLException {
-        return hidden.getShort(_parmName);
+    public short getShort(String parmName) throws SQLException {
+        return hidden.getShort(parmName);
     }
 
     @Override
-    public SQLXML getSQLXML(int _parmIdx) throws SQLException {
-        return hidden.getSQLXML(_parmIdx);
+    public SQLXML getSQLXML(int parmIdx) throws SQLException {
+        return hidden.getSQLXML(parmIdx);
     }
 
     @Override
-    public SQLXML getSQLXML(String _parmName) throws SQLException {
-        return hidden.getSQLXML(_parmName);
+    public SQLXML getSQLXML(String parmName) throws SQLException {
+        return hidden.getSQLXML(parmName);
     }
 
     @Override
-    public String getString(int _parmIdx) throws SQLException {
-        return hidden.getString(_parmIdx);
+    public String getString(int parmIdx) throws SQLException {
+        return hidden.getString(parmIdx);
     }
 
     @Override
-    public String getString(String _parmName) throws SQLException {
-        return hidden.getString(_parmName);
+    public String getString(String parmName) throws SQLException {
+        return hidden.getString(parmName);
     }
 
     @Override
-    public Time getTime(int _parmIdx, Calendar cal) throws SQLException {
-        return hidden.getTime(_parmIdx, cal);
+    public Time getTime(int parmIdx, Calendar cal) throws SQLException {
+        return hidden.getTime(parmIdx, cal);
     }
 
     @Override
-    public Time getTime(int _parmIdx) throws SQLException {
-        return hidden.getTime(_parmIdx);
+    public Time getTime(int parmIdx) throws SQLException {
+        return hidden.getTime(parmIdx);
     }
 
     @Override
-    public Time getTime(String _parmName, Calendar cal) throws SQLException {
-        return hidden.getTime(_parmName, cal);
+    public Time getTime(String parmName, Calendar cal) throws SQLException {
+        return hidden.getTime(parmName, cal);
     }
 
     @Override
-    public Time getTime(String _parmName) throws SQLException {
-        return hidden.getTime(_parmName);
+    public Time getTime(String parmName) throws SQLException {
+        return hidden.getTime(parmName);
     }
 
     @Override
-    public Timestamp getTimestamp(int _parmIdx, Calendar cal) throws SQLException {
-        return hidden.getTimestamp(_parmIdx, cal);
+    public Timestamp getTimestamp(int parmIdx, Calendar cal) throws SQLException {
+        return hidden.getTimestamp(parmIdx, cal);
     }
 
     @Override
-    public Timestamp getTimestamp(int _parmIdx) throws SQLException {
-        return hidden.getTimestamp(_parmIdx);
+    public Timestamp getTimestamp(int parmIdx) throws SQLException {
+        return hidden.getTimestamp(parmIdx);
     }
 
     @Override
-    public Timestamp getTimestamp(String _parmName, Calendar cal) throws SQLException {
-        return hidden.getTimestamp(_parmName, cal);
+    public Timestamp getTimestamp(String parmName, Calendar cal) throws SQLException {
+        return hidden.getTimestamp(parmName, cal);
     }
 
     @Override
-    public Timestamp getTimestamp(String _parmName) throws SQLException {
-        return hidden.getTimestamp(_parmName);
+    public Timestamp getTimestamp(String parmName) throws SQLException {
+        return hidden.getTimestamp(parmName);
     }
 
     @Override
-    public URL getURL(int _parmIdx) throws SQLException {
-        return hidden.getURL(_parmIdx);
+    public URL getURL(int parmIdx) throws SQLException {
+        return hidden.getURL(parmIdx);
     }
 
     @Override
-    public URL getURL(String _parmName) throws SQLException {
-        return hidden.getURL(_parmName);
+    public URL getURL(String parmName) throws SQLException {
+        return hidden.getURL(parmName);
     }
 
     @Override
-    public void registerOutParameter(int _parmIdx, int _sqlType, int scale) throws SQLException {
-        hidden.registerOutParameter(_parmIdx, _sqlType, scale);
+    public void registerOutParameter(int parmIdx, int sqlType, int scale) throws SQLException {
+        hidden.registerOutParameter(parmIdx, sqlType, scale);
     }
 
     @Override
-    public void registerOutParameter(int _parmIdx, int _sqlType, String _typeName) throws SQLException {
-        hidden.registerOutParameter(_parmIdx, _sqlType, _typeName);
+    public void registerOutParameter(int parmIdx, int sqlType, String typeName) throws SQLException {
+        hidden.registerOutParameter(parmIdx, sqlType, typeName);
     }
 
     @Override
-    public void registerOutParameter(int _parmIdx, int _sqlType) throws SQLException {
-        hidden.registerOutParameter(_parmIdx, _sqlType);
+    public void registerOutParameter(int parmIdx, int sqlType) throws SQLException {
+        hidden.registerOutParameter(parmIdx, sqlType);
     }
 
     @Override
-    public void registerOutParameter(String _parmName, int _sqlType, int scale) throws SQLException {
-        hidden.registerOutParameter(_parmName, _sqlType, scale);
+    public void registerOutParameter(String parmName, int sqlType, int scale) throws SQLException {
+        hidden.registerOutParameter(parmName, sqlType, scale);
     }
 
     @Override
-    public void registerOutParameter(String _parmName, int _sqlType, String _typeName) throws SQLException {
-        hidden.registerOutParameter(_parmName, _sqlType, _typeName);
+    public void registerOutParameter(String parmName, int sqlType, String typeName) throws SQLException {
+        hidden.registerOutParameter(parmName, sqlType, typeName);
     }
 
     @Override
-    public void registerOutParameter(String _parmName, int _sqlType) throws SQLException {
-        hidden.registerOutParameter(_parmName, _sqlType);
+    public void registerOutParameter(String parmName, int sqlType) throws SQLException {
+        hidden.registerOutParameter(parmName, sqlType);
     }
 
     @Override
-    public void setAsciiStream(String _parmName, InputStream x, int length) throws SQLException {
-        hidden.setAsciiStream(_parmName, x, length);
+    public void setAsciiStream(String parmName, InputStream x, int length) throws SQLException {
+        hidden.setAsciiStream(parmName, x, length);
     }
 
     @Override
-    public void setAsciiStream(String _parmName, InputStream x, long length) throws SQLException {
-        hidden.setAsciiStream(_parmName, x, length);
+    public void setAsciiStream(String parmName, InputStream x, long length) throws SQLException {
+        hidden.setAsciiStream(parmName, x, length);
     }
 
     @Override
-    public void setAsciiStream(String _parmName, InputStream x) throws SQLException {
-        hidden.setAsciiStream(_parmName, x);
+    public void setAsciiStream(String parmName, InputStream x) throws SQLException {
+        hidden.setAsciiStream(parmName, x);
     }
 
     @Override
-    public void setBigDecimal(String _parmName, BigDecimal x) throws SQLException {
-        hidden.setBigDecimal(_parmName, x);
+    public void setBigDecimal(String parmName, BigDecimal x) throws SQLException {
+        hidden.setBigDecimal(parmName, x);
     }
 
     @Override
-    public void setBinaryStream(String _parmName, InputStream x, int length) throws SQLException {
-        hidden.setBinaryStream(_parmName, x, length);
+    public void setBinaryStream(String parmName, InputStream x, int length) throws SQLException {
+        hidden.setBinaryStream(parmName, x, length);
     }
 
     @Override
-    public void setBinaryStream(String _parmName, InputStream x, long length) throws SQLException {
-        hidden.setBinaryStream(_parmName, x, length);
+    public void setBinaryStream(String parmName, InputStream x, long length) throws SQLException {
+        hidden.setBinaryStream(parmName, x, length);
     }
 
     @Override
-    public void setBinaryStream(String _parmName, InputStream x) throws SQLException {
-        hidden.setBinaryStream(_parmName, x);
+    public void setBinaryStream(String parmName, InputStream x) throws SQLException {
+        hidden.setBinaryStream(parmName, x);
     }
 
     @Override
-    public void setBlob(String _parmName, Blob x) throws SQLException {
-        hidden.setBlob(_parmName, x);
+    public void setBlob(String parmName, Blob x) throws SQLException {
+        hidden.setBlob(parmName, x);
     }
 
     @Override
-    public void setBlob(String _parmName, InputStream inputStream, long length) throws SQLException {
-        hidden.setBlob(_parmName, inputStream, length);
+    public void setBlob(String parmName, InputStream inputStream, long length) throws SQLException {
+        hidden.setBlob(parmName, inputStream, length);
     }
 
     @Override
-    public void setBlob(String _parmName, InputStream inputStream) throws SQLException {
-        hidden.setBlob(_parmName, inputStream);
+    public void setBlob(String parmName, InputStream inputStream) throws SQLException {
+        hidden.setBlob(parmName, inputStream);
     }
 
     @Override
-    public void setBoolean(String _parmName, boolean x) throws SQLException {
-        hidden.setBoolean(_parmName, x);
+    public void setBoolean(String parmName, boolean x) throws SQLException {
+        hidden.setBoolean(parmName, x);
     }
 
     @Override
-    public void setByte(String _parmName, byte x) throws SQLException {
-        hidden.setByte(_parmName, x);
+    public void setByte(String parmName, byte x) throws SQLException {
+        hidden.setByte(parmName, x);
     }
 
     @Override
-    public void setBytes(String _parmName, byte[] x) throws SQLException {
-        hidden.setBytes(_parmName, x);
+    public void setBytes(String parmName, byte[] x) throws SQLException {
+        hidden.setBytes(parmName, x);
     }
 
     @Override
-    public void setCharacterStream(String _parmName, Reader reader, int length) throws SQLException {
-        hidden.setCharacterStream(_parmName, reader, length);
+    public void setCharacterStream(String parmName, Reader reader, int length) throws SQLException {
+        hidden.setCharacterStream(parmName, reader, length);
     }
 
     @Override
-    public void setCharacterStream(String _parmName, Reader reader, long length) throws SQLException {
-        hidden.setCharacterStream(_parmName, reader, length);
+    public void setCharacterStream(String parmName, Reader reader, long length) throws SQLException {
+        hidden.setCharacterStream(parmName, reader, length);
     }
 
     @Override
-    public void setCharacterStream(String _parmName, Reader reader) throws SQLException {
-        hidden.setCharacterStream(_parmName, reader);
+    public void setCharacterStream(String parmName, Reader reader) throws SQLException {
+        hidden.setCharacterStream(parmName, reader);
     }
 
     @Override
-    public void setClob(String _parmName, Clob x) throws SQLException {
-        hidden.setClob(_parmName, x);
+    public void setClob(String parmName, Clob x) throws SQLException {
+        hidden.setClob(parmName, x);
     }
 
     @Override
-    public void setClob(String _parmName, Reader reader, long length) throws SQLException {
-        hidden.setClob(_parmName, reader, length);
+    public void setClob(String parmName, Reader reader, long length) throws SQLException {
+        hidden.setClob(parmName, reader, length);
     }
 
     @Override
-    public void setClob(String _parmName, Reader reader) throws SQLException {
-        hidden.setClob(_parmName, reader);
+    public void setClob(String parmName, Reader reader) throws SQLException {
+        hidden.setClob(parmName, reader);
     }
 
     @Override
-    public void setDate(String _parmName, Date x, Calendar cal) throws SQLException {
-        hidden.setDate(_parmName, x, cal);
+    public void setDate(String parmName, Date x, Calendar cal) throws SQLException {
+        hidden.setDate(parmName, x, cal);
     }
 
     @Override
-    public void setDate(String _parmName, Date x) throws SQLException {
-        hidden.setDate(_parmName, x);
+    public void setDate(String parmName, Date x) throws SQLException {
+        hidden.setDate(parmName, x);
     }
 
     @Override
-    public void setDouble(String _parmName, double x) throws SQLException {
-        hidden.setDouble(_parmName, x);
+    public void setDouble(String parmName, double x) throws SQLException {
+        hidden.setDouble(parmName, x);
     }
 
     @Override
-    public void setFloat(String _parmName, float x) throws SQLException {
-        hidden.setFloat(_parmName, x);
+    public void setFloat(String parmName, float x) throws SQLException {
+        hidden.setFloat(parmName, x);
     }
 
     @Override
-    public void setInt(int _parmIdx, int arg1) throws UcanaccessSQLException {
-        tryCatch(() -> hidden.setInt(_parmIdx, arg1));
+    public void setInt(int parmIdx, int arg1) throws UcanaccessSQLException {
+        tryCatch(() -> hidden.setInt(parmIdx, arg1));
     }
 
     @Override
-    public void setInt(String _parmName, int x) throws SQLException {
-        hidden.setInt(_parmName, x);
+    public void setInt(String parmName, int x) throws SQLException {
+        hidden.setInt(parmName, x);
     }
 
     @Override
-    public void setLong(String _parmName, long x) throws SQLException {
-        hidden.setLong(_parmName, x);
+    public void setLong(String parmName, long x) throws SQLException {
+        hidden.setLong(parmName, x);
     }
 
     @Override
-    public void setNCharacterStream(String _parmName, Reader value, long length) throws SQLException {
-        hidden.setNCharacterStream(_parmName, value, length);
+    public void setNCharacterStream(String parmName, Reader value, long length) throws SQLException {
+        hidden.setNCharacterStream(parmName, value, length);
     }
 
     @Override
-    public void setNCharacterStream(String _parmName, Reader value) throws SQLException {
-        hidden.setNCharacterStream(_parmName, value);
+    public void setNCharacterStream(String parmName, Reader value) throws SQLException {
+        hidden.setNCharacterStream(parmName, value);
     }
 
     @Override
-    public void setNClob(String _parmName, NClob value) throws SQLException {
-        hidden.setNClob(_parmName, value);
+    public void setNClob(String parmName, NClob value) throws SQLException {
+        hidden.setNClob(parmName, value);
     }
 
     @Override
-    public void setNClob(String _parmName, Reader reader, long length) throws SQLException {
-        hidden.setNClob(_parmName, reader, length);
+    public void setNClob(String parmName, Reader reader, long length) throws SQLException {
+        hidden.setNClob(parmName, reader, length);
     }
 
     @Override
-    public void setNClob(String _parmName, Reader reader) throws SQLException {
-        hidden.setNClob(_parmName, reader);
+    public void setNClob(String parmName, Reader reader) throws SQLException {
+        hidden.setNClob(parmName, reader);
     }
 
     @Override
-    public void setNString(String _parmName, String value) throws SQLException {
-        hidden.setNString(_parmName, value);
+    public void setNString(String parmName, String value) throws SQLException {
+        hidden.setNString(parmName, value);
     }
 
     @Override
-    public void setNull(String _parmName, int _sqlType, String _typeName) throws SQLException {
-        hidden.setNull(_parmName, _sqlType, _typeName);
+    public void setNull(String parmName, int sqlType, String typeName) throws SQLException {
+        hidden.setNull(parmName, sqlType, typeName);
     }
 
     @Override
-    public void setNull(String _parmName, int _sqlType) throws SQLException {
-        hidden.setNull(_parmName, _sqlType);
+    public void setNull(String parmName, int sqlType) throws SQLException {
+        hidden.setNull(parmName, sqlType);
     }
 
     @Override
-    public void setObject(String _parmName, Object x, int targetSqlType, int scale) throws SQLException {
-        hidden.setObject(_parmName, x, targetSqlType, scale);
+    public void setObject(String parmName, Object x, int targetSqlType, int scale) throws SQLException {
+        hidden.setObject(parmName, x, targetSqlType, scale);
     }
 
     @Override
-    public void setObject(String _parmName, Object x, int targetSqlType) throws SQLException {
-        hidden.setObject(_parmName, x, targetSqlType);
+    public void setObject(String parmName, Object x, int targetSqlType) throws SQLException {
+        hidden.setObject(parmName, x, targetSqlType);
     }
 
     @Override
-    public void setObject(String _parmName, Object x) throws SQLException {
-        hidden.setObject(_parmName, x);
+    public void setObject(String parmName, Object x) throws SQLException {
+        hidden.setObject(parmName, x);
     }
 
     @Override
-    public void setRowId(String _parmName, RowId x) throws SQLException {
-        hidden.setRowId(_parmName, x);
+    public void setRowId(String parmName, RowId x) throws SQLException {
+        hidden.setRowId(parmName, x);
     }
 
     @Override
-    public void setSQLXML(String _parmName, SQLXML xmlObject) throws SQLException {
-        hidden.setSQLXML(_parmName, xmlObject);
+    public void setSQLXML(String parmName, SQLXML xmlObject) throws SQLException {
+        hidden.setSQLXML(parmName, xmlObject);
     }
 
     @Override
-    public void setString(String _parmName, String x) throws SQLException {
-        hidden.setString(_parmName, x);
+    public void setString(String parmName, String x) throws SQLException {
+        hidden.setString(parmName, x);
     }
 
     @Override
-    public void setTime(String _parmName, Time x, Calendar cal) throws SQLException {
-        hidden.setTime(_parmName, x, cal);
+    public void setTime(String parmName, Time x, Calendar cal) throws SQLException {
+        hidden.setTime(parmName, x, cal);
     }
 
     @Override
-    public void setTime(String _parmName, Time x) throws SQLException {
-        hidden.setTime(_parmName, x);
+    public void setTime(String parmName, Time x) throws SQLException {
+        hidden.setTime(parmName, x);
     }
 
     @Override
-    public void setTimestamp(String _parmName, Timestamp x, Calendar cal) throws SQLException {
-        hidden.setTimestamp(_parmName, x, cal);
+    public void setTimestamp(String parmName, Timestamp x, Calendar cal) throws SQLException {
+        hidden.setTimestamp(parmName, x, cal);
     }
 
     @Override
-    public void setTimestamp(String _parmName, Timestamp x) throws SQLException {
-        hidden.setTimestamp(_parmName, x);
+    public void setTimestamp(String parmName, Timestamp x) throws SQLException {
+        hidden.setTimestamp(parmName, x);
     }
 
     @Override
-    public void setURL(String _parmName, URL val) throws SQLException {
-        hidden.setURL(_parmName, val);
+    public void setURL(String parmName, URL val) throws SQLException {
+        hidden.setURL(parmName, val);
     }
 
     @Override

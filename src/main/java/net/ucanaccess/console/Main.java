@@ -27,21 +27,21 @@ public class Main {
     private final BufferedReader input;
     private String               lastSqlQuery;
 
-    public Main(Connection _conn, BufferedReader _input) {
-        conn = _conn;
-        input = _input;
+    public Main(Connection conn, BufferedReader input) {
+        this.conn = conn;
+        this.input = input;
     }
 
-    private static boolean hasPassword(File _f) throws IOException {
-        try (Database db = Try.catching(() -> DatabaseBuilder.open(_f))
+    private static boolean hasPassword(File f) throws IOException {
+        try (Database db = Try.catching(() -> DatabaseBuilder.open(f))
             .orElseGet(() -> Try.catching(() -> new DatabaseBuilder()
                 .withReadOnly(true)
-                .withFile(_f).open()).orThrow())) {
+                .withFile(f).open()).orThrow())) {
             return db.getDatabasePassword() != null;
         }
     }
 
-    public static void main(String[] _args) throws Exception {
+    public static void main(String[] args) throws Exception {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         // password properties info
         Properties props = new Properties();
@@ -49,10 +49,10 @@ public class Main {
         long size = 0;
         String passwordEntry = "";
         String[] commands = null;
-        if (_args.length > 0) {
-            String file = _args[0];
+        if (args.length > 0) {
+            String file = args[0];
             if (file.endsWith(".properties")) {
-                File pfl = new File(_args[0]);
+                File pfl = new File(args[0]);
                 if (pfl.exists()) {
                     try (FileInputStream fis = new FileInputStream(pfl)) {
                         props.load(fis);
@@ -66,12 +66,12 @@ public class Main {
             } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
                 fl = new File(file);
                 size = fl.length();
-                if (_args.length > 1) {
+                if (args.length > 1) {
                     int arg = 1;
                     if (hasPassword(fl)) {
-                       passwordEntry = _args[arg++];
+                       passwordEntry = args[arg++];
                     } else {
-                       commands = Arrays.copyOfRange(_args, arg++, _args.length);
+                       commands = Arrays.copyOfRange(args, arg++, args.length);
                     }
                 }
             }
@@ -79,8 +79,8 @@ public class Main {
 
         try {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        } catch (ClassNotFoundException _ex) {
-            System.err.println(_ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            System.err.println(ex.getMessage());
             System.err.println("Check your classpath!");
             System.exit(1);
         }
@@ -119,8 +119,8 @@ public class Main {
                 System.out.println(sqlw.getMessage());
                 sqlw = sqlw.getNextWarning();
             }
-        } catch (Exception _ex) {
-            System.err.println(_ex);
+        } catch (Exception ex) {
+            System.err.println(ex);
             System.exit(1);
         }
         Main main = new Main(conn, input);
@@ -128,15 +128,15 @@ public class Main {
         main.start(commands);
     }
 
-    public static void setBatchMode(boolean _batchMode) {
-        batchMode = _batchMode;
+    public static void setBatchMode(boolean batchMode) {
+        Main.batchMode = batchMode;
     }
 
     /**
-     * Prints the ResultSet {@code _resultSet} in a format suitable for the terminal console given by {@code _printStream}.
+     * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.
      */
-    public void consoleDump(ResultSet _resultSet, PrintStream _printStream) throws SQLException {
-        new TableFormat(_resultSet).output(_printStream);
+    public void consoleDump(ResultSet resultSet, PrintStream printStream) throws SQLException {
+        new TableFormat(resultSet).output(printStream);
     }
 
     private void executeStatement(String sql) throws SQLException {
@@ -177,8 +177,8 @@ public class Main {
                 System.exit(0);
             }
             return ret.trim();
-        } catch (IOException _ex) {
-            throw new UcanaccessRuntimeException(_ex.getMessage());
+        } catch (IOException ex) {
+            throw new UcanaccessRuntimeException(ex.getMessage());
         }
     }
 
@@ -243,8 +243,8 @@ public class Main {
                     } else {
                         executeStatement(cmd);
                     }
-                } catch (Exception _ex) {
-                    prompt(_ex.getMessage());
+                } catch (Exception ex) {
+                    prompt(ex.getMessage());
                 }
                 if (exit) {
                    connected = false;
@@ -363,24 +363,24 @@ public class Main {
      * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export
      * operations.
      */
-    private void exportCsvAndSchema(CharSequence _sqlQuery, String _csvFileName, String _schemaFileName, Exporter _exporter) throws SQLException, IOException {
-        Objects.requireNonNull(_sqlQuery, "Sql required");
+    private void exportCsvAndSchema(CharSequence sqlQuery, String csvFileName, String schemaFileName, Exporter exporter) throws SQLException, IOException {
+        Objects.requireNonNull(sqlQuery, "Sql required");
         try (Statement statement = conn.createStatement()) {
-            ResultSet rs = statement.executeQuery(_sqlQuery.toString());
+            ResultSet rs = statement.executeQuery(sqlQuery.toString());
 
             // output the csvFile
-            File csvFile = new File(_csvFileName);
+            File csvFile = new File(csvFileName);
             try (PrintStream out = new PrintStream(csvFile)) {
-                _exporter.dumpCsv(rs, out);
+                exporter.dumpCsv(rs, out);
                 out.flush();
             }
             prompt("Created CSV file: " + csvFile.getAbsolutePath());
 
             // output the schema file if requested
-            if (_schemaFileName != null) {
-                File schemaFile = new File(_schemaFileName);
+            if (schemaFileName != null) {
+                File schemaFile = new File(schemaFileName);
                 try (PrintStream out = new PrintStream(csvFile)) {
-                    _exporter.dumpSchema(rs, out);
+                    exporter.dumpSchema(rs, out);
                     out.flush();
                 }
                 prompt("Created schema file: " + schemaFile.getAbsolutePath());
@@ -433,12 +433,12 @@ public class Main {
         private final List<Integer>      colTypes;
         private final List<List<String>> records            = new ArrayList<>();
 
-        TableFormat(ResultSet _resultSet) throws SQLException {
-            this(_resultSet, -1);
+        TableFormat(ResultSet resultSet) throws SQLException {
+            this(resultSet, -1);
         }
 
-        TableFormat(ResultSet _resultSet, int _maxRows) throws SQLException {
-            ResultSetMetaData meta = _resultSet.getMetaData();
+        TableFormat(ResultSet resultSet, int maxRows) throws SQLException {
+            ResultSetMetaData meta = resultSet.getMetaData();
             int columnCount = meta.getColumnCount();
 
             colNames = new ArrayList<>(columnCount);
@@ -452,11 +452,11 @@ public class Main {
             }
 
             records.add(colNames); // header record
-            while (_resultSet.next() && (_maxRows < 0 || _maxRows < records.size())) {
+            while (resultSet.next() && (maxRows < 0 || maxRows < records.size())) {
                 List<String> rec = new ArrayList<>();
                 records.add(rec);
                 for (int col = 1; col <= columnCount; ++col) {
-                    Object obj = _resultSet.getObject(col);
+                    Object obj = resultSet.getObject(col);
                     if (obj != null && obj.getClass().isArray() && !obj.getClass().getComponentType().isPrimitive()) {
                         obj = Arrays.toString((Object[]) obj);
                     }
@@ -472,7 +472,7 @@ public class Main {
             }
         }
 
-        void output(PrintStream _printStream) {
+        void output(PrintStream printStream) {
             String interline = null;
             String divider = "|";
             for (int idx = 0; idx < records.size(); idx++) {
@@ -481,49 +481,49 @@ public class Main {
                 if (idx == 0) { // index 0 holds header
                     interline = line.replaceAll("[^\\" + divider + "]", "-").replace(divider, "+");
                     interline = "·" + interline + "·";
-                    _printStream.println();
-                    _printStream.println(interline);
-                    _printStream.println(divider + line + divider);
-                    _printStream.println(interline);
+                    printStream.println();
+                    printStream.println(interline);
+                    printStream.println(divider + line + divider);
+                    printStream.println(interline);
 
                 } else {
-                    _printStream.println(divider + line + divider);
+                    printStream.println(divider + line + divider);
                 }
             }
 
             if (records.size() > 1) {
-                _printStream.println(interline);
+                printStream.println(interline);
             }
         }
 
-        String joinWithLen(CharSequence _delim, List<? extends String> _elems) {
+        String joinWithLen(CharSequence delim, List<? extends String> elems) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < _elems.size(); i++) {
+            for (int i = 0; i < elems.size(); i++) {
                 int width = colWidths.get(i);
                 int type = colTypes.get(i);
-                String str = _elems.get(i);
+                String str = elems.get(i);
                 sb.append(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
-                if (i < _elems.size() - 1) {
-                    sb.append(_delim);
+                if (i < elems.size() - 1) {
+                    sb.append(delim);
                 }
             }
             return sb.toString();
         }
 
-        static boolean isNumericJdbcType(int _type) {
-            return NUMERIC_JDBC_TYPES.contains(_type);
+        static boolean isNumericJdbcType(int type) {
+            return NUMERIC_JDBC_TYPES.contains(type);
         }
 
-        static String rightPad(String _str, int _width) {
-            return (_str + repeat(" ", _width - _str.length())).substring(0, _width);
+        static String rightPad(String str, int width) {
+            return (str + repeat(" ", width - str.length())).substring(0, width);
         }
 
-        static String leftPad(String _str, int _width) {
-            return (repeat(" ", _width - _str.length()) + _str).substring(0, _width);
+        static String leftPad(String str, int width) {
+            return (repeat(" ", width - str.length()) + str).substring(0, width);
         }
 
-        static String repeat(String _str, int _count) {
-            return _count > 0 ? String.format("%0" + _count + "d", 0).replace("0", _str) : "";
+        static String repeat(String str, int count) {
+            return count > 0 ? String.format("%0" + count + "d", 0).replace("0", str) : "";
         }
 
     }

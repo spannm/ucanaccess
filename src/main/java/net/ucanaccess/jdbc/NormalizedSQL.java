@@ -11,16 +11,16 @@ public class NormalizedSQL {
         return sql;
     }
 
-    public void setSql(String _sql) {
-        sql = _sql;
+    public void setSql(String sql) {
+        this.sql = sql;
     }
 
     public Map<String, String> getAliases() {
         return aliases;
     }
 
-    public String put(String _key, String _value) {
-        return aliases.put(_key, _value);
+    public String put(String key, String value) {
+        return aliases.put(key, value);
     }
 
     @Override

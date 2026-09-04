@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  *     String str1 = null;
  *     try {
  *         str1 = Files.getLastModifiedTime(p).toString();
- *     } catch (IOException _ex) {
+ *     } catch (IOException ex) {
  *         str1 = "unknown";
  *     }
  *     System.out.println("1: File time is: " + str1);
@@ -66,16 +66,16 @@ public final class Try<V, EC extends Throwable> {
     /**
      * Creates a new instance from a throwing supplier.
      *
-     * @param _catchable a throwing supplier
+     * @param catchable a throwing supplier
      */
-    private Try(IThrowingSupplier<V, EC> _catchable) {
+    private Try(IThrowingSupplier<V, EC> catchable) {
         V locVal = null;
         EC locEx = null;
         try {
-            locVal = _catchable.get();
-        } catch (Throwable _ex) {
+            locVal = catchable.get();
+        } catch (Throwable ex) {
             @SuppressWarnings("unchecked")
-            EC castEx = (EC) _ex;
+            EC castEx = (EC) ex;
             locEx = castEx;
         }
         val = locVal;
@@ -85,12 +85,12 @@ public final class Try<V, EC extends Throwable> {
     /**
      * Creates a new instance from a value and an exception.
      *
-     * @param _val value, may be null
-     * @param _ex exception, may be null
+     * @param val value, may be null
+     * @param ex exception, may be null
      */
-    private Try(V _val, EC _ex) {
-        val = _val;
-        t = _ex;
+    private Try(V val, EC ex) {
+        this.val = val;
+        t = ex;
     }
 
     /**
@@ -98,31 +98,31 @@ public final class Try<V, EC extends Throwable> {
      *
      * @param <R> the type of value supplied by the supplier
      * @param <EC> the type of exception, if any, thrown by the supplier
-     * @param _catchable a throwing supplier
+     * @param catchable a throwing supplier
      * @return new instance
      */
-    public static <R, EC extends Throwable> Try<R, EC> catching(IThrowingSupplier<R, EC> _catchable) {
-        return new Try<>(Objects.requireNonNull(_catchable, "Supplier required"));
+    public static <R, EC extends Throwable> Try<R, EC> catching(IThrowingSupplier<R, EC> catchable) {
+        return new Try<>(Objects.requireNonNull(catchable, "Supplier required"));
     }
 
     /**
      * Creates a new instance from a throwing {@link Runnable}.
      *
      * @param <EC> the type of exception, if any, thrown by the runnable
-     * @param _catchable a throwing runnable
+     * @param catchable a throwing runnable
      * @return new instance
      */
-    public static <EC extends Throwable> Try<Void, EC> catching(IThrowingRunnable<EC> _catchable) {
-        Objects.requireNonNull(_catchable, "Runnable required");
+    public static <EC extends Throwable> Try<Void, EC> catching(IThrowingRunnable<EC> catchable) {
+        Objects.requireNonNull(catchable, "Runnable required");
         return new Try<>(() -> { // convert to throwing supplier returning null
-            _catchable.run();
+            catchable.run();
             return null;
         });
     }
 
     /**
      * Try-with-resources support for a single resource.<br>
-     * The resource is created and returned by {@code _resourceSupplier} and processed in {@code _catchable}.<br>
+     * The resource is created and returned by {@code resourceSupplier} and processed in {@code catchable}.<br>
      * If an exception occurs during resource creation, this execution is thrown and thus processing ends.
      *
      * @param <R> the type of resource (must implement {@link AutoCloseable})
@@ -130,43 +130,43 @@ public final class Try<V, EC extends Throwable> {
      * @param <V> the type of value returned by the function
      * @param <EC> the type of exception, if any, thrown by the function
      *
-     * @param _resourceSupplier the resource supplier
-     * @param _catchable the function executed on the resource
+     * @param resourceSupplier the resource supplier
+     * @param catchable the function executed on the resource
      * @return new instance
      */
     public static <R extends AutoCloseable, ES extends Throwable, V, EC extends Throwable> Try<V, EC> withResources(
-        IThrowingSupplier<R, ES> _resourceSupplier, IThrowingFunction<R, V, EC> _catchable) {
+        IThrowingSupplier<R, ES> resourceSupplier, IThrowingFunction<R, V, EC> catchable) {
 
-        Objects.requireNonNull(_resourceSupplier, "Resource supplier required");
-        Objects.requireNonNull(_catchable, "Resource consumer required");
-        try (R r = _resourceSupplier.get()) {
+        Objects.requireNonNull(resourceSupplier, "Resource supplier required");
+        Objects.requireNonNull(catchable, "Resource consumer required");
+        try (R r = resourceSupplier.get()) {
             V locVal = null;
             EC locEx = null;
             try {
-                locVal = _catchable.apply(r);
-            } catch (Throwable _ex) {
+                locVal = catchable.apply(r);
+            } catch (Throwable ex) {
                 // this block catches exceptions thrown by the 'catchable' function
                 // tf it's an InterruptedException, restore the interrupt status
-                if (_ex instanceof InterruptedException) {
+                if (ex instanceof InterruptedException) {
                     Thread.currentThread().interrupt();
                 }
                 @SuppressWarnings("unchecked")
-                EC castEx = (EC) _ex;
+                EC castEx = (EC) ex;
                 locEx = castEx;
             }
             return new Try<>(locVal, locEx);
-        } catch (Throwable _ex) {
+        } catch (Throwable ex) {
             // this block catches exceptions from two sources:
             // 1. The 'resourceSupplier.get()' call (exceptions of type ES)
             // 2. The implicit 'r.close()' call of the AutoCloseable resource
 
             // If an InterruptedException occurs here (e.g., during resource closing),
             // it's crucial to restore the thread's interrupted status
-            if (_ex instanceof InterruptedException) {
+            if (ex instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            doThrow(_ex);
-            return null; // technically unreachable due to doThrow(_ex)
+            doThrow(ex);
+            return null; // technically unreachable due to doThrow(ex)
         }
     }
 
@@ -174,12 +174,12 @@ public final class Try<V, EC extends Throwable> {
      * Try-with-resources support for a single resource with a {@link Void} (no) result.
      */
     public static <R extends AutoCloseable, ES extends Throwable, EC extends Throwable> Try<Void, EC> withResources(
-        IThrowingSupplier<R, ES> _resourceSupplier, IThrowingConsumer<R, EC> _catchable) {
+        IThrowingSupplier<R, ES> resourceSupplier, IThrowingConsumer<R, EC> catchable) {
 
-        Objects.requireNonNull(_resourceSupplier, "Resource supplier required");
-        Objects.requireNonNull(_catchable, "Resource consumer required");
-        return withResources(_resourceSupplier, i -> { // convert to throwing function returning null
-            _catchable.accept(i);
+        Objects.requireNonNull(resourceSupplier, "Resource supplier required");
+        Objects.requireNonNull(catchable, "Resource consumer required");
+        return withResources(resourceSupplier, i -> { // convert to throwing function returning null
+            catchable.accept(i);
             return null;
         });
     }
@@ -189,17 +189,17 @@ public final class Try<V, EC extends Throwable> {
      *
      * @param <V1> the type result produced by the mapper
      * @param <E1> the type of exception thrown by the mapper
-     * @param _mapper mapping function
+     * @param mapper mapping function
      * @return new instance with transformed value
      */
-    public <V1, E1 extends Throwable> Try<V1, E1> map(Function<? super V, ? extends V1> _mapper) {
-        Objects.requireNonNull(_mapper, "Mapper required");
+    public <V1, E1 extends Throwable> Try<V1, E1> map(Function<? super V, ? extends V1> mapper) {
+        Objects.requireNonNull(mapper, "Mapper required");
         if (t != null) {
             @SuppressWarnings("unchecked")
             E1 e1 = (E1) t;
             return new Try<>((V1) null, e1);
         }
-        return catching((IThrowingSupplier<V1, E1>) () -> _mapper.apply(val));
+        return catching((IThrowingSupplier<V1, E1>) () -> mapper.apply(val));
     }
 
     /**
@@ -232,47 +232,47 @@ public final class Try<V, EC extends Throwable> {
     }
 
     /**
-     * Returns the successful value or if an exception has occurred returns {@code _other}.
+     * Returns the successful value or if an exception has occurred returns {@code other}.
      *
-     * @param _other the value to be returned, if an exception has occurred. May be {@code null}.
-     * @return the successful value, otherwise the {@code _other} value
+     * @param other the value to be returned, if an exception has occurred. May be {@code null}.
+     * @return the successful value, otherwise the {@code other} value
      */
-    public V orElse(V _other) {
-        return hasThrown() ? _other : val;
+    public V orElse(V other) {
+        return hasThrown() ? other : val;
     }
 
     /**
-     * Executes {@code _consumer} with the exception as parameter, if an exception has occurred.<br>
+     * Executes {@code consumer} with the exception as parameter, if an exception has occurred.<br>
      * If an exception occurs during execution of the throwing consumer, that exception is thrown.
-     * @param _consumer consumer to execute in case of exception. The exception object is passed to the consumer.
+     * @param consumer consumer to execute in case of exception. The exception object is passed to the consumer.
      */
-    public void orElse(IThrowingConsumer<EC, Throwable> _consumer) {
+    public void orElse(IThrowingConsumer<EC, Throwable> consumer) {
         if (hasThrown()) {
-            catching(() -> _consumer.accept(t)).orThrow();
+            catching(() -> consumer.accept(t)).orThrow();
         }
     }
 
     /**
-     * If an exception has occurred, executes {@code _function} with the exception as parameter
+     * If an exception has occurred, executes {@code function} with the exception as parameter
      * to retrieve an alternative value, otherwise returns the value.
-     * @param _function function to execute in case of exception. The exception object is passed to the function.
+     * @param function function to execute in case of exception. The exception object is passed to the function.
      * @return the successful value or value returned by the function
      */
-    public V orElseApply(IThrowingFunction<EC, V, Throwable> _function) {
+    public V orElseApply(IThrowingFunction<EC, V, Throwable> function) {
         if (hasThrown()) {
-            return catching(() -> _function.apply(t)).orThrow();
+            return catching(() -> function.apply(t)).orThrow();
         }
         return val;
     }
 
     /**
-     * If an exception has occurred, executes {@code _supplier} to get an alternative value, otherwise returns the value.
-     * @param _supplier supplier that supplies an alternative value
+     * If an exception has occurred, executes {@code supplier} to get an alternative value, otherwise returns the value.
+     * @param supplier supplier that supplies an alternative value
      * @return the successful value or value returned by the supplier
      */
-    public V orElseGet(IThrowingSupplier<V, Throwable> _supplier) {
+    public V orElseGet(IThrowingSupplier<V, Throwable> supplier) {
         if (hasThrown()) {
-            return catching(_supplier::get).orThrow();
+            return catching(supplier::get).orThrow();
         }
         return val;
     }
@@ -298,18 +298,18 @@ public final class Try<V, EC extends Throwable> {
     }
 
     /**
-     * Returns the successful value or throws the exception returned by {@code _function}.<br>
+     * Returns the successful value or throws the exception returned by {@code function}.<br>
      * The function is applied if this object has previously thrown and must provide an exception.
      *
-     * @param <T2> the type of exception returned by {@code _function}
-     * @param _function non-null function to provide an exception. The previous exception object is passed to the function.
+     * @param <T2> the type of exception returned by {@code function}
+     * @param function non-null function to provide an exception. The previous exception object is passed to the function.
      * @return the successful value
-     * @throws T2 the exception returned by {@code _function}
+     * @throws T2 the exception returned by {@code function}
      */
-    public <T2 extends Throwable> V orThrow(Function<EC, T2> _function) throws T2 {
-        Objects.requireNonNull(_function, "Function required");
+    public <T2 extends Throwable> V orThrow(Function<EC, T2> function) throws T2 {
+        Objects.requireNonNull(function, "Function required");
         if (hasThrown()) {
-            Throwable t2 = _function.apply(t);
+            Throwable t2 = function.apply(t);
             if (t2 == null) {
                 doThrow(new IllegalStateException("Function must provide a throwable"));
             } else {
@@ -327,13 +327,13 @@ public final class Try<V, EC extends Throwable> {
     /**
      * Performs a vacuous cast on a Throwable to evade the Java checked exception mechanism.
      * @param <T> the type of Throwable
-     * @param _t throwable
+     * @param t throwable
      * @return run-time exception
      * @throws T throwable
      */
     @SuppressWarnings("unchecked")
-    private static <T extends Throwable> RuntimeException doThrow(Throwable _t) throws T {
-        throw (T) _t;
+    private static <T extends Throwable> RuntimeException doThrow(Throwable t) throws T {
+        throw (T) t;
     }
 
 }

@@ -17,15 +17,15 @@ import java.sql.SQLException;
 class ExceptionCodeTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements(Sql.of(CREATE, TABLE, "t (pk VARCHAR(10) PRIMARY KEY)"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testVUKException(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testVUKException(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
 
@@ -42,7 +42,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testGenException(AccessVersion _accessVersion) {
+    void testGenException(AccessVersion accessVersion) {
         UcanaccessSQLException ex = new UcanaccessSQLException("foo", "ko", 11111);
         assertEquals(11111, ex.getErrorCode());
         assertEquals("ko", ex.getSQLState());
@@ -50,7 +50,7 @@ class ExceptionCodeTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testGException(AccessVersion _accessVersion) {
+    void testGException(AccessVersion accessVersion) {
         assertThatThrownBy(() -> buildConnection()
             .withDbPath("kuso_yaro")
             .withUser("")

@@ -55,7 +55,10 @@
         <module name="EqualsHashCode"/>
         <module name="GenericWhitespace"/>
         <module name="FinalClass"/>
-        <module name="HiddenField"/>
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
         <module name="HideUtilityClassConstructor"/>
         <module name="IllegalImport"/>
         <module name="IllegalInstantiation"/>

@@ -150,8 +150,8 @@ public class Persist2Jet {
                     }
                 }
             }
-        } catch (Exception _ex) {
-            throw new SQLException(_ex);
+        } catch (Exception ex) {
+            throw new SQLException(ex);
         }
     }
 
@@ -170,55 +170,55 @@ public class Persist2Jet {
         return vl;
     }
 
-    private String getNormalizedName(String _name, Map<String, String> _columnMap) {
-        return _columnMap == null ? _name : _columnMap.getOrDefault(_name, _name);
+    private String getNormalizedName(String name, Map<String, String> columnMap) {
+        return columnMap == null ? name : columnMap.getOrDefault(name, name);
     }
 
-    private ColumnBuilder getColumn(ResultSet _rs, int _seq, Map<String, String> _columnMap, String[] _types) throws SQLException, IOException {
-        String name = _rs.getString(COLUMN_NAME);
-        String nname = getNormalizedName(name, _columnMap);
+    private ColumnBuilder getColumn(ResultSet rs, int seq, Map<String, String> columnMap, String[] types) throws SQLException, IOException {
+        String name = rs.getString(COLUMN_NAME);
+        String nname = getNormalizedName(name, columnMap);
         ColumnBuilder cb = new ColumnBuilder(nname);
-        short length = (short) _rs.getInt(COLUMN_SIZE);
-        byte scale = (byte) _rs.getInt(DECIMAL_DIGITS);
+        short length = (short) rs.getInt(COLUMN_SIZE);
+        byte scale = (byte) rs.getInt(DECIMAL_DIGITS);
         DataType dt = null;
-        if (length == 0 && _types != null) {
-            if (_types[_seq].equalsIgnoreCase(AccessType.MEMO.name())
-                    || _types[_seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
+        if (length == 0 && types != null) {
+            if (types[seq].equalsIgnoreCase(AccessType.MEMO.name())
+                    || types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
                 dt = DataType.MEMO;
                 cb.withType(dt);
-                if (_types[_seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
+                if (types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {
                     cb.withHyperlink(true);
                 }
             }
-            if (_types[_seq].equalsIgnoreCase(AccessType.TEXT.name())) {
+            if (types[seq].equalsIgnoreCase(AccessType.TEXT.name())) {
                 dt = DataType.TEXT;
                 cb.withType(dt);
             }
         }
 
-        if (_types != null && _seq < _types.length && _types[_seq] != null
-                && (_types[_seq].equalsIgnoreCase(AccessType.LONG.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.BYTE.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.CURRENCY.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.INTEGER.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.SINGLE.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.DOUBLE.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.YESNO.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.DATETIME.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.COUNTER.name())
-                        || _types[_seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {
-            dt = TypesMap.map2Jackcess(AccessType.valueOf(_types[_seq].toUpperCase(Locale.US)));
+        if (types != null && seq < types.length && types[seq] != null
+                && (types[seq].equalsIgnoreCase(AccessType.LONG.name())
+                        || types[seq].equalsIgnoreCase(AccessType.BYTE.name())
+                        || types[seq].equalsIgnoreCase(AccessType.CURRENCY.name())
+                        || types[seq].equalsIgnoreCase(AccessType.INTEGER.name())
+                        || types[seq].equalsIgnoreCase(AccessType.SINGLE.name())
+                        || types[seq].equalsIgnoreCase(AccessType.DOUBLE.name())
+                        || types[seq].equalsIgnoreCase(AccessType.YESNO.name())
+                        || types[seq].equalsIgnoreCase(AccessType.DATETIME.name())
+                        || types[seq].equalsIgnoreCase(AccessType.COUNTER.name())
+                        || types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {
+            dt = TypesMap.map2Jackcess(AccessType.valueOf(types[seq].toUpperCase(Locale.US)));
             cb.withType(dt)
               .withLengthInUnits((short) dt.getFixedSize());
         }
 
         if (dt == null) {
-            if (_types != null && _seq < _types.length && _types[_seq] != null
-                    && _types[_seq].equalsIgnoreCase(AccessType.NUMERIC.name())) {
+            if (types != null && seq < types.length && types[seq] != null
+                    && types[seq].equalsIgnoreCase(AccessType.NUMERIC.name())) {
                 dt = DataType.NUMERIC;
             } else {
                 dt = DataType.fromSQLType(
-                        _rs.getInt(DATA_TYPE),
+                        rs.getInt(DATA_TYPE),
                         length,
                         UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
             }
@@ -234,13 +234,13 @@ public class Persist2Jet {
             }
         }
 
-        if (_types != null && _seq < _types.length) {
-            if (_types[_seq].equalsIgnoreCase(AccessType.COUNTER.name())
-                    || _types[_seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())) {
+        if (types != null && seq < types.length) {
+            if (types[seq].equalsIgnoreCase(AccessType.COUNTER.name())
+                    || types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())) {
                 cb.withAutoNumber(true)
                   .withProperty(PropertyMap.REQUIRED_PROP, false); // re: Ticket #2
             }
-            if (_types[_seq].equalsIgnoreCase(AccessType.GUID.name())) {
+            if (types[seq].equalsIgnoreCase(AccessType.GUID.name())) {
                 cb.withType(DataType.GUID)
                   .withAutoNumber(true);
             }
@@ -248,15 +248,15 @@ public class Persist2Jet {
         return cb;
     }
 
-    private ColumnBuilder getColumn(String _tableName, Map<String, String> _columnMap, String[] _types)
+    private ColumnBuilder getColumn(String tableName, Map<String, String> columnMap, String[] types)
             throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
-        String columnName = _columnMap.keySet().iterator().next();
-        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, _tableName.toUpperCase(),
+        String columnName = columnMap.keySet().iterator().next();
+        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableName.toUpperCase(),
                 SQLConverter.preEscapingIdentifier(columnName));
 
         if (rs.next()) {
-            return getColumn(rs, 0, _columnMap, _types);
+            return getColumn(rs, 0, columnMap, types);
 
         }
         return null;
@@ -281,12 +281,12 @@ public class Persist2Jet {
         return arcl;
     }
 
-    private void checkPK(List<IndexBuilder> _arcl, IndexBuilder _ibpk) {
-        if (_ibpk == null) {
+    private void checkPK(List<IndexBuilder> arcl, IndexBuilder ibpk) {
+        if (ibpk == null) {
             return;
         }
-        Iterator<IndexBuilder> itib = _arcl.iterator();
-        List<IndexBuilder.Column> clspk = _ibpk.getColumns();
+        Iterator<IndexBuilder> itib = arcl.iterator();
+        List<IndexBuilder.Column> clspk = ibpk.getColumns();
         List<String> columnNamesPK = new ArrayList<>();
         for (IndexBuilder.Column clpk : clspk) {
             columnNamesPK.add(clpk.getName().toUpperCase());
@@ -353,15 +353,15 @@ public class Persist2Jet {
         }
     }
 
-    private void saveColumnsDefaults(String[] _defaults, Boolean[] _required, Column _cl, int _j) throws IOException {
+    private void saveColumnsDefaults(String[] defaults, Boolean[] required, Column cl, int j) throws IOException {
 
-        PropertyMap map = _cl.getProperties();
-        if (_defaults != null && _j < _defaults.length && _defaults[_j] != null) {
-            map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, _defaults[_j]);
+        PropertyMap map = cl.getProperties();
+        if (defaults != null && j < defaults.length && defaults[j] != null) {
+            map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, defaults[j]);
         }
 
-        if (_required != null && _j < _required.length && _required[_j] != null && !_cl.isAutoNumber()) {
-            map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, _required[_j]);
+        if (required != null && j < required.length && required[j] != null && !cl.isAutoNumber()) {
+            map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, required[j]);
         }
 
         map.save();
@@ -557,14 +557,14 @@ public class Persist2Jet {
 
     }
 
-    public void addColumn(String _tableName, String _columnName, Map<String, String> _columnMap, String[] _types,
-        String[] _defaults, Boolean[] _notNulls) throws IOException, SQLException {
+    public void addColumn(String tableName, String columnName, Map<String, String> columnMap, String[] types,
+        String[] defaults, Boolean[] notNulls) throws IOException, SQLException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
-        String tn = escape4Access(_tableName);
-        String ntn = escape4Hsqldb(_tableName);
+        String tn = escape4Access(tableName);
+        String ntn = escape4Hsqldb(tableName);
         Metadata mtd = new Metadata(conn.getHSQLDBConnection());
-        ColumnBuilder cb = getColumn(ntn, _columnMap, _types);
+        ColumnBuilder cb = getColumn(ntn, columnMap, types);
         if (cb == null) {
             return;
         }
@@ -572,47 +572,47 @@ public class Persist2Jet {
         Column col = cb.addToTable(t);
         int idTable = mtd.getTableId(ntn.toUpperCase());
         mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),
-            getUcaMetadataTypeName(0, cb, _types), idTable);
-        saveColumnsDefaults(_defaults, _notNulls, col, 0);
-        updateNewColumnToDefault(_tableName, _columnName, t, col);
-        setHsqldbNotNull(_tableName, _columnName, col);
+            getUcaMetadataTypeName(0, cb, types), idTable);
+        saveColumnsDefaults(defaults, notNulls, col, 0);
+        updateNewColumnToDefault(tableName, columnName, t, col);
+        setHsqldbNotNull(tableName, columnName, col);
         conn.reloadDbIO();
     }
 
-    private void setHsqldbNotNull(String _tableName, String _columnName, Column _cl) throws SQLException, IOException {
-        boolean req = Optional.ofNullable(_cl.getProperties().getValue(PropertyMap.REQUIRED_PROP))
+    private void setHsqldbNotNull(String tableName, String columnName, Column cl) throws SQLException, IOException {
+        boolean req = Optional.ofNullable(cl.getProperties().getValue(PropertyMap.REQUIRED_PROP))
             .map(Boolean.class::cast).orElse(false);
         if (req) {
             UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
             try (Statement stNN = conn.getHSQLDBConnection().createStatement()) {
                 stNN.execute(SQLConverter.convertSQL(
-                    "ALTER TABLE " + _tableName + " ALTER COLUMN " + _columnName + " SET NOT NULL ").getSql());
+                    "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " SET NOT NULL ").getSql());
             }
         }
     }
 
-    private void updateNewColumnToDefault(String _tableName, String _columnName, Table t, Column _col)
+    private void updateNewColumnToDefault(String tableName, String columnName, Table t, Column col)
         throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());
-        lj.loadDefaultValues(_col);
-        String default4SQL = lj.defaultValue4SQL(_col);
+        lj.loadDefaultValues(col);
+        String default4SQL = lj.defaultValue4SQL(col);
 
         Object defObj = lj.tryDefault(default4SQL);
         conn.setFeedbackState(true);
         if (default4SQL != null) {
             for (Row row : t) {
-                row.put(_col.getName(), defObj);
+                row.put(col.getName(), defObj);
                 t.updateRow(row);
             }
             conn.getDbIO().flush();
 
         }
 
-        if (default4SQL != null || _col.getType().equals(DataType.BOOLEAN)) {
-            defObj = default4SQL == null && _col.getType().equals(DataType.BOOLEAN) ? Boolean.FALSE : defObj;
+        if (default4SQL != null || col.getType().equals(DataType.BOOLEAN)) {
+            defObj = default4SQL == null && col.getType().equals(DataType.BOOLEAN) ? Boolean.FALSE : defObj;
             try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(
-                SQLConverter.convertSQL("UPDATE " + _tableName + " SET " + _columnName + "= ?").getSql())) {
+                SQLConverter.convertSQL("UPDATE " + tableName + " SET " + columnName + "= ?").getSql())) {
                 ps.setObject(1, defObj);
                 ps.executeUpdate();
             }

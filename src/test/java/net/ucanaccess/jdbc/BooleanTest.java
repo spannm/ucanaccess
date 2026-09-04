@@ -9,8 +9,8 @@ import java.sql.SQLException;
 class BooleanTest extends UcanaccessBaseFileTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements(
             "CREATE TABLE tblMain (id INT NOT NULL PRIMARY KEY, company TEXT NOT NULL, closed YESNO)",
             "INSERT INTO tblMain (id, company) VALUES(1, 'pippo')",

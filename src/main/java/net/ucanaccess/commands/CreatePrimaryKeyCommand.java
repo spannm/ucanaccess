@@ -10,9 +10,9 @@ public class CreatePrimaryKeyCommand implements ICommand {
     private final String tableName;
     private final String execId;
 
-    public CreatePrimaryKeyCommand(String _tableName, String _execId) {
-        tableName = _tableName;
-        execId = _execId;
+    public CreatePrimaryKeyCommand(String tableName, String execId) {
+        this.tableName = tableName;
+        this.execId = execId;
     }
 
     @Override

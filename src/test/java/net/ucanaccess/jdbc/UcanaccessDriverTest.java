@@ -87,11 +87,11 @@ class UcanaccessDriverTest extends UcanaccessBaseTest {
         method.setAccessible(true);
         try {
             return method.invoke(new UcanaccessDriver(), className);
-        } catch (InvocationTargetException _ex) {
-            if (_ex.getCause() instanceof Exception) {
-                throw (Exception) _ex.getCause();
+        } catch (InvocationTargetException ex) {
+            if (ex.getCause() instanceof Exception) {
+                throw (Exception) ex.getCause();
             }
-            throw _ex;
+            throw ex;
         }
     }
 
@@ -109,7 +109,7 @@ class UcanaccessDriverTest extends UcanaccessBaseTest {
         }
 
         @Override
-        public Database open(File _file, String _password) {
+        public Database open(File file, String password) {
             return null;
         }
     }

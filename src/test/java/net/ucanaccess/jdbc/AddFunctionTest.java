@@ -17,8 +17,8 @@ class AddFunctionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testAddFunction(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testAddFunction(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         /*
          * Display the Locale language in effect (assuming that this is the first test in the suite). Unfortunately,

@@ -25,30 +25,30 @@ public class Attachment extends ComplexBase {
         flags = atc.getFileFlags();
     }
 
-    public Attachment(ComplexValue.Id id, String tableName, String columnName, String _url, String _name, String _type,
-            byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
+    public Attachment(ComplexValue.Id id, String tableName, String columnName, String url, String name, String type,
+            byte[] data, LocalDateTime timeStamp, Integer flags) {
         super(id, tableName, columnName);
-        url = _url;
-        name = _name;
-        type = _type;
-        data = _data;
-        timeStamp = handleJackcessLocalDateTimeResolution(_timeStamp);
-        flags = _flags;
+        this.url = url;
+        this.name = name;
+        this.type = type;
+        this.data = data;
+        this.timeStamp = handleJackcessLocalDateTimeResolution(timeStamp);
+        this.flags = flags;
     }
 
-    public Attachment(String _url, String _name, String _type, byte[] _data, LocalDateTime _timeStamp, Integer _flags) {
-        this(CREATE_ID, null, null, _url, _name, _type, _data, _timeStamp, _flags);
+    public Attachment(String url, String name, String type, byte[] data, LocalDateTime timeStamp, Integer flags) {
+        this(CREATE_ID, null, null, url, name, type, data, timeStamp, flags);
 
     }
 
     @Override
-    public boolean equals(Object _obj) {
-        if (this == _obj) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
-        } else if (_obj == null || getClass() != _obj.getClass()) {
+        } else if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Attachment other = (Attachment) _obj;
+        Attachment other = (Attachment) obj;
         if (!Arrays.equals(data, other.data)) {
             return false;
         }
@@ -123,28 +123,28 @@ public class Attachment extends ComplexBase {
         return result;
     }
 
-    public void setData(byte[] _data) {
-        data = _data;
+    public void setData(byte[] data) {
+        this.data = data;
     }
 
-    public void setFlags(Integer _flags) {
-        flags = _flags;
+    public void setFlags(Integer flags) {
+        this.flags = flags;
     }
 
-    public void setName(String _name) {
-        name = _name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setTimeStamp(LocalDateTime _timeStamp) {
-        timeStamp = _timeStamp;
+    public void setTimeStamp(LocalDateTime timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
-    public void setType(String _type) {
-        type = _type;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public void setUrl(String _url) {
-        url = _url;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @Override

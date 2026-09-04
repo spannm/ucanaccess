@@ -19,16 +19,16 @@ import java.sql.SQLException;
 class BlobOleTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_ole_test (id COUNTER PRIMARY KEY, c_descr TEXT(400), c_ole OLE)");
     }
 
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBlobOle(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    void testBlobOle(AccessVersion accessVersion) throws SQLException, IOException {
+        init(accessVersion);
 
         String imgFileName = getFileResource("blobOleTest.jpg"); // media file (c) Markus Spann
 
@@ -109,8 +109,8 @@ class BlobOleTest extends UcanaccessBaseTest {
     // It only works with JRE 1.6 and later (JDBC 3)
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBlobPackaged(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    void testBlobPackaged(AccessVersion accessVersion) throws SQLException, IOException {
+        init(accessVersion);
 
         String binFileName = getFileResource("blobOleTest.gif"); // media file (c) Markus Spann
         File file = createTempFileName(binFileName.replace('/', File.separatorChar), null);
@@ -132,8 +132,8 @@ class BlobOleTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testTwoColumnPk(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testTwoColumnPk(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // fix for ticket #23 should prevent this test from throwing an error
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

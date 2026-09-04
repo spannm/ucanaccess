@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 
 public class InsertResultSet extends AbstractExecuteResultSet {
 
-    protected InsertResultSet(UcanaccessResultSet _resultSet) {
-        super(_resultSet, ResultSet::insertRow);
+    protected InsertResultSet(UcanaccessResultSet resultSet) {
+        super(resultSet, ResultSet::insertRow);
     }
 
 }

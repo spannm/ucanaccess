@@ -12,15 +12,15 @@ import java.sql.SQLException;
 class AliasTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_alias (id LONG, descr MEMO, Actuación TEXT)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testBig(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testBig(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             int id = 6666554;
             st.execute("INSERT INTO t_alias (id, descr) VALUES( " + id + ",'t')");
@@ -33,8 +33,8 @@ class AliasTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testAccent(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testAccent(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_alias (id, Actuación) VALUES(1, 'X')");
             ResultSet rs = st.executeQuery("SELECT [Actuación] AS Actuació8_0_0_ FROM t_alias ");
@@ -46,8 +46,8 @@ class AliasTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testAsin(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testAsin(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("CREATE TABLE t_asin (asin TEXT, ff TEXT)");
             dumpQueryResult("SELECT asin, ff FROM t_asin");

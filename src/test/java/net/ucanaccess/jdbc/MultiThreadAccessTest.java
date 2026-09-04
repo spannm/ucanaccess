@@ -20,8 +20,8 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
     private String               dbPath;
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         dbPath = getFileAccDb().getAbsolutePath();
         executeStatements("CREATE TABLE t_mta (id COUNTER PRIMARY KEY, descr MEMO)");
     }
@@ -68,8 +68,8 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testMultiThread(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testMultiThread(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         List<Thread> threads = IntStream.range(0, 50).mapToObj(i -> new Thread(() -> assertDoesNotThrow(() -> {
             crud();

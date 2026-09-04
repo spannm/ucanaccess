@@ -10,8 +10,8 @@ import java.sql.SQLException;
 class ByteTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements(
             "CREATE TABLE t_byte (ID int NOT NULL PRIMARY KEY, company TEXT NOT NULL, Closed byte); ",
             "INSERT INTO t_byte (id,company) VALUES(1, 'pippo')",
@@ -20,8 +20,8 @@ class ByteTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCreate(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testCreate(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
         dumpQueryResult("SELECT * FROM t_byte");
         checkQuery("SELECT * FROM t_byte");
     }

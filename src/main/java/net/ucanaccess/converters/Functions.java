@@ -42,8 +42,8 @@ public final class Functions {
     private Functions() {
     }
 
-    static SimpleDateFormat createSimpleDateFormat(String _pt) {
-        SimpleDateFormat sdf = new SimpleDateFormat(_pt);
+    static SimpleDateFormat createSimpleDateFormat(String pt) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pt);
         ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new Date(Long.MIN_VALUE));
         return sdf;
     }
@@ -51,100 +51,100 @@ public final class Functions {
     /**
      * Returns an Integer representing the character code corresponding to the first letter in a string.
      *
-     * @param _s any valid string expression
+     * @param s any valid string expression
      * @return character code
      */
     @FunctionType(functionName = "Asc", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer asc(String _s) {
-        return _s == null || _s.isEmpty() ? null : (int) _s.charAt(0);
+    public static Integer asc(String s) {
+        return s == null || s.isEmpty() ? null : (int) s.charAt(0);
     }
 
     @FunctionType(functionName = "Equals", argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
-    public static Boolean equals(Object _obj1, Object _obj2) {
-        if (_obj1 == null || _obj2 == null || !_obj1.getClass().equals(_obj2.getClass())) {
+    public static Boolean equals(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {
             return false;
         }
-        if (_obj1.getClass().isArray()) {
-            return Arrays.equals((Object[]) _obj1, (Object[]) _obj2);
+        if (obj1.getClass().isArray()) {
+            return Arrays.equals((Object[]) obj1, (Object[]) obj2);
         }
-        return _obj1.equals(_obj2);
+        return obj1.equals(obj2);
     }
 
     @FunctionType(functionName = "EqualsIgnoreOrder", argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
-    public static Boolean equalsIgnoreOrder(Object _obj1, Object _obj2) {
-        if (_obj1 == null || _obj2 == null || !_obj1.getClass().equals(_obj2.getClass())) {
+    public static Boolean equalsIgnoreOrder(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {
             return false;
         }
-        if (_obj1.getClass().isArray()) {
-            List<Object> lo1 = Arrays.asList((Object[]) _obj1);
-            List<Object> lo2 = Arrays.asList((Object[]) _obj2);
+        if (obj1.getClass().isArray()) {
+            List<Object> lo1 = Arrays.asList((Object[]) obj1);
+            List<Object> lo2 = Arrays.asList((Object[]) obj2);
             return lo1.containsAll(lo2) && lo2.containsAll(lo1);
         }
-        return _obj1.equals(_obj2);
+        return obj1.equals(obj2);
     }
 
     @FunctionType(functionName = "Contains", argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
-    public static Boolean contains(Object _obj1, Object _obj2) {
-        if (_obj1 == null || _obj2 == null || !_obj1.getClass().isArray()) {
+    public static Boolean contains(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null || !obj1.getClass().isArray()) {
             return false;
         }
-        List<Object> arr1 = Arrays.asList((Object[]) _obj1);
-        List<Object> arr2 = _obj2.getClass().isArray() ? Arrays.asList((Object[]) _obj2) : Arrays.asList(_obj2);
+        List<Object> arr1 = Arrays.asList((Object[]) obj1);
+        List<Object> arr2 = obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(obj2);
         return arr1.containsAll(arr2);
     }
 
     /**
      * Returns a double specifying the arctangent of a number.
      *
-     * @param _number a double or any valid numeric expression.
+     * @param number a double or any valid numeric expression.
      * @return arctangent
      */
     @FunctionType(functionName = "Atn", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static double atn(double _number) {
-        return Math.atan(_number);
+    public static double atn(double number) {
+        return Math.atan(number);
     }
 
     /**
      * Returns a double specifying the square root of a number.
      *
-     * @param _number a double greater than or equal to zero
+     * @param number a double greater than or equal to zero
      * @return square root
      */
     @FunctionType(functionName = "Sqr", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static double sqr(double _number) {
-        return Math.sqrt(_number);
+    public static double sqr(double number) {
+        return Math.sqrt(number);
     }
 
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.YESNO)
-    public static boolean cbool(BigDecimal _value) {
-        return cboolImpl(_value);
+    public static boolean cbool(BigDecimal value) {
+        return cboolImpl(value);
     }
 
     /**
      * Converts a value to a boolean.
      *
-     * @param _value boolean input
+     * @param value boolean input
      * @return boolean
      */
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.YESNO}, returnType = AccessType.YESNO)
-    public static boolean cbool(Boolean _value) {
-        return cboolImpl(_value);
+    public static boolean cbool(Boolean value) {
+        return cboolImpl(value);
     }
 
     @FunctionType(functionName = "CBool", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
-    public static boolean cbool(String _value) {
-        return cboolImpl(_value);
+    public static boolean cbool(String value) {
+        return cboolImpl(value);
     }
 
-    private static boolean cboolImpl(Object _obj) {
-        if (_obj == null) {
+    private static boolean cboolImpl(Object obj) {
+        if (obj == null) {
             return false;
-        } else if (_obj instanceof Boolean) {
-            return (Boolean) _obj;
-        } else if (_obj instanceof String) {
-            return Boolean.parseBoolean((String) _obj);
+        } else if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        } else if (obj instanceof String) {
+            return Boolean.parseBoolean((String) obj);
         } else {
-            return _obj instanceof Number && ((Number) _obj).intValue() != 0;
+            return obj instanceof Number && ((Number) obj).intValue() != 0;
         }
     }
 
@@ -152,251 +152,251 @@ public final class Functions {
      * Converts an expression into a currency value.
      */
     @FunctionType(functionName = "CCur", argumentTypes = {AccessType.CURRENCY}, returnType = AccessType.CURRENCY)
-    public static BigDecimal ccur(BigDecimal _value) {
-        return _value.setScale(4, RoundingMode.HALF_UP);
+    public static BigDecimal ccur(BigDecimal value) {
+        return value.setScale(4, RoundingMode.HALF_UP);
     }
 
     /**
      * Converts an expression into a date value.
      */
     @FunctionType(functionName = "CDate", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
-    public static Timestamp cdate(String _dt) {
-        return dateValue(_dt, false);
+    public static Timestamp cdate(String dt) {
+        return dateValue(dt, false);
     }
 
     /**
      * Converts an expression to a double.
      */
     @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double cdbl(Double _number) {
-        return _number;
+    public static Double cdbl(Double number) {
+        return number;
     }
 
     @FunctionType(functionName = "CDec", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double cdec(Double _number) {
-        return _number;
+    public static Double cdec(Double number) {
+        return number;
     }
 
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
-    public static Short cint(Double _number) {
-        return new BigDecimal((long) Math.floor(_number + 0.499999999999999d)).shortValueExact();
+    public static Short cint(Double number) {
+        return new BigDecimal((long) Math.floor(number + 0.499999999999999d)).shortValueExact();
     }
 
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
-    public static Short cint(boolean _boolean) {
-        return (short) (_boolean ? -1 : 0);
+    public static Short cint(boolean bool) {
+        return (short) (bool ? -1 : 0);
     }
 
     /**
      * Converts an expression to a long integer.
      */
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
-    public static Integer clng(Double _value) {
-        return (int) Math.floor(_value + 0.5d);
+    public static Integer clng(Double value) {
+        return (int) Math.floor(value + 0.5d);
     }
 
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer clng(String _value) throws UcanaccessSQLException {
-        return Try.catching(() -> clng(FormatCache.getNoArgs().parse(_value).doubleValue()))
+    public static Integer clng(String value) throws UcanaccessSQLException {
+        return Try.catching(() -> clng(FormatCache.getNoArgs().parse(value).doubleValue()))
             .orThrow(UcanaccessSQLException::new);
     }
 
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer clng(Integer _value) {
-        return _value;
+    public static Integer clng(Integer value) {
+        return value;
     }
 
     @FunctionType(functionName = "CLong", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
-    public static Integer clong(Double _value) {
-        return clng(_value);
+    public static Integer clong(Double value) {
+        return clng(value);
     }
 
     @FunctionType(functionName = "CLong", argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer clong(Integer _value) {
-        return _value;
+    public static Integer clong(Integer value) {
+        return value;
     }
 
     @FunctionType(functionName = "CLong", argumentTypes = {AccessType.YESNO}, returnType = AccessType.LONG)
-    public static Integer clong(boolean _value) {
-        return _value ? -1 : 0;
+    public static Integer clong(boolean value) {
+        return value ? -1 : 0;
     }
 
     @FunctionType(functionName = "CSign", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.SINGLE)
-    public static double csign(double _value) {
+    public static double csign(double value) {
         MathContext mc = new MathContext(7);
-        return new BigDecimal(Double.toString(_value), mc).doubleValue();
+        return new BigDecimal(Double.toString(value), mc).doubleValue();
     }
 
     /**
      * Converts a value to a string.
      */
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.YESNO}, returnType = AccessType.MEMO)
-    public static String cstr(Boolean _value) throws UcanaccessSQLException {
-        return cstrImpl(_value);
+    public static String cstr(Boolean value) throws UcanaccessSQLException {
+        return cstrImpl(value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.TEXT}, returnType = AccessType.MEMO)
-    public static String cstr(String _value) {
-        return _value;
+    public static String cstr(String value) {
+        return value;
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
-    public static String cstr(double _value) throws UcanaccessSQLException {
-        return cstrImpl(_value);
+    public static String cstr(double value) throws UcanaccessSQLException {
+        return cstrImpl(value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String cstr(int _value) throws UcanaccessSQLException {
-        return cstrImpl(_value);
+    public static String cstr(int value) throws UcanaccessSQLException {
+        return cstrImpl(value);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
-    public static String cstr(Timestamp _value) throws UcanaccessSQLException {
-        return _value == null ? null : format(_value, GENERAL_DATE);
+    public static String cstr(Timestamp value) throws UcanaccessSQLException {
+        return value == null ? null : format(value, GENERAL_DATE);
     }
 
-    private static String cstrImpl(Object _value) throws UcanaccessSQLException {
-        return _value == null ? null : format(_value.toString(), "", true);
+    private static String cstrImpl(Object value) throws UcanaccessSQLException {
+        return value == null ? null : format(value.toString(), "", true);
     }
 
     @FunctionType(functionName = "CVar", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
-    public static String cvar(Double _value) throws UcanaccessSQLException {
-        return format(_value, "general number");
+    public static String cvar(Double value) throws UcanaccessSQLException {
+        return format(value, "general number");
     }
 
     /**
      * Returns a date containing a date to which a specified time interval has been added.
      *
-     * @param _intv interval of time
-     * @param _vl number of intervals to add (to get dates in the future) or dedcut (to get dates in the past)
-     * @param _dt date to which the interval is added
+     * @param intv interval of time
+     * @param vl number of intervals to add (to get dates in the future) or dedcut (to get dates in the past)
+     * @param dt date to which the interval is added
      * @return calculated date
      * @throws UcanaccessSQLException on invalid date interval input
      */
     @FunctionType(namingConflict = true, functionName = "DateAdd",
         argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.DATETIME}, returnType = AccessType.DATETIME)
-    public static Date dateAdd(String _intv, int _vl, Date _dt) throws UcanaccessSQLException {
-        if (_dt == null || _intv == null) {
+    public static Date dateAdd(String intv, int vl, Date dt) throws UcanaccessSQLException {
+        if (dt == null || intv == null) {
             return null;
         }
         Calendar cl = Calendar.getInstance();
-        cl.setTime(_dt);
-        if ("yyyy".equalsIgnoreCase(_intv)) {
-            cl.add(Calendar.YEAR, _vl);
-        } else if ("q".equalsIgnoreCase(_intv)) { // quarter
-            cl.add(Calendar.MONTH, _vl * 3);
-        } else if ("m".equalsIgnoreCase(_intv)) { // month
-            cl.add(Calendar.MONTH, _vl);
-        } else if ("y".equalsIgnoreCase(_intv)) { // day of year
-            cl.add(Calendar.DAY_OF_YEAR, _vl);
-        } else if ("d".equalsIgnoreCase(_intv)) { // day
-            cl.add(Calendar.DAY_OF_YEAR, _vl);
-        } else if ("w".equalsIgnoreCase(_intv)) { // weekday
-            cl.add(Calendar.DAY_OF_WEEK, _vl);
-        } else if ("ww".equalsIgnoreCase(_intv)) { // week
-            cl.add(Calendar.WEEK_OF_YEAR, _vl);
-        } else if ("h".equalsIgnoreCase(_intv)) { // hour
-            cl.add(Calendar.HOUR, _vl);
-        } else if ("n".equalsIgnoreCase(_intv)) { // minute
-            cl.add(Calendar.MINUTE, _vl);
-        } else if ("s".equalsIgnoreCase(_intv)) { // second
-            cl.add(Calendar.SECOND, _vl);
+        cl.setTime(dt);
+        if ("yyyy".equalsIgnoreCase(intv)) {
+            cl.add(Calendar.YEAR, vl);
+        } else if ("q".equalsIgnoreCase(intv)) { // quarter
+            cl.add(Calendar.MONTH, vl * 3);
+        } else if ("m".equalsIgnoreCase(intv)) { // month
+            cl.add(Calendar.MONTH, vl);
+        } else if ("y".equalsIgnoreCase(intv)) { // day of year
+            cl.add(Calendar.DAY_OF_YEAR, vl);
+        } else if ("d".equalsIgnoreCase(intv)) { // day
+            cl.add(Calendar.DAY_OF_YEAR, vl);
+        } else if ("w".equalsIgnoreCase(intv)) { // weekday
+            cl.add(Calendar.DAY_OF_WEEK, vl);
+        } else if ("ww".equalsIgnoreCase(intv)) { // week
+            cl.add(Calendar.WEEK_OF_YEAR, vl);
+        } else if ("h".equalsIgnoreCase(intv)) { // hour
+            cl.add(Calendar.HOUR, vl);
+        } else if ("n".equalsIgnoreCase(intv)) { // minute
+            cl.add(Calendar.MINUTE, vl);
+        } else if ("s".equalsIgnoreCase(intv)) { // second
+            cl.add(Calendar.SECOND, vl);
         } else {
-            throw new InvalidIntervalValueException(_intv);
+            throw new InvalidIntervalValueException(intv);
         }
-        return _dt instanceof Timestamp
+        return dt instanceof Timestamp
             ? new Timestamp(cl.getTimeInMillis())
             : new java.sql.Date(cl.getTimeInMillis());
     }
 
     @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.DATETIME}, returnType = AccessType.DATETIME)
-    public static Timestamp dateAdd(String _intv, int _vl, Timestamp _dt) throws UcanaccessSQLException {
-        return (Timestamp) dateAdd(_intv, _vl, (Date) _dt);
+    public static Timestamp dateAdd(String intv, int vl, Timestamp dt) throws UcanaccessSQLException {
+        return (Timestamp) dateAdd(intv, vl, (Date) dt);
     }
 
     @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.MEMO}, returnType = AccessType.DATETIME)
-    public static Timestamp dateAdd(String _intv, int _vl, String _dt) throws UcanaccessSQLException {
-        return (Timestamp) dateAdd(_intv, _vl, (Date) dateValue(_dt, false));
+    public static Timestamp dateAdd(String intv, int vl, String dt) throws UcanaccessSQLException {
+        return (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt, false));
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer dateDiff(String _intv, String _dt1, String _dt2) throws UcanaccessSQLException {
-        return dateDiff(_intv, dateValue(_dt1, false), dateValue(_dt2, false));
+    public static Integer dateDiff(String intv, String dt1, String dt2) throws UcanaccessSQLException {
+        return dateDiff(intv, dateValue(dt1, false), dateValue(dt2, false));
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.DATETIME}, returnType = AccessType.LONG)
-    public static Integer dateDiff(String _intv, String _dt1, Timestamp _dt2) throws UcanaccessSQLException {
-        return dateDiff(_intv, dateValue(_dt1, false), _dt2);
+    public static Integer dateDiff(String intv, String dt1, Timestamp dt2) throws UcanaccessSQLException {
+        return dateDiff(intv, dateValue(dt1, false), dt2);
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer dateDiff(String _intv, Timestamp _dt1, String _dt2) throws UcanaccessSQLException {
-        return dateDiff(_intv, _dt1, dateValue(_dt2, false));
+    public static Integer dateDiff(String intv, Timestamp dt1, String dt2) throws UcanaccessSQLException {
+        return dateDiff(intv, dt1, dateValue(dt2, false));
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.LONG)
-    public static Integer dateDiff(String _intv, Timestamp _dt1, Timestamp _dt2) throws UcanaccessSQLException {
-        if (_dt1 == null || _intv == null || _dt2 == null) {
+    public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2) throws UcanaccessSQLException {
+        if (dt1 == null || intv == null || dt2 == null) {
             return null;
         }
         Calendar clMin = Calendar.getInstance();
         Calendar clMax = Calendar.getInstance();
-        int sign = _dt1.after(_dt2) ? -1 : 1;
+        int sign = dt1.after(dt2) ? -1 : 1;
         if (sign == 1) {
-            clMax.setTime(_dt2);
-            clMin.setTime(_dt1);
+            clMax.setTime(dt2);
+            clMin.setTime(dt1);
         } else {
-            clMax.setTime(_dt1);
-            clMin.setTime(_dt2);
+            clMax.setTime(dt1);
+            clMin.setTime(dt2);
         }
         clMin.set(Calendar.MILLISECOND, 0);
         clMax.set(Calendar.MILLISECOND, 0);
         Integer result;
-        if ("yyyy".equalsIgnoreCase(_intv)) {
+        if ("yyyy".equalsIgnoreCase(intv)) {
             result = clMax.get(Calendar.YEAR) - clMin.get(Calendar.YEAR);
-        } else if ("q".equalsIgnoreCase(_intv)) {
-            result = dateDiff("yyyy", _dt1, _dt2) * 4 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH)) / 3;
-        } else if ("y".equalsIgnoreCase(_intv) || "d".equalsIgnoreCase(_intv)) {
+        } else if ("q".equalsIgnoreCase(intv)) {
+            result = dateDiff("yyyy", dt1, dt2) * 4 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH)) / 3;
+        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
             result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24));
-        } else if ("m".equalsIgnoreCase(_intv)) {
-            result = dateDiff("yyyy", _dt1, _dt2) * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
-        } else if ("w".equalsIgnoreCase(_intv) || "ww".equalsIgnoreCase(_intv)) {
+        } else if ("m".equalsIgnoreCase(intv)) {
+            result = dateDiff("yyyy", dt1, dt2) * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
+        } else if ("w".equalsIgnoreCase(intv) || "ww".equalsIgnoreCase(intv)) {
             result = (int) Math.floor((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7));
-        } else if ("h".equalsIgnoreCase(_intv)) {
+        } else if ("h".equalsIgnoreCase(intv)) {
             result = (int) Math.round((clMax.getTime().getTime() - clMin.getTime().getTime()) / (1000d * 60 * 60));
-        } else if ("n".equalsIgnoreCase(_intv)) {
+        } else if ("n".equalsIgnoreCase(intv)) {
             result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60));
-        } else if ("s".equalsIgnoreCase(_intv)) {
+        } else if ("s".equalsIgnoreCase(intv)) {
             result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / 1000);
         } else {
-            throw new InvalidIntervalValueException(_intv);
+            throw new InvalidIntervalValueException(intv);
         }
         return result * sign;
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer datePart(String _intv, String _dt, Integer _firstDayOfWeek) throws UcanaccessSQLException {
-        return datePart(_intv, dateValue(_dt, false), _firstDayOfWeek);
+    public static Integer datePart(String intv, String dt, Integer firstDayOfWeek) throws UcanaccessSQLException {
+        return datePart(intv, dateValue(dt, false), firstDayOfWeek);
     }
 
     /**
      * Returns an integer containing the specified part of a given date.
      *
-     * @param _interval interval of time you want to return
-     * @param _date value that you want to evaluate
-     * @param _firstDayOfWeek constant that specifies the first day of the week
+     * @param interval interval of time you want to return
+     * @param date value that you want to evaluate
+     * @param firstDayOfWeek constant that specifies the first day of the week
      * @return date part
      * @throws UcanaccessSQLException on invalid date interval input
      */
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer datePart(String _interval, Timestamp _date, Integer _firstDayOfWeek) throws UcanaccessSQLException {
-        Integer ret = "ww".equalsIgnoreCase(_interval)
-            ? datePart(_interval, _date, _firstDayOfWeek, 1)
-            : datePart(_interval, _date);
-        if ("w".equalsIgnoreCase(_interval) && _firstDayOfWeek > 1) {
+    public static Integer datePart(String interval, Timestamp date, Integer firstDayOfWeek) throws UcanaccessSQLException {
+        Integer ret = "ww".equalsIgnoreCase(interval)
+            ? datePart(interval, date, firstDayOfWeek, 1)
+            : datePart(interval, date);
+        if ("w".equalsIgnoreCase(interval) && firstDayOfWeek > 1) {
             Calendar cl = Calendar.getInstance();
-            cl.setTime(_date);
-            ret = cl.get(Calendar.DAY_OF_WEEK) - _firstDayOfWeek + 1;
+            cl.setTime(date);
+            ret = cl.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek + 1;
             if (ret <= 0) {
                 ret = 7 + ret;
             }
@@ -405,35 +405,35 @@ public final class Functions {
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer datePart(String _intv, String _dt, Integer _firstDayOfWeek, Integer _firstWeekOfYear)
+    public static Integer datePart(String intv, String dt, Integer firstDayOfWeek, Integer firstWeekOfYear)
         throws UcanaccessSQLException {
-        return datePart(_intv, dateValue(_dt, false), _firstDayOfWeek, _firstWeekOfYear);
+        return datePart(intv, dateValue(dt, false), firstDayOfWeek, firstWeekOfYear);
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer datePart(String _intv, Timestamp _dt, Integer _firstDayOfWeek, Integer _firstWeekOfYear) throws UcanaccessSQLException {
-        Integer ret = datePart(_intv, _dt);
-        if (ret != null && "ww".equalsIgnoreCase(_intv) && (_firstWeekOfYear > 1 || _firstDayOfWeek > 1)) {
+    public static Integer datePart(String intv, Timestamp dt, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+        Integer ret = datePart(intv, dt);
+        if (ret != null && "ww".equalsIgnoreCase(intv) && (firstWeekOfYear > 1 || firstDayOfWeek > 1)) {
             Calendar cl = Calendar.getInstance();
-            cl.setTime(_dt);
+            cl.setTime(dt);
             cl.set(Calendar.MONTH, Calendar.JANUARY);
             cl.set(Calendar.DAY_OF_MONTH, 1);
             Calendar cl1 = Calendar.getInstance();
-            cl1.setTime(_dt);
-            if (_firstDayOfWeek == 0) {
-                _firstDayOfWeek = 1;
+            cl1.setTime(dt);
+            if (firstDayOfWeek == 0) {
+                firstDayOfWeek = 1;
             }
-            int dow = cl.get(Calendar.DAY_OF_WEEK) - _firstDayOfWeek + 1;
+            int dow = cl.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek + 1;
             if (dow <= 0) {
                 dow = 7 + dow;
-                if (cl1.get(Calendar.DAY_OF_WEEK) - _firstDayOfWeek >= 0) {
+                if (cl1.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek >= 0) {
                     ret++;
                 }
             }
-            if (dow > 4 && _firstWeekOfYear == 2) {
+            if (dow > 4 && firstWeekOfYear == 2) {
                 ret--;
             }
-            if (dow > 1 && _firstWeekOfYear == 3) {
+            if (dow > 1 && firstWeekOfYear == 3) {
                 ret--;
             }
         }
@@ -441,57 +441,57 @@ public final class Functions {
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer datePart(String _intv, String _dt) throws UcanaccessSQLException {
-        return datePart(_intv, dateValue(_dt, false));
+    public static Integer datePart(String intv, String dt) throws UcanaccessSQLException {
+        return datePart(intv, dateValue(dt, false));
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.DATETIME}, returnType = AccessType.LONG)
-    public static Integer datePart(String _intv, Timestamp _dt) throws UcanaccessSQLException {
-        if (_intv == null || _dt == null) {
+    public static Integer datePart(String intv, Timestamp dt) throws UcanaccessSQLException {
+        if (intv == null || dt == null) {
             return null;
         }
         Calendar cl = Calendar.getInstance(Locale.US);
-        cl.setTime(_dt);
-        if ("yyyy".equalsIgnoreCase(_intv)) {
+        cl.setTime(dt);
+        if ("yyyy".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.YEAR);
-        } else if ("q".equalsIgnoreCase(_intv)) {
+        } else if ("q".equalsIgnoreCase(intv)) {
             return (int) Math.ceil((cl.get(Calendar.MONTH) + 1) / 3d);
-        } else if ("d".equalsIgnoreCase(_intv)) {
+        } else if ("d".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.DAY_OF_MONTH);
-        } else if ("y".equalsIgnoreCase(_intv)) {
+        } else if ("y".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.DAY_OF_YEAR);
-        } else if ("m".equalsIgnoreCase(_intv)) {
+        } else if ("m".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.MONTH) + 1;
-        } else if ("ww".equalsIgnoreCase(_intv)) {
+        } else if ("ww".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.WEEK_OF_YEAR);
-        } else if ("w".equalsIgnoreCase(_intv)) {
+        } else if ("w".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.DAY_OF_WEEK);
-        } else if ("h".equalsIgnoreCase(_intv)) {
+        } else if ("h".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.HOUR_OF_DAY);
-        } else if ("n".equalsIgnoreCase(_intv)) {
+        } else if ("n".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.MINUTE);
-        } else if ("s".equalsIgnoreCase(_intv)) {
+        } else if ("s".equalsIgnoreCase(intv)) {
             return cl.get(Calendar.SECOND);
         } else {
-            throw new InvalidIntervalValueException(_intv);
+            throw new InvalidIntervalValueException(intv);
         }
     }
 
     /**
      * Returns a date for a specified year, month, and day.
      *
-     * @param _year number between 100 and 9999, inclusive, or a numeric expression
-     * @param _month any numeric expression
-     * @param _day any numeric expression
+     * @param year number between 100 and 9999, inclusive, or a numeric expression
+     * @param month any numeric expression
+     * @param day any numeric expression
      * @return date
      */
     @FunctionType(functionName = "DateSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
-    public static Timestamp dateSerial(int _year, int _month, int _day) {
+    public static Timestamp dateSerial(int year, int month, int day) {
         Calendar cl = Calendar.getInstance();
         cl.setLenient(true);
-        cl.set(Calendar.YEAR, _year);
-        cl.set(Calendar.MONTH, _month - 1);
-        cl.set(Calendar.DAY_OF_MONTH, _day);
+        cl.set(Calendar.YEAR, year);
+        cl.set(Calendar.MONTH, month - 1);
+        cl.set(Calendar.DAY_OF_MONTH, day);
         cl.set(Calendar.HOUR_OF_DAY, 0);
         cl.set(Calendar.MINUTE, 0);
         cl.set(Calendar.SECOND, 0);
@@ -500,23 +500,23 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "DateValue", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
-    public static Timestamp dateValue(String _dt) {
-        return dateValue(_dt, true);
+    public static Timestamp dateValue(String dt) {
+        return dateValue(dt, true);
     }
 
     @FunctionType(functionName = "Timestamp0", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
-    public static Timestamp timestamp0(String _dt) {
+    public static Timestamp timestamp0(String dt) {
         GregorianCalendar gc = new GregorianCalendar();
         gc.setGregorianChange(new Date(Long.MIN_VALUE));
         Pattern patDate = Pattern.compile(SQLConverter.DATE_FORMAT + "\\s");
         Pattern patTime = Pattern.compile(SQLConverter.HHMMSS_FORMAT);
-        Matcher mtc = patDate.matcher(_dt);
+        Matcher mtc = patDate.matcher(dt);
         if (mtc.find()) {
             gc.set(Integer.parseInt(mtc.group(1)), Integer.parseInt(mtc.group(2)) - 1, Integer.parseInt(mtc.group(3)));
         } else {
             UcanaccessRuntimeException.throwNow("internal error in parsing timestamp");
         }
-        mtc = patTime.matcher(_dt);
+        mtc = patTime.matcher(dt);
         if (mtc.find()) {
             gc.set(Calendar.HOUR_OF_DAY, Integer.parseInt(mtc.group(1)));
             gc.set(Calendar.MINUTE, Integer.parseInt(mtc.group(2)));
@@ -528,11 +528,11 @@ public final class Functions {
         return new Timestamp(gc.getTime().getTime());
     }
 
-    private static Timestamp dateValue(String _dt, boolean _onlyDate) {
+    private static Timestamp dateValue(String dt, boolean onlyDate) {
         RegionalSettings reg = getRegionalSettings();
         if (!"true".equalsIgnoreCase(reg.getRS())
             && (!"PM".equalsIgnoreCase(reg.getPM()) || !"AM".equalsIgnoreCase(reg.getAM()))) {
-            _dt = _dt.replaceAll("(?i)" + Pattern.quote(reg.getPM()), "PM")
+            dt = dt.replaceAll("(?i)" + Pattern.quote(reg.getPM()), "PM")
                 .replaceAll("(?i)" + Pattern.quote(reg.getAM()), "AM");
         }
 
@@ -541,8 +541,8 @@ public final class Functions {
             boolean yearOverride = entry.getValue();
 
             try {
-                Timestamp t = new Timestamp(sdf.parse(_dt).getTime());
-                if (_onlyDate) {
+                Timestamp t = new Timestamp(sdf.parse(dt).getTime());
+                if (onlyDate) {
                     t = dateValue(t);
                 }
                 if (yearOverride) {
@@ -553,8 +553,8 @@ public final class Functions {
                     t = new Timestamp(cl.getTime().getTime());
                 }
                 return t;
-            } catch (ParseException _ignored) {
-                LOGGER.log(Level.DEBUG, "Ignoring {0}", _ignored.toString());
+            } catch (ParseException ignored) {
+                LOGGER.log(Level.DEBUG, "Ignoring {0}", ignored.toString());
             }
         }
         return null;
@@ -564,9 +564,9 @@ public final class Functions {
      * Returns a date based on a string. If the given string does not include a year component, this function will use the current year.
      */
     @FunctionType(functionName = "DateValue", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
-    public static Timestamp dateValue(Timestamp _dt) {
+    public static Timestamp dateValue(Timestamp dt) {
         Calendar cl = Calendar.getInstance();
-        cl.setTime(_dt);
+        cl.setTime(dt);
         cl.set(Calendar.HOUR_OF_DAY, 0);
         cl.set(Calendar.MINUTE, 0);
         cl.set(Calendar.SECOND, 0);
@@ -575,57 +575,57 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DOUBLE, AccessType.TEXT}, returnType = AccessType.TEXT)
-    public static String format(Double _d, String _par) throws UcanaccessSQLException {
-        if (_d == null) {
+    public static String format(Double d, String par) throws UcanaccessSQLException {
+        if (d == null) {
             return "";
-        } else if ("percent".equalsIgnoreCase(_par)) {
-            return FormatCache.getZpzz().format(_d * 100) + "%";
-        } else if ("fixed".equalsIgnoreCase(_par)) {
-            return FormatCache.getZpzz().format(_d);
-        } else if ("standard".equalsIgnoreCase(_par)) {
-            return FormatCache.getSharp().format(_d);
-        } else if ("general number".equalsIgnoreCase(_par)) {
-            return FormatCache.getNoGrouping().format(_d);
-        } else if ("currency".equalsIgnoreCase(_par)) {
-            return FormatCache.getCurrencyDefault().format(_d);
-        } else if ("yes/no".equalsIgnoreCase(_par)) {
-            return _d == 0 ? "No" : "Yes";
-        } else if ("true/false".equalsIgnoreCase(_par)) {
-            return _d == 0 ? "False" : "True";
-        } else if ("On/Off".equalsIgnoreCase(_par)) {
-            return _d == 0 ? "Off" : "On";
-        } else if ("Scientific".equalsIgnoreCase(_par)) {
-            return String.format("%6.2E", _d);
+        } else if ("percent".equalsIgnoreCase(par)) {
+            return FormatCache.getZpzz().format(d * 100) + "%";
+        } else if ("fixed".equalsIgnoreCase(par)) {
+            return FormatCache.getZpzz().format(d);
+        } else if ("standard".equalsIgnoreCase(par)) {
+            return FormatCache.getSharp().format(d);
+        } else if ("general number".equalsIgnoreCase(par)) {
+            return FormatCache.getNoGrouping().format(d);
+        } else if ("currency".equalsIgnoreCase(par)) {
+            return FormatCache.getCurrencyDefault().format(d);
+        } else if ("yes/no".equalsIgnoreCase(par)) {
+            return d == 0 ? "No" : "Yes";
+        } else if ("true/false".equalsIgnoreCase(par)) {
+            return d == 0 ? "False" : "True";
+        } else if ("On/Off".equalsIgnoreCase(par)) {
+            return d == 0 ? "Off" : "On";
+        } else if ("Scientific".equalsIgnoreCase(par)) {
+            return String.format("%6.2E", d);
         }
-        return Try.catching(() -> FormatCache.getDecimalFormat(_par).format(_d))
+        return Try.catching(() -> FormatCache.getDecimalFormat(par).format(d))
             .orThrow(UcanaccessSQLException::new);
     }
 
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.TEXT, AccessType.TEXT}, returnType = AccessType.TEXT)
-    public static String format(String _s, String _par) throws UcanaccessSQLException {
-        if (_s == null) {
+    public static String format(String s, String par) throws UcanaccessSQLException {
+        if (s == null) {
             return "";
         }
-        return format(_s, _par, false);
+        return format(s, par, false);
     }
 
-    public static String format(String _s, String _par, boolean _incl) throws UcanaccessSQLException {
-        if (isNumeric(_s)) {
-            if (_incl) {
-                return format(Double.parseDouble(_s), _par);
+    public static String format(String s, String par, boolean incl) throws UcanaccessSQLException {
+        if (isNumeric(s)) {
+            if (incl) {
+                return format(Double.parseDouble(s), par);
             }
-            return Try.catching(() -> format(FormatCache.getNoArgs().parse(_s).doubleValue(), _par))
+            return Try.catching(() -> format(FormatCache.getNoArgs().parse(s).doubleValue(), par))
                 .orThrow(UcanaccessSQLException::new);
-        } else if (isDate(_s)) {
-            return format(dateValue(_s, false), _par);
+        } else if (isDate(s)) {
+            return format(dateValue(s, false), par);
         }
-        return _s;
+        return s;
     }
 
-    private static String formatDate(Timestamp _t, String _pattern) {
+    private static String formatDate(Timestamp t, String pattern) {
         RegionalSettings reg = getRegionalSettings();
-        SimpleDateFormat sdf = createSimpleDateFormat(_pattern);
-        String ret = sdf.format(_t);
+        SimpleDateFormat sdf = createSimpleDateFormat(pattern);
+        String ret = sdf.format(t);
         if (!reg.getRS().equalsIgnoreCase("true")) {
             if (!reg.getAM().equals("AM")) {
                 ret = ret.replace("AM", reg.getAM());
@@ -642,74 +642,74 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME, AccessType.TEXT}, returnType = AccessType.TEXT)
-    public static String format(Timestamp _t, String _par) throws UcanaccessSQLException {
-        if (_t == null) {
+    public static String format(Timestamp t, String par) throws UcanaccessSQLException {
+        if (t == null) {
             return "";
         }
         RegionalSettings reg = getRegionalSettings();
 
-        if ("long date".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getLongDatePattern());
-        } else if ("medium date".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getMediumDatePattern());
-        } else if ("short date".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getShortDatePattern());
-        } else if (GENERAL_DATE.equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getGeneralPattern());
-        } else if ("long time".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getLongTimePattern());
-        } else if ("medium time".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getMediumTimePattern());
-        } else if ("short time".equalsIgnoreCase(_par)) {
-            return formatDate(_t, reg.getShortTimePattern());
-        } else if ("q".equalsIgnoreCase(_par)) {
-            return String.valueOf(datePart(_par, _t));
+        if ("long date".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getLongDatePattern());
+        } else if ("medium date".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getMediumDatePattern());
+        } else if ("short date".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getShortDatePattern());
+        } else if (GENERAL_DATE.equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getGeneralPattern());
+        } else if ("long time".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getLongTimePattern());
+        } else if ("medium time".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getMediumTimePattern());
+        } else if ("short time".equalsIgnoreCase(par)) {
+            return formatDate(t, reg.getShortTimePattern());
+        } else if ("q".equalsIgnoreCase(par)) {
+            return String.valueOf(datePart(par, t));
         }
-        return createSimpleDateFormat(_par
+        return createSimpleDateFormat(par
             .replace('m', 'M')
             .replace('n', 'm')
             .replace("(?i)AM/PM|A/P|AMPM", "a")
-            .replace("dddd", "EEEE")).format(_t);
+            .replace("dddd", "EEEE")).format(t);
     }
 
     /**
      * Returns one of two parts, depending on the evaluation of an expression.
      */
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String iif(Boolean _b, String _o1, String _o2) {
-        return iifImpl(_b, _o1, _o2);
+    public static String iif(Boolean b, String o1, String o2) {
+        return iifImpl(b, o1, o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer iif(Boolean _b, Integer _o1, Integer _o2) {
-        return iifImpl(_b, _o1, _o2);
+    public static Integer iif(Boolean b, Integer o1, Integer o2) {
+        return iifImpl(b, o1, o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double iif(Boolean _b, Double _o1, Double _o2) {
-        return iifImpl(_b, _o1, _o2);
+    public static Double iif(Boolean b, Double o1, Double o2) {
+        return iifImpl(b, o1, o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.YESNO, AccessType.YESNO}, returnType = AccessType.YESNO)
-    public static Boolean iif(Boolean _b, Boolean _o1, Boolean _o2) {
-        return iifImpl(_b, _o1, _o2);
+    public static Boolean iif(Boolean b, Boolean o1, Boolean o2) {
+        return iifImpl(b, o1, o2);
     }
 
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
-    public static Timestamp iif(Boolean b, Timestamp _o1, Timestamp _o2) {
-        return iifImpl(b, _o1, _o2);
+    public static Timestamp iif(Boolean b, Timestamp o1, Timestamp o2) {
+        return iifImpl(b, o1, o2);
     }
 
-    private static <T> T iifImpl(Boolean _b, T _o1, T _o2) {
-        return _b != null && _b ? _o1 : _o2;
+    private static <T> T iifImpl(Boolean b, T o1, T o2) {
+        return b != null && b ? o1 : o2;
     }
 
     /**
      * Returns the position of the first occurrence of a string in another string.
      */
     @FunctionType(namingConflict = true, functionName = "InStr", argumentTypes = {AccessType.LONG, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer instr(Integer _start, String _text, String _search) {
-        return instr(_start, _text, _search, -1);
+    public static Integer instr(Integer start, String text, String search) {
+        return instr(start, text, search, -1);
     }
 
     @FunctionType(namingConflict = true, functionName = "InStr", argumentTypes = {AccessType.LONG, AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
@@ -768,12 +768,12 @@ public final class Functions {
      * Returns {@code true} if the expression is a valid date, otherwise {@code false}.
      */
     @FunctionType(functionName = "IsDate", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
-    public static boolean isDate(String _value) {
-        return dateValue(_value) != null;
+    public static boolean isDate(String value) {
+        return dateValue(value) != null;
     }
 
     @FunctionType(functionName = "IsDate", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.YESNO)
-    public static boolean isDate(Timestamp _value) {
+    public static boolean isDate(Timestamp value) {
         return true;
     }
 
@@ -781,18 +781,18 @@ public final class Functions {
      * Returns {@code true} if the expression is a {@code null} value, otherwise {@code false}.
      */
     @FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
-    public static boolean isNull(String _value) {
-        return _value == null;
+    public static boolean isNull(String value) {
+        return value == null;
     }
 
     @FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.YESNO)
-    public static boolean isNull(Timestamp _value) {
-        return _value == null;
+    public static boolean isNull(Timestamp value) {
+        return value == null;
     }
 
     @FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.YESNO)
-    public static boolean isNull(Double _value) {
-        return _value == null;
+    public static boolean isNull(Double value) {
+        return value == null;
     }
 
     /**
@@ -804,30 +804,30 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "IsNumeric", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
-    public static boolean isNumeric(String _s) {
+    public static boolean isNumeric(String str) {
         return Try.catching(() -> {
             Currency cr = Currency.getInstance(Locale.getDefault());
-            if (_s.startsWith(cr.getSymbol())) {
-                return isNumeric(_s.substring(cr.getSymbol().length()));
+            if (str.startsWith(cr.getSymbol())) {
+                return isNumeric(str.substring(cr.getSymbol().length()));
             }
-            if (_s.startsWith("+") || _s.startsWith("-")) {
-                return isNumeric(_s.substring(1));
+            if (str.startsWith("+") || str.startsWith("-")) {
+                return isNumeric(str.substring(1));
             }
             DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();
             String sep = dfs.getDecimalSeparator() + "";
             String gs = dfs.getGroupingSeparator() + "";
-            if (_s.startsWith(gs)) {
+            if (str.startsWith(gs)) {
                 return false;
             }
-            if (_s.startsWith(sep)) {
-                return isNumeric(_s.substring(1));
+            if (str.startsWith(sep)) {
+                return isNumeric(str.substring(1));
             }
 
             String s;
             if (".".equals(sep)) {
-                s = _s.replaceAll(gs, "");
+                s = str.replaceAll(gs, "");
             } else {
-                s = _s.replace(".", "")
+                s = str.replace(".", "")
                     .replace(sep, ".");
             }
             new BigDecimal(s);
@@ -839,13 +839,13 @@ public final class Functions {
      * Extracts a substring from a string, starting from the left-most character.
      */
     @FunctionType(functionName = "Left", namingConflict = true, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String left(String _input, int _i) {
-        if (_input == null || _i < 0) {
+    public static String left(String input, int i) {
+        if (input == null || i < 0) {
             return null;
-        } else if (_i >= _input.length()) {
-            return _input;
+        } else if (i >= input.length()) {
+            return input;
         } else {
-            return _input.substring(0, _i);
+            return input.substring(0, i);
         }
     }
 
@@ -858,46 +858,46 @@ public final class Functions {
      * Returns the length of the specified string.
      */
     @FunctionType(functionName = "Len", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer len(String _value) {
-        return _value == null ? null : _value.length();
+    public static Integer len(String value) {
+        return value == null ? null : value.length();
     }
 
     /**
      * Extracts a substring from a string (starting at any position).
      */
     @FunctionType(functionName = "Mid", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String mid(String _value, int start) {
-        return mid(_value, start, _value.length());
+    public static String mid(String value, int start) {
+        return mid(value, start, value.length());
     }
 
     @FunctionType(functionName = "Mid", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String mid(String _value, int start, int length) {
-        if (_value == null) {
+    public static String mid(String value, int start, int length) {
+        if (value == null) {
             return null;
         }
         int len = start - 1 + length;
         if (start < 1) {
             UcanaccessRuntimeException.throwNow("Invalid function call");
         }
-        if (len > _value.length()) {
-            len = _value.length();
+        if (len > value.length()) {
+            len = value.length();
         }
-        return _value.substring(start - 1, len);
+        return value.substring(start - 1, len);
     }
 
     /**
      * Returns a string representing the month given a number from 1 to 12.
      */
     @FunctionType(namingConflict = true, functionName = "MonthName", argumentTypes = {AccessType.LONG}, returnType = AccessType.TEXT)
-    public static String monthName(int _number) throws UcanaccessSQLException {
-        return monthName(_number, false);
+    public static String monthName(int number) throws UcanaccessSQLException {
+        return monthName(number, false);
     }
 
     @FunctionType(namingConflict = true, functionName = "MonthName", argumentTypes = {AccessType.LONG, AccessType.YESNO}, returnType = AccessType.TEXT)
-    public static String monthName(int _number, boolean _abbreviate) throws UcanaccessSQLException {
-        if (_number >= 1 && _number <= 12) {
+    public static String monthName(int number, boolean abbreviate) throws UcanaccessSQLException {
+        if (number >= 1 && number <= 12) {
             DateFormatSymbols dfs = new DateFormatSymbols();
-            return _abbreviate ? dfs.getShortMonths()[_number - 1] : dfs.getMonths()[_number - 1];
+            return abbreviate ? dfs.getShortMonths()[number - 1] : dfs.getMonths()[number - 1];
         }
         throw new UcanaccessSQLException("Invalid month number");
     }
@@ -922,68 +922,68 @@ public final class Functions {
      * Returns the second argument if the first argument is {@code null}.
      */
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String nz(String _value) {
-        return _value == null ? "" : _value;
+    public static String nz(String value) {
+        return value == null ? "" : value;
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double nz(Double _value) {
-        return _value == null ? 0 : _value;
+    public static Double nz(Double value) {
+        return value == null ? 0 : value;
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer nz(Integer _value) {
-        return _value == null ? 0 : _value;
+    public static Integer nz(Integer value) {
+        return value == null ? 0 : value;
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.NUMERIC)
-    public static BigDecimal nz(BigDecimal _value) {
-        return _value == null ? BigDecimal.ZERO : _value;
+    public static BigDecimal nz(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String nz(String _value, String _other) {
-        return (String) nz(_value, (Object) _other);
+    public static String nz(String value, String other) {
+        return (String) nz(value, (Object) other);
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.NUMERIC, AccessType.NUMERIC}, returnType = AccessType.NUMERIC)
-    public static BigDecimal nz(BigDecimal value, BigDecimal _other) {
-        return (BigDecimal) nz(value, (Object) _other);
+    public static BigDecimal nz(BigDecimal value, BigDecimal other) {
+        return (BigDecimal) nz(value, (Object) other);
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double nz(Double value, Double _other) {
-        return (Double) nz(value, (Object) _other);
+    public static Double nz(Double value, Double other) {
+        return (Double) nz(value, (Object) other);
     }
 
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer nz(Integer value, Integer _other) {
-        return (Integer) nz(value, (Object) _other);
+    public static Integer nz(Integer value, Integer other) {
+        return (Integer) nz(value, (Object) other);
     }
 
-    private static Object nz(Object value, Object _other) {
-        return value == null ? _other : value;
+    private static Object nz(Object value, Object other) {
+        return value == null ? other : value;
     }
 
     /**
      * Returns the sign of a number. If number &gt; 0, it returns 1. If number = 0, it returns 0.
      */
     @FunctionType(functionName = "Sgn", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
-    public static short sgn(double _n) {
-        return (short) (_n == 0 ? 0 : _n > 0 ? 1 : -1);
+    public static short sgn(double n) {
+        return (short) (n == 0 ? 0 : n > 0 ? 1 : -1);
     }
 
     @FunctionType(functionName = "Sign", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
-    public static short sign(double _n) {
-        return sgn(_n);
+    public static short sign(double n) {
+        return sgn(n);
     }
 
     /**
      * Returns a string with a specified number of spaces.
      */
     @FunctionType(functionName = "Space", argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String space(Integer _nr) {
-        return " ".repeat(Math.max(0, Objects.requireNonNullElse(_nr, 0)));
+    public static String space(Integer nr) {
+        return " ".repeat(Math.max(0, Objects.requireNonNullElse(nr, 0)));
     }
 
     /**
@@ -1010,20 +1010,20 @@ public final class Functions {
      * Accepts a string as input and returns the numbers found in that string.
      */
     @FunctionType(functionName = "Val", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DOUBLE)
-    public static Double val(String _val1) {
-        return val((Object) _val1);
+    public static Double val(String val1) {
+        return val((Object) val1);
     }
 
     @FunctionType(functionName = "Val", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.DOUBLE)
-    public static Double val(BigDecimal _val1) {
-        return val((Object) _val1);
+    public static Double val(BigDecimal val1) {
+        return val((Object) val1);
     }
 
-    private static Double val(Object _val1) {
-        if (_val1 == null) {
+    private static Double val(Object val1) {
+        if (val1 == null) {
             return null;
         }
-        String val = _val1.toString().trim();
+        String val = val1.toString().trim();
         int lp = val.lastIndexOf('.');
         char[] ca = val.toCharArray();
         StringBuilder sb = new StringBuilder();
@@ -1057,65 +1057,65 @@ public final class Functions {
      * Returns a string representing the day of the week given a number from 1 to 7.
      */
     @FunctionType(functionName = "WeekdayName", argumentTypes = {AccessType.LONG}, returnType = AccessType.TEXT)
-    public static String weekdayName(int _number) {
-        return weekdayName(_number, false);
+    public static String weekdayName(int number) {
+        return weekdayName(number, false);
     }
 
     @FunctionType(functionName = "WeekdayName", argumentTypes = {AccessType.LONG, AccessType.YESNO}, returnType = AccessType.TEXT)
-    public static String weekdayName(int _number, boolean _abbreviate) {
+    public static String weekdayName(int number, boolean abbreviate) {
         int vbSunday = 1;
-        return weekdayName(_number, _abbreviate, vbSunday);
+        return weekdayName(number, abbreviate, vbSunday);
     }
 
     @FunctionType(functionName = "WeekdayName", argumentTypes = {AccessType.LONG, AccessType.YESNO, AccessType.LONG}, returnType = AccessType.TEXT)
-    public static String weekdayName(int _number, boolean _abbreviate, int _firstDayOfWeek) {
+    public static String weekdayName(int num, boolean abbreviate, int firstDayOfWeek) {
         // DayOfWeek starts with Monday, WeekdayName with Sunday (default)
-        int firstDayOfWeek = Math.min(Math.max(1, _firstDayOfWeek), 7);
-        int offset = firstDayOfWeek == 1 ? -1 : firstDayOfWeek - 2;
-        int number = _number;
+        int fdow = Math.min(Math.max(1, firstDayOfWeek), 7);
+        int offset = fdow == 1 ? -1 : fdow - 2;
+        int number = num;
         while (number > 7) {
             number -= 7;
         }
         return DayOfWeek.of(number).plus(offset)
-            .getDisplayName(_abbreviate ? TextStyle.SHORT : TextStyle.FULL, Locale.getDefault());
+            .getDisplayName(abbreviate ? TextStyle.SHORT : TextStyle.FULL, Locale.getDefault());
     }
 
     /**
      * Returns a number representing the day of the week (a number from 1 to 7) given a date value.
      */
     @FunctionType(functionName = "WeekDay", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
-    public static Integer weekDay(Timestamp _date) throws UcanaccessSQLException {
-        return datePart("w", _date);
+    public static Integer weekDay(Timestamp date) throws UcanaccessSQLException {
+        return datePart("w", date);
     }
 
     @FunctionType(functionName = "WeekDay", argumentTypes = {AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer weekDay(Timestamp _date, Integer _firstDayOfWeek) throws UcanaccessSQLException {
-        return datePart("w", _date, _firstDayOfWeek);
+    public static Integer weekDay(Timestamp date, Integer firstDayOfWeek) throws UcanaccessSQLException {
+        return datePart("w", date, firstDayOfWeek);
     }
 
     /**
      * Returns a Variant (String) containing a repeating character string of the length specified.
      */
     @FunctionType(functionName = "String", argumentTypes = {AccessType.LONG, AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String string(Integer _nr, String _str) {
-        if (_str == null) {
+    public static String string(Integer nr, String str) {
+        if (str == null) {
             return null;
-        } else if (_str.isEmpty()) {
+        } else if (str.isEmpty()) {
             return "";
         }
 
-        return _str.substring(0, 1).repeat(_nr);
+        return str.substring(0, 1).repeat(nr);
     }
 
     /**
      * Returns a time given an hour, minute, and second value.
      */
     @FunctionType(functionName = "TimeSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
-    public static Timestamp timeSerial(Integer _h, Integer _m, Integer _s) {
+    public static Timestamp timeSerial(Integer h, Integer m, Integer s) {
         return new Timestamp(LocalDateTime.now()
             .withYear(1899).withMonth(12).withDayOfMonth(30)
             .truncatedTo(ChronoUnit.SECONDS)
-            .withHour(_h).withMinute(_m).withSecond(_s)
+            .withHour(h).withMinute(m).withSecond(s)
             .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
     }
 
@@ -1128,21 +1128,21 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "Rnd", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double rnd(Double _d) {
+    public static Double rnd(Double d) {
         if (random == null) {
             random = new SecureRandom();
         }
-        if (_d == null || _d > 0) {
+        if (d == null || d > 0) {
             lastRnd = random.nextDouble();
             return lastRnd;
         }
-        if (_d < 0) {
+        if (d < 0) {
             if (rnd == null) {
-                rnd = _d;
+                rnd = d;
             }
             return rnd;
         }
-        if (_d == 0) {
+        if (d == 0) {
             if (lastRnd == null) {
                 lastRnd = random.nextDouble();
             }
@@ -1155,60 +1155,60 @@ public final class Functions {
      * Returns a string whose characters are in reverse order.
      */
     @FunctionType(functionName = "StrReverse", argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
-    public static String strReverse(String _value) {
-        return _value == null ? null : new StringBuilder(_value).reverse().toString();
+    public static String strReverse(String value) {
+        return value == null ? null : new StringBuilder(value).reverse().toString();
     }
 
     /**
      * Returns a string converted as specified.
      */
     @FunctionType(functionName = "StrConv", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String strConv(String _value, int _conversion) {
-        if (_value == null) {
+    public static String strConv(String value, int conversion) {
+        if (value == null) {
             return null;
-        } else if (_conversion == 1) { // vbUpperCase
-            return _value.toUpperCase();
-        } else if (_conversion == 2) { // vbLowerCase
-            return _value.toLowerCase();
-        } else if (_conversion == 3) { // vbProperCase: not implemented
-            return _value;
+        } else if (conversion == 1) { // vbUpperCase
+            return value.toUpperCase();
+        } else if (conversion == 2) { // vbLowerCase
+            return value.toLowerCase();
+        } else if (conversion == 3) { // vbProperCase: not implemented
+            return value;
         }
-        return _value;
+        return value;
     }
 
     /**
      * Returns an integer value representing the result of a string comparison.
      */
     @FunctionType(functionName = "StrComp", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
-    public static Integer strComp(String _value1, String _value2, Integer _type) throws UcanaccessSQLException {
-        switch (_type) {
+    public static Integer strComp(String value1, String value2, Integer type) throws UcanaccessSQLException {
+        switch (type) {
             case 0:
             case -1:
             case 2:
-                return _value1.compareTo(_value2);
+                return value1.compareTo(value2);
             case 1:
-                return _value1.toUpperCase().compareTo(_value2.toUpperCase());
+                return value1.toUpperCase().compareTo(value2.toUpperCase());
             default:
-                throw new InvalidFunctionParameterException("StrComp", _type);
+                throw new InvalidFunctionParameterException("StrComp", type);
         }
     }
 
     @FunctionType(functionName = "StrComp", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
-    public static Integer strComp(String _value1, String _value2) throws UcanaccessSQLException {
-        return strComp(_value1, _value2, 0);
+    public static Integer strComp(String value1, String value2) throws UcanaccessSQLException {
+        return strComp(value1, value2, 0);
     }
 
     /**
      * Returns the integer portion of a number.
      */
     @FunctionType(functionName = "Int", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
-    public static Integer mint(Double _value) {
-        return new BigDecimal((long) Math.floor(_value)).intValueExact();
+    public static Integer mint(Double value) {
+        return new BigDecimal((long) Math.floor(value)).intValueExact();
     }
 
     @FunctionType(functionName = "Int", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
-    public static Short mint(boolean _value) {
-        return (short) (_value ? -1 : 0);
+    public static Short mint(boolean value) {
+        return (short) (value ? -1 : 0);
     }
 
     @FunctionType(functionName = "DDB", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
@@ -1453,20 +1453,20 @@ public final class Functions {
     }
 
     @FunctionType(functionName = "formulaToNumeric", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.DOUBLE)
-    public static Double formulaToNumeric(String _res, String _datatype) {
-        if (_res == null) {
+    public static Double formulaToNumeric(String input, String datatype) {
+        if (input == null) {
             return null;
         }
         return Try.catching(() -> {
             DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();
             String sep = dfs.getDecimalSeparator() + "";
             String gs = dfs.getGroupingSeparator() + "";
-            String res = _res.replaceAll(Pattern.quote(gs), "");
+            String res = input.replaceAll(Pattern.quote(gs), "");
             if (!".".equalsIgnoreCase(sep)) {
                 res = res.replaceAll(Pattern.quote(sep), ".");
             }
             double d = val(res);
-            DataType dt = DataType.valueOf(_datatype);
+            DataType dt = DataType.valueOf(datatype);
             if (dt.equals(DataType.BYTE) || dt.equals(DataType.INT) || dt.equals(DataType.LONG)) {
                 d = Math.rint(d + APPROX);
             }
@@ -1628,38 +1628,38 @@ public final class Functions {
     /**
      * Returns the integer portion of a number.
      *
-     * @param _number a double or any valid numeric expression, if {@code null}, {@code null} is returned
+     * @param number a double or any valid numeric expression, if {@code null}, {@code null} is returned
      * @return integer portion
      */
     @SuppressWarnings("PMD.UnnecessaryCast")
     @FunctionType(namingConflict = true, functionName = "Fix", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static Double fix(Double _number) {
-        return _number == null
+    public static Double fix(Double number) {
+        return number == null
             ? null
-            : sign(_number) * (double) mint(Math.abs(_number));
+            : sign(number) * (double) mint(Math.abs(number));
     }
 
     @FunctionType(functionName = "PARTITION", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.MEMO)
-    public static String partition(Double _number, double start, double stop, double interval) {
-        if (_number == null) {
+    public static String partition(Double number, double start, double stop, double interval) {
+        if (number == null) {
             return null;
         }
-        _number = Math.rint(_number);
+        number = Math.rint(number);
         interval = Math.rint(interval);
 
         String ul = String.valueOf(lrint(stop) + 1);
         stop = lrint(stop);
         start = lrint(start);
         int h = ul.length();
-        if (_number < start) {
+        if (number < start) {
             return padLeft(-1, h) + ":" + padLeft(lrint(start) - 1, h);
         }
-        if (_number > stop) {
+        if (number > stop) {
             return ul + ":" + padLeft(-1, h);
         }
 
         for (double d = start; d <= stop; d += interval) {
-            if (_number >= d && _number < d + interval) {
+            if (number >= d && number < d + interval) {
                 return padLeft(lceil(d), h) + ":"
                     + padLeft(d + interval <= stop ? lfloor(d + interval) : lrint(stop), h);
 
@@ -1668,16 +1668,16 @@ public final class Functions {
         return "";
     }
 
-    private static int lfloor(double _d) {
-        return (int) Math.floor(_d - APPROX);
+    private static int lfloor(double d) {
+        return (int) Math.floor(d - APPROX);
     }
 
-    private static int lceil(double _d) {
-        return (int) Math.ceil(_d - APPROX);
+    private static int lceil(double d) {
+        return (int) Math.ceil(d - APPROX);
     }
 
-    private static int lrint(double _d) {
-        return (int) Math.rint(_d - APPROX);
+    private static int lrint(double d) {
+        return (int) Math.rint(d - APPROX);
     }
 
     private static String padLeft(int ext, int n) {

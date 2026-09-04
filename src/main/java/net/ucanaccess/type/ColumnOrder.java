@@ -11,11 +11,11 @@ public enum ColumnOrder {
     DATA,
     DISPLAY;
 
-    public static ColumnOrder parse(String _val) {
-        if (_val == null) {
+    public static ColumnOrder parse(String value) {
+        if (value == null) {
             return null;
         }
-        String val = _val.strip().toLowerCase();
+        String val = value.strip().toLowerCase();
         for (ColumnOrder ver : values()) {
             if (val.equalsIgnoreCase(ver.name())) {
                 return ver;

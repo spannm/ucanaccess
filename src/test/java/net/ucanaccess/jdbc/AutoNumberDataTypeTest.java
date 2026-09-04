@@ -17,8 +17,8 @@ class AutoNumberDataTypeTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource(include = "V2016")
-    void testAutoNumberDataType(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testAutoNumberDataType(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         Object colVal1;
         int columnType1;

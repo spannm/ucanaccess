@@ -12,15 +12,15 @@ import java.util.List;
 class RegexTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_regex (id COUNTER, descr MEMO) ");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testRegex(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testRegex(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         String s = "C".repeat(5000);
         String[] in = new String[] {"", "\"\"'tCC", s, s + "'", s + "\"", s + "\"''t",
@@ -45,8 +45,8 @@ class RegexTest extends UcanaccessBaseTest {
         }
     }
 
-    private String getStatement(CharSequence _s, CharSequence _dlm) {
-        return "INSERT INTO t_regex (descr) VALUES( " + _dlm + _s + _dlm + ")";
+    private String getStatement(CharSequence s, CharSequence dlm) {
+        return "INSERT INTO t_regex (descr) VALUES( " + dlm + s + dlm + ")";
     }
 
 }

@@ -18,8 +18,8 @@ public final class FormatCache {
     private FormatCache() {
     }
 
-    public static synchronized DecimalFormat getDecimalFormat(String _pattern) {
-        return CACHE.computeIfAbsent(_pattern, p -> {
+    public static synchronized DecimalFormat getDecimalFormat(String pattern) {
+        return CACHE.computeIfAbsent(pattern, p -> {
             DecimalFormat dc = new DecimalFormat(p);
             dc.setRoundingMode(RoundingMode.HALF_UP);
             return dc;

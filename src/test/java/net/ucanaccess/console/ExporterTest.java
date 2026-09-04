@@ -37,8 +37,8 @@ class ExporterTest extends AbstractBaseTest {
         // any type not explicitly defined in the switch statement is mapped to a "string".
         Types.BIT + "; string"
     })
-    void testToBigQueryType(int _sqlType, CharSequence _expected) {
-        assertEquals(_expected, Exporter.toBigQueryType(_sqlType));
+    void testToBigQueryType(int sqlType, CharSequence expected) {
+        assertEquals(expected, Exporter.toBigQueryType(sqlType));
     }
 
     @ParameterizedTest(name = "[{index}] {0} --> {1}")
@@ -48,8 +48,8 @@ class ExporterTest extends AbstractBaseTest {
         "2; nullable",
         "3; nullable"
     })
-    void testToBigQueryNullable(int _nullable, CharSequence _expected) {
-        assertEquals(_expected, Exporter.toBigQueryNullable(_nullable));
+    void testToBigQueryNullable(int nullable, CharSequence expected) {
+        assertEquals(expected, Exporter.toBigQueryNullable(nullable));
     }
 
     @Test

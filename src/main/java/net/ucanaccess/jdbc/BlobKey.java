@@ -18,27 +18,27 @@ public class BlobKey implements Serializable {
     private final String        tableName;
     private final String        columnName;
 
-    public BlobKey(Map<String, Object> _key, String _tableName, String _columnName) {
-        key = _key;
-        tableName = _tableName;
-        columnName = _columnName;
+    public BlobKey(Map<String, Object> key, String tableName, String columnName) {
+        this.key = key;
+        this.tableName = tableName;
+        this.columnName = columnName;
     }
 
-    public BlobKey(Table _table, String _columnName, Row _row) {
-        tableName = _table.getName();
-        columnName = _columnName;
-        if (hasPrimaryKey(_table)) {
-            List<? extends Index.Column> cl = _table.getPrimaryKeyIndex().getColumns();
+    public BlobKey(Table table, String columnName, Row row) {
+        tableName = table.getName();
+        this.columnName = columnName;
+        if (hasPrimaryKey(table)) {
+            List<? extends Index.Column> cl = table.getPrimaryKeyIndex().getColumns();
             Map<String, Object> keyMap = new HashMap<>();
             for (Index.Column c : cl) {
-                keyMap.put(c.getName(), _row.get(c.getName()));
+                keyMap.put(c.getName(), row.get(c.getName()));
             }
             key = keyMap;
         }
     }
 
-    public static boolean hasPrimaryKey(Table _table) {
-        for (Index idx : _table.getIndexes()) {
+    public static boolean hasPrimaryKey(Table table) {
+        for (Index idx : table.getIndexes()) {
             if (idx.isPrimaryKey()) {
                 return true;
             }
@@ -46,9 +46,9 @@ public class BlobKey implements Serializable {
         return false;
     }
 
-    public OleBlob getOleBlob(Database _db) throws UcanaccessSQLException {
+    public OleBlob getOleBlob(Database db) throws UcanaccessSQLException {
         return Try.catching(() -> {
-            Table t = _db.getTable(tableName);
+            Table t = db.getTable(tableName);
             Cursor c = CursorBuilder.createPrimaryKeyCursor(t);
             return c.findFirstRow(key) ? c.getCurrentRow().getBlob(columnName) : null;
         }).orThrow(UcanaccessSQLException::new);
@@ -63,18 +63,18 @@ public class BlobKey implements Serializable {
         }).orThrow(UcanaccessSQLException::new);
     }
 
-    public static BlobKey getBlobKey(byte[] _bytes) {
-        return Try.withResources(() -> new ByteArrayInputStream(_bytes), bais -> {
+    public static BlobKey getBlobKey(byte[] bytes) {
+        return Try.withResources(() -> new ByteArrayInputStream(bytes), bais -> {
             ObjectInputStream ois = new ObjectInputStream(bais);
             Object obj = ois.readObject();
             return obj instanceof BlobKey ? (BlobKey) obj : null;
         }).orIgnore();
     }
 
-    public static BlobKey getBlobKey(InputStream _is) {
+    public static BlobKey getBlobKey(InputStream is) {
         return Try.catching(() -> {
             byte[] bt = new byte[MAX_SIZE];
-            int readBytes = _is.read(bt);
+            int readBytes = is.read(bt);
             return readBytes > 0 ? getBlobKey(bt) : null;
         }).orIgnore();
     }

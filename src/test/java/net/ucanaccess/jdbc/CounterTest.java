@@ -11,15 +11,15 @@ import java.sql.SQLException;
 class CounterTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_counter (cntr COUNTER PRIMARY KEY, chr CHAR(4), descr MEMO)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCreateTypes(AccessVersion _accessVersion) throws SQLException, IOException {
-        init(_accessVersion);
+    void testCreateTypes(AccessVersion accessVersion) throws SQLException, IOException {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String table = "t_counter";

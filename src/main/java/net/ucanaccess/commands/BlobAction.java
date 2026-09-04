@@ -19,13 +19,13 @@ public class BlobAction implements IFeedbackAction {
     private boolean            containsBlob;
     private final Set<BlobKey> keys = new HashSet<>();
 
-    public BlobAction(Table _table, Object[] newValues) {
-        table = _table;
+    public BlobAction(Table table, Object[] newValues) {
+        this.table = table;
 
-        if (!BlobKey.hasPrimaryKey(_table)) {
+        if (!BlobKey.hasPrimaryKey(table)) {
             return;
         }
-        Index pk = _table.getPrimaryKeyIndex();
+        Index pk = table.getPrimaryKeyIndex();
         HashSet<String> hsKey = new HashSet<>();
         for (Index.Column icl : pk.getColumns()) {
             hsKey.add(icl.getName());
@@ -33,7 +33,7 @@ public class BlobAction implements IFeedbackAction {
         HashSet<String> hsBlob = new HashSet<>();
         int i = 0;
         Map<String, Object> keyMap = new HashMap<>();
-        for (Column col : _table.getColumns()) {
+        for (Column col : table.getColumns()) {
             if (col.getType().equals(DataType.OLE) && newValues[i] != null) {
                 containsBlob = true;
                 hsBlob.add(col.getName());
@@ -44,7 +44,7 @@ public class BlobAction implements IFeedbackAction {
             ++i;
         }
         for (String cln : hsBlob) {
-            keys.add(new BlobKey(keyMap, table.getName(), cln));
+            keys.add(new BlobKey(keyMap, this.table.getName(), cln));
         }
 
     }

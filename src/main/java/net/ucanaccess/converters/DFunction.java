@@ -21,9 +21,9 @@ public class DFunction {
     private Connection                conn;
     private final String              sql;
 
-    public DFunction(Connection _conn, String _sql) {
-        conn = _conn;
-        sql = _sql;
+    public DFunction(Connection conn, String sql) {
+        this.conn = conn;
+        this.sql = sql;
     }
 
     private String convertDFunctions() {
@@ -77,7 +77,7 @@ public class DFunction {
                                         "[".equals(pref) ? resolveAmbiguosTableName(cln) + ".$1$2$3"
                                             : "$1" + resolveAmbiguosTableName(cln) + ".$2$3");
                                 }
-                            } catch (SQLException _ignored) {
+                            } catch (SQLException ignored) {
                             }
                             sb.append(tkn);
                         }
@@ -91,15 +91,15 @@ public class DFunction {
         return sqlOut;
     }
 
-    private String resolveAmbiguosTableName(String _identifier) {
+    private String resolveAmbiguosTableName(String identifier) {
         return Try.withResources(conn::createStatement, st -> {
             String sqlOut = sql.replaceAll("[\\r\\n]+", " ");
-            sqlOut = PAT_SELECT_FROM.matcher(sqlOut).replaceFirst("SELECT " + _identifier + " FROM $2");
+            sqlOut = PAT_SELECT_FROM.matcher(sqlOut).replaceFirst("SELECT " + identifier + " FROM $2");
             String f4t = SQLConverter.convertSQL(sqlOut).getSql();
             ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();
             String tableN = rsmd.getTableName(1);
-            return tableN == null || tableN.isBlank() ? _identifier : tableN;
-        }).orElse(_identifier);
+            return tableN == null || tableN.isBlank() ? identifier : tableN;
+        }).orElse(identifier);
     }
 
     private List<String> getColumnNames(String tableName) throws SQLException {

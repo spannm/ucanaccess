@@ -21,10 +21,10 @@ public abstract class ComplexBase implements Serializable {
     private String                      tableName;
     private String                      columnName;
 
-    protected ComplexBase(ComplexValue.Id _id, String _tableName, String _columnName) {
-        id = _id.get();
-        tableName = _tableName;
-        columnName = _columnName;
+    protected ComplexBase(ComplexValue.Id id, String tableName, String columnName) {
+        this.id = id.get();
+        this.tableName = tableName;
+        this.columnName = columnName;
     }
 
     protected ComplexBase(ComplexValue cv) {
@@ -36,16 +36,16 @@ public abstract class ComplexBase implements Serializable {
         return tableName;
     }
 
-    public void setTableName(String _tableName) {
-        tableName = _tableName;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public String getColumnName() {
         return columnName;
     }
 
-    public void setColumnName(String _columnName) {
-        columnName = _columnName;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     @Override
@@ -124,15 +124,15 @@ public abstract class ComplexBase implements Serializable {
      * Converts a local date-time (date/time without timezone) with arbitrary resolution (depends on Java version)
      * to millisecond-only resolution for compatibility with Jackcess.
      *
-     * @param _ldt local datetime with arbitrary resolution
+     * @param ldt local datetime with arbitrary resolution
      * @return local datetime with arbitrary resolution
      */
-    static LocalDateTime handleJackcessLocalDateTimeResolution(LocalDateTime _ldt) {
-        if (_ldt == null) {
-            return _ldt;
+    static LocalDateTime handleJackcessLocalDateTimeResolution(LocalDateTime ldt) {
+        if (ldt == null) {
+            return ldt;
         }
-        long millis = TimeUnit.NANOSECONDS.toMillis(_ldt.getNano());
-        return _ldt.withNano((int) TimeUnit.MILLISECONDS.toNanos(millis));
+        long millis = TimeUnit.NANOSECONDS.toMillis(ldt.getNano());
+        return ldt.withNano((int) TimeUnit.MILLISECONDS.toNanos(millis));
     }
 
 }

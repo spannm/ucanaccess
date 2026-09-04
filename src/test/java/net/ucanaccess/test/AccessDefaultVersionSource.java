@@ -24,7 +24,7 @@ public @interface AccessDefaultVersionSource {
     class DefaultAccessVersionArgumentsProvider implements ArgumentsProvider {
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext _context) throws Exception {
+        public Stream<Arguments> provideArguments(ExtensionContext context) throws Exception {
             return Stream.of(AccessVersion.getDefaultAccessVersion()).map(Arguments::of);
         }
 

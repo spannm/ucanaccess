@@ -37,12 +37,12 @@ public class Pivot {
     private boolean                                pivotInCondition   = true;
     private String                                 originalQuery;
 
-    public Pivot(Connection _conn) {
-        conn = _conn;
+    public Pivot(Connection conn) {
+        this.conn = conn;
     }
 
-    private void cachePrepare(String _name) {
-        Optional.ofNullable(pivotIn).ifPresent(p -> PREPARE_MAP.put(_name, p));
+    private void cachePrepare(String name) {
+        Optional.ofNullable(pivotIn).ifPresent(p -> PREPARE_MAP.put(name, p));
     }
 
     public static void clearPrepared() {
@@ -50,32 +50,32 @@ public class Pivot {
 
     }
 
-    private void prepareGetFromCache(String _name) {
-        pivotIn = PREPARE_MAP.getOrDefault(_name, pivotIn);
+    private void prepareGetFromCache(String name) {
+        pivotIn = PREPARE_MAP.getOrDefault(name, pivotIn);
     }
 
-    public void registerPivot(String _name) {
+    public void registerPivot(String name) {
         if (!pivotInCondition) {
-            PIVOT_MAP.put(_name, originalQuery);
+            PIVOT_MAP.put(name, originalQuery);
         }
     }
 
-    public static void checkAndRefreshPivot(String _currSql, UcanaccessConnection _conn) {
+    public static void checkAndRefreshPivot(String currSql, UcanaccessConnection conn) {
 
         for (Entry<String, String> e : PIVOT_MAP.entrySet()) {
             String name = e.getKey();
             String val = e.getValue();
             Pattern pat = Pattern.compile("(\\W)(?i)" + name + "(\\W)");
-            Matcher mtc = pat.matcher(_currSql);
+            Matcher mtc = pat.matcher(currSql);
             if (mtc.find()) {
                 try {
-                    if (_conn == null && UcanaccessConnection.hasContext()) {
-                        _conn = UcanaccessConnection.getCtxConnection();
+                    if (conn == null && UcanaccessConnection.hasContext()) {
+                        conn = UcanaccessConnection.getCtxConnection();
                     }
-                    if (_conn == null) {
+                    if (conn == null) {
                         return;
                     }
-                    Connection connHsql = _conn.getHSQLDBConnection();
+                    Connection connHsql = conn.getHSQLDBConnection();
                     Pivot pivot = new Pivot(connHsql);
 
                     if (!pivot.parsePivot(val)) {
@@ -103,21 +103,21 @@ public class Pivot {
                         String v = nsql.getSql();
                         st.executeUpdate(v);
                     }
-                } catch (Exception _ex) {
-                    System.getLogger(Pivot.class.getName()).log(Level.WARNING, _ex.getMessage());
+                } catch (Exception ex) {
+                    System.getLogger(Pivot.class.getName()).log(Level.WARNING, ex.getMessage());
                 }
             }
         }
     }
 
-    public boolean parsePivot(String _originalQuery) {
-        originalQuery = _originalQuery;
-        _originalQuery = _originalQuery.replace('\n', ' ').replace('\r', ' ')
+    public boolean parsePivot(String query) {
+        originalQuery = query;
+        query = query.replace('\n', ' ').replace('\r', ' ')
                 .replaceAll("(?i)(\\[PIVOT\\])", "XPIVOT").trim();
-        if (_originalQuery.endsWith(";")) {
-            _originalQuery = _originalQuery.substring(0, _originalQuery.length() - 1);
+        if (query.endsWith(";")) {
+            query = query.substring(0, query.length() - 1);
         }
-        Matcher mtc = PAT_PIVOT.matcher(_originalQuery);
+        Matcher mtc = PAT_PIVOT.matcher(query);
         if (mtc.groupCount() < 4) {
             return false;
         }
@@ -152,10 +152,10 @@ public class Pivot {
         }
     }
 
-    private void appendCaseWhen(StringBuilder _sb, String _condition, String _cn) {
-        _sb.append(aggregateFun).append("(CASE WHEN ").append(_condition)
+    private void appendCaseWhen(StringBuilder sb, String condition, String cn) {
+        sb.append(aggregateFun).append("(CASE WHEN ").append(condition)
            .append(" THEN ").append(expression)
-           .append(" END) AS ").append(_cn);
+           .append(" END) AS ").append(cn);
     }
 
     public String verifySQL() {

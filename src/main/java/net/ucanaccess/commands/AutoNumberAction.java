@@ -16,11 +16,11 @@ public class AutoNumberAction implements IFeedbackAction {
     private final Map<String, Object> oldAutoValues = new HashMap<>();
     private final Table               table;
 
-    public AutoNumberAction(Table _table, Object[] memento, Object[] byAccess) throws SQLException {
-        table = _table;
+    public AutoNumberAction(Table table, Object[] memento, Object[] byAccess) throws SQLException {
+        this.table = table;
         int i = 0;
 
-        for (Column col : _table.getColumns()) {
+        for (Column col : table.getColumns()) {
             if (col.isAutoNumber()) {
                 UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
                 Connection connHsqldb = conn.getHSQLDBConnection();
@@ -34,7 +34,7 @@ public class AutoNumberAction implements IFeedbackAction {
                 newAutoValues.put(col.getName(), cnNew);
                 conn.setFeedbackState(true);
                 String sql = String.format("UPDATE %s SET %s=? WHERE %s=?",
-                    SQLConverter.escapeIdentifier(_table.getName(), connHsqldb), hsqlColName, hsqlColName);
+                    SQLConverter.escapeIdentifier(table.getName(), connHsqldb), hsqlColName, hsqlColName);
 
                 try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {
                     ps.setObject(1, cnNew);

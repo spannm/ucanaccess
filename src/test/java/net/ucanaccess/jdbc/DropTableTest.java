@@ -11,24 +11,24 @@ import java.util.List;
 class DropTableTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))",
             "CREATE TABLE [AAA n] (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
     }
 
-    void createSimple(String _tableName, String _a, List<List<Object>> _ver) throws SQLException {
+    void createSimple(String tableName, String a, List<List<Object>> ver) throws SQLException {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.execute("INSERT INTO " + _tableName + " VALUES ('33A', 11, '" + _a + "')");
-            st.execute("INSERT INTO " + _tableName + " VALUES ('33B', 111, '" + _a + "')");
-            checkQuery("SELECT * FROM " + _tableName + " ORDER BY c", _ver);
+            st.execute("INSERT INTO " + tableName + " VALUES ('33A', 11, '" + a + "')");
+            st.execute("INSERT INTO " + tableName + " VALUES ('33B', 111, '" + a + "')");
+            checkQuery("SELECT * FROM " + tableName + " ORDER BY c", ver);
         }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDrop(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testDrop(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // ucanaccess.setAutoCommit(false);
         createSimple("AAAn", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
@@ -44,8 +44,8 @@ class DropTableTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDropBlank(AccessVersion _accessVersion) throws SQLException {
-        init(_accessVersion);
+    void testDropBlank(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
 
         // ucanaccess.setAutoCommit(false);
         createSimple("[AAA n]", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));

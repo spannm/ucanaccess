@@ -77,8 +77,8 @@ public class TriggerAutoNumber extends TriggerBase {
                 }
                 ++i;
             }
-        } catch (Exception _ex) {
-            throw new TriggerException(_ex.getMessage());
+        } catch (Exception ex) {
+            throw new TriggerException(ex.getMessage());
         }
     }
 

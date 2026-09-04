@@ -19,8 +19,8 @@ class UnproperExecuteQueryTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testExecute(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testExecute(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             String tableName = "t_noroman";
             for (String sql : List.of(

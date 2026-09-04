@@ -17,8 +17,8 @@ class NoRomanCharacterTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testNoRomanCharactersInColumnName(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testNoRomanCharactersInColumnName(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
         dumpQueryResult("SELECT * FROM t_noroman");
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {

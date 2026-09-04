@@ -18,16 +18,16 @@ import java.sql.SQLException;
 class CsvDumpTest extends UcanaccessBaseTest {
 
     @Override
-    protected void init(AccessVersion _accessVersion) throws SQLException {
-        super.init(_accessVersion);
+    protected void init(AccessVersion accessVersion) throws SQLException {
+        super.init(accessVersion);
         executeStatements("CREATE TABLE t_csv (id INTEGER, text_field TEXT, text_field2 TEXT, memo_field MEMO, "
             + "byte_field BYTE, boolean_field YESNO, double_field DOUBLE, currency_field CURRENCY, date_field DATETIME)");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testCsvDump(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testCsvDump(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.execute("INSERT INTO t_csv (id, text_field, text_field2, memo_field, byte_field, boolean_field, "
@@ -54,8 +54,8 @@ class CsvDumpTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
-    void testDumpSchema(AccessVersion _accessVersion) throws Exception {
-        init(_accessVersion);
+    void testDumpSchema(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);

@@ -18,8 +18,8 @@ class ExternalResourcesTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessDefaultVersionSource
-    void testLinks(AccessVersion _accessVersion) throws SQLException {
-        setAccessVersion(_accessVersion);
+    void testLinks(AccessVersion accessVersion) throws SQLException {
+        setAccessVersion(accessVersion);
 
         String dbLinked = getAccessTempPath();
         String dbLinkee1 = copyResourceToTempFile(getTestDbDir() + "linkee1.mdb").getAbsolutePath();

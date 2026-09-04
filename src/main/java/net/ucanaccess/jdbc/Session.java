@@ -12,11 +12,11 @@ public class Session {
         return user;
     }
 
-    public void setPassword(String _password) {
-        password = _password;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setUser(String _user) {
-        user = _user;
+    public void setUser(String user) {
+        this.user = user;
     }
 }

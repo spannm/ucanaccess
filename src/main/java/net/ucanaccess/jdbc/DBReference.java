@@ -88,23 +88,23 @@ public class DBReference {
      */
     private boolean                                 allowRemoteLinks;
 
-    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface _jko, final String _pwd, Charset _charset)
+    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, final String pwd, Charset charset)
         throws IOException {
         dbFile = fl;
-        pwd = _pwd;
-        jko = _jko;
-        charset = _charset;
+        this.pwd = pwd;
+        this.jko = jko;
+        this.charset = charset;
         lastModified = System.currentTimeMillis();
         memoryTimer = new MemoryTimer(this);
         if (!fl.exists() && ff != null) {
             DatabaseBuilder dbb = new DatabaseBuilder();
             dbIO = dbb.withAutoSync(false).withFileFormat(ff).withFile(fl).create();
         } else {
-            dbIO = _jko.open(fl, _pwd, _charset);
+            dbIO = jko.open(fl, pwd, charset);
             try {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
-            } catch (Exception _ignored) {
+            } catch (Exception ignored) {
             }
             dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
                 if (linkeeFileName == null) {
@@ -135,7 +135,7 @@ public class DBReference {
                 } else {
                     links.add(linkeeFile);
                 }
-                Database ldb = open(linkeeFile, _pwd);
+                Database ldb = open(linkeeFile, pwd);
                 ldb.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);
                 return ldb;
             });
@@ -151,16 +151,16 @@ public class DBReference {
      * Such paths are excluded from automatic resolution by default since they let an untrusted Access database
      * file trigger an outbound network connection (see {@link #allowRemoteLinks}).
      *
-     * @param  _fileName the linked database path as stored in the Access database file
+     * @param  fileName the linked database path as stored in the Access database file
      * @return           {@code true} if the path is a network/UNC path, {@code false} otherwise
      */
-    static boolean isNetworkPath(String _fileName) {
-        String normalized = _fileName.replace('/', '\\');
+    static boolean isNetworkPath(String fileName) {
+        String normalized = fileName.replace('/', '\\');
         return normalized.startsWith("\\\\");
     }
 
-    public Database open(File _dbfl, String _pwd) throws IOException {
-        Database ret = jko.open(_dbfl, _pwd, charset);
+    public Database open(File dbfl, String password) throws IOException {
+        Database ret = jko.open(dbfl, password, charset);
         if (columnOrderDisplay) {
             ret.setColumnOrder(ColumnOrder.DISPLAY);
         }
@@ -174,8 +174,8 @@ public class DBReference {
             } else {
                 try {
                     closeHsqlDb(session, true);
-                } catch (Exception _ex) {
-                    throw new UcanaccessSQLException(_ex);
+                } catch (Exception ex) {
+                    throw new UcanaccessSQLException(ex);
                 }
                 return false;
             }
@@ -183,8 +183,8 @@ public class DBReference {
         return false;
     }
 
-    public static boolean addOnReloadRefListener(IOnReloadReferenceListener _action) {
-        return onReloadListeners.add(_action);
+    public static boolean addOnReloadRefListener(IOnReloadReferenceListener action) {
+        return onReloadListeners.add(action);
     }
 
     public static String getVersion() {
@@ -203,28 +203,28 @@ public class DBReference {
         return lm;
     }
 
-    Connection checkLastModified(Connection _conn, Session _session) throws UcanaccessSQLException {
+    Connection checkLastModified(Connection conn, Session session) throws UcanaccessSQLException {
         // I'm detecting if another process(and not another thread) is writing
 
         try {
             if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
-                return _conn;
+                return conn;
             }
             updateLastModified();
-            closeHsqlDb(_session);
+            closeHsqlDb(session);
             dbIO.flush();
             dbIO.close();
             dbIO = open(dbFile, pwd);
             id = createId();
             firstConnection = true;
-            LoadJet lj = new LoadJet(getHSQLDBConnection(_session), dbIO);
+            LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);
             lj.setSkipIndexes(skipIndexes);
             lj.setSysSchema(sysSchema);
             lj.loadDB();
 
-            return getHSQLDBConnection(_session);
-        } catch (SQLException | IOException _ex) {
-            throw UcanaccessSQLException.wrap(_ex);
+            return getHSQLDBConnection(session);
+        } catch (SQLException | IOException ex) {
+            throw UcanaccessSQLException.wrap(ex);
         }
     }
 
@@ -296,8 +296,8 @@ public class DBReference {
         closeHsqlDb(session, false);
     }
 
-    private void closeHsqlDb(Session _session, boolean _firstConnectionKeeptMirror) throws IOException {
-        finalizeHsqlDb(_session);
+    private void closeHsqlDb(Session session, boolean firstConnectionKeeptMirror) throws IOException {
+        finalizeHsqlDb(session);
         if (!inMemory) {
             if (toKeepHsql == null) {
                 File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;
@@ -312,7 +312,7 @@ public class DBReference {
                     logger.log(Level.INFO, "Could not delete {0}", hbase);
                 }
 
-            } else if (!immediatelyReleaseResources || _firstConnectionKeeptMirror) {
+            } else if (!immediatelyReleaseResources || firstConnectionKeeptMirror) {
                 boolean deleted = toKeepHsql.delete();
                 if (!deleted) {
                     logger.log(Level.INFO, "Could not delete {0}", toKeepHsql);
@@ -337,13 +337,13 @@ public class DBReference {
         memoryTimer.decrementActiveConnection(session);
     }
 
-    private void finalizeHsqlDb(Session _session) throws IOException {
+    private void finalizeHsqlDb(Session session) throws IOException {
         if (!hsqldbShutdown) {
             releaseLock();
-            try (Connection conn = getHSQLDBConnection(_session); Statement st = conn.createStatement()) {
+            try (Connection conn = getHSQLDBConnection(session); Statement st = conn.createStatement()) {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
-            } catch (Exception _ignored) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -356,17 +356,17 @@ public class DBReference {
         return dbIO;
     }
 
-    private void setIgnoreCase(Connection _conn) {
-        try (Statement st = _conn.createStatement()) {
+    private void setIgnoreCase(Connection conn) {
+        try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
 
-        } catch (Exception _ignored) {
+        } catch (Exception ignored) {
 
         }
     }
 
-    private void initHSQLDB(Connection _conn) {
-        try (Statement st = _conn.createStatement()) {
+    private void initHSQLDB(Connection conn) {
+        try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE SQL SYNTAX ora TRUE");
             st.execute(String.format("SET DATABASE SQL CONCAT NULLS %s", concatNulls));
             if (lobScale == null && inMemory) {
@@ -375,16 +375,16 @@ public class DBReference {
                 st.execute(String.format("SET FILES LOB SCALE %s", lobScale));
             }
 
-        } catch (Exception _ex) {
-            logger.log(Level.WARNING, _ex.toString());
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, ex.toString());
         }
     }
 
-    public Connection getHSQLDBConnection(Session _session) throws SQLException {
+    public Connection getHSQLDBConnection(Session session) throws SQLException {
         boolean keptMirror = firstConnection && toKeepHsql != null && toKeepHsql.exists();
 
-        Connection conn = DriverManager.getConnection(getHsqlUrl(_session),
-            Optional.ofNullable(_session.getUser()).orElse("Admin"), _session.getPassword());
+        Connection conn = DriverManager.getConnection(getHsqlUrl(session),
+            Optional.ofNullable(session.getUser()).orElse("Admin"), session.getPassword());
 
         if (version == null) {
             version = conn.getMetaData().getDriverVersion();
@@ -422,7 +422,7 @@ public class DBReference {
         return encryptionKey;
     }
 
-    private String getHsqlUrl(Session _session) throws SQLException {
+    private String getHsqlUrl(Session session) throws SQLException {
         try {
             if (openExclusive && fileLock == null) {
                 lockMdbFile();
@@ -465,19 +465,19 @@ public class DBReference {
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
                         if (toKeepHsql == null) {
-                            closeHsqlDb(_session);
+                            closeHsqlDb(session);
                         } else {
-                            finalizeHsqlDb(_session);
+                            finalizeHsqlDb(session);
                         }
-                    } catch (Exception _ex) {
-                        logger.log(Level.WARNING, _ex.toString());
+                    } catch (Exception ex) {
+                        logger.log(Level.WARNING, ex.toString());
                     }
                 }));
             }
             String mro = mirrorReadOnly ? ";readonly=true" : "";
             return "jdbc:hsqldb:" + (inMemory ? "mem:" + id : tempHsql.getAbsolutePath()) + enc + log + mro;
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -541,8 +541,8 @@ public class DBReference {
                 fileLock = tryLock;
                 readOnly = false;
             }
-        } catch (IOException _ex) {
-            throw new UcanaccessSQLException(_ex);
+        } catch (IOException ex) {
+            throw new UcanaccessSQLException(ex);
         }
     }
 
@@ -566,19 +566,19 @@ public class DBReference {
         memoryTimer.setInactivityTimeout(inactivityTimeout);
     }
 
-    public void setInMemory(boolean _inMemory) {
-        inMemory = _inMemory;
+    public void setInMemory(boolean inMemory) {
+        this.inMemory = inMemory;
     }
 
-    public void setOpenExclusive(boolean _openExclusive) {
-        openExclusive = _openExclusive;
+    public void setOpenExclusive(boolean openExclusive) {
+        this.openExclusive = openExclusive;
     }
 
-    public void setShowSchema(boolean _showSchema) {
-        showSchema = _showSchema;
+    public void setShowSchema(boolean showSchema) {
+        this.showSchema = showSchema;
     }
 
-    void shutdown(Session _session) throws Exception {
+    void shutdown(Session session) throws Exception {
         DBReferenceSingleton.getInstance().remove(dbFile.getAbsolutePath());
         if (immediatelyReleaseResources) {
             for (IOnReloadReferenceListener listener : onReloadListeners) {
@@ -588,7 +588,7 @@ public class DBReference {
         memoryTimer.timer.cancel();
         dbIO.flush();
         dbIO.close();
-        closeHsqlDb(_session);
+        closeHsqlDb(session);
 
     }
 
@@ -596,16 +596,16 @@ public class DBReference {
         lastModified = filesUpdateTime();
     }
 
-    public void setImmediatelyReleaseResources(boolean _immediatelyReleaseResources) {
-        immediatelyReleaseResources = _immediatelyReleaseResources;
+    public void setImmediatelyReleaseResources(boolean immediatelyReleaseResources) {
+        this.immediatelyReleaseResources = immediatelyReleaseResources;
     }
 
-    public void setEncryptHSQLDB(boolean _encryptHSQLDB) {
-        encryptHSQLDB = _encryptHSQLDB;
+    public void setEncryptHSQLDB(boolean encryptHSQLDB) {
+        this.encryptHSQLDB = encryptHSQLDB;
     }
 
-    public void setExternalResourcesMapping(Map<String, String> _externalResourcesMapping) {
-        externalResourcesMapping = _externalResourcesMapping;
+    public void setExternalResourcesMapping(Map<String, String> externalResourcesMapping) {
+        this.externalResourcesMapping = externalResourcesMapping;
     }
 
     /**
@@ -614,18 +614,18 @@ public class DBReference {
      * Disabled by default; see the security note on {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}
      * for why this matters when opening database files from an untrusted source.
      *
-     * @param _allowRemoteLinks {@code true} to allow automatic resolution of network/UNC linked paths
+     * @param allowRemoteLinks {@code true} to allow automatic resolution of network/UNC linked paths
      */
-    public void setAllowRemoteLinks(boolean _allowRemoteLinks) {
-        allowRemoteLinks = _allowRemoteLinks;
+    public void setAllowRemoteLinks(boolean allowRemoteLinks) {
+        this.allowRemoteLinks = allowRemoteLinks;
     }
 
     public File getToKeepHsql() {
         return toKeepHsql;
     }
 
-    public void setToKeepHsql(File _toKeepHsql) {
-        toKeepHsql = _toKeepHsql;
+    public void setToKeepHsql(File toKeepHsql) {
+        this.toKeepHsql = toKeepHsql;
     }
 
     public boolean isEncryptHSQLDB() {
@@ -643,48 +643,48 @@ public class DBReference {
         return inMemory;
     }
 
-    public void setMirrorFolder(File _mirrorFolder) {
-        mirrorFolder = _mirrorFolder;
+    public void setMirrorFolder(File mirrorFolder) {
+        this.mirrorFolder = mirrorFolder;
     }
 
     public boolean isIgnoreCase() {
         return ignoreCase;
     }
 
-    public void setIgnoreCase(boolean _ignoreCase) {
-        ignoreCase = _ignoreCase;
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.ignoreCase = ignoreCase;
     }
 
-    public void setMirrorReadOnly(boolean _mirrorReadOnly) {
-        mirrorReadOnly = _mirrorReadOnly;
+    public void setMirrorReadOnly(boolean mirrorReadOnly) {
+        this.mirrorReadOnly = mirrorReadOnly;
     }
 
-    public void setLobScale(Integer _lobScale) {
-        lobScale = _lobScale;
+    public void setLobScale(Integer lobScale) {
+        this.lobScale = lobScale;
     }
 
-    public void setSkipIndexes(boolean _skipIndexes) {
-        skipIndexes = _skipIndexes;
+    public void setSkipIndexes(boolean skipIndexes) {
+        this.skipIndexes = skipIndexes;
     }
 
-    public void setSysSchema(boolean _sysSchema) {
-        sysSchema = _sysSchema;
+    public void setSysSchema(boolean sysSchema) {
+        this.sysSchema = sysSchema;
     }
 
     public boolean isPreventReloading() {
         return preventReloading;
     }
 
-    public void setPreventReloading(boolean _preventReloading) {
-        preventReloading = _preventReloading;
+    public void setPreventReloading(boolean preventReloading) {
+        this.preventReloading = preventReloading;
     }
 
     public boolean isConcatNulls() {
         return concatNulls;
     }
 
-    public void setConcatNulls(boolean _concatNulls) {
-        concatNulls = _concatNulls;
+    public void setConcatNulls(boolean concatNulls) {
+        this.concatNulls = concatNulls;
     }
 
     /**
@@ -715,18 +715,18 @@ public class DBReference {
         private long              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;
         private long              lastConnectionTime;
 
-        MemoryTimer(DBReference _dbReference) {
-            dbReference = _dbReference;
-            timer = new Timer(getClass().getSimpleName() + '-' + _dbReference.getDbFile().getName(), true);
+        MemoryTimer(DBReference dbReference) {
+            this.dbReference = dbReference;
+            timer = new Timer(getClass().getSimpleName() + '-' + dbReference.getDbFile().getName(), true);
         }
 
-        synchronized void decrementActiveConnection(final Session _session) {
+        synchronized void decrementActiveConnection(final Session session) {
             activeConnection--;
             if (dbReference.immediatelyReleaseResources && activeConnection == 0) {
                 try {
-                    dbReference.shutdown(_session);
-                } catch (Exception _ex) {
-                    logger.log(Level.WARNING, "Error shutting down db {0}: {1}", dbReference, _ex.toString());
+                    dbReference.shutdown(session);
+                } catch (Exception ex) {
+                    logger.log(Level.WARNING, "Error shutting down db {0}: {1}", dbReference, ex.toString());
                 }
                 timer.cancel();
 
@@ -740,9 +740,9 @@ public class DBReference {
                             if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout
                                 && getActiveConnection() == 0) {
                                 try {
-                                    dbReference.shutdown(_session);
-                                } catch (Exception _ignored) {
-                                    logger.log(Level.DEBUG, "Ignore {0}", _ignored.toString());
+                                    dbReference.shutdown(session);
+                                } catch (Exception ignored) {
+                                    logger.log(Level.DEBUG, "Ignore {0}", ignored.toString());
                                 }
                             }
                         }
@@ -767,8 +767,8 @@ public class DBReference {
             }
         }
 
-        void setInactivityTimeout(int _inactivityTimeout) {
-            inactivityTimeout = _inactivityTimeout;
+        void setInactivityTimeout(int inactivityTimeout) {
+            this.inactivityTimeout = inactivityTimeout;
         }
     }
 

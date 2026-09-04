@@ -16,11 +16,11 @@ public class DeleteCommand extends AbstractCursorCommand {
     private final Map<String, Object> rowPattern;
     private final Table               table;
 
-    public DeleteCommand(Table _table, Map<String, Object> _rowPattern, String _execId) {
-        indexSelector = new IndexSelector(_table);
-        rowPattern = _rowPattern;
-        execId = _execId;
-        table = _table;
+    public DeleteCommand(Table table, Map<String, Object> rowPattern, String execId) {
+        indexSelector = new IndexSelector(table);
+        this.rowPattern = rowPattern;
+        this.execId = execId;
+        this.table = table;
     }
 
     @Override
