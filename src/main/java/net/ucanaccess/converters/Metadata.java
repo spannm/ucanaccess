@@ -282,7 +282,7 @@ public class Metadata {
                 result.add(rs.getString(COLUMN_NAME));
             }
             return !SYSTEM_SUBQUERY.equals(tableName) ? result : null;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public String getColumnName(String escapedTableName, String escapedColumnName) throws SQLException {
@@ -297,7 +297,7 @@ public class Metadata {
                 }
             }
             return null;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public String getEscapedColumnName(String tableName, String columnName) throws SQLException {
@@ -306,7 +306,7 @@ public class Metadata {
             ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_COLUMN_NAME) : null;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public String getEscapedTableName(String tableName) throws SQLException {
@@ -314,7 +314,7 @@ public class Metadata {
             ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_TABLE_NAME) : null;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public boolean isAutoIncrement(String tableName, String columnName) throws SQLException {
@@ -323,7 +323,7 @@ public class Metadata {
             ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_AUTOINCREMENT);
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public boolean isCurrency(String tableName, String columnName) throws SQLException {
@@ -332,7 +332,7 @@ public class Metadata {
             ps.setString(2, columnName);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getBoolean(IS_CURRENCY);
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public Integer getTableId(String escapedName) throws SQLException {
@@ -340,7 +340,7 @@ public class Metadata {
             ps.setString(1, escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt(TABLE_ID) : -1;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public String getTableName(String escapedName) throws SQLException {
@@ -348,14 +348,14 @@ public class Metadata {
             ps.setString(1, escapedName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(TABLE_NAME) : null;
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public void dropTable(String tableName) throws SQLException {
         Try.withResources(() -> conn.prepareStatement(DROP_TABLE), ps -> {
             ps.setString(1, tableName);
             ps.execute();
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public void columnDef(String tableName, String columnName, String def) throws SQLException {
@@ -364,7 +364,7 @@ public class Metadata {
             ps.setString(2, columnName);
             ps.setString(3, tableName);
             ps.execute();
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public void calculatedField(String tableName, String columnName) throws SQLException {
@@ -372,7 +372,7 @@ public class Metadata {
             ps.setString(1, columnName);
             ps.setString(2, tableName);
             ps.execute();
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
     public void rename(String oldTableName, String newTableName, String newEscapedTableName) throws SQLException {
@@ -381,7 +381,7 @@ public class Metadata {
             ps.setString(2, newEscapedTableName);
             ps.setString(3, oldTableName);
             ps.executeUpdate();
-        }).orThrow(ex -> ex);
+        }).orThrow(ex -> (SQLException) ex);
     }
 
 }

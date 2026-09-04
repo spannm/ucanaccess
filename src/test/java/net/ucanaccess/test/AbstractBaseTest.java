@@ -107,7 +107,7 @@ public abstract class AbstractBaseTest extends Assertions {
         UcanaccessRuntimeException.requireNonNull(source, "Source file required");
         UcanaccessRuntimeException.requireNonNull(target, "Target file required");
         Try.catching(() -> Files.copy(source, target.toPath(), StandardCopyOption.REPLACE_EXISTING))
-            .orThrow(e -> new UncheckedIOException("Failed to copy '" + source + "' to '" + target + "'", e));
+            .orThrow(e -> new UncheckedIOException("Failed to copy '" + source + "' to '" + target + "'", (IOException) e));
         return target;
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractBaseTest extends Assertions {
         UcanaccessRuntimeException.requireNonNull(in, "Input stream required");
         UcanaccessRuntimeException.requireNonNull(target, "Target file required");
         Try.catching(() -> Files.copy(in, target.toPath(), StandardCopyOption.REPLACE_EXISTING))
-            .orThrow(e -> new UncheckedIOException("Failed to copy to '" + target + "'", e));
+            .orThrow(e -> new UncheckedIOException("Failed to copy to '" + target + "'", (IOException) e));
         return target;
     }
 

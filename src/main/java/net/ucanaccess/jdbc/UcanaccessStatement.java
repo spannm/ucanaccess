@@ -394,7 +394,7 @@ public class UcanaccessStatement implements Statement {
         return tryCatch(catchable, UcanaccessSQLException::wrap);
     }
 
-    protected static final <R, T extends Throwable> R tryCatch(IThrowingSupplier<R, T> catchable, Function<T, UcanaccessSQLException> exSupplier) throws UcanaccessSQLException {
+    protected static final <R, T extends Throwable> R tryCatch(IThrowingSupplier<R, T> catchable, Function<Throwable, UcanaccessSQLException> exSupplier) throws UcanaccessSQLException {
         return Try.catching(catchable).orThrow(exSupplier);
     }
 

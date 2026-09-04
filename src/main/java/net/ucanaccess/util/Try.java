@@ -246,7 +246,7 @@ public final class Try<V, EC extends Throwable> {
      * If an exception occurs during execution of the throwing consumer, that exception is thrown.
      * @param consumer consumer to execute in case of exception. The exception object is passed to the consumer.
      */
-    public void orElse(IThrowingConsumer<EC, Throwable> consumer) {
+    public void orElse(IThrowingConsumer<Throwable, Throwable> consumer) {
         if (hasThrown()) {
             catching(() -> consumer.accept(t)).orThrow();
         }
@@ -258,7 +258,7 @@ public final class Try<V, EC extends Throwable> {
      * @param function function to execute in case of exception. The exception object is passed to the function.
      * @return the successful value or value returned by the function
      */
-    public V orElseApply(IThrowingFunction<EC, V, Throwable> function) {
+    public V orElseApply(IThrowingFunction<Throwable, V, Throwable> function) {
         if (hasThrown()) {
             return catching(() -> function.apply(t)).orThrow();
         }
@@ -306,7 +306,7 @@ public final class Try<V, EC extends Throwable> {
      * @return the successful value
      * @throws T2 the exception returned by {@code function}
      */
-    public <T2 extends Throwable> V orThrow(Function<EC, T2> function) throws T2 {
+    public <T2 extends Throwable> V orThrow(Function<Throwable, T2> function) throws T2 {
         Objects.requireNonNull(function, "Function required");
         if (hasThrown()) {
             Throwable t2 = function.apply(t);

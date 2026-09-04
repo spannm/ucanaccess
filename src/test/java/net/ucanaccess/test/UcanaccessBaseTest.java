@@ -284,8 +284,10 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                         + objExpected + " in [" + query + ']');
                 } else {
                     if (objActual instanceof Blob) {
-                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
-                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes).orThrow(UncheckedIOException::new);
+                        byte[] barrActual = Try.withResources(((Blob) objActual)::getBinaryStream, InputStream::readAllBytes)
+                            .orThrow(e -> new UncheckedIOException((IOException) e));
+                        byte[] barrExpected = Try.withResources(((Blob) objExpected)::getBinaryStream, InputStream::readAllBytes)
+                            .orThrow(e -> new UncheckedIOException((IOException) e));
                         for (int y = 0; y < barrExpected.length; y++) {
                             assertEquals(barrExpected[y], barrActual[y], "Byte mismatch at position " + y + " in column " + col + " in blob");
                         }
@@ -442,14 +444,14 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         File f = createTempFileName(prefix);
 
         getLogger().log(Level.DEBUG, "Creating temp file {0}", f);
-        Try.catching(() -> Files.createFile(f.toPath())).orThrow(UncheckedIOException::new);
+        Try.catching(() -> Files.createFile(f.toPath())).orThrow(e -> new UncheckedIOException((IOException) e));
 
         f.deleteOnExit();
         return f;
     }
 
     void createNewDatabase(FileFormat fileFormat, File dbFile) {
-        Try.withResources(() -> DatabaseBuilder.create(fileFormat, dbFile), Database::flush).orThrow(UncheckedIOException::new);
+        Try.withResources(() -> DatabaseBuilder.create(fileFormat, dbFile), Database::flush).orThrow(e -> new UncheckedIOException((IOException) e));
         getLogger().log(Level.INFO, "Access {0} database created: {1}", fileFormat.name(), dbFile.getAbsolutePath());
     }
 

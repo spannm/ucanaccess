@@ -71,7 +71,8 @@ class TryTest extends AbstractBaseTest {
         assertEquals(-1L, tryCatch.orElseApply(t -> -1L));
         assertEquals(-1L, tryCatch.orElseGet(() -> -1L));
         assertSame(ex1, assertThrows(IOException.class, tryCatch::orThrow));
-        UncheckedIOException unioex = assertThrows(UncheckedIOException.class, () -> tryCatch.orThrow(UncheckedIOException::new));
+        UncheckedIOException unioex = assertThrows(UncheckedIOException.class,
+            () -> tryCatch.orThrow(t -> new UncheckedIOException((IOException) t)));
         assertSame(ex1, unioex.getCause());
 
         Try<Boolean, Throwable> mappedtc = tryCatch.map(size -> {
@@ -100,6 +101,26 @@ class TryTest extends AbstractBaseTest {
         assertSame(exception, assertThrows(IllegalArgumentException.class, tryCatch::orThrow));
         RuntimeException rtex = assertThrows(RuntimeException.class, () -> tryCatch.orThrow(RuntimeException::new));
         assertSame(exception, rtex.getCause());
+    }
+
+    @Test
+    void testSupplierThrowsUndeclaredRuntimeExceptionDoesNotThrowClassCastException() {
+        // regression test: the code block is statically inferred to only throw IOException,
+        // but actually throws an unrelated, undeclared RuntimeException at runtime (e.g. a bug
+        // deeper in some library). orThrow()/orElse()/orElseApply() must not fail with a
+        // ClassCastException while trying to treat that exception as an IOException
+        Try<Integer, IOException> tryCatch = Try.catching(() -> {
+            int[] tooSmall = new int[2];
+            return tooSmall[5];
+        });
+
+        assertTrue(tryCatch.hasThrown());
+        assertInstanceOf(ArrayIndexOutOfBoundsException.class, tryCatch.getException());
+
+        assertEquals(-1, tryCatch.orElseApply(t -> -1));
+
+        RuntimeException wrapped = assertThrows(RuntimeException.class, () -> tryCatch.orThrow(RuntimeException::new));
+        assertInstanceOf(ArrayIndexOutOfBoundsException.class, wrapped.getCause());
     }
 
 }
