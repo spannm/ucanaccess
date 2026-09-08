@@ -61,4 +61,38 @@ class CounterTest extends UcanaccessBaseTest {
 
     }
 
+    /**
+     * Regression test for a bug where Jackcess's internal table cache holds {@link io.github.spannm.jackcess.Table}
+     * instances only via {@code WeakReference}. Without pinning, a GC pass between the {@code DISABLE AUTOINCREMENT
+     * ON} DDL statement and a subsequent {@code INSERT} could collect the {@code Table} object whose
+     * {@code allowAutoNumberInsert} flag had just been toggled; the table would then be silently reloaded with the
+     * flag reset to its default, and an explicit AutoNumber value would be replaced by an auto-generated one.
+     */
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource(include = "V2016")
+    void testDisableAutoincrementSurvivesGc(AccessVersion accessVersion) throws SQLException, IOException {
+        init(accessVersion);
+
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
+            executeStatements(st, "DISABLE AUTOINCREMENT ON t_counter");
+            assertTrue(st.getConnection().getDbIO().getTable("t_counter").isAllowAutoNumberInsert());
+
+            for (int i = 0; i < 5; i++) {
+                System.gc();
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            assertTrue(st.getConnection().getDbIO().getTable("t_counter").isAllowAutoNumberInsert(),
+                "allowAutoNumberInsert must survive a GC pass between DDL and DML");
+
+            executeStatements(st,
+                "INSERT INTO t_counter (cntr, chr, descr) VALUES (3, 'C', 'autoincr OFF, insert arbitrary AutoNumber value')");
+        }
+
+        checkQuery("SELECT cntr, chr FROM t_counter ORDER BY cntr", recs(rec(3, "C")));
+    }
+
 }

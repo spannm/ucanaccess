@@ -1,6 +1,7 @@
 package net.ucanaccess.jdbc;
 
 import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.commands.CompositeCommand;
 import net.ucanaccess.commands.ICommand;
 import net.ucanaccess.commands.ICommand.CommandType;
@@ -348,6 +349,10 @@ public class UcanaccessConnection implements Connection {
 
     public Database getDbIO() {
         return ref.getDbIO();
+    }
+
+    void pinAutoNumberTable(String tableName, Table table) {
+        ref.pinAutoNumberTable(tableName, table);
     }
 
     @Override

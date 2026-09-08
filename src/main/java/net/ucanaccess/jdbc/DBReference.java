@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,14 @@ public class DBReference {
     private boolean                                 hsqldbShutdown;
     private File                                    mirrorFolder;
     private final Set<File>                         links             = new HashSet<>();
+    /**
+     * Holds strong references to {@link Table} instances on which a caller has explicitly toggled
+     * {@code allowAutoNumberInsert} (via {@code DISABLE}/{@code ENABLE AUTOINCREMENT ON}). Jackcess's internal
+     * table cache only holds {@link Table} objects via {@code WeakReference}s, so without this pin the GC could
+     * collect such a table between statements; the table would then be transparently reloaded on next access,
+     * silently resetting {@code allowAutoNumberInsert} to its default and losing the toggle.
+     */
+    private final Map<String, Table>                pinnedAutoNumberTables = new HashMap<>();
     private boolean                                 ignoreCase        = true;
     private boolean                                 mirrorReadOnly;
     private Integer                                 lobScale;
@@ -214,6 +223,7 @@ public class DBReference {
             closeHsqlDb(session);
             dbIO.flush();
             dbIO.close();
+            pinnedAutoNumberTables.clear();
             dbIO = open(dbFile, pwd);
             id = createId();
             firstConnection = true;
@@ -558,8 +568,17 @@ public class DBReference {
         for (IOnReloadReferenceListener listener : onReloadListeners) {
             listener.onReload();
         }
+        pinnedAutoNumberTables.clear();
         dbIO = open(dbFile, pwd);
 
+    }
+
+    /**
+     * Pins the given table so it is not garbage-collected while an explicit {@code allowAutoNumberInsert} toggle
+     * (from {@code DISABLE}/{@code ENABLE AUTOINCREMENT ON}) is in effect on it.
+     */
+    void pinAutoNumberTable(String tableName, Table table) {
+        pinnedAutoNumberTables.put(tableName, table);
     }
 
     public void setInactivityTimeout(int inactivityTimeout) {
@@ -586,6 +605,7 @@ public class DBReference {
             }
         }
         memoryTimer.timer.cancel();
+        pinnedAutoNumberTables.clear();
         dbIO.flush();
         dbIO.close();
         closeHsqlDb(session);

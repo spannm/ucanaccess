@@ -1,5 +1,6 @@
 package net.ucanaccess.jdbc;
 
+import io.github.spannm.jackcess.Table;
 import net.ucanaccess.commands.DDLCommandEnlist;
 import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.SQLConverter;
@@ -65,7 +66,11 @@ public abstract class AbstractExecute {
             throw new TableNotFoundException(tableName);
         }
         boolean enableAutoIncr = ddlType.equals(DDLType.ENABLE_AUTOINCREMENT);
-        conn.getDbIO().getTable(rtn).setAllowAutoNumberInsert(!enableAutoIncr);
+        Table table = conn.getDbIO().getTable(rtn);
+        table.setAllowAutoNumberInsert(!enableAutoIncr);
+        // Jackcess only holds this Table via a WeakReference in its internal cache; pin it here so a GC pass
+        // between this DDL statement and a later DML statement can't silently reset the flag we just set.
+        conn.pinAutoNumberTable(rtn, table);
         if (this instanceof Execute) {
             return false;
         } else {
