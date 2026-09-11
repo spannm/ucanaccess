@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.support.AnnotationSupport;
 
 import java.lang.annotation.ElementType;
@@ -41,7 +42,7 @@ public @interface AccessVersionSource {
     class AccessVersionArgumentsProvider implements ArgumentsProvider {
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
             AccessVersionSource src = context.getElement().map(elem -> AnnotationSupport.findAnnotation(elem, AccessVersionSource.class).get()).orElse(null);
 
             List<AccessVersion> include = Arrays.stream(src.include()).map(AccessVersion::valueOf).collect(Collectors.toList());

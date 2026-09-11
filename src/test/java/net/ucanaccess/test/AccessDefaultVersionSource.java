@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,7 +25,7 @@ public @interface AccessDefaultVersionSource {
     class DefaultAccessVersionArgumentsProvider implements ArgumentsProvider {
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
             return Stream.of(AccessVersion.getDefaultAccessVersion()).map(Arguments::of);
         }
 
