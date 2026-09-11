@@ -1,0 +1,31 @@
+name: Bug Report
+description: Something isn't working as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: UCanAccess version
+      placeholder: e.g. 5.1.7
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How can we reproduce it?
+      description: >
+        The SQL statement(s) or JDBC code that trigger it, the stack trace,
+        and/or a minimal sample database (attach it here, with any sensitive
+        data removed) help a lot — but share whatever you have, even if it's
+        incomplete.
+    validations:
+      required: false
