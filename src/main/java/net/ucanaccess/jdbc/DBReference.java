@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DBReference {
+public final class DBReference {
     private static final String                     CIPHER_SPEC       = "AES";
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
     private static String                           version;

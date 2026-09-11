@@ -23,6 +23,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
     private String                             sql;
     private final Map<Integer, ParameterReset> memento = new HashMap<>();
 
+    @SuppressWarnings("this-escape")
     public UcanaccessPreparedStatement(NormalizedSQL nsql, PreparedStatement hidden, UcanaccessConnection conn) throws SQLException {
         super(hidden, conn);
         sql = nsql.getSql();
