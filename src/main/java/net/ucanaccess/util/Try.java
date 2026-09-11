@@ -134,11 +134,14 @@ public final class Try<V, EC extends Throwable> {
      * @param catchable the function executed on the resource
      * @return new instance
      */
+    @SuppressWarnings("try")
     public static <R extends AutoCloseable, ES extends Throwable, V, EC extends Throwable> Try<V, EC> withResources(
         IThrowingSupplier<R, ES> resourceSupplier, IThrowingFunction<R, V, EC> catchable) {
 
         Objects.requireNonNull(resourceSupplier, "Resource supplier required");
         Objects.requireNonNull(catchable, "Resource consumer required");
+        // R is only bound by AutoCloseable, so javac conservatively assumes close() could throw
+        // InterruptedException; none of this class's actual callers use an interruptible resource
         try (R r = resourceSupplier.get()) {
             V locVal = null;
             EC locEx = null;

@@ -562,7 +562,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     /**
      * A single record made up of one or more columns.
      */
-    @SafeVarargs
     protected static final List<Object> rec(Object... cols) {
         return Stream.of(cols).collect(Collectors.toCollection(ArrayList::new));
     }
@@ -578,6 +577,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
      * A list of records.
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     protected static final List<List<Object>> recs(List<Object>... recs) {
         return Stream.of(recs).collect(Collectors.toCollection(ArrayList::new));
     }
