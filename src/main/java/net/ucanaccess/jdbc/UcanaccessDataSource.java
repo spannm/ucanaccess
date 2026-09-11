@@ -21,13 +21,14 @@ import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
 import javax.sql.DataSource;
 
-@SuppressWarnings("PMD.UnnecessaryFullyQualifiedName")
+@SuppressWarnings({"PMD.UnnecessaryFullyQualifiedName", "serial"})
 public class UcanaccessDataSource implements Serializable, Referenceable, DataSource {
     private static final long           serialVersionUID = -5622403376078548785L;
 
     private String                      accessPath;
     private int                         loginTimeout     = 0;
     private transient PrintWriter       logWriter        = new PrintWriter(System.out);
+    // declared as Map, but always an EnumMap, which is serializable
     private final Map<Property, String> userPass         = new EnumMap<>(Property.class);
 
     private final Map<Property, String> props            = new EnumMap<>(Property.class);

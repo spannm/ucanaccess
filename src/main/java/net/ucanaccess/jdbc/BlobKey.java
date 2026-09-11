@@ -14,6 +14,9 @@ public class BlobKey implements Serializable {
     private static final long   serialVersionUID = -8580858159403159903L;
     public static final int     MAX_SIZE         = 4096;
 
+    // declared as Map rather than a concrete Serializable type; callers are expected to pass a serializable Map
+    // (this class is only ever populated with a HashMap internally, see the Table/Row constructor below)
+    @SuppressWarnings("serial")
     private Map<String, Object> key;
     private final String        tableName;
     private final String        columnName;

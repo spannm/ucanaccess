@@ -7,6 +7,8 @@ import java.util.Map;
 public class UnsupportedValue extends ComplexBase {
 
     private static final long   serialVersionUID = 1L;
+    // populated from Jackcess's own (serializable) raw value map; values are always JDBC-compatible types
+    @SuppressWarnings("serial")
     private Map<String, Object> values;
 
     public UnsupportedValue(io.github.spannm.jackcess.complex.UnsupportedValue cv) {
