@@ -1292,22 +1292,22 @@ public class LoadJet {
             QueryImpl qi = (QueryImpl) q;
             for (QueryImpl.Row row : qi.getRows()) {
 
-                if (QueryFormat.COLUMN_ATTRIBUTE.equals(row._attribute)) {
-                    String name = row._name1;
+                if (QueryFormat.COLUMN_ATTRIBUTE.equals(row.attribute)) {
+                    String name = row.name1;
 
                     if (name == null) {
-                        int beginIndex = Math.max(row._expression.lastIndexOf('['), row._expression.lastIndexOf('.'));
+                        int beginIndex = Math.max(row.expression.lastIndexOf('['), row.expression.lastIndexOf('.'));
 
-                        if (beginIndex < 0 || beginIndex == row._expression.length() - 1
-                                || row._expression.endsWith(")")) {
+                        if (beginIndex < 0 || beginIndex == row.expression.length() - 1
+                                || row.expression.endsWith(")")) {
                             continue;
                         }
-                        name = row._expression.substring(beginIndex + 1);
+                        name = row.expression.substring(beginIndex + 1);
                         if (name.endsWith("]")) {
                             name = name.substring(0, name.length() - 1);
                         }
                         if (name.contentEquals("*")) {
-                            String table = row._expression.substring(0, beginIndex);
+                            String table = row.expression.substring(0, beginIndex);
                             List<String> result = metadata.getColumnNames(table);
                             if (result != null) {
                                 for (String column : result) {
