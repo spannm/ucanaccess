@@ -266,6 +266,16 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <scmReleaseCommitComment>chore(release): prepare release @{releaseLabel}</scmReleaseCommitComment>
+                        <scmDevelopmentCommitComment>chore(release): prepare for next development iteration</scmDevelopmentCommitComment>
+                        <scmBranchCommitComment>chore(release): branch @{releaseLabel}</scmBranchCommitComment>
+                    </configuration>
+                </plugin>
+
+                <plugin>
                     <groupId>com.github.ekryd.sortpom</groupId>
                     <artifactId>sortpom-maven-plugin</artifactId>
                     <version>${dep.plugin.sortpom.version}</version>
