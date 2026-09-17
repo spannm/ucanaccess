@@ -95,6 +95,8 @@
         <!-- The default build target. -->
         <project.build.targetJdk>11</project.build.targetJdk>
 
+        <project.rootDirectory>${maven.multiModuleProjectDirectory}</project.rootDirectory>
+
         <developerId>spannm</developerId>
         <githubBaseUrl>https://github.com/${developerId}/</githubBaseUrl>
 
@@ -132,6 +134,8 @@
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
         <dep.checkstyle.version>10.26.1</dep.checkstyle.version>
+        <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
+        <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
         <basepom.check.skip-dependency>false</basepom.check.skip-dependency>
@@ -244,7 +248,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
-                        <configLocation>src/test/resources/team/checkstyle-rules.xml</configLocation>
+                        <configLocation>${check.checkstyle.ruleset}</configLocation>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -260,7 +264,7 @@
                     <artifactId>maven-pmd-plugin</artifactId>
                     <configuration>
                         <rulesets>
-                            <ruleset>src/test/resources/team/pmd-rules.xml</ruleset>
+                            <ruleset>${check.pmd.ruleset}</ruleset>
                         </rulesets>
                     </configuration>
                 </plugin>
