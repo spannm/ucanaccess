@@ -291,8 +291,16 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <configuration>
                         <archive>
+                            <index>false</index>
+                            <manifest>
+                                <mainClass>net.ucanaccess.about.ThisLib</mainClass>
+                            </manifest>
                             <manifestEntries combine.children="append">
                                 <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
+                                <Project-Description>${project.description}</Project-Description>
+                                <Project-Url>${project.url}</Project-Url>
+                                <Issue-Management-Url>${project.issueManagement.url}</Issue-Management-Url>
+                                <Scm-Url>${project.scm.url}</Scm-Url>
                             </manifestEntries>
                         </archive>
                     </configuration>
