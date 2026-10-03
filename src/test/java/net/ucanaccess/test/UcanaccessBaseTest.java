@@ -63,8 +63,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         this.accessVersion = accessVersion;
     }
 
-    protected void init(AccessVersion accessVersion) throws SQLException {
-        this.accessVersion = accessVersion;
+    protected void init(AccessVersion version) throws SQLException {
+        accessVersion = version;
         ucanaccess = createUcanaccessConnection();
     }
 
