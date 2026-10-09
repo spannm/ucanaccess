@@ -241,22 +241,34 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public UcanaccessStatement createStatement() throws SQLException {
-        checkConnection();
-        return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);
+        try {
+            checkConnection();
+            return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
+        }
     }
 
     @Override
     public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        checkConnection();
-        return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);
+        try {
+            checkConnection();
+            return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
+        }
     }
 
     @Override
     public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        checkConnection();
-        return new UcanaccessStatement(
-                hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
+        try {
+            checkConnection();
+            return new UcanaccessStatement(
+                    hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
+        } catch (SQLException ex) {
+            throw new UcanaccessSQLException(ex);
+        }
     }
 
     @Override
