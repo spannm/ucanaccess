@@ -372,10 +372,11 @@ public final class SQLConverter {
         String sql = inputSql + " ";
         aliases(sql, nsql);
         sql = replaceBacktick(sql);
-        sql = replaceAposNames(sql);
         sql = convertUnion(sql);
         sql = convertAccessDate(sql);
+        // quoted aliases first, so that apostrophised aliases are not mangled by replaceAposNames
         sql = convertQuotedAliases(sql, nsql);
+        sql = replaceAposNames(sql);
         sql = escape(sql);
         sql = convertLike(sql);
         sql = replaceWhiteSpacedTables(sql);
