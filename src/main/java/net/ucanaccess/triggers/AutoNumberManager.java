@@ -32,13 +32,7 @@ public final class AutoNumberManager {
         // Note: This code assumes *sequential* integer AutoNumber values.
         // (Access also supports *random* integer AutoNumber values, but they
         // are not very common.)
-        ColumnImpl column = (ColumnImpl) col;
-        AtomicInteger next = REGISTER.get(column);
-        if (next == null) {
-            next = new AtomicInteger((Integer) column.getAutoNumberGenerator().getLast());
-            REGISTER.put(column, next);
-        }
-        return next.incrementAndGet();
+        return seed(col).incrementAndGet();
     }
 
     /** Sets the AutoNumber seed to {@code newVal}. */
@@ -48,15 +42,15 @@ public final class AutoNumberManager {
 
     /** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
     public static synchronized void bump(Column col, int newVal) {
-        ColumnImpl column = (ColumnImpl) col;
-        AtomicInteger next = REGISTER.get(column);
-        if (next == null) {
-            next = new AtomicInteger((Integer) column.getAutoNumberGenerator().getLast());
-            REGISTER.put(column, next);
-        }
+        AtomicInteger next = seed(col);
         if (newVal > next.get()) {
             next.set(newVal);
         }
+    }
+
+    private static AtomicInteger seed(Column col) {
+        return REGISTER.computeIfAbsent(col,
+            c -> new AtomicInteger((Integer) ((ColumnImpl) c).getAutoNumberGenerator().getLast()));
     }
 
 }

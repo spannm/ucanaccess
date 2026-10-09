@@ -35,6 +35,11 @@ public class Persist2Jet {
      * Cache of columns names per table name and database file.
      */
     private static final Map<File, Map<String, List<String>>> COL_NAMES_CACHE = new LinkedHashMap<>();
+
+    private static final String SYS_RELATIONSHIPS        = "MSysRelationships";
+    private static final String COL_OBJECT_ID            = "ObjectId";
+    private static final String COL_SZ_OBJECT            = "szObject";
+    private static final String COL_SZ_REFERENCED_OBJECT = "szReferencedObject";
     static {
         DBReference.addOnReloadRefListener(COL_NAMES_CACHE::clear);
     }
@@ -52,13 +57,8 @@ public class Persist2Jet {
         return escapeIdentifiers(vl, t);
     }
 
-    public Object[] getValues(Map<String, Object> rowPattern, Table t) {
-        Object[] values = new Object[rowPattern.size()];
-        int i = 0;
-        for (Object obj : rowPattern.values()) {
-            values[i++] = obj;
-        }
-        return values;
+    public Object[] getValues(Map<String, Object> rowPattern) {
+        return rowPattern.values().toArray();
     }
 
     public List<String> getCreateColumnNamesCache(String tableName) throws SQLException {
@@ -481,17 +481,17 @@ public class Persist2Jet {
                 Integer id = (Integer) row.get("Id");
                 Table tsa = db.getSystemTable("MSysACEs");
                 Map<String, Object> rowtsa = new HashMap<>();
-                rowtsa.put("ObjectId", id);
+                rowtsa.put(COL_OBJECT_ID, id);
                 Cursor cur = tsa.getDefaultCursor();
                 if (cur.findNextRow(rowtsa)) {
                     cur.deleteCurrentRow();
                 }
                 catc.deleteCurrentRow();
-                Table srs = db.getSystemTable("MSysRelationships");
+                Table srs = db.getSystemTable(SYS_RELATIONSHIPS);
                 Cursor srsc = srs.getDefaultCursor();
                 while ((row = srsc.getNextRow()) != null) {
-                    String szObject = (String) row.get("szObject");
-                    String szReferencedObject = (String) row.get("szReferencedObject");
+                    String szObject = (String) row.get(COL_SZ_OBJECT);
+                    String szReferencedObject = (String) row.get(COL_SZ_REFERENCED_OBJECT);
                     if (szObject != null && szObject.equalsIgnoreCase(tableName)
                             || szReferencedObject != null && szReferencedObject.equalsIgnoreCase(tableName)) {
                         srsc.deleteCurrentRow();
@@ -526,24 +526,24 @@ public class Persist2Jet {
             if (name != null && name.equalsIgnoreCase(oldTableName)) {
                 Integer id = (Integer) row.get("Id");
                 Map<String, Object> rowtsa = new HashMap<>();
-                rowtsa.put("ObjectId", id);
+                rowtsa.put(COL_OBJECT_ID, id);
                 Row r = catc.getCurrentRow();
                 r.put("Name", tn);
                 catc.updateCurrentRowFromMap(r);
-                Table srs = db.getSystemTable("MSysRelationships");
+                Table srs = db.getSystemTable(SYS_RELATIONSHIPS);
                 Cursor srsc = srs.getDefaultCursor();
 
                 while ((row = srsc.getNextRow()) != null) {
-                    String szObject = (String) row.get("szObject");
-                    String szReferencedObject = (String) row.get("szReferencedObject");
+                    String szObject = (String) row.get(COL_SZ_OBJECT);
+                    String szReferencedObject = (String) row.get(COL_SZ_REFERENCED_OBJECT);
                     boolean updated = false;
                     if (szObject != null && szObject.equalsIgnoreCase(oldTableName)) {
-                        row.put("szObject", tn);
+                        row.put(COL_SZ_OBJECT, tn);
                         updated = true;
                     }
 
                     if (szReferencedObject != null && szReferencedObject.equalsIgnoreCase(oldTableName)) {
-                        row.put("szReferencedObject", tn);
+                        row.put(COL_SZ_REFERENCED_OBJECT, tn);
                         updated = true;
                     }
                     if (updated) {
@@ -756,7 +756,7 @@ public class Persist2Jet {
         relationshipName = escape4Access(relationshipName);
         UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
         Database db = conn.getDbIO();
-        Table tbl = db.getSystemTable("MSysRelationships");
+        Table tbl = db.getSystemTable(SYS_RELATIONSHIPS);
         IndexCursor crsr = CursorBuilder.createCursor(tbl.getIndex("szRelationship"));
         Row r = crsr.findRowByEntry(relationshipName);
         if (r != null) {

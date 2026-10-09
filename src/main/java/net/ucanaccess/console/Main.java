@@ -496,7 +496,7 @@ public class Main {
             }
         }
 
-        String joinWithLen(CharSequence delim, List<? extends String> elems) {
+        String joinWithLen(CharSequence delim, List<String> elems) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < elems.size(); i++) {
                 int width = colWidths.get(i);

@@ -78,6 +78,7 @@ public class DFunction {
                                             : "$1" + resolveAmbiguosTableName(cln) + ".$2$3");
                                 }
                             } catch (SQLException ignored) {
+                                // metadata not available, keep the token unchanged
                             }
                             sb.append(tkn);
                         }

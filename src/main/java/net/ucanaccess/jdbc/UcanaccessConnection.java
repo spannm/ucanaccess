@@ -321,6 +321,7 @@ public class UcanaccessConnection implements Connection {
      * Extension hook called towards end of {@link #flushIO()}.
      */
     void afterFlushIoHook() {
+        // no-op by default
     }
 
     private void finalizeEnlistedResources() {
@@ -790,7 +791,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void setSchema(String schema) {
-
+        // schemas are not supported, the call is ignored
     }
 
     @Override
@@ -820,6 +821,7 @@ public class UcanaccessConnection implements Connection {
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) {
+        // local database file, network timeouts do not apply
     }
 
     @Override

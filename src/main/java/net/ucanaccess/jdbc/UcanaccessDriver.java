@@ -253,7 +253,8 @@ public final class UcanaccessDriver implements Driver {
             if (i == 1 || i == 2 || i == 4 || i == 8 || i == 16 || i == 32) {
                 return i;
             }
-        } catch (Exception ignored) {
+        } catch (NumberFormatException ignored) {
+            // invalid value, reported below
         }
         LOGGER.log(Level.WARNING, "Lobscale value must equal at least one of the following values: 1,2,4,8,16,32, skipping it");
         return null;

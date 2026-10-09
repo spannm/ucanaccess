@@ -9,6 +9,7 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import org.hsqldb.types.JavaObjectData;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TriggerAppendOnly extends TriggerBase {
@@ -30,18 +31,15 @@ public class TriggerAppendOnly extends TriggerBase {
                     String val = newR[i] == null ? null : newR[i].toString();
                     if (INSERT_BEFORE_ROW == type) {
                         newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] {new Version(val, upTime)});
-                    } else if (UPDATE_BEFORE_ROW == type && (oldR[i] != null || newR[i] != null)) {
-                        if (oldR[i] == null && newR[i] != null || oldR[i] != null && newR[i] == null
-                            || !oldR[i].equals(newR[i])) {
-                            Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
+                    } else if (UPDATE_BEFORE_ROW == type && !Objects.equals(oldR[i], newR[i])) {
+                        Version[] oldV = (Version[]) ((JavaObjectData) oldR[verCol.getColumnNumber()]).getObject();
 
-                            Version[] newV = new Version[oldV.length + 1];
-                            if (oldV.length > 0) {
-                                System.arraycopy(oldV, 0, newV, 1, oldV.length);
-                            }
-                            newV[0] = new Version(val, upTime);
-                            newR[verCol.getColumnNumber()] = new JavaObjectData(newV);
+                        Version[] newV = new Version[oldV.length + 1];
+                        if (oldV.length > 0) {
+                            System.arraycopy(oldV, 0, newV, 1, oldV.length);
                         }
+                        newV[0] = new Version(val, upTime);
+                        newR[verCol.getColumnNumber()] = new JavaObjectData(newV);
                     }
                 }
                 ++i;

@@ -181,6 +181,9 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    /**
+     * @deprecated Use {@link #getBigDecimal(int)}
+     */
     @Override
     @Deprecated
     public BigDecimal getBigDecimal(int idx, int arg1) throws SQLException {
@@ -200,6 +203,9 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    /**
+     * @deprecated Use {@link #getBigDecimal(String)}
+     */
     @Override
     @Deprecated
     public BigDecimal getBigDecimal(String columnLabel, int arg1) throws SQLException {
@@ -833,6 +839,9 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    /**
+     * @deprecated Use {@link #getCharacterStream(int)}
+     */
     @Override
     @Deprecated
     public InputStream getUnicodeStream(int idx) throws SQLException {
@@ -843,6 +852,9 @@ public class UcanaccessResultSet implements ResultSet {
         }
     }
 
+    /**
+     * @deprecated Use {@link #getCharacterStream(String)}
+     */
     @Override
     @Deprecated
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {

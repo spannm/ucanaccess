@@ -6,7 +6,7 @@ public class SingleValue extends ComplexBase {
 
     private static final long serialVersionUID = 1L;
     // always holds a JDBC-compatible value (String, Number, Date, byte[], ...), all of which are serializable
-    @SuppressWarnings("serial")
+    @SuppressWarnings({"serial", "java:S1948"})
     private Object            value;
 
     public SingleValue(io.github.spannm.jackcess.complex.SingleValue cv) {

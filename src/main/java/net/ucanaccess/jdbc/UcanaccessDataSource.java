@@ -34,6 +34,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
     private final Map<Property, String> props            = new EnumMap<>(Property.class);
 
     public UcanaccessDataSource() {
+        // default constructor required for bean-style configuration
     }
 
     /**

@@ -347,10 +347,9 @@ public class ParametricQuery {
 
             // apostrophe treatment
             for (String s : l) {
-                String h = treatApos(s);
                 for (String modf : paramNames) {
                     if (convertSQL(modf).equals(s)) {
-                        h = treatApos(modf);
+                        String h = treatApos(modf);
                         if (!aposMap.containsKey(h)) {
                             paramNames.set(paramNames.indexOf(modf), h);
                             psTxt = psTxt.replaceAll("(?i)" + Pattern.quote(s), convertSQL(h));

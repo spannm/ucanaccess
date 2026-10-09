@@ -9,7 +9,7 @@ public final class FunctionsAggregate {
     }
 
     public static Object first(Object in, Boolean flag, Object[] register, Integer[] counter) {
-        if (flag) {
+        if (Boolean.TRUE.equals(flag)) {
             return register[0];
         }
         if (register[0] == null) {
@@ -41,7 +41,7 @@ public final class FunctionsAggregate {
     }
 
     public static Object last(Object in, Boolean flag, Object[] register, Integer[] counter) {
-        if (flag) {
+        if (Boolean.TRUE.equals(flag)) {
             return register[0];
         }
         register[0] = in;

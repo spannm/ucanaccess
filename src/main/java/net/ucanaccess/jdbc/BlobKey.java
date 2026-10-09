@@ -16,7 +16,7 @@ public class BlobKey implements Serializable {
 
     // declared as Map rather than a concrete Serializable type; callers are expected to pass a serializable Map
     // (this class is only ever populated with a HashMap internally, see the Table/Row constructor below)
-    @SuppressWarnings("serial")
+    @SuppressWarnings({"serial", "java:S1948"})
     private Map<String, Object> key;
     private final String        tableName;
     private final String        columnName;

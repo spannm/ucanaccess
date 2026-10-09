@@ -215,7 +215,6 @@ public final class SQLConverter {
                     if (ret[0] == -1) {
                         return new int[] {mc.start(), mc.end()};
                     }
-                    continue;
                 } else {
                     if (ret[0] == -1) {
                         ret[0] = mc.start();
@@ -915,7 +914,7 @@ public final class SQLConverter {
                 + convertToRegexMatches(p3);
         }
 
-        String result = likeContent
+        return likeContent
 
         // 1. Handle Access-specific escapes with tilde (~)
             .replace("~*", "*").replace("~#", "#").replace("~_", "_")
@@ -928,8 +927,6 @@ public final class SQLConverter {
 
         // 3. Handle character classes and negation
             .replaceAll("\\[\\!([^\\]]+)\\]", "[^$1]"); // handles [!abc], [!1-9] etc.
-
-        return result;
     }
 
     private static String convertToLikeCondition(String likeContent) {
@@ -939,11 +936,11 @@ public final class SQLConverter {
                 + mtc.group(0).charAt(1)
                 + convertToLikeCondition(likeContent.substring(mtc.end(0)));
         }
-        return likeContent.replaceAll("\\*", "%").replaceAll("\\?", "_");
+        return likeContent.replace('*', '%').replace('?', '_');
     }
 
     private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
-        int i = likeContent.replaceAll("\\[#\\]", "").indexOf('#');
+        int i = likeContent.replace("[#]", "").indexOf('#');
         not = not == null ? "" : " NOT ";
         if (i >= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {
             return not + "REGEXP_MATCHES(" + conditionField + ",'" + convertToRegexMatches(likeContent) + "')" + closePar
@@ -978,12 +975,8 @@ public final class SQLConverter {
             int idxe = mtc.end();
             boolean replace = true;
             for (int j = idx; j >= 0; j--) {
-                if (Character.isDigit(cq[j])) {
-                    continue;
-                } else {
-                    if (Character.isLetter(cq[j])) {
-                        replace = false;
-                    }
+                if (!Character.isDigit(cq[j])) {
+                    replace = !Character.isLetter(cq[j]);
                     break;
                 }
             }
@@ -1079,11 +1072,9 @@ public final class SQLConverter {
                 } else if (Character.isDigit(c)) {
                     foundType = true;
                     digit = true;
-                } else if (c == '+' || c == '-') {
-                    if (j + 1 < ca.length && ca[j + 1] != '(' && ca[j + 1] != '[') {
-                        foundType = true;
-                        digit = true;
-                    }
+                } else if ((c == '+' || c == '-') && j + 1 < ca.length && ca[j + 1] != '(' && ca[j + 1] != '[') {
+                    foundType = true;
+                    digit = true;
                 }
 
             }

@@ -1030,11 +1030,12 @@ public final class Functions {
         int minLength = 1;
         for (int i = 0; i < ca.length; i++) {
             char c = ca[i];
+            if (c == ' ') {
+                continue;
+            }
             if ((c == '-' || c == '+') && i == 0) {
                 minLength++;
                 sb.append(c);
-            } else if (c == ' ') {
-                continue;
             } else if (Character.isDigit(c)) {
                 sb.append(c);
             } else if (c == '.' && i == lp) {
@@ -1399,18 +1400,14 @@ public final class Functions {
         final int financialMaxIterations = 20; // Bet accuracy with 128
         final double financialPrecision = 0.0000001; // 1.0e-8
 
-        double y = 0;
         double y0 = 0;
         double y1 = 0;
         double x0 = 0;
         double f = 0;
         double i = 0;
         double rate = guess;
-        if (Math.abs(rate) < financialPrecision) {
-            y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
-        } else {
+        if (Math.abs(rate) >= financialPrecision) {
             f = Math.exp(nper * Math.log(1 + rate));
-            y = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
         }
         y0 = pv + pmt * nper + fv;
         y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
@@ -1424,6 +1421,7 @@ public final class Functions {
             x0 = x1;
             x1 = rate;
 
+            double y;
             if (Math.abs(rate) < financialPrecision) {
                 y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;
             } else {

@@ -67,7 +67,7 @@ public class DeleteCommand extends AbstractCursorCommand {
 
     @Override
     public IFeedbackAction rollback() throws SQLException {
-        InsertCommand ic = new InsertCommand(table, new Persist2Jet().getValues(rowPattern, table), execId);
+        InsertCommand ic = new InsertCommand(table, new Persist2Jet().getValues(rowPattern), execId);
         return ic.persist();
     }
 

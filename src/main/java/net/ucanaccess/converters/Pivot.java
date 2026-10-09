@@ -26,7 +26,6 @@ public class Pivot {
     private static final Map<String, String>       PIVOT_MAP          = new HashMap<>();
     private static final Map<String, List<String>> PREPARE_MAP        = new HashMap<>();
 
-    private String                                 transform;
     private String                                 select;
     private String                                 from;
     private String                                 expression;
@@ -122,7 +121,7 @@ public class Pivot {
             return false;
         }
         if (mtc.matches()) {
-            transform = mtc.group(1);
+            String transform = mtc.group(1);
             Matcher aggr = PAT_PIVOT_AGGR.matcher(transform);
             if (aggr.find()) {
                 if (aggr.groupCount() < 2) {

@@ -43,6 +43,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class DBReference {
+    private static final String MSG_COULD_NOT_DELETE = "Could not delete {0}";
+    private static final String MSG_COULD_NOT_CREATE = "Could not create file {0}";
+    private static final String MSG_CREATED_FILE     = "Created file {0}";
+
     private static final String                     CIPHER_SPEC       = "AES";
     private static List<IOnReloadReferenceListener> onReloadListeners = new ArrayList<>();
     private static String                           version;
@@ -114,6 +118,7 @@ public final class DBReference {
                 readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);
                 dbFormat = dbIO.getFileFormat();
             } catch (Exception ignored) {
+                // file format cannot be determined, treat database as writable with unknown format
             }
             dbIO.setLinkResolver((linkerDb, linkeeFileName) -> {
                 if (linkeeFileName == null) {
@@ -198,6 +203,12 @@ public final class DBReference {
 
     public static String getVersion() {
         return version;
+    }
+
+    private static synchronized void initVersion(Connection conn) throws SQLException {
+        if (version == null) {
+            version = conn.getMetaData().getDriverVersion();
+        }
     }
 
     public static boolean is2xx() {
@@ -315,26 +326,26 @@ public final class DBReference {
                 if (hbase.exists()) {
                     Arrays.stream(Optional.ofNullable(hbase.listFiles()).orElse(new File[0]))
                         .filter(f -> !f.delete())
-                        .forEach(f -> logger.log(Level.WARNING, "Could not delete {0}", f));
+                        .forEach(f -> logger.log(Level.WARNING, MSG_COULD_NOT_DELETE, f));
                 }
                 boolean deleted = hbase.delete();
                 if (!deleted) {
-                    logger.log(Level.INFO, "Could not delete {0}", hbase);
+                    logger.log(Level.INFO, MSG_COULD_NOT_DELETE, hbase);
                 }
 
             } else if (!immediatelyReleaseResources || firstConnectionKeeptMirror) {
                 boolean deleted = toKeepHsql.delete();
                 if (!deleted) {
-                    logger.log(Level.INFO, "Could not delete {0}", toKeepHsql);
+                    logger.log(Level.INFO, MSG_COULD_NOT_DELETE, toKeepHsql);
                 }
                 if (toKeepHsql.createNewFile()) {
-                    logger.log(Level.DEBUG, "Created file {0}", toKeepHsql);
+                    logger.log(Level.DEBUG, MSG_CREATED_FILE, toKeepHsql);
                 } else {
-                    logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
+                    logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, toKeepHsql);
                 }
                 for (File hsqlf : getHSQLDBFiles()) {
                     if (hsqlf.exists() && !hsqlf.delete()) {
-                        logger.log(Level.INFO, "Could not delete {0}", hsqlf);
+                        logger.log(Level.INFO, MSG_COULD_NOT_DELETE, hsqlf);
                     }
                 }
                 mirrorRecreated = true;
@@ -354,6 +365,7 @@ public final class DBReference {
                 st.execute("SHUTDOWN");
                 hsqldbShutdown = true;
             } catch (Exception ignored) {
+                // best effort, the database may already be shut down
             }
         }
     }
@@ -396,9 +408,7 @@ public final class DBReference {
         Connection conn = DriverManager.getConnection(getHsqlUrl(session),
             Optional.ofNullable(session.getUser()).orElse("Admin"), session.getPassword());
 
-        if (version == null) {
-            version = conn.getMetaData().getDriverVersion();
-        }
+        initVersion(conn);
 
         if (firstConnection) {
             if (ignoreCase && (!keptMirror || mirrorRecreated)) {
@@ -449,9 +459,9 @@ public final class DBReference {
                 if (toKeepHsql != null) {
                     if (!toKeepHsql.exists()) {
                         if (toKeepHsql.createNewFile()) {
-                            logger.log(Level.DEBUG, "Created file {0}", toKeepHsql);
+                            logger.log(Level.DEBUG, MSG_CREATED_FILE, toKeepHsql);
                         } else {
-                            logger.log(Level.WARNING, "Could not create file {0}", toKeepHsql);
+                            logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, toKeepHsql);
                         }
                     }
                     tempHsql = toKeepHsql;
@@ -463,12 +473,12 @@ public final class DBReference {
 
                     if (!tempHsql.exists()) {
                         if (tempHsql.createNewFile()) {
-                            logger.log(Level.DEBUG, "Created file {0}", tempHsql);
+                            logger.log(Level.DEBUG, MSG_CREATED_FILE, tempHsql);
                             if (!tempHsql.delete()) {
-                                logger.log(Level.INFO, "Could not delete {0}", tempHsql);
+                                logger.log(Level.INFO, MSG_COULD_NOT_DELETE, tempHsql);
                             }
                         } else {
-                            logger.log(Level.WARNING, "Could not create file {0}", tempHsql);
+                            logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, tempHsql);
                         }
                     }
                 }
@@ -535,9 +545,9 @@ public final class DBReference {
         try {
             File flLock = fileLock();
             if (flLock.createNewFile()) {
-                logger.log(Level.DEBUG, "Created file {0}", flLock);
+                logger.log(Level.DEBUG, MSG_CREATED_FILE, flLock);
             } else {
-                logger.log(Level.WARNING, "Could not create file {0}", flLock);
+                logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, flLock);
             }
 
             // suppress Eclipse warning "Resource leak: 'raf' is never closed", because that is exactly how UCanAccess

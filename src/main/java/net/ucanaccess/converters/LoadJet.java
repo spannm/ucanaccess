@@ -420,7 +420,7 @@ public class LoadJet {
                     if (dpso != null) {
                         dps = col.getProperties().get("DecimalPlaces").getValue();
                     }
-                    byte dp = dps == null ? 7 : (Byte) dps < 0 ? 7 : (Byte) dps;
+                    byte dp = dps == null || (Byte) dps < 0 ? 7 : (Byte) dps;
 
                     htype = "NUMERIC(" + (col.getPrecision() > 0 ? col.getPrecision() : 100) + ',' + dp + ')';
                 }
@@ -430,8 +430,7 @@ public class LoadJet {
             return htype;
         }
 
-        private String getCalculatedFieldTrigger(String ntn, Column col, boolean isCreate)
-                throws IOException, SQLException {
+        private String getCalculatedFieldTrigger(String ntn, Column col, boolean isCreate) throws IOException {
             DataType dt = getReturnType(col);
             String fun = null;
             if (isNumeric(dt)) {
@@ -837,7 +836,14 @@ public class LoadJet {
                 logger.log(Level.WARNING, ex.getMessage());
                 return;
             }
-            String pre = pk ? "Primary Key " : uk ? "Index Unique " : "Index";
+            String pre;
+            if (pk) {
+                pre = "Primary Key ";
+            } else if (uk) {
+                pre = "Index Unique ";
+            } else {
+                pre = "Index";
+            }
             loadedIndexes.add(pre + " on " + tn + " Columns:" + commaSeparated(idx.getColumns(), false));
 
         }
@@ -1140,19 +1146,16 @@ public class LoadJet {
             if (sysSchema) {
                 createSystemSchema();
                 for (String tn : dbIO.getSystemTableNames()) {
-                    UcanaccessTable t = null;
                     try {
-                        t = new UcanaccessTable(dbIO.getSystemTable(tn), tn);
-
-                        if (t != null) {
-                            createTable(t, true);
-                            loadTableData(t, true);
-                            exec("SET TABLE " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
-                                    + " READONLY TRUE", false);
-                            exec("GRANT SELECT ON " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
-                                    + " TO PUBLIC", false);
-                        }
+                        UcanaccessTable t = new UcanaccessTable(dbIO.getSystemTable(tn), tn);
+                        createTable(t, true);
+                        loadTableData(t, true);
+                        exec("SET TABLE " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
+                                + " READONLY TRUE", false);
+                        exec("GRANT SELECT ON " + schema(SQLConverter.escapeIdentifier(t.getName()), true)
+                                + " TO PUBLIC", false);
                     } catch (Exception ignored) {
+                        // system tables that cannot be loaded are skipped
                     }
                 }
             }

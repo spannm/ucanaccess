@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class TriggerAutoNumber extends TriggerBase {
     private static final String GUID_PATTERN =
-            "\\s*[{]?([\\p{XDigit}]{8})-([\\p{XDigit}]{4})-([\\p{XDigit}]{4})-([\\p{XDigit}]{4})-([\\p{XDigit}]{12})[}]?\\s*";
+            "\\s*\\{?(\\p{XDigit}{8})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}{4})-(\\p{XDigit}{12})\\}?\\s*";
 
     @Override
     public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
@@ -70,10 +70,8 @@ public class TriggerAutoNumber extends TriggerBase {
                     } else if (cl.getAutoNumberGenerator().getType().equals(DataType.GUID)) {
                         validateGUID(newR[i]);
                     }
-                } else if (DataType.BOOLEAN.equals(cl.getType())) {
-                    if (newR[i] == null) {
-                        newR[i] = false;
-                    }
+                } else if (DataType.BOOLEAN.equals(cl.getType()) && newR[i] == null) {
+                    newR[i] = false;
                 }
                 ++i;
             }

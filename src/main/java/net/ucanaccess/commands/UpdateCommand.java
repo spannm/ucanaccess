@@ -123,7 +123,7 @@ public class UpdateCommand extends AbstractCursorCommand {
         Persist2Jet p2a = new Persist2Jet();
 
         UpdateCommand urev = new UpdateCommand(table, p2a.getRowPattern(modifiedRow, table),
-                p2a.getValues(getRowPattern(), table), execId);
+                p2a.getValues(getRowPattern()), execId);
         urev.isRollbacking = true;
         return urev.persist();
     }
