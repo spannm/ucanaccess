@@ -730,7 +730,7 @@ public final class SQLConverter {
         }
 
         String escaped = name;
-        escaped = name.replace("'", "").replace("\"", "").replaceAll(Pattern.quote("\\"), "_");
+        escaped = name.replace("'", "").replace("\"", "").replace('\\', '_');
 
         if (!escaped.isEmpty() && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
@@ -783,7 +783,7 @@ public final class SQLConverter {
     public static String checkLang(String name, Connection conn, boolean quote) {
         String n = name;
         if (!quote) {
-            n = name.replace(Pattern.quote("["), "\"").replace(Pattern.quote("]"), "\"");
+            n = name.replace('[', '"').replace(']', '"');
         }
         try (Statement st = conn.createStatement()) {
             st.execute(String.format("SELECT 1 AS %s FROM dual", n));
