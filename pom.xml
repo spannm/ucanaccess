@@ -357,6 +357,27 @@
         <plugins>
 
             <plugin>
+                <!-- agent is prepared by basepom; add an XML report for the Sonar coverage import -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <formats>
+                                <format>XML</format>
+                                <format>HTML</format>
+                            </formats>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>io.github.spannm</groupId>
                 <artifactId>figlet-maven-plugin</artifactId>
                 <version>${dep.plugin.figlet.version}</version>
