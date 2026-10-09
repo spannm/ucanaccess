@@ -51,7 +51,7 @@ class HsqlDb272Test extends UcanaccessBaseTest {
     }
 
     @AfterEach
-    void cleanUp() throws Exception {
+    void cleanUp() {
         Optional.ofNullable(getTestTempDir().listFiles()).map(Arrays::asList).orElse(List.of())
             .stream()
             .filter(f -> f.getName().startsWith(getShortTestMethodName()))

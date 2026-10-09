@@ -24,7 +24,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
     void confirmNotNullColumnUsingJet(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         // future-proofing in case default file version changes
-        assertEquals(getFileFormat().name(), "V2003");
+        assertEquals("V2003", getFileFormat().name());
 
         String mdbPath = ucanaccess.getDbIO().getFile().getAbsolutePath();
 

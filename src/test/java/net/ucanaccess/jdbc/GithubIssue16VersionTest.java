@@ -50,8 +50,6 @@ class GithubIssue16VersionTest extends UcanaccessBaseTest {
 
             checkQuery("SELECT * FROM " + tbl + " WHERE Donor_ID=1",
                 recs(rec(1, null, sqlDt, sqlDt, "donation_type", amt, "designation")));
-
-            // executeStatements("DROP TABLE " + tbl);
         }
     }
 

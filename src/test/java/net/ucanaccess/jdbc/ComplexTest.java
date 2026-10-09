@@ -1,6 +1,8 @@
 package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.SingleValue;
@@ -8,7 +10,6 @@ import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -109,8 +110,8 @@ class ComplexTest extends UcanaccessBaseFileTest {
     void testComplexRollback() throws SQLException {
         init();
 
-        ucanaccess = Mockito.spy(ucanaccess);
-        Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))
+        ucanaccess = spy(ucanaccess);
+        doThrow(new UcanaccessRuntimeException(getTestMethodName()))
             .when(ucanaccess).afterFlushIoHook();
 
         ucanaccess.setAutoCommit(false);

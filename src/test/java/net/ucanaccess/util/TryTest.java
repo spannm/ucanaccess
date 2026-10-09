@@ -75,10 +75,7 @@ class TryTest extends AbstractBaseTest {
             () -> tryCatch.orThrow(t -> new UncheckedIOException((IOException) t)));
         assertSame(ex1, unioex.getCause());
 
-        Try<Boolean, Throwable> mappedtc = tryCatch.map(size -> {
-            boolean greaterZero = size > 0; // will throw NPE but not even executed
-            return greaterZero;
-        });
+        Try<Boolean, Throwable> mappedtc = tryCatch.map(size -> size > 0); // would throw NPE but is not even executed
         NoSuchFileException ex2 = assertThrows(NoSuchFileException.class, mappedtc::get);
         assertSame(ex2, mappedtc.getException()); // original exception unchanged
         assertSame(ex1, ex2);

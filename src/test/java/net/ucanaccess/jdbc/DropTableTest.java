@@ -30,11 +30,9 @@ class DropTableTest extends UcanaccessBaseTest {
     void testDrop(AccessVersion accessVersion) throws SQLException {
         init(accessVersion);
 
-        // ucanaccess.setAutoCommit(false);
         createSimple("AAAn", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("DROP TABLE AAAn");
-            // ucanaccess.commit();
             st.execute("CREATE TABLE AAAn (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
             createSimple("AAAn", "b", recs(rec("33A", 11, "b"), rec("33B", 111, "b")));
             dumpQueryResult("SELECT * FROM AAAn");
@@ -47,11 +45,9 @@ class DropTableTest extends UcanaccessBaseTest {
     void testDropBlank(AccessVersion accessVersion) throws SQLException {
         init(accessVersion);
 
-        // ucanaccess.setAutoCommit(false);
         createSimple("[AAA n]", "a", recs(rec("33A", 11, "a"), rec("33B", 111, "a")));
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             st.executeUpdate("DROP TABLE [AAA n]");
-            // ucanaccess.commit();
             st.execute("CREATE TABLE [AAA n] (baaaa TEXT(3) PRIMARY KEY, A INTEGER, C TEXT(4))");
             createSimple("[AAA n]", "b", recs(rec("33A", 11, "b"), rec("33B", 111, "b")));
             dumpQueryResult("SELECT * FROM [AAA n]");

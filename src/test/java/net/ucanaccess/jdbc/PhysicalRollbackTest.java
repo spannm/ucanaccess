@@ -1,13 +1,14 @@
 package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.mockito.Mockito;
 
 import java.sql.SQLException;
 
@@ -30,8 +31,8 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
     void testCommit(AccessVersion accessVersion) throws SQLException {
         init(accessVersion);
 
-        ucanaccess = Mockito.spy(ucanaccess);
-        Mockito.doThrow(new UcanaccessRuntimeException(getTestMethodName()))
+        ucanaccess = spy(ucanaccess);
+        doThrow(new UcanaccessRuntimeException(getTestMethodName()))
             .when(ucanaccess).afterFlushIoHook();
 
         ucanaccess.setAutoCommit(false);

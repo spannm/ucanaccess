@@ -8,6 +8,7 @@ import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.ResultSet;
@@ -270,26 +271,32 @@ class FunctionsTest extends UcanaccessBaseTest {
 
         checkQuery("SELECT IsDate('january 3,2015') FROM t_funcs", singleRec(true));
 
-        // fails in JDK8: checkQuery("SELECT isDate('janr 3,2015') FROM " + TBL, false);
+        checkQuery("SELECT IsDate('janr 3,2015') FROM t_funcs", singleRec(false));
         checkQuery("SELECT IsDate('03 3,2015') FROM t_funcs", singleRec(true));
         checkQuery("SELECT IsDate('3 3,2015') FROM t_funcs", singleRec(true));
-        // fails in JDK8: checkQuery("SELECT isDate('Fri Feb 10 00:25:09 CET 2012') FROM " + TBL, false);
+        checkQuery("SELECT IsDate('Fri Feb 10 00:25:09 CET 2012') FROM t_funcs", singleRec(false));
         checkQuery("SELECT IsDate('Fri Feb 10 2012') FROM t_funcs", singleRec(false));
         checkQuery("SELECT IsDate('Fri Feb 10 00:25:09 2012') FROM t_funcs", singleRec(false));
-        // fails in JDK8: checkQuery("SELECT isDate('Fri Feb 10 00:25:09') FROM " + TBL, false);
-        // fails in JDK8: checkQuery("SELECT isDate('jan 35,2015') FROM " + TBL, false);
+        checkQuery("SELECT IsDate('Fri Feb 10 00:25:09') FROM t_funcs", singleRec(false));
+        checkQuery("SELECT IsDate('jan 35,2015') FROM t_funcs", singleRec(false));
         checkQuery("SELECT IsDate('Feb 20 01:25:09 PM') FROM t_funcs", singleRec(true));
-        // fails in JDK8: checkQuery("SELECT isDate('Feb 10 00:25:09') FROM t_funcs", singleRec(true));
-        // fails in JDK8: checkQuery("SELECT isDate('02 10 00:25:09') FROM t_funcs", singleRec(true));
-        // fails in JDK8: checkQuery("SELECT isDate('Feb 35 00:25:09') FROM t_funcs", singleRec(true));
+    }
+
+    @Disabled("IsDate does not yet recognize 24-hour date/time values without a year")
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testIsDateWithoutYear(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT IsDate('Feb 10 00:25:09') FROM t_funcs", singleRec(true));
+        checkQuery("SELECT IsDate('02 10 00:25:09') FROM t_funcs", singleRec(true));
+        checkQuery("SELECT IsDate('Feb 35 00:25:09') FROM t_funcs", singleRec(true));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
     void testSimpleDateFormatLenientTrue(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
-        // format taken from:
-        // checkQuery("SELECT isDate('Feb 10 00:25:09') FROM " + TBL, true);
+        // format taken from IsDate('Feb 10 00:25:09'), see testIsDateWithoutYear
 
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd hh:mm:ss");
         sdf.setLenient(true); // fails with lenient = false, see next test case
