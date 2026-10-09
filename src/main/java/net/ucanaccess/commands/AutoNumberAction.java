@@ -16,6 +16,7 @@ public class AutoNumberAction implements IFeedbackAction {
     private final Map<String, Object> oldAutoValues = new HashMap<>();
     private final Table               table;
 
+    @SuppressWarnings("java:S2077") // identifiers come from database metadata and are escaped, values are bound as parameters
     public AutoNumberAction(Table table, Object[] memento, Object[] byAccess) throws SQLException {
         this.table = table;
         int i = 0;

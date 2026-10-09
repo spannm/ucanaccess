@@ -169,6 +169,7 @@ public class LoadJet {
         triggersGenerator.synchronisationTriggers(tableName, hasAutoNumberColumn, hasAppendOnly);
     }
 
+    @SuppressWarnings("java:S2077") // evaluates a column default expression read from the database file by design
     public Object tryDefault(Object def) {
         try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery(String.format("SELECT %s FROM DUAL", def));

@@ -405,6 +405,7 @@ public class Persist2Jet {
         return ucaMetadataTypeName;
     }
 
+    @SuppressWarnings("java:S2077") // table name stems from the CREATE TABLE statement executed by the caller
     public void createTable(String tableName, Map<String, String> columnMap, String[] types, String[] defaults,
             Boolean[] notNulls) throws IOException, SQLException {
 

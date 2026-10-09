@@ -780,6 +780,7 @@ public final class SQLConverter {
         return checkLang(name, conn, true);
     }
 
+    @SuppressWarnings("java:S2077") // probes whether an escaped identifier is accepted as column alias
     public static String checkLang(String name, Connection conn, boolean quote) {
         String n = name;
         if (!quote) {

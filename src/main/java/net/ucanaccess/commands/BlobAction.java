@@ -50,6 +50,7 @@ public class BlobAction implements IFeedbackAction {
     }
 
     @Override
+    @SuppressWarnings("java:S2077") // identifiers come from database metadata and are escaped, values are bound as parameters
     public void doAction(ICommand toChange) throws SQLException {
         if (containsBlob) {
             UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
@@ -63,8 +64,6 @@ public class BlobAction implements IFeedbackAction {
                     SQLConverter.escapeIdentifier(table.getName(), connHsqldb),
                     SQLConverter.escapeIdentifier(bkey.getColumnName(), connHsqldb),
                     bkey.getKey().keySet().stream().map(k -> SQLConverter.escapeIdentifier(k, connHsqldb) + " = ?").collect(Collectors.joining(" AND ")));
-
-                conn.setFeedbackState(true);
 
                 conn.setFeedbackState(true);
                 try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {

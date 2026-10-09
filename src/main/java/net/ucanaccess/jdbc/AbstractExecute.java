@@ -78,6 +78,7 @@ public abstract class AbstractExecute {
         }
     }
 
+    @SuppressWarnings("java:S2077") // table name stems from the DDL statement executed by the caller
     private int count(String tableName) throws SQLException {
         UcanaccessConnection conn = statement.getConnection();
         try (UcanaccessStatement st = conn.createStatement();
