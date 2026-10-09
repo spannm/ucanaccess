@@ -42,7 +42,7 @@ class HsqlDb272Test extends UcanaccessBaseTest {
             Class<? extends org.hsqldb.Trigger> trigger = net.ucanaccess.triggers.TriggerUpdate.class;
             stmt.executeUpdate("CREATE TRIGGER triggerUpdate_Tbl AFTER UPDATE ON Tbl FOR EACH ROW CALL \"" + trigger.getName() + "\"");
             stmt.executeUpdate("INSERT INTO Tbl (Txt) VALUES ('Insert')");
-            stmt.executeUpdate("UPDATE Tbl SET Txt = 'Update'");
+            assertEquals(1, stmt.executeUpdate("UPDATE Tbl SET Txt = 'Update'"));
         }
     }
 

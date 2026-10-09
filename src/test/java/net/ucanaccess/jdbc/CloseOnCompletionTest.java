@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -16,9 +18,10 @@ class CloseOnCompletionTest extends UcanaccessBaseTest {
         init(accessVersion);
 
         try (PreparedStatement st = ucanaccess.prepareStatement("CREATE TABLE t_cloc (id VARCHAR(23))")) {
-            st.closeOnCompletion();
-            st.execute();
+            st.closeOnCompletion(); // ignored by HSQLDB
+            assertThat(st.execute()).isFalse();
         }
+        checkQuery("SELECT COUNT(*) FROM t_cloc", singleRec(0));
     }
 
 }

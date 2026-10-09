@@ -55,7 +55,7 @@ class MemoryTest extends UcanaccessBaseTest {
             getLogger().log(Level.DEBUG, "Tree memory 2 = {0}", Runtime.getRuntime().freeMemory());
             getLogger().log(Level.DEBUG, "Tree memory diff = {0}", Runtime.getRuntime().freeMemory() - occ);
 
-            dumpQueryResult("SELECT * FROM t_mem LIMIT 10");
+            checkQuery("SELECT COUNT(*) FROM t_mem", singleRec(nbRecords + 1));
             getLogger().log(Level.INFO, "Thread.activeCount() diff {0}", Thread.activeCount() - ac);
         }
     }

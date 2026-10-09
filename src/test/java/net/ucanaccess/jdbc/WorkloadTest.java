@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -39,7 +41,7 @@ class WorkloadTest extends UcanaccessBaseTest {
                 TimeUnit.MILLISECONDS.toSeconds(midTime - startTime));
 
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
-            st.executeUpdate("update aaAB set c='yessssss'&a");
+            assertThat(st.executeUpdate("update aaAB set c='yessssss'&a")).isEqualTo(nbRecords + 1);
             ucanaccess.commit();
             getLogger().log(Level.INFO, "Update performance test, all {0} table records updated in {1} seconds", nbRecords,
                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - midTime));

@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.converters.Functions;
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -632,7 +635,11 @@ class FunctionsTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testRnd(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
-        dumpQueryResult("SELECT rnd() FROM t_funcs");
+        try (UcanaccessStatement st = ucanaccess.createStatement();
+            ResultSet rs = st.executeQuery("SELECT rnd() FROM t_funcs")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isBetween(0d, 1d);
+        }
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -1,11 +1,14 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.UcanaccessBaseFileTest;
 import net.ucanaccess.type.AccessVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.lang.System.Logger.Level;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 class ReservedWordLeaveTest extends UcanaccessBaseFileTest {
@@ -13,6 +16,7 @@ class ReservedWordLeaveTest extends UcanaccessBaseFileTest {
     @Test
     void testLoadReserved() throws SQLException {
         init();
+        checkQuery("SELECT COUNT(LEAVE) FROM t_leave", singleRec(0));
     }
 
     @Test
@@ -37,7 +41,7 @@ class ReservedWordLeaveTest extends UcanaccessBaseFileTest {
                 executeStatements(st,
                     "CREATE TABLE " + tbl + " (LEAVE TEXT)",
                     "INSERT INTO " + tbl + " (LEAVE) VALUES('left')");
-                dumpQueryResult(() -> st.executeQuery("SELECT * FROM " + tbl));
+                assertLeftRow(st, tbl);
             }
         }
 
@@ -48,11 +52,19 @@ class ReservedWordLeaveTest extends UcanaccessBaseFileTest {
         try (UcanaccessConnection conn = builderExisting.build()) {
 
             try (UcanaccessStatement st = conn.createStatement()) {
-                dumpQueryResult(() -> st.executeQuery("SELECT * FROM " + tbl));
+                assertLeftRow(st, tbl);
                 st.execute("DROP TABLE " + tbl);
             }
         }
 
+    }
+
+    private static void assertLeftRow(UcanaccessStatement st, String tbl) throws SQLException {
+        try (ResultSet rs = st.executeQuery("SELECT LEAVE FROM " + tbl)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString(1)).isEqualTo("left");
+            assertThat(rs.next()).isFalse();
+        }
     }
 
 }

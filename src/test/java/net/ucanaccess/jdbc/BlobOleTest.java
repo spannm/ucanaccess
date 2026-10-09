@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -147,8 +149,9 @@ class BlobOleTest extends UcanaccessBaseTest {
             Blob b = ucanaccess.createBlob();
             b.setBytes(1, new byte[] {1});
             ps.setBlob(3, b);
-            ps.executeUpdate();
+            assertThat(ps.executeUpdate()).isOne();
         }
+        checkQuery("SELECT pk_col1, pk_col2, blob_col FROM t_two_col_pk", singleRec(1, 1, new byte[] {1}));
     }
 
 }

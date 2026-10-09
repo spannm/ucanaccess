@@ -181,9 +181,11 @@ class CreateTableTest extends UcanaccessBaseTest {
                 "CREATE TABLE [ggg kk] ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] NUMERIC(22,6) DEFAULT 12.99)",
                 "CREATE TABLE kkk  ([---bgaaf aa] AUTOINCREMENT PRIMARY KEY, [---bghhaaf b aa] TEXT(222) DEFAULT 'vvv')",
                 "INSERT INTO kkk ([---bgaaf aa],[---bghhaaf b aa]) VALUES(1, '23fff')",
-                "CREATE TABLE counter (counter AUTOINCREMENT PRIMARY KEY, [simple] TEXT(222) DEFAULT 'vvv')");
+                "CREATE TABLE counter (counter AUTOINCREMENT PRIMARY KEY, [simple] TEXT(222) DEFAULT 'vvv')",
+                "INSERT INTO counter ([simple]) VALUES ('x')");
         }
-        dumpQueryResult("SELECT * FROM counter");
+        checkQuery("SELECT [---bgaaf aa], [---bghhaaf b aa] FROM kkk", singleRec(1, "23fff"));
+        checkQuery("SELECT counter, [simple] FROM counter", singleRec(1, "x"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -209,12 +211,16 @@ class CreateTableTest extends UcanaccessBaseTest {
     void testPs(AccessVersion accessVersion) throws SQLException {
         init(accessVersion);
 
-        for (PreparedStatement ps : List.of(
-            ucanaccess.prepareStatement("CREATE TABLE PS0 (PS AUTOINCREMENT PRIMARY KEY)"),
-            ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0),
-            ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0),
-            ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0))) {
-            ps.execute();
+        try (PreparedStatement ps0 = ucanaccess.prepareStatement("CREATE TABLE PS0 (PS AUTOINCREMENT PRIMARY KEY)");
+            PreparedStatement ps1 = ucanaccess.prepareStatement("CREATE TABLE PS1 (PS AUTOINCREMENT PRIMARY KEY)", 0);
+            PreparedStatement ps2 = ucanaccess.prepareStatement("CREATE TABLE PS2 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0);
+            PreparedStatement ps3 = ucanaccess.prepareStatement("CREATE TABLE PS3 (PS AUTOINCREMENT PRIMARY KEY)", 0, 0, 0)) {
+            for (PreparedStatement ps : List.of(ps0, ps1, ps2, ps3)) {
+                assertThat(ps.execute()).isFalse();
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            checkQuery("SELECT COUNT(*) FROM PS" + i, singleRec(0));
         }
     }
 
@@ -227,6 +233,8 @@ class CreateTableTest extends UcanaccessBaseTest {
         try (PreparedStatement prepStmt = ucanaccess.prepareStatement("CREATE TABLE zzzFoo1 ([Req-MTI] TEXT(20))")) {
             prepStmt.executeUpdate();
         }
+        executeStatements("INSERT INTO zzzFoo1 ([Req-MTI]) VALUES ('mti')");
+        checkQuery("SELECT [Req-MTI] FROM zzzFoo1", singleRec("mti"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -269,7 +277,11 @@ class CreateTableTest extends UcanaccessBaseTest {
 
         executeStatements(
             "CREATE TABLE t01 (id LONG PRIMARY KEY, comments MEMO)",
-            "CREATE TABLE t_1 (id LONG PRIMARY KEY)");
+            "CREATE TABLE t_1 (id LONG PRIMARY KEY)",
+            "INSERT INTO t01 (id) VALUES (1)",
+            "INSERT INTO t_1 (id) VALUES (2)");
+        checkQuery("SELECT id FROM t01", singleRec(1));
+        checkQuery("SELECT id FROM t_1", singleRec(2));
     }
 
 }

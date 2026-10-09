@@ -1,5 +1,8 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import net.ucanaccess.test.AccessDefaultVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -18,20 +21,22 @@ class FolderTest extends UcanaccessBaseTest {
         init(accessVersion);
 
         String folderPath = System.getProperty("accessFolder");
-        if (folderPath == null) {
-            return;
-        }
+        assumeTrue(folderPath != null, "System property accessFolder not set");
 
-        File folder = new File(folderPath);
-        for (File fl : folder.listFiles()) {
-            UcanaccessConnection conn = buildConnection()
+        File[] files = new File(folderPath).listFiles();
+        assertThat(files).as("Content of folder %s", folderPath).isNotNull();
+
+        for (File fl : files) {
+            try (UcanaccessConnection conn = buildConnection()
                 .withDbPath(fl.getAbsolutePath())
-                .build();
-            SQLWarning sqlw = conn.getWarnings();
-            getLogger().log(Level.INFO, "open {0}", fl.getAbsolutePath());
-            while (sqlw != null) {
-                getLogger().log(Level.INFO, sqlw.getMessage());
-                sqlw = sqlw.getNextWarning();
+                .build()) {
+                assertThat(conn.isClosed()).isFalse();
+                getLogger().log(Level.INFO, "open {0}", fl.getAbsolutePath());
+                SQLWarning sqlw = conn.getWarnings();
+                while (sqlw != null) {
+                    getLogger().log(Level.INFO, sqlw.getMessage());
+                    sqlw = sqlw.getNextWarning();
+                }
             }
         }
     }

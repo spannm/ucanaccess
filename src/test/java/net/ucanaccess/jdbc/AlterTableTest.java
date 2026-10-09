@@ -218,7 +218,21 @@ class AlterTableTest extends UcanaccessBaseFileTest {
             st.execute("ALTER TABLE " + tableWithTheReferences
                 + " ADD CONSTRAINT FOREIGN_KEY_2 FOREIGN KEY (Person2Id) REFERENCES "
                 + tableToBeReferenced + "(id) ON DELETE CASCADE");
+
+            executeStatements(st,
+                "INSERT INTO " + tableToBeReferenced + " (Name) VALUES ('Alice')",
+                "INSERT INTO " + tableToBeReferenced + " (Name) VALUES ('Bob')",
+                "INSERT INTO " + tableWithTheReferences + " (id, Person1Id, Person2Id) VALUES (1, 1, 2)",
+                "INSERT INTO " + tableWithTheReferences + " (id, Person1Id, Person2Id) VALUES (2, 2, 1)");
+
+            // both references must be enforced
+            assertThatThrownBy(() -> st.execute("INSERT INTO " + tableWithTheReferences
+                + " (id, Person1Id, Person2Id) VALUES (3, 1, 99)")).isInstanceOf(UcanaccessSQLException.class);
+
+            // deleting a person cascades to all relationships referencing it via either key
+            st.execute("DELETE FROM " + tableToBeReferenced + " WHERE Name = 'Bob'");
         }
+        checkQuery("SELECT COUNT(*) FROM RelationShipsTable", singleRec(0));
     }
 
     @Test
