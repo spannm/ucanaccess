@@ -60,6 +60,13 @@ public class UcanaccessConnection implements Connection {
         CTX.set(new Context(conn));
     }
 
+    /**
+     * Removes the context of the current thread.
+     */
+    public static synchronized void clearCtx() {
+        CTX.remove();
+    }
+
     public static synchronized void setCtxExecId(String id) {
         Optional.ofNullable(CTX.get()).ifPresent(ctx -> ctx.setCurrentExecId(id));
     }
@@ -319,8 +326,7 @@ public class UcanaccessConnection implements Connection {
     private void finalizeEnlistedResources() {
         commands.clear();
         savepointsMap.clear();
-        setCtxConnection(null);
-        setCtxExecId(null);
+        clearCtx();
     }
 
     @Override

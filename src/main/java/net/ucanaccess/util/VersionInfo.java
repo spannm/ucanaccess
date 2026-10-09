@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -162,7 +163,10 @@ public final class VersionInfo {
             if (pom == null) {
                 LOGGER.log(Level.WARNING, "Failed to find ''{0}'' in path ''{1}''", filename, currDir);
             } else {
-                Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pom.toFile());
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+                Document document = dbf.newDocumentBuilder().parse(pom.toFile());
                 document.getDocumentElement().normalize();
 
                 String ver = (String) XPathFactory.newInstance().newXPath()

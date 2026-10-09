@@ -46,8 +46,9 @@ public abstract class AbstractBaseTest extends Assertions {
     }
 
     @BeforeEach
-    public final void setTestMethodName(TestInfo testInfo) {
+    public final void beforeEachTest(TestInfo testInfo) {
         lastTestInfo = testInfo;
+        logTestBegin(testInfo);
     }
 
     protected final String getTestMethodName() {
@@ -62,8 +63,7 @@ public abstract class AbstractBaseTest extends Assertions {
         return testMethod.map(Method::getName).orElse(null);
     }
 
-    @BeforeEach
-    public final void logTestBegin(TestInfo testInfo) {
+    private void logTestBegin(TestInfo testInfo) {
         if (testInfo.getTestMethod().isEmpty() || testInfo.getDisplayName().startsWith(testInfo.getTestMethod().get().getName())) {
             getLogger().log(Level.DEBUG, ">>>> TEST: {0} <<<<", testInfo.getDisplayName());
         } else {

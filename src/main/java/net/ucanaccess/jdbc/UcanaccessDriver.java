@@ -53,6 +53,7 @@ public final class UcanaccessDriver implements Driver {
     }
 
     @Override
+    @SuppressWarnings("java:S2095") // the new connection is handed over to and closed by the caller
     public Connection connect(String url, Properties props) throws SQLException {
         if (!acceptsURL(url)) {
             return null;
