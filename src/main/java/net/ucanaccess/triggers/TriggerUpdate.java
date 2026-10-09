@@ -2,7 +2,6 @@ package net.ucanaccess.triggers;
 
 import io.github.spannm.jackcess.Table;
 import net.ucanaccess.commands.UpdateCommand;
-import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.jdbc.BlobKey;
 import net.ucanaccess.jdbc.UcanaccessConnection;
@@ -17,7 +16,7 @@ public class TriggerUpdate extends TriggerBase {
     @Override
     public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
         checkContext();
-        UcanaccessConnection conn = UcanaccessRuntimeException.requireNonNull(UcanaccessConnection.getCtxConnection(), "Connection required");
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         if (conn.isFeedbackState()) {
             return;
         }
@@ -57,7 +56,7 @@ public class TriggerUpdate extends TriggerBase {
             Object value = values[i];
             if (value instanceof BlobData) {
                 BlobData bd = (BlobData) value;
-                JDBCConnection hsqlConn = (JDBCConnection) UcanaccessConnection.getCtxConnection()
+                JDBCConnection hsqlConn = (JDBCConnection) UcanaccessConnection.requireCtxConnection()
                         .getHSQLDBConnection();
                 SessionInterface si = hsqlConn.getSession();
                 long length = bd.length(si);
@@ -69,7 +68,7 @@ public class TriggerUpdate extends TriggerBase {
                     if (bk == null) {
                         values[i] = bt;
                     } else {
-                        values[i] = bk.getOleBlob(UcanaccessConnection.getCtxConnection().getDbIO());
+                        values[i] = bk.getOleBlob(UcanaccessConnection.requireCtxConnection().getDbIO());
                     }
                 }
 

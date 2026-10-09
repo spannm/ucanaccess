@@ -52,7 +52,7 @@ public class BlobAction implements IFeedbackAction {
     @Override
     public void doAction(ICommand toChange) throws SQLException {
         if (containsBlob) {
-            UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+            UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
             Connection connHsqldb = conn.getHSQLDBConnection();
 
             for (BlobKey bkey : keys) {

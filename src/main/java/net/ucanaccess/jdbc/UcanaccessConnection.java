@@ -9,6 +9,7 @@ import net.ucanaccess.commands.ICursorCommand;
 import net.ucanaccess.commands.IFeedbackAction;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 
 import java.io.File;
@@ -46,6 +47,15 @@ public class UcanaccessConnection implements Connection {
      */
     public static synchronized UcanaccessConnection getCtxConnection() {
         return Optional.ofNullable(CTX.get()).map(Context::getCurrentConnection).orElse(null);
+    }
+
+    /**
+     * Returns the current database connection from the context.
+     * @return connection, never {@code null}
+     * @throws UcanaccessRuntimeException if no connection is bound to the current thread
+     */
+    public static UcanaccessConnection requireCtxConnection() {
+        return UcanaccessRuntimeException.requireNonNull(getCtxConnection(), "No connection bound to the current thread");
     }
 
     public static synchronized boolean hasContext() {

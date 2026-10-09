@@ -22,7 +22,7 @@ public class AutoNumberAction implements IFeedbackAction {
 
         for (Column col : table.getColumns()) {
             if (col.isAutoNumber()) {
-                UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+                UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
                 Connection connHsqldb = conn.getHSQLDBConnection();
                 String hsqlColName = SQLConverter.escapeIdentifier(col.getName(), connHsqldb);
                 Object cnOld = memento[i];

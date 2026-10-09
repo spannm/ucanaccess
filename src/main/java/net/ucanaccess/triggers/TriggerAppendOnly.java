@@ -17,7 +17,7 @@ public class TriggerAppendOnly extends TriggerBase {
     @Override
     public void fire(int type, String name, String tableName, Object[] oldR, Object[] newR) {
         checkContext();
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         if (conn.isFeedbackState()) {
             return;
         }

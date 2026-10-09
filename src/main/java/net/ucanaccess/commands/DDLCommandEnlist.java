@@ -28,7 +28,7 @@ public class DDLCommandEnlist {
 
     private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
         String tn = ddlType.getDBObjectName();
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         String execId = UcanaccessConnection.getCtxExcId();
         Connection hsqlConn = ac.getHSQLDBConnection();
         Database db = ac.getDbIO();
@@ -109,7 +109,7 @@ public class DDLCommandEnlist {
         String execId = UcanaccessConnection.getCtxExcId();
         CreateForeignKeyCommand c4io =
                 new CreateForeignKeyCommand(tableName, referencedTable, execId, relationshipName);
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
             ac.commit();
@@ -120,7 +120,7 @@ public class DDLCommandEnlist {
         String relationshipName = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         DropForeignKeyCommand c4io = new DropForeignKeyCommand(execId, relationshipName);
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
             ac.commit();
@@ -131,7 +131,7 @@ public class DDLCommandEnlist {
         String tableName = ddlType.getDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
         CreatePrimaryKeyCommand c4io = new CreatePrimaryKeyCommand(tableName, execId);
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
             ac.commit();
@@ -142,7 +142,7 @@ public class DDLCommandEnlist {
         String indexName = ddlType.getDBObjectName();
         String tableName = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         CreateIndexCommand c4io = new CreateIndexCommand(indexName, tableName, execId);
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
@@ -162,7 +162,7 @@ public class DDLCommandEnlist {
         String tknt = columnName + columnDefinition;
         parseColumnTypes(typeList, defaultList, notNullList, tknt);
         checkForOutOfPlaceNotNull(sql);
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         AddColumnCommand c4io = new AddColumnCommand(tableName, columnName, execId, columnMap, types,
                 defaults, notNulls);
         ac.add(c4io);
@@ -182,7 +182,7 @@ public class DDLCommandEnlist {
     private void enlistDropTable(DDLType ddlType) throws SQLException {
         String tn = ddlType.getDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         DropTableCommand c4io = new DropTableCommand(tn, execId);
         ac.add(c4io);
         if (!ac.getAutoCommit()) {
@@ -194,7 +194,7 @@ public class DDLCommandEnlist {
         String oldTn = ddlType.getDBObjectName();
         String newTn = ddlType.getSecondDBObjectName();
         String execId = UcanaccessConnection.getCtxExcId();
-        UcanaccessConnection ac = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         AlterRenameCommand c4io = new AlterRenameCommand(oldTn, newTn, execId);
         ac.add(c4io);
         if (!ac.getAutoCommit()) {

@@ -64,7 +64,7 @@ public class Persist2Jet {
     public List<String> getCreateColumnNamesCache(String tableName) throws SQLException {
         String nname = SQLConverter.basicEscapingIdentifier(tableName).toUpperCase();
         nname = UcanaccessDatabaseMetadata.normalizeName(nname);
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Map<String, List<String>> dbFileObjMap = COL_NAMES_CACHE.computeIfAbsent(conn.getDbIO().getFile(), k -> new LinkedHashMap<>());
         if (!dbFileObjMap.containsKey(nname)) {
             try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, nname, null)) {
@@ -82,7 +82,7 @@ public class Persist2Jet {
     }
 
     private List<String> getColumnNamesCreate(String ntn) throws SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         List<String> ar = new ArrayList<>();
         ResultSet rs = conn.getMetaData().getColumns(null, PUBLIC, ntn, null);
         while (rs.next()) {
@@ -129,7 +129,7 @@ public class Persist2Jet {
                 } else if (value instanceof BlobData) {
                     BlobData bd = (BlobData) value;
                     JDBCConnection hsqlConn =
-                            (JDBCConnection) UcanaccessConnection.getCtxConnection().getHSQLDBConnection();
+                            (JDBCConnection) UcanaccessConnection.requireCtxConnection().getHSQLDBConnection();
                     SessionInterface si = hsqlConn.getSession();
                     long length = bd.length(si);
                     values[i] = ((BlobData) value).getBytes(si, 0, (int) length);
@@ -220,7 +220,7 @@ public class Persist2Jet {
                 dt = DataType.fromSQLType(
                         rs.getInt(DATA_TYPE),
                         length,
-                        UcanaccessConnection.getCtxConnection().getDbIO().getFileFormat());
+                        UcanaccessConnection.requireCtxConnection().getDbIO().getFileFormat());
             }
             cb.withType(dt);
             if (length > 0 && dt.equals(DataType.TEXT)) {
@@ -250,7 +250,7 @@ public class Persist2Jet {
 
     private ColumnBuilder getColumn(String tableName, Map<String, String> columnMap, String[] types)
             throws SQLException, IOException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String columnName = columnMap.keySet().iterator().next();
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableName.toUpperCase(),
                 SQLConverter.preEscapingIdentifier(columnName));
@@ -264,7 +264,7 @@ public class Persist2Jet {
 
     private Collection<ColumnBuilder> getColumns(String tableName, Map<String, String> columnMap, String[] types)
             throws SQLException, IOException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Map<Integer, ColumnBuilder> ordm = new TreeMap<>();
         String tableNamePattern = tableName.toUpperCase(Locale.US).replace("_", "\\_");
         ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableNamePattern, null);
@@ -311,7 +311,7 @@ public class Persist2Jet {
     }
 
     private IndexBuilder getIndexBuilderPK(String tableName, Map<String, String> columnMap) throws SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, PUBLIC, tableName.toUpperCase());
         IndexBuilder indpk = null;
         while (pkrs.next()) {
@@ -328,7 +328,7 @@ public class Persist2Jet {
 
     private void addIndexBuildersSimple(String tableName, Map<String, String> columnMap, List<IndexBuilder> arcl)
             throws SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         ResultSet idxrs = conn.getMetaData().getIndexInfo(null, PUBLIC, tableName, false, false);
         Map<String, IndexBuilder> hi = new HashMap<>();
         for (IndexBuilder ib : arcl) {
@@ -408,7 +408,7 @@ public class Persist2Jet {
     public void createTable(String tableName, Map<String, String> columnMap, String[] types, String[] defaults,
             Boolean[] notNulls) throws IOException, SQLException {
 
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         final Database db = conn.getDbIO();
         String tn = escape4Access(tableName);
         String ntn = escape4Hsqldb(tableName);
@@ -455,7 +455,7 @@ public class Persist2Jet {
     }
 
     public void dropTable(String tableName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         tableName = escape4Access(tableName);
         Table t = db.getTable(tableName);
@@ -505,7 +505,7 @@ public class Persist2Jet {
     }
 
     public void renameTable(String oldTableName, String newTableName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         oldTableName = escape4Access(oldTableName);
         String tn = escape4Access(newTableName);
@@ -559,7 +559,7 @@ public class Persist2Jet {
 
     public void addColumn(String tableName, String columnName, Map<String, String> columnMap, String[] types,
         String[] defaults, Boolean[] notNulls) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         String tn = escape4Access(tableName);
         String ntn = escape4Hsqldb(tableName);
@@ -583,7 +583,7 @@ public class Persist2Jet {
         boolean req = Optional.ofNullable(cl.getProperties().getValue(PropertyMap.REQUIRED_PROP))
             .map(Boolean.class::cast).orElse(false);
         if (req) {
-            UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+            UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
             try (Statement stNN = conn.getHSQLDBConnection().createStatement()) {
                 stNN.execute(SQLConverter.convertSQL(
                     "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " SET NOT NULL ").getSql());
@@ -593,7 +593,7 @@ public class Persist2Jet {
 
     private void updateNewColumnToDefault(String tableName, String columnName, Table t, Column col)
         throws SQLException, IOException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());
         lj.loadDefaultValues(col);
         String default4SQL = lj.defaultValue4SQL(col);
@@ -622,7 +622,7 @@ public class Persist2Jet {
     }
 
     public void createIndex(String tableName, String indexName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         String ntn = escape4Hsqldb(tableName);
         String idn = escape4Hsqldb(indexName);
@@ -656,7 +656,7 @@ public class Persist2Jet {
     }
 
     public void createPrimaryKey(String tableName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String ntn = escape4Hsqldb(tableName);
         Table t = conn.getDbIO().getTable(escape4Access(tableName));
         Metadata md = new Metadata(conn);
@@ -692,7 +692,7 @@ public class Persist2Jet {
     }
 
     public void createForeignKeys(String tableName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String ntn = escape4Hsqldb(tableName);
         String tn = escape4Access(tableName);
         ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase());
@@ -708,7 +708,7 @@ public class Persist2Jet {
 
     private void createForeignKey(String tn4Hsqldb, String refTn4Hsqldb, String tn4Access, String refTn4Access,
             String relationshipName) throws IOException, SQLException {
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         Table t = db.getTable(tn4Access);
         Table rt = db.getTable(refTn4Access);
@@ -754,7 +754,7 @@ public class Persist2Jet {
 
     public void dropForeignKey(String relationshipName) throws IOException {
         relationshipName = escape4Access(relationshipName);
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Database db = conn.getDbIO();
         Table tbl = db.getSystemTable(SYS_RELATIONSHIPS);
         IndexCursor crsr = CursorBuilder.createCursor(tbl.getIndex("szRelationship"));

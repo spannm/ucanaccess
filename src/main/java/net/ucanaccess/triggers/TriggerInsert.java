@@ -10,7 +10,7 @@ public class TriggerInsert extends TriggerBase {
     @Override
     public void fire(int type, String name, String tableName, Object[] oldRow, Object[] newRow) {
         checkContext();
-        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String execId = UcanaccessConnection.getCtxExcId();
 
         Try.catching(() -> {
