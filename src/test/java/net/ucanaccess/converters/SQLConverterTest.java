@@ -3,6 +3,7 @@ package net.ucanaccess.converters;
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -135,6 +136,49 @@ class SQLConverterTest extends AbstractBaseTest {
             } else {
                 assertEquals(expectedRegex, SQLConverter.convertToRegexMatches(inputLikeClause));
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Identifiers and default values")
+    class IdentifiersAndDefaultsTests {
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT 1abc2, x FROM t | SELECT Z_1abc2, x FROM t",
+                "SELECT 1a1a1 FROM t    | SELECT Z_1a1a1 FROM t",
+                "SELECT 123 FROM t      | SELECT 123 FROM t"
+            }
+        )
+        void testDigitStartingIdentifiers(String sql, String expected) {
+            assertEquals(expected, SQLConverter.convertSQL(sql, true).getSql());
+        }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '`',
+            value = {
+                "c TEXT DEFAULT 'abc'      | 'abc'",
+                "c TEXT DEFAULT 'it''s'    | 'it''s'",
+                "c TEXT DEFAULT \"a\"\"b\" | \"a\"\"b\"",
+                "c LONG DEFAULT 42         | 42",
+                "c DATETIME DEFAULT Now()  | Now()"
+            }
+        )
+        void testGetDDLDefault(String ddl, String expected) {
+            assertEquals(expected, SQLConverter.getDDLDefault(ddl));
+        }
+
+        @Test
+        void testLargeInputsDoNotOverflowStack() {
+            String literal = "'" + "ab''".repeat(5000) + "'";
+            assertEquals(literal, SQLConverter.getDDLDefault("c MEMO DEFAULT " + literal));
+
+            String identifier = "1" + "a1".repeat(5000);
+            assertEquals("SELECT Z_" + identifier + " FROM t", SQLConverter.convertSQL("SELECT " + identifier + " FROM t", true).getSql());
         }
     }
 

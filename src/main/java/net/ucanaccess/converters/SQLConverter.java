@@ -40,11 +40,11 @@ public final class SQLConverter {
         private static final Pattern       YES                        = Pattern.compile("(\\W)YES(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO                         = Pattern.compile("(\\W)NO(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       WITH_OWNERACCESS_OPTION    = Pattern.compile("(\\W)WITH\\s+OWNERACCESS\\s+OPTION(\\W)", Pattern.CASE_INSENSITIVE);
-        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)(([0-9])+(([_A-Z])+([0-9])*)+)(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)([0-9]+[_A-Z][_A-Z0-9]*)(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile("(\\W)((_)+([_A-Z0-9])+)(\\W)", Pattern.CASE_INSENSITIVE);
         private static final List<Pattern> DEFAULT_CATCH              = List.of(
-            Pattern.compile("(\\s*DEFAULT\\s+)('(?:[^']*(?:'')*)*')([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("(\\s*DEFAULT\\s+)(\"(?:[^\"]*(?:\"\")*)*\")([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(\\s*DEFAULT\\s+)('[^']*+(?:''[^']*+)*+')([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(\\s*DEFAULT\\s+)(\"[^\"]*+(?:\"\"[^\"]*+)*+\")([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(\\s*DEFAULT\\s+)([0-9\\.\\-\\+]+)([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(\\s*DEFAULT\\s+)([_0-9A-Z]*\\([^\\)]*\\))([\\s\\)\\,])", Pattern.CASE_INSENSITIVE));
         private static final Pattern       DEFAULT_CATCH_0            = Pattern.compile("(\\s*DEFAULT\\s+)", Pattern.CASE_INSENSITIVE);
@@ -649,7 +649,7 @@ public final class SQLConverter {
             String prefix = grp0.matches("\\.([0-9])+[Ee]([0-9])+\\s") || grp0.matches("\\.([0-9])+[Ee][-+]") ? "" : "Z_";
             String build = m.group(1) + prefix + m.group(2);
             sql = sql.substring(0, m.start()) + build
-                    + replaceDigitStartingIdentifiers(m.group(7) + sql.substring(m.end()));
+                    + replaceDigitStartingIdentifiers(m.group(3) + sql.substring(m.end()));
         }
 
         return sql;
