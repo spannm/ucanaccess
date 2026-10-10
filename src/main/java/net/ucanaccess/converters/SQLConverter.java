@@ -41,7 +41,7 @@ public final class SQLConverter {
         private static final Pattern       YES                        = Pattern.compile("(\\W)YES(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO                         = Pattern.compile("(\\W)NO(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       WITH_OWNERACCESS_OPTION    = Pattern.compile("(\\W)WITH\\s+OWNERACCESS\\s+OPTION(\\W)", Pattern.CASE_INSENSITIVE);
-        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)([0-9]+[_A-Z][_A-Z0-9]*)(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)(\\d+[_A-Z][_A-Z0-9]*)(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile("(\\W)(_[_A-Z0-9]++)(\\W)", Pattern.CASE_INSENSITIVE);
         private static final List<Pattern> DEFAULT_CATCH              = List.of(
             Pattern.compile("(\\s*DEFAULT\\s+)('[^']*+(?:''[^']*+)*+')([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
@@ -99,10 +99,10 @@ public final class SQLConverter {
             .collect(Collectors.joining("|"))
         + ")(\\W)", Pattern.CASE_INSENSITIVE);
 
-    public static final String               DATE_ACCESS_FORMAT             = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12][0-9]|3[01])/(\\d\\d\\d\\d)";
-    public static final String               DATE_FORMAT                    = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12][0-9]|3[01])";
-    public static final String               HHMMSS_ACCESS_FORMAT           = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])";
-    public static final String               HHMMSS_FORMAT                  = "([0-9]|0[0-9]|1[0-9]|2[0-4]):([0-9]|[0-5][0-9]):([0-5][0-9]|[0-9])";
+    public static final String               DATE_ACCESS_FORMAT             = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12]\\d|3[01])/(\\d\\d\\d\\d)";
+    public static final String               DATE_FORMAT                    = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12]\\d|3[01])";
+    public static final String               HHMMSS_ACCESS_FORMAT           = "(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):(\\d|[0-5]\\d)";
+    public static final String               HHMMSS_FORMAT                  = "(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):([0-5]\\d|\\d)";
 
     private static final List<String>        PROCEDURE_KEYWORDS             = List.of("NEW", "ROW");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
@@ -647,7 +647,7 @@ public final class SQLConverter {
             if (Character.isLetter(grp0.charAt(0))) {
                 return sql;
             }
-            String prefix = grp0.matches("\\.([0-9])+[Ee]([0-9])+\\s") || grp0.matches("\\.([0-9])+[Ee][-+]") ? "" : "Z_";
+            String prefix = grp0.matches("\\.(\\d)+[Ee](\\d)+\\s") || grp0.matches("\\.(\\d)+[Ee][-+]") ? "" : "Z_";
             String build = m.group(1) + prefix + m.group(2);
             sql = sql.substring(0, m.start()) + build
                     + replaceDigitStartingIdentifiers(m.group(3) + sql.substring(m.end()));

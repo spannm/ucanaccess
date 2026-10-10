@@ -37,6 +37,7 @@ public class Metadata {
      * @author Markus Spann
      * @since v5.1.0
      */
+    @SuppressWarnings("java:S115") // constant names are the connection property names used in JDBC URLs
     public enum Property {
         user(String.class, null, 500),
         password(String.class, null, 500),
