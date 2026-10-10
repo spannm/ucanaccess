@@ -52,8 +52,8 @@ class ThisLibTest extends AbstractBaseTest {
     void main_outsideJar_printsNothing() {
         PrintStream out = System.out;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            System.setOut(new PrintStream(bos, true, StandardCharsets.UTF_8));
+        try (PrintStream ps = new PrintStream(bos, true, StandardCharsets.UTF_8)) {
+            System.setOut(ps);
             ThisLib.main(new String[0]);
         } finally {
             System.setOut(out);

@@ -1264,10 +1264,6 @@ public class LoadJet {
         }
 
         void synchronisationTriggers(String tableName, boolean hasAutoNumberColumn, boolean hasAutoAppendOnly) throws SQLException {
-            // loadTrigger(tableName, "beforeInsColCache", "BEFORE INSERT", TriggerColumCache.class);
-            // loadTrigger(tableName, "beforeUpdColCache", "BEFORE UPDATE", TriggerColumCache.class);
-            // loadTrigger(tableName, "beforeDelColCache", "BEFORE DELETE", TriggerColumCache.class);
-
             loadTrigger(tableName, "generic_insert", "AFTER INSERT", TriggerInsert.class);
             loadTrigger(tableName, "generic_update", "AFTER UPDATE", TriggerUpdate.class);
             loadTrigger(tableName, "generic_delete", "AFTER DELETE", TriggerDelete.class);

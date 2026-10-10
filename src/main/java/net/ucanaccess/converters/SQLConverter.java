@@ -381,7 +381,6 @@ public final class SQLConverter {
         sql = convertLike(sql);
         sql = replaceWhiteSpacedTables(sql);
         sql = translateAccessPowerOperators(sql);
-        // sql = replaceExclamationPoints(sql);
         if (!creatingQuery) {
             Pivot.checkAndRefreshPivot(sql, conn);
             sql = DFunction.convertDFunctions(sql, conn);
@@ -730,8 +729,7 @@ public final class SQLConverter {
             ALREADY_ESCAPED_IDENTIFIERS.add(nl.substring(1));
         }
 
-        String escaped = name;
-        escaped = name.replace("'", "").replace("\"", "").replace('\\', '_');
+        String escaped = name.replace("'", "").replace("\"", "").replace('\\', '_');
 
         if (!escaped.isEmpty() && Character.isDigit(escaped.trim().charAt(0))) {
             escaped = "Z_" + escaped.trim();
@@ -1071,10 +1069,8 @@ public final class SQLConverter {
                     foundType = true;
                     group = true;
                     countPar++;
-                } else if (Character.isDigit(c)) {
-                    foundType = true;
-                    digit = true;
-                } else if ((c == '+' || c == '-') && j + 1 < ca.length && ca[j + 1] != '(' && ca[j + 1] != '[') {
+                } else if (Character.isDigit(c)
+                    || ((c == '+' || c == '-') && j + 1 < ca.length && ca[j + 1] != '(' && ca[j + 1] != '[')) {
                     foundType = true;
                     digit = true;
                 }
