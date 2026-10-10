@@ -57,7 +57,7 @@ jobs:
                 cache: maven
                 # Sonatype Central Snapshots
                 # must match distributionManagement/snapshotRepository/id in pom:
-                server-id: central
+                server-id: sonatype-central
                 server-username: SONATYPE_CENTRAL_USERNAME
                 server-password: SONATYPE_CENTRAL_PASSWORD
 

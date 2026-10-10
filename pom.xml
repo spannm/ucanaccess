@@ -70,12 +70,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>central</id>
+            <id>sonatype-central</id>
             <name>Sonatype Central Snapshots</name>
             <url>${basepom.deploy.snapshot.url}</url>
         </snapshotRepository>
         <repository>
-            <id>central</id>
+            <id>sonatype-central</id>
             <name>Sonatype Central Staging Repository</name>
             <url>https://central.sonatype.com</url>
         </repository>
@@ -408,7 +408,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <skipPublishing>false</skipPublishing>
-                    <publishingServerId>central</publishingServerId>
+                    <publishingServerId>sonatype-central</publishingServerId>
                     <!-- do not automatically release staged artifacts to Maven Central.
                          This is the recommended setting for releases, as it allows us to manually inspect the staged repository
                          in the Central Portal before officially publishing.
