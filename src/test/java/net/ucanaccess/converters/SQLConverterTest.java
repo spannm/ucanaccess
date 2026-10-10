@@ -14,6 +14,7 @@ import java.time.Duration;
 /**
  * Unit tests for the {@link net.ucanaccess.converters.SQLConverter} class.
  */
+@SuppressWarnings("checkstyle:MethodName")
 class SQLConverterTest extends AbstractBaseTest {
 
     @Nested

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+@SuppressWarnings("checkstyle:MethodName")
 class ThisLibTest extends AbstractBaseTest {
 
     private static final String NL = System.lineSeparator();

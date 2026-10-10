@@ -22,6 +22,7 @@ import java.util.Objects;
 /**
  * Unit tests calling the static methods of {@link Functions} directly, without a database.
  */
+@SuppressWarnings("checkstyle:MethodName")
 class FunctionsUnitTest extends AbstractBaseTest {
 
     private static final String    DT1 = "2026-01-15 10:30:45";
