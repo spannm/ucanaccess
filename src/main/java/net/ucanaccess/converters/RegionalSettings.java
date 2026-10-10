@@ -24,7 +24,7 @@ public final class RegionalSettings {
         this.locale = locale;
         String[] dfsp = new String[] {getGeneralPattern(), getLongDatePattern(), getMediumDatePattern(), getShortDatePattern()};
         for (String pattern : dfsp) {
-            if (pattern.indexOf('.') > 0 && !pattern.contains("h.") && !pattern.contains("H.")) {
+            if (pattern.contains(".") && !pattern.contains("h.") && !pattern.contains("H.")) {
                 pointDateSeparator = true;
                 break;
             }
@@ -117,7 +117,7 @@ public final class RegionalSettings {
     }
 
     void addDateP(String pattern, boolean heuristic, boolean yearOverride) {
-        if (heuristic && !pattern.contains("a") && pattern.indexOf('H') > 0) {
+        if (heuristic && !pattern.contains("a") && pattern.contains("H")) {
             String chg = pattern.replace('H', 'h') + " a";
             addDateP(chg, false, false);
             addTogglePattern(chg);
@@ -138,7 +138,7 @@ public final class RegionalSettings {
 
         if (heuristic) {
             addTogglePattern(pattern);
-            if (pattern.endsWith(" a") && pattern.indexOf('h') > 0) {
+            if (pattern.endsWith(" a") && pattern.contains("h")) {
                 String chg = pattern.substring(0, pattern.length() - 2).trim().replace('h', 'H');
                 addDateP(chg, false, false);
                 addTogglePattern(chg);
@@ -149,18 +149,18 @@ public final class RegionalSettings {
 
     void addTogglePattern(String p) {
 
-        if (p.indexOf('/') > 0) {
+        if (p.contains("/")) {
             addDateP(p.replace('/', '-'), false, false);
             if (isPointDateSeparator()) {
                 addDateP(p.replace('/', '.'), false, false);
             }
-        } else if (p.indexOf('-') > 0) {
+        } else if (p.contains("-")) {
             addDateP(p.replaceAll(Pattern.quote("-"), "/"), false, false);
             if (isPointDateSeparator()) {
                 addDateP(p.replaceAll(Pattern.quote("-"), "."), false, false);
             }
 
-        } else if (p.indexOf('.') > 0 && !p.contains("h.") && !p.contains("H.")) {
+        } else if (p.contains(".") && !p.contains("h.") && !p.contains("H.")) {
             addDateP(p.replaceAll(Pattern.quote("."), "/"), false, false);
         }
     }

@@ -263,8 +263,9 @@ public class ParametricQuery {
                 decl = "[" + decl + "]";
             }
             list.add(decl);
-            String type0 = type.indexOf('(') > 0 ? type.substring(0, type.indexOf('(')) : type;
-            String typeS = type.indexOf('(') > 0 ? type.substring(type.indexOf('(')) : "";
+            int paren = type.indexOf('(');
+            String type0 = paren >= 0 ? type.substring(0, paren) : type;
+            String typeS = paren >= 0 ? type.substring(paren) : "";
             Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
 
             type = hm.get(type0.toUpperCase()) + typeS;
@@ -326,7 +327,7 @@ public class ParametricQuery {
 
     private String convertSQL(String sql, List<String> parameters2) {
         for (String s : parameters2) {
-            if (s.indexOf('\'') > 0 || s.indexOf('"') > 0) {
+            if (s.contains("'") || s.contains("\"")) {
                 String src = Pattern.quote(s);
                 String target = treatApos(s);
                 sql = sql.replaceAll(src, target);

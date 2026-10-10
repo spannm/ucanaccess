@@ -602,7 +602,7 @@ public final class SQLConverter {
                 return convertResidualSql(sql);
             }
             String content = sql.substring(init + 1, end);
-            if (content.indexOf(' ') > 0) {
+            if (content.contains(" ")) {
                 String tryContent = " " + content + " ";
                 String tryConversion = convertXescaped(tryContent);
                 if (!tryConversion.equalsIgnoreCase(tryContent)) {
@@ -613,7 +613,7 @@ public final class SQLConverter {
 
             content = basicEscapingIdentifier(content).toUpperCase();
             String subs = " ";
-            if (content != null && !isKeyword && (content.indexOf(' ') > 0 || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {
+            if (content != null && !isKeyword && (content.contains(" ") || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {
                 subs = "\"";
             }
             sql = convertResidualSql(sql.substring(0, init)) + subs + content + subs
@@ -721,7 +721,7 @@ public final class SQLConverter {
         if (TableBuilder.isReservedWord(nl)) {
             ESCAPED_IDENTIFIERS.add(nl);
         }
-        if (name.contains("'") || name.indexOf('"') > 0) {
+        if (name.contains("'") || name.contains("\"")) {
             APOSTROPHISED_NAMES.add(name);
         }
 
@@ -770,7 +770,7 @@ public final class SQLConverter {
     }
 
     private static String hsqlEscape(String escaped, boolean quote) {
-        if (escaped != null && (escaped.indexOf(' ') > 0 || escaped.contains("$"))) {
+        if (escaped != null && (escaped.contains(" ") || escaped.contains("$"))) {
             escaped = quote ? '"' + escaped + '"' : '[' + escaped + ']';
         }
         return escaped;

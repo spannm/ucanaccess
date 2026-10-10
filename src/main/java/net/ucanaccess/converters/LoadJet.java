@@ -633,7 +633,9 @@ public class LoadJet {
 
             if (defVal != null && !"GenGUID()".equals(defVal)) {
                 String default4SQL = defaultValue4SQL(defVal, col.getType());
-                boolean defIsFunction = defVal.toString().trim().endsWith(")") && defVal.toString().indexOf('(') > 0;
+                String defStr = defVal.toString().trim();
+                // a function call like NOW() or DATE(), not a parenthesized expression like (1+2)
+                boolean defIsFunction = defStr.endsWith(")") && defStr.contains("(") && !defStr.startsWith("(");
                 if (defIsFunction) {
                     metadata.columnDef(col.getTable().getName(), col.getName(), defVal.toString());
                 }
@@ -899,7 +901,7 @@ public class LoadJet {
 
         private void createTable(Table t, boolean systemTable) throws SQLException, IOException {
             String tn = t.getName();
-            if (tn.indexOf(' ') > 0) {
+            if (tn.contains(" ")) {
                 SQLConverter.addWhiteSpacedTableNames(tn);
             }
             String ntn = SQLConverter.escapeIdentifier(tn); // clean
@@ -1338,7 +1340,7 @@ public class LoadJet {
             registerQueryColumns(query, seq);
             qnn = SQLConverter.completeEscaping(qnn, false);
             qnn = SQLConverter.checkLang(qnn, conn, false);
-            if (qnn.indexOf(' ') > 0) {
+            if (qnn.contains(" ")) {
                 SQLConverter.addWhiteSpacedTableNames(query.getName());
             }
 
