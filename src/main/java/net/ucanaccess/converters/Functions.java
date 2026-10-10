@@ -1492,11 +1492,13 @@ public final class Functions {
         return res == null ? null : res != 0d;
     }
 
+    @SuppressWarnings("java:S2447") // null is the SQL NULL result of this function
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.YESNO)
     public static Boolean formulaToBoolean(Timestamp res, String datatype) {
         return null;
     }
 
+    @SuppressWarnings("java:S2447") // null is the SQL NULL result of this function
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.YESNO)
     public static Boolean formulaToBoolean(String res, String datatype) {
         if (res == null) {

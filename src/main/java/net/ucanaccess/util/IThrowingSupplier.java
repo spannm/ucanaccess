@@ -16,6 +16,7 @@ import java.util.function.Supplier;
  * @since v5.1.0
  */
 @FunctionalInterface
+@SuppressWarnings("java:S1181") // wraps any Throwable thrown by the supplier by design
 public interface IThrowingSupplier<R, T extends Throwable> {
 
     /**

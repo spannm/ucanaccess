@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("java:S4925") // loading the HSQLDB driver explicitly registers it where service loading does not
 public final class UcanaccessDriver implements Driver {
 
     public static final String  URL_PREFIX = "jdbc:ucanaccess://";

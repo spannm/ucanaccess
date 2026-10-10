@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("java:S106") // interactive console that prints its results to standard output
 public class Main {
     private static final String  EXPORT_USAGE  = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
         + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";

@@ -676,6 +676,7 @@ public class UcanaccessPreparedStatement extends UcanaccessStatement implements 
      * @deprecated Use {@code setCharacterStream}
      */
     @Override
+    @SuppressWarnings({"java:S1133", "java:S6355"}) // implements a method deprecated in the JDBC API
     @Deprecated
     public void setUnicodeStream(int parmIdx, InputStream is, int length) throws UcanaccessSQLException {
         try {

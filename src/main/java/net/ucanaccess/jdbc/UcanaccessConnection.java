@@ -281,6 +281,7 @@ public class UcanaccessConnection implements Connection {
         }
     }
 
+    @SuppressWarnings("java:S1181") // roll back on any failure, including errors, before rethrowing
     private void flushIO() throws SQLException {
         List<IFeedbackAction> ibal = new ArrayList<>();
         LinkedList<ICommand> executed = new LinkedList<>();

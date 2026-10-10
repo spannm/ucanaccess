@@ -28,6 +28,7 @@ public final class ThisLib {
      *
      * @param args command-line arguments (unused)
      */
+    @SuppressWarnings("java:S106") // prints the build information to the console by design
     public static void main(String[] args) {
         readManifest().ifPresent(m -> System.out.print(buildInfo(m)));
     }

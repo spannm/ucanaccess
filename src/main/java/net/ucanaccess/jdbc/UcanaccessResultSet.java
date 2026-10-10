@@ -185,6 +185,7 @@ public class UcanaccessResultSet implements ResultSet {
      * @deprecated Use {@link #getBigDecimal(int)}
      */
     @Override
+    @SuppressWarnings({"java:S1133", "java:S6355"}) // implements a method deprecated in the JDBC API
     @Deprecated
     public BigDecimal getBigDecimal(int idx, int arg1) throws SQLException {
         try {
@@ -207,6 +208,7 @@ public class UcanaccessResultSet implements ResultSet {
      * @deprecated Use {@link #getBigDecimal(String)}
      */
     @Override
+    @SuppressWarnings({"java:S1133", "java:S6355"}) // implements a method deprecated in the JDBC API
     @Deprecated
     public BigDecimal getBigDecimal(String columnLabel, int arg1) throws SQLException {
         try {
@@ -843,6 +845,7 @@ public class UcanaccessResultSet implements ResultSet {
      * @deprecated Use {@link #getCharacterStream(int)}
      */
     @Override
+    @SuppressWarnings({"java:S1133", "java:S6355"}) // implements a method deprecated in the JDBC API
     @Deprecated
     public InputStream getUnicodeStream(int idx) throws SQLException {
         try {
@@ -856,6 +859,7 @@ public class UcanaccessResultSet implements ResultSet {
      * @deprecated Use {@link #getCharacterStream(String)}
      */
     @Override
+    @SuppressWarnings({"java:S1133", "java:S6355"}) // implements a method deprecated in the JDBC API
     @Deprecated
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
         try {

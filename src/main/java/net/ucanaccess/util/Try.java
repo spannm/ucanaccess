@@ -56,6 +56,10 @@ import java.util.function.Supplier;
  * @author Markus Spann
  * @since v5.1.0
  */
+@SuppressWarnings({
+    "java:S119",  // type parameter names describe their role, e.g. EC for the exception of the code block
+    "java:S1181"  // catching any Throwable is the purpose of this class
+})
 public final class Try<V, EC extends Throwable> {
 
     /** The immutable value or {@code null} if an exception occurred during retrieval. */
