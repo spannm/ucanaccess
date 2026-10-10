@@ -1406,10 +1406,9 @@ public final class Functions {
         double x0 = 0;
         double f = 0;
         double i = 0;
-        double rate = guess;
-        if (Math.abs(rate) >= financialPrecision) {
-            f = Math.exp(nper * Math.log(1 + rate));
-        }
+        // the secant method starts from rates 0 and guess, so a guess of 0 gives no second point
+        double rate = Math.abs(guess) < financialPrecision ? 0.1 : guess;
+        f = Math.exp(nper * Math.log(1 + rate));
         y0 = pv + pmt * nper + fv;
         y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
 

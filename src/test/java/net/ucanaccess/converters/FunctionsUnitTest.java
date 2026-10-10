@@ -344,6 +344,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
     void rate_loan_returnsInterestRate() {
         assertThat(Functions.rate(12, -88.85, 1000, 0, 0)).isCloseTo(0.01, within(1e-4));
         assertThat(Functions.rate(12, -88.85, 1000, 0, 0, 0.05)).isCloseTo(0.01, within(1e-4));
+        assertThat(Functions.rate(12, -88.85, 1000, 0, 0, 0)).isCloseTo(0.01, within(1e-4));
     }
 
     @Test
