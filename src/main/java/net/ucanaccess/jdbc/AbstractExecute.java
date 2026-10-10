@@ -158,7 +158,7 @@ public abstract class AbstractExecute {
                     if (tableName == null) {
                         throw new TableNotFoundException(tableName);
                     }
-                    Pattern pat = Pattern.compile("\\s+ADD\\s+CONSTRAINT\\s+.*?\\s+FOREIGN\\s+KEY\\s+", Pattern.CASE_INSENSITIVE);
+                    Pattern pat = Pattern.compile("\\s++ADD\\s++CONSTRAINT\\s+.*?\\s++FOREIGN\\s++KEY\\s++", Pattern.CASE_INSENSITIVE);
                     ddlExpr = pat.matcher(sql0).replaceFirst(" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\" FOREIGN KEY ");
                 }
             } else if (ddlType.equals(DDLType.DROP_FOREIGN_KEY)) {

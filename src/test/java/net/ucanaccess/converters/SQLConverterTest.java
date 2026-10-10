@@ -1,11 +1,15 @@
 package net.ucanaccess.converters;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.time.Duration;
 
 /**
  * Unit tests for the {@link net.ucanaccess.converters.SQLConverter} class.
@@ -137,6 +141,20 @@ class SQLConverterTest extends AbstractBaseTest {
                 assertEquals(expectedRegex, SQLConverter.convertToRegexMatches(inputLikeClause));
             }
         }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT * FROM t WHERE c LIKE 'a*'                     | SELECT * FROM t WHERE  c  like 'a%'",
+                "SELECT * FROM t WHERE c NOT LIKE 'a?b'                | SELECT * FROM t WHERE  c  NOT  like 'a_b'",
+                "SELECT * FROM t WHERE (c LIKE 'a#')                   | SELECT * FROM t WHERE (REGEXP_MATCHES(c,'a\\d')  )",
+                "SELECT * FROM t WHERE c LIKE '[a-c]*' AND d LIKE 'x'  | SELECT * FROM t WHERE REGEXP_MATCHES(c,'[a-c].*')   AND  d  like 'x'"
+            }
+        )
+        void convertSQL_likeCondition_convertedToLikeOrRegexp(String sql, String expected) {
+            assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
+        }
     }
 
     @Nested
@@ -179,6 +197,30 @@ class SQLConverterTest extends AbstractBaseTest {
 
             String identifier = "1" + "a1".repeat(5000);
             assertEquals("SELECT Z_" + identifier + " FROM t", SQLConverter.convertSQL("SELECT " + identifier + " FROM t", true).getSql());
+        }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT _a, __b1 FROM t    | SELECT Z_a, Z__b1 FROM t",
+                "SELECT [x y]. FROM t      | SELECT (x y)FROM t"
+            }
+        )
+        void convertSQL_underscoreIdentifierOrBracketedSubquery_converted(String sql, String expected) {
+            assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
+        }
+
+        @Test
+        void convertSQL_largeInput_noCatastrophicBacktracking() {
+            String underscores = "SELECT " + "_".repeat(20000) + " FROM t";
+            String longLiteral = "SELECT * FROM t WHERE c = '" + "a".repeat(20000) + "'";
+            String longWhitespace = "SELECT * FROM t WHERE c =" + " ".repeat(5000) + "1";
+            assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
+                assertThat(SQLConverter.convertSQL(underscores, true).getSql()).isEqualTo(underscores.replace(" _", " Z_"));
+                assertThat(SQLConverter.convertSQL(longLiteral, true).getSql()).isEqualTo(longLiteral);
+                assertThat(SQLConverter.convertSQL(longWhitespace, true).getSql()).isEqualTo(longWhitespace);
+            });
         }
     }
 

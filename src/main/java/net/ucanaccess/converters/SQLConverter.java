@@ -24,12 +24,13 @@ public final class SQLConverter {
         private static final Pattern       DOUBLE_QUOTE_S             = Pattern.compile("(\")+");
         private static final Pattern       QUOTE_M                    = Pattern.compile("'(([^'])*)'");
         private static final Pattern       DOUBLE_QUOTE_M             = Pattern.compile("\"(([^\"])*)\"");
+        // the leading lookarounds skip start positions inside a word or whitespace run, which can never begin the leftmost match
         private static final Pattern       FIND_LIKE                  = Pattern.compile(
-            "[\\s\\(]*([\\w\\.]*)([\\s\\)]*)(NOT\\s*)*LIKE\\s*'([^']*(?:'')*)'", Pattern.CASE_INSENSITIVE);
+            "(?!(?<=[\\w.])[\\w.])(?!(?<=[\\s(])[\\s(])[\\s\\(]*+([\\w\\.]*)([\\s\\)]*+)((?:NOT\\s*)*)LIKE\\s*+'([^']*+(?:'')*)'", Pattern.CASE_INSENSITIVE);
         private static final Pattern       ACCESS_LIKE_CHARINTERVAL   = Pattern.compile("\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]");
         private static final Pattern       ACCESS_LIKE_ESCAPE         = Pattern.compile("\\[[\\*_#]\\]");
         private static final Pattern       CHECK_DDL                  = Pattern.compile("^(\\s*(CREATE|ALTER|DROP|ENABLE|DISABLE))\\s+.*", Pattern.CASE_INSENSITIVE);
-        private static final Pattern       KIND_OF_SUBQUERY           = Pattern.compile("(\\[)(( FROM )*(SELECT )*([^\\]])*)(\\]\\.\\s)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       KIND_OF_SUBQUERY           = Pattern.compile("(\\[)([^\\]]*+)(\\]\\.\\s)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
         private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
@@ -41,7 +42,7 @@ public final class SQLConverter {
         private static final Pattern       NO                         = Pattern.compile("(\\W)NO(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       WITH_OWNERACCESS_OPTION    = Pattern.compile("(\\W)WITH\\s+OWNERACCESS\\s+OPTION(\\W)", Pattern.CASE_INSENSITIVE);
         private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile("(\\W)([0-9]+[_A-Z][_A-Z0-9]*)(\\W)", Pattern.CASE_INSENSITIVE);
-        private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile("(\\W)((_)+([_A-Z0-9])+)(\\W)", Pattern.CASE_INSENSITIVE);
+        private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile("(\\W)(_[_A-Z0-9]++)(\\W)", Pattern.CASE_INSENSITIVE);
         private static final List<Pattern> DEFAULT_CATCH              = List.of(
             Pattern.compile("(\\s*DEFAULT\\s+)('[^']*+(?:''[^']*+)*+')([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(\\s*DEFAULT\\s+)(\"[^\"]*+(?:\"\"[^\"]*+)*+\")([\\s\\)\\,])", Pattern.CASE_INSENSITIVE),
@@ -630,7 +631,7 @@ public final class SQLConverter {
             return ".";
         }
         return replaceExclamationPoints(
-                replaceDigitStartingIdentifiers(Patterns.UNDERSCORE_IDENTIFIERS.matcher(sql).replaceAll("$1Z$2$5")));
+                replaceDigitStartingIdentifiers(Patterns.UNDERSCORE_IDENTIFIERS.matcher(sql).replaceAll("$1Z$2$3")));
     }
 
     private static String convertSQLTokens(String sql) {
@@ -942,7 +943,7 @@ public final class SQLConverter {
 
     private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
         int i = likeContent.replace("[#]", "").indexOf('#');
-        not = not == null ? "" : " NOT ";
+        not = not.isEmpty() ? "" : " NOT ";
         if (i >= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {
             return not + "REGEXP_MATCHES(" + conditionField + ",'" + convertToRegexMatches(likeContent) + "')" + closePar
                     + " ";

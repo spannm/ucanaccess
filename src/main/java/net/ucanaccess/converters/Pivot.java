@@ -17,10 +17,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Pivot {
+    @SuppressWarnings("java:S8786") // parses a crosstab query definition from the database file, greedy groups pick the last keyword by design
     private static final Pattern                   PAT_PIVOT          = Pattern.compile("TRANSFORM(.*\\W)SELECT(.*\\W)FROM(.*\\W)PIVOT(.*)", Pattern.CASE_INSENSITIVE);
+    @SuppressWarnings("java:S8786") // parses a crosstab query definition from the database file, greedy groups pick the last keyword by design
     private static final Pattern                   PAT_PIVOT_EXPR     = Pattern.compile("(.*)IN\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PAT_PIVOT_AGGR     = Pattern.compile("(SUM|MAX|MIN|FIRST|LAST|AVG|COUNT|STDEV|VAR)\\s*\\((.*)\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern                   PAT_PIVOT_CN       = Pattern.compile("[\"'#](.*)[\"'#]");
+    @SuppressWarnings("java:S8786") // parses a crosstab query definition from the database file, greedy groups pick the last keyword by design
     private static final Pattern                   PAT_PIVOT_GROUP_BY = Pattern.compile("(.+)GROUP\\s+BY(.+)", Pattern.CASE_INSENSITIVE);
 
     private static final Map<String, String>       PIVOT_MAP          = new HashMap<>();

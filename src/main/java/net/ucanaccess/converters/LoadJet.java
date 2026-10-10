@@ -1409,6 +1409,7 @@ public class LoadJet {
         private String solveAmbiguous(String sql) {
             try {
                 sql = sql.replaceAll("\\s+", " ");
+                @SuppressWarnings("java:S8786") // parses a view definition from the database file, greedy groups pick the last SELECT ... FROM by design
                 Pattern pat = Pattern.compile("(.*)\\s+SELECT(\\s.*\\s)FROM(\\s)(.*)", Pattern.CASE_INSENSITIVE);
                 Matcher mtc = pat.matcher(sql);
                 if (mtc.find()) {
@@ -1418,7 +1419,7 @@ public class LoadJet {
                     StringBuilder sb = new StringBuilder(pre).append(" select ");
                     List<String> lkl = new LinkedList<>();
 
-                    Pattern patAlias = Pattern.compile("\\s+AS\\s+", Pattern.CASE_INSENSITIVE);
+                    Pattern patAlias = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
                     for (String s : split) {
                         int i = s.lastIndexOf('.');
                         boolean alias = patAlias.matcher(s).find();
