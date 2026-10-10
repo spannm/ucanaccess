@@ -28,6 +28,7 @@ import java.util.Date;
  * </pre>
  * </p>
  */
+@SuppressWarnings("java:S2143") // formats java.util.Date values returned by JDBC
 public final class Exporter {
     /** The default delimiter is semi-colon for historical reasons. */
     private static final String DEFAULT_CSV_DELIMITER = ";";

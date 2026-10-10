@@ -908,7 +908,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "Date", argumentTypes = {}, returnType = AccessType.DATETIME)
     public static Timestamp date() {
-        return Timestamp.valueOf(LocalDate.now().atStartOfDay());
+        return Timestamp.valueOf(LocalDate.now(ZoneId.systemDefault()).atStartOfDay());
     }
 
     /**
@@ -1001,7 +1001,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "Time", argumentTypes = {}, returnType = AccessType.DATETIME)
     public static Timestamp time() {
-        return new Timestamp(LocalDateTime.now()
+        return new Timestamp(LocalDateTime.now(ZoneId.systemDefault())
             .withYear(1899).withMonth(12).withDayOfMonth(30)
             .truncatedTo(ChronoUnit.SECONDS)
             .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -1114,7 +1114,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "TimeSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
     public static Timestamp timeSerial(Integer h, Integer m, Integer s) {
-        return new Timestamp(LocalDateTime.now()
+        return new Timestamp(LocalDateTime.now(ZoneId.systemDefault())
             .withYear(1899).withMonth(12).withDayOfMonth(30)
             .truncatedTo(ChronoUnit.SECONDS)
             .withHour(h).withMinute(m).withSecond(s)

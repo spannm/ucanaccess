@@ -9,6 +9,7 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import org.hsqldb.types.JavaObjectData;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public class TriggerAppendOnly extends TriggerBase {
             for (Column col : t.getColumns()) {
                 if (col.isAppendOnly()) {
                     ColumnImpl verCol = (ColumnImpl) col.getVersionHistoryColumn();
-                    LocalDateTime upTime = LocalDateTime.now();
+                    LocalDateTime upTime = LocalDateTime.now(ZoneId.systemDefault());
                     String val = newR[i] == null ? null : newR[i].toString();
                     if (INSERT_BEFORE_ROW == type) {
                         newR[verCol.getColumnNumber()] = new JavaObjectData(new Version[] {new Version(val, upTime)});

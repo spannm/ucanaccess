@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("java:S2143") // reads java.util.Date values from Jackcess system tables
 public final class DBReference {
     private static final String MSG_COULD_NOT_DELETE = "Could not delete {0}";
     private static final String MSG_COULD_NOT_CREATE = "Could not create file {0}";
@@ -726,7 +728,7 @@ public final class DBReference {
         private final String                   name;
 
         private UniqueString() {
-            name = LocalDateTime.now().format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
+            name = LocalDateTime.now(ZoneId.systemDefault()).format(FORMATTER) + '_' + String.format("%03d", COUNTER.getAndIncrement());
         }
 
         @Override

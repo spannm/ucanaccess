@@ -18,6 +18,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +159,7 @@ public class UpdateCommand extends AbstractCursorCommand {
                         List<io.github.spannm.jackcess.complex.Version> oldV = rowFk.getVersions();
                         String vn = v.getValue();
                         String vo = !oldV.isEmpty() ? oldV.get(0).getValue() : null;
-                        LocalDateTime upTime = isRollbacking ? LocalDateTime.now() : v.getModifiedDate();
+                        LocalDateTime upTime = isRollbacking ? LocalDateTime.now(ZoneId.systemDefault()) : v.getModifiedDate();
 
                         if (vn != null && vo == null || vo != null && vn == null
                                 || vo != null && vn != null && !vo.equals(vn)) {

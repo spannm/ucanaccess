@@ -11,6 +11,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
+@SuppressWarnings("java:S2143") // Calendar is part of the JDBC API signatures
 public class UcanaccessResultSet implements ResultSet {
     private final ResultSet           wrapped;
     private final UcanaccessStatement wrappedStatement;

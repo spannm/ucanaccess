@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
+@SuppressWarnings("java:S2143") // Calendar is part of the JDBC API signatures
 public class UcanaccessCallableStatement extends UcanaccessPreparedStatement implements CallableStatement {
 
     private CallableStatement hidden;

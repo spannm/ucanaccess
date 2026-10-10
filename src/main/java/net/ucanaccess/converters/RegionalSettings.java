@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S2143") // parses with the SimpleDateFormat patterns of the regional date format resources
 public final class RegionalSettings {
 
     static final Map<Locale, RegionalSettings> REG_MAP = new HashMap<>();

@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@SuppressWarnings("java:S2143") // converts java.util.Date values read by Jackcess
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 

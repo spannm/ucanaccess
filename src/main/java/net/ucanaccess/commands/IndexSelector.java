@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+@SuppressWarnings("java:S2143") // compares java.util.Date values read by Jackcess
 public final class IndexSelector {
 
     private final Table table;
