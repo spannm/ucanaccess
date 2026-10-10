@@ -8,17 +8,21 @@ import net.ucanaccess.complex.Attachment;
 import net.ucanaccess.complex.ComplexBase;
 import net.ucanaccess.complex.SingleValue;
 import net.ucanaccess.complex.Version;
+import net.ucanaccess.converters.Metadata;
 import net.ucanaccess.converters.Persist2Jet;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.jdbc.DBReferenceSingleton;
+import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.triggers.AutoNumberManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class InsertCommand implements ICommand {
     private final String tableName;
@@ -75,9 +79,18 @@ public class InsertCommand implements ICommand {
         }
     }
 
-    public void insertRow(Table tbl) throws IOException {
+    /**
+     * Adds the new row to the given table.
+     *
+     * @return the table the row was added to and the id of the new row
+     */
+    private Map.Entry<Table, RowId> insertRow(Table tbl) throws IOException {
+        // the element after the last column receives the id of the new row
+        int numCols = tbl.getColumnCount();
+        Object[] row = Arrays.copyOf(newRow, numCols + 1);
+        row[numCols] = ColumnImpl.RETURN_ROW_ID;
         try {
-            tbl.addRow(newRow);
+            tbl.addRow(row);
         } catch (ConstraintViolationException ex) {
             List<? extends Column> lc = tbl.getColumns();
             boolean retry = false;
@@ -97,8 +110,45 @@ public class InsertCommand implements ICommand {
             ref.reloadDbIO();
             dbIO = ref.getDbIO();
             tbl = dbIO.getTable(tableName);
-            tbl.addRow(newRow);
+            tbl.addRow(row);
         }
+        // the table fills in generated values such as autonumbers and column defaults
+        System.arraycopy(row, 0, newRow, 0, Math.min(newRow.length, numCols));
+        return new SimpleImmutableEntry<>(tbl, row[numCols] instanceof RowId ? (RowId) row[numCols] : null);
+    }
+
+    /**
+     * Jackcess replaces {@code null} with the column default on insert. The row has already been inserted into HSQLDB,
+     * which applied the defaults of omitted columns, so a remaining {@code null} was set explicitly and is restored.
+     */
+    private void restoreExplicitNulls(Table tbl, RowId rowId, Object[] memento, List<? extends Column> colList)
+        throws IOException, SQLException {
+        if (rowId == null) {
+            return;
+        }
+        Cursor cursor = null;
+        int j = 0;
+        for (Column col : colList) {
+            if (memento[j] == null && newRow[j] != null && !col.isAutoNumber() && col.getType() != DataType.BOOLEAN
+                && col.getProperties().getValue(PropertyMap.DEFAULT_VALUE_PROP) != null && hasNativeDefault(col)) {
+                if (cursor == null) {
+                    cursor = CursorBuilder.createCursor(tbl);
+                    cursor.findRow(rowId);
+                }
+                cursor.setCurrentRowValue(col, null);
+                newRow[j] = null;
+            }
+            j++;
+        }
+    }
+
+    /**
+     * Only a native HSQLDB column default leaves an explicit {@code null} in the row. Defaults that UCanAccess could not
+     * translate are left to Jackcess.
+     */
+    private static boolean hasNativeDefault(Column col) throws SQLException {
+        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();
+        return conn != null && new Metadata(conn.getHSQLDBConnection()).hasNativeColumnDefault(col.getTable().getName(), col.getName());
     }
 
     @Override
@@ -125,7 +175,8 @@ public class InsertCommand implements ICommand {
                 colList = Arrays.asList(cllReorded);
             }
 
-            insertRow(table);
+            Map.Entry<Table, RowId> inserted = insertRow(table);
+            restoreExplicitNulls(inserted.getKey(), inserted.getValue(), memento, colList);
             j = 0;
             for (Column col : colList) {
                 ColumnImpl colImpl = (ColumnImpl) col;

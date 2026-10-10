@@ -1,14 +1,25 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
-@Disabled
+@SuppressWarnings("checkstyle:MethodName")
 class ColumnDefaultTest extends UcanaccessBaseTest {
 
     static Stream<TestData> getTestData() {
@@ -41,10 +52,67 @@ class ColumnDefaultTest extends UcanaccessBaseTest {
                 "INSERT INTO " + tblName + " (id, " + colName + ") VALUES ('[3] " + colName + " some value', " + (testData.quoteVal ? testData.insValue : "'" + testData.insValue + "'") + ")");
 
             checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[1]%'", recs(rec("[1] " + colName + " omitted", testData.defValue)));
-            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[2]%'", recs(rec("[2] " + colName + " explicit NULL", null)));
+            // Access Yes/No columns cannot hold NULL
+            Object explicitNull = "BOOLEAN".equals(testData.dataType) ? Boolean.FALSE : null;
+            checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[2]%'", recs(rec("[2] " + colName + " explicit NULL", explicitNull)));
             checkQuery("SELECT * FROM " + tblName + " WHERE id LIKE '[3]%'", recs(rec("[3] " + colName + " some value", testData.insValue)));
 
+            // the values written to the Access file must match
+            checkQuery("SELECT * FROM " + tblName + " ORDER BY id");
+
         }
+    }
+
+    @Test
+    void insert_preparedStatementWithQuotedNames_keepsExplicitNull() throws Exception {
+        init(AccessVersion.getDefaultAccessVersion());
+        executeStatements("CREATE TABLE [tbl defaults] ([row id] TEXT(50) PRIMARY KEY, [int col] INTEGER NULL DEFAULT 7)");
+
+        try (PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO [tbl defaults] ([row id], [int col]) VALUES (?, ?)")) {
+            ps.setString(1, "setNull");
+            ps.setNull(2, Types.INTEGER);
+            ps.executeUpdate();
+            ps.setString(1, "setObject");
+            ps.setObject(2, null);
+            ps.executeUpdate();
+            ps.setString(1, "value");
+            ps.setInt(2, 3);
+            ps.executeUpdate();
+        }
+        executeStatements("INSERT INTO [tbl defaults] ([row id]) VALUES ('omitted')");
+
+        checkQuery("SELECT [row id], [int col] FROM [tbl defaults] ORDER BY [row id]",
+            recs(rec("omitted", 7), rec("setNull", null), rec("setObject", null), rec("value", 3)));
+        // the values written to the Access file must match
+        checkQuery("SELECT * FROM [tbl defaults] ORDER BY [row id]");
+    }
+
+    @Test
+    void insert_afterLoadingDatabaseFile_keepsExplicitNull() throws Exception {
+        init(AccessVersion.getDefaultAccessVersion());
+        executeStatements("CREATE TABLE tbl_load (id TEXT(50) PRIMARY KEY, int_col INTEGER NULL DEFAULT 7)");
+        ucanaccess.close();
+
+        // a copy is loaded from scratch, so its column defaults are read from the Access file
+        File copy = copyFile(getFileAccDb().toPath(), createTempFileName("load"));
+        try (UcanaccessConnection conn = buildConnection().withDbPath(copy.getAbsolutePath()).build();
+             Statement st = conn.createStatement()) {
+            st.executeUpdate("INSERT INTO tbl_load (id, int_col) VALUES ('explicit NULL', NULL)");
+            st.executeUpdate("INSERT INTO tbl_load (id) VALUES ('omitted')");
+
+            assertThat(readRows(st, "SELECT id, int_col FROM tbl_load ORDER BY id"))
+                .containsExactly(Arrays.asList("explicit NULL", null), List.of("omitted", 7));
+        }
+    }
+
+    private static List<List<Object>> readRows(Statement st, String sql) throws SQLException {
+        List<List<Object>> rows = new ArrayList<>();
+        try (ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                rows.add(Arrays.asList(rs.getObject(1), rs.getObject(2)));
+            }
+        }
+        return rows;
     }
 
     static class TestData {

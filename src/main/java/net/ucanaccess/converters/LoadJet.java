@@ -657,6 +657,10 @@ public class LoadJet {
                             + "(column {1}, table {2}). It may result in a data truncation error at run-time due to max column size {3}",
                             defVal, col.getName(), col.getTable().getName(), col.getLengthInUnits());
                     }
+                    // a native column default keeps an explicit NULL on insert, a trigger cannot tell it apart
+                    if (!defIsFunction && trySetNativeColumnDefault(ntn, col, defFound)) {
+                        return null;
+                    }
                     String triggerName = escapeIdentifier("tr_" + ntn + "_default" + NAMING_COUNTER.getAndIncrement());
                     return "CREATE TRIGGER " + triggerName + " BEFORE INSERT ON " + ntn
                         + " REFERENCING NEW ROW AS NEW FOR EACH ROW IF NEW." + ncn + " IS NULL THEN"
@@ -664,6 +668,49 @@ public class LoadJet {
                 }
             }
             return null;
+        }
+
+        /**
+         * Sets a constant default value as HSQLDB column default.
+         *
+         * @return {@code true} if the default was set, {@code false} if it has to be handled by a trigger
+         */
+        private boolean trySetNativeColumnDefault(String ntn, Column col, Object value) {
+            String literal = toSqlLiteral(value, col.getType());
+            if (literal == null) {
+                return false;
+            }
+            try {
+                exec("ALTER TABLE " + ntn + " ALTER COLUMN " + escapeIdentifier(col.getName()) + " SET DEFAULT " + literal, false);
+                return true;
+            } catch (SQLException ex) {
+                logger.log(Level.DEBUG, "Cannot set default {0} of column {1}, using a trigger: {2}", literal, col.getName(), ex.getMessage());
+                return false;
+            }
+        }
+
+        private String toSqlLiteral(Object value, DataType dt) {
+            if (value == null) {
+                return null;
+            }
+            switch (dt) {
+                case BYTE:
+                case INT:
+                case LONG:
+                case BIG_INT:
+                case FLOAT:
+                case DOUBLE:
+                case MONEY:
+                case NUMERIC:
+                    return Try.catching(() -> new BigDecimal(value.toString().trim()).toPlainString()).orIgnore();
+                case BOOLEAN:
+                    return value instanceof Boolean ? value.toString().toUpperCase(Locale.US) : null;
+                case TEXT:
+                case MEMO:
+                    return "'" + value.toString().replace("'", "''") + "'";
+                default:
+                    return null;
+            }
         }
 
         private void addTriggerColumnDefault(Column col) throws SQLException, IOException {

@@ -196,6 +196,13 @@ public class Metadata {
     private static final String SELECT_TABLE_ESCAPED      =
         "SELECT ESCAPED_TABLE_NAME FROM UCA_METADATA.TABLES WHERE TABLE_NAME = ?";
 
+    private static final String SELECT_NATIVE_COLUMN_DEF  =
+        "SELECT l.COLUMN_DEF FROM INFORMATION_SCHEMA.SYSTEM_COLUMNS l "
+            + "INNER JOIN UCA_METADATA.COLUMNS c ON (UPPER(l.COLUMN_NAME) = UPPER(TRIM(BOTH '\"' FROM c.ESCAPED_COLUMN_NAME))) "
+            + "INNER JOIN UCA_METADATA.TABLES t ON (t.TABLE_ID = c.TABLE_ID "
+            + "AND UPPER(l.TABLE_NAME) = UPPER(TRIM(BOTH '\"' FROM t.ESCAPED_TABLE_NAME))) "
+            + "WHERE t.TABLE_NAME = ? AND c.COLUMN_NAME = ?";
+
     private static final String SELECT_TABLE_METADATA     =
         "SELECT TABLE_ID, TABLE_NAME FROM UCA_METADATA.TABLES WHERE ESCAPED_TABLE_NAME = ?";
     private static final String DROP_TABLE                = "DELETE FROM UCA_METADATA.TABLES WHERE TABLE_NAME = ?";
@@ -315,6 +322,18 @@ public class Metadata {
             ps.setString(1, tableName);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getString(ESCAPED_TABLE_NAME) : null;
+        }).orThrow(ex -> (SQLException) ex);
+    }
+
+    /**
+     * Returns whether the HSQLDB column has a default value, as opposed to a default applied by trigger or none at all.
+     */
+    public boolean hasNativeColumnDefault(String tableName, String columnName) throws SQLException {
+        return Try.withResources(() -> conn.prepareStatement(SELECT_NATIVE_COLUMN_DEF), ps -> {
+            ps.setString(1, tableName);
+            ps.setString(2, columnName);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getString(1) != null;
         }).orThrow(ex -> (SQLException) ex);
     }
 
