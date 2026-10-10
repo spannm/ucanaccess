@@ -105,6 +105,13 @@
         <ucanaccess.console.main>net.ucanaccess.console.Main</ucanaccess.console.main>
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
+        <!-- Rule S2143 (use java.time) does not fit: java.util.Date and Calendar are part of the JDBC API
+             and of Jackcess, and dates are parsed and formatted with SimpleDateFormat patterns.
+             The rule reports whole files, which @SuppressWarnings cannot cover. -->
+        <sonar.issue.ignore.multicriteria>s2143</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.s2143.ruleKey>java:S2143</sonar.issue.ignore.multicriteria.s2143.ruleKey>
+        <sonar.issue.ignore.multicriteria.s2143.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.s2143.resourceKey>
+
         <dep.jackcess.version>5.1.7</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>

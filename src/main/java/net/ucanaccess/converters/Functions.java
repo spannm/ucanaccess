@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("java:S2143") // formatting and parsing use the SimpleDateFormat patterns of the regional settings
 public final class Functions {
     private static final Logger LOGGER = System.getLogger(Functions.class.getName());
     private static SecureRandom random;
@@ -349,6 +348,7 @@ public final class Functions {
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.LONG)
+    @SuppressWarnings("java:S8700") // Access dates have no time zone, so the difference is measured in wall-clock time
     public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2) throws UcanaccessSQLException {
         if (dt1 == null || intv == null || dt2 == null) {
             return null;

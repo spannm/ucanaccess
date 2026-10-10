@@ -17,7 +17,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("java:S2143") // Calendar is part of the JDBC API signatures
 public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
 
     private PreparedStatement                  wrappedPs;

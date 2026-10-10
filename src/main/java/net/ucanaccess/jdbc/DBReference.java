@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("java:S2143") // reads java.util.Date values from Jackcess system tables
 public final class DBReference {
     private static final String MSG_COULD_NOT_DELETE = "Could not delete {0}";
     private static final String MSG_COULD_NOT_CREATE = "Could not create file {0}";
