@@ -20,16 +20,19 @@ import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.text.*;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S2143") // formatting and parsing use the SimpleDateFormat patterns of the regional settings
 public final class Functions {
     private static final Logger LOGGER = System.getLogger(Functions.class.getName());
     private static SecureRandom random;
@@ -38,6 +41,11 @@ public final class Functions {
     private static final double APPROX = 0.00000001;
 
     private static final String GENERAL_DATE = "general date";
+
+    /** Day zero of Access date values. */
+    private static final LocalDateTime ACCESS_BASE_DATE         = LocalDateTime.of(1899, 12, 30, 0, 0);
+    /** Weeks as in Access by default: starting on Sunday, week 1 contains January 1st. */
+    private static final WeekFields    WEEK_FIELDS_SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);
 
     private Functions() {
     }
@@ -279,34 +287,40 @@ public final class Functions {
         if (dt == null || intv == null) {
             return null;
         }
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(dt);
+        LocalDateTime ldt = toLocalDateTime(dt);
         if ("yyyy".equalsIgnoreCase(intv)) {
-            cl.add(Calendar.YEAR, vl);
+            ldt = ldt.plusYears(vl);
         } else if ("q".equalsIgnoreCase(intv)) { // quarter
-            cl.add(Calendar.MONTH, vl * 3);
+            ldt = ldt.plusMonths(vl * 3L);
         } else if ("m".equalsIgnoreCase(intv)) { // month
-            cl.add(Calendar.MONTH, vl);
-        } else if ("y".equalsIgnoreCase(intv)) { // day of year
-            cl.add(Calendar.DAY_OF_YEAR, vl);
-        } else if ("d".equalsIgnoreCase(intv)) { // day
-            cl.add(Calendar.DAY_OF_YEAR, vl);
-        } else if ("w".equalsIgnoreCase(intv)) { // weekday
-            cl.add(Calendar.DAY_OF_WEEK, vl);
+            ldt = ldt.plusMonths(vl);
+        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv) || "w".equalsIgnoreCase(intv)) { // day of year, day, weekday
+            ldt = ldt.plusDays(vl);
         } else if ("ww".equalsIgnoreCase(intv)) { // week
-            cl.add(Calendar.WEEK_OF_YEAR, vl);
+            ldt = ldt.plusWeeks(vl);
         } else if ("h".equalsIgnoreCase(intv)) { // hour
-            cl.add(Calendar.HOUR, vl);
+            ldt = ldt.plusHours(vl);
         } else if ("n".equalsIgnoreCase(intv)) { // minute
-            cl.add(Calendar.MINUTE, vl);
+            ldt = ldt.plusMinutes(vl);
         } else if ("s".equalsIgnoreCase(intv)) { // second
-            cl.add(Calendar.SECOND, vl);
+            ldt = ldt.plusSeconds(vl);
         } else {
             throw new InvalidIntervalValueException(intv);
         }
-        return dt instanceof Timestamp
-            ? new Timestamp(cl.getTimeInMillis())
-            : new java.sql.Date(cl.getTimeInMillis());
+        Timestamp result = Timestamp.valueOf(ldt);
+        return dt instanceof Timestamp ? result : new java.sql.Date(result.getTime());
+    }
+
+    /**
+     * Converts a date to local date and time. Access stores dates without time zone,
+     * so date arithmetic must not be affected by daylight saving time changes.
+     */
+    private static LocalDateTime toLocalDateTime(Date dt) {
+        return dt instanceof Timestamp ? ((Timestamp) dt).toLocalDateTime() : new Timestamp(dt.getTime()).toLocalDateTime();
+    }
+
+    private static int dayOfWeekSundayFirst(LocalDate date) {
+        return date.getDayOfWeek().getValue() % 7 + 1;
     }
 
     @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.DATETIME}, returnType = AccessType.DATETIME)
@@ -339,36 +353,28 @@ public final class Functions {
         if (dt1 == null || intv == null || dt2 == null) {
             return null;
         }
-        Calendar clMin = Calendar.getInstance();
-        Calendar clMax = Calendar.getInstance();
         int sign = dt1.after(dt2) ? -1 : 1;
-        if (sign == 1) {
-            clMax.setTime(dt2);
-            clMin.setTime(dt1);
-        } else {
-            clMax.setTime(dt1);
-            clMin.setTime(dt2);
-        }
-        clMin.set(Calendar.MILLISECOND, 0);
-        clMax.set(Calendar.MILLISECOND, 0);
-        int years = clMax.get(Calendar.YEAR) - clMin.get(Calendar.YEAR);
+        LocalDateTime min = (sign == 1 ? dt1 : dt2).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime max = (sign == 1 ? dt2 : dt1).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);
+        int years = max.getYear() - min.getYear();
+        long millis = Duration.between(min, max).toMillis();
         Integer result;
         if ("yyyy".equalsIgnoreCase(intv)) {
             result = years;
         } else if ("q".equalsIgnoreCase(intv)) {
-            result = years * 4 + clMax.get(Calendar.MONTH) / 3 - clMin.get(Calendar.MONTH) / 3;
+            result = years * 4 + (max.getMonthValue() - 1) / 3 - (min.getMonthValue() - 1) / 3;
         } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24));
+            result = (int) Math.rint((double) millis / (1000 * 60 * 60 * 24));
         } else if ("m".equalsIgnoreCase(intv)) {
-            result = years * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
+            result = years * 12 + max.getMonthValue() - min.getMonthValue();
         } else if ("w".equalsIgnoreCase(intv) || "ww".equalsIgnoreCase(intv)) {
-            result = (int) Math.floor((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7));
+            result = (int) Math.floor((double) millis / (1000 * 60 * 60 * 24 * 7));
         } else if ("h".equalsIgnoreCase(intv)) {
-            result = (int) Math.round((clMax.getTime().getTime() - clMin.getTime().getTime()) / (1000d * 60 * 60));
+            result = (int) Math.round(millis / (1000d * 60 * 60));
         } else if ("n".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60));
+            result = (int) Math.rint((double) millis / (1000 * 60));
         } else if ("s".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / 1000);
+            result = (int) Math.rint((double) millis / 1000);
         } else {
             throw new InvalidIntervalValueException(intv);
         }
@@ -395,9 +401,7 @@ public final class Functions {
             ? datePart(interval, date, firstDayOfWeek, 1)
             : datePart(interval, date);
         if ("w".equalsIgnoreCase(interval) && firstDayOfWeek > 1) {
-            Calendar cl = Calendar.getInstance();
-            cl.setTime(date);
-            ret = cl.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek + 1;
+            ret = dayOfWeekSundayFirst(date.toLocalDateTime().toLocalDate()) - firstDayOfWeek + 1;
             if (ret <= 0) {
                 ret = 7 + ret;
             }
@@ -415,19 +419,14 @@ public final class Functions {
     public static Integer datePart(String intv, Timestamp dt, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
         Integer ret = datePart(intv, dt);
         if (ret != null && "ww".equalsIgnoreCase(intv) && (firstWeekOfYear > 1 || firstDayOfWeek > 1)) {
-            Calendar cl = Calendar.getInstance();
-            cl.setTime(dt);
-            cl.set(Calendar.MONTH, Calendar.JANUARY);
-            cl.set(Calendar.DAY_OF_MONTH, 1);
-            Calendar cl1 = Calendar.getInstance();
-            cl1.setTime(dt);
+            LocalDate date = dt.toLocalDateTime().toLocalDate();
             if (firstDayOfWeek == 0) {
                 firstDayOfWeek = 1;
             }
-            int dow = cl.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek + 1;
+            int dow = dayOfWeekSundayFirst(date.withDayOfYear(1)) - firstDayOfWeek + 1;
             if (dow <= 0) {
                 dow = 7 + dow;
-                if (cl1.get(Calendar.DAY_OF_WEEK) - firstDayOfWeek >= 0) {
+                if (dayOfWeekSundayFirst(date) - firstDayOfWeek >= 0) {
                     ret++;
                 }
             }
@@ -451,28 +450,27 @@ public final class Functions {
         if (intv == null || dt == null) {
             return null;
         }
-        Calendar cl = Calendar.getInstance(Locale.US);
-        cl.setTime(dt);
+        LocalDateTime ldt = dt.toLocalDateTime();
         if ("yyyy".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.YEAR);
+            return ldt.getYear();
         } else if ("q".equalsIgnoreCase(intv)) {
-            return (int) Math.ceil((cl.get(Calendar.MONTH) + 1) / 3d);
+            return (ldt.getMonthValue() + 2) / 3;
         } else if ("d".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.DAY_OF_MONTH);
+            return ldt.getDayOfMonth();
         } else if ("y".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.DAY_OF_YEAR);
+            return ldt.getDayOfYear();
         } else if ("m".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.MONTH) + 1;
+            return ldt.getMonthValue();
         } else if ("ww".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.WEEK_OF_YEAR);
+            return ldt.get(WEEK_FIELDS_SUNDAY_START.weekOfWeekBasedYear());
         } else if ("w".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.DAY_OF_WEEK);
+            return dayOfWeekSundayFirst(ldt.toLocalDate());
         } else if ("h".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.HOUR_OF_DAY);
+            return ldt.getHour();
         } else if ("n".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.MINUTE);
+            return ldt.getMinute();
         } else if ("s".equalsIgnoreCase(intv)) {
-            return cl.get(Calendar.SECOND);
+            return ldt.getSecond();
         } else {
             throw new InvalidIntervalValueException(intv);
         }
@@ -488,16 +486,8 @@ public final class Functions {
      */
     @FunctionType(functionName = "DateSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
     public static Timestamp dateSerial(int year, int month, int day) {
-        Calendar cl = Calendar.getInstance();
-        cl.setLenient(true);
-        cl.set(Calendar.YEAR, year);
-        cl.set(Calendar.MONTH, month - 1);
-        cl.set(Calendar.DAY_OF_MONTH, day);
-        cl.set(Calendar.HOUR_OF_DAY, 0);
-        cl.set(Calendar.MINUTE, 0);
-        cl.set(Calendar.SECOND, 0);
-        cl.set(Calendar.MILLISECOND, 0);
-        return new Timestamp(cl.getTime().getTime());
+        // month and day may lie outside their usual range and then roll over, like in Access
+        return Timestamp.valueOf(LocalDate.of(year, 1, 1).plusMonths(month - 1L).plusDays(day - 1L).atStartOfDay());
     }
 
     @FunctionType(functionName = "DateValue", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
@@ -566,13 +556,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "DateValue", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
     public static Timestamp dateValue(Timestamp dt) {
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(dt);
-        cl.set(Calendar.HOUR_OF_DAY, 0);
-        cl.set(Calendar.MINUTE, 0);
-        cl.set(Calendar.SECOND, 0);
-        cl.set(Calendar.MILLISECOND, 0);
-        return new Timestamp(cl.getTime().getTime());
+        return Timestamp.valueOf(dt.toLocalDateTime().toLocalDate().atStartOfDay());
     }
 
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DOUBLE, AccessType.TEXT}, returnType = AccessType.TEXT)
@@ -1477,9 +1461,7 @@ public final class Functions {
         if (res == null) {
             return null;
         }
-        Calendar clbb = Calendar.getInstance();
-        clbb.set(1899, 11, 30, 0, 0, 0);
-        return (double) dateDiff("y", new Timestamp(clbb.getTimeInMillis()), res);
+        return (double) dateDiff("y", Timestamp.valueOf(ACCESS_BASE_DATE), res);
     }
 
     @FunctionType(functionName = "formulaToBoolean", argumentTypes = {AccessType.YESNO, AccessType.MEMO}, returnType = AccessType.YESNO)
@@ -1538,9 +1520,8 @@ public final class Functions {
 
     @FunctionType(functionName = "formulaToText", argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.MEMO)
     public static String formulaToText(Timestamp res, String datatype) throws UcanaccessSQLException {
-        Calendar cl = Calendar.getInstance();
-        cl.setTimeInMillis(res.getTime());
-        if (cl.get(Calendar.HOUR) == 0 && cl.get(Calendar.MINUTE) == 0 && cl.get(Calendar.SECOND) == 0) {
+        LocalDateTime ldt = res.toLocalDateTime();
+        if (ldt.getHour() == 0 && ldt.getMinute() == 0 && ldt.getSecond() == 0) {
             return format(res, "short date");
         } else {
             return format(res, GENERAL_DATE);
@@ -1565,10 +1546,7 @@ public final class Functions {
         if (res == null) {
             return null;
         }
-        Calendar clbb = Calendar.getInstance();
-        clbb.set(1899, 11, 30, 0, 0, 0);
-        clbb.set(Calendar.MILLISECOND, 0);
-        return dateAdd("y", res ? -1 : 0, new Timestamp(clbb.getTimeInMillis()));
+        return dateAdd("y", res ? -1 : 0, Timestamp.valueOf(ACCESS_BASE_DATE));
     }
 
     @FunctionType(functionName = "orderJet", argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
@@ -1581,11 +1559,8 @@ public final class Functions {
         if (res == null) {
             return null;
         }
-        Calendar clbb = Calendar.getInstance();
-        clbb.set(1899, 11, 30, 0, 0, 0);
-        clbb.set(Calendar.MILLISECOND, 0);
         Double d = Math.floor(res);
-        Timestamp tr = dateAdd("y", d.intValue(), new Timestamp(clbb.getTimeInMillis()));
+        Timestamp tr = dateAdd("y", d.intValue(), Timestamp.valueOf(ACCESS_BASE_DATE));
         d = (res - res.intValue()) * 24;
         tr = dateAdd("H", d.intValue(), tr);
         d = (d - d.intValue()) * 60;

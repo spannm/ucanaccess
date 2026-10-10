@@ -15,9 +15,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
+import java.util.concurrent.Callable;
 
 /**
  * Unit tests calling the static methods of {@link Functions} directly, without a database.
@@ -386,6 +389,47 @@ class FunctionsUnitTest extends AbstractBaseTest {
     @Test
     void timeSerial_hourMinuteSecond_timeOnBaseDate() {
         assertThat(Functions.timeSerial(13, 14, 15)).isEqualTo(Timestamp.valueOf(LocalDateTime.of(1899, 12, 30, 13, 14, 15)));
+    }
+
+    // Access dates have no time zone, so a daylight saving time change must not affect the result
+    @ParameterizedTest(name = "[{index}] {0}, {1} => {2}")
+    @CsvSource({
+        "2026-03-29, h, 24",
+        "2026-03-29, n, 1440",
+        "2026-03-29, s, 86400",
+        "2026-03-29, d, 1",
+        "2026-10-25, h, 24",
+        "2026-10-25, s, 86400"
+    })
+    void dateDiff_acrossDaylightSavingChange_countsWallClockTime(String day, String interval, int expected) throws Exception {
+        LocalDateTime start = LocalDate.parse(day).atStartOfDay();
+        Integer diff = inTimeZone("Europe/Berlin",
+            () -> Functions.dateDiff(interval, Timestamp.valueOf(start), Timestamp.valueOf(start.plusDays(1))));
+        assertThat(diff).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(strings = {"2026-03-29", "2026-10-25"})
+    void dateAdd_hoursAcrossDaylightSavingChange_keepsWallClockTime(String day) throws Exception {
+        LocalDateTime start = LocalDate.parse(day).atStartOfDay();
+        Timestamp result = inTimeZone("Europe/Berlin", () -> Functions.dateAdd("h", 24, Timestamp.valueOf(start)));
+        assertThat(result.toLocalDateTime()).isEqualTo(start.plusDays(1));
+    }
+
+    @Test
+    void formulaToText_noon_formattedWithTime() throws UcanaccessSQLException {
+        Timestamp noon = Timestamp.valueOf("2026-01-15 12:00:00");
+        assertThat(Functions.formulaToText(noon, "DATETIME")).isEqualTo(Functions.format(noon, "general date"));
+    }
+
+    private static <T> T inTimeZone(String zoneId, Callable<T> callable) throws Exception {
+        TimeZone defaultZone = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone(zoneId));
+            return callable.call();
+        } finally {
+            TimeZone.setDefault(defaultZone);
+        }
     }
 
 }
