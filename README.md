@@ -83,14 +83,31 @@ implementation("io.github.spannm:ucanaccess:5.1.7")
 
 ## 🔁 Migrating from `net.sf.ucanaccess`
 
-Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has had no release since 2020 and no longer receives security or compatibility updates. Switching to this fork is a **drop-in, API-compatible change** — no code changes required, just update your dependency coordinates:
+Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has had no release since 2020 and no longer receives security or compatibility updates. Development of UCanAccess continues here. For most projects, switching is a **drop-in change**: the JDBC driver class and connection URL stay the same, just update your dependency coordinates:
 
 ```diff
 - <groupId>net.sf.ucanaccess</groupId>
 + <groupId>io.github.spannm</groupId>
   <artifactId>ucanaccess</artifactId>
 - <version>5.0.1</version>
-+ <version>5.1.7</version>
++ <version>5.1.8</version>
+```
+
+If you pass your own class with the `jackcessOpener` connection property, adapt it as well:
+
+- implement `net.ucanaccess.jdbc.IJackcessOpenerInterface` instead of `JackcessOpenerInterface`
+- Jackcess is now `io.github.spannm:jackcess` with the package `io.github.spannm.jackcess` instead of `com.healthmarketscience.jackcess`
+- `DatabaseBuilder` uses fluent `with...` methods, e.g. `withReadOnly(true)` instead of `setReadOnly(true)`
+
+If another dependency still pulls in `net.sf.ucanaccess:ucanaccess`, exclude it there. Both artifacts contain the same classes, and whichever comes first on the classpath wins:
+
+```xml
+<exclusions>
+  <exclusion>
+    <groupId>net.sf.ucanaccess</groupId>
+    <artifactId>ucanaccess</artifactId>
+  </exclusion>
+</exclusions>
 ```
 
 You get current Jackcess/HSQLDB versions (with their CVE fixes), tested Java 11/17/21 support on Linux and Windows, and active maintenance — with the same JDBC driver class and connection URL you already use.
