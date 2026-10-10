@@ -351,15 +351,16 @@ public final class Functions {
         }
         clMin.set(Calendar.MILLISECOND, 0);
         clMax.set(Calendar.MILLISECOND, 0);
+        int years = clMax.get(Calendar.YEAR) - clMin.get(Calendar.YEAR);
         Integer result;
         if ("yyyy".equalsIgnoreCase(intv)) {
-            result = clMax.get(Calendar.YEAR) - clMin.get(Calendar.YEAR);
+            result = years;
         } else if ("q".equalsIgnoreCase(intv)) {
-            result = dateDiff("yyyy", dt1, dt2) * 4 + (clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH)) / 3;
+            result = years * 4 + clMax.get(Calendar.MONTH) / 3 - clMin.get(Calendar.MONTH) / 3;
         } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
             result = (int) Math.rint((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24));
         } else if ("m".equalsIgnoreCase(intv)) {
-            result = dateDiff("yyyy", dt1, dt2) * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
+            result = years * 12 + clMax.get(Calendar.MONTH) - clMin.get(Calendar.MONTH);
         } else if ("w".equalsIgnoreCase(intv) || "ww".equalsIgnoreCase(intv)) {
             result = (int) Math.floor((double) (clMax.getTimeInMillis() - clMin.getTimeInMillis()) / (1000 * 60 * 60 * 24 * 7));
         } else if ("h".equalsIgnoreCase(intv)) {
