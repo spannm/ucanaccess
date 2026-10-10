@@ -1,5 +1,7 @@
 package net.ucanaccess.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -9,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@SuppressWarnings("checkstyle:MethodName")
 class CrudTest extends UcanaccessBaseTest {
 
     @Override
@@ -34,6 +37,21 @@ class CrudTest extends UcanaccessBaseTest {
             st.executeUpdate("DELETE FROM t_crud WHERE id=" + id2);
             assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t_crud where id=" + id2), "Delete failed");
         }
+    }
+
+    // failed with a NullPointerException in HSQLDB 2.7.2
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void update_textPrimaryKey_persisted(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
+        executeStatements(
+            "CREATE TABLE t_text_pk (txt VARCHAR(42) NOT NULL PRIMARY KEY)",
+            "INSERT INTO t_text_pk (txt) VALUES ('Insert')");
+
+        try (UcanaccessStatement st = ucanaccess.createStatement()) {
+            assertThat(st.executeUpdate("UPDATE t_text_pk SET txt = 'Update'")).isOne();
+        }
+        assertThat(getVerifyCount("SELECT COUNT(*) FROM t_text_pk WHERE txt = 'Update'")).isOne();
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
