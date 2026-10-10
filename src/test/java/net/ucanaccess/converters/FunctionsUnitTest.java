@@ -412,8 +412,9 @@ class FunctionsUnitTest extends AbstractBaseTest {
     @ValueSource(strings = {"2026-03-29", "2026-10-25"})
     void dateAdd_hoursAcrossDaylightSavingChange_keepsWallClockTime(String day) throws Exception {
         LocalDateTime start = LocalDate.parse(day).atStartOfDay();
-        Timestamp result = inTimeZone("Europe/Berlin", () -> Functions.dateAdd("h", 24, Timestamp.valueOf(start)));
-        assertThat(result.toLocalDateTime()).isEqualTo(start.plusDays(1));
+        LocalDateTime result = inTimeZone("Europe/Berlin",
+            () -> Functions.dateAdd("h", 24, Timestamp.valueOf(start)).toLocalDateTime());
+        assertThat(result).isEqualTo(start.plusDays(1));
     }
 
     @Test
