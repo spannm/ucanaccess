@@ -1651,10 +1651,10 @@ public final class Functions {
         start = lrint(start);
         int h = ul.length();
         if (number < start) {
-            return padLeft(-1, h) + ":" + padLeft(lrint(start) - 1, h);
+            return padLeft("", h) + ":" + padLeft(lrint(start) - 1, h);
         }
         if (number > stop) {
-            return ul + ":" + padLeft(-1, h);
+            return ul + ":" + padLeft("", h);
         }
 
         for (double d = start; d <= stop; d += interval) {
@@ -1679,9 +1679,12 @@ public final class Functions {
         return (int) Math.rint(d - APPROX);
     }
 
-    private static String padLeft(int ext, int n) {
-        String tp = ext > 0 ? String.valueOf(ext) : "";
-        return String.format("%1$" + n + "s", tp);
+    private static String padLeft(int value, int n) {
+        return padLeft(String.valueOf(value), n);
+    }
+
+    private static String padLeft(String value, int n) {
+        return String.format("%1$" + n + "s", value);
     }
 
 }

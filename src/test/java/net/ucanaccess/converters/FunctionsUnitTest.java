@@ -355,21 +355,24 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.rnd()).isLessThan(1.0);
     }
 
-    @ParameterizedTest(name = "[{index}] {0} => \"{1}\"")
+    @ParameterizedTest(name = "[{index}] Partition({0}, {1}, 100, {2}) => \"{3}\"")
     @CsvSource(delimiter = '|', quoteCharacter = '"', value = {
-        "5   | \"  1: 10\"",
-        "15  | \" 11: 20\"",
-        "100 | \" 91:100\"",
-        "120 | \"101:   \""
+        "5   | 1  | 10 | \"  1: 10\"",
+        "15  | 1  | 10 | \" 11: 20\"",
+        "100 | 1  | 10 | \" 91:100\"",
+        "120 | 1  | 10 | \"101:   \"",
+        "5   | 11 | 10 | \"   : 10\"",
+        "3   | 0  | 5  | \"  0:  4\"",
+        "-1  | 0  | 5  | \"   : -1\"",
+        "0   | 1  | 10 | \"   :  0\""
     })
-    void partition_number_returnsRange(double number, String expected) {
-        assertThat(Functions.partition(number, 1, 100, 10)).isEqualTo(expected);
+    void partition_number_returnsRange(double number, double start, double interval, String expected) {
+        assertThat(Functions.partition(number, start, 100, interval)).isEqualTo(expected);
     }
 
     @Test
-    void partition_nullOrBelowStart_returnsNullOrOpenRange() {
+    void partition_null_returnsNull() {
         assertThat(Functions.partition(null, 1, 100, 10)).isNull();
-        assertThat(Functions.partition(5.0, 11, 100, 10)).isEqualTo("   : 10");
     }
 
     @Test
