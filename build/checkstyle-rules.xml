@@ -74,9 +74,6 @@
         <!--module name="InnerAssignment" /-->
         <!--module name="InnerTypeLast" /-->
         <!--module name="InterfaceIsType" /-->
-        <module name="JavadocStyle">
-            <property name="checkFirstSentence" value="false"/>
-        </module>
         <module name="LeftCurly"/>
         <module name="LocalFinalVariableName">
             <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>

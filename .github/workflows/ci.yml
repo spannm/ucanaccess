@@ -29,15 +29,19 @@ jobs:
         steps:
         -   uses: actions/checkout@v7
 
-        -   name: Set up JDK ${{ matrix.java }}
+        -   name: Set up JDK 21 (build) and JDK ${{ matrix.java }} (test toolchain)
+            # installing matrix.java alongside 21 registers both in ~/.m2/toolchains.xml; the
+            # last version listed becomes JAVA_HOME/the JDK that runs Maven itself.
             uses: actions/setup-java@v6
             with:
-                java-version: ${{ matrix.java }}
+                java-version: |
+                    ${{ matrix.java }}
+                    21
                 distribution: temurin
                 cache: maven
 
-        -   name: Build with Maven/JDK ${{ matrix.java }} on ${{ matrix.os }}
-            run: mvn --batch-mode --file pom.xml clean verify
+        -   name: Build with Maven/JDK 21 on ${{ matrix.os }}, tests forked onto JDK ${{ matrix.java }}
+            run: mvn --batch-mode --file pom.xml -Dtest.jdk=${{ matrix.java }} clean verify
 
     deploy:
         needs: build
@@ -52,14 +56,14 @@ jobs:
         -   name: Set up Java for deployment to Sonatype snapshot repo
             uses: actions/setup-java@v6
             with:
-                java-version: '11'
+                java-version: '21'
                 distribution: 'temurin'
                 cache: maven
                 # Sonatype Central Snapshots
                 # must match distributionManagement/snapshotRepository/id in pom:
                 server-id: sonatype-central
-                server-username: SONATYPE_CENTRAL_USERNAME
-                server-password: SONATYPE_CENTRAL_PASSWORD
+                server-username-env-var: SONATYPE_CENTRAL_USERNAME
+                server-password-env-var: SONATYPE_CENTRAL_PASSWORD
 
         -   name: Deploy to Sonatype Central snapshot repo
             run: mvn --batch-mode --file pom.xml --activate-profiles fast deploy

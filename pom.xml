@@ -91,7 +91,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The minimum JDK version required to build. -->
-        <project.build.systemJdk>11</project.build.systemJdk>
+        <project.build.systemJdk>21</project.build.systemJdk>
         <!-- The default build target. -->
         <project.build.targetJdk>11</project.build.targetJdk>
 
@@ -140,7 +140,7 @@
 
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
-        <dep.checkstyle.version>10.26.1</dep.checkstyle.version>
+        <dep.checkstyle.version>14.3.0</dep.checkstyle.version>
         <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
         <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
@@ -565,6 +565,31 @@
                 <basepom.check.skip-extended>true</basepom.check.skip-extended>
                 <cyclonedx.skip>true</cyclonedx.skip>
             </properties>
+        </profile>
+
+        <profile>
+            <id>toolchain-tests</id>
+            <!-- fork the test JVM onto the JDK toolchain given by test.jdk, to verify the targetJdk=11
+                 bytecode at runtime on older JDKs while the build itself needs JDK 21. Requires that
+                 JDK registered in ~/.m2/toolchains.xml (see ci.yml). Usage: mvn -Dtest.jdk=11 clean verify -->
+            <activation>
+                <property>
+                    <name>test.jdk</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <jdkToolchain>
+                                <version>${test.jdk}</version>
+                            </jdkToolchain>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <profile>
