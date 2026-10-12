@@ -55,7 +55,7 @@ public abstract class AbstractExecute {
     }
 
     private Object enableDisable(DDLType ddlType) throws SQLException, IOException {
-        String tableName = Objects.requireNonNull(ddlType.getDBObjectName());
+        String tableName = Objects.requireNonNull(ddlType.getDBObjectName(sql));
         if (tableName.startsWith("[") && tableName.endsWith("]")) {
             tableName = tableName.substring(1, tableName.length() - 1);
         }
@@ -113,10 +113,10 @@ public abstract class AbstractExecute {
             }
 
             if (DDLType.ADD_COLUMN.equals(ddlType)
-                && SQLConverter.couldNeedDefault(ddlType.getColumnDefinition())) {
-                String cn = ddlType.getSecondDBObjectName();
-                String tn = ddlType.getDBObjectName();
-                int count = count(ddlType.getDBObjectName());
+                && SQLConverter.couldNeedDefault(ddlType.getColumnDefinition(sql))) {
+                String cn = ddlType.getSecondDBObjectName(sql);
+                String tn = ddlType.getDBObjectName(sql);
+                int count = count(ddlType.getDBObjectName(sql));
                 if (count > 0) {
                     throw new UcanaccessSQLException(String.format(
                         "When adding a new column not null(%s), you must specify a default "
@@ -127,8 +127,8 @@ public abstract class AbstractExecute {
             }
 
             String sql0 = ddlType.equals(DDLType.ADD_COLUMN)
-                ? SQLConverter.convertSQL(SQLConverter.convertAddColumn(ddlType.getDBObjectName(),
-                    ddlType.getSecondDBObjectName(), ddlType.getColumnDefinition())).getSql()
+                ? SQLConverter.convertSQL(SQLConverter.convertAddColumn(ddlType.getDBObjectName(sql),
+                    ddlType.getSecondDBObjectName(sql), ddlType.getColumnDefinition(sql))).getSql()
                 : SQLConverter.convertSQL(sql).getSql();
 
             boolean enDis = ddlType.in(DDLType.ENABLE_AUTOINCREMENT, DDLType.DISABLE_AUTOINCREMENT);
@@ -141,14 +141,14 @@ public abstract class AbstractExecute {
             if (ddlType.in(DDLType.CREATE_TABLE, DDLType.CREATE_TABLE_AS_SELECT)) {
                 ddlExpr = SQLConverter.convertCreateTable(sql0);
             } else if (ddlType.equals(DDLType.CREATE_FOREIGN_KEY)) {
-                String constraintName = ddlType.getSecondDBObjectName();
+                String constraintName = ddlType.getSecondDBObjectName(sql);
                 if (constraintName == null) {
                     ddlExpr = sql0;
                 } else {
                     if (constraintName.startsWith("[") && constraintName.endsWith("]")) {
                         constraintName = constraintName.substring(1, constraintName.length() - 1);
                     }
-                    String tableName = ddlType.getDBObjectName();
+                    String tableName = ddlType.getDBObjectName(sql);
                     if (tableName.startsWith("[") && tableName.endsWith("]")) {
                         tableName = tableName.substring(1, tableName.length() - 1);
                     }
@@ -162,14 +162,14 @@ public abstract class AbstractExecute {
                     ddlExpr = pat.matcher(sql0).replaceFirst(" ADD CONSTRAINT \"" + tableName + "_" + constraintName.toUpperCase(Locale.US) + "\" FOREIGN KEY ");
                 }
             } else if (ddlType.equals(DDLType.DROP_FOREIGN_KEY)) {
-                String constraintName = ddlType.getSecondDBObjectName();
+                String constraintName = ddlType.getSecondDBObjectName(sql);
                 if (constraintName == null) {
                     throw new UcanaccessSQLException();
                 } else {
                     if (constraintName.startsWith("[") && constraintName.endsWith("]")) {
                         constraintName = constraintName.substring(1, constraintName.length() - 1);
                     }
-                    String tableName = ddlType.getDBObjectName();
+                    String tableName = ddlType.getDBObjectName(sql);
                     if (tableName.startsWith("[") && tableName.endsWith("]")) {
                         tableName = tableName.substring(1, tableName.length() - 1);
                     }

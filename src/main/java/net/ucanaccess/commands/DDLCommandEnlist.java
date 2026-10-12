@@ -27,7 +27,7 @@ public class DDLCommandEnlist {
     private Map<String, String> columnMap = new HashMap<>();
 
     private void enlistCreateTable(String sql, DDLType ddlType) throws SQLException {
-        String tn = ddlType.getDBObjectName();
+        String tn = ddlType.getDBObjectName(sql);
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         String execId = UcanaccessConnection.getCtxExcId();
         Connection hsqlConn = ac.getHSQLDBConnection();
@@ -77,35 +77,35 @@ public class DDLCommandEnlist {
             enlistCreateTable(sql, ddlType);
             break;
         case DROP_TABLE:
-            enlistDropTable(ddlType);
+            enlistDropTable(sql, ddlType);
             break;
         case ALTER_RENAME:
-            enlistAlterRename(ddlType);
+            enlistAlterRename(sql, ddlType);
             break;
         case ADD_COLUMN:
             enlistAddColumn(sql, ddlType);
             break;
         case CREATE_INDEX:
-            enlistCreateIndex(ddlType);
+            enlistCreateIndex(sql, ddlType);
             break;
         case CREATE_PRIMARY_KEY:
-            enlistCreatePrimaryKey(ddlType);
+            enlistCreatePrimaryKey(sql, ddlType);
             break;
         case CREATE_FOREIGN_KEY:
-            enlistCreateForeignKey(ddlType);
+            enlistCreateForeignKey(sql, ddlType);
             break;
         case DROP_FOREIGN_KEY:
-            enlistDropForeignKey(ddlType);
+            enlistDropForeignKey(sql, ddlType);
             break;
         default:
             break;
         }
     }
 
-    private void enlistCreateForeignKey(DDLType ddlType) throws SQLException {
-        String tableName = ddlType.getDBObjectName();
-        String relationshipName = ddlType.getSecondDBObjectName();
-        String referencedTable = ddlType.getThirdDBObjectName();
+    private void enlistCreateForeignKey(String sql, DDLType ddlType) throws SQLException {
+        String tableName = ddlType.getDBObjectName(sql);
+        String relationshipName = ddlType.getSecondDBObjectName(sql);
+        String referencedTable = ddlType.getThirdDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         CreateForeignKeyCommand c4io =
                 new CreateForeignKeyCommand(tableName, referencedTable, execId, relationshipName);
@@ -116,8 +116,8 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistDropForeignKey(DDLType ddlType) throws SQLException {
-        String relationshipName = ddlType.getSecondDBObjectName();
+    private void enlistDropForeignKey(String sql, DDLType ddlType) throws SQLException {
+        String relationshipName = ddlType.getSecondDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         DropForeignKeyCommand c4io = new DropForeignKeyCommand(execId, relationshipName);
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
@@ -127,8 +127,8 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistCreatePrimaryKey(DDLType ddlType) throws SQLException {
-        String tableName = ddlType.getDBObjectName();
+    private void enlistCreatePrimaryKey(String sql, DDLType ddlType) throws SQLException {
+        String tableName = ddlType.getDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         CreatePrimaryKeyCommand c4io = new CreatePrimaryKeyCommand(tableName, execId);
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
@@ -138,9 +138,9 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistCreateIndex(DDLType ddlType) throws SQLException {
-        String indexName = ddlType.getDBObjectName();
-        String tableName = ddlType.getSecondDBObjectName();
+    private void enlistCreateIndex(String sql, DDLType ddlType) throws SQLException {
+        String indexName = ddlType.getDBObjectName(sql);
+        String tableName = ddlType.getSecondDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         CreateIndexCommand c4io = new CreateIndexCommand(indexName, tableName, execId);
@@ -151,9 +151,9 @@ public class DDLCommandEnlist {
     }
 
     private void enlistAddColumn(String sql, DDLType ddlType) throws SQLException {
-        String tableName = ddlType.getDBObjectName();
-        String columnName = ddlType.getSecondDBObjectName();
-        String columnDefinition = ddlType.getColumnDefinition();
+        String tableName = ddlType.getDBObjectName(sql);
+        String columnName = ddlType.getSecondDBObjectName(sql);
+        String columnDefinition = ddlType.getColumnDefinition(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         List<String> typeList = new ArrayList<>();
         List<String> defaultList = new ArrayList<>();
@@ -179,8 +179,8 @@ public class DDLCommandEnlist {
 
     }
 
-    private void enlistDropTable(DDLType ddlType) throws SQLException {
-        String tn = ddlType.getDBObjectName();
+    private void enlistDropTable(String sql, DDLType ddlType) throws SQLException {
+        String tn = ddlType.getDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         DropTableCommand c4io = new DropTableCommand(tn, execId);
@@ -190,9 +190,9 @@ public class DDLCommandEnlist {
         }
     }
 
-    private void enlistAlterRename(DDLType ddlType) throws SQLException {
-        String oldTn = ddlType.getDBObjectName();
-        String newTn = ddlType.getSecondDBObjectName();
+    private void enlistAlterRename(String sql, DDLType ddlType) throws SQLException {
+        String oldTn = ddlType.getDBObjectName(sql);
+        String newTn = ddlType.getSecondDBObjectName(sql);
         String execId = UcanaccessConnection.getCtxExcId();
         UcanaccessConnection ac = UcanaccessConnection.requireCtxConnection();
         AlterRenameCommand c4io = new AlterRenameCommand(oldTn, newTn, execId);

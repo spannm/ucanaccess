@@ -245,7 +245,6 @@ public final class SQLConverter {
         ENABLE_AUTOINCREMENT("\\s*enable\\s+autoincrement\\s+on\\s*" + NAME_PAT);
 
         private final Pattern pattern;
-        private String        ddl;
 
         DDLType(String regex) {
             pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -267,7 +266,6 @@ public final class SQLConverter {
                     if (cand.equals(DDLType.DROP_TABLE_CASCADE)) {
                         return null;
                     }
-                    cand.ddl = elab(s);
                     return cand;
                 }
             }
@@ -281,36 +279,56 @@ public final class SQLConverter {
             return s.replaceAll("\\[([^\\]]*)\\]", " $0 ");
         }
 
-        public String getDBObjectName() {
-            Matcher m = pattern.matcher(ddl);
-            if (m.find()) {
-                return m.group(1);
-            }
-            return null;
+        /**
+         * Returns the name of the first database object in the given DDL statement, usually the table.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getDBObjectName(String sql) {
+            return group(sql, 1);
         }
 
-        public String getSecondDBObjectName() {
-            Matcher m = pattern.matcher(ddl);
-            if (m.find()) {
-                return m.group(1 + NAME_PAT_STEP);
-            }
-            return null;
+        /**
+         * Returns the name of the second database object in the given DDL statement, e.g. a column or constraint.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getSecondDBObjectName(String sql) {
+            return group(sql, 1 + NAME_PAT_STEP);
         }
 
-        public String getThirdDBObjectName() {
-            Matcher m = pattern.matcher(ddl);
-            if (m.find()) {
-                return m.group(1 + 2 * NAME_PAT_STEP);
-            }
-            return null;
+        /**
+         * Returns the name of the third database object in the given DDL statement, e.g. the referenced table.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getThirdDBObjectName(String sql) {
+            return group(sql, 1 + 2 * NAME_PAT_STEP);
         }
 
-        public String getColumnDefinition() {
-            Matcher m = pattern.matcher(ddl);
-            if (m.find()) {
-                return m.group(2 * NAME_PAT_STEP + 1);
-            }
-            return null;
+        /**
+         * Returns the column definition in the given DDL statement.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getColumnDefinition(String sql) {
+            return group(sql, 2 * NAME_PAT_STEP + 1);
+        }
+
+        /**
+         * Returns the given group of this type's pattern matched against the given DDL statement, or {@code null} if it does not match.
+         *
+         * @param sql   the DDL statement
+         * @param group the index of the capturing group
+         * @return the captured text or {@code null}
+         */
+        private String group(String sql, int group) {
+            Matcher m = pattern.matcher(elab(sql));
+            return m.find() ? m.group(group) : null;
         }
 
         public String getSelect(String s) {
