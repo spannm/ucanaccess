@@ -171,7 +171,7 @@ public final class RegionalSettings {
 
     public static RegionalSettings getRegionalSettings(Locale input) {
         Locale loc = Objects.requireNonNullElseGet(input, Locale::getDefault);
-        return REG_MAP.computeIfAbsent(loc, RegionalSettings::new);
+        return REG_MAP.computeIfAbsent(loc, l -> new RegionalSettings(l));
     }
 
     @Override

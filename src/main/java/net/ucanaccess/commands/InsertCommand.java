@@ -31,9 +31,9 @@ public class InsertCommand implements ICommand {
     private final String execId;
     private Table        table;
 
-    public InsertCommand(String tableName, Database dbIo, Object[] newRow, String execId) {
+    public InsertCommand(String tableName, Database dbIO, Object[] newRow, String execId) {
         this.tableName = tableName;
-        dbIO = dbIo;
+        this.dbIO = dbIO;
         this.newRow = newRow;
         this.execId = execId;
 

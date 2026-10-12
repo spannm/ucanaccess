@@ -46,7 +46,6 @@ class MultiThreadAccessTest extends UcanaccessBaseTest {
             ps.execute();
             ps = conn.prepareStatement("UPDATE t_mta SET descr='" + Thread.currentThread() + "'");
             ps.executeUpdate();
-            ps = conn.prepareStatement("DELETE FROM t_mta WHERE descr='" + Thread.currentThread() + "'");
             conn.commit();
         }
     }

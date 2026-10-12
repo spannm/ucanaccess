@@ -13,6 +13,7 @@ import net.ucanaccess.jdbc.UcanaccessConnection;
 import org.hsqldb.types.JavaObjectData;
 
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.UUID;
 
 public class TriggerAutoNumber extends TriggerBase {
@@ -53,7 +54,7 @@ public class TriggerAutoNumber extends TriggerBase {
                             if (cl.getAutoNumberGenerator().getType().equals(DataType.GUID)) {
 
                                 if (newR[i] == null) {
-                                    newR[i] = "{" + UUID.randomUUID().toString().toUpperCase() + "}";
+                                    newR[i] = "{" + UUID.randomUUID().toString().toUpperCase(Locale.ROOT) + "}";
                                 }
                                 conn.setGeneratedKey(newR[i]);
                             } else if (cl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {

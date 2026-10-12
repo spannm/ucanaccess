@@ -27,7 +27,7 @@ public class UcanaccessConnection implements Connection {
 
     private final Logger                      logger        = System.getLogger(getClass().getName());
     private boolean                           feedbackState;
-    private final LinkedList<ICommand>        commands      = new LinkedList<>();
+    private final Deque<ICommand>             commands      = new ArrayDeque<>();
     private Connection                        hsqlDBConnection;
     private final Map<Savepoint, String>      savepointsMap = new HashMap<>();
     private DBReference                       ref;
@@ -284,7 +284,7 @@ public class UcanaccessConnection implements Connection {
     @SuppressWarnings("java:S1181") // roll back on any failure, including errors, before rethrowing
     private void flushIO() throws SQLException {
         List<IFeedbackAction> ibal = new ArrayList<>();
-        LinkedList<ICommand> executed = new LinkedList<>();
+        Deque<ICommand> executed = new ArrayDeque<>();
 
         try {
 
@@ -782,6 +782,7 @@ public class UcanaccessConnection implements Connection {
         return super.toString() + "[" + ref.getDbFile() + "]";
     }
 
+    @SuppressWarnings("LockOnNonEnclosingClassLiteral") // the driver class is the driver-wide lock
     void checkLastModified() throws UcanaccessSQLException {
         try {
 
@@ -822,6 +823,7 @@ public class UcanaccessConnection implements Connection {
         return "";
     }
 
+    @SuppressWarnings("LockOnNonEnclosingClassLiteral") // the driver class is the driver-wide lock
     public void unloadDB() throws UcanaccessSQLException {
         try {
             synchronized (UcanaccessDriver.class) {

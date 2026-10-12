@@ -701,7 +701,7 @@ public final class Functions {
     public static Integer instr(Integer start, String text, String search, Integer compare) {
         start--;
         if (compare != 0) {
-            text = text.toLowerCase();
+            text = text.toLowerCase(Locale.getDefault());
         }
         if (text.length() <= start) {
             return 0;
@@ -737,7 +737,7 @@ public final class Functions {
     @FunctionType(functionName = "InStrRev", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
     public static Integer instrrev(String text, String search, Integer start, Integer compare) {
         if (compare != 0) {
-            text = text.toLowerCase();
+            text = text.toLowerCase(Locale.getDefault());
         }
         if (text.length() <= start) {
             return 0;
@@ -1025,7 +1025,7 @@ public final class Functions {
                 sb.append(c);
             } else if (c == '.' && i == lp) {
                 sb.append(c);
-                if (i == 0 || i == 1 && minLength == 2) {
+                if (i == 0 || (i == 1 && minLength == 2)) {
                     minLength++;
                 }
             } else {
@@ -1153,9 +1153,9 @@ public final class Functions {
         if (value == null) {
             return null;
         } else if (conversion == 1) { // vbUpperCase
-            return value.toUpperCase();
+            return value.toUpperCase(Locale.getDefault());
         } else if (conversion == 2) { // vbLowerCase
-            return value.toLowerCase();
+            return value.toLowerCase(Locale.getDefault());
         } else if (conversion == 3) { // vbProperCase: not implemented
             return value;
         }
@@ -1173,7 +1173,7 @@ public final class Functions {
             case 2:
                 return value1.compareTo(value2);
             case 1:
-                return value1.toUpperCase().compareTo(value2.toUpperCase());
+                return value1.toUpperCase(Locale.getDefault()).compareTo(value2.toUpperCase(Locale.getDefault()));
             default:
                 throw new InvalidFunctionParameterException("StrComp", type);
         }
@@ -1204,10 +1204,10 @@ public final class Functions {
 
     @FunctionType(functionName = "DDB", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static double ddb(double cost, double salvage, double life, double period, double factor) {
-        if (cost < 0 || life == 2d && period > 1d) {
+        if (cost < 0 || (life == 2d && period > 1d)) {
             return 0;
         }
-        if (life < 2d || life == 2d && period <= 1d) {
+        if (life < 2d || (life == 2d && period <= 1d)) {
             return cost - salvage;
         }
         if (period <= 1d) {
@@ -1385,20 +1385,15 @@ public final class Functions {
         final int financialMaxIterations = 20; // Bet accuracy with 128
         final double financialPrecision = 0.0000001; // 1.0e-8
 
-        double y0 = 0;
-        double y1 = 0;
-        double x0 = 0;
-        double f = 0;
-        double i = 0;
         // the secant method starts from rates 0 and guess, so a guess of 0 gives no second point
         double rate = Math.abs(guess) < financialPrecision ? 0.1 : guess;
-        f = Math.exp(nper * Math.log(1 + rate));
-        y0 = pv + pmt * nper + fv;
-        y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
+        double f = Math.exp(nper * Math.log(1 + rate));
+        double y0 = pv + pmt * nper + fv;
+        double y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;
 
         // find root by Newton secant method
-        i = 0.0;
-        x0 = 0.0;
+        double i = 0.0;
+        double x0 = 0.0;
         double x1 = rate;
         while (Math.abs(y0 - y1) > financialPrecision && i < financialMaxIterations) {
             rate = (y1 * x0 - y0 * x1) / (y1 - y0);

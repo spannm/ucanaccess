@@ -60,10 +60,10 @@ public class LoadJet {
     private boolean                    skipIndexes;
     private final Metadata             metadata;
 
-    public LoadJet(Connection conn, Database dbIo) {
+    public LoadJet(Connection conn, Database dbIO) {
         logger = System.getLogger(getClass().getName());
         this.conn = conn;
-        dbIO = dbIo;
+        this.dbIO = dbIO;
         try {
             ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
         } catch (Exception ignored) {
@@ -362,7 +362,7 @@ public class LoadJet {
 
         private final List<String>  unresolvedTables         = new ArrayList<>();
         private final List<String>  calculatedFieldsTriggers = new ArrayList<>();
-        private final List<String>  loadingOrder             = new LinkedList<>();
+        private final List<String>  loadingOrder             = new ArrayList<>();
         private final Set<Column>   alreadyIndexed           = new LinkedHashSet<>();
         private final Set<String>   readOnlyTables           = new LinkedHashSet<>();
 
@@ -997,7 +997,7 @@ public class LoadJet {
                     }
                     tablesLoader.execInsert(ps, values);
 
-                    if (errorCheck || i > 0 && i % step == 0 || !it.hasNext()) {
+                    if (errorCheck || (i > 0 && i % step == 0) || !it.hasNext()) {
                         try {
                             ps.executeBatch();
                         } catch (SQLException ex) {
@@ -1052,7 +1052,7 @@ public class LoadJet {
                     IndexImpl idx = (IndexImpl) idxi;
                     if (idx.isForeignKey() && !idx.getReference().isPrimaryTable()) {
                         boolean isAuto = idx.getTable().getName().equals(idx.getReferencedIndex().getTable().getName());
-                        if (autoref && isAuto || !autoref && !isAuto) {
+                        if ((autoref && isAuto) || (!autoref && !isAuto)) {
                             loadForeignKey(idx, tn);
                         }
                     }
@@ -1243,11 +1243,10 @@ public class LoadJet {
                 throws SQLException {
             String tn = t.getName();
             String ntn = schema(escapeIdentifier(tn), systemTable);
-            String comma = "";
             StringBuilder sbI = new StringBuilder(" INSERT INTO ").append(ntn).append(" (");
             StringBuilder sbE = new StringBuilder(" VALUES( ");
             Set<String> se = row.keySet();
-            comma = "";
+            String comma = "";
             for (String cn : se) {
                 sbI.append(comma).append(escapeIdentifier(cn));
                 sbE.append(comma).append(" ? ");
@@ -1401,10 +1400,9 @@ public class LoadJet {
 
             }
             querySql = new DFunction(conn, querySql).toSQL();
-            StringBuilder sb = new StringBuilder("CREATE VIEW ").append(qnn).append(" AS ").append(querySql);
             String v = null;
             try {
-                v = SQLConverter.convertSQL(sb.toString(), true).getSql();
+                v = SQLConverter.convertSQL("CREATE VIEW " + qnn + " AS " + querySql, true).getSql();
 
                 if (v.trim().endsWith(";")) {
                     v = v.trim().substring(0, v.length() - 1);
@@ -1460,7 +1458,7 @@ public class LoadJet {
                     String pre = mtc.group(1) == null ? "" : mtc.group(1);
                     String[] split = select.split(",", -1);
                     StringBuilder sb = new StringBuilder(pre).append(" select ");
-                    List<String> lkl = new LinkedList<>();
+                    List<String> lkl = new ArrayList<>();
 
                     Pattern patAlias = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
                     for (String s : split) {
@@ -1542,7 +1540,7 @@ public class LoadJet {
         private void queryPorting(List<Query> lq) throws SQLException {
             List<String> arn = new ArrayList<>();
             for (Query q : lq) {
-                arn.add(q.getName().toLowerCase());
+                arn.add(q.getName().toLowerCase(Locale.ROOT));
             }
             boolean heavy = false;
             while (!lq.isEmpty()) {
@@ -1551,7 +1549,7 @@ public class LoadJet {
                     String qtxt = null;
                     boolean qryGot = true;
                     try {
-                        qtxt = q.toSQLString().toLowerCase();
+                        qtxt = q.toSQLString().toLowerCase(Locale.ROOT);
                     } catch (Exception ignored) {
                         qryGot = false;
                     }
@@ -1566,7 +1564,7 @@ public class LoadJet {
                     }
                     if (qryGot && !foundDep && loadView(q)) {
                         arq.add(q);
-                        arn.remove(q.getName().toLowerCase());
+                        arn.remove(q.getName().toLowerCase(Locale.ROOT));
                     }
                 }
                 if (arq.isEmpty()) {

@@ -1,8 +1,6 @@
 package net.ucanaccess.test;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +20,8 @@ public abstract class UcanaccessBaseFileTest extends UcanaccessBaseTest {
                 return f.getAbsolutePath();
             }
             String resource = getTestDbDir() + prefix + ext;
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(resource)) {
-                if (is != null) {
-                    return resource;
-                }
-            } catch (IOException ex) {
-                continue;
+            if (getClass().getClassLoader().getResource(resource) != null) {
+                return resource;
             }
         }
         fail("Test " + getShortTestMethodName() + " requires a database file");

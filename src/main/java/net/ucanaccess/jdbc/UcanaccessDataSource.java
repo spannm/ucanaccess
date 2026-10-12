@@ -9,6 +9,7 @@ import net.ucanaccess.type.AccessVersion;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -27,7 +28,7 @@ public class UcanaccessDataSource implements Serializable, Referenceable, DataSo
 
     private String                      accessPath;
     private int                         loginTimeout     = 0;
-    private transient PrintWriter       logWriter        = new PrintWriter(System.out);
+    private transient PrintWriter       logWriter        = new PrintWriter(System.out, false, Charset.defaultCharset());
     // declared as Map, but always an EnumMap, which is serializable
     private final Map<Property, String> userPass         = new EnumMap<>(Property.class);
 

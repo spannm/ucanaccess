@@ -94,8 +94,8 @@ public final class UcanaccessDriver implements Driver {
 
                 if (!alreadyLoaded) {
                     if ((useCustomOpener
-                        || knownProps.containsKey(encrypt) && Boolean.parseBoolean(knownProps.get(encrypt)))
-                        && (knownProps.containsKey(memory) && !Boolean.parseBoolean(knownProps.get(memory))
+                        || (knownProps.containsKey(encrypt) && Boolean.parseBoolean(knownProps.get(encrypt))))
+                        && ((knownProps.containsKey(memory) && !Boolean.parseBoolean(knownProps.get(memory)))
                             || knownProps.containsKey(keepMirror))) {
                         dbRef.setEncryptHSQLDB(true);
                     }
@@ -181,7 +181,7 @@ public final class UcanaccessDriver implements Driver {
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
                         if (cl.getType().isTextual()) {
                             LOGGER.log(Level.WARNING, "Invalid textual value in table {0}, column {1}: it might look like {2}",
-                                cl.getTable().getName(), cl.getName(), new String(bt));
+                                cl.getTable().getName(), cl.getName(), new String(bt, cl.getDatabase().getCharset()));
                         }
                         throw new IOException(ex);
                     });

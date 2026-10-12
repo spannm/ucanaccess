@@ -29,17 +29,17 @@ public class UcanaccessResultSet implements ResultSet {
         if (metadata == null) {
             loadMetadata();
         }
-        String lu = label.toUpperCase();
+        String lu = label.toUpperCase(Locale.ROOT);
         if (metadata.contains(lu)) {
             return lu;
         }
         String escaped = SQLConverter.preEscapingIdentifier(label);
-        String slabel = label.substring(1).toUpperCase();
+        String slabel = label.substring(1).toUpperCase(Locale.ROOT);
         if (SQLConverter.isXescaped(slabel) && metadata.contains(slabel)) {
             return slabel;
         }
 
-        if (metadata.contains(escaped.toUpperCase())) {
+        if (metadata.contains(escaped.toUpperCase(Locale.ROOT))) {
             return escaped;
         }
 
@@ -50,7 +50,7 @@ public class UcanaccessResultSet implements ResultSet {
         metadata = new HashSet<>();
         ResultSetMetaData rsmd = wrapped.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            metadata.add(rsmd.getColumnLabel(i).toUpperCase());
+            metadata.add(rsmd.getColumnLabel(i).toUpperCase(Locale.ROOT));
         }
 
     }

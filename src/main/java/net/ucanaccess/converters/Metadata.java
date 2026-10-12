@@ -13,6 +13,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class Metadata {
@@ -37,7 +38,9 @@ public class Metadata {
      * @author Markus Spann
      * @since v5.1.0
      */
-    @SuppressWarnings("java:S115") // constant names are the connection property names used in JDBC URLs
+    // constant names are the connection property names used in JDBC URLs;
+    // default and valid values are immutable constants
+    @SuppressWarnings({"java:S115", "ImmutableEnumChecker"})
     public enum Property {
         user(String.class, null, 500),
         password(String.class, null, 500),
@@ -133,7 +136,7 @@ public class Metadata {
                 return false;
             } else if (type.isEnum()) {
                 for (Object en : type.getEnumConstants()) {
-                    if (en == val || en.toString().equalsIgnoreCase(val.toString())) {
+                    if (en.equals(val) || en.toString().equalsIgnoreCase(val.toString())) {
                         return true;
                     }
                 }
@@ -146,7 +149,7 @@ public class Metadata {
                 }
                 return true;
             } else if (val instanceof CharSequence) {
-                return validValues.contains(val.toString().toUpperCase());
+                return validValues.contains(val.toString().toUpperCase(Locale.ROOT));
             } else {
                 return validValues.contains(val);
             }
@@ -156,7 +159,7 @@ public class Metadata {
             if (val == null) {
                 return null;
             }
-            String value = val.toString().strip().toLowerCase();
+            String value = val.toString().strip().toLowerCase(Locale.ROOT);
             for (Property prop : values()) {
                 if (value.equalsIgnoreCase(prop.name())) {
                     return prop;

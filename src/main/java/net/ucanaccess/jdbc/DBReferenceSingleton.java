@@ -39,6 +39,7 @@ public final class DBReferenceSingleton {
         return dbRegistry.put(path, dbr);
     }
 
+    @SuppressWarnings("LockOnNonEnclosingClassLiteral") // the driver class is the driver-wide lock
     public DBReference remove(String path) {
         synchronized (UcanaccessDriver.class) {
             return dbRegistry.remove(path);

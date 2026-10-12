@@ -11,6 +11,7 @@ import net.ucanaccess.util.Sql;
 import net.ucanaccess.util.Try;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
         // password properties info
         Properties props = new Properties();
         File fl = null;
@@ -61,7 +62,7 @@ public class Main {
                     // convert keys to enum name or lower-case
                     props = props.stringPropertyNames().stream()
                         .collect(Collectors.toMap(
-                            k -> Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase()),
+                            k -> Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase(Locale.ROOT)),
                             props::getProperty, (v1, v2) -> v1, Properties::new));
                 }
             } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
@@ -239,7 +240,7 @@ public class Main {
             if (userInput.endsWith(";")) {
                 String cmd = sb.substring(0, sb.length() - 1).trim();
                 try {
-                    if (cmd.toLowerCase().startsWith("export ")) {
+                    if (cmd.toLowerCase(Locale.ROOT).startsWith("export ")) {
                         executeExport(cmd);
                     } else {
                         executeStatement(cmd);

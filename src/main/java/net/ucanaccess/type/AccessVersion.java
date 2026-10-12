@@ -2,6 +2,8 @@ package net.ucanaccess.type;
 
 import io.github.spannm.jackcess.Database.FileFormat;
 
+import java.util.Locale;
+
 /**
  * Enum of MS Access versions to encapsulate Jackcess {@link FileFormat}.
  */
@@ -27,7 +29,7 @@ public enum AccessVersion {
 
     @Override
     public String toString() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ROOT);
     }
 
     public static AccessVersion getDefaultAccessVersion() {

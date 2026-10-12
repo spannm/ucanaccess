@@ -9,9 +9,9 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public abstract class ComplexBase implements Serializable {
     private static final long           serialVersionUID = 1L;
@@ -131,8 +131,7 @@ public abstract class ComplexBase implements Serializable {
         if (ldt == null) {
             return ldt;
         }
-        long millis = TimeUnit.NANOSECONDS.toMillis(ldt.getNano());
-        return ldt.withNano((int) TimeUnit.MILLISECONDS.toNanos(millis));
+        return ldt.truncatedTo(ChronoUnit.MILLIS);
     }
 
 }

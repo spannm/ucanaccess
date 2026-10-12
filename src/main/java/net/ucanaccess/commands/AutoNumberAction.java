@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class AutoNumberAction implements IFeedbackAction {
@@ -29,7 +30,7 @@ public class AutoNumberAction implements IFeedbackAction {
                 Object cnOld = memento[i];
                 Object cnNew = byAccess[i];
                 if (cnNew instanceof String) {
-                    cnNew = ((String) cnNew).toUpperCase();
+                    cnNew = ((String) cnNew).toUpperCase(Locale.ROOT);
                 }
                 oldAutoValues.put(col.getName(), cnOld);
                 newAutoValues.put(col.getName(), cnNew);

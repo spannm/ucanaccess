@@ -14,6 +14,7 @@ import java.time.LocalDate;
 class GithubIssue16Test extends UcanaccessBaseFileTest {
 
     @Test
+    @SuppressWarnings("BigDecimalLiteralDouble") // reproduces the reported value, created from a double
     void testIssue16() throws SQLException {
         init();
 

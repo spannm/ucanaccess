@@ -45,7 +45,7 @@ public class Persist2Jet {
     }
 
     public Map<String, Object> getRowPattern(Object[] varr, Table t) throws SQLException {
-        String ntn = SQLConverter.basicEscapingIdentifier(t.getName()).toUpperCase();
+        String ntn = SQLConverter.basicEscapingIdentifier(t.getName()).toUpperCase(Locale.ROOT);
         Map<String, Object> vl = new LinkedHashMap<>();
         int i = 0;
         for (String s : getCreateColumnNamesCache(ntn)) {
@@ -62,7 +62,7 @@ public class Persist2Jet {
     }
 
     public List<String> getCreateColumnNamesCache(String tableName) throws SQLException {
-        String nname = SQLConverter.basicEscapingIdentifier(tableName).toUpperCase();
+        String nname = SQLConverter.basicEscapingIdentifier(tableName).toUpperCase(Locale.ROOT);
         nname = UcanaccessDatabaseMetadata.normalizeName(nname);
         UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         Map<String, List<String>> dbFileObjMap = COL_NAMES_CACHE.computeIfAbsent(conn.getDbIO().getFile(), k -> new LinkedHashMap<>());
@@ -72,7 +72,7 @@ public class Persist2Jet {
                 while (rs.next()) {
                     Integer pos = rs.getInt(ORDINAL_POSITION);
                     String name = rs.getString(COLUMN_NAME);
-                    colsByPos.put(pos, name.toUpperCase());
+                    colsByPos.put(pos, name.toUpperCase(Locale.ROOT));
                 }
                 List<String> colList = colsByPos.values().stream().collect(Collectors.toUnmodifiableList());
                 dbFileObjMap.put(nname, colList);
@@ -160,8 +160,8 @@ public class Persist2Jet {
         Map<String, Object> vl = new LinkedHashMap<>();
         for (Column col : colums) {
             String key = col.getName();
-            String keyu = key.toUpperCase();
-            String ekey = map.containsKey(keyu) ? keyu : SQLConverter.escapeIdentifier(key).toUpperCase();
+            String keyu = key.toUpperCase(Locale.ROOT);
+            String ekey = map.containsKey(keyu) ? keyu : SQLConverter.escapeIdentifier(key).toUpperCase(Locale.ROOT);
             if (!map.containsKey(ekey) && map.containsKey(ekey.substring(1, ekey.length() - 1))) {
                 ekey = ekey.substring(1, ekey.length() - 1);
             }
@@ -252,7 +252,7 @@ public class Persist2Jet {
             throws SQLException, IOException {
         UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String columnName = columnMap.keySet().iterator().next();
-        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableName.toUpperCase(),
+        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableName.toUpperCase(Locale.ROOT),
                 SQLConverter.preEscapingIdentifier(columnName));
 
         if (rs.next()) {
@@ -289,7 +289,7 @@ public class Persist2Jet {
         List<IndexBuilder.Column> clspk = ibpk.getColumns();
         List<String> columnNamesPK = new ArrayList<>();
         for (IndexBuilder.Column clpk : clspk) {
-            columnNamesPK.add(clpk.getName().toUpperCase());
+            columnNamesPK.add(clpk.getName().toUpperCase(Locale.ROOT));
         }
         while (itib.hasNext()) {
             IndexBuilder ib = itib.next();
@@ -299,7 +299,7 @@ public class Persist2Jet {
             }
             boolean clsPK = true;
             for (IndexBuilder.Column cl : cls) {
-                if (!columnNamesPK.contains(cl.getName().toUpperCase())) {
+                if (!columnNamesPK.contains(cl.getName().toUpperCase(Locale.ROOT))) {
                     clsPK = false;
                     break;
                 }
@@ -312,7 +312,7 @@ public class Persist2Jet {
 
     private IndexBuilder getIndexBuilderPK(String tableName, Map<String, String> columnMap) throws SQLException {
         UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
-        ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, PUBLIC, tableName.toUpperCase());
+        ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, PUBLIC, tableName.toUpperCase(Locale.ROOT));
         IndexBuilder indpk = null;
         while (pkrs.next()) {
             if (indpk == null) {
@@ -382,7 +382,7 @@ public class Persist2Jet {
 
     private String escape4Hsqldb(String tn) {
 
-        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
+        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
             tn = tn.substring(1, tn.length() - 1);
             return SQLConverter.preEscapingIdentifier(tn);
         }
@@ -391,7 +391,7 @@ public class Persist2Jet {
 
     private String escape4Access(String tn) {
 
-        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
+        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
             return tn.substring(1, tn.length() - 1);
         }
         return tn;
@@ -493,8 +493,8 @@ public class Persist2Jet {
                 while ((row = srsc.getNextRow()) != null) {
                     String szObject = (String) row.get(COL_SZ_OBJECT);
                     String szReferencedObject = (String) row.get(COL_SZ_REFERENCED_OBJECT);
-                    if (szObject != null && szObject.equalsIgnoreCase(tableName)
-                            || szReferencedObject != null && szReferencedObject.equalsIgnoreCase(tableName)) {
+                    if ((szObject != null && szObject.equalsIgnoreCase(tableName))
+                            || (szReferencedObject != null && szReferencedObject.equalsIgnoreCase(tableName))) {
                         srsc.deleteCurrentRow();
                     }
                 }
@@ -525,9 +525,6 @@ public class Persist2Jet {
         while ((row = catc.getNextRow()) != null) {
             String name = (String) row.get("Name");
             if (name != null && name.equalsIgnoreCase(oldTableName)) {
-                Integer id = (Integer) row.get("Id");
-                Map<String, Object> rowtsa = new HashMap<>();
-                rowtsa.put(COL_OBJECT_ID, id);
                 Row r = catc.getCurrentRow();
                 r.put("Name", tn);
                 catc.updateCurrentRowFromMap(r);
@@ -571,7 +568,7 @@ public class Persist2Jet {
         }
         Table t = db.getTable(tn);
         Column col = cb.addToTable(t);
-        int idTable = mtd.getTableId(ntn.toUpperCase());
+        int idTable = mtd.getTableId(ntn.toUpperCase(Locale.ROOT));
         mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),
             getUcaMetadataTypeName(0, cb, types), idTable);
         saveColumnsDefaults(defaults, notNulls, col, 0);
@@ -611,7 +608,9 @@ public class Persist2Jet {
         }
 
         if (default4SQL != null || col.getType().equals(DataType.BOOLEAN)) {
-            defObj = default4SQL == null && col.getType().equals(DataType.BOOLEAN) ? Boolean.FALSE : defObj;
+            if (default4SQL == null && col.getType().equals(DataType.BOOLEAN)) {
+                defObj = false;
+            }
             try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(
                 SQLConverter.convertSQL("UPDATE " + tableName + " SET " + columnName + "= ?").getSql())) {
                 ps.setObject(1, defObj);
@@ -631,7 +630,7 @@ public class Persist2Jet {
         String in = escape4Access(indexName);
         Table t = db.getTable(tn);
 
-        ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(), false, false);
+        ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(Locale.ROOT), false, false);
         boolean asc = false;
         List<String> cols = new ArrayList<>();
         IndexBuilder ib = new IndexBuilder(in);
@@ -663,7 +662,7 @@ public class Persist2Jet {
         Metadata md = new Metadata(conn);
 
         Map<Short, String> cols = new TreeMap<>();
-        try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase())) {
+        try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase(Locale.ROOT))) {
             while (rs.next()) {
                 cols.put(rs.getShort(KEY_SEQ), md.getColumnName(ntn, rs.getString(COLUMN_NAME)));
             }
@@ -696,7 +695,7 @@ public class Persist2Jet {
         UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();
         String ntn = escape4Hsqldb(tableName);
         String tn = escape4Access(tableName);
-        ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase());
+        ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase(Locale.ROOT));
         Set<String> hs = new HashSet<>();
         while (fkrs.next()) {
             hs.add(fkrs.getString(PKTABLE_NAME));
@@ -717,7 +716,7 @@ public class Persist2Jet {
             .withName(relationshipName)
             .withReferentialIntegrity();
         ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getCrossReference(null, null,
-                refTn4Hsqldb.toUpperCase(), null, null, tn4Hsqldb.toUpperCase());
+                refTn4Hsqldb.toUpperCase(Locale.ROOT), null, null, tn4Hsqldb.toUpperCase(Locale.ROOT));
         Metadata mt = new Metadata(conn);
         while (fkrs.next()) {
             /*

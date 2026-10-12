@@ -11,6 +11,7 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.UcanaccessBaseFileTest;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,8 +71,8 @@ class ComplexTest extends UcanaccessBaseFileTest {
             ps.setObject(4, new SingleValue[] {new SingleValue("ccc16"), new SingleValue("ccc24")});
             LocalDateTime now = LocalDateTime.now();
             Attachment[] atcs = new Attachment[] {
-                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), now, null),
-                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), now, null)};
+                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(StandardCharsets.UTF_8), now, null),
+                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(StandardCharsets.UTF_8), now, null)};
             ps.setObject(5, atcs);
             ps.execute();
             dumpQueryResult("SELECT * FROM t_complex ORDER BY id");
@@ -83,7 +84,7 @@ class ComplexTest extends UcanaccessBaseFileTest {
         }
 
         Attachment[] atc = new Attachment[] {new Attachment(null, "cccsss.cvs", "cvs",
-            "ddddd ;sssssssssssssssssssddd".getBytes(), LocalDateTime.now(), null)};
+            "ddddd ;sssssssssssssssssssddd".getBytes(StandardCharsets.UTF_8), LocalDateTime.now(), null)};
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_complex SET [attach-data]=? WHERE id=?")) {
             ps.setObject(1, atc);
             ps.setString(2, "row12");
@@ -127,8 +128,8 @@ class ComplexTest extends UcanaccessBaseFileTest {
             SingleValue[] svs = new SingleValue[] {new SingleValue("16"), new SingleValue("24")};
             ps.setObject(4, svs);
             Attachment[] atcs = new Attachment[] {
-                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(), LocalDateTime.now(), null),
-                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(), LocalDateTime.now(), null)};
+                new Attachment(null, "ccc.txt", "txt", "ddddd ddd".getBytes(StandardCharsets.UTF_8), LocalDateTime.now(), null),
+                new Attachment(null, "ccczz.txt", "txt", "ddddd zzddd".getBytes(StandardCharsets.UTF_8), LocalDateTime.now(), null)};
             ps.setObject(5, atcs);
             ps.execute();
         }

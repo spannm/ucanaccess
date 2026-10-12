@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ public class DDLCommandEnlist {
         Database db = ac.getDbIO();
         LoadJet lfa = new LoadJet(hsqlConn, db);
         String ntn = tn;
-        if (tn.startsWith("[") && tn.endsWith("]") || tn.startsWith("`") && tn.endsWith("`")) {
+        if ((tn.startsWith("[") && tn.endsWith("]")) || (tn.startsWith("`") && tn.endsWith("`"))) {
             ntn = SQLConverter.escapeIdentifier(tn.substring(1, tn.length() - 1));
         }
 
@@ -221,7 +222,7 @@ public class DDLCommandEnlist {
         String[] colDecls = tknt.split("\\s+");
         colDecls = checkEscaped("[", "]", colDecls, tknt);
         colDecls = checkEscaped("`", "`", colDecls, tknt);
-        String escaped = SQLConverter.isListedAsKeyword(colDecls[0]) ? colDecls[0].toUpperCase()
+        String escaped = SQLConverter.isListedAsKeyword(colDecls[0]) ? colDecls[0].toUpperCase(Locale.ROOT)
                 : SQLConverter.basicEscapingIdentifier(colDecls[0]);
         columnMap.put(escaped, colDecls[0]);
 
@@ -237,7 +238,7 @@ public class DDLCommandEnlist {
         }
         boolean decDef = false;
         if (!reset) {
-            if (colDecls[1] != null && colDecls[1].toUpperCase().startsWith("NUMERIC(")) {
+            if (colDecls[1] != null && colDecls[1].toUpperCase(Locale.ROOT).startsWith("NUMERIC(")) {
                 colDecls[1] = "NUMERIC";
                 decDef = true;
             }
@@ -245,7 +246,7 @@ public class DDLCommandEnlist {
 
         }
 
-        if ((colDecls.length > 2 || reset && colDecls.length == 2)
+        if ((colDecls.length > 2 || (reset && colDecls.length == 2))
                 && "not".equalsIgnoreCase(colDecls[colDecls.length - 2])
                 && "null".equalsIgnoreCase(colDecls[colDecls.length - 1])) {
             notNullList.add(true);

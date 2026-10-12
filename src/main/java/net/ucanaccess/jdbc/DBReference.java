@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -126,7 +127,7 @@ public final class DBReference {
                     throw new IOException("Cannot resolve db link");
                 }
                 Map<String, String> emr = externalResourcesMapping;
-                String remapped = emr == null ? null : emr.get(linkeeFileName.toLowerCase());
+                String remapped = emr == null ? null : emr.get(linkeeFileName.toLowerCase(Locale.ROOT));
                 // an explicit remapping via the "reMap" connection property is trusted application configuration
                 // and therefore bypasses the network-path guard below; the raw (untrusted) path stored in the
                 // database file itself is not probed or opened in that case
@@ -228,7 +229,7 @@ public final class DBReference {
         // I'm detecting if another process(and not another thread) is writing
 
         try {
-            if (lastModified + 2000 > filesUpdateTime() || preventReloading && !checkInside()) {
+            if (lastModified + 2000 > filesUpdateTime() || (preventReloading && !checkInside())) {
                 return conn;
             }
             updateLastModified();
@@ -382,9 +383,8 @@ public final class DBReference {
     private void setIgnoreCase(Connection conn) {
         try (Statement st = conn.createStatement()) {
             st.execute("SET DATABASE COLLATION \"SQL_TEXT_UCC\"");
-
-        } catch (Exception ignored) {
-
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Could not set the case-insensitive collation", ex);
         }
     }
 
@@ -766,6 +766,7 @@ public final class DBReference {
             if (dbReference.inMemory && inactivityTimeout > 0 && activeConnection == 0) {
                 TimerTask task = new TimerTask() {
                     @Override
+                    @SuppressWarnings("LockOnNonEnclosingClassLiteral") // the driver class is the driver-wide lock
                     public void run() {
                         synchronized (UcanaccessDriver.class) {
                             if (System.currentTimeMillis() - getLastConnectionTime() >= inactivityTimeout

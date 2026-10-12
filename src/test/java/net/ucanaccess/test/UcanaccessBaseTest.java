@@ -210,7 +210,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                             bdExpected = new BigDecimal(expectedObj.toString());
                         } else {
                             fail(String.format("Expected object of unexpected type for numeric comparison at row %d, col %d%s: %s (type: %s)",
-                                rowIdx + 1, displayCol, expressionContext, expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null")));
+                                rowIdx + 1, displayCol, expressionContext, expectedObj, expectedObj.getClass().getSimpleName()));
                             continue;
                         }
 
@@ -223,7 +223,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                         assertEquals(roundedExpected, roundedActual, delta,
                             String.format("Expected floating-point value to be equal with tolerance at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
                                 rowIdx + 1, displayCol, expressionContext,
-                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                expectedObj, expectedObj.getClass().getSimpleName(),
                                 actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
 
                     } else if (actualObj instanceof Number && expectedObj instanceof Number) {
@@ -233,7 +233,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                         assertEquals(((Number) expectedObj).longValue(), ((Number) actualObj).longValue(),
                             String.format("Expected integral number to be equal (converted to long) at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
                                 rowIdx + 1, displayCol, expressionContext,
-                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                expectedObj, expectedObj.getClass().getSimpleName(),
                                 actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
 
                     } else if (actualObj instanceof Date && expectedObj instanceof Date) {
@@ -245,7 +245,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                         assertEquals(expectedObj, actualObj,
                             String.format("Expected objects to be equal at row %d, col %d%s.%nExpected: %s (%s)%nActual:   %s (%s)",
                                 rowIdx + 1, displayCol, expressionContext,
-                                expectedObj, (expectedObj != null ? expectedObj.getClass().getSimpleName() : "null"),
+                                expectedObj, expectedObj.getClass().getSimpleName(),
                                 actualObj, (actualObj != null ? actualObj.getClass().getSimpleName() : "null")));
                     }
                 }
@@ -277,9 +277,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                     ? verifyResultSet.getBoolean(col)
                     : verifyResultSet.getObject(col);
 
-                if (objActual == null && objExpected == null) {
-                    continue;
-                } else if (objActual == null) {
+                if (objActual == null) {
                     assertNull(objExpected, "Object in verify set at row:col " + row + ':' + col + " should be null, but was: "
                         + objExpected + " in [" + query + ']');
                 } else {

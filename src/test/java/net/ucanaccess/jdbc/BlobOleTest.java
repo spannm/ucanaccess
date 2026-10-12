@@ -17,6 +17,7 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 class BlobOleTest extends UcanaccessBaseTest {
 
@@ -104,7 +105,7 @@ class BlobOleTest extends UcanaccessBaseTest {
 
     private String getFileResource(String fileName) {
         String folder = getClass().getSimpleName();
-        folder = folder.substring(0, 1).toLowerCase() + folder.substring(1);
+        folder = folder.substring(0, 1).toLowerCase(Locale.ROOT) + folder.substring(1);
         return String.join(File.separator, folder, fileName);
     }
 

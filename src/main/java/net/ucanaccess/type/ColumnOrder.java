@@ -1,5 +1,7 @@
 package net.ucanaccess.type;
 
+import java.util.Locale;
+
 /**
  * Valid values of driver property {@code columnOrder}.
  *
@@ -15,7 +17,7 @@ public enum ColumnOrder {
         if (value == null) {
             return null;
         }
-        String val = value.strip().toLowerCase();
+        String val = value.strip().toLowerCase(Locale.ROOT);
         for (ColumnOrder ver : values()) {
             if (val.equalsIgnoreCase(ver.name())) {
                 return ver;

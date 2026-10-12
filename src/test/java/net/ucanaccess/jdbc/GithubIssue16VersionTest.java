@@ -17,6 +17,7 @@ class GithubIssue16VersionTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
+    @SuppressWarnings("BigDecimalLiteralDouble") // reproduces the reported value, created from a double
     void testIssue16(AccessVersion accessVersion) throws SQLException {
         init(accessVersion);
 

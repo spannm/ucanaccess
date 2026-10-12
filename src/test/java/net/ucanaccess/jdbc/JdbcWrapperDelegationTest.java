@@ -153,6 +153,7 @@ class JdbcWrapperDelegationTest extends AbstractBaseTest {
      * @param wrapperFactory creates the wrapper around a delegate
      * @param ownLogic names of methods that are implemented by the wrapper itself instead of delegating
      */
+    @SuppressWarnings("unchecked") // generic varargs of Mockito.clearInvocations
     private static <I> void assertDelegation(Class<I> iface, WrapperFactory<I> wrapperFactory, Set<String> ownLogic) throws Exception {
         List<Method> methods = Arrays.stream(iface.getMethods())
             .filter(m -> !m.isDefault() && !Modifier.isStatic(m.getModifiers()))

@@ -1,5 +1,7 @@
 package net.ucanaccess.exception;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
 import net.ucanaccess.util.VersionInfo;
 import org.hsqldb.error.ErrorCode;
@@ -30,7 +32,8 @@ public class UcanaccessSQLException extends SQLException {
         this(reason, UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 
-    public UcanaccessSQLException(String reason, Object... args) {
+    @FormatMethod
+    public UcanaccessSQLException(@FormatString String reason, Object... args) {
         this(String.format(reason, args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);
     }
 

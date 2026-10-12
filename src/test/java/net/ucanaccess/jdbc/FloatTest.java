@@ -25,7 +25,7 @@ class FloatTest extends UcanaccessBaseFileTest {
         ps.execute();
         dumpQueryResult("SELECT * FROM t_float ORDER BY pk");
         checkQuery("SELECT [row] FROM t_float ORDER BY pk");
-        ps.setFloat(1, 4.10011001155f);
+        ps.setFloat(1, 4.10011f);
         ps.execute();
         checkQuery("SELECT [row] FROM t_float ORDER BY pk");
         checkQuery("SELECT COUNT(*) FROM t_float WHERE [row]=4.10011", singleRec(2));

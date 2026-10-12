@@ -101,6 +101,7 @@ public class UcanaccessStatement implements Statement {
         });
     }
 
+    @SuppressWarnings("ReferenceEquality") // identity tells whether the connection was replaced
     protected void checkLastModified() throws UcanaccessSQLException {
 
         if (connection.getAutoCommit() || connection.isCheckModified()) {

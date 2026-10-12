@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
@@ -55,7 +56,7 @@ class NotNullDdlTest extends UcanaccessBaseTest {
 
         assertThat(proc.exitValue()).isZero();
 
-        try (BufferedReader output = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+        try (BufferedReader output = new BufferedReader(new InputStreamReader(proc.getErrorStream(), Charset.defaultCharset()))) {
             String stderr = output.lines().collect(Collectors.joining(System.lineSeparator()));
 
             if (stderr.isEmpty()) {

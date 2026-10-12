@@ -168,7 +168,7 @@ public final class SQLConverter {
     }
 
     public static boolean isListedAsKeyword(String s) {
-        return s != null && KEYWORDS_LIST.contains(s.toUpperCase());
+        return s != null && KEYWORDS_LIST.contains(s.toUpperCase(Locale.ROOT));
     }
 
     private static int[] getQuoteGroup(String s) {
@@ -624,12 +624,12 @@ public final class SQLConverter {
                 String tryContent = " " + content + " ";
                 String tryConversion = convertXescaped(tryContent);
                 if (!tryConversion.equalsIgnoreCase(tryContent)) {
-                    IDENTIFIERS_CONTAINING_KEYWORD.put(tryConversion.trim(), content.toUpperCase());
+                    IDENTIFIERS_CONTAINING_KEYWORD.put(tryConversion.trim(), content.toUpperCase(Locale.ROOT));
                 }
             }
             boolean isKeyword = isListedAsKeyword(content);
 
-            content = basicEscapingIdentifier(content).toUpperCase();
+            content = basicEscapingIdentifier(content).toUpperCase(Locale.ROOT);
             String subs = " ";
             if (content != null && !isKeyword && (content.contains(" ") || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {
                 subs = "\"";
@@ -699,7 +699,7 @@ public final class SQLConverter {
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
         if (fd.length > 0 || fs.length > 0) {
-            boolean inid = fs.length == 0 || fd.length > 0 && fd[0] < fs[0];
+            boolean inid = fs.length == 0 || (fd.length > 0 && fd[0] < fs[0]);
             String group;
             String str;
             int[] mcr = inid ? fd : fs;
@@ -721,8 +721,8 @@ public final class SQLConverter {
     }
 
     public static String procedureEscapingIdentifier(String name) {
-        if (PROCEDURE_KEYWORDS.contains(name.toUpperCase())) {
-            name = '"' + name.toUpperCase() + '"';
+        if (PROCEDURE_KEYWORDS.contains(name.toUpperCase(Locale.ROOT))) {
+            name = '"' + name.toUpperCase(Locale.ROOT) + '"';
 
         }
         return name;
@@ -883,7 +883,7 @@ public final class SQLConverter {
     }
 
     private static String clearDefaultsCreateStatement(String sql) throws SQLException {
-        if (!sql.toUpperCase().contains("DEFAULT")) {
+        if (!sql.toUpperCase(Locale.ROOT).contains("DEFAULT")) {
             return sql;
         }
         int startDecl = sql.indexOf('(');
@@ -1018,7 +1018,7 @@ public final class SQLConverter {
         int[] fd = getDoubleQuoteGroup(tsql);
         int[] fs = getQuoteGroup(tsql);
         if (fd.length > 0 || fs.length > 0) {
-            boolean inid = fs.length == 0 || fd.length > 0 && fd[0] < fs[0];
+            boolean inid = fs.length == 0 || (fd.length > 0 && fd[0] < fs[0]);
             String group;
             String str;
             int[] mcr = inid ? fd : fs;

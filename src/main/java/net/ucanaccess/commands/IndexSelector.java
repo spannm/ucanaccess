@@ -95,8 +95,8 @@ public final class IndexSelector {
                 return (Integer) dbVal == SQLConverter.asUnsigned((Byte) currVal);
             }
 
-            if (dbVal instanceof Float && currVal instanceof Double
-                    || dbVal instanceof Double && currVal instanceof Float) {
+            if ((dbVal instanceof Float && currVal instanceof Double)
+                    || (dbVal instanceof Double && currVal instanceof Float)) {
                 if (new BigDecimal(dbVal.toString()).compareTo(new BigDecimal(currVal.toString())) == 0) {
                     return true;
                 }

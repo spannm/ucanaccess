@@ -8,6 +8,7 @@ import net.ucanaccess.util.Try;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +29,7 @@ public class DFunction {
 
     private String convertDFunctions() {
         String sqlOut = sql;
-        boolean hasFrom = sql.toUpperCase().contains(" FROM ");
+        boolean hasFrom = sql.toUpperCase(Locale.ROOT).contains(" FROM ");
 
         String init = hasFrom ? " (SELECT " : "";
         String end = hasFrom ? " ) " : "";
@@ -62,15 +63,15 @@ public class DFunction {
                         } else {
                             tkn += " ";
                             try {
-                                for (String cln : getColumnNames(tn.toUpperCase())) {
+                                for (String cln : getColumnNames(tn.toUpperCase(Locale.ROOT))) {
                                     Pattern patOppn = Pattern.compile("(\\W)(" + cln + ")(\\W)", Pattern.CASE_INSENSITIVE);
                                     Matcher mtcop = patOppn.matcher(tkn);
                                     if (!mtcop.find()) {
                                         continue;
                                     }
                                     String pref = mtcop.group(1);
-                                    if (".".equals(pref) || "[".equals(pref) && mtcop.start(1) > 0
-                                        && tkn.charAt(mtcop.start(1) - 1) == '.') {
+                                    if (".".equals(pref) || ("[".equals(pref) && mtcop.start(1) > 0
+                                        && tkn.charAt(mtcop.start(1) - 1) == '.')) {
                                         continue;
                                     }
                                     tkn = tkn.replaceAll("(\\W)((?i)" + cln + ")(\\W)",
@@ -122,8 +123,8 @@ public class DFunction {
 
     private static boolean isQuoted(String g3) {
         g3 = g3.trim();
-        return g3.startsWith("'") && g3.endsWith("'") && g3.substring(1, g3.length() - 1).indexOf('\'') < 0
-            || g3.startsWith("\"") && g3.endsWith("\"") && g3.substring(1, g3.length() - 1).indexOf('"') < 0;
+        return (g3.startsWith("'") && g3.endsWith("'") && g3.substring(1, g3.length() - 1).indexOf('\'') < 0)
+            || (g3.startsWith("\"") && g3.endsWith("\"") && g3.substring(1, g3.length() - 1).indexOf('"') < 0);
     }
 
     private static String unpad(String tkn) {

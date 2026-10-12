@@ -197,7 +197,7 @@ public class ParametricQuery {
     }
 
     private String treatApos(String s) {
-        return s.replace("'", "").replace("\"", "").toUpperCase();
+        return s.replace("'", "").replace("\"", "").toUpperCase(Locale.ROOT);
     }
 
     private boolean exec(String expression) {
@@ -268,7 +268,7 @@ public class ParametricQuery {
             String typeS = paren >= 0 ? type.substring(paren) : "";
             Map<String, String> hm = TypesMap.getAccess2HsqlTypesMap();
 
-            type = hm.get(type0.toUpperCase()) + typeS;
+            type = hm.get(type0.toUpperCase(Locale.ROOT)) + typeS;
             if ("VARCHAR".equalsIgnoreCase(type)) {
                 type += "(255)";
             }
@@ -400,9 +400,9 @@ public class ParametricQuery {
 
             for (String par : paramNames) {
                 String par1 = SQLConverter.preEscapingIdentifier(par.substring(1, par.length() - 1));
-                int index = sql.toUpperCase().indexOf(par.toUpperCase());
-                if (index >= 0 && ex.getMessage() != null && (ex.getMessage().toUpperCase().endsWith(": " + par1)
-                        || ex.getMessage().toUpperCase().contains(": " + par1 + " IN STATEMENT "))) {
+                int index = sql.toUpperCase(Locale.ROOT).indexOf(par.toUpperCase(Locale.ROOT));
+                if (index >= 0 && ex.getMessage() != null && (ex.getMessage().toUpperCase(Locale.ROOT).endsWith(": " + par1)
+                        || ex.getMessage().toUpperCase(Locale.ROOT).contains(": " + par1 + " IN STATEMENT "))) {
                     sql = sql.replaceAll("(?i)" + Pattern.quote(par), "?");
                     psmp.put(par1, index);
                     parem.put(par1, par);

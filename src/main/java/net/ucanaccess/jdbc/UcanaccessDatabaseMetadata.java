@@ -11,6 +11,7 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
     private static final String        SELECT_BASE  = "SELECT * FROM INFORMATION_SCHEMA.";
@@ -37,7 +38,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
         StringBuilder sb = new StringBuilder(" AND ").append(prefix).append(field).append(" IN ").append("(");
         String comma = "";
         for (Object norm : options) {
-            String val = norm instanceof String ? "'" + norm.toString().toUpperCase() + "'" : norm.toString();
+            String val = norm instanceof String ? "'" + norm.toString().toUpperCase(Locale.ROOT) + "'" : norm.toString();
             sb.append(comma).append(val);
             comma = ",";
         }
@@ -217,7 +218,7 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
-        table = SQLConverter.escapeIdentifier(table).toUpperCase();
+        table = SQLConverter.escapeIdentifier(table).toUpperCase(Locale.ROOT);
 
         try {
 
@@ -1111,10 +1112,10 @@ public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
             return name;
         }
         if (name.contains("%")) {
-            return name.toUpperCase();
+            return name.toUpperCase(Locale.ROOT);
         } else {
             if (name.startsWith("\"") && name.endsWith("\"")) {
-                String stb = name.substring(1, name.length() - 1).toUpperCase();
+                String stb = name.substring(1, name.length() - 1).toUpperCase(Locale.ROOT);
                 if (SQLConverter.isListedAsKeyword(stb)) {
                     return stb;
                 }

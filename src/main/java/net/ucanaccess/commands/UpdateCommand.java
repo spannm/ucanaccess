@@ -161,8 +161,8 @@ public class UpdateCommand extends AbstractCursorCommand {
                         String vo = !oldV.isEmpty() ? oldV.get(0).getValue() : null;
                         LocalDateTime upTime = isRollbacking ? LocalDateTime.now(ZoneId.systemDefault()) : v.getModifiedDate();
 
-                        if (vn != null && vo == null || vo != null && vn == null
-                                || vo != null && vn != null && !vo.equals(vn)) {
+                        if ((vn != null && vo == null) || (vo != null && vn == null)
+                                || (vo != null && vn != null && !vo.equals(vn))) {
                             rowFk.addVersion(vn, upTime);
                         }
                     }

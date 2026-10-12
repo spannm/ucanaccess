@@ -121,8 +121,8 @@ class ColumnDefaultTest extends UcanaccessBaseTest {
         private final Object  insValue;
         private final boolean quoteVal;
 
-        TestData(String datatype, Object defValue,  Object insValue, boolean quoteVal) {
-            dataType = datatype;
+        TestData(String dataType, Object defValue,  Object insValue, boolean quoteVal) {
+            this.dataType = dataType;
             this.defValue = defValue;
             this.insValue = insValue;
             this.quoteVal = quoteVal;

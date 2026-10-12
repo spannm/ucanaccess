@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ class CorruptedTest extends UcanaccessBaseFileTest {
         }
 
         Pattern pat = Pattern.compile("^[0-9\\-]{10} .+? WARN LoadJet[ \\-]+");
-        List<String> actual = Arrays.stream(errContent.toString().split(System.lineSeparator()))
+        List<String> actual = Arrays.stream(errContent.toString(Charset.defaultCharset()).split(System.lineSeparator()))
             .map(pat::matcher)
             .filter(Matcher::find)
             .map(m -> m.replaceAll(""))

@@ -279,7 +279,7 @@ public final class Try<V, EC extends Throwable> {
      */
     public V orElseGet(IThrowingSupplier<V, Throwable> supplier) {
         if (hasThrown()) {
-            return catching(supplier::get).orThrow();
+            return catching(supplier).orThrow();
         }
         return val;
     }

@@ -104,7 +104,7 @@ class UcanaccessDriverTest extends UcanaccessBaseTest {
 
         // public is required: UcanaccessDriver#newJackcessOpenerInstance loads this class by name via
         // Class#getConstructor(), which only ever finds a *public* no-arg constructor.
-        @SuppressWarnings("checkstyle:RedundantModifier")
+        @SuppressWarnings({"checkstyle:RedundantModifier", "StaticAssignmentInConstructor"})
         public NonOpenerWithSideEffect() {
             instantiated = true;
         }
