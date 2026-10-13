@@ -41,7 +41,7 @@ jobs:
                 cache: maven
 
         -   name: Build with Maven/JDK 21 on ${{ matrix.os }}, tests forked onto JDK ${{ matrix.java }}
-            run: mvn --batch-mode --file pom.xml -Dtest.jdk=${{ matrix.java }} clean verify
+            run: mvn --batch-mode --file pom.xml "-Dtest.jdk=${{ matrix.java }}" clean verify
 
     deploy:
         needs: build
