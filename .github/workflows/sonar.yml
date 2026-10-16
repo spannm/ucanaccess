@@ -48,9 +48,15 @@ jobs:
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            # rule S2143 (use java.time) does not fit: java.util.Date and Calendar are part of the
+            # JDBC API and of Jackcess, and dates are parsed and formatted with SimpleDateFormat
+            # patterns. The rule reports whole files, which @SuppressWarnings cannot cover.
             run: >
                 mvn --batch-mode --file pom.xml verify
-                org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar
+                org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar
                 -Dsonar.organization=spannm
                 -Dsonar.projectKey=io.github.spannm:ucanaccess
                 -Dsonar.host.url=https://sonarcloud.io
+                -Dsonar.issue.ignore.multicriteria=s2143
+                -Dsonar.issue.ignore.multicriteria.s2143.ruleKey=java:S2143
+                '-Dsonar.issue.ignore.multicriteria.s2143.resourceKey=**/*.java'
