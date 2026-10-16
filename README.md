@@ -29,7 +29,7 @@
 
 * **Drop-in Replacement**: Fully compatible with previous UCanAccess versions.
 
-* **Modern Core**: Built on top of the latest **Jackcess 5.1.6** and **HSQLDB 2.7.4** for maximum stability and security.
+* **Modern Core**: Built on top of the latest **Jackcess 5.2.0** and **HSQLDB 2.7.4** for maximum stability and security.
 
 * **Comprehensive SQL Support**: Supports SELECT, INSERT, UPDATE, DELETE, and even complex DDL operations like `ALTER TABLE`.
 
@@ -41,7 +41,7 @@
 
 ## 🛠 Tech Stack & Requirements
 
-* **Java Version**: 11 or higher (LTS versions like Java 17 and 21 are fully supported and tested).
+* **Java Version**: 11 or higher (LTS versions like Java 17 and 21 are fully supported, the tests run on Java 11, 17 and 21).
 
 * **Build Tool**: [Maven](https://maven.apache.org/)
 
@@ -63,20 +63,20 @@ To use UCanAccess in your project, add the following dependency.
 <dependency>
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.1.7</version>
+    <version>5.2.0</version>
 </dependency>
 ```
 
 ### Gradle (Groovy / `build.gradle`)
 
 ```groovy
-implementation 'io.github.spannm:ucanaccess:5.1.7'
+implementation 'io.github.spannm:ucanaccess:5.2.0'
 ```
 
 ### Gradle (Kotlin DSL / `build.gradle.kts`)
 
 ```kotlin
-implementation("io.github.spannm:ucanaccess:5.1.7")
+implementation("io.github.spannm:ucanaccess:5.2.0")
 ```
 
 <p style="height: 20px;">&nbsp;</p>
@@ -90,7 +90,7 @@ Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has 
 + <groupId>io.github.spannm</groupId>
   <artifactId>ucanaccess</artifactId>
 - <version>5.0.1</version>
-+ <version>5.1.8</version>
++ <version>5.2.0</version>
 ```
 
 If you pass your own class with the `jackcessOpener` connection property, adapt it as well:
