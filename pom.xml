@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-oss</artifactId>
-        <version>69</version>
+        <version>70</version>
     </parent>
 
     <groupId>io.github.spannm</groupId>
@@ -135,6 +135,7 @@
         <dep.plugin.error-prone.version>2.50.0</dep.plugin.error-prone.version>
 
         <basepom.deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</basepom.deploy.snapshot.url>
+        <basepom.central-publishing.repo-id>sonatype-central</basepom.central-publishing.repo-id>
 
         <!-- the current "minimal" version of maven -->
         <basepom.maven.version>3.9.0</basepom.maven.version>
@@ -142,7 +143,7 @@
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
         <dep.checkstyle.version>14.3.0</dep.checkstyle.version>
-        <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
+        <basepom.check.checkstyle-config-location>${project.rootDirectory}/build/checkstyle-rules.xml</basepom.check.checkstyle-config-location>
         <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
         <basepom.check.skip-license>true</basepom.check.skip-license>
@@ -263,7 +264,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
-                        <configLocation>${check.checkstyle.ruleset}</configLocation>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     </configuration>
                     <dependencies>
@@ -423,7 +423,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <skipPublishing>false</skipPublishing>
-                    <publishingServerId>sonatype-central</publishingServerId>
                     <!-- do not automatically release staged artifacts to Maven Central.
                          This is the recommended setting for releases, as it allows us to manually inspect the staged repository
                          in the Central Portal before officially publishing.
