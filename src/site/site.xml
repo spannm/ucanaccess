@@ -26,7 +26,6 @@
             <item name="Discussions (GitHub)" href="https://github.com/spannm/ucanaccess/discussions/" target="_blank"/>
             <item name="Maven Central" href="https://central.sonatype.com/artifact/${project.groupId}/${project.artifactId}/" target="_blank"/>
             <item name="Jackcess (Github)" href="${githubBaseUrl}jackcess/" target="_blank"/>
-            <item name="Legacy project (SourceForge)" href="https://ucanaccess.sourceforge.net/" target="_blank"/>
         </links>
 
         <menu name="Overview">

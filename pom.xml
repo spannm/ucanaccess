@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
-    <description>Actively maintained, pure Java JDBC driver for Microsoft Access databases (.mdb, .accdb) requiring no native libraries. A maintained fork of the unmaintained net.sf.ucanaccess project, built on current Jackcess and HSQLDB versions with Java 11/17/21 support. Used by Java applications and JDBC client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write Microsoft Access databases.</description>
+    <description>Actively maintained, pure Java JDBC driver for Microsoft Access databases (.mdb, .accdb) requiring no native libraries. Continues the original net.sf.ucanaccess project, built on current Jackcess and HSQLDB versions with Java 11/17/21 support. Used by Java applications and JDBC client programs (e.g. OpenOffice, LibreOffice, SQuirreL SQL) to read and write Microsoft Access databases.</description>
     <url>${githubBaseUrl}${project.artifactId}</url>
     <inceptionYear>2012</inceptionYear>
 
@@ -49,7 +49,7 @@
         </developer>
         <developer>
             <name>Gord Thompson</name>
-            <email>gordonthompson@users.sf.net</email>
+            <email>gord@gordthompson.com</email>
             <roles>
                 <role>developer emeritus</role>
             </roles>

@@ -49,7 +49,9 @@
 
     * [Jackcess](https://github.com/spannm/jackcess/)
 
-    * [HyperSQL Database (HSQLDB)](http://hsqldb.org/)
+    * [Jackcess Encrypt](https://github.com/spannm/jackcess-encrypt/) (optional, for encrypted databases)
+
+    * [HyperSQL Database (HSQLDB)](https://hsqldb.org/)
 
 <p style="height: 20px;">&nbsp;</p>
 
@@ -147,7 +149,7 @@ String url = "jdbc:ucanaccess://C:/path/to/your/database.accdb;allowRemoteLinks=
 
 <p style="height: 20px;">&nbsp;</p>
 
-## ❤️ Why this Fork?
+## Why a New Home?
 
 The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020, leaving `net.sf.ucanaccess:ucanaccess` unmaintained at version 5.0.1.
 As a long-time contributor and Java enthusiast, I decided to give UCanAccess a **new home**.

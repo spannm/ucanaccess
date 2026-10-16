@@ -59,7 +59,7 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             <code>openExclusive=true</code>
             ), UCanAccess locks the mdb/accdb file to prevent updates from other processes. Default=false.<br/> <br/> <strong>showSchema</strong>:
             if true, catalog "PUBLIC" and schema "PUBLIC" and other HSQLDB schemas are shown in the DatabaseMetadata
-            implementation. Default=false. Using <i>showSchema=true</i> is recommended with Squirrel SQL.
+            implementation. Default=false. Using <i>showSchema=true</i> is recommended with SQuirreL SQL.
         </p>
         <p>
             <strong>inactivityTimeout</strong> (since UcanAccess 0.1.1): it is used only with the default memory mode (memory=true).
@@ -171,12 +171,13 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             . It avoids the data being reloaded when they aren't actually changed by the GUI.
         </p>
         <p>
-            <strong>jackcessOpener</strong>: in order to use <i>Jackcess Encrypt</i> extension, you can specify a class that
+            <strong>jackcessOpener</strong>: in order to use the
+            <a href="https://github.com/spannm/jackcess-encrypt/">Jackcess Encrypt</a> extension, you can specify a class that
             implements the <i>net.ucanaccess.jdbc.IJackcessOpenerInterface</i> interface (in that case you need additional
             jar files in your classpath: a version of jackcess-encrypt.jar and all related dependencies).<br/> The
-            following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file: <strong>Example
-            for UCanAccess2. Notice that you must use UCanAccess 2.x.x with jackcess-encrypt-2.x.x and all related
-            dependencies</strong><br/>
+            following example shows a custom integration with <i>Jackcess Encrypt</i> for opening a Money (.mny) file.
+            <strong>Notice that the Jackcess Encrypt version must match the Jackcess version used by
+            UCanAccess</strong><br/>
         </p>
         <p>
             <strong>Security note:</strong> the class name passed to <code>jackcessOpener</code> is loaded and
