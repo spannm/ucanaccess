@@ -142,9 +142,9 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
             &gt; New Driver...</i>
         </p>
         <p>
-            2) In the field <i>"Driver File(s)"</i> add "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>.jar" <strong>and
-            all dependencies</strong> (all jars in the <code>lib/</code> folder of the UCanAccess
-            distribution: "hsqldb.jar", "jackcess-<i>x</i>.<i>y</i>.<i>z</i>.jar").<br/><br/>
+            2) In the field <i>"Driver File(s)"</i> add "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>-uber.jar". This
+            self-contained jar includes Jackcess and HSQLDB. Download the current
+            <a href="https://repo1.maven.org/maven2/io/github/spannm/ucanaccess/5.2.0/ucanaccess-5.2.0-uber.jar">ucanaccess-5.2.0-uber.jar</a> from Maven Central.<br/><br/>
             Setting the field <i>Driver Class</i>: <code>net.ucanaccess.jdbc.UcanaccessDriver</code>
         </p>
         <p>
@@ -165,8 +165,18 @@ Use two backslashes (\\) to insert one backslash within quotes (e.g. &quot;c:\\t
 
         <h2>SQuirreL SQL</h2>
         <p>
-            For detailed instructions on how to configure SQuirreL SQL with UCanAccess please see <a
-                href="https://stackoverflow.com/a/36608661/2144390">this answer on Stack Overflow</a>.<br/>
+            Recent SQuirreL SQL versions come with a predefined "UCanAccess (MS Access)" driver. SQuirreL does not
+            download driver jars itself, so the driver needs the self-contained
+            "ucanaccess-<i>x</i>.<i>y</i>.<i>z</i>-uber.jar", which includes Jackcess and HSQLDB. Download the current
+            <a href="https://repo1.maven.org/maven2/io/github/spannm/ucanaccess/5.2.0/ucanaccess-5.2.0-uber.jar">ucanaccess-5.2.0-uber.jar</a> from Maven Central, then open the driver
+            in SQuirreL, add the jar on the <i>Extra Class Path</i> tab and make sure the driver class is
+            <code>net.ucanaccess.jdbc.UcanaccessDriver</code>. With older SQuirreL versions create the driver
+            yourself with the same settings and the URL <code>jdbc:ucanaccess://&lt;path_to_mdb_or_accdb_file&gt;</code>.
+        </p>
+        <p>
+            For a step-by-step walkthrough see <a
+                href="https://stackoverflow.com/a/36608661/2144390">this answer on Stack Overflow</a>. It was written
+            for an older UCanAccess version; with current versions the uber jar alone is enough.<br/>
             <br/> SQuirreL SQL web site: <a href="http://www.squirrelsql.org/">http://www.squirrelsql.org/</a>
         </p>
     </body>
