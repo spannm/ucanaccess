@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccessVersion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.type</a> &gt; <span class="el_source">AccessVersion.java</span></div><h1>AccessVersion.java</h1><pre class="source lang-java linenums">package net.ucanaccess.type;
+
+import io.github.spannm.jackcess.Database.FileFormat;
+
+import java.util.Locale;
+
+/**
+ * Enum of MS Access versions to encapsulate Jackcess {@link FileFormat}.
+ */
+<span class="fc" id="L10">public enum AccessVersion {</span>
+
+<span class="fc" id="L12">    V2000(FileFormat.V2000),</span>
+<span class="fc" id="L13">    V2003(FileFormat.V2003),</span>
+<span class="fc" id="L14">    V2007(FileFormat.V2007),</span>
+<span class="fc" id="L15">    V2010(FileFormat.V2010),</span>
+<span class="fc" id="L16">    V2016(FileFormat.V2016);</span>
+
+<span class="fc" id="L18">    private static final AccessVersion DEFAULT_ACCESS_VERSION = V2003;</span>
+
+    private final FileFormat           fileFormat;
+
+<span class="fc" id="L22">    AccessVersion(FileFormat fileFormat) {</span>
+<span class="fc" id="L23">        this.fileFormat = fileFormat;</span>
+<span class="fc" id="L24">    }</span>
+
+    public FileFormat getFileFormat() {
+<span class="fc" id="L27">        return fileFormat;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L32">        return name().toLowerCase(Locale.ROOT);</span>
+    }
+
+    public static AccessVersion getDefaultAccessVersion() {
+<span class="fc" id="L36">        return DEFAULT_ACCESS_VERSION;</span>
+    }
+
+    public static AccessVersion parse(String str) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (str == null) {</span>
+<span class="nc" id="L41">            return null;</span>
+        }
+<span class="fc" id="L43">        String val = str.strip();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for (AccessVersion ver : values()) {</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">            if (val.equalsIgnoreCase(ver.name())) {</span>
+<span class="fc" id="L46">                return ver;</span>
+            }
+        }
+<span class="fc" id="L49">        return null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

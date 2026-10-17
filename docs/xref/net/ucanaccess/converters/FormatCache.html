@@ -26,8 +26,8 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">private</strong> <a name="FormatCache" href="../../../net/ucanaccess/converters/FormatCache.html#FormatCache">FormatCache</a>() {
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>      }
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">synchronized</strong> DecimalFormat getDecimalFormat(String _pattern) {
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>          <strong class="jxr_keyword">return</strong> CACHE.computeIfAbsent(_pattern, p -&gt; {
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">synchronized</strong> DecimalFormat getDecimalFormat(String pattern) {
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>          <strong class="jxr_keyword">return</strong> CACHE.computeIfAbsent(pattern, p -&gt; {
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>              DecimalFormat dc = <strong class="jxr_keyword">new</strong> DecimalFormat(p);
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>              dc.setRoundingMode(RoundingMode.HALF_UP);
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>              <strong class="jxr_keyword">return</strong> dc;

@@ -1,0 +1,1922 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessDatabaseMetadata.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessDatabaseMetadata.java</span></div><h1>UcanaccessDatabaseMetadata.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import static net.ucanaccess.type.SqlConstants.*;
+
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.InvalidParameterException;
+import net.ucanaccess.exception.UcanaccessSQLException;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+public class UcanaccessDatabaseMetadata implements DatabaseMetaData {
+    private static final String        SELECT_BASE  = &quot;SELECT * FROM INFORMATION_SCHEMA.&quot;;
+    private static final String        NATIVE_ALIAS = &quot; l.&quot;;
+    private static final String        CUSTOM_ALIAS = &quot; r.&quot;;
+    private static final String        CAST_EXPR    = &quot;CAST(null AS VARCHAR(50)) AS &quot;;
+
+    private final UcanaccessConnection connection;
+    private final DatabaseMetaData     wrapped;
+
+<span class="fc" id="L25">    public UcanaccessDatabaseMetadata(DatabaseMetaData wrapped, UcanaccessConnection connection) {</span>
+<span class="fc" id="L26">        this.wrapped = wrapped;</span>
+<span class="fc" id="L27">        this.connection = connection;</span>
+<span class="fc" id="L28">    }</span>
+
+    private String from(String left, String right) {
+<span class="fc" id="L31">        return &quot; FROM &quot; + &quot;INFORMATION_SCHEMA.&quot; + left + &quot; l INNER JOIN UCA_METADATA.&quot; + right + &quot; r &quot;;</span>
+    }
+
+    private String in(String prefix, String field, Object[] options) {
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if (options == null || options.length == 0) {</span>
+<span class="fc" id="L36">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L38">        StringBuilder sb = new StringBuilder(&quot; AND &quot;).append(prefix).append(field).append(&quot; IN &quot;).append(&quot;(&quot;);</span>
+<span class="fc" id="L39">        String comma = &quot;&quot;;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        for (Object norm : options) {</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            String val = norm instanceof String ? &quot;'&quot; + norm.toString().toUpperCase(Locale.ROOT) + &quot;'&quot; : norm.toString();</span>
+<span class="fc" id="L42">            sb.append(comma).append(val);</span>
+<span class="fc" id="L43">            comma = &quot;,&quot;;</span>
+        }
+<span class="fc" id="L45">        sb.append(&quot;)&quot;);</span>
+<span class="fc" id="L46">        return sb.toString();</span>
+    }
+
+    private String nAlias(String s) {
+<span class="fc" id="L50">        return NATIVE_ALIAS + s;</span>
+    }
+
+    private String cAlias(String s) {
+<span class="fc" id="L54">        return CUSTOM_ALIAS + s;</span>
+    }
+
+    private static String on(List&lt;String&gt; left, List&lt;String&gt; right) {
+<span class="fc" id="L58">        StringBuilder sb = new StringBuilder(&quot; ON(&quot;);</span>
+<span class="fc" id="L59">        Iterator&lt;String&gt; il = left.iterator();</span>
+<span class="fc" id="L60">        Iterator&lt;String&gt; ir = right.iterator();</span>
+<span class="fc" id="L61">        String and = &quot;&quot;;</span>
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        while (il.hasNext() &amp;&amp; ir.hasNext()) {</span>
+<span class="fc" id="L63">            sb.append(and).append(NATIVE_ALIAS).append(il.next()).append(&quot;=&quot;).append(CUSTOM_ALIAS).append(ir.next());</span>
+<span class="fc" id="L64">            and = &quot; AND &quot;;</span>
+        }
+<span class="fc" id="L66">        sb.append(&quot;) &quot;);</span>
+<span class="fc" id="L67">        return sb.toString();</span>
+    }
+
+    private static String and(String left, String op, String right) {
+<span class="fc" id="L71">        return and(left, op, right, &quot; AND &quot;);</span>
+    }
+
+    private static String and(String left, String op, String right, String and) {
+<span class="fc" id="L75">        return and(left, op, right, and, true);</span>
+    }
+
+    private static String and(String left, String op, String right, boolean apos) {
+<span class="fc" id="L79">        return and(left, op, right, &quot; AND &quot;, apos);</span>
+    }
+
+    private static String and(String left, String op, String right, String and, boolean apos) {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (right == null) {</span>
+<span class="fc" id="L84">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L86">        StringBuilder sb = new StringBuilder(and);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (right.isEmpty()) {</span>
+<span class="nc" id="L88">            return sb.append(left).append(&quot; IS NULL &quot;).toString();</span>
+        }
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        String exp = apos ? &quot;'&quot; + right + &quot;'&quot; : right;</span>
+<span class="fc" id="L91">        sb.append(left).append(&quot; &quot;);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (LIKE.equals(op)) {</span>
+<span class="fc bfc" id="L93" title="All 4 branches covered.">            if (exp.indexOf('_') &lt; 0 &amp;&amp; exp.indexOf('%') &lt; 0) {</span>
+<span class="fc" id="L94">                sb.append(&quot; = &quot;).append(exp);</span>
+            } else {
+<span class="fc" id="L96">                sb.append(&quot; LIKE &quot;).append(exp)</span>
+<span class="fc" id="L97">                  .append(&quot; ESCAPE '\\'&quot;);</span>
+            }
+        } else {
+<span class="fc" id="L100">            sb.append(op).append(' ').append(exp);</span>
+        }
+<span class="fc" id="L102">        return sb.toString();</span>
+    }
+
+    private String select(String htableName, List&lt;String&gt; exclude, List&lt;String&gt; replace) throws SQLException {
+<span class="fc" id="L106">        ResultSetMetaData rsmd = executeQuery(SELECT_BASE + htableName + &quot; WHERE 1=0&quot;).getMetaData();</span>
+<span class="fc" id="L107">        String comma = &quot;&quot;;</span>
+<span class="fc" id="L108">        StringBuilder sb = new StringBuilder(&quot;SELECT &quot;);</span>
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        for (int i = 1; i &lt;= rsmd.getColumnCount(); i++) {</span>
+<span class="fc" id="L111">            String colName = rsmd.getColumnName(i);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            if (exclude.contains(colName)) {</span>
+<span class="fc" id="L113">                String es = replace.get(exclude.indexOf(colName));</span>
+<span class="fc" id="L114">                sb.append(comma);</span>
+
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                if (es == null) {</span>
+<span class="fc" id="L117">                    sb.append(CAST_EXPR).append(colName);</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                } else if (PUBLIC.equals(es)) {</span>
+<span class="nc" id="L119">                    sb.append(&quot;'PUBLIC' AS &quot;).append(colName);</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">                } else if (es.startsWith(CAST_EXPR)) {</span>
+<span class="fc" id="L121">                    sb.append(es);</span>
+                } else {
+<span class="fc bfc" id="L123" title="All 2 branches covered.">                    String suffix = es.contains(&quot;.&quot;) ? &quot;&quot; : &quot;r.&quot;;</span>
+<span class="fc" id="L124">                    sb.append(suffix).append(es).append(&quot; AS &quot;).append(colName);</span>
+                }
+<span class="fc" id="L126">            } else {</span>
+<span class="fc" id="L127">                sb.append(comma).append(&quot;l.&quot;).append(colName);</span>
+            }
+<span class="fc" id="L129">            comma = &quot;, &quot;;</span>
+        }
+<span class="fc" id="L131">        return sb.toString();</span>
+    }
+
+    private ResultSet executeQuery(String sql) throws SQLException {
+<span class="fc" id="L135">        connection.checkLastModified();</span>
+<span class="fc" id="L136">        try (Statement st = connection.getHSQLDBConnection().createStatement()) {</span>
+<span class="fc" id="L137">            return st.executeQuery(sql);</span>
+        }
+    }
+
+    @Override
+    public boolean allProceduresAreCallable() throws SQLException {
+        try {
+<span class="fc" id="L144">            return wrapped.allProceduresAreCallable();</span>
+<span class="fc" id="L145">        } catch (SQLException ex) {</span>
+<span class="fc" id="L146">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean allTablesAreSelectable() throws SQLException {
+        try {
+<span class="fc" id="L153">            return wrapped.allTablesAreSelectable();</span>
+<span class="fc" id="L154">        } catch (SQLException ex) {</span>
+<span class="fc" id="L155">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+        try {
+<span class="fc" id="L162">            return wrapped.autoCommitFailureClosesAllResultSets();</span>
+<span class="fc" id="L163">        } catch (SQLException ex) {</span>
+<span class="fc" id="L164">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean dataDefinitionCausesTransactionCommit() throws SQLException {
+        try {
+<span class="fc" id="L171">            return wrapped.dataDefinitionCausesTransactionCommit();</span>
+<span class="fc" id="L172">        } catch (SQLException ex) {</span>
+<span class="fc" id="L173">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean dataDefinitionIgnoredInTransactions() throws SQLException {
+        try {
+<span class="fc" id="L180">            return wrapped.dataDefinitionIgnoredInTransactions();</span>
+<span class="fc" id="L181">        } catch (SQLException ex) {</span>
+<span class="fc" id="L182">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean deletesAreDetected(int type) throws SQLException {
+        try {
+<span class="fc" id="L189">            return wrapped.deletesAreDetected(type);</span>
+<span class="fc" id="L190">        } catch (SQLException ex) {</span>
+<span class="fc" id="L191">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean doesMaxRowSizeIncludeBlobs() throws SQLException {
+        try {
+<span class="fc" id="L198">            return wrapped.doesMaxRowSizeIncludeBlobs();</span>
+<span class="fc" id="L199">        } catch (SQLException ex) {</span>
+<span class="fc" id="L200">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean generatedKeyAlwaysReturned() {
+<span class="nc" id="L206">        return true;</span>
+    }
+
+    @Override
+    public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
+            String attributeNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L213">            return wrapped.getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern);</span>
+<span class="fc" id="L214">        } catch (SQLException ex) {</span>
+<span class="fc" id="L215">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
+<span class="fc" id="L221">        table = SQLConverter.escapeIdentifier(table).toUpperCase(Locale.ROOT);</span>
+
+        try {
+
+<span class="fc" id="L225">            Integer[] scopeArr = new Integer[] {bestRowTemporary, bestRowTransaction, bestRowSession};</span>
+
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">            String nullableS = nullable ? null : String.valueOf(columnNoNulls);</span>
+<span class="fc" id="L228">            String sql = select(&quot;SYSTEM_BESTROWIDENTIFIER&quot;,</span>
+<span class="fc" id="L229">                    List.of(TABLE_CAT, TABLE_SCHEM, TABLE_NAME, COLUMN_NAME),</span>
+<span class="fc" id="L230">                    Arrays.asList(null, null, TABLE_NAME, COLUMN_NAME))</span>
+<span class="fc" id="L231">                    + from(&quot;SYSTEM_BESTROWIDENTIFIER&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L232">                    + on(List.of(TABLE_NAME, COLUMN_NAME), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+<span class="fc" id="L233">                    + and(TABLE_CAT, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L234">                    + and(TABLE_SCHEM, &quot;=&quot;, schema) + and(TABLE_NAME, &quot;=&quot;, table)</span>
+<span class="fc" id="L235">                    + and(&quot;NULLABLE&quot;, &quot;=&quot;, nullableS, false)</span>
+<span class="fc" id="L236">                    + in(NATIVE_ALIAS, &quot;SCOPE&quot;, scopeArr);</span>
+
+<span class="fc" id="L238">            return executeQuery(sql);</span>
+<span class="nc" id="L239">        } catch (SQLException ex) {</span>
+<span class="nc" id="L240">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getCatalogs() throws SQLException {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (connection.isShowSchema()) {</span>
+            try {
+<span class="nc" id="L248">                return wrapped.getCatalogs();</span>
+<span class="nc" id="L249">            } catch (SQLException ex) {</span>
+<span class="nc" id="L250">                throw new UcanaccessSQLException(ex);</span>
+            }
+        }
+<span class="nc" id="L253">        throw new SQLFeatureNotSupportedException(&quot;Catalogs&quot;);</span>
+    }
+
+    @Override
+    public String getCatalogSeparator() throws SQLException {
+        try {
+<span class="fc" id="L259">            return wrapped.getCatalogSeparator();</span>
+<span class="fc" id="L260">        } catch (SQLException ex) {</span>
+<span class="fc" id="L261">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getCatalogTerm() throws SQLException {
+        try {
+<span class="fc" id="L268">            return wrapped.getCatalogTerm();</span>
+<span class="fc" id="L269">        } catch (SQLException ex) {</span>
+<span class="fc" id="L270">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getClientInfoProperties() throws SQLException {
+        try {
+<span class="fc" id="L277">            return executeQuery(&quot;SELECT * FROM UCA_METADATA.PROP&quot;);</span>
+<span class="nc" id="L278">        } catch (SQLException ex) {</span>
+<span class="nc" id="L279">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
+        try {
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">            if (table == null) {</span>
+<span class="nc" id="L287">                throw new InvalidParameterException(&quot;table&quot;, table);</span>
+            }
+<span class="fc" id="L289">            columnNamePattern = normalizeName(columnNamePattern);</span>
+<span class="fc" id="L290">            table = normalizeName(table);</span>
+<span class="pc bpc" id="L291" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schema)) {</span>
+<span class="nc" id="L292">                return wrapped.getColumnPrivileges(catalog, schema, table, columnNamePattern);</span>
+            }
+<span class="pc bpc" id="L294" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+
+<span class="fc" id="L297">            String s = &quot;SELECT &quot; + cat + &quot; TABLE_CAT, &quot; + schem + &quot; TABLE_SCHEM,&quot;;</span>
+<span class="fc" id="L298">            String select = s</span>
+<span class="fc" id="L299">                + cAlias(TABLE_NAME) + &quot;,&quot; + cAlias(COLUMN_NAME) + &quot;,&quot;</span>
+<span class="fc" id="L300">                + nAlias(&quot;GRANTOR&quot;) + &quot;,&quot; + nAlias(&quot;GRANTEE&quot;) + &quot;,&quot;</span>
+<span class="fc" id="L301">                + nAlias(&quot;PRIVILEGE_TYPE PRIVILEGE&quot;) + &quot;,&quot; + nAlias(&quot;IS_GRANTABLE&quot;)</span>
+<span class="fc" id="L302">                + from(&quot;COLUMN_PRIVILEGES&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L303">                + on(List.of(TABLE_NAME, COLUMN_NAME),</span>
+<span class="fc" id="L304">                    List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+<span class="fc" id="L305">                + and(TABLE_CATALOG, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L306">                + and(&quot;TABLE_SCHEMA&quot;, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L307">                + and(TABLE_NAME, &quot;=&quot;, table)</span>
+<span class="fc" id="L308">                + and(COLUMN_NAME, LIKE, columnNamePattern);</span>
+
+<span class="fc" id="L310">            return executeQuery(select);</span>
+<span class="nc" id="L311">        } catch (SQLException ex) {</span>
+<span class="nc" id="L312">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L319">            columnNamePattern = normalizeName(columnNamePattern);</span>
+<span class="fc" id="L320">            tableNamePattern = normalizeName(tableNamePattern);</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schemaPattern)) {</span>
+<span class="nc" id="L322">                return wrapped.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);</span>
+            }
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+
+<span class="fc" id="L327">            String select = select(&quot;SYSTEM_COLUMNS&quot;,</span>
+<span class="fc" id="L328">                List.of(TABLE_CAT, TABLE_SCHEM, TABLE_NAME, COLUMN_NAME, &quot;COLUMN_DEF&quot;, &quot;IS_AUTOINCREMENT&quot;, &quot;IS_GENERATEDCOLUMN&quot;),</span>
+<span class="fc" id="L329">                Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME, &quot;COLUMN_DEF&quot;, &quot;IS_AUTOINCREMENT&quot;,</span>
+                    &quot;IS_GENERATEDCOLUMN&quot;))
+<span class="fc" id="L331">                + &quot;,&quot; + cAlias(&quot;ORIGINAL_TYPE&quot;)</span>
+<span class="fc" id="L332">                + from(&quot;SYSTEM_COLUMNS&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L333">                + on(List.of(TABLE_NAME, COLUMN_NAME), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+<span class="fc" id="L334">                + and(TABLE_CAT, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L335">                + and(TABLE_SCHEM, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L336">                + and(TABLE_NAME, LIKE, tableNamePattern)</span>
+<span class="fc" id="L337">                + and(COLUMN_NAME, LIKE, columnNamePattern);</span>
+
+<span class="fc" id="L339">            return executeQuery(select);</span>
+<span class="nc" id="L340">        } catch (SQLException ex) {</span>
+<span class="nc" id="L341">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Connection getConnection() {
+<span class="nc" id="L347">        return connection;</span>
+    }
+
+    @Override
+    public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
+        String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
+        try {
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">            if (parentTable == null) {</span>
+<span class="nc" id="L355">                throw new InvalidParameterException(&quot;parentTable&quot;, parentTable);</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">            } else if (foreignTable == null) {</span>
+<span class="nc" id="L357">                throw new InvalidParameterException(&quot;foreignTable&quot;, foreignTable);</span>
+            }
+<span class="fc" id="L359">            parentTable = normalizeName(parentTable);</span>
+<span class="fc" id="L360">            foreignTable = normalizeName(foreignTable);</span>
+<span class="pc bpc" id="L361" title="1 of 2 branches missed.">            if (invokeWrapper(parentCatalog, parentSchema)) {</span>
+<span class="nc" id="L362">                return wrapped.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog,</span>
+                    foreignSchema, foreignTable);
+            }
+<span class="pc bpc" id="L365" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="fc" id="L367">            String select = select(&quot;SYSTEM_CROSSREFERENCE&quot;,</span>
+<span class="fc" id="L368">                List.of(&quot;PKTABLE_CAT&quot;, &quot;PKTABLE_SCHEM&quot;, &quot;PKTABLE_NAME&quot;, &quot;PKCOLUMN_NAME&quot;, &quot;FKTABLE_CAT&quot;,</span>
+                    &quot;FKTABLE_SCHEM&quot;, &quot;FKTABLE_NAME&quot;, &quot;FKCOLUMN_NAME&quot;),
+<span class="fc" id="L370">                Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME, cat, schem, &quot;v.TABLE_NAME&quot;, &quot;v.COLUMN_NAME&quot;))</span>
+<span class="fc" id="L371">                + from(&quot;SYSTEM_CROSSREFERENCE&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L372">                + on(List.of(&quot;PKTABLE_NAME&quot;, &quot;PKCOLUMN_NAME&quot;), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+                + &quot; INNER JOIN UCA_METADATA.COLUMNS_VIEW v &quot;
+                + &quot;ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)&quot;
+<span class="fc" id="L375">                + and(&quot;PKTABLE_CAT&quot;, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L376">                + and(&quot;PKTABLE_SCHEM&quot;, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L377">                + and(&quot;PKTABLE_NAME&quot;, &quot;=&quot;, parentTable)</span>
+<span class="fc" id="L378">                + and(&quot;FKTABLE_CAT&quot;, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L379">                + and(&quot;FKTABLE_SCHEM&quot;, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L380">                + and(&quot;FKTABLE_NAME&quot;, &quot;=&quot;, foreignTable)</span>
+                + &quot; &quot; + ORDER_BY + &quot; FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, &quot; + KEY_SEQ;
+
+<span class="fc" id="L383">            return executeQuery(select);</span>
+<span class="nc" id="L384">        } catch (SQLException ex) {</span>
+<span class="nc" id="L385">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getDatabaseMajorVersion() throws SQLException {
+        try {
+<span class="fc" id="L392">            return wrapped.getDatabaseMajorVersion();</span>
+<span class="fc" id="L393">        } catch (SQLException ex) {</span>
+<span class="fc" id="L394">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getDatabaseMinorVersion() throws SQLException {
+        try {
+<span class="fc" id="L401">            return wrapped.getDatabaseMinorVersion();</span>
+<span class="fc" id="L402">        } catch (SQLException ex) {</span>
+<span class="fc" id="L403">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getDatabaseProductName() {
+
+<span class="nc" id="L410">        return &quot;UCanAccess driver for Microsoft Access databases using HSQLDB&quot;;</span>
+
+    }
+
+    @Override
+    public String getDatabaseProductVersion() {
+        try {
+<span class="nc" id="L417">            return connection.getDbIO().getFileFormat().toString();</span>
+<span class="nc" id="L418">        } catch (IOException ex) {</span>
+<span class="nc" id="L419">            return &quot;&quot;;</span>
+        }
+    }
+
+    @Override
+    public int getDefaultTransactionIsolation() throws SQLException {
+        try {
+<span class="fc" id="L426">            return wrapped.getDefaultTransactionIsolation();</span>
+<span class="fc" id="L427">        } catch (SQLException ex) {</span>
+<span class="fc" id="L428">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getDriverMajorVersion() {
+<span class="nc" id="L434">        return 0;</span>
+    }
+
+    @Override
+    public int getDriverMinorVersion() {
+<span class="nc" id="L439">        return 0;</span>
+    }
+
+    @Override
+    public String getDriverName() {
+<span class="nc" id="L444">        return &quot;Ucanaccess&quot;;</span>
+    }
+
+    @Override
+    public String getDriverVersion() {
+        try {
+<span class="nc" id="L450">            String version = getClass().getPackage().getImplementationVersion();</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            return version == null ? &quot;3.x.x&quot; : version;</span>
+<span class="nc" id="L452">        } catch (Exception ex) {</span>
+<span class="nc" id="L453">            return &quot;2.x.x&quot;;</span>
+        }
+    }
+
+    @Override
+    public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+        try {
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">            if (table == null) {</span>
+<span class="nc" id="L461">                throw new InvalidParameterException(&quot;table&quot;, table);</span>
+            }
+<span class="fc" id="L463">            table = normalizeName(table);</span>
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schema)) {</span>
+<span class="nc" id="L465">                return wrapped.getExportedKeys(catalog, schema, table);</span>
+            }
+<span class="pc bpc" id="L467" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L468" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="fc" id="L469">            String select = select(&quot;SYSTEM_CROSSREFERENCE&quot;,</span>
+<span class="fc" id="L470">                List.of(&quot;PKTABLE_CAT&quot;, &quot;PKTABLE_SCHEM&quot;, &quot;PKTABLE_NAME&quot;, &quot;PKCOLUMN_NAME&quot;, &quot;FKTABLE_CAT&quot;,</span>
+                    &quot;FKTABLE_SCHEM&quot;, &quot;FKTABLE_NAME&quot;, &quot;FKCOLUMN_NAME&quot;),
+<span class="fc" id="L472">                Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME, cat, schem, &quot;v.TABLE_NAME&quot;, &quot;v.COLUMN_NAME&quot;))</span>
+<span class="fc" id="L473">                + from(&quot;SYSTEM_CROSSREFERENCE&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L474">                + on(List.of(&quot;PKTABLE_NAME&quot;, &quot;PKCOLUMN_NAME&quot;), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+                + &quot; INNER JOIN UCA_METADATA.COLUMNS_VIEW v &quot;
+                + &quot;ON( l.FKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.FKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)&quot;
+<span class="fc" id="L477">                + and(&quot;PKTABLE_CAT&quot;, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L478">                + and(&quot;PKTABLE_SCHEM&quot;, &quot;=&quot;, PUBLIC) + and(&quot;PKTABLE_NAME&quot;, &quot;=&quot;, table)</span>
+                + &quot; &quot; + ORDER_BY + &quot; FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ&quot;;
+
+<span class="fc" id="L481">            return executeQuery(select);</span>
+<span class="nc" id="L482">        } catch (SQLException ex) {</span>
+<span class="nc" id="L483">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getExtraNameCharacters() throws SQLException {
+        try {
+<span class="fc" id="L490">            return wrapped.getExtraNameCharacters();</span>
+<span class="fc" id="L491">        } catch (SQLException ex) {</span>
+<span class="fc" id="L492">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getFunctionColumns(String catalog, String schemaPattern,
+        String functionNamePattern, String columnNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L500">            columnNamePattern = normalizeName(columnNamePattern);</span>
+<span class="fc" id="L501">            return wrapped.getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern);</span>
+<span class="fc" id="L502">        } catch (SQLException ex) {</span>
+<span class="fc" id="L503">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L510">            return wrapped.getFunctions(catalog, schemaPattern, functionNamePattern);</span>
+<span class="fc" id="L511">        } catch (SQLException ex) {</span>
+<span class="fc" id="L512">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getIdentifierQuoteString() {
+<span class="nc" id="L518">        return &quot;`&quot;;</span>
+    }
+
+    @Override
+    public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
+        try {
+<span class="pc bpc" id="L524" title="1 of 2 branches missed.">            if (table == null) {</span>
+<span class="nc" id="L525">                throw new InvalidParameterException(&quot;table&quot;, table);</span>
+            }
+<span class="fc" id="L527">            table = normalizeName(table);</span>
+<span class="pc bpc" id="L528" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schema)) {</span>
+<span class="nc" id="L529">                return wrapped.getImportedKeys(catalog, schema, table);</span>
+            }
+
+<span class="pc bpc" id="L532" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L533" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="fc" id="L534">            String select = select(&quot;SYSTEM_CROSSREFERENCE&quot;,</span>
+<span class="fc" id="L535">                List.of(&quot;FKTABLE_CAT&quot;, &quot;FKTABLE_SCHEM&quot;, &quot;FKTABLE_NAME&quot;, &quot;FKCOLUMN_NAME&quot;, &quot;PKTABLE_CAT&quot;,</span>
+                    &quot;PKTABLE_SCHEM&quot;, &quot;PKTABLE_NAME&quot;, &quot;PKCOLUMN_NAME&quot;),
+<span class="fc" id="L537">                Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME, cat, schem, &quot;v.TABLE_NAME&quot;, &quot;v.COLUMN_NAME&quot;))</span>
+<span class="fc" id="L538">                + from(&quot;SYSTEM_CROSSREFERENCE&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L539">                + on(List.of(&quot;FKTABLE_NAME&quot;, &quot;FKCOLUMN_NAME&quot;), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+                + &quot; INNER JOIN UCA_METADATA.COLUMNS_VIEW v &quot;
+                + &quot;ON( l.PKTABLE_NAME= v.ESCAPED_TABLE_NAME AND l.PKCOLUMN_NAME= v.ESCAPED_COLUMN_NAME)&quot;
+<span class="fc" id="L542">                + and(&quot;FKTABLE_CAT&quot;, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L543">                + and(&quot;FKTABLE_SCHEM&quot;, &quot;=&quot;, PUBLIC) + and(&quot;FKTABLE_NAME&quot;, &quot;=&quot;, table)</span>
+                + &quot; &quot; + ORDER_BY + &quot; PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, &quot; + KEY_SEQ;
+<span class="fc" id="L545">            return executeQuery(select);</span>
+<span class="nc" id="L546">        } catch (SQLException ex) {</span>
+<span class="nc" id="L547">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
+        try {
+<span class="pc bpc" id="L554" title="1 of 2 branches missed.">            if (table == null) {</span>
+<span class="nc" id="L555">                throw new InvalidParameterException(&quot;table&quot;, table);</span>
+            }
+<span class="fc" id="L557">            table = normalizeName(table);</span>
+<span class="pc bpc" id="L558" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L559" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L560" title="1 of 2 branches missed.">            String nuS = unique ? &quot;AND NON_UNIQUE IS FALSE&quot; : &quot;&quot;;</span>
+<span class="fc" id="L561">            String select = select(&quot;SYSTEM_INDEXINFO&quot;, List.of(TABLE_CAT, TABLE_SCHEM, TABLE_NAME, COLUMN_NAME),</span>
+<span class="fc" id="L562">                Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME))</span>
+<span class="fc" id="L563">                + from(&quot;SYSTEM_INDEXINFO&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L564">                + on(List.of(TABLE_NAME, COLUMN_NAME), List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+<span class="fc" id="L565">                + and(TABLE_CAT, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L566">                + and(TABLE_SCHEM, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L567">                + and(TABLE_NAME, &quot;=&quot;, table) + nuS;</span>
+
+<span class="fc" id="L569">            return executeQuery(select);</span>
+<span class="nc" id="L570">        } catch (SQLException ex) {</span>
+<span class="nc" id="L571">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getJDBCMajorVersion() throws SQLException {
+        try {
+<span class="fc" id="L578">            return wrapped.getJDBCMajorVersion();</span>
+<span class="fc" id="L579">        } catch (SQLException ex) {</span>
+<span class="fc" id="L580">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getJDBCMinorVersion() throws SQLException {
+        try {
+<span class="fc" id="L587">            return wrapped.getJDBCMinorVersion();</span>
+<span class="fc" id="L588">        } catch (SQLException ex) {</span>
+<span class="fc" id="L589">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxBinaryLiteralLength() throws SQLException {
+        try {
+<span class="fc" id="L596">            return wrapped.getMaxBinaryLiteralLength();</span>
+<span class="fc" id="L597">        } catch (SQLException ex) {</span>
+<span class="fc" id="L598">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxCatalogNameLength() throws SQLException {
+        try {
+<span class="fc" id="L605">            return wrapped.getMaxCatalogNameLength();</span>
+<span class="fc" id="L606">        } catch (SQLException ex) {</span>
+<span class="fc" id="L607">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxCharLiteralLength() throws SQLException {
+        try {
+<span class="fc" id="L614">            return wrapped.getMaxCharLiteralLength();</span>
+<span class="fc" id="L615">        } catch (SQLException ex) {</span>
+<span class="fc" id="L616">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnNameLength() throws SQLException {
+        try {
+<span class="fc" id="L623">            return wrapped.getMaxColumnNameLength();</span>
+<span class="fc" id="L624">        } catch (SQLException ex) {</span>
+<span class="fc" id="L625">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnsInGroupBy() throws SQLException {
+        try {
+<span class="fc" id="L632">            return wrapped.getMaxColumnsInGroupBy();</span>
+<span class="fc" id="L633">        } catch (SQLException ex) {</span>
+<span class="fc" id="L634">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnsInIndex() throws SQLException {
+        try {
+<span class="fc" id="L641">            return wrapped.getMaxColumnsInIndex();</span>
+<span class="fc" id="L642">        } catch (SQLException ex) {</span>
+<span class="fc" id="L643">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnsInOrderBy() throws SQLException {
+        try {
+<span class="fc" id="L650">            return wrapped.getMaxColumnsInOrderBy();</span>
+<span class="fc" id="L651">        } catch (SQLException ex) {</span>
+<span class="fc" id="L652">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnsInSelect() throws SQLException {
+        try {
+<span class="fc" id="L659">            return wrapped.getMaxColumnsInSelect();</span>
+<span class="fc" id="L660">        } catch (SQLException ex) {</span>
+<span class="fc" id="L661">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxColumnsInTable() throws SQLException {
+        try {
+<span class="fc" id="L668">            return wrapped.getMaxColumnsInTable();</span>
+<span class="fc" id="L669">        } catch (SQLException ex) {</span>
+<span class="fc" id="L670">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxConnections() throws SQLException {
+        try {
+<span class="fc" id="L677">            return wrapped.getMaxConnections();</span>
+<span class="fc" id="L678">        } catch (SQLException ex) {</span>
+<span class="fc" id="L679">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxCursorNameLength() throws SQLException {
+        try {
+<span class="fc" id="L686">            return wrapped.getMaxCursorNameLength();</span>
+<span class="fc" id="L687">        } catch (SQLException ex) {</span>
+<span class="fc" id="L688">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxIndexLength() throws SQLException {
+        try {
+<span class="fc" id="L695">            return wrapped.getMaxIndexLength();</span>
+<span class="fc" id="L696">        } catch (SQLException ex) {</span>
+<span class="fc" id="L697">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxProcedureNameLength() throws SQLException {
+        try {
+<span class="fc" id="L704">            return wrapped.getMaxProcedureNameLength();</span>
+<span class="fc" id="L705">        } catch (SQLException ex) {</span>
+<span class="fc" id="L706">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxRowSize() throws SQLException {
+        try {
+<span class="fc" id="L713">            return wrapped.getMaxRowSize();</span>
+<span class="fc" id="L714">        } catch (SQLException ex) {</span>
+<span class="fc" id="L715">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxSchemaNameLength() throws SQLException {
+        try {
+<span class="fc" id="L722">            return wrapped.getMaxSchemaNameLength();</span>
+<span class="fc" id="L723">        } catch (SQLException ex) {</span>
+<span class="fc" id="L724">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxStatementLength() throws SQLException {
+        try {
+<span class="fc" id="L731">            return wrapped.getMaxStatementLength();</span>
+<span class="fc" id="L732">        } catch (SQLException ex) {</span>
+<span class="fc" id="L733">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxStatements() throws SQLException {
+        try {
+<span class="fc" id="L740">            return wrapped.getMaxStatements();</span>
+<span class="fc" id="L741">        } catch (SQLException ex) {</span>
+<span class="fc" id="L742">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxTableNameLength() throws SQLException {
+        try {
+<span class="fc" id="L749">            return wrapped.getMaxTableNameLength();</span>
+<span class="fc" id="L750">        } catch (SQLException ex) {</span>
+<span class="fc" id="L751">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxTablesInSelect() throws SQLException {
+        try {
+<span class="fc" id="L758">            return wrapped.getMaxTablesInSelect();</span>
+<span class="fc" id="L759">        } catch (SQLException ex) {</span>
+<span class="fc" id="L760">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getMaxUserNameLength() throws SQLException {
+        try {
+<span class="fc" id="L767">            return wrapped.getMaxUserNameLength();</span>
+<span class="fc" id="L768">        } catch (SQLException ex) {</span>
+<span class="fc" id="L769">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getNumericFunctions() throws SQLException {
+        try {
+<span class="fc" id="L776">            return wrapped.getNumericFunctions();</span>
+<span class="fc" id="L777">        } catch (SQLException ex) {</span>
+<span class="fc" id="L778">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    private boolean invokeWrapper(String catalog, String schema) {
+<span class="pc bpc" id="L783" title="5 of 6 branches missed.">        return connection.isShowSchema()</span>
+<span class="pc bnc" id="L784" title="All 4 branches missed.">            &amp;&amp; (catalog != null || schema != null) &amp;&amp; (!PUBLIC.equals(catalog) || !PUBLIC.equals(schema));</span>
+    }
+
+    @Override
+    public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+<span class="pc bpc" id="L789" title="1 of 2 branches missed.">        if (table == null) {</span>
+<span class="nc" id="L790">            throw new InvalidParameterException(&quot;table&quot;, table);</span>
+        }
+        try {
+<span class="fc" id="L793">            String tn = normalizeName(table);</span>
+<span class="pc bpc" id="L794" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schema)) {</span>
+<span class="nc" id="L795">                return wrapped.getPrimaryKeys(catalog, schema, tn);</span>
+            }
+<span class="pc bpc" id="L797" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L798" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="fc" id="L799">            String select = select(&quot;SYSTEM_PRIMARYKEYS&quot;, List.of(TABLE_CAT, TABLE_SCHEM, TABLE_NAME, COLUMN_NAME),</span>
+<span class="fc" id="L800">                    Arrays.asList(cat, schem, TABLE_NAME, COLUMN_NAME))</span>
+<span class="fc" id="L801">                    + from(&quot;SYSTEM_PRIMARYKEYS&quot;, COLUMNS_VIEW)</span>
+<span class="fc" id="L802">                    + on(List.of(TABLE_NAME, COLUMN_NAME),</span>
+<span class="fc" id="L803">                            List.of(ESCAPED_TABLE_NAME, ESCAPED_COLUMN_NAME))</span>
+<span class="fc" id="L804">                    + and(TABLE_CAT, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L805">                    + and(TABLE_SCHEM, &quot;=&quot;, PUBLIC) + and(TABLE_NAME, &quot;=&quot;, tn)</span>
+                    + &quot; &quot; + ORDER_BY + &quot; &quot; + COLUMN_NAME;
+<span class="fc" id="L807">            return executeQuery(select);</span>
+<span class="nc" id="L808">        } catch (SQLException ex) {</span>
+<span class="nc" id="L809">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern,
+            String columnNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L817">            columnNamePattern = normalizeName(columnNamePattern);</span>
+<span class="fc" id="L818">            return wrapped.getProcedureColumns(catalog, schemaPattern, procedureNamePattern, columnNamePattern);</span>
+<span class="fc" id="L819">        } catch (SQLException ex) {</span>
+<span class="fc" id="L820">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
+            throws SQLException {
+        try {
+<span class="fc" id="L828">            return wrapped.getProcedures(catalog, schemaPattern, procedureNamePattern);</span>
+<span class="fc" id="L829">        } catch (SQLException ex) {</span>
+<span class="fc" id="L830">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getProcedureTerm() throws SQLException {
+        try {
+<span class="fc" id="L837">            return wrapped.getProcedureTerm();</span>
+<span class="fc" id="L838">        } catch (SQLException ex) {</span>
+<span class="fc" id="L839">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
+            String columnNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L847">            return wrapped.getPseudoColumns(catalog, schemaPattern, tableNamePattern,</span>
+                    columnNamePattern);
+<span class="fc" id="L849">        } catch (SQLException ex) {</span>
+<span class="fc" id="L850">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getResultSetHoldability() throws SQLException {
+        try {
+<span class="fc" id="L857">            return wrapped.getResultSetHoldability();</span>
+<span class="fc" id="L858">        } catch (SQLException ex) {</span>
+<span class="fc" id="L859">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
+<span class="nc" id="L865">        throw new SQLFeatureNotSupportedException(&quot;RowIdLifetime&quot;);</span>
+    }
+
+    @Override
+    public ResultSet getSchemas() throws SQLException {
+<span class="nc bnc" id="L870" title="All 2 branches missed.">        if (connection.isShowSchema()) {</span>
+            try {
+<span class="nc" id="L872">                return wrapped.getSchemas();</span>
+<span class="nc" id="L873">            } catch (SQLException ex) {</span>
+<span class="nc" id="L874">                throw new UcanaccessSQLException(ex);</span>
+            }
+        }
+<span class="nc" id="L877">        throw new SQLFeatureNotSupportedException(&quot;Schemas&quot;);</span>
+    }
+
+    @Override
+    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+<span class="nc bnc" id="L882" title="All 2 branches missed.">        if (connection.isShowSchema()) {</span>
+            try {
+<span class="nc" id="L884">                return wrapped.getSchemas(catalog, schemaPattern);</span>
+<span class="nc" id="L885">            } catch (SQLException ex) {</span>
+<span class="nc" id="L886">                throw new UcanaccessSQLException(ex);</span>
+            }
+        }
+<span class="nc" id="L889">        throw new SQLFeatureNotSupportedException(&quot;Schemas&quot;);</span>
+    }
+
+    @Override
+    public String getSchemaTerm() {
+<span class="nc" id="L894">        return null;</span>
+    }
+
+    @Override
+    public String getSearchStringEscape() throws SQLException {
+        try {
+<span class="fc" id="L900">            return wrapped.getSearchStringEscape();</span>
+<span class="fc" id="L901">        } catch (SQLException ex) {</span>
+<span class="fc" id="L902">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getSQLKeywords() throws SQLException {
+        try {
+<span class="fc" id="L909">            return wrapped.getSQLKeywords();</span>
+<span class="fc" id="L910">        } catch (SQLException ex) {</span>
+<span class="fc" id="L911">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getSQLStateType() throws SQLException {
+        try {
+<span class="fc" id="L918">            return wrapped.getSQLStateType();</span>
+<span class="fc" id="L919">        } catch (SQLException ex) {</span>
+<span class="fc" id="L920">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getStringFunctions() throws SQLException {
+        try {
+<span class="fc" id="L927">            return wrapped.getStringFunctions();</span>
+<span class="fc" id="L928">        } catch (SQLException ex) {</span>
+<span class="fc" id="L929">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L936">            tableNamePattern = normalizeName(tableNamePattern);</span>
+<span class="fc" id="L937">            return wrapped.getSuperTables(catalog, schemaPattern, tableNamePattern);</span>
+<span class="fc" id="L938">        } catch (SQLException ex) {</span>
+<span class="fc" id="L939">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L946">            return wrapped.getSuperTypes(catalog, schemaPattern, typeNamePattern);</span>
+<span class="fc" id="L947">        } catch (SQLException ex) {</span>
+<span class="fc" id="L948">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getSystemFunctions() throws SQLException {
+        try {
+<span class="fc" id="L955">            return wrapped.getSystemFunctions();</span>
+<span class="fc" id="L956">        } catch (SQLException ex) {</span>
+<span class="fc" id="L957">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+        try {
+<span class="fc" id="L964">            tableNamePattern = normalizeName(tableNamePattern);</span>
+<span class="fc" id="L965">            String select = select(TABLE_PRIVILEGES, List.of(TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME),</span>
+<span class="fc" id="L966">                List.of(CAST_EXPR + &quot; TABLE_CAT &quot;, CAST_EXPR + &quot; TABLE_SCHEM&quot;, TABLE_NAME))</span>
+<span class="fc" id="L967">                + from(TABLE_PRIVILEGES, TABLES)</span>
+<span class="fc" id="L968">                + on(List.of(TABLE_NAME), List.of(ESCAPED_TABLE_NAME))</span>
+<span class="fc" id="L969">                + and(TABLE_CATALOG, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L970">                + and(&quot;TABLE_SCHEMA&quot;, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L971">                + and(TABLE_NAME, LIKE, tableNamePattern);</span>
+
+<span class="fc" id="L973">            return executeQuery(select);</span>
+<span class="nc" id="L974">        } catch (SQLException ex) {</span>
+<span class="nc" id="L975">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+        try {
+<span class="fc" id="L982">            tableNamePattern = normalizeName(tableNamePattern);</span>
+
+<span class="pc bpc" id="L984" title="1 of 2 branches missed.">            if (invokeWrapper(catalog, schemaPattern)) {</span>
+<span class="nc" id="L985">                return wrapped.getTables(catalog, schemaPattern, tableNamePattern, types);</span>
+            }
+<span class="pc bpc" id="L987" title="1 of 2 branches missed.">            String cat = connection.isShowSchema() ? PUBLIC : null;</span>
+<span class="pc bpc" id="L988" title="1 of 2 branches missed.">            String schem = connection.isShowSchema() ? PUBLIC : null;</span>
+
+<span class="fc" id="L990">            String select = select(SYSTEM_TABLES, List.of(TABLE_CAT, TABLE_SCHEM, TABLE_NAME),</span>
+<span class="fc" id="L991">                Arrays.asList(cat, schem, TABLE_NAME))</span>
+<span class="fc" id="L992">                + from(SYSTEM_TABLES, TABLES)</span>
+<span class="fc" id="L993">                + on(List.of(TABLE_NAME), List.of(ESCAPED_TABLE_NAME))</span>
+<span class="fc" id="L994">                + and(TABLE_CAT, &quot;=&quot;, PUBLIC, &quot; WHERE &quot;)</span>
+<span class="fc" id="L995">                + and(TABLE_SCHEM, &quot;=&quot;, PUBLIC)</span>
+<span class="fc" id="L996">                + and(TABLE_NAME, LIKE, tableNamePattern)</span>
+<span class="fc" id="L997">                + in(CUSTOM_ALIAS, &quot;TYPE&quot;, types);</span>
+
+<span class="fc" id="L999">            return executeQuery(select);</span>
+<span class="nc" id="L1000">        } catch (SQLException ex) {</span>
+<span class="nc" id="L1001">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getTableTypes() throws SQLException {
+        try {
+<span class="fc" id="L1008">            return wrapped.getTableTypes();</span>
+<span class="fc" id="L1009">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1010">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getTimeDateFunctions() throws SQLException {
+        try {
+<span class="fc" id="L1017">            return wrapped.getTimeDateFunctions();</span>
+<span class="fc" id="L1018">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1019">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getTypeInfo() throws SQLException {
+        try {
+<span class="fc" id="L1026">            return wrapped.getTypeInfo();</span>
+<span class="fc" id="L1027">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1028">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
+            throws SQLException {
+        try {
+<span class="fc" id="L1036">            return wrapped.getUDTs(catalog, schemaPattern, typeNamePattern, types);</span>
+<span class="fc" id="L1037">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1038">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String getURL() {
+<span class="nc" id="L1044">        return connection.getUrl();</span>
+    }
+
+    @Override
+    public String getUserName() throws SQLException {
+        try {
+<span class="fc" id="L1050">            return wrapped.getUserName();</span>
+<span class="fc" id="L1051">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1052">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
+        try {
+<span class="fc" id="L1059">            return wrapped.getVersionColumns(catalog, schema, table);</span>
+<span class="fc" id="L1060">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1061">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean insertsAreDetected(int type) throws SQLException {
+        try {
+<span class="fc" id="L1068">            return wrapped.insertsAreDetected(type);</span>
+<span class="fc" id="L1069">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1070">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean isCatalogAtStart() throws SQLException {
+        try {
+<span class="fc" id="L1077">            return wrapped.isCatalogAtStart();</span>
+<span class="fc" id="L1078">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1079">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean isReadOnly() throws SQLException {
+        try {
+<span class="fc" id="L1086">            return wrapped.isReadOnly();</span>
+<span class="fc" id="L1087">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1088">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean isWrapperFor(Class&lt;?&gt; iface) throws SQLException {
+        try {
+<span class="fc" id="L1095">            return wrapped.isWrapperFor(iface);</span>
+<span class="fc" id="L1096">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1097">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean locatorsUpdateCopy() throws SQLException {
+        try {
+<span class="fc" id="L1104">            return wrapped.locatorsUpdateCopy();</span>
+<span class="fc" id="L1105">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1106">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    public static String normalizeName(String name) {
+<span class="pc bpc" id="L1111" title="1 of 4 branches missed.">        if (name == null || name.isBlank()) {</span>
+<span class="fc" id="L1112">            return name;</span>
+        }
+<span class="fc bfc" id="L1114" title="All 2 branches covered.">        if (name.contains(&quot;%&quot;)) {</span>
+<span class="fc" id="L1115">            return name.toUpperCase(Locale.ROOT);</span>
+        } else {
+<span class="pc bpc" id="L1117" title="3 of 4 branches missed.">            if (name.startsWith(&quot;\&quot;&quot;) &amp;&amp; name.endsWith(&quot;\&quot;&quot;)) {</span>
+<span class="nc" id="L1118">                String stb = name.substring(1, name.length() - 1).toUpperCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L1119" title="All 2 branches missed.">                if (SQLConverter.isListedAsKeyword(stb)) {</span>
+<span class="nc" id="L1120">                    return stb;</span>
+                }
+            }
+<span class="pc bpc" id="L1123" title="1 of 2 branches missed.">            if (SQLConverter.isListedAsKeyword(name)) {</span>
+<span class="nc" id="L1124">                return name;</span>
+            }
+<span class="fc" id="L1126">            return SQLConverter.preEscapingIdentifier(name);</span>
+        }
+    }
+
+    @Override
+    public boolean nullPlusNonNullIsNull() throws SQLException {
+        try {
+<span class="fc" id="L1133">            return wrapped.nullPlusNonNullIsNull();</span>
+<span class="fc" id="L1134">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1135">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean nullsAreSortedAtEnd() throws SQLException {
+        try {
+<span class="fc" id="L1142">            return wrapped.nullsAreSortedAtEnd();</span>
+<span class="fc" id="L1143">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1144">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean nullsAreSortedAtStart() throws SQLException {
+        try {
+<span class="fc" id="L1151">            return wrapped.nullsAreSortedAtStart();</span>
+<span class="fc" id="L1152">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1153">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean nullsAreSortedHigh() throws SQLException {
+        try {
+<span class="fc" id="L1160">            return wrapped.nullsAreSortedHigh();</span>
+<span class="fc" id="L1161">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1162">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean nullsAreSortedLow() throws SQLException {
+        try {
+<span class="fc" id="L1169">            return wrapped.nullsAreSortedLow();</span>
+<span class="fc" id="L1170">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1171">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean othersDeletesAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1178">            return wrapped.othersDeletesAreVisible(type);</span>
+<span class="fc" id="L1179">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1180">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean othersInsertsAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1187">            return wrapped.othersInsertsAreVisible(type);</span>
+<span class="fc" id="L1188">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1189">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean othersUpdatesAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1196">            return wrapped.othersUpdatesAreVisible(type);</span>
+<span class="fc" id="L1197">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1198">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean ownDeletesAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1205">            return wrapped.ownDeletesAreVisible(type);</span>
+<span class="fc" id="L1206">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1207">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean ownInsertsAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1214">            return wrapped.ownInsertsAreVisible(type);</span>
+<span class="fc" id="L1215">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1216">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean ownUpdatesAreVisible(int type) throws SQLException {
+        try {
+<span class="fc" id="L1223">            return wrapped.ownUpdatesAreVisible(type);</span>
+<span class="fc" id="L1224">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1225">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesLowerCaseIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1232">            return wrapped.storesLowerCaseIdentifiers();</span>
+<span class="fc" id="L1233">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1234">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1241">            return wrapped.storesLowerCaseQuotedIdentifiers();</span>
+<span class="fc" id="L1242">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1243">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesMixedCaseIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1250">            return wrapped.storesMixedCaseIdentifiers();</span>
+<span class="fc" id="L1251">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1252">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1259">            return wrapped.storesMixedCaseQuotedIdentifiers();</span>
+<span class="fc" id="L1260">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1261">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesUpperCaseIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1268">            return wrapped.storesUpperCaseIdentifiers();</span>
+<span class="fc" id="L1269">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1270">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1277">            return wrapped.storesUpperCaseQuotedIdentifiers();</span>
+<span class="fc" id="L1278">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1279">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsAlterTableWithAddColumn() throws SQLException {
+        try {
+<span class="fc" id="L1286">            return wrapped.supportsAlterTableWithAddColumn();</span>
+<span class="fc" id="L1287">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1288">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsAlterTableWithDropColumn() throws SQLException {
+        try {
+<span class="fc" id="L1295">            return wrapped.supportsAlterTableWithDropColumn();</span>
+<span class="fc" id="L1296">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1297">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsANSI92EntryLevelSQL() throws SQLException {
+        try {
+<span class="fc" id="L1304">            return wrapped.supportsANSI92EntryLevelSQL();</span>
+<span class="fc" id="L1305">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1306">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsANSI92FullSQL() throws SQLException {
+        try {
+<span class="fc" id="L1313">            return wrapped.supportsANSI92FullSQL();</span>
+<span class="fc" id="L1314">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1315">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsANSI92IntermediateSQL() throws SQLException {
+        try {
+<span class="fc" id="L1322">            return wrapped.supportsANSI92IntermediateSQL();</span>
+<span class="fc" id="L1323">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1324">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsBatchUpdates() throws SQLException {
+        try {
+<span class="fc" id="L1331">            return wrapped.supportsBatchUpdates();</span>
+<span class="fc" id="L1332">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1333">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCatalogsInDataManipulation() throws SQLException {
+        try {
+<span class="fc" id="L1340">            return wrapped.supportsCatalogsInDataManipulation();</span>
+<span class="fc" id="L1341">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1342">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCatalogsInIndexDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1349">            return wrapped.supportsCatalogsInIndexDefinitions();</span>
+<span class="fc" id="L1350">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1351">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1358">            return wrapped.supportsCatalogsInPrivilegeDefinitions();</span>
+<span class="fc" id="L1359">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1360">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCatalogsInProcedureCalls() throws SQLException {
+        try {
+<span class="fc" id="L1367">            return wrapped.supportsCatalogsInProcedureCalls();</span>
+<span class="fc" id="L1368">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1369">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCatalogsInTableDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1376">            return wrapped.supportsCatalogsInTableDefinitions();</span>
+<span class="fc" id="L1377">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1378">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsColumnAliasing() throws SQLException {
+        try {
+<span class="fc" id="L1385">            return wrapped.supportsColumnAliasing();</span>
+<span class="fc" id="L1386">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1387">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsConvert() throws SQLException {
+        try {
+<span class="fc" id="L1394">            return wrapped.supportsConvert();</span>
+<span class="fc" id="L1395">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1396">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsConvert(int fromType, int toType) throws SQLException {
+        try {
+<span class="fc" id="L1403">            return wrapped.supportsConvert(fromType, toType);</span>
+<span class="fc" id="L1404">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1405">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCoreSQLGrammar() throws SQLException {
+        try {
+<span class="fc" id="L1412">            return wrapped.supportsCoreSQLGrammar();</span>
+<span class="fc" id="L1413">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1414">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsCorrelatedSubqueries() throws SQLException {
+        try {
+<span class="fc" id="L1421">            return wrapped.supportsCorrelatedSubqueries();</span>
+<span class="fc" id="L1422">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1423">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException {
+        try {
+<span class="fc" id="L1430">            return wrapped.supportsDataDefinitionAndDataManipulationTransactions();</span>
+<span class="fc" id="L1431">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1432">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsDataManipulationTransactionsOnly() throws SQLException {
+        try {
+<span class="fc" id="L1439">            return wrapped.supportsDataManipulationTransactionsOnly();</span>
+<span class="fc" id="L1440">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1441">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsDifferentTableCorrelationNames() throws SQLException {
+        try {
+<span class="fc" id="L1448">            return wrapped.supportsDifferentTableCorrelationNames();</span>
+<span class="fc" id="L1449">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1450">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsExpressionsInOrderBy() throws SQLException {
+        try {
+<span class="fc" id="L1457">            return wrapped.supportsExpressionsInOrderBy();</span>
+<span class="fc" id="L1458">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1459">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsExtendedSQLGrammar() throws SQLException {
+        try {
+<span class="fc" id="L1466">            return wrapped.supportsExtendedSQLGrammar();</span>
+<span class="fc" id="L1467">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1468">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsFullOuterJoins() throws SQLException {
+        try {
+<span class="fc" id="L1475">            return wrapped.supportsFullOuterJoins();</span>
+<span class="fc" id="L1476">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1477">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsGetGeneratedKeys() throws SQLException {
+        try {
+<span class="fc" id="L1484">            return wrapped.supportsGetGeneratedKeys();</span>
+<span class="fc" id="L1485">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1486">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsGroupBy() throws SQLException {
+        try {
+<span class="fc" id="L1493">            return wrapped.supportsGroupBy();</span>
+<span class="fc" id="L1494">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1495">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsGroupByBeyondSelect() throws SQLException {
+        try {
+<span class="fc" id="L1502">            return wrapped.supportsGroupByBeyondSelect();</span>
+<span class="fc" id="L1503">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1504">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsGroupByUnrelated() throws SQLException {
+        try {
+<span class="fc" id="L1511">            return wrapped.supportsGroupByUnrelated();</span>
+<span class="fc" id="L1512">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1513">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsIntegrityEnhancementFacility() throws SQLException {
+        try {
+<span class="fc" id="L1520">            return wrapped.supportsIntegrityEnhancementFacility();</span>
+<span class="fc" id="L1521">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1522">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsLikeEscapeClause() throws SQLException {
+        try {
+<span class="fc" id="L1529">            return wrapped.supportsLikeEscapeClause();</span>
+<span class="fc" id="L1530">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1531">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsLimitedOuterJoins() throws SQLException {
+        try {
+<span class="fc" id="L1538">            return wrapped.supportsLimitedOuterJoins();</span>
+<span class="fc" id="L1539">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1540">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMinimumSQLGrammar() throws SQLException {
+        try {
+<span class="fc" id="L1547">            return wrapped.supportsMinimumSQLGrammar();</span>
+<span class="fc" id="L1548">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1549">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMixedCaseIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1556">            return wrapped.supportsMixedCaseIdentifiers();</span>
+<span class="fc" id="L1557">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1558">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
+        try {
+<span class="fc" id="L1565">            return wrapped.supportsMixedCaseQuotedIdentifiers();</span>
+<span class="fc" id="L1566">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1567">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMultipleOpenResults() throws SQLException {
+        try {
+<span class="fc" id="L1574">            return wrapped.supportsMultipleOpenResults();</span>
+<span class="fc" id="L1575">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1576">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMultipleResultSets() throws SQLException {
+        try {
+<span class="fc" id="L1583">            return wrapped.supportsMultipleResultSets();</span>
+<span class="fc" id="L1584">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1585">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsMultipleTransactions() throws SQLException {
+        try {
+<span class="fc" id="L1592">            return wrapped.supportsMultipleTransactions();</span>
+<span class="fc" id="L1593">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1594">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsNamedParameters() throws SQLException {
+        try {
+<span class="fc" id="L1601">            return wrapped.supportsNamedParameters();</span>
+<span class="fc" id="L1602">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1603">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsNonNullableColumns() throws SQLException {
+        try {
+<span class="fc" id="L1610">            return wrapped.supportsNonNullableColumns();</span>
+<span class="fc" id="L1611">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1612">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOpenCursorsAcrossCommit() throws SQLException {
+        try {
+<span class="fc" id="L1619">            return wrapped.supportsOpenCursorsAcrossCommit();</span>
+<span class="fc" id="L1620">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1621">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOpenCursorsAcrossRollback() throws SQLException {
+        try {
+<span class="fc" id="L1628">            return wrapped.supportsOpenCursorsAcrossRollback();</span>
+<span class="fc" id="L1629">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1630">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOpenStatementsAcrossCommit() throws SQLException {
+        try {
+<span class="fc" id="L1637">            return wrapped.supportsOpenStatementsAcrossCommit();</span>
+<span class="fc" id="L1638">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1639">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOpenStatementsAcrossRollback() throws SQLException {
+        try {
+<span class="fc" id="L1646">            return wrapped.supportsOpenStatementsAcrossRollback();</span>
+<span class="fc" id="L1647">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1648">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOrderByUnrelated() throws SQLException {
+        try {
+<span class="fc" id="L1655">            return wrapped.supportsOrderByUnrelated();</span>
+<span class="fc" id="L1656">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1657">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsOuterJoins() throws SQLException {
+        try {
+<span class="fc" id="L1664">            return wrapped.supportsOuterJoins();</span>
+<span class="fc" id="L1665">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1666">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsPositionedDelete() throws SQLException {
+        try {
+<span class="fc" id="L1673">            return wrapped.supportsPositionedDelete();</span>
+<span class="fc" id="L1674">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1675">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsPositionedUpdate() throws SQLException {
+        try {
+<span class="fc" id="L1682">            return wrapped.supportsPositionedUpdate();</span>
+<span class="fc" id="L1683">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1684">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
+        try {
+<span class="fc" id="L1691">            return wrapped.supportsResultSetConcurrency(type, concurrency);</span>
+<span class="fc" id="L1692">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1693">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsResultSetHoldability(int holdability) throws SQLException {
+        try {
+<span class="fc" id="L1700">            return wrapped.supportsResultSetHoldability(holdability);</span>
+<span class="fc" id="L1701">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1702">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsResultSetType(int type) throws SQLException {
+        try {
+<span class="fc" id="L1709">            return wrapped.supportsResultSetType(type);</span>
+<span class="fc" id="L1710">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1711">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSavepoints() throws SQLException {
+        try {
+<span class="fc" id="L1718">            return wrapped.supportsSavepoints();</span>
+<span class="fc" id="L1719">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1720">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSchemasInDataManipulation() throws SQLException {
+        try {
+<span class="fc" id="L1727">            return wrapped.supportsSchemasInDataManipulation();</span>
+<span class="fc" id="L1728">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1729">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSchemasInIndexDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1736">            return wrapped.supportsSchemasInIndexDefinitions();</span>
+<span class="fc" id="L1737">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1738">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSchemasInPrivilegeDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1745">            return wrapped.supportsSchemasInPrivilegeDefinitions();</span>
+<span class="fc" id="L1746">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1747">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSchemasInProcedureCalls() throws SQLException {
+        try {
+<span class="fc" id="L1754">            return wrapped.supportsSchemasInProcedureCalls();</span>
+<span class="fc" id="L1755">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1756">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSchemasInTableDefinitions() throws SQLException {
+        try {
+<span class="fc" id="L1763">            return wrapped.supportsSchemasInTableDefinitions();</span>
+<span class="fc" id="L1764">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1765">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSelectForUpdate() throws SQLException {
+        try {
+<span class="fc" id="L1772">            return wrapped.supportsSelectForUpdate();</span>
+<span class="fc" id="L1773">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1774">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsStatementPooling() throws SQLException {
+        try {
+<span class="fc" id="L1781">            return wrapped.supportsStatementPooling();</span>
+<span class="fc" id="L1782">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1783">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+        try {
+<span class="fc" id="L1790">            return wrapped.supportsStoredFunctionsUsingCallSyntax();</span>
+<span class="fc" id="L1791">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1792">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsStoredProcedures() throws SQLException {
+        try {
+<span class="fc" id="L1799">            return wrapped.supportsStoredProcedures();</span>
+<span class="fc" id="L1800">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1801">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSubqueriesInComparisons() throws SQLException {
+        try {
+<span class="fc" id="L1808">            return wrapped.supportsSubqueriesInComparisons();</span>
+<span class="fc" id="L1809">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1810">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSubqueriesInExists() throws SQLException {
+        try {
+<span class="fc" id="L1817">            return wrapped.supportsSubqueriesInExists();</span>
+<span class="fc" id="L1818">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1819">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSubqueriesInIns() throws SQLException {
+        try {
+<span class="fc" id="L1826">            return wrapped.supportsSubqueriesInIns();</span>
+<span class="fc" id="L1827">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1828">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsSubqueriesInQuantifieds() throws SQLException {
+        try {
+<span class="fc" id="L1835">            return wrapped.supportsSubqueriesInQuantifieds();</span>
+<span class="fc" id="L1836">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1837">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsTableCorrelationNames() throws SQLException {
+        try {
+<span class="fc" id="L1844">            return wrapped.supportsTableCorrelationNames();</span>
+<span class="fc" id="L1845">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1846">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
+        try {
+<span class="fc" id="L1853">            return wrapped.supportsTransactionIsolationLevel(level);</span>
+<span class="fc" id="L1854">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1855">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsTransactions() throws SQLException {
+        try {
+<span class="fc" id="L1862">            return wrapped.supportsTransactions();</span>
+<span class="fc" id="L1863">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1864">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsUnion() throws SQLException {
+        try {
+<span class="fc" id="L1871">            return wrapped.supportsUnion();</span>
+<span class="fc" id="L1872">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1873">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean supportsUnionAll() throws SQLException {
+        try {
+<span class="fc" id="L1880">            return wrapped.supportsUnionAll();</span>
+<span class="fc" id="L1881">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1882">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public &lt;T&gt; T unwrap(Class&lt;T&gt; iface) throws SQLException {
+        try {
+<span class="fc" id="L1889">            return wrapped.unwrap(iface);</span>
+<span class="fc" id="L1890">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1891">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean updatesAreDetected(int type) throws SQLException {
+        try {
+<span class="fc" id="L1898">            return wrapped.updatesAreDetected(type);</span>
+<span class="fc" id="L1899">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1900">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean usesLocalFilePerTable() throws SQLException {
+        try {
+<span class="fc" id="L1907">            return wrapped.usesLocalFilePerTable();</span>
+<span class="fc" id="L1908">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1909">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean usesLocalFiles() throws SQLException {
+        try {
+<span class="fc" id="L1916">            return wrapped.usesLocalFiles();</span>
+<span class="fc" id="L1917">        } catch (SQLException ex) {</span>
+<span class="fc" id="L1918">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

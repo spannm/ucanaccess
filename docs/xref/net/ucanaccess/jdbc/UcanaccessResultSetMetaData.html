@@ -24,12 +24,12 @@
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, String&gt; aliases;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="UcanaccessResultSetMetaData" href="../../../net/ucanaccess/jdbc/UcanaccessResultSetMetaData.html#UcanaccessResultSetMetaData">UcanaccessResultSetMetaData</a>(ResultSetMetaData _wrapped, Map&lt;String, String&gt; _aliases,
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>              <a name="UcanaccessResultSet" href="../../../net/ucanaccess/jdbc/UcanaccessResultSet.html#UcanaccessResultSet">UcanaccessResultSet</a> _resultSet) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>          wrapped = _wrapped;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="UcanaccessResultSetMetaData" href="../../../net/ucanaccess/jdbc/UcanaccessResultSetMetaData.html#UcanaccessResultSetMetaData">UcanaccessResultSetMetaData</a>(ResultSetMetaData wrapped, Map&lt;String, String&gt; aliases,
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>              <a name="UcanaccessResultSet" href="../../../net/ucanaccess/jdbc/UcanaccessResultSet.html#UcanaccessResultSet">UcanaccessResultSet</a> resultSet) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>          <strong class="jxr_keyword">this</strong>.wrapped = wrapped;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>          metadata = <strong class="jxr_keyword">new</strong> <a name="Metadata" href="../../../net/ucanaccess/converters/Metadata.html#Metadata">Metadata</a>(_resultSet.getStatement().getConnection());
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>          aliases = _aliases;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>          metadata = <strong class="jxr_keyword">new</strong> <a name="Metadata" href="../../../net/ucanaccess/converters/Metadata.html#Metadata">Metadata</a>(resultSet.getStatement().getConnection());
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>          <strong class="jxr_keyword">this</strong>.aliases = aliases;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>      }
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>      @Override

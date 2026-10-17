@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessDataSourceFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessDataSourceFactory.java</span></div><h1>UcanaccessDataSourceFactory.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import net.ucanaccess.converters.Metadata.Property;
+
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
+
+<span class="nc" id="L12">public class UcanaccessDataSourceFactory implements ObjectFactory {</span>
+
+    @Override
+    public Object getObjectInstance(Object uref, Name name, Context nameCtx, Hashtable&lt;?, ?&gt; environment) {
+
+<span class="nc" id="L17">        String dataSourceClass = UcanaccessDataSource.class.getName();</span>
+<span class="nc" id="L18">        Reference ref = (Reference) uref;</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        if (ref.getClassName().equals(dataSourceClass)) {</span>
+<span class="nc" id="L20">            UcanaccessDataSource dataSource = new UcanaccessDataSource();</span>
+<span class="nc" id="L21">            dataSource.setAccessPath((String) ref.get(&quot;accessPath&quot;).getContent());</span>
+<span class="nc" id="L22">            dataSource.setUser((String) ref.get(Property.user.name()).getContent());</span>
+<span class="nc" id="L23">            dataSource.setPassword((String) ref.get(Property.password.name()).getContent());</span>
+
+<span class="nc" id="L25">            dataSource.setColumnOrder((String) ref.get(Property.columnOrder.name()).getContent());</span>
+<span class="nc" id="L26">            dataSource.setConcatNulls((Boolean) ref.get(Property.concatNulls.name()).getContent());</span>
+<span class="nc" id="L27">            dataSource.setEncrypt((Boolean) ref.get(Property.encrypt.name()).getContent());</span>
+<span class="nc" id="L28">            dataSource.setIgnoreCase((Boolean) ref.get(Property.ignoreCase.name()).getContent());</span>
+<span class="nc" id="L29">            dataSource.setImmediatelyReleaseResources((Boolean) ref.get(Property.immediatelyReleaseResources.name()).getContent());</span>
+<span class="nc" id="L30">            dataSource.setInactivityTimeout((Integer) ref.get(Property.inactivityTimeout.name()).getContent());</span>
+<span class="nc" id="L31">            dataSource.setJackcessOpener((String) ref.get(Property.jackcessOpener.name()).getContent());</span>
+<span class="nc" id="L32">            dataSource.setKeepMirror((String) ref.get(Property.keepMirror.name()).getContent());</span>
+<span class="nc" id="L33">            dataSource.setLobScale((Integer) ref.get(Property.lobScale.name()).getContent());</span>
+<span class="nc" id="L34">            dataSource.setMemory((Boolean) ref.get(Property.memory.name()).getContent());</span>
+<span class="nc" id="L35">            dataSource.setMirrorFolder((String) ref.get(Property.mirrorFolder.name()).getContent());</span>
+<span class="nc" id="L36">            dataSource.setNewDatabaseVersion((String) ref.get(Property.newDatabaseVersion.name()).getContent());</span>
+<span class="nc" id="L37">            dataSource.setOpenExclusive((Boolean) ref.get(Property.openExclusive.name()).getContent());</span>
+<span class="nc" id="L38">            dataSource.setPreventReloading((Boolean) ref.get(Property.preventReloading.name()).getContent());</span>
+<span class="nc" id="L39">            dataSource.setReMap((String) ref.get(Property.reMap.name()).getContent());</span>
+<span class="nc" id="L40">            dataSource.setShowSchema((Boolean) ref.get(Property.showSchema.name()).getContent());</span>
+<span class="nc" id="L41">            dataSource.setSkipIndexes((Boolean) ref.get(Property.skipIndexes.name()).getContent());</span>
+<span class="nc" id="L42">            dataSource.setSysSchema((Boolean) ref.get(Property.sysSchema.name()).getContent());</span>
+
+<span class="nc" id="L44">            return dataSource;</span>
+        } else {
+<span class="nc" id="L46">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

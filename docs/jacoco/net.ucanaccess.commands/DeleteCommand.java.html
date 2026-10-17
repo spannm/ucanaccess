@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeleteCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.commands</a> &gt; <span class="el_source">DeleteCommand.java</span></div><h1>DeleteCommand.java</h1><pre class="source lang-java linenums">package net.ucanaccess.commands;
+
+import io.github.spannm.jackcess.Cursor;
+import io.github.spannm.jackcess.Table;
+import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Map;
+
+public class DeleteCommand extends AbstractCursorCommand {
+    private final String              execId;
+    private final IndexSelector       indexSelector;
+    private final Map&lt;String, Object&gt; rowPattern;
+    private final Table               table;
+
+<span class="fc" id="L19">    public DeleteCommand(Table table, Map&lt;String, Object&gt; rowPattern, String execId) {</span>
+<span class="fc" id="L20">        indexSelector = new IndexSelector(table);</span>
+<span class="fc" id="L21">        this.rowPattern = rowPattern;</span>
+<span class="fc" id="L22">        this.execId = execId;</span>
+<span class="fc" id="L23">        this.table = table;</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public String getExecId() {
+<span class="fc" id="L28">        return execId;</span>
+    }
+
+    @Override
+    public IndexSelector getIndexSelector() {
+<span class="fc" id="L33">        return indexSelector;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; getRowPattern() {
+<span class="fc" id="L38">        return rowPattern;</span>
+    }
+
+    @Override
+    public String getTableName() {
+<span class="fc" id="L43">        return table.getName();</span>
+    }
+
+    @Override
+    public CommandType getType() {
+<span class="fc" id="L48">        return CommandType.DELETE;</span>
+    }
+
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+<span class="fc" id="L53">        Try.catching(() -&gt; {</span>
+<span class="fc" id="L54">            Cursor cur = indexSelector.getCursor();</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (cur.findNextRow(rowPattern)) {</span>
+<span class="fc" id="L56">                cur.deleteCurrentRow();</span>
+            }
+<span class="fc" id="L58">        }).orThrow(UcanaccessSQLException::new);</span>
+<span class="fc" id="L59">        return null;</span>
+    }
+
+    @Override
+    public CompositeFeedbackAction persistCurrentRow(Cursor cur) throws IOException {
+<span class="fc" id="L64">        cur.deleteCurrentRow();</span>
+<span class="fc" id="L65">        return null;</span>
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+<span class="fc" id="L70">        InsertCommand ic = new InsertCommand(table, new Persist2Jet().getValues(rowPattern), execId);</span>
+<span class="fc" id="L71">        return ic.persist();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

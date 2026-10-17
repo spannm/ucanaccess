@@ -25,7 +25,7 @@
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>          String dataSourceClass = UcanaccessDataSource.<strong class="jxr_keyword">class</strong>.getName();
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>          Reference ref = (Reference) uref;
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>          <strong class="jxr_keyword">if</strong> (ref.getClassName().equals(dataSourceClass)) {
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>              <a name="UcanaccessDataSource" href="../../../net/ucanaccess/jdbc/UcanaccessDataSource.html#UcanaccessDataSource">UcanaccessDataSource</a> dataSource = <strong class="jxr_keyword">new</strong> <a name="UcanaccessDataSource" href="../../../net/ucanaccess/jdbc/UcanaccessDataSource.html#UcanaccessDataSource">UcanaccessDataSource</a>();
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>              UcanaccessDataSource dataSource = <strong class="jxr_keyword">new</strong> UcanaccessDataSource();
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>              dataSource.setAccessPath((String) ref.get(<span class="jxr_string">"accessPath"</span>).getContent());
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>              dataSource.setUser((String) ref.get(Property.user.name()).getContent());
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>              dataSource.setPassword((String) ref.get(Property.password.name()).getContent());

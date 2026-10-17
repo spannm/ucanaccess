@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessCallableStatement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessCallableStatement.java</span></div><h1>UcanaccessCallableStatement.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import net.ucanaccess.exception.UcanaccessSQLException;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.Map;
+
+public class UcanaccessCallableStatement extends UcanaccessPreparedStatement implements CallableStatement {
+
+    private CallableStatement hidden;
+
+    public UcanaccessCallableStatement(NormalizedSQL nsql, CallableStatement hidden, UcanaccessConnection connection)
+            throws SQLException {
+<span class="fc" id="L19">        super(nsql, hidden, connection);</span>
+<span class="fc" id="L20">        this.hidden = hidden;</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public void setShort(String parmName, short x) throws SQLException {
+<span class="fc" id="L25">        tryCatch(() -&gt; hidden.setShort(parmName, x));</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public boolean wasNull() throws SQLException {
+<span class="fc" id="L30">        return tryCatch(() -&gt; hidden.wasNull());</span>
+    }
+
+    @Override
+    public Array getArray(int parmIdx) throws SQLException {
+<span class="fc" id="L35">        return tryCatch(() -&gt; hidden.getArray(parmIdx));</span>
+    }
+
+    @Override
+    public Array getArray(String parmName) throws SQLException {
+<span class="fc" id="L40">        return tryCatch(() -&gt; hidden.getArray(parmName));</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;deprecation&quot;)
+    public BigDecimal getBigDecimal(int parmIdx, int scale) throws SQLException {
+<span class="fc" id="L46">        return tryCatch(() -&gt; hidden.getBigDecimal(parmIdx, scale));</span>
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(int parmIdx) throws SQLException {
+<span class="fc" id="L51">        return tryCatch(() -&gt; hidden.getBigDecimal(parmIdx));</span>
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(String parmName) throws SQLException {
+<span class="fc" id="L56">        return tryCatch(() -&gt; hidden.getBigDecimal(parmName));</span>
+    }
+
+    @Override
+    public Blob getBlob(int parmIdx) throws SQLException {
+<span class="fc" id="L61">        return tryCatch(() -&gt; hidden.getBlob(parmIdx));</span>
+    }
+
+    @Override
+    public Blob getBlob(String parmName) throws SQLException {
+<span class="fc" id="L66">        return tryCatch(() -&gt; hidden.getBlob(parmName));</span>
+    }
+
+    @Override
+    public boolean getBoolean(int parmIdx) throws SQLException {
+<span class="fc" id="L71">        return tryCatch(() -&gt; hidden.getBoolean(parmIdx));</span>
+    }
+
+    @Override
+    public boolean getBoolean(String parmName) throws SQLException {
+<span class="fc" id="L76">        return tryCatch(() -&gt; hidden.getBoolean(parmName));</span>
+    }
+
+    @Override
+    public byte getByte(int parmIdx) throws SQLException {
+<span class="fc" id="L81">        return tryCatch(() -&gt; hidden.getByte(parmIdx));</span>
+    }
+
+    @Override
+    public byte getByte(String parmName) throws SQLException {
+<span class="fc" id="L86">        return tryCatch(() -&gt; hidden.getByte(parmName));</span>
+    }
+
+    @Override
+    public byte[] getBytes(int parmIdx) throws SQLException {
+<span class="fc" id="L91">        return tryCatch(() -&gt; hidden.getBytes(parmIdx));</span>
+    }
+
+    @Override
+    public byte[] getBytes(String parmName) throws SQLException {
+<span class="fc" id="L96">        return tryCatch(() -&gt; hidden.getBytes(parmName));</span>
+    }
+
+    @Override
+    public Reader getCharacterStream(int parmIdx) throws SQLException {
+<span class="fc" id="L101">        return tryCatch(() -&gt; hidden.getCharacterStream(parmIdx));</span>
+    }
+
+    @Override
+    public Reader getCharacterStream(String parmName) throws SQLException {
+<span class="fc" id="L106">        return tryCatch(() -&gt; hidden.getCharacterStream(parmName));</span>
+    }
+
+    @Override
+    public Clob getClob(int parmIdx) throws SQLException {
+<span class="fc" id="L111">        return tryCatch(() -&gt; hidden.getClob(parmIdx));</span>
+    }
+
+    @Override
+    public Clob getClob(String parmName) throws SQLException {
+<span class="fc" id="L116">        return tryCatch(() -&gt; hidden.getClob(parmName));</span>
+    }
+
+    @Override
+    public Date getDate(int parmIdx, Calendar cal) throws SQLException {
+<span class="fc" id="L121">        return tryCatch(() -&gt; hidden.getDate(parmIdx, cal));</span>
+    }
+
+    @Override
+    public Date getDate(int parmIdx) throws SQLException {
+<span class="fc" id="L126">        return tryCatch(() -&gt; hidden.getDate(parmIdx));</span>
+    }
+
+    @Override
+    public Date getDate(String parmName, Calendar cal) throws SQLException {
+<span class="fc" id="L131">        return tryCatch(() -&gt; hidden.getDate(parmName, cal));</span>
+    }
+
+    @Override
+    public Date getDate(String parmName) throws SQLException {
+<span class="fc" id="L136">        return tryCatch(() -&gt; hidden.getDate(parmName));</span>
+    }
+
+    @Override
+    public double getDouble(int parmIdx) throws SQLException {
+<span class="fc" id="L141">        return tryCatch(() -&gt; hidden.getDouble(parmIdx));</span>
+    }
+
+    @Override
+    public double getDouble(String parmName) throws SQLException {
+<span class="fc" id="L146">        return tryCatch(() -&gt; hidden.getDouble(parmName));</span>
+    }
+
+    @Override
+    public float getFloat(int parmIdx) throws SQLException {
+<span class="fc" id="L151">        return tryCatch(() -&gt; hidden.getFloat(parmIdx));</span>
+    }
+
+    @Override
+    public float getFloat(String parmName) throws SQLException {
+<span class="fc" id="L156">        return tryCatch(() -&gt; hidden.getFloat(parmName));</span>
+    }
+
+    @Override
+    public ResultSet getGeneratedKeys() throws UcanaccessSQLException {
+<span class="nc" id="L161">        return tryCatch(hidden::getGeneratedKeys);</span>
+    }
+
+    @Override
+    public int getInt(int parmIdx) throws SQLException {
+<span class="fc" id="L166">        return tryCatch(() -&gt; hidden.getInt(parmIdx));</span>
+    }
+
+    @Override
+    public int getInt(String parmName) throws SQLException {
+<span class="fc" id="L171">        return tryCatch(() -&gt; hidden.getInt(parmName));</span>
+    }
+
+    @Override
+    public long getLong(int parmIdx) throws SQLException {
+<span class="fc" id="L176">        return tryCatch(() -&gt; hidden.getLong(parmIdx));</span>
+    }
+
+    @Override
+    public long getLong(String parmName) throws SQLException {
+<span class="fc" id="L181">        return tryCatch(() -&gt; hidden.getLong(parmName));</span>
+    }
+
+    @Override
+    public int getMaxFieldSize() throws UcanaccessSQLException {
+<span class="fc" id="L186">        return tryCatch(hidden::getMaxFieldSize);</span>
+    }
+
+    @Override
+    public int getMaxRows() throws UcanaccessSQLException {
+<span class="fc" id="L191">        return tryCatch(hidden::getMaxRows);</span>
+    }
+
+    @Override
+    public ResultSetMetaData getMetaData() throws UcanaccessSQLException {
+<span class="fc" id="L196">        return tryCatch(hidden::getMetaData);</span>
+    }
+
+    @Override
+    public boolean getMoreResults() throws UcanaccessSQLException {
+<span class="fc" id="L201">        return tryCatch(() -&gt; hidden.getMoreResults());</span>
+    }
+
+    @Override
+    public boolean getMoreResults(int current) throws UcanaccessSQLException {
+<span class="fc" id="L206">        return tryCatch(() -&gt; hidden.getMoreResults(current));</span>
+    }
+
+    @Override
+    public Reader getNCharacterStream(int parmIdx) throws SQLException {
+<span class="fc" id="L211">        return tryCatch(() -&gt; hidden.getNCharacterStream(parmIdx));</span>
+    }
+
+    @Override
+    public Reader getNCharacterStream(String parmName) throws SQLException {
+<span class="fc" id="L216">        return tryCatch(() -&gt; hidden.getNCharacterStream(parmName));</span>
+    }
+
+    @Override
+    public NClob getNClob(int parmIdx) throws SQLException {
+<span class="fc" id="L221">        return tryCatch(() -&gt; hidden.getNClob(parmIdx));</span>
+    }
+
+    @Override
+    public NClob getNClob(String parmName) throws SQLException {
+<span class="fc" id="L226">        return tryCatch(() -&gt; hidden.getNClob(parmName));</span>
+    }
+
+    @Override
+    public String getNString(int parmIdx) throws SQLException {
+<span class="fc" id="L231">        return tryCatch(() -&gt; hidden.getNString(parmIdx));</span>
+    }
+
+    @Override
+    public String getNString(String parmName) throws SQLException {
+<span class="fc" id="L236">        return tryCatch(() -&gt; hidden.getNString(parmName));</span>
+    }
+
+    @Override
+    public Object getObject(int parmIdx, Map&lt;String, Class&lt;?&gt;&gt; map) throws SQLException {
+<span class="fc" id="L241">        return tryCatch(() -&gt; hidden.getObject(parmIdx, map));</span>
+    }
+
+    @Override
+    public Object getObject(int parmIdx) throws SQLException {
+<span class="fc" id="L246">        return tryCatch(() -&gt; hidden.getObject(parmIdx));</span>
+    }
+
+    @Override
+    public Object getObject(String parmName, Map&lt;String, Class&lt;?&gt;&gt; map) throws SQLException {
+<span class="fc" id="L251">        return tryCatch(() -&gt; hidden.getObject(parmName, map));</span>
+    }
+
+    @Override
+    public Object getObject(String parmName) throws SQLException {
+<span class="fc" id="L256">        return tryCatch(() -&gt; hidden.getObject(parmName));</span>
+    }
+
+    @Override
+    public &lt;T&gt; T getObject(int parmIdx, Class&lt;T&gt; type) throws SQLException {
+<span class="fc" id="L261">        return tryCatch(() -&gt; hidden.getObject(parmIdx, type));</span>
+    }
+
+    @Override
+    public &lt;T&gt; T getObject(String parmName, Class&lt;T&gt; type) throws SQLException {
+<span class="fc" id="L266">        return tryCatch(() -&gt; hidden.getObject(parmName, type));</span>
+    }
+
+    @Override
+    public Ref getRef(int parmIdx) throws SQLException {
+<span class="fc" id="L271">        return tryCatch(() -&gt; hidden.getRef(parmIdx));</span>
+    }
+
+    @Override
+    public Ref getRef(String parmName) throws SQLException {
+<span class="fc" id="L276">        return tryCatch(() -&gt; hidden.getRef(parmName));</span>
+    }
+
+    @Override
+    public ResultSet getResultSet() throws UcanaccessSQLException {
+<span class="fc" id="L281">        return tryCatch(hidden::getResultSet);</span>
+    }
+
+    @Override
+    public RowId getRowId(int parmIdx) throws SQLException {
+<span class="fc" id="L286">        return tryCatch(() -&gt; hidden.getRowId(parmIdx));</span>
+    }
+
+    @Override
+    public RowId getRowId(String parmName) throws SQLException {
+<span class="fc" id="L291">        return tryCatch(() -&gt; hidden.getRowId(parmName));</span>
+    }
+
+    @Override
+    public short getShort(int parmIdx) throws SQLException {
+<span class="fc" id="L296">        return tryCatch(() -&gt; hidden.getShort(parmIdx));</span>
+    }
+
+    @Override
+    public short getShort(String parmName) throws SQLException {
+<span class="fc" id="L301">        return tryCatch(() -&gt; hidden.getShort(parmName));</span>
+    }
+
+    @Override
+    public SQLXML getSQLXML(int parmIdx) throws SQLException {
+<span class="fc" id="L306">        return tryCatch(() -&gt; hidden.getSQLXML(parmIdx));</span>
+    }
+
+    @Override
+    public SQLXML getSQLXML(String parmName) throws SQLException {
+<span class="fc" id="L311">        return tryCatch(() -&gt; hidden.getSQLXML(parmName));</span>
+    }
+
+    @Override
+    public String getString(int parmIdx) throws SQLException {
+<span class="fc" id="L316">        return tryCatch(() -&gt; hidden.getString(parmIdx));</span>
+    }
+
+    @Override
+    public String getString(String parmName) throws SQLException {
+<span class="fc" id="L321">        return tryCatch(() -&gt; hidden.getString(parmName));</span>
+    }
+
+    @Override
+    public Time getTime(int parmIdx, Calendar cal) throws SQLException {
+<span class="fc" id="L326">        return tryCatch(() -&gt; hidden.getTime(parmIdx, cal));</span>
+    }
+
+    @Override
+    public Time getTime(int parmIdx) throws SQLException {
+<span class="fc" id="L331">        return tryCatch(() -&gt; hidden.getTime(parmIdx));</span>
+    }
+
+    @Override
+    public Time getTime(String parmName, Calendar cal) throws SQLException {
+<span class="fc" id="L336">        return tryCatch(() -&gt; hidden.getTime(parmName, cal));</span>
+    }
+
+    @Override
+    public Time getTime(String parmName) throws SQLException {
+<span class="fc" id="L341">        return tryCatch(() -&gt; hidden.getTime(parmName));</span>
+    }
+
+    @Override
+    public Timestamp getTimestamp(int parmIdx, Calendar cal) throws SQLException {
+<span class="fc" id="L346">        return tryCatch(() -&gt; hidden.getTimestamp(parmIdx, cal));</span>
+    }
+
+    @Override
+    public Timestamp getTimestamp(int parmIdx) throws SQLException {
+<span class="fc" id="L351">        return tryCatch(() -&gt; hidden.getTimestamp(parmIdx));</span>
+    }
+
+    @Override
+    public Timestamp getTimestamp(String parmName, Calendar cal) throws SQLException {
+<span class="fc" id="L356">        return tryCatch(() -&gt; hidden.getTimestamp(parmName, cal));</span>
+    }
+
+    @Override
+    public Timestamp getTimestamp(String parmName) throws SQLException {
+<span class="fc" id="L361">        return tryCatch(() -&gt; hidden.getTimestamp(parmName));</span>
+    }
+
+    @Override
+    public URL getURL(int parmIdx) throws SQLException {
+<span class="fc" id="L366">        return tryCatch(() -&gt; hidden.getURL(parmIdx));</span>
+    }
+
+    @Override
+    public URL getURL(String parmName) throws SQLException {
+<span class="fc" id="L371">        return tryCatch(() -&gt; hidden.getURL(parmName));</span>
+    }
+
+    @Override
+    public void registerOutParameter(int parmIdx, int sqlType, int scale) throws SQLException {
+<span class="fc" id="L376">        tryCatch(() -&gt; hidden.registerOutParameter(parmIdx, sqlType, scale));</span>
+<span class="fc" id="L377">    }</span>
+
+    @Override
+    public void registerOutParameter(int parmIdx, int sqlType, String typeName) throws SQLException {
+<span class="fc" id="L381">        tryCatch(() -&gt; hidden.registerOutParameter(parmIdx, sqlType, typeName));</span>
+<span class="fc" id="L382">    }</span>
+
+    @Override
+    public void registerOutParameter(int parmIdx, int sqlType) throws SQLException {
+<span class="fc" id="L386">        tryCatch(() -&gt; hidden.registerOutParameter(parmIdx, sqlType));</span>
+<span class="fc" id="L387">    }</span>
+
+    @Override
+    public void registerOutParameter(String parmName, int sqlType, int scale) throws SQLException {
+<span class="fc" id="L391">        tryCatch(() -&gt; hidden.registerOutParameter(parmName, sqlType, scale));</span>
+<span class="fc" id="L392">    }</span>
+
+    @Override
+    public void registerOutParameter(String parmName, int sqlType, String typeName) throws SQLException {
+<span class="fc" id="L396">        tryCatch(() -&gt; hidden.registerOutParameter(parmName, sqlType, typeName));</span>
+<span class="fc" id="L397">    }</span>
+
+    @Override
+    public void registerOutParameter(String parmName, int sqlType) throws SQLException {
+<span class="fc" id="L401">        tryCatch(() -&gt; hidden.registerOutParameter(parmName, sqlType));</span>
+<span class="fc" id="L402">    }</span>
+
+    @Override
+    public void setAsciiStream(String parmName, InputStream x, int length) throws SQLException {
+<span class="fc" id="L406">        tryCatch(() -&gt; hidden.setAsciiStream(parmName, x, length));</span>
+<span class="fc" id="L407">    }</span>
+
+    @Override
+    public void setAsciiStream(String parmName, InputStream x, long length) throws SQLException {
+<span class="fc" id="L411">        tryCatch(() -&gt; hidden.setAsciiStream(parmName, x, length));</span>
+<span class="fc" id="L412">    }</span>
+
+    @Override
+    public void setAsciiStream(String parmName, InputStream x) throws SQLException {
+<span class="fc" id="L416">        tryCatch(() -&gt; hidden.setAsciiStream(parmName, x));</span>
+<span class="fc" id="L417">    }</span>
+
+    @Override
+    public void setBigDecimal(String parmName, BigDecimal x) throws SQLException {
+<span class="fc" id="L421">        tryCatch(() -&gt; hidden.setBigDecimal(parmName, x));</span>
+<span class="fc" id="L422">    }</span>
+
+    @Override
+    public void setBinaryStream(String parmName, InputStream x, int length) throws SQLException {
+<span class="fc" id="L426">        tryCatch(() -&gt; hidden.setBinaryStream(parmName, x, length));</span>
+<span class="fc" id="L427">    }</span>
+
+    @Override
+    public void setBinaryStream(String parmName, InputStream x, long length) throws SQLException {
+<span class="fc" id="L431">        tryCatch(() -&gt; hidden.setBinaryStream(parmName, x, length));</span>
+<span class="fc" id="L432">    }</span>
+
+    @Override
+    public void setBinaryStream(String parmName, InputStream x) throws SQLException {
+<span class="fc" id="L436">        tryCatch(() -&gt; hidden.setBinaryStream(parmName, x));</span>
+<span class="fc" id="L437">    }</span>
+
+    @Override
+    public void setBlob(String parmName, Blob x) throws SQLException {
+<span class="fc" id="L441">        tryCatch(() -&gt; hidden.setBlob(parmName, x));</span>
+<span class="fc" id="L442">    }</span>
+
+    @Override
+    public void setBlob(String parmName, InputStream inputStream, long length) throws SQLException {
+<span class="fc" id="L446">        tryCatch(() -&gt; hidden.setBlob(parmName, inputStream, length));</span>
+<span class="fc" id="L447">    }</span>
+
+    @Override
+    public void setBlob(String parmName, InputStream inputStream) throws SQLException {
+<span class="fc" id="L451">        tryCatch(() -&gt; hidden.setBlob(parmName, inputStream));</span>
+<span class="fc" id="L452">    }</span>
+
+    @Override
+    public void setBoolean(String parmName, boolean x) throws SQLException {
+<span class="fc" id="L456">        tryCatch(() -&gt; hidden.setBoolean(parmName, x));</span>
+<span class="fc" id="L457">    }</span>
+
+    @Override
+    public void setByte(String parmName, byte x) throws SQLException {
+<span class="fc" id="L461">        tryCatch(() -&gt; hidden.setByte(parmName, x));</span>
+<span class="fc" id="L462">    }</span>
+
+    @Override
+    public void setBytes(String parmName, byte[] x) throws SQLException {
+<span class="fc" id="L466">        tryCatch(() -&gt; hidden.setBytes(parmName, x));</span>
+<span class="fc" id="L467">    }</span>
+
+    @Override
+    public void setCharacterStream(String parmName, Reader reader, int length) throws SQLException {
+<span class="fc" id="L471">        tryCatch(() -&gt; hidden.setCharacterStream(parmName, reader, length));</span>
+<span class="fc" id="L472">    }</span>
+
+    @Override
+    public void setCharacterStream(String parmName, Reader reader, long length) throws SQLException {
+<span class="fc" id="L476">        tryCatch(() -&gt; hidden.setCharacterStream(parmName, reader, length));</span>
+<span class="fc" id="L477">    }</span>
+
+    @Override
+    public void setCharacterStream(String parmName, Reader reader) throws SQLException {
+<span class="fc" id="L481">        tryCatch(() -&gt; hidden.setCharacterStream(parmName, reader));</span>
+<span class="fc" id="L482">    }</span>
+
+    @Override
+    public void setClob(String parmName, Clob x) throws SQLException {
+<span class="fc" id="L486">        tryCatch(() -&gt; hidden.setClob(parmName, x));</span>
+<span class="fc" id="L487">    }</span>
+
+    @Override
+    public void setClob(String parmName, Reader reader, long length) throws SQLException {
+<span class="fc" id="L491">        tryCatch(() -&gt; hidden.setClob(parmName, reader, length));</span>
+<span class="fc" id="L492">    }</span>
+
+    @Override
+    public void setClob(String parmName, Reader reader) throws SQLException {
+<span class="fc" id="L496">        tryCatch(() -&gt; hidden.setClob(parmName, reader));</span>
+<span class="fc" id="L497">    }</span>
+
+    @Override
+    public void setDate(String parmName, Date x, Calendar cal) throws SQLException {
+<span class="fc" id="L501">        tryCatch(() -&gt; hidden.setDate(parmName, x, cal));</span>
+<span class="fc" id="L502">    }</span>
+
+    @Override
+    public void setDate(String parmName, Date x) throws SQLException {
+<span class="fc" id="L506">        tryCatch(() -&gt; hidden.setDate(parmName, x));</span>
+<span class="fc" id="L507">    }</span>
+
+    @Override
+    public void setDouble(String parmName, double x) throws SQLException {
+<span class="fc" id="L511">        tryCatch(() -&gt; hidden.setDouble(parmName, x));</span>
+<span class="fc" id="L512">    }</span>
+
+    @Override
+    public void setFloat(String parmName, float x) throws SQLException {
+<span class="nc" id="L516">        tryCatch(() -&gt; hidden.setFloat(parmName, x));</span>
+<span class="nc" id="L517">    }</span>
+
+    @Override
+    public void setInt(int parmIdx, int arg1) throws UcanaccessSQLException {
+<span class="fc" id="L521">        tryCatch(() -&gt; hidden.setInt(parmIdx, arg1));</span>
+<span class="fc" id="L522">    }</span>
+
+    @Override
+    public void setInt(String parmName, int x) throws SQLException {
+<span class="fc" id="L526">        tryCatch(() -&gt; hidden.setInt(parmName, x));</span>
+<span class="fc" id="L527">    }</span>
+
+    @Override
+    public void setLong(String parmName, long x) throws SQLException {
+<span class="fc" id="L531">        tryCatch(() -&gt; hidden.setLong(parmName, x));</span>
+<span class="fc" id="L532">    }</span>
+
+    @Override
+    public void setNCharacterStream(String parmName, Reader value, long length) throws SQLException {
+<span class="fc" id="L536">        tryCatch(() -&gt; hidden.setNCharacterStream(parmName, value, length));</span>
+<span class="fc" id="L537">    }</span>
+
+    @Override
+    public void setNCharacterStream(String parmName, Reader value) throws SQLException {
+<span class="fc" id="L541">        tryCatch(() -&gt; hidden.setNCharacterStream(parmName, value));</span>
+<span class="fc" id="L542">    }</span>
+
+    @Override
+    public void setNClob(String parmName, NClob value) throws SQLException {
+<span class="fc" id="L546">        tryCatch(() -&gt; hidden.setNClob(parmName, value));</span>
+<span class="fc" id="L547">    }</span>
+
+    @Override
+    public void setNClob(String parmName, Reader reader, long length) throws SQLException {
+<span class="fc" id="L551">        tryCatch(() -&gt; hidden.setNClob(parmName, reader, length));</span>
+<span class="fc" id="L552">    }</span>
+
+    @Override
+    public void setNClob(String parmName, Reader reader) throws SQLException {
+<span class="fc" id="L556">        tryCatch(() -&gt; hidden.setNClob(parmName, reader));</span>
+<span class="fc" id="L557">    }</span>
+
+    @Override
+    public void setNString(String parmName, String value) throws SQLException {
+<span class="fc" id="L561">        tryCatch(() -&gt; hidden.setNString(parmName, value));</span>
+<span class="fc" id="L562">    }</span>
+
+    @Override
+    public void setNull(String parmName, int sqlType, String typeName) throws SQLException {
+<span class="fc" id="L566">        tryCatch(() -&gt; hidden.setNull(parmName, sqlType, typeName));</span>
+<span class="fc" id="L567">    }</span>
+
+    @Override
+    public void setNull(String parmName, int sqlType) throws SQLException {
+<span class="fc" id="L571">        tryCatch(() -&gt; hidden.setNull(parmName, sqlType));</span>
+<span class="fc" id="L572">    }</span>
+
+    @Override
+    public void setObject(String parmName, Object x, int targetSqlType, int scale) throws SQLException {
+<span class="fc" id="L576">        tryCatch(() -&gt; hidden.setObject(parmName, x, targetSqlType, scale));</span>
+<span class="fc" id="L577">    }</span>
+
+    @Override
+    public void setObject(String parmName, Object x, int targetSqlType) throws SQLException {
+<span class="fc" id="L581">        tryCatch(() -&gt; hidden.setObject(parmName, x, targetSqlType));</span>
+<span class="fc" id="L582">    }</span>
+
+    @Override
+    public void setObject(String parmName, Object x) throws SQLException {
+<span class="fc" id="L586">        tryCatch(() -&gt; hidden.setObject(parmName, x));</span>
+<span class="fc" id="L587">    }</span>
+
+    @Override
+    public void setRowId(String parmName, RowId x) throws SQLException {
+<span class="fc" id="L591">        tryCatch(() -&gt; hidden.setRowId(parmName, x));</span>
+<span class="fc" id="L592">    }</span>
+
+    @Override
+    public void setSQLXML(String parmName, SQLXML xmlObject) throws SQLException {
+<span class="fc" id="L596">        tryCatch(() -&gt; hidden.setSQLXML(parmName, xmlObject));</span>
+<span class="fc" id="L597">    }</span>
+
+    @Override
+    public void setString(String parmName, String x) throws SQLException {
+<span class="fc" id="L601">        tryCatch(() -&gt; hidden.setString(parmName, x));</span>
+<span class="fc" id="L602">    }</span>
+
+    @Override
+    public void setTime(String parmName, Time x, Calendar cal) throws SQLException {
+<span class="nc" id="L606">        tryCatch(() -&gt; hidden.setTime(parmName, x, cal));</span>
+<span class="nc" id="L607">    }</span>
+
+    @Override
+    public void setTime(String parmName, Time x) throws SQLException {
+<span class="nc" id="L611">        tryCatch(() -&gt; hidden.setTime(parmName, x));</span>
+<span class="nc" id="L612">    }</span>
+
+    @Override
+    public void setTimestamp(String parmName, Timestamp x, Calendar cal) throws SQLException {
+<span class="fc" id="L616">        tryCatch(() -&gt; hidden.setTimestamp(parmName, x, cal));</span>
+<span class="fc" id="L617">    }</span>
+
+    @Override
+    public void setTimestamp(String parmName, Timestamp x) throws SQLException {
+<span class="fc" id="L621">        tryCatch(() -&gt; hidden.setTimestamp(parmName, x));</span>
+<span class="fc" id="L622">    }</span>
+
+    @Override
+    public void setURL(String parmName, URL val) throws SQLException {
+<span class="nc" id="L626">        tryCatch(() -&gt; hidden.setURL(parmName, val));</span>
+<span class="nc" id="L627">    }</span>
+
+    @Override
+    public boolean execute() throws UcanaccessSQLException {
+<span class="nc bnc" id="L631" title="All 2 branches missed.">        if (!UcanaccessConnection.hasContext()) {</span>
+<span class="nc" id="L632">            UcanaccessConnection.setCtxConnection(super.getConnection());</span>
+        }
+<span class="nc" id="L634">        return super.execute();</span>
+    }
+
+    @Override
+    public int executeUpdate() throws UcanaccessSQLException {
+<span class="pc bpc" id="L639" title="1 of 2 branches missed.">        if (!UcanaccessConnection.hasContext()) {</span>
+<span class="fc" id="L640">            UcanaccessConnection.setCtxConnection(super.getConnection());</span>
+        }
+<span class="fc" id="L642">        return super.executeUpdate();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

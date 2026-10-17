@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThisLib.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.about</a> &gt; <span class="el_source">ThisLib.java</span></div><h1>ThisLib.java</h1><pre class="source lang-java linenums">package net.ucanaccess.about;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+/**
+ * Provides metadata and build information about this library when executed directly via CLI.
+ */
+public final class ThisLib {
+
+    private ThisLib() {
+    }
+
+    /**
+     * Main entry point when the JAR file is executed directly.
+     * &lt;p&gt;
+     * Reads the {@code MANIFEST.MF} file from the JAR package and prints formatted metadata
+     * to {@code System.out}.
+     *
+     * @param args command-line arguments (unused)
+     */
+    @SuppressWarnings(&quot;java:S106&quot;) // prints the build information to the console by design
+    public static void main(String[] args) {
+<span class="pc" id="L33">        readManifest().ifPresent(m -&gt; System.out.print(buildInfo(m)));</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Builds the formatted metadata text printed when the JAR file is executed directly.
+     *
+     * @param manifest the manifest to read metadata from, may be {@code null}
+     * @return the formatted metadata text, terminated with a trailing line separator
+     */
+    static String buildInfo(Manifest manifest) {
+<span class="fc" id="L43">        String title = getAttribute(manifest, &quot;Implementation-Title&quot;, &quot;Project-Name&quot;).orElse(&quot;Java Library&quot;);</span>
+<span class="fc" id="L44">        String version = getAttribute(manifest, &quot;Implementation-Version&quot;, &quot;Project-Version&quot;).orElse(&quot;unknown&quot;);</span>
+<span class="fc" id="L45">        String description = getAttribute(manifest, &quot;Project-Description&quot;).orElse(&quot;&quot;);</span>
+
+<span class="fc" id="L47">        String gitCommit = getAttribute(manifest, &quot;Git-Commit-Id&quot;, &quot;X-BasePOM-Git-Commit-Id&quot;).orElse(null);</span>
+
+<span class="fc" id="L49">        String nl = System.lineSeparator();</span>
+<span class="fc" id="L50">        StringBuilder sb = new StringBuilder(nl);</span>
+<span class="fc" id="L51">        sb.append(title).append(&quot; v&quot;).append(version).append(nl);</span>
+
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (!description.isEmpty()) {</span>
+<span class="fc" id="L54">            sb.append(description).append(nl);</span>
+        }
+<span class="fc" id="L56">        sb.append(nl);</span>
+
+<span class="fc" id="L58">        List&lt;Map.Entry&lt;String, String&gt;&gt; metadata = Arrays.asList(</span>
+<span class="fc" id="L59">            entry(&quot;Vendor&quot;,      getAttribute(manifest, &quot;Implementation-Vendor&quot;).orElse(null)),</span>
+<span class="fc" id="L60">            entry(&quot;Build JDK&quot;,   getAttribute(manifest, &quot;Build-Jdk-Spec&quot;).orElse(null)),</span>
+<span class="fc" id="L61">            entry(&quot;Build Time&quot;,  getAttribute(manifest, &quot;Build-Time&quot;).orElse(null)),</span>
+<span class="fc" id="L62">            entry(&quot;Git Commit&quot;,  gitCommit),</span>
+<span class="fc" id="L63">            entry(&quot;Git Branch&quot;,  getAttribute(manifest, &quot;Git-Branch&quot;).orElse(null)),</span>
+<span class="fc" id="L64">            entry(&quot;Homepage&quot;,    getAttribute(manifest, &quot;Project-Url&quot;).orElse(null)),</span>
+<span class="fc" id="L65">            entry(&quot;Issues&quot;,      getAttribute(manifest, &quot;Issue-Management-Url&quot;).orElse(null)),</span>
+<span class="fc" id="L66">            entry(&quot;Source Code&quot;, getAttribute(manifest, &quot;Scm-Url&quot;).orElse(null)));</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (Map.Entry&lt;String, String&gt; e : metadata) {</span>
+<span class="pc bpc" id="L69" title="1 of 4 branches missed.">            if (e.getValue() != null &amp;&amp; !e.getValue().isEmpty()) {</span>
+<span class="fc" id="L70">                sb.append(String.format(&quot;%-15s: %s&quot;, e.getKey(), e.getValue())).append(nl);</span>
+            }
+<span class="fc" id="L72">        }</span>
+
+<span class="fc" id="L74">        sb.append(nl);</span>
+<span class="fc" id="L75">        sb.append(&quot;Please note: This JAR is a software library and not intended for direct CLI execution.&quot;)</span>
+<span class="fc" id="L76">            .append(nl);</span>
+
+<span class="fc" id="L78">        return sb.toString();</span>
+    }
+
+    /**
+     * Creates an immutable map entry representing a key-value metadata pair.
+     *
+     * @param key metadata key
+     * @param value metadata value
+     * @return immutable map entry
+     */
+    private static Map.Entry&lt;String, String&gt; entry(String key, String value) {
+<span class="fc" id="L89">        return new SimpleImmutableEntry&lt;&gt;(key, value);</span>
+    }
+
+    /**
+     * Resolves and parses the {@code MANIFEST.MF} file from the location of this class's code source.
+     *
+     * @return an {@link Optional} containing the parsed {@link Manifest}, or empty if unavailable
+     */
+    private static Optional&lt;Manifest&gt; readManifest() {
+<span class="fc" id="L98">        CodeSource codeSource = ThisLib.class.getProtectionDomain().getCodeSource();</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (codeSource == null) {</span>
+<span class="nc" id="L100">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L103">        URL location = codeSource.getLocation();</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (location == null) {</span>
+<span class="nc" id="L105">            return Optional.empty();</span>
+        }
+
+        try {
+<span class="fc" id="L109">            URL manifestUrl = new URL(&quot;jar:&quot; + location.toExternalForm() + &quot;!/META-INF/MANIFEST.MF&quot;);</span>
+<span class="nc" id="L110">            try (InputStream is = manifestUrl.openStream()) {</span>
+<span class="nc" id="L111">                return Optional.of(new Manifest(is));</span>
+            }
+<span class="fc" id="L113">        } catch (IOException ignored) {</span>
+            // running outside JAR context (e.g., IDE) is expected
+<span class="fc" id="L115">            return Optional.empty();</span>
+        }
+    }
+
+    /**
+     * Searches for the given attribute names in the main attributes first.
+     * &lt;p&gt;
+     * If not found, searches across all named individual sections in the manifest.
+     *
+     * @param manifest the manifest to search in, may be {@code null}
+     * @param attributeNames one or more attribute names to look for
+     * @return an {@link Optional} containing the first non-blank attribute value, or empty
+     */
+    private static Optional&lt;String&gt; getAttribute(Manifest manifest, String... attributeNames) {
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        if (manifest == null || attributeNames == null) {</span>
+<span class="fc" id="L130">            return Optional.empty();</span>
+        }
+
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        for (String attrName : attributeNames) {</span>
+<span class="fc" id="L134">            Optional&lt;String&gt; value = findInAttributes(manifest.getMainAttributes(), attrName);</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            if (value.isPresent()) {</span>
+<span class="fc" id="L136">                return value;</span>
+            }
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            for (Attributes sectionAttributes : manifest.getEntries().values()) {</span>
+<span class="fc" id="L140">                value = findInAttributes(sectionAttributes, attrName);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">                if (value.isPresent()) {</span>
+<span class="fc" id="L142">                    return value;</span>
+                }
+<span class="fc" id="L144">            }</span>
+        }
+
+<span class="fc" id="L147">        return Optional.empty();</span>
+    }
+
+    /**
+     * Extract and trims an attribute value from the given attributes object.
+     *
+     * @param attributes the attributes container, may be {@code null}
+     * @param name the name of the attribute
+     * @return an {@link Optional} containing the trimmed value, or empty if null or blank
+     */
+    private static Optional&lt;String&gt; findInAttributes(Attributes attributes, String name) {
+<span class="pc bpc" id="L158" title="2 of 4 branches missed.">        if (attributes == null || name == null) {</span>
+<span class="nc" id="L159">            return Optional.empty();</span>
+        }
+<span class="fc" id="L161">        String val = attributes.getValue(name);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (val == null) {</span>
+<span class="fc" id="L163">            return Optional.empty();</span>
+        }
+<span class="fc" id="L165">        String trimmed = val.trim();</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        return trimmed.isEmpty() ? Optional.empty() : Optional.of(trimmed);</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

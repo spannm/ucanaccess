@@ -18,9 +18,9 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String execId;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String tableName;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">public</strong> <a name="DropTableCommand" href="../../../net/ucanaccess/commands/DropTableCommand.html#DropTableCommand">DropTableCommand</a>(String _tableName, String _execId) {
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>          tableName = _tableName;
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>          execId = _execId;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">public</strong> <a name="DropTableCommand" href="../../../net/ucanaccess/commands/DropTableCommand.html#DropTableCommand">DropTableCommand</a>(String tableName, String execId) {
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>          <strong class="jxr_keyword">this</strong>.tableName = tableName;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>          <strong class="jxr_keyword">this</strong>.execId = execId;
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>      }
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>      @Override
@@ -43,8 +43,8 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>          <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>              <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a> p2a = <strong class="jxr_keyword">new</strong> <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a>();
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>              p2a.dropTable(tableName);
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>          } <strong class="jxr_keyword">catch</strong> (IOException _ex) {
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>          } <strong class="jxr_keyword">catch</strong> (IOException ex) {
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(ex);
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>          }
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>      }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutoNumberManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.triggers</a> &gt; <span class="el_source">AutoNumberManager.java</span></div><h1>AutoNumberManager.java</h1><pre class="source lang-java linenums">package net.ucanaccess.triggers;
+
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.impl.ColumnImpl;
+import net.ucanaccess.jdbc.DBReference;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public final class AutoNumberManager {
+    // Consider replacing AtomicInteger with a custom wrapper around an 'int' if performance
+    // becomes an issue. Never use an Integer here because Integer is an immutable object.
+<span class="fc" id="L14">    private static final Map&lt;Column, AtomicInteger&gt; REGISTER = new HashMap&lt;&gt;();</span>
+
+    static {
+        // Must call AutoNumberManager.clear() for proper thread synchronization.
+        // Do not call register.clear() directly.
+<span class="fc" id="L19">        DBReference.addOnReloadRefListener(AutoNumberManager::clear);</span>
+<span class="fc" id="L20">    }</span>
+
+    private AutoNumberManager() {
+    }
+
+    /** Clears all AutoNumber column seeds to 0. */
+    static synchronized void clear() {
+<span class="fc" id="L27">        REGISTER.clear();</span>
+<span class="fc" id="L28">    }</span>
+
+    /** Returns the next AutoNumber value, and increments the seed. */
+    static synchronized int getNext(Column col) {
+        // Note: This code assumes *sequential* integer AutoNumber values.
+        // (Access also supports *random* integer AutoNumber values, but they
+        // are not very common.)
+<span class="fc" id="L35">        return seed(col).incrementAndGet();</span>
+    }
+
+    /** Sets the AutoNumber seed to {@code newVal}. */
+    public static synchronized void reset(Column col, int newVal) {
+<span class="fc" id="L40">        REGISTER.put(col, new AtomicInteger(newVal));</span>
+<span class="fc" id="L41">    }</span>
+
+    /** Bumps the AutoNumber seed to {@code newVal} if it is higher than the existing one. */
+    public static synchronized void bump(Column col, int newVal) {
+<span class="fc" id="L45">        AtomicInteger next = seed(col);</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (newVal &gt; next.get()) {</span>
+<span class="fc" id="L47">            next.set(newVal);</span>
+        }
+<span class="fc" id="L49">    }</span>
+
+    private static AtomicInteger seed(Column col) {
+<span class="fc" id="L52">        return REGISTER.computeIfAbsent(col,</span>
+<span class="fc" id="L53">            c -&gt; new AtomicInteger((Integer) ((ColumnImpl) c).getAutoNumberGenerator().getLast()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

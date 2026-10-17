@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessSQLException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.exception</a> &gt; <span class="el_source">UcanaccessSQLException.java</span></div><h1>UcanaccessSQLException.java</h1><pre class="source lang-java linenums">package net.ucanaccess.exception;
+
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
+import net.ucanaccess.jdbc.IUcanaccessErrorCodes;
+import net.ucanaccess.util.VersionInfo;
+import org.hsqldb.error.ErrorCode;
+
+import java.sql.SQLException;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+
+/**
+ * The sql exception specific to {@code Ucanaccess}.
+ */
+public class UcanaccessSQLException extends SQLException {
+
+    static final String         MSG_PREFIX                   = &quot;UCAExc:&quot;;
+
+    private static final long   serialVersionUID             = -1432048647665807662L;
+<span class="fc" id="L22">    private static final String UCANACCESS_GENERIC_ERROR_STR = String.valueOf(IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR);</span>
+
+<span class="fc" id="L24">    public UcanaccessSQLException() {</span>
+<span class="fc" id="L25">    }</span>
+
+    public UcanaccessSQLException(String reason, String sqlState, int vendorCode, Throwable cause) {
+<span class="fc" id="L28">        super(reason, sqlState, vendorCode, cause);</span>
+<span class="fc" id="L29">    }</span>
+
+    public UcanaccessSQLException(String reason) {
+<span class="fc" id="L32">        this(reason, UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);</span>
+<span class="fc" id="L33">    }</span>
+
+    @FormatMethod
+    public UcanaccessSQLException(@FormatString String reason, Object... args) {
+<span class="nc" id="L37">        this(String.format(reason, args), UCANACCESS_GENERIC_ERROR_STR, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);</span>
+<span class="nc" id="L38">    }</span>
+
+    public UcanaccessSQLException(String reason, String sqlState, int vendorCode) {
+<span class="fc" id="L41">        super(reason, sqlState, vendorCode, null);</span>
+<span class="fc" id="L42">    }</span>
+
+    public UcanaccessSQLException(String reason, String sqlState, Throwable cause) {
+<span class="nc" id="L45">        super(reason, sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, cause);</span>
+<span class="nc" id="L46">    }</span>
+
+    public UcanaccessSQLException(String reason, Throwable cause) {
+<span class="fc" id="L49">        super(reason, UCANACCESS_GENERIC_ERROR_STR,</span>
+            IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, cause);
+<span class="fc" id="L51">    }</span>
+
+    public UcanaccessSQLException(String reason, String sqlState) {
+<span class="nc" id="L54">        super(reason, sqlState, IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR, null);</span>
+<span class="nc" id="L55">    }</span>
+
+    public UcanaccessSQLException(Throwable cause) {
+<span class="fc" id="L58">        super(explainCause(cause),</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            cause instanceof SQLException ? ((SQLException) cause).getSQLState() : UCANACCESS_GENERIC_ERROR_STR,</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            cause instanceof SQLException ? ((SQLException) cause).getErrorCode() : IUcanaccessErrorCodes.UCANACCESS_GENERIC_ERROR,</span>
+            cause);
+<span class="fc" id="L62">    }</span>
+
+    public static String explainCause(Throwable cause) {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (cause instanceof SQLException) {</span>
+<span class="fc" id="L66">            SQLException se = (SQLException) cause;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            if (se.getErrorCode() == -ErrorCode.X_42562) {</span>
+<span class="nc" id="L68">                return cause.getMessage()</span>
+                    + &quot; This exception may happen if you add integers representing units of time directly to datetime values &quot;
+                    + &quot;using the arithmetic plus operator but without specifying the unit of date.&quot;
+<span class="nc" id="L71">                    + System.lineSeparator()</span>
+                    + &quot;In this specific case you have to use, for example, &lt;dateColumn&gt; + 1 DAY.&quot;;
+            }
+        }
+<span class="fc" id="L75">        return cause.getMessage();</span>
+    }
+
+    String addVersionInfo(String message) {
+<span class="fc bfc" id="L79" title="All 4 branches covered.">        if (message != null &amp;&amp; message.startsWith(MSG_PREFIX)) {</span>
+<span class="fc" id="L80">            return message;</span>
+        }
+
+<span class="fc" id="L83">        String ver = VersionInfo.find(getClass()).getVersion();</span>
+<span class="fc" id="L84">        return (MSG_PREFIX</span>
+            + &quot;::&quot;
+<span class="fc" id="L86">            + Optional.ofNullable(ver).orElse(&quot;x.y.z&quot;)</span>
+            + &quot; &quot;
+<span class="fc bfc" id="L88" title="All 4 branches covered.">            + (message == null || message.isBlank() ? &quot;(n/a)&quot; : message)).trim();</span>
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+<span class="fc" id="L93">        return addVersionInfo(super.getLocalizedMessage());</span>
+    }
+
+    @Override
+    public String getMessage() {
+<span class="fc" id="L98">        return addVersionInfo(super.getMessage());</span>
+    }
+
+    /**
+     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException}.
+     * &lt;p&gt;
+     * If the throwable is already a {@link UcanaccessSQLException}, it's returned as is.
+     * This is a convenience method calling {@link #wrap(String, Throwable)} without a reason prefix.
+     * &lt;/p&gt;
+     *
+     * @param &lt;T&gt; the type of the {@link Throwable} to wrap.
+     * @param t the {@link Throwable} to wrap.
+     * @return a {@link UcanaccessSQLException} instance.
+     */
+    public static final &lt;T extends Throwable&gt; UcanaccessSQLException wrap(T t) {
+<span class="fc" id="L113">        return wrap(null, t);</span>
+    }
+
+    /**
+     * Wraps a {@link Throwable} into a {@link UcanaccessSQLException},
+     * prepending an optional reason message.
+     * &lt;p&gt;
+     * Preserves original SQLState, ErrorCode, and Cause when wrapping {@link SQLException} types.
+     * If {@code reason} is null or blank, the message is derived solely from {@code t}.
+     * &lt;/p&gt;
+     *
+     * @param &lt;T&gt; the type of the {@link Throwable} to wrap
+     * @param reason an optional custom message prefix
+     * @param t the {@link Throwable} to wrap
+     * @return a {@link UcanaccessSQLException} instance
+     */
+    public static final &lt;T extends Throwable&gt; UcanaccessSQLException wrap(String reason, T t) {
+<span class="pc bpc" id="L130" title="1 of 4 branches missed.">        String r = reason == null || reason.isBlank() ? null : reason.trim();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (t instanceof UcanaccessSQLException) {</span>
+<span class="fc" id="L132">            UcanaccessSQLException ex = (UcanaccessSQLException) t;</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            if (r == null) {</span>
+<span class="nc" id="L134">                return ex;</span>
+            }
+<span class="fc" id="L136">            return new UcanaccessSQLException(r + &quot;: &quot; + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        } else if (t instanceof SQLException) {</span>
+<span class="fc" id="L138">            SQLException ex = (SQLException) t;</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            return new UcanaccessSQLException(r == null ? ex.getMessage() : r + &quot;: &quot; + ex.getMessage(), ex.getSQLState(), ex.getErrorCode(), ex.getCause());</span>
+        } else {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            return new UcanaccessSQLException(r == null ? t.getMessage() : r + &quot;: &quot; + t.getMessage(), t);</span>
+        }
+    }
+
+    public static final &lt;T extends UcanaccessSQLException&gt; void throwIf(BooleanSupplier condition, Supplier&lt;T&gt; exceptionSupplier) throws T {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (condition.getAsBoolean()) {</span>
+<span class="nc" id="L147">            throw exceptionSupplier.get();</span>
+        }
+<span class="nc" id="L149">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

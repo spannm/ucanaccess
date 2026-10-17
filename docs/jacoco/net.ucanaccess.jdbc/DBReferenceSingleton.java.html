@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DBReferenceSingleton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">DBReferenceSingleton.java</span></div><h1>DBReferenceSingleton.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import io.github.spannm.jackcess.Database.FileFormat;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+public final class DBReferenceSingleton {
+    private static DBReferenceSingleton    singleton;
+<span class="fc" id="L14">    private final Map&lt;String, DBReference&gt; dbRegistry = Collections.synchronizedMap(new HashMap&lt;&gt;());</span>
+
+<span class="fc" id="L16">    private DBReferenceSingleton() {</span>
+<span class="fc" id="L17">    }</span>
+
+    public static synchronized DBReferenceSingleton getInstance() {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (singleton == null) {</span>
+<span class="fc" id="L21">            singleton = new DBReferenceSingleton();</span>
+        }
+<span class="fc" id="L23">        return singleton;</span>
+    }
+
+    public DBReference getReference(File ref) {
+<span class="fc" id="L27">        return dbRegistry.get(ref.getAbsolutePath());</span>
+    }
+
+    public boolean loaded(File fl) {
+<span class="fc" id="L31">        return dbRegistry.containsKey(fl.getAbsolutePath());</span>
+    }
+
+    public DBReference loadReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, String pwd, Charset charset) throws IOException {
+<span class="fc" id="L35">        return new DBReference(fl, ff, jko, pwd, charset);</span>
+    }
+
+    public DBReference put(String path, DBReference dbr) {
+<span class="fc" id="L39">        return dbRegistry.put(path, dbr);</span>
+    }
+
+    @SuppressWarnings(&quot;LockOnNonEnclosingClassLiteral&quot;) // the driver class is the driver-wide lock
+    public DBReference remove(String path) {
+<span class="fc" id="L44">        synchronized (UcanaccessDriver.class) {</span>
+<span class="fc" id="L45">            return dbRegistry.remove(path);</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

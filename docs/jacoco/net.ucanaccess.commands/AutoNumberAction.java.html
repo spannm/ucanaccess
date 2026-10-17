@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutoNumberAction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.commands</a> &gt; <span class="el_source">AutoNumberAction.java</span></div><h1>AutoNumberAction.java</h1><pre class="source lang-java linenums">package net.ucanaccess.commands;
+
+import io.github.spannm.jackcess.Column;
+import io.github.spannm.jackcess.Table;
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+public class AutoNumberAction implements IFeedbackAction {
+<span class="fc" id="L16">    private final Map&lt;String, Object&gt; newAutoValues = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L17">    private final Map&lt;String, Object&gt; oldAutoValues = new HashMap&lt;&gt;();</span>
+    private final Table               table;
+
+    @SuppressWarnings(&quot;java:S2077&quot;) // identifiers come from database metadata and are escaped, values are bound as parameters
+<span class="fc" id="L21">    public AutoNumberAction(Table table, Object[] memento, Object[] byAccess) throws SQLException {</span>
+<span class="fc" id="L22">        this.table = table;</span>
+<span class="fc" id="L23">        int i = 0;</span>
+
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        for (Column col : table.getColumns()) {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            if (col.isAutoNumber()) {</span>
+<span class="fc" id="L27">                UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L28">                Connection connHsqldb = conn.getHSQLDBConnection();</span>
+<span class="fc" id="L29">                String hsqlColName = SQLConverter.escapeIdentifier(col.getName(), connHsqldb);</span>
+<span class="fc" id="L30">                Object cnOld = memento[i];</span>
+<span class="fc" id="L31">                Object cnNew = byAccess[i];</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">                if (cnNew instanceof String) {</span>
+<span class="fc" id="L33">                    cnNew = ((String) cnNew).toUpperCase(Locale.ROOT);</span>
+                }
+<span class="fc" id="L35">                oldAutoValues.put(col.getName(), cnOld);</span>
+<span class="fc" id="L36">                newAutoValues.put(col.getName(), cnNew);</span>
+<span class="fc" id="L37">                conn.setFeedbackState(true);</span>
+<span class="fc" id="L38">                String sql = String.format(&quot;UPDATE %s SET %s=? WHERE %s=?&quot;,</span>
+<span class="fc" id="L39">                    SQLConverter.escapeIdentifier(table.getName(), connHsqldb), hsqlColName, hsqlColName);</span>
+
+<span class="fc" id="L41">                try (PreparedStatement ps = connHsqldb.prepareStatement(sql)) {</span>
+<span class="fc" id="L42">                    ps.setObject(1, cnNew);</span>
+<span class="fc" id="L43">                    ps.setObject(2, cnOld);</span>
+<span class="fc" id="L44">                    ps.executeUpdate();</span>
+
+<span class="fc" id="L46">                    conn.setGeneratedKey(cnNew);</span>
+<span class="fc" id="L47">                    conn.setFeedbackState(false);</span>
+                }
+            }
+<span class="fc" id="L50">            i++;</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">    }</span>
+
+    @Override
+    public void doAction(ICommand toChange) {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (!table.getName().equalsIgnoreCase(toChange.getTableName())) {</span>
+<span class="nc" id="L57">            return;</span>
+        }
+<span class="nc bnc" id="L59" title="All 3 branches missed.">        switch (toChange.getType()) {</span>
+        case DELETE:
+        case UPDATE:
+<span class="nc" id="L62">            AbstractCursorCommand acm = (AbstractCursorCommand) toChange;</span>
+<span class="nc" id="L63">            Map&lt;String, Object&gt; old = acm.getRowPattern();</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            for (Map.Entry&lt;String, Object&gt; entry : oldAutoValues.entrySet()) {</span>
+<span class="nc bnc" id="L65" title="All 4 branches missed.">                if (old.containsKey(entry.getKey()) &amp;&amp; old.get(entry.getKey()).equals(entry.getValue())) {</span>
+<span class="nc" id="L66">                    old.put(entry.getKey(), newAutoValues.get(entry.getKey()));</span>
+                }
+<span class="nc" id="L68">            }</span>
+<span class="nc" id="L69">            break;</span>
+        case COMPOSITE:
+<span class="nc" id="L71">            CompositeCommand cc = (CompositeCommand) toChange;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (ICommand ic : cc.getComposite()) {</span>
+<span class="nc" id="L73">                doAction(ic);</span>
+<span class="nc" id="L74">            }</span>
+<span class="nc" id="L75">            break;</span>
+        default:
+            break;
+        }
+<span class="nc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

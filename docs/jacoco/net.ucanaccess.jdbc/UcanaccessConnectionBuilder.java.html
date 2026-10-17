@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessConnectionBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessConnectionBuilder.java</span></div><h1>UcanaccessConnectionBuilder.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import static net.ucanaccess.converters.Metadata.Property.*;
+
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.converters.Metadata.Property;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.type.AccessVersion;
+import net.ucanaccess.type.ColumnOrder;
+import net.ucanaccess.util.Try;
+
+import java.io.File;
+import java.sql.DriverManager;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * A builder for Ucanaccess database urls and connections.
+ *
+ * @author Markus Spann
+ * @since v5.1.0
+ */
+<span class="fc" id="L26">public final class UcanaccessConnectionBuilder {</span>
+
+    private String                      dbPath;
+<span class="fc" id="L29">    private final Map&lt;Property, Object&gt; props = new EnumMap&lt;&gt;(Property.class);</span>
+
+    public UcanaccessConnectionBuilder withDbPath(String path) {
+<span class="fc" id="L32">        dbPath = path;</span>
+<span class="fc" id="L33">        return this;</span>
+    }
+
+    public UcanaccessConnectionBuilder withDbPath(File path) {
+<span class="nc" id="L37">        dbPath = Optional.ofNullable(path).map(File::getAbsolutePath).orElse(null);</span>
+<span class="nc" id="L38">        return this;</span>
+    }
+
+    public UcanaccessConnectionBuilder withUser(String user) {
+<span class="fc" id="L42">        return withProp(Property.user, user);</span>
+    }
+
+    public UcanaccessConnectionBuilder withPassword(String pass) {
+<span class="fc" id="L46">        return withProp(password, pass);</span>
+    }
+
+    public UcanaccessConnectionBuilder withoutUserPass() {
+<span class="fc" id="L50">        props.remove(user);</span>
+<span class="fc" id="L51">        props.remove(password);</span>
+<span class="fc" id="L52">        return this;</span>
+    }
+
+    public UcanaccessConnectionBuilder withColumnOrderData() {
+<span class="nc" id="L56">        return withProp(columnOrder, ColumnOrder.DATA);</span>
+    }
+
+    public UcanaccessConnectionBuilder withColumnOrderDisplay() {
+<span class="fc" id="L60">        return withProp(columnOrder, ColumnOrder.DISPLAY);</span>
+    }
+
+    public UcanaccessConnectionBuilder withConcatNulls(boolean concatNulls) {
+<span class="fc" id="L64">        return withProp(Property.concatNulls, concatNulls);</span>
+    }
+
+    public UcanaccessConnectionBuilder withIgnoreCase(boolean ignoreCase) {
+<span class="nc" id="L68">        return withProp(Property.ignoreCase, ignoreCase);</span>
+    }
+
+    public UcanaccessConnectionBuilder withImmediatelyReleaseResources() {
+<span class="fc" id="L72">        return withProp(immediatelyReleaseResources, true);</span>
+    }
+
+    public UcanaccessConnectionBuilder withInactivityTimeout(int inactivityTimeout) {
+<span class="nc" id="L76">        return withProp(Property.inactivityTimeout, inactivityTimeout);</span>
+    }
+
+    public UcanaccessConnectionBuilder withMemory() {
+<span class="fc" id="L80">        return withProp(memory, true);</span>
+    }
+
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(AccessVersion version) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        return withProp(newDatabaseVersion, version == null ? null : version.name());</span>
+    }
+
+    public UcanaccessConnectionBuilder withNewDatabaseVersion(String version) {
+<span class="nc" id="L88">        AccessVersion accVersion = null;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (version != null) {</span>
+<span class="nc" id="L90">            accVersion = AccessVersion.parse(version);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (accVersion == null) {</span>
+<span class="nc" id="L92">                UcanaccessRuntimeException.throwNow(&quot;Valid version required: &quot; + version);</span>
+            }
+        }
+<span class="nc" id="L95">        return withProp(newDatabaseVersion, accVersion);</span>
+    }
+
+    public UcanaccessConnectionBuilder withProp(Metadata.Property prop, Object value) {
+<span class="fc" id="L99">        UcanaccessRuntimeException.requireNonNull(prop, &quot;Property required&quot;);</span>
+
+<span class="fc" id="L101">        String val = Optional.ofNullable(value).map(Object::toString).orElse(&quot;&quot;);</span>
+<span class="fc" id="L102">        props.put(prop, val);</span>
+
+<span class="fc" id="L104">        return this;</span>
+    }
+
+    public String getUrl() {
+<span class="fc" id="L108">        UcanaccessRuntimeException.requireNonNull(dbPath, &quot;Database path required&quot;);</span>
+
+<span class="fc" id="L110">        String url = UcanaccessDriver.URL_PREFIX + dbPath;</span>
+
+<span class="fc" id="L112">        String propsStr = propsToString(&quot;;&quot;);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (!propsStr.isEmpty()) {</span>
+<span class="fc" id="L114">            url += &quot;;&quot; + propsStr;</span>
+        }
+<span class="fc" id="L116">        return url;</span>
+    }
+
+    public String getUser() {
+<span class="fc" id="L120">        return (String) props.get(user);</span>
+    }
+
+    public String getPassword() {
+<span class="fc" id="L124">        return (String) props.get(password);</span>
+    }
+
+    public UcanaccessConnection build() {
+<span class="fc" id="L128">        Try.catching(() -&gt; Class.forName(UcanaccessDriver.class.getName()))</span>
+<span class="fc" id="L129">            .orThrow(UcanaccessRuntimeException::new);</span>
+
+<span class="fc" id="L131">        return Try.catching(() -&gt; DriverManager.getConnection(getUrl(), getUser(), getPassword()))</span>
+<span class="fc" id="L132">            .map(UcanaccessConnection.class::cast).orThrow();</span>
+    }
+
+    /**
+     * Creates a semicolon-delimited string of all properties and their values, without properties {@code user} and {@code password},
+     * and performing special handling on certain properties.
+     *
+     * @param delimiter delimiter
+     * @return property string
+     */
+    String propsToString(CharSequence delimiter) {
+<span class="fc" id="L143">        Map&lt;Property, Object&gt; copy = new LinkedHashMap&lt;&gt;(props);</span>
+
+<span class="fc" id="L145">        copy.remove(user);</span>
+<span class="fc" id="L146">        copy.remove(password);</span>
+
+        // special handling of certain properties
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (Integer.parseInt(copy.getOrDefault(inactivityTimeout, -1).toString()) &gt; -1) {</span>
+<span class="nc" id="L150">            copy.remove(immediatelyReleaseResources);</span>
+        } else {
+<span class="fc" id="L152">            copy.put(immediatelyReleaseResources, true);</span>
+        }
+
+<span class="fc" id="L155">        return copy.entrySet().stream()</span>
+<span class="fc" id="L156">            .map(e -&gt; e.getKey().name() + '=' + e.getValue())</span>
+<span class="fc" id="L157">            .collect(Collectors.joining(delimiter));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L162">        return String.format(&quot;%s[user=%s, dbPath=%s, props={%s}]&quot;,</span>
+<span class="nc" id="L163">            getClass().getSimpleName(), props.get(user), dbPath, propsToString(&quot;, &quot;));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -19,9 +19,9 @@
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String execId;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String relationshipName;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>      <strong class="jxr_keyword">public</strong> <a name="DropForeignKeyCommand" href="../../../net/ucanaccess/commands/DropForeignKeyCommand.html#DropForeignKeyCommand">DropForeignKeyCommand</a>(String _execId, String _relationshipName) {
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>          execId = _execId;
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>          relationshipName = _relationshipName;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>      <strong class="jxr_keyword">public</strong> <a name="DropForeignKeyCommand" href="../../../net/ucanaccess/commands/DropForeignKeyCommand.html#DropForeignKeyCommand">DropForeignKeyCommand</a>(String execId, String relationshipName) {
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>          <strong class="jxr_keyword">this</strong>.execId = execId;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>          <strong class="jxr_keyword">this</strong>.relationshipName = relationshipName;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>      }
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> String getRelationshipName() {

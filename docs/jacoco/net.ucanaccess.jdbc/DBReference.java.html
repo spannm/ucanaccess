@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DBReference.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">DBReference.java</span></div><h1>DBReference.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.DatabaseBuilder;
+import io.github.spannm.jackcess.DateTimeType;
+import io.github.spannm.jackcess.Row;
+import io.github.spannm.jackcess.Table;
+import io.github.spannm.jackcess.Table.ColumnOrder;
+import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.exception.UcanaccessSQLException;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.nio.channels.FileLock;
+import java.nio.charset.Charset;
+import java.nio.file.AccessDeniedException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public final class DBReference {
+    private static final String MSG_COULD_NOT_DELETE = &quot;Could not delete {0}&quot;;
+    private static final String MSG_COULD_NOT_CREATE = &quot;Could not create file {0}&quot;;
+    private static final String MSG_CREATED_FILE     = &quot;Created file {0}&quot;;
+
+    private static final String                     CIPHER_SPEC       = &quot;AES&quot;;
+<span class="fc" id="L53">    private static List&lt;IOnReloadReferenceListener&gt; onReloadListeners = new ArrayList&lt;&gt;();</span>
+    private static String                           version;
+
+<span class="fc" id="L56">    private final Logger                            logger            = System.getLogger(getClass().getName());</span>
+    private final File                              dbFile;
+    private Database                                dbIO;
+<span class="fc" id="L59">    private FileLock                                fileLock          = null;</span>
+<span class="fc" id="L60">    private String                                  id                = createId();</span>
+<span class="fc" id="L61">    private boolean                                 inMemory          = true;</span>
+    private long                                    lastModified;
+<span class="fc" id="L63">    private boolean                                 openExclusive     = false;</span>
+    private final MemoryTimer                       memoryTimer;
+    private boolean                                 readOnly;
+    private boolean                                 readOnlyFileFormat;
+    private boolean                                 showSchema;
+    private File                                    tempHsql;
+    private File                                    toKeepHsql;
+    private boolean                                 immediatelyReleaseResources;
+    private boolean                                 encryptHSQLDB;
+    private String                                  encryptionKey;
+    private final String                            pwd;
+    private final IJackcessOpenerInterface          jko;
+    private Map&lt;String, String&gt;                     externalResourcesMapping;
+<span class="fc" id="L76">    private boolean                                 firstConnection   = true;</span>
+    private FileFormat                              dbFormat;
+    private boolean                                 columnOrderDisplay;
+    private boolean                                 hsqldbShutdown;
+    private File                                    mirrorFolder;
+<span class="fc" id="L81">    private final Set&lt;File&gt;                         links             = new HashSet&lt;&gt;();</span>
+    /**
+     * Holds strong references to {@link Table} instances on which a caller has explicitly toggled
+     * {@code allowAutoNumberInsert} (via {@code DISABLE}/{@code ENABLE AUTOINCREMENT ON}). Jackcess's internal
+     * table cache only holds {@link Table} objects via {@code WeakReference}s, so without this pin the GC could
+     * collect such a table between statements; the table would then be transparently reloaded on next access,
+     * silently resetting {@code allowAutoNumberInsert} to its default and losing the toggle.
+     */
+<span class="fc" id="L89">    private final Map&lt;String, Table&gt;                pinnedAutoNumberTables = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L90">    private boolean                                 ignoreCase        = true;</span>
+    private boolean                                 mirrorReadOnly;
+    private Integer                                 lobScale;
+    private boolean                                 skipIndexes;
+    private boolean                                 sysSchema;
+    private boolean                                 preventReloading;
+    private boolean                                 concatNulls;
+    private boolean                                 mirrorRecreated;
+    private Charset                                 charset;
+    /**
+     * Whether the {@link io.github.spannm.jackcess.util.LinkResolver} registered below may automatically resolve
+     * linked tables that point to a network/UNC path. {@code false} by default; see
+     * {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}.
+     */
+    private boolean                                 allowRemoteLinks;
+
+    public DBReference(File fl, FileFormat ff, IJackcessOpenerInterface jko, final String pwd, Charset charset)
+<span class="fc" id="L107">        throws IOException {</span>
+<span class="fc" id="L108">        dbFile = fl;</span>
+<span class="fc" id="L109">        this.pwd = pwd;</span>
+<span class="fc" id="L110">        this.jko = jko;</span>
+<span class="fc" id="L111">        this.charset = charset;</span>
+<span class="fc" id="L112">        lastModified = System.currentTimeMillis();</span>
+<span class="fc" id="L113">        memoryTimer = new MemoryTimer(this);</span>
+<span class="fc bfc" id="L114" title="All 4 branches covered.">        if (!fl.exists() &amp;&amp; ff != null) {</span>
+<span class="fc" id="L115">            DatabaseBuilder dbb = new DatabaseBuilder();</span>
+<span class="fc" id="L116">            dbIO = dbb.withAutoSync(false).withFileFormat(ff).withFile(fl).create();</span>
+<span class="fc" id="L117">        } else {</span>
+<span class="fc" id="L118">            dbIO = jko.open(fl, pwd, charset);</span>
+            try {
+<span class="fc" id="L120">                readOnlyFileFormat = dbIO.getFileFormat().equals(FileFormat.V1997);</span>
+<span class="fc" id="L121">                dbFormat = dbIO.getFileFormat();</span>
+<span class="nc" id="L122">            } catch (Exception ignored) {</span>
+                // file format cannot be determined, treat database as writable with unknown format
+<span class="fc" id="L124">            }</span>
+<span class="fc" id="L125">            dbIO.setLinkResolver((linkerDb, linkeeFileName) -&gt; {</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">                if (linkeeFileName == null) {</span>
+<span class="nc" id="L127">                    throw new IOException(&quot;Cannot resolve db link&quot;);</span>
+                }
+<span class="fc" id="L129">                Map&lt;String, String&gt; emr = externalResourcesMapping;</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                String remapped = emr == null ? null : emr.get(linkeeFileName.toLowerCase(Locale.ROOT));</span>
+                // an explicit remapping via the &quot;reMap&quot; connection property is trusted application configuration
+                // and therefore bypasses the network-path guard below; the raw (untrusted) path stored in the
+                // database file itself is not probed or opened in that case
+<span class="pc bpc" id="L134" title="5 of 6 branches missed.">                if (remapped == null &amp;&amp; !allowRemoteLinks &amp;&amp; isNetworkPath(linkeeFileName)) {</span>
+<span class="nc" id="L135">                    throw new AccessDeniedException(linkeeFileName, null,</span>
+                        &quot;Linked database points to a network/UNC path; automatic resolution of such paths is &quot;
+                            + &quot;disabled by default because the linked path is taken verbatim from the (possibly &quot;
+                            + &quot;untrusted) Access database file. Set the '&quot; + Metadata.Property.allowRemoteLinks
+                            + &quot;' connection property to true only if linked network paths are trusted.&quot;);
+                }
+                // for a network path with an explicit remapping, use the remapped (trusted) path directly without
+                // probing the raw network path first
+<span class="pc bpc" id="L143" title="2 of 4 branches missed.">                File linkeeFile = remapped != null &amp;&amp; isNetworkPath(linkeeFileName)</span>
+<span class="nc" id="L144">                    ? new File(remapped)</span>
+<span class="fc" id="L145">                    : new File(linkeeFileName);</span>
+<span class="pc bpc" id="L146" title="2 of 4 branches missed.">                if (!linkeeFile.exists() &amp;&amp; remapped != null) {</span>
+<span class="fc" id="L147">                    linkeeFile = new File(remapped);</span>
+                }
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">                if (!linkeeFile.exists()) {</span>
+<span class="nc" id="L150">                    logger.log(Level.WARNING, &quot;External file {0} does not exist&quot;, linkeeFile.getAbsolutePath());</span>
+                } else {
+<span class="fc" id="L152">                    links.add(linkeeFile);</span>
+                }
+<span class="fc" id="L154">                Database ldb = open(linkeeFile, pwd);</span>
+<span class="fc" id="L155">                ldb.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);</span>
+<span class="fc" id="L156">                return ldb;</span>
+            });
+<span class="fc" id="L158">            dbIO.setDateTimeType(DateTimeType.LOCAL_DATE_TIME);</span>
+<span class="fc" id="L159">            dbIO.setEnforceForeignKeys(false);</span>
+        }
+<span class="fc" id="L161">    }</span>
+
+    /**
+     * Determines whether the given linked database path is a network/UNC path, e.g. {@code \\server\share\db.accdb},
+     * {@code //server/share/db.accdb} or a device-style UNC path such as {@code \\?\UNC\server\share\db.accdb}.
+     * &lt;p&gt;
+     * Such paths are excluded from automatic resolution by default since they let an untrusted Access database
+     * file trigger an outbound network connection (see {@link #allowRemoteLinks}).
+     *
+     * @param  fileName the linked database path as stored in the Access database file
+     * @return           {@code true} if the path is a network/UNC path, {@code false} otherwise
+     */
+    static boolean isNetworkPath(String fileName) {
+<span class="fc" id="L174">        String normalized = fileName.replace('/', '\\');</span>
+<span class="fc" id="L175">        return normalized.startsWith(&quot;\\\\&quot;);</span>
+    }
+
+    public Database open(File dbfl, String password) throws IOException {
+<span class="fc" id="L179">        Database ret = jko.open(dbfl, password, charset);</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (columnOrderDisplay) {</span>
+<span class="nc" id="L181">            ret.setColumnOrder(ColumnOrder.DISPLAY);</span>
+        }
+<span class="fc" id="L183">        return ret;</span>
+    }
+
+    boolean loadedFromKeptMirror(Session session) throws UcanaccessSQLException {
+<span class="fc bfc" id="L187" title="All 4 branches covered.">        if (toKeepHsql != null &amp;&amp; toKeepHsql.exists()) {</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if (getLastUpdateHSQLDB() &gt;= dbFile.lastModified()) {</span>
+<span class="nc" id="L189">                return true;</span>
+            } else {
+                try {
+<span class="fc" id="L192">                    closeHsqlDb(session, true);</span>
+<span class="nc" id="L193">                } catch (Exception ex) {</span>
+<span class="nc" id="L194">                    throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L195">                }</span>
+<span class="fc" id="L196">                return false;</span>
+            }
+        }
+<span class="fc" id="L199">        return false;</span>
+    }
+
+    public static boolean addOnReloadRefListener(IOnReloadReferenceListener action) {
+<span class="fc" id="L203">        return onReloadListeners.add(action);</span>
+    }
+
+    public static String getVersion() {
+<span class="nc" id="L207">        return version;</span>
+    }
+
+    private static synchronized void initVersion(Connection conn) throws SQLException {
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if (version == null) {</span>
+<span class="fc" id="L212">            version = conn.getMetaData().getDriverVersion();</span>
+        }
+<span class="fc" id="L214">    }</span>
+
+    public static boolean is2xx() {
+<span class="fc" id="L217">        return version.startsWith(&quot;2.&quot;);</span>
+    }
+
+    private long filesUpdateTime() {
+<span class="fc" id="L221">        long lm = dbFile.lastModified();</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        for (File fl : links) {</span>
+<span class="fc" id="L223">            lm = Math.max(lm, fl.lastModified());</span>
+<span class="fc" id="L224">        }</span>
+<span class="fc" id="L225">        return lm;</span>
+    }
+
+    Connection checkLastModified(Connection conn, Session session) throws UcanaccessSQLException {
+        // I'm detecting if another process(and not another thread) is writing
+
+        try {
+<span class="pc bpc" id="L232" title="5 of 6 branches missed.">            if (lastModified + 2000 &gt; filesUpdateTime() || (preventReloading &amp;&amp; !checkInside())) {</span>
+<span class="fc" id="L233">                return conn;</span>
+            }
+<span class="nc" id="L235">            updateLastModified();</span>
+<span class="nc" id="L236">            closeHsqlDb(session);</span>
+<span class="nc" id="L237">            dbIO.flush();</span>
+<span class="nc" id="L238">            dbIO.close();</span>
+<span class="nc" id="L239">            pinnedAutoNumberTables.clear();</span>
+<span class="nc" id="L240">            dbIO = open(dbFile, pwd);</span>
+<span class="nc" id="L241">            id = createId();</span>
+<span class="nc" id="L242">            firstConnection = true;</span>
+<span class="nc" id="L243">            LoadJet lj = new LoadJet(getHSQLDBConnection(session), dbIO);</span>
+<span class="nc" id="L244">            lj.setSkipIndexes(skipIndexes);</span>
+<span class="nc" id="L245">            lj.setSysSchema(sysSchema);</span>
+<span class="nc" id="L246">            lj.loadDB();</span>
+
+<span class="nc" id="L248">            return getHSQLDBConnection(session);</span>
+<span class="nc" id="L249">        } catch (SQLException | IOException ex) {</span>
+<span class="nc" id="L250">            throw UcanaccessSQLException.wrap(ex);</span>
+        }
+    }
+
+    private boolean checkInside(Database db) throws IOException {
+<span class="nc" id="L255">        Table t = db.getSystemTable(&quot;MSysObjects&quot;);</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        for (Row row : t) {</span>
+<span class="nc" id="L258">            Object dobj = row.get(&quot;DateUpdate&quot;);</span>
+<span class="nc" id="L259">            Object tobj = row.get(&quot;Type&quot;);</span>
+
+<span class="nc bnc" id="L261" title="All 4 branches missed.">            if (dobj == null || tobj == null) {</span>
+<span class="nc" id="L262">                continue;</span>
+            }
+<span class="nc" id="L264">            Date dt = (Date) dobj;</span>
+
+<span class="nc" id="L266">            short type = (Short) tobj;</span>
+<span class="nc bnc" id="L267" title="All 8 branches missed.">            if (lastModified &lt; dt.getTime() &amp;&amp; (type == 1 || type == 5 || type == 8)</span>
+
+            ) {
+<span class="nc" id="L270">                return true;</span>
+            }
+
+<span class="nc" id="L273">        }</span>
+<span class="nc" id="L274">        return false;</span>
+    }
+
+    private boolean checkInside() throws IOException {
+
+<span class="nc" id="L279">        boolean reload = checkInside(dbIO);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        if (reload) {</span>
+<span class="nc" id="L281">            return true;</span>
+        }
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        for (File fl : links) {</span>
+<span class="nc" id="L284">            Database db = DatabaseBuilder.open(fl);</span>
+<span class="nc" id="L285">            reload = checkInside(db);</span>
+<span class="nc" id="L286">            db.close();</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            if (reload) {</span>
+<span class="nc" id="L288">                return true;</span>
+            }
+<span class="nc" id="L290">        }</span>
+
+<span class="nc" id="L292">        return false;</span>
+    }
+
+    private List&lt;File&gt; getHSQLDBFiles() {
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (toKeepHsql == null) {</span>
+<span class="nc" id="L297">            return List.of();</span>
+        }
+<span class="fc" id="L299">        File folder = toKeepHsql.getParentFile();</span>
+<span class="fc" id="L300">        String name = toKeepHsql.getName();</span>
+<span class="fc" id="L301">        return Stream.of(&quot;data&quot;, &quot;lck&quot;, &quot;lobs&quot;, &quot;log&quot;, &quot;properties&quot;, &quot;script&quot;)</span>
+<span class="fc" id="L302">            .map(ext -&gt; new File(folder, name + &quot;.&quot; + ext)).collect(Collectors.toList());</span>
+    }
+
+    private long getLastUpdateHSQLDB() {
+<span class="fc" id="L306">        long lu = 0;</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        for (File hsqlF : getHSQLDBFiles()) {</span>
+<span class="fc bfc" id="L308" title="All 4 branches covered.">            if (hsqlF.exists() &amp;&amp; hsqlF.lastModified() &gt; lu) {</span>
+<span class="fc" id="L309">                lu = hsqlF.lastModified();</span>
+            }
+<span class="fc" id="L311">        }</span>
+<span class="pc bpc" id="L312" title="3 of 6 branches missed.">        if (toKeepHsql != null &amp;&amp; toKeepHsql.exists() &amp;&amp; toKeepHsql.lastModified() &gt; lu) {</span>
+<span class="nc" id="L313">            lu = toKeepHsql.lastModified();</span>
+        }
+<span class="fc" id="L315">        return lu;</span>
+    }
+
+    private void closeHsqlDb(Session session) throws IOException {
+<span class="fc" id="L319">        closeHsqlDb(session, false);</span>
+<span class="fc" id="L320">    }</span>
+
+    private void closeHsqlDb(Session session, boolean firstConnectionKeeptMirror) throws IOException {
+<span class="fc" id="L323">        finalizeHsqlDb(session);</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">        if (!inMemory) {</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">            if (toKeepHsql == null) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;</span>
+<span class="nc" id="L327">                File hbase = new File(folder, &quot;UCanAccess_&quot; + id);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                if (hbase.exists()) {</span>
+<span class="nc" id="L329">                    Arrays.stream(Optional.ofNullable(hbase.listFiles()).orElse(new File[0]))</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                        .filter(f -&gt; !f.delete())</span>
+<span class="nc" id="L331">                        .forEach(f -&gt; logger.log(Level.WARNING, MSG_COULD_NOT_DELETE, f));</span>
+                }
+<span class="nc" id="L333">                boolean deleted = hbase.delete();</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                if (!deleted) {</span>
+<span class="nc" id="L335">                    logger.log(Level.INFO, MSG_COULD_NOT_DELETE, hbase);</span>
+                }
+
+<span class="pc bpc" id="L338" title="1 of 4 branches missed.">            } else if (!immediatelyReleaseResources || firstConnectionKeeptMirror) {</span>
+<span class="fc" id="L339">                boolean deleted = toKeepHsql.delete();</span>
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">                if (!deleted) {</span>
+<span class="nc" id="L341">                    logger.log(Level.INFO, MSG_COULD_NOT_DELETE, toKeepHsql);</span>
+                }
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">                if (toKeepHsql.createNewFile()) {</span>
+<span class="fc" id="L344">                    logger.log(Level.DEBUG, MSG_CREATED_FILE, toKeepHsql);</span>
+                } else {
+<span class="nc" id="L346">                    logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, toKeepHsql);</span>
+                }
+<span class="fc bfc" id="L348" title="All 2 branches covered.">                for (File hsqlf : getHSQLDBFiles()) {</span>
+<span class="pc bpc" id="L349" title="1 of 4 branches missed.">                    if (hsqlf.exists() &amp;&amp; !hsqlf.delete()) {</span>
+<span class="nc" id="L350">                        logger.log(Level.INFO, MSG_COULD_NOT_DELETE, hsqlf);</span>
+                    }
+<span class="fc" id="L352">                }</span>
+<span class="fc" id="L353">                mirrorRecreated = true;</span>
+            }
+        }
+
+<span class="fc" id="L357">    }</span>
+
+    public void decrementActiveConnection(Session session) {
+<span class="fc" id="L360">        memoryTimer.decrementActiveConnection(session);</span>
+<span class="fc" id="L361">    }</span>
+
+    private void finalizeHsqlDb(Session session) throws IOException {
+<span class="fc bfc" id="L364" title="All 2 branches covered.">        if (!hsqldbShutdown) {</span>
+<span class="fc" id="L365">            releaseLock();</span>
+<span class="fc" id="L366">            try (Connection conn = getHSQLDBConnection(session); Statement st = conn.createStatement()) {</span>
+<span class="fc" id="L367">                st.execute(&quot;SHUTDOWN&quot;);</span>
+<span class="fc" id="L368">                hsqldbShutdown = true;</span>
+<span class="nc" id="L369">            } catch (Exception ignored) {</span>
+                // best effort, the database may already be shut down
+<span class="fc" id="L371">            }</span>
+        }
+<span class="fc" id="L373">    }</span>
+
+    File getDbFile() {
+<span class="fc" id="L376">        return dbFile;</span>
+    }
+
+    public Database getDbIO() {
+<span class="fc" id="L380">        return dbIO;</span>
+    }
+
+    private void setIgnoreCase(Connection conn) {
+<span class="fc" id="L384">        try (Statement st = conn.createStatement()) {</span>
+<span class="fc" id="L385">            st.execute(&quot;SET DATABASE COLLATION \&quot;SQL_TEXT_UCC\&quot;&quot;);</span>
+<span class="nc" id="L386">        } catch (Exception ex) {</span>
+<span class="nc" id="L387">            logger.log(Level.WARNING, &quot;Could not set the case-insensitive collation&quot;, ex);</span>
+<span class="fc" id="L388">        }</span>
+<span class="fc" id="L389">    }</span>
+
+    private void initHSQLDB(Connection conn) {
+<span class="fc" id="L392">        try (Statement st = conn.createStatement()) {</span>
+<span class="fc" id="L393">            st.execute(&quot;SET DATABASE SQL SYNTAX ora TRUE&quot;);</span>
+<span class="fc" id="L394">            st.execute(String.format(&quot;SET DATABASE SQL CONCAT NULLS %s&quot;, concatNulls));</span>
+<span class="pc bpc" id="L395" title="1 of 4 branches missed.">            if (lobScale == null &amp;&amp; inMemory) {</span>
+<span class="fc" id="L396">                st.execute(&quot;SET FILES LOB SCALE 1&quot;);</span>
+<span class="pc bpc" id="L397" title="1 of 2 branches missed.">            } else if (lobScale != null) {</span>
+<span class="nc" id="L398">                st.execute(String.format(&quot;SET FILES LOB SCALE %s&quot;, lobScale));</span>
+            }
+
+<span class="nc" id="L401">        } catch (Exception ex) {</span>
+<span class="nc" id="L402">            logger.log(Level.WARNING, ex.toString());</span>
+<span class="fc" id="L403">        }</span>
+<span class="fc" id="L404">    }</span>
+
+    public Connection getHSQLDBConnection(Session session) throws SQLException {
+<span class="fc bfc" id="L407" title="All 6 branches covered.">        boolean keptMirror = firstConnection &amp;&amp; toKeepHsql != null &amp;&amp; toKeepHsql.exists();</span>
+
+<span class="fc" id="L409">        Connection conn = DriverManager.getConnection(getHsqlUrl(session),</span>
+<span class="fc" id="L410">            Optional.ofNullable(session.getUser()).orElse(&quot;Admin&quot;), session.getPassword());</span>
+
+<span class="fc" id="L412">        initVersion(conn);</span>
+
+<span class="fc bfc" id="L414" title="All 2 branches covered.">        if (firstConnection) {</span>
+<span class="pc bpc" id="L415" title="2 of 6 branches missed.">            if (ignoreCase &amp;&amp; (!keptMirror || mirrorRecreated)) {</span>
+<span class="fc" id="L416">                setIgnoreCase(conn);</span>
+            }
+<span class="pc bpc" id="L418" title="5 of 6 branches missed.">            if (!mirrorReadOnly || !keptMirror || mirrorRecreated) {</span>
+<span class="fc" id="L419">                initHSQLDB(conn);</span>
+            }
+<span class="fc" id="L421">            firstConnection = false;</span>
+<span class="fc" id="L422">            mirrorRecreated = false;</span>
+        }
+<span class="fc" id="L424">        hsqldbShutdown = false;</span>
+<span class="fc" id="L425">        conn.setAutoCommit(false);</span>
+<span class="fc" id="L426">        return conn;</span>
+    }
+
+    String getId() {
+<span class="fc" id="L430">        return id;</span>
+    }
+
+    private String getKey() throws SQLException {
+<span class="nc bnc" id="L434" title="All 2 branches missed.">        if (encryptionKey == null) {</span>
+<span class="nc" id="L435">            String url = &quot;jdbc:hsqldb:mem:&quot; + id + &quot;_tmp&quot;;</span>
+<span class="nc" id="L436">            try (Connection conn = DriverManager.getConnection(url);</span>
+<span class="nc" id="L437">                Statement stmt = conn.createStatement();</span>
+<span class="nc" id="L438">                ResultSet rs = stmt.executeQuery(&quot;CALL CRYPT_KEY('&quot; + CIPHER_SPEC + &quot;', null) &quot;)) {</span>
+<span class="nc" id="L439">                rs.next();</span>
+<span class="nc" id="L440">                encryptionKey = rs.getString(1);</span>
+            }
+        }
+<span class="nc" id="L443">        return encryptionKey;</span>
+    }
+
+    private String getHsqlUrl(Session session) throws SQLException {
+        try {
+<span class="pc bpc" id="L448" title="3 of 4 branches missed.">            if (openExclusive &amp;&amp; fileLock == null) {</span>
+<span class="nc" id="L449">                lockMdbFile();</span>
+            }
+<span class="fc" id="L451">            String enc = &quot;&quot;;</span>
+<span class="fc" id="L452">            String log = &quot;&quot;;</span>
+<span class="pc bpc" id="L453" title="1 of 2 branches missed.">            if (encryptHSQLDB) {</span>
+<span class="nc" id="L454">                enc = &quot;;crypt_key=&quot; + getKey() + &quot;;crypt_type=aes;crypt_lobs=true&quot;;</span>
+            }
+<span class="pc bpc" id="L456" title="1 of 4 branches missed.">            if (!inMemory &amp;&amp; toKeepHsql == null) {</span>
+<span class="nc" id="L457">                log = &quot;;hsqldb.log_data=FALSE&quot;;</span>
+            }
+<span class="fc bfc" id="L459" title="All 4 branches covered.">            if (!inMemory &amp;&amp; tempHsql == null) {</span>
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">                if (toKeepHsql != null) {</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">                    if (!toKeepHsql.exists()) {</span>
+<span class="pc bpc" id="L462" title="1 of 2 branches missed.">                        if (toKeepHsql.createNewFile()) {</span>
+<span class="fc" id="L463">                            logger.log(Level.DEBUG, MSG_CREATED_FILE, toKeepHsql);</span>
+                        } else {
+<span class="nc" id="L465">                            logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, toKeepHsql);</span>
+                        }
+                    }
+<span class="fc" id="L468">                    tempHsql = toKeepHsql;</span>
+                } else {
+<span class="nc bnc" id="L470" title="All 2 branches missed.">                    File folder = mirrorFolder == null ? dbFile.getParentFile() : mirrorFolder;</span>
+<span class="nc" id="L471">                    File hbase = new File(folder, &quot;UCanAccess_&quot; + id);</span>
+<span class="nc" id="L472">                    hbase.mkdir();</span>
+<span class="nc" id="L473">                    tempHsql = new File(hbase, id);</span>
+
+<span class="nc bnc" id="L475" title="All 2 branches missed.">                    if (!tempHsql.exists()) {</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">                        if (tempHsql.createNewFile()) {</span>
+<span class="nc" id="L477">                            logger.log(Level.DEBUG, MSG_CREATED_FILE, tempHsql);</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">                            if (!tempHsql.delete()) {</span>
+<span class="nc" id="L479">                                logger.log(Level.INFO, MSG_COULD_NOT_DELETE, tempHsql);</span>
+                            }
+                        } else {
+<span class="nc" id="L482">                            logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, tempHsql);</span>
+                        }
+                    }
+                }
+<span class="fc" id="L486">                Runtime.getRuntime().addShutdownHook(new Thread(() -&gt; {</span>
+                    try {
+<span class="pc bpc" id="L488" title="1 of 2 branches missed.">                        if (toKeepHsql == null) {</span>
+<span class="nc" id="L489">                            closeHsqlDb(session);</span>
+                        } else {
+<span class="fc" id="L491">                            finalizeHsqlDb(session);</span>
+                        }
+<span class="nc" id="L493">                    } catch (Exception ex) {</span>
+<span class="nc" id="L494">                        logger.log(Level.WARNING, ex.toString());</span>
+<span class="fc" id="L495">                    }</span>
+<span class="fc" id="L496">                }));</span>
+            }
+<span class="pc bpc" id="L498" title="1 of 2 branches missed.">            String mro = mirrorReadOnly ? &quot;;readonly=true&quot; : &quot;&quot;;</span>
+<span class="fc bfc" id="L499" title="All 2 branches covered.">            return &quot;jdbc:hsqldb:&quot; + (inMemory ? &quot;mem:&quot; + id : tempHsql.getAbsolutePath()) + enc + log + mro;</span>
+<span class="nc" id="L500">        } catch (IOException ex) {</span>
+<span class="nc" id="L501">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    public long getInactivityTimeout() {
+<span class="nc" id="L506">        return memoryTimer.inactivityTimeout;</span>
+    }
+
+    private String createId() {
+<span class="fc" id="L510">        return UUID.randomUUID() + &quot;-&quot; + new UniqueString();</span>
+    }
+
+    public void incrementActiveConnection() {
+<span class="fc" id="L514">        memoryTimer.incrementActiveConnection();</span>
+<span class="fc" id="L515">    }</span>
+
+    public boolean isReadOnly() throws UcanaccessSQLException {
+<span class="pc bpc" id="L518" title="1 of 2 branches missed.">        if (readOnly) {</span>
+<span class="nc" id="L519">            lockMdbFile();</span>
+        }
+<span class="pc bpc" id="L521" title="2 of 4 branches missed.">        return readOnlyFileFormat || readOnly;</span>
+    }
+
+    boolean isReadOnlyFileFormat() {
+<span class="nc" id="L525">        return readOnlyFileFormat;</span>
+    }
+
+    boolean isShowSchema() {
+<span class="fc" id="L529">        return showSchema;</span>
+    }
+
+    private File fileLock() {
+<span class="nc" id="L533">        File folder = dbFile.getParentFile();</span>
+<span class="nc" id="L534">        String fileName = dbFile.getName();</span>
+<span class="nc" id="L535">        int suffixStart = fileName.lastIndexOf('.');</span>
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        if (suffixStart &lt; 0) {</span>
+<span class="nc" id="L537">            suffixStart = fileName.length();</span>
+        }
+<span class="nc bnc" id="L539" title="All 6 branches missed.">        String suffix = FileFormat.V2016 == dbFormat || FileFormat.V2010 == dbFormat || FileFormat.V2007 == dbFormat</span>
+<span class="nc" id="L540">            ? &quot;.laccdb&quot;</span>
+<span class="nc" id="L541">            : &quot;.ldb&quot;;</span>
+<span class="nc" id="L542">        return new File(folder, fileName.substring(0, suffixStart) + suffix);</span>
+    }
+
+    private void lockMdbFile() throws UcanaccessSQLException {
+        try {
+<span class="nc" id="L547">            File flLock = fileLock();</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">            if (flLock.createNewFile()) {</span>
+<span class="nc" id="L549">                logger.log(Level.DEBUG, MSG_CREATED_FILE, flLock);</span>
+            } else {
+<span class="nc" id="L551">                logger.log(Level.WARNING, MSG_COULD_NOT_CREATE, flLock);</span>
+            }
+
+            // suppress Eclipse warning &quot;Resource leak: 'raf' is never closed&quot;, because that is exactly how UCanAccess
+            // &quot;locks&quot; the file
+            @SuppressWarnings(&quot;resource&quot;)
+<span class="nc" id="L557">            final RandomAccessFile raf = new RandomAccessFile(flLock, &quot;rw&quot;);</span>
+<span class="nc" id="L558">            FileLock tryLock = raf.getChannel().tryLock();</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">            if (tryLock == null) {</span>
+<span class="nc" id="L560">                readOnly = true;</span>
+            } else {
+<span class="nc" id="L562">                fileLock = tryLock;</span>
+<span class="nc" id="L563">                readOnly = false;</span>
+            }
+<span class="nc" id="L565">        } catch (IOException ex) {</span>
+<span class="nc" id="L566">            throw new UcanaccessSQLException(ex);</span>
+<span class="nc" id="L567">        }</span>
+<span class="nc" id="L568">    }</span>
+
+    public void releaseLock() throws IOException {
+<span class="pc bpc" id="L571" title="1 of 2 branches missed.">        if (fileLock != null) {</span>
+<span class="nc" id="L572">            fileLock.release();</span>
+        }
+<span class="fc" id="L574">    }</span>
+
+    public void reloadDbIO() throws IOException {
+<span class="fc" id="L577">        dbIO.flush();</span>
+<span class="fc" id="L578">        dbIO.close();</span>
+<span class="fc bfc" id="L579" title="All 2 branches covered.">        for (IOnReloadReferenceListener listener : onReloadListeners) {</span>
+<span class="fc" id="L580">            listener.onReload();</span>
+<span class="fc" id="L581">        }</span>
+<span class="fc" id="L582">        pinnedAutoNumberTables.clear();</span>
+<span class="fc" id="L583">        dbIO = open(dbFile, pwd);</span>
+
+<span class="fc" id="L585">    }</span>
+
+    /**
+     * Pins the given table so it is not garbage-collected while an explicit {@code allowAutoNumberInsert} toggle
+     * (from {@code DISABLE}/{@code ENABLE AUTOINCREMENT ON}) is in effect on it.
+     */
+    void pinAutoNumberTable(String tableName, Table table) {
+<span class="fc" id="L592">        pinnedAutoNumberTables.put(tableName, table);</span>
+<span class="fc" id="L593">    }</span>
+
+    public void setInactivityTimeout(int inactivityTimeout) {
+<span class="nc" id="L596">        memoryTimer.setInactivityTimeout(inactivityTimeout);</span>
+<span class="nc" id="L597">    }</span>
+
+    public void setInMemory(boolean inMemory) {
+<span class="fc" id="L600">        this.inMemory = inMemory;</span>
+<span class="fc" id="L601">    }</span>
+
+    public void setOpenExclusive(boolean openExclusive) {
+<span class="nc" id="L604">        this.openExclusive = openExclusive;</span>
+<span class="nc" id="L605">    }</span>
+
+    public void setShowSchema(boolean showSchema) {
+<span class="nc" id="L608">        this.showSchema = showSchema;</span>
+<span class="nc" id="L609">    }</span>
+
+    void shutdown(Session session) throws Exception {
+<span class="fc" id="L612">        DBReferenceSingleton.getInstance().remove(dbFile.getAbsolutePath());</span>
+<span class="pc bpc" id="L613" title="1 of 2 branches missed.">        if (immediatelyReleaseResources) {</span>
+<span class="fc bfc" id="L614" title="All 2 branches covered.">            for (IOnReloadReferenceListener listener : onReloadListeners) {</span>
+<span class="fc" id="L615">                listener.onReload();</span>
+<span class="fc" id="L616">            }</span>
+        }
+<span class="fc" id="L618">        memoryTimer.timer.cancel();</span>
+<span class="fc" id="L619">        pinnedAutoNumberTables.clear();</span>
+<span class="fc" id="L620">        dbIO.flush();</span>
+<span class="fc" id="L621">        dbIO.close();</span>
+<span class="fc" id="L622">        closeHsqlDb(session);</span>
+
+<span class="fc" id="L624">    }</span>
+
+    public void updateLastModified() {
+<span class="fc" id="L627">        lastModified = filesUpdateTime();</span>
+<span class="fc" id="L628">    }</span>
+
+    public void setImmediatelyReleaseResources(boolean immediatelyReleaseResources) {
+<span class="fc" id="L631">        this.immediatelyReleaseResources = immediatelyReleaseResources;</span>
+<span class="fc" id="L632">    }</span>
+
+    public void setEncryptHSQLDB(boolean encryptHSQLDB) {
+<span class="nc" id="L635">        this.encryptHSQLDB = encryptHSQLDB;</span>
+<span class="nc" id="L636">    }</span>
+
+    public void setExternalResourcesMapping(Map&lt;String, String&gt; externalResourcesMapping) {
+<span class="fc" id="L639">        this.externalResourcesMapping = externalResourcesMapping;</span>
+<span class="fc" id="L640">    }</span>
+
+    /**
+     * Enables or disables automatic resolution of linked tables that point to a network/UNC path.
+     * &lt;p&gt;
+     * Disabled by default; see the security note on {@link net.ucanaccess.converters.Metadata.Property#allowRemoteLinks}
+     * for why this matters when opening database files from an untrusted source.
+     *
+     * @param allowRemoteLinks {@code true} to allow automatic resolution of network/UNC linked paths
+     */
+    public void setAllowRemoteLinks(boolean allowRemoteLinks) {
+<span class="nc" id="L651">        this.allowRemoteLinks = allowRemoteLinks;</span>
+<span class="nc" id="L652">    }</span>
+
+    public File getToKeepHsql() {
+<span class="nc" id="L655">        return toKeepHsql;</span>
+    }
+
+    public void setToKeepHsql(File toKeepHsql) {
+<span class="fc" id="L659">        this.toKeepHsql = toKeepHsql;</span>
+<span class="fc" id="L660">    }</span>
+
+    public boolean isEncryptHSQLDB() {
+<span class="fc" id="L663">        return encryptHSQLDB;</span>
+    }
+
+    public void setColumnOrderDisplay() {
+<span class="fc" id="L667">        columnOrderDisplay = true;</span>
+<span class="pc bpc" id="L668" title="1 of 2 branches missed.">        if (dbIO != null) {</span>
+<span class="fc" id="L669">            dbIO.setColumnOrder(ColumnOrder.DISPLAY);</span>
+        }
+<span class="fc" id="L671">    }</span>
+
+    public boolean isInMemory() {
+<span class="nc" id="L674">        return inMemory;</span>
+    }
+
+    public void setMirrorFolder(File mirrorFolder) {
+<span class="nc" id="L678">        this.mirrorFolder = mirrorFolder;</span>
+<span class="nc" id="L679">    }</span>
+
+    public boolean isIgnoreCase() {
+<span class="nc" id="L682">        return ignoreCase;</span>
+    }
+
+    public void setIgnoreCase(boolean ignoreCase) {
+<span class="nc" id="L686">        this.ignoreCase = ignoreCase;</span>
+<span class="nc" id="L687">    }</span>
+
+    public void setMirrorReadOnly(boolean mirrorReadOnly) {
+<span class="nc" id="L690">        this.mirrorReadOnly = mirrorReadOnly;</span>
+<span class="nc" id="L691">    }</span>
+
+    public void setLobScale(Integer lobScale) {
+<span class="nc" id="L694">        this.lobScale = lobScale;</span>
+<span class="nc" id="L695">    }</span>
+
+    public void setSkipIndexes(boolean skipIndexes) {
+<span class="nc" id="L698">        this.skipIndexes = skipIndexes;</span>
+<span class="nc" id="L699">    }</span>
+
+    public void setSysSchema(boolean sysSchema) {
+<span class="nc" id="L702">        this.sysSchema = sysSchema;</span>
+<span class="nc" id="L703">    }</span>
+
+    public boolean isPreventReloading() {
+<span class="nc" id="L706">        return preventReloading;</span>
+    }
+
+    public void setPreventReloading(boolean preventReloading) {
+<span class="nc" id="L710">        this.preventReloading = preventReloading;</span>
+<span class="nc" id="L711">    }</span>
+
+    public boolean isConcatNulls() {
+<span class="nc" id="L714">        return concatNulls;</span>
+    }
+
+    public void setConcatNulls(boolean concatNulls) {
+<span class="fc" id="L718">        this.concatNulls = concatNulls;</span>
+<span class="fc" id="L719">    }</span>
+
+    /**
+     * Unique string based on current date/time and a unique id.
+     */
+    private static final class UniqueString {
+<span class="fc" id="L725">        private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyyMMdd-HHmmss&quot;);</span>
+<span class="fc" id="L726">        private static final AtomicInteger     COUNTER   = new AtomicInteger(1);</span>
+        private final String                   name;
+
+<span class="fc" id="L729">        private UniqueString() {</span>
+<span class="fc" id="L730">            name = LocalDateTime.now(ZoneId.systemDefault()).format(FORMATTER) + '_' + String.format(&quot;%03d&quot;, COUNTER.getAndIncrement());</span>
+<span class="fc" id="L731">        }</span>
+
+        @Override
+        public String toString() {
+<span class="fc" id="L735">            return name;</span>
+        }
+    }
+
+    private static class MemoryTimer {
+        private static final long INACTIVITY_TIMEOUT_DEFAULT = 120000;
+
+<span class="fc" id="L742">        private final Logger      logger                     = System.getLogger(getClass().getName());</span>
+        private final DBReference dbReference;
+        private final Timer       timer;
+        private int               activeConnection;
+<span class="fc" id="L746">        private long              inactivityTimeout          = INACTIVITY_TIMEOUT_DEFAULT;</span>
+        private long              lastConnectionTime;
+
+<span class="fc" id="L749">        MemoryTimer(DBReference dbReference) {</span>
+<span class="fc" id="L750">            this.dbReference = dbReference;</span>
+<span class="fc" id="L751">            timer = new Timer(getClass().getSimpleName() + '-' + dbReference.getDbFile().getName(), true);</span>
+<span class="fc" id="L752">        }</span>
+
+        synchronized void decrementActiveConnection(final Session session) {
+<span class="fc" id="L755">            activeConnection--;</span>
+<span class="pc bpc" id="L756" title="1 of 4 branches missed.">            if (dbReference.immediatelyReleaseResources &amp;&amp; activeConnection == 0) {</span>
+                try {
+<span class="fc" id="L758">                    dbReference.shutdown(session);</span>
+<span class="fc" id="L759">                } catch (Exception ex) {</span>
+<span class="fc" id="L760">                    logger.log(Level.WARNING, &quot;Error shutting down db {0}: {1}&quot;, dbReference, ex.toString());</span>
+<span class="fc" id="L761">                }</span>
+<span class="fc" id="L762">                timer.cancel();</span>
+
+<span class="fc" id="L764">                return;</span>
+            }
+<span class="pc bpc" id="L766" title="3 of 6 branches missed.">            if (dbReference.inMemory &amp;&amp; inactivityTimeout &gt; 0 &amp;&amp; activeConnection == 0) {</span>
+<span class="nc" id="L767">                TimerTask task = new TimerTask() {</span>
+                    @Override
+                    @SuppressWarnings(&quot;LockOnNonEnclosingClassLiteral&quot;) // the driver class is the driver-wide lock
+                    public void run() {
+<span class="nc" id="L771">                        synchronized (UcanaccessDriver.class) {</span>
+<span class="nc bnc" id="L772" title="All 2 branches missed.">                            if (System.currentTimeMillis() - getLastConnectionTime() &gt;= inactivityTimeout</span>
+<span class="nc bnc" id="L773" title="All 2 branches missed.">                                &amp;&amp; getActiveConnection() == 0) {</span>
+                                try {
+<span class="nc" id="L775">                                    dbReference.shutdown(session);</span>
+<span class="nc" id="L776">                                } catch (Exception ignored) {</span>
+<span class="nc" id="L777">                                    logger.log(Level.DEBUG, &quot;Ignore {0}&quot;, ignored.toString());</span>
+<span class="nc" id="L778">                                }</span>
+                            }
+<span class="nc" id="L780">                        }</span>
+<span class="nc" id="L781">                    }</span>
+                };
+<span class="nc" id="L783">                timer.schedule(task, inactivityTimeout);</span>
+            }
+<span class="fc" id="L785">        }</span>
+
+        synchronized int getActiveConnection() {
+<span class="nc" id="L788">            return activeConnection;</span>
+        }
+
+        synchronized long getLastConnectionTime() {
+<span class="nc" id="L792">            return lastConnectionTime;</span>
+        }
+
+        synchronized void incrementActiveConnection() {
+<span class="fc" id="L796">            activeConnection++;</span>
+<span class="pc bpc" id="L797" title="1 of 4 branches missed.">            if (dbReference.inMemory &amp;&amp; inactivityTimeout &gt; 0) {</span>
+<span class="fc" id="L798">                lastConnectionTime = System.currentTimeMillis();</span>
+            }
+<span class="fc" id="L800">        }</span>
+
+        void setInactivityTimeout(int inactivityTimeout) {
+<span class="nc" id="L803">            this.inactivityTimeout = inactivityTimeout;</span>
+<span class="nc" id="L804">        }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

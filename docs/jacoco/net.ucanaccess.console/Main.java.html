@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.console</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package net.ucanaccess.console;
+
+import static net.ucanaccess.type.SqlConstants.FROM;
+import static net.ucanaccess.type.SqlConstants.SELECT;
+
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.DatabaseBuilder;
+import net.ucanaccess.converters.Metadata.Property;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.util.Sql;
+import net.ucanaccess.util.Try;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@SuppressWarnings(&quot;java:S106&quot;) // interactive console that prints its results to standard output
+public class Main {
+    private static final String  EXPORT_USAGE  = &quot;export [--help] [--bom] [-d &lt;delimiter&gt;] [-t &lt;table&gt;] &quot;
+        + &quot;[--big_query_schema &lt;pathToSchemaFile&gt;] &quot; + &quot;[--newlines] &lt;pathToCsv&gt;&quot;;
+
+    private static final String  EXPORT_PROMPT = &quot;Export command syntax is: &quot; + EXPORT_USAGE;
+
+<span class="fc" id="L26">    private static boolean       batchMode     = false;</span>
+    private final Connection     conn;
+<span class="fc" id="L28">    private boolean              connected     = true;</span>
+    private final BufferedReader input;
+    private String               lastSqlQuery;
+
+<span class="fc" id="L32">    public Main(Connection conn, BufferedReader input) {</span>
+<span class="fc" id="L33">        this.conn = conn;</span>
+<span class="fc" id="L34">        this.input = input;</span>
+<span class="fc" id="L35">    }</span>
+
+    private static boolean hasPassword(File f) throws IOException {
+<span class="nc" id="L38">        try (Database db = Try.catching(() -&gt; DatabaseBuilder.open(f))</span>
+<span class="nc" id="L39">            .orElseGet(() -&gt; Try.catching(() -&gt; new DatabaseBuilder()</span>
+<span class="nc" id="L40">                .withReadOnly(true)</span>
+<span class="nc" id="L41">                .withFile(f).open()).orThrow())) {</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            return db.getDatabasePassword() != null;</span>
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+<span class="nc" id="L47">        BufferedReader input = new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));</span>
+        // password properties info
+<span class="nc" id="L49">        Properties props = new Properties();</span>
+<span class="nc" id="L50">        File fl = null;</span>
+<span class="nc" id="L51">        long size = 0;</span>
+<span class="nc" id="L52">        String passwordEntry = &quot;&quot;;</span>
+<span class="nc" id="L53">        String[] commands = null;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (args.length &gt; 0) {</span>
+<span class="nc" id="L55">            String file = args[0];</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (file.endsWith(&quot;.properties&quot;)) {</span>
+<span class="nc" id="L57">                File pfl = new File(args[0]);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (pfl.exists()) {</span>
+<span class="nc" id="L59">                    try (FileInputStream fis = new FileInputStream(pfl)) {</span>
+<span class="nc" id="L60">                        props.load(fis);</span>
+                    }
+                    // convert keys to enum name or lower-case
+<span class="nc" id="L63">                    props = props.stringPropertyNames().stream()</span>
+<span class="nc" id="L64">                        .collect(Collectors.toMap(</span>
+<span class="nc" id="L65">                            k -&gt; Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase(Locale.ROOT)),</span>
+<span class="nc" id="L66">                            props::getProperty, (v1, v2) -&gt; v1, Properties::new));</span>
+                }
+<span class="nc bnc" id="L68" title="All 4 branches missed.">            } else if (file.endsWith(&quot;.accdb&quot;) || file.endsWith(&quot;.mdb&quot;)) {</span>
+<span class="nc" id="L69">                fl = new File(file);</span>
+<span class="nc" id="L70">                size = fl.length();</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                if (args.length &gt; 1) {</span>
+<span class="nc" id="L72">                    int arg = 1;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                    if (hasPassword(fl)) {</span>
+<span class="nc" id="L74">                       passwordEntry = args[arg++];</span>
+                    } else {
+<span class="nc" id="L76">                       commands = Arrays.copyOfRange(args, arg++, args.length);</span>
+                    }
+                }
+            }
+        }
+
+        try {
+<span class="nc" id="L83">            Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);</span>
+<span class="nc" id="L84">        } catch (ClassNotFoundException ex) {</span>
+<span class="nc" id="L85">            System.err.println(ex.getMessage());</span>
+<span class="nc" id="L86">            System.err.println(&quot;Check your classpath!&quot;);</span>
+<span class="nc" id="L87">            System.exit(1);</span>
+<span class="nc" id="L88">        }</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        while (fl == null || !fl.exists()) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (fl != null) {</span>
+<span class="nc" id="L91">                System.out.println(&quot;Given file does not exist&quot;);</span>
+            }
+<span class="nc" id="L93">            System.out.print(&quot;Please, enter the full path to the access file (.mdb or .accdb): &quot;);</span>
+<span class="nc" id="L94">            String path = input.readLine().trim();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (path.endsWith(&quot;;&quot;)) {</span>
+<span class="nc" id="L96">                path = path.substring(0, path.length() - 1);</span>
+            }
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (&quot;quit&quot;.equalsIgnoreCase(path)) {</span>
+<span class="nc" id="L99">                System.out.println(&quot;I'm so unhappy. Goodbye.&quot;);</span>
+<span class="nc" id="L100">                System.exit(1);</span>
+            }
+<span class="nc" id="L102">            fl = new File(path);</span>
+<span class="nc" id="L103">            size = fl.length();</span>
+<span class="nc" id="L104">        }</span>
+<span class="nc" id="L105">        Connection conn = null;</span>
+        try {
+<span class="nc" id="L107">            String noMem = &quot;&quot;;</span>
+<span class="nc bnc" id="L108" title="All 6 branches missed.">            if (passwordEntry.isEmpty() &amp;&amp; (props.containsKey(Property.jackcessOpener.name()) || hasPassword(fl))) {</span>
+<span class="nc" id="L109">                System.out.print(&quot;Please, enter password: &quot;);</span>
+<span class="nc" id="L110">                passwordEntry = &quot;;password=&quot; + input.readLine().trim();</span>
+            }
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (!props.containsKey(Property.jackcessOpener.name())) {</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                noMem = size &gt; 30000000 ? &quot;;&quot; + Property.memory + &quot;=false&quot; : &quot;&quot;;</span>
+            }
+
+<span class="nc" id="L117">            conn = DriverManager.getConnection(&quot;jdbc:ucanaccess://&quot; + fl.getAbsolutePath() + passwordEntry + noMem, props);</span>
+
+<span class="nc" id="L119">            SQLWarning sqlw = conn.getWarnings();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            while (sqlw != null) {</span>
+<span class="nc" id="L121">                System.out.println(sqlw.getMessage());</span>
+<span class="nc" id="L122">                sqlw = sqlw.getNextWarning();</span>
+            }
+<span class="nc" id="L124">        } catch (Exception ex) {</span>
+<span class="nc" id="L125">            System.err.println(ex);</span>
+<span class="nc" id="L126">            System.exit(1);</span>
+<span class="nc" id="L127">        }</span>
+<span class="nc" id="L128">        Main main = new Main(conn, input);</span>
+<span class="nc" id="L129">        main.sayHello(conn.getMetaData().getDriverVersion());</span>
+<span class="nc" id="L130">        main.start(commands);</span>
+<span class="nc" id="L131">    }</span>
+
+    public static void setBatchMode(boolean batchMode) {
+<span class="fc" id="L134">        Main.batchMode = batchMode;</span>
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.
+     */
+    public void consoleDump(ResultSet resultSet, PrintStream printStream) throws SQLException {
+<span class="fc" id="L141">        new TableFormat(resultSet).output(printStream);</span>
+<span class="fc" id="L142">    }</span>
+
+    private void executeStatement(String sql) throws SQLException {
+<span class="nc" id="L145">        try (Statement st = conn.createStatement()) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            if (st.execute(sql)) {</span>
+<span class="nc" id="L147">                ResultSet rs = st.getResultSet();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L149">                    consoleDump(rs, System.out);</span>
+<span class="nc" id="L150">                    lastSqlQuery = sql;</span>
+                } else {
+<span class="nc" id="L152">                    System.out.println(&quot;Ok!&quot;);</span>
+                }
+<span class="nc" id="L154">            } else {</span>
+<span class="nc" id="L155">                int num = st.getUpdateCount();</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                prompt(num == 0 ? &quot;No rows affected&quot; : num + &quot; row(s) affected&quot;);</span>
+            }
+        }
+<span class="nc" id="L159">    }</span>
+
+    private void prompt() {
+<span class="nc" id="L162">        System.out.println();</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (!batchMode) {</span>
+<span class="nc" id="L164">            System.out.print(&quot;UCanAccess&gt;&quot;);</span>
+        }
+<span class="nc" id="L166">    }</span>
+
+    private void prompt(String content) {
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!batchMode) {</span>
+<span class="nc" id="L170">            System.out.println(&quot;UCanAccess&gt;&quot; + content);</span>
+        }
+<span class="nc" id="L172">    }</span>
+
+    private String readInput() {
+        try {
+<span class="nc" id="L176">            String ret = input.readLine();</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (ret == null) {</span>
+<span class="nc" id="L178">                prompt(&quot;Ciao!&quot;);</span>
+<span class="nc" id="L179">                System.exit(0);</span>
+            }
+<span class="nc" id="L181">            return ret.trim();</span>
+<span class="nc" id="L182">        } catch (IOException ex) {</span>
+<span class="nc" id="L183">            throw new UcanaccessRuntimeException(ex.getMessage());</span>
+        }
+    }
+
+    private void sayHello(String version) {
+<span class="nc" id="L188">        prompt(&quot;&quot;);</span>
+<span class="nc" id="L189">        System.out.println(&quot;UCanAccess version &quot; + version);</span>
+<span class="nc" id="L190">        System.out.println(&quot;You are connected!! &quot;);</span>
+
+<span class="nc" id="L192">        System.out.println(&quot;Type quit to exit &quot;);</span>
+<span class="nc" id="L193">        System.out.println();</span>
+<span class="nc" id="L194">        System.out.println(&quot;Commands end with ; &quot;);</span>
+<span class="nc" id="L195">        System.out.println();</span>
+<span class="nc" id="L196">        System.out.println(&quot;Use:   &quot;);</span>
+<span class="nc" id="L197">        System.out.printf(&quot;   %s;%n&quot;, EXPORT_USAGE);</span>
+<span class="nc" id="L198">        System.out.println(</span>
+                &quot;for exporting the result set from the last executed query or a specific table into a .csv file&quot;);
+<span class="nc" id="L200">        prompt();</span>
+<span class="nc" id="L201">    }</span>
+
+    private void printExportHelp() {
+<span class="nc" id="L204">        System.out.printf(&quot;Usage: %s;%n&quot;, EXPORT_USAGE);</span>
+<span class="nc" id="L205">        System.out.println(&quot;Export the most recent SQL query to the given &lt;pathToCsv&gt; file.&quot;);</span>
+<span class="nc" id="L206">        System.out.println(&quot;  -d &lt;delimiter&gt; Set the CSV column delimiter (default: ';').&quot;);</span>
+<span class="nc" id="L207">        System.out.println(&quot;  -t &lt;table&gt;     Output the &lt;table&gt; instead of the previous query.&quot;);</span>
+<span class="nc" id="L208">        System.out.println(&quot;  --big_query_schema &lt;schemaFile&gt;  Output the BigQuery schema&quot; + &quot; to &lt;schemaFile&gt;.&quot;);</span>
+<span class="nc" id="L209">        System.out.println(&quot;  --bom          Output the UTF-8 byte order mark.&quot;);</span>
+<span class="nc" id="L210">        System.out.println(&quot;  --newlines     Preserve embedded newlines (\\r, \\n).&quot;);</span>
+<span class="nc" id="L211">        System.out.println(&quot;  --help         Print this help message.&quot;);</span>
+<span class="nc" id="L212">        System.out.println(&quot;Single (') or double (\&quot;) quoted strings are supported.&quot;);</span>
+<span class="nc" id="L213">        System.out.println(&quot;Backslash (\\) escaping (e.g. \\n, \\t) is enabled within quotes.&quot;);</span>
+<span class="nc" id="L214">        System.out.println(&quot;Use two backslashes (\\\\) to insert one backslash within quotes &quot;</span>
+                + &quot;(e.g. \&quot;c:\\\\temp\\\\newfile.csv\&quot;).&quot;);
+<span class="nc" id="L216">    }</span>
+
+    private void start(String[] commands) {
+<span class="nc" id="L219">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L220">        boolean exit = false;</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        while (connected) {</span>
+            String userInput;
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            if (commands != null) {</span>
+<span class="nc" id="L224">                userInput = String.join(&quot; &quot;, commands);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                if (!userInput.endsWith(&quot;;&quot;)) {</span>
+<span class="nc" id="L226">                   userInput += &quot;;&quot;;</span>
+                }
+<span class="nc" id="L228">                commands = null;</span>
+<span class="nc" id="L229">                exit = true;</span>
+            } else {
+<span class="nc" id="L231">                userInput = readInput();</span>
+            }
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (&quot;quit&quot;.equalsIgnoreCase(userInput)) {</span>
+<span class="nc" id="L234">                connected = false;</span>
+<span class="nc" id="L235">                break;</span>
+            }
+<span class="nc" id="L237">            sb.append(&quot; &quot;).append(userInput);</span>
+
+            // If the current userInput ends with ';', then execute the buffered command.
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            if (userInput.endsWith(&quot;;&quot;)) {</span>
+<span class="nc" id="L241">                String cmd = sb.substring(0, sb.length() - 1).trim();</span>
+                try {
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                    if (cmd.toLowerCase(Locale.ROOT).startsWith(&quot;export &quot;)) {</span>
+<span class="nc" id="L244">                        executeExport(cmd);</span>
+                    } else {
+<span class="nc" id="L246">                        executeStatement(cmd);</span>
+                    }
+<span class="nc" id="L248">                } catch (Exception ex) {</span>
+<span class="nc" id="L249">                    prompt(ex.getMessage());</span>
+<span class="nc" id="L250">                }</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                if (exit) {</span>
+<span class="nc" id="L252">                   connected = false;</span>
+<span class="nc" id="L253">                   break;</span>
+                }
+<span class="nc" id="L255">                sb.setLength(0);</span>
+<span class="nc" id="L256">                prompt();</span>
+            }
+<span class="nc" id="L258">        }</span>
+<span class="nc" id="L259">        System.out.println(&quot;Cheers! Thank you for using the UCanAccess JDBC Driver.&quot;);</span>
+<span class="nc" id="L260">    }</span>
+
+    /**
+     * Parse the {@code cmd} to handle command line flags of the form: &quot;export [-d delimiter] [-t table] pathToCsv&quot;. For
+     * example:
+     *
+     * &lt;pre&gt;
+     * export -d , -t License License.csv
+     * &lt;/pre&gt;
+     *
+     * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The
+     * {@code -t License} option dumps the {@code License} table using the SQL statement &quot;SELECT * FROM [License]&quot;.
+     */
+    private void executeExport(String cmd) throws SQLException, IOException {
+<span class="nc" id="L274">        List&lt;String&gt; tokens = tokenize(cmd);</span>
+
+<span class="nc" id="L276">        Exporter.Builder exporterBuilder = new Exporter.Builder();</span>
+<span class="nc" id="L277">        String table = null;</span>
+<span class="nc" id="L278">        String schemaFileName = null;</span>
+
+        // Process the command line flags.
+<span class="nc" id="L281">        int i = 1; // skip the first token which will always be &quot;export&quot;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        for (; i &lt; tokens.size(); i++) {</span>
+<span class="nc" id="L283">            String arg = tokens.get(i);</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">            if (!arg.startsWith(&quot;-&quot;)) {</span>
+<span class="nc" id="L285">                break;</span>
+            }
+<span class="nc bnc" id="L287" title="All 8 branches missed.">            switch (arg) {</span>
+                case &quot;-d&quot;:
+<span class="nc" id="L289">                    i++;</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                    if (i &gt;= tokens.size()) {</span>
+<span class="nc" id="L291">                        prompt(&quot;Missing parameter for -d flag&quot;);</span>
+<span class="nc" id="L292">                        prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L293">                        return;</span>
+                    }
+<span class="nc" id="L295">                    exporterBuilder.withDelimiter(tokens.get(i));</span>
+<span class="nc" id="L296">                    break;</span>
+                case &quot;-t&quot;:
+<span class="nc" id="L298">                    i++;</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">                    if (i &gt;= tokens.size()) {</span>
+<span class="nc" id="L300">                        prompt(&quot;Missing parameter for -t flag&quot;);</span>
+<span class="nc" id="L301">                        prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L302">                        return;</span>
+                    }
+<span class="nc" id="L304">                    table = tokens.get(i);</span>
+<span class="nc" id="L305">                    break;</span>
+                case &quot;--bom&quot;:
+<span class="nc" id="L307">                    exporterBuilder.includeBom(true);</span>
+<span class="nc" id="L308">                    break;</span>
+                case &quot;--newlines&quot;:
+<span class="nc" id="L310">                    exporterBuilder.preserveNewlines(true);</span>
+<span class="nc" id="L311">                    break;</span>
+                case &quot;--big_query_schema&quot;:
+<span class="nc" id="L313">                    i++;</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                    if (i &gt;= tokens.size()) {</span>
+<span class="nc" id="L315">                        prompt(&quot;Missing parameter for --big_query_schema flag&quot;);</span>
+<span class="nc" id="L316">                        prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L317">                        return;</span>
+                    }
+<span class="nc" id="L319">                    schemaFileName = tokens.get(i);</span>
+<span class="nc" id="L320">                    break;</span>
+                case &quot;--help&quot;:
+<span class="nc" id="L322">                    printExportHelp();</span>
+<span class="nc" id="L323">                    return;</span>
+                case &quot;--&quot;:
+<span class="nc" id="L325">                    i++;</span>
+<span class="nc" id="L326">                    break;</span>
+                default:
+<span class="nc" id="L328">                    prompt(&quot;Unknown flag &quot; + arg);</span>
+<span class="nc" id="L329">                    prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L330">                    return;</span>
+            }
+
+        }
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (i &gt;= tokens.size()) {</span>
+<span class="nc" id="L335">            prompt(&quot;File name not found&quot;);</span>
+<span class="nc" id="L336">            prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L337">            return;</span>
+        }
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (i &lt; tokens.size() - 1) {</span>
+<span class="nc" id="L340">            prompt(&quot;Too many arguments&quot;);</span>
+<span class="nc" id="L341">            prompt(EXPORT_PROMPT);</span>
+<span class="nc" id="L342">            return;</span>
+        }
+<span class="nc" id="L344">        String csvFileName = tokens.get(i);</span>
+<span class="nc" id="L345">        Exporter exporter = exporterBuilder.build();</span>
+
+        // Determine the SQL statement to execute. If the '-t table' option is given
+        // run a 'select * from [table]' query to export the table, instead of
+        // executing the 'lastSqlQuery'.
+        String sqlQuery;
+<span class="nc bnc" id="L351" title="All 4 branches missed.">        if (table != null &amp;&amp; !table.isEmpty()) {</span>
+<span class="nc" id="L352">            sqlQuery = Sql.of(SELECT, &quot;*&quot;, FROM, &quot;[&quot; + table + &quot;]&quot;).toString();</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        } else if (lastSqlQuery != null) {</span>
+<span class="nc" id="L354">            sqlQuery = lastSqlQuery;</span>
+        } else {
+<span class="nc" id="L356">            prompt(&quot;You must first execute an SQL query, then export the ResultSet!&quot;);</span>
+<span class="nc" id="L357">            return;</span>
+        }
+
+<span class="nc" id="L360">        exportCsvAndSchema(sqlQuery, csvFileName, schemaFileName, exporter);</span>
+<span class="nc" id="L361">    }</span>
+
+    /**
+     * Runs the given{@code sqlQuery} and exports the CSV to {@code csvFileName}. and the BigQuery schema to
+     * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export
+     * operations.
+     */
+    private void exportCsvAndSchema(CharSequence sqlQuery, String csvFileName, String schemaFileName, Exporter exporter) throws SQLException, IOException {
+<span class="nc" id="L369">        Objects.requireNonNull(sqlQuery, &quot;Sql required&quot;);</span>
+<span class="nc" id="L370">        try (Statement statement = conn.createStatement()) {</span>
+<span class="nc" id="L371">            ResultSet rs = statement.executeQuery(sqlQuery.toString());</span>
+
+            // output the csvFile
+<span class="nc" id="L374">            File csvFile = new File(csvFileName);</span>
+<span class="nc" id="L375">            try (PrintStream out = new PrintStream(csvFile)) {</span>
+<span class="nc" id="L376">                exporter.dumpCsv(rs, out);</span>
+<span class="nc" id="L377">                out.flush();</span>
+            }
+<span class="nc" id="L379">            prompt(&quot;Created CSV file: &quot; + csvFile.getAbsolutePath());</span>
+
+            // output the schema file if requested
+<span class="nc bnc" id="L382" title="All 2 branches missed.">            if (schemaFileName != null) {</span>
+<span class="nc" id="L383">                File schemaFile = new File(schemaFileName);</span>
+<span class="nc" id="L384">                try (PrintStream out = new PrintStream(csvFile)) {</span>
+<span class="nc" id="L385">                    exporter.dumpSchema(rs, out);</span>
+<span class="nc" id="L386">                    out.flush();</span>
+                }
+<span class="nc" id="L388">                prompt(&quot;Created schema file: &quot; + schemaFile.getAbsolutePath());</span>
+            }
+        }
+<span class="nc" id="L391">    }</span>
+
+    static List&lt;String&gt; tokenize(String s) throws IOException {
+        // Create a tokenizer that creates tokens delimited by whitespace. Also handles single and
+        // double quotes. Does not support comments or numbers. All characters between U+0000
+        // U+0020 are considered to be whitespace characters (this includes \r, \n, and \t).
+        // All characters from U+0021 to U+00FF are normal word characters.
+        // Internally, StreamTokenzier treats all characters &gt;= U+0100 to be a normal
+        // word character, and unfortunately, this cannot be changed.
+        //
+        // Non-breaking-space character U+00A0 is currently treated as a normal character,
+        // but I could be convinced that it should be considered a whitespace.
+<span class="fc" id="L403">        StreamTokenizer st = new StreamTokenizer(new StringReader(s));</span>
+<span class="fc" id="L404">        st.resetSyntax();</span>
+<span class="fc" id="L405">        st.wordChars(33, 255);</span>
+<span class="fc" id="L406">        st.whitespaceChars(0, ' ');</span>
+<span class="fc" id="L407">        st.quoteChar('&quot;');</span>
+<span class="fc" id="L408">        st.quoteChar('\'');</span>
+
+<span class="fc" id="L410">        List&lt;String&gt; tokens = new ArrayList&lt;&gt;();</span>
+        while (true) {
+<span class="fc" id="L412">            int ttype = st.nextToken();</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">            if (ttype == StreamTokenizer.TT_EOF) {</span>
+<span class="fc" id="L414">                break;</span>
+<span class="fc bfc" id="L415" title="All 2 branches covered.">            } else if (ttype == StreamTokenizer.TT_WORD) {</span>
+<span class="fc" id="L416">                tokens.add(st.sval);</span>
+<span class="pc bpc" id="L417" title="1 of 4 branches missed.">            } else if (ttype == '\'' || ttype == '&quot;') {</span>
+<span class="fc" id="L418">                tokens.add(st.sval);</span>
+            }
+<span class="fc" id="L420">        }</span>
+<span class="fc" id="L421">        return tokens;</span>
+    }
+
+    /**
+     * Helper to produce table-formatted output of a JDBC resultset.
+     * @author Markus Spann
+     */
+    static class TableFormat {
+<span class="fc" id="L429">        static final List&lt;Integer&gt;       NUMERIC_JDBC_TYPES =</span>
+<span class="fc" id="L430">            List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,</span>
+<span class="fc" id="L431">                Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);</span>
+        private static final int         MAX_COL_WIDTH      = 50;
+        private final List&lt;String&gt;       colNames;
+        private final List&lt;Integer&gt;      colWidths;
+        private final List&lt;Integer&gt;      colTypes;
+<span class="fc" id="L436">        private final List&lt;List&lt;String&gt;&gt; records            = new ArrayList&lt;&gt;();</span>
+
+        TableFormat(ResultSet resultSet) throws SQLException {
+<span class="fc" id="L439">            this(resultSet, -1);</span>
+<span class="fc" id="L440">        }</span>
+
+<span class="fc" id="L442">        TableFormat(ResultSet resultSet, int maxRows) throws SQLException {</span>
+<span class="fc" id="L443">            ResultSetMetaData meta = resultSet.getMetaData();</span>
+<span class="fc" id="L444">            int columnCount = meta.getColumnCount();</span>
+
+<span class="fc" id="L446">            colNames = new ArrayList&lt;&gt;(columnCount);</span>
+<span class="fc" id="L447">            colWidths = new ArrayList&lt;&gt;(columnCount);</span>
+<span class="fc" id="L448">            colTypes = new ArrayList&lt;&gt;(columnCount);</span>
+<span class="fc bfc" id="L449" title="All 2 branches covered.">            for (int col = 1; col &lt;= columnCount; ++col) {</span>
+<span class="fc" id="L450">                String colLabel = meta.getColumnLabel(col);</span>
+<span class="fc" id="L451">                colNames.add(colLabel);</span>
+<span class="fc" id="L452">                colWidths.add(Math.min(colLabel.length(), MAX_COL_WIDTH));</span>
+<span class="fc" id="L453">                colTypes.add(meta.getColumnType(col));</span>
+            }
+
+<span class="fc" id="L456">            records.add(colNames); // header record</span>
+<span class="pc bpc" id="L457" title="3 of 6 branches missed.">            while (resultSet.next() &amp;&amp; (maxRows &lt; 0 || maxRows &lt; records.size())) {</span>
+<span class="fc" id="L458">                List&lt;String&gt; rec = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L459">                records.add(rec);</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">                for (int col = 1; col &lt;= columnCount; ++col) {</span>
+<span class="fc" id="L461">                    Object obj = resultSet.getObject(col);</span>
+<span class="pc bpc" id="L462" title="1 of 6 branches missed.">                    if (obj != null &amp;&amp; obj.getClass().isArray() &amp;&amp; !obj.getClass().getComponentType().isPrimitive()) {</span>
+<span class="fc" id="L463">                        obj = Arrays.toString((Object[]) obj);</span>
+                    }
+
+<span class="fc bfc" id="L466" title="All 2 branches covered.">                    String s = obj == null ? &quot;&quot; : obj.toString();</span>
+<span class="fc" id="L467">                    rec.add(s);</span>
+
+<span class="fc" id="L469">                    int colWidth = colWidths.get(col - 1);</span>
+<span class="fc bfc" id="L470" title="All 4 branches covered.">                    if (colWidth &lt; s.length() &amp;&amp; colWidth &lt; MAX_COL_WIDTH) {</span>
+<span class="fc" id="L471">                        colWidths.set(col - 1, s.length());</span>
+                    }
+                }
+<span class="fc" id="L474">            }</span>
+<span class="fc" id="L475">        }</span>
+
+        void output(PrintStream printStream) {
+<span class="fc" id="L478">            String interline = null;</span>
+<span class="fc" id="L479">            String divider = &quot;|&quot;;</span>
+<span class="fc bfc" id="L480" title="All 2 branches covered.">            for (int idx = 0; idx &lt; records.size(); idx++) {</span>
+<span class="fc" id="L481">                List&lt;String&gt; rec = records.get(idx);</span>
+<span class="fc" id="L482">                String line = &quot; &quot; + joinWithLen(&quot; &quot; + divider + &quot; &quot;, rec) + &quot; &quot;;</span>
+<span class="fc bfc" id="L483" title="All 2 branches covered.">                if (idx == 0) { // index 0 holds header</span>
+<span class="fc" id="L484">                    interline = line.replaceAll(&quot;[^\\&quot; + divider + &quot;]&quot;, &quot;-&quot;).replace(divider, &quot;+&quot;);</span>
+<span class="fc" id="L485">                    interline = &quot;·&quot; + interline + &quot;·&quot;;</span>
+<span class="fc" id="L486">                    printStream.println();</span>
+<span class="fc" id="L487">                    printStream.println(interline);</span>
+<span class="fc" id="L488">                    printStream.println(divider + line + divider);</span>
+<span class="fc" id="L489">                    printStream.println(interline);</span>
+
+                } else {
+<span class="fc" id="L492">                    printStream.println(divider + line + divider);</span>
+                }
+            }
+
+<span class="fc bfc" id="L496" title="All 2 branches covered.">            if (records.size() &gt; 1) {</span>
+<span class="fc" id="L497">                printStream.println(interline);</span>
+            }
+<span class="fc" id="L499">        }</span>
+
+        String joinWithLen(CharSequence delim, List&lt;String&gt; elems) {
+<span class="fc" id="L502">            StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">            for (int i = 0; i &lt; elems.size(); i++) {</span>
+<span class="fc" id="L504">                int width = colWidths.get(i);</span>
+<span class="fc" id="L505">                int type = colTypes.get(i);</span>
+<span class="fc" id="L506">                String str = elems.get(i);</span>
+<span class="fc bfc" id="L507" title="All 2 branches covered.">                sb.append(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));</span>
+<span class="fc bfc" id="L508" title="All 2 branches covered.">                if (i &lt; elems.size() - 1) {</span>
+<span class="fc" id="L509">                    sb.append(delim);</span>
+                }
+            }
+<span class="fc" id="L512">            return sb.toString();</span>
+        }
+
+        static boolean isNumericJdbcType(int type) {
+<span class="fc" id="L516">            return NUMERIC_JDBC_TYPES.contains(type);</span>
+        }
+
+        static String rightPad(String str, int width) {
+<span class="fc" id="L520">            return (str + repeat(&quot; &quot;, width - str.length())).substring(0, width);</span>
+        }
+
+        static String leftPad(String str, int width) {
+<span class="fc" id="L524">            return (repeat(&quot; &quot;, width - str.length()) + str).substring(0, width);</span>
+        }
+
+        static String repeat(String str, int count) {
+<span class="fc bfc" id="L528" title="All 2 branches covered.">            return count &gt; 0 ? String.format(&quot;%0&quot; + count + &quot;d&quot;, 0).replace(&quot;0&quot;, str) : &quot;&quot;;</span>
+        }
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

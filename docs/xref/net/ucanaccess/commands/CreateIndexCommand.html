@@ -19,10 +19,10 @@
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String tableName;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String execId;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>      <strong class="jxr_keyword">public</strong> <a name="CreateIndexCommand" href="../../../net/ucanaccess/commands/CreateIndexCommand.html#CreateIndexCommand">CreateIndexCommand</a>(String _indexName, String _tableName, String _execId) {
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>          indexName = _indexName;
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>          tableName = _tableName;
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>          execId = _execId;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>      <strong class="jxr_keyword">public</strong> <a name="CreateIndexCommand" href="../../../net/ucanaccess/commands/CreateIndexCommand.html#CreateIndexCommand">CreateIndexCommand</a>(String indexName, String tableName, String execId) {
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>          <strong class="jxr_keyword">this</strong>.indexName = indexName;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>          <strong class="jxr_keyword">this</strong>.tableName = tableName;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>          <strong class="jxr_keyword">this</strong>.execId = execId;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>      }
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>      @Override

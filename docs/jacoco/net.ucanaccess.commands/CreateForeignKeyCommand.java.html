@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateForeignKeyCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.commands</a> &gt; <span class="el_source">CreateForeignKeyCommand.java</span></div><h1>CreateForeignKeyCommand.java</h1><pre class="source lang-java linenums">package net.ucanaccess.commands;
+
+import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
+
+import java.sql.SQLException;
+
+public class CreateForeignKeyCommand implements ICommand {
+
+    private final String tableName;
+    private final String referencedTable;
+    private final String execId;
+    private final String relationshipName;
+
+<span class="fc" id="L16">    public CreateForeignKeyCommand(String tableName, String referencedTable, String execId, String relationshipName) {</span>
+<span class="fc" id="L17">        this.tableName = tableName;</span>
+<span class="fc" id="L18">        this.referencedTable = referencedTable;</span>
+<span class="fc" id="L19">        this.execId = execId;</span>
+<span class="fc" id="L20">        this.relationshipName = relationshipName;</span>
+<span class="fc" id="L21">    }</span>
+
+    public String getRelationshipName() {
+<span class="nc" id="L24">        return relationshipName;</span>
+    }
+
+    @Override
+    public String getExecId() {
+<span class="nc" id="L29">        return execId;</span>
+    }
+
+    @Override
+    public String getTableName() {
+<span class="nc" id="L34">        return tableName;</span>
+    }
+
+    @Override
+    public CommandType getType() {
+<span class="fc" id="L39">        return CommandType.DDL;</span>
+    }
+
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+<span class="fc" id="L44">        Try.catching(() -&gt; new Persist2Jet().createForeignKey(tableName, referencedTable, relationshipName))</span>
+<span class="fc" id="L45">            .orThrow(UcanaccessSQLException::new);</span>
+<span class="fc" id="L46">        return null;</span>
+    }
+
+    @Override
+    public IFeedbackAction rollback() {
+<span class="nc" id="L51">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

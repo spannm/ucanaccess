@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InsertCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.commands</a> &gt; <span class="el_source">InsertCommand.java</span></div><h1>InsertCommand.java</h1><pre class="source lang-java linenums">package net.ucanaccess.commands;
+
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.Table.ColumnOrder;
+import io.github.spannm.jackcess.complex.ComplexValueForeignKey;
+import io.github.spannm.jackcess.impl.ColumnImpl;
+import net.ucanaccess.complex.Attachment;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.complex.SingleValue;
+import net.ucanaccess.complex.Version;
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.converters.Persist2Jet;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.DBReferenceSingleton;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.triggers.AutoNumberManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+public class InsertCommand implements ICommand {
+    private final String tableName;
+    private Database     dbIO;
+    private Object[]     newRow;
+    private final String execId;
+    private Table        table;
+
+<span class="nc" id="L34">    public InsertCommand(String tableName, Database dbIO, Object[] newRow, String execId) {</span>
+<span class="nc" id="L35">        this.tableName = tableName;</span>
+<span class="nc" id="L36">        this.dbIO = dbIO;</span>
+<span class="nc" id="L37">        this.newRow = newRow;</span>
+<span class="nc" id="L38">        this.execId = execId;</span>
+
+<span class="nc" id="L40">    }</span>
+
+<span class="fc" id="L42">    public InsertCommand(Table table, Object[] newRow, String execId) {</span>
+<span class="fc" id="L43">        this.table = table;</span>
+<span class="fc" id="L44">        tableName = table.getName();</span>
+<span class="fc" id="L45">        this.newRow = newRow;</span>
+<span class="fc" id="L46">        this.execId = execId;</span>
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public String getExecId() {
+<span class="fc" id="L51">        return execId;</span>
+    }
+
+    @Override
+    public String getTableName() {
+<span class="nc" id="L56">        return tableName;</span>
+    }
+
+    @Override
+    public CommandType getType() {
+<span class="fc" id="L61">        return CommandType.INSERT;</span>
+    }
+
+    private Object[] mementoRow() {
+<span class="fc" id="L65">        Object[] clone = new Object[newRow.length];</span>
+<span class="fc" id="L66">        int i = 0;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (Object obj : newRow) {</span>
+<span class="fc" id="L68">            clone[i] = obj;</span>
+<span class="fc" id="L69">            ++i;</span>
+        }
+<span class="fc" id="L71">        return clone;</span>
+    }
+
+    private void initComplex() {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (int i = 0; i &lt; newRow.length; ++i) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">            if (newRow[i] instanceof ComplexBase) {</span>
+<span class="nc" id="L77">                newRow[i] = Column.AUTO_NUMBER;</span>
+            }
+        }
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * Adds the new row to the given table.
+     *
+     * @return the table the row was added to and the id of the new row
+     */
+    private Map.Entry&lt;Table, RowId&gt; insertRow(Table tbl) throws IOException {
+        // the element after the last column receives the id of the new row
+<span class="fc" id="L89">        int numCols = tbl.getColumnCount();</span>
+<span class="fc" id="L90">        Object[] row = Arrays.copyOf(newRow, numCols + 1);</span>
+<span class="fc" id="L91">        row[numCols] = ColumnImpl.RETURN_ROW_ID;</span>
+        try {
+<span class="fc" id="L93">            tbl.addRow(row);</span>
+<span class="nc" id="L94">        } catch (ConstraintViolationException ex) {</span>
+<span class="nc" id="L95">            List&lt;? extends Column&gt; lc = tbl.getColumns();</span>
+<span class="nc" id="L96">            boolean retry = false;</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            for (Column col : lc) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                if (col.isAutoNumber()) {</span>
+<span class="nc" id="L99">                    retry = true;</span>
+<span class="nc" id="L100">                    break;</span>
+                }
+<span class="nc" id="L102">            }</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            if (!retry) {</span>
+<span class="nc" id="L104">                throw ex;</span>
+            }
+<span class="nc" id="L106">            Database db = tbl.getDatabase();</span>
+<span class="nc" id="L107">            File fl = db.getFile();</span>
+<span class="nc" id="L108">            DBReferenceSingleton dbsin = DBReferenceSingleton.getInstance();</span>
+<span class="nc" id="L109">            DBReference ref = dbsin.getReference(fl);</span>
+<span class="nc" id="L110">            ref.reloadDbIO();</span>
+<span class="nc" id="L111">            dbIO = ref.getDbIO();</span>
+<span class="nc" id="L112">            tbl = dbIO.getTable(tableName);</span>
+<span class="nc" id="L113">            tbl.addRow(row);</span>
+<span class="fc" id="L114">        }</span>
+        // the table fills in generated values such as autonumbers and column defaults
+<span class="fc" id="L116">        System.arraycopy(row, 0, newRow, 0, Math.min(newRow.length, numCols));</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        return new SimpleImmutableEntry&lt;&gt;(tbl, row[numCols] instanceof RowId ? (RowId) row[numCols] : null);</span>
+    }
+
+    /**
+     * Jackcess replaces {@code null} with the column default on insert. The row has already been inserted into HSQLDB,
+     * which applied the defaults of omitted columns, so a remaining {@code null} was set explicitly and is restored.
+     */
+    private void restoreExplicitNulls(Table tbl, RowId rowId, Object[] memento, List&lt;? extends Column&gt; colList)
+        throws IOException, SQLException {
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if (rowId == null) {</span>
+<span class="nc" id="L127">            return;</span>
+        }
+<span class="fc" id="L129">        Cursor cursor = null;</span>
+<span class="fc" id="L130">        int j = 0;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        for (Column col : colList) {</span>
+<span class="pc bpc" id="L132" title="2 of 8 branches missed.">            if (memento[j] == null &amp;&amp; newRow[j] != null &amp;&amp; !col.isAutoNumber() &amp;&amp; col.getType() != DataType.BOOLEAN</span>
+<span class="pc bpc" id="L133" title="2 of 4 branches missed.">                &amp;&amp; col.getProperties().getValue(PropertyMap.DEFAULT_VALUE_PROP) != null &amp;&amp; hasNativeDefault(col)) {</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                if (cursor == null) {</span>
+<span class="fc" id="L135">                    cursor = CursorBuilder.createCursor(tbl);</span>
+<span class="fc" id="L136">                    cursor.findRow(rowId);</span>
+                }
+<span class="fc" id="L138">                cursor.setCurrentRowValue(col, null);</span>
+<span class="fc" id="L139">                newRow[j] = null;</span>
+            }
+<span class="fc" id="L141">            j++;</span>
+<span class="fc" id="L142">        }</span>
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * Only a native HSQLDB column default leaves an explicit {@code null} in the row. Defaults that UCanAccess could not
+     * translate are left to Jackcess.
+     */
+    private static boolean hasNativeDefault(Column col) throws SQLException {
+<span class="fc" id="L150">        UcanaccessConnection conn = UcanaccessConnection.getCtxConnection();</span>
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">        return conn != null &amp;&amp; new Metadata(conn.getHSQLDBConnection()).hasNativeColumnDefault(col.getTable().getName(), col.getName());</span>
+    }
+
+    @Override
+    public IFeedbackAction persist() throws SQLException {
+        try {
+<span class="fc" id="L157">            AutoNumberAction ana = null;</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">            if (table == null) {</span>
+<span class="nc" id="L159">                table = dbIO.getTable(tableName);</span>
+            }
+<span class="fc" id="L161">            Object[] memento = mementoRow();</span>
+<span class="fc" id="L162">            initComplex();</span>
+<span class="fc" id="L163">            int j = 0;</span>
+<span class="fc" id="L164">            List&lt;? extends Column&gt; colList = table.getColumns();</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">            if (table.getDatabase().getColumnOrder().equals(ColumnOrder.DISPLAY)) {</span>
+<span class="fc" id="L166">                Object[] newRowReorded = new Object[newRow.length];</span>
+<span class="fc" id="L167">                Column[] cllReorded = new Column[newRow.length];</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">                for (Column col : table.getColumns()) {</span>
+<span class="fc" id="L169">                    newRowReorded[col.getColumnIndex()] = newRow[j];</span>
+<span class="fc" id="L170">                    memento[col.getColumnIndex()] = newRow[j];</span>
+<span class="fc" id="L171">                    cllReorded[col.getColumnIndex()] = col;</span>
+<span class="fc" id="L172">                    j++;</span>
+<span class="fc" id="L173">                }</span>
+<span class="fc" id="L174">                newRow = newRowReorded;</span>
+<span class="fc" id="L175">                colList = Arrays.asList(cllReorded);</span>
+            }
+
+<span class="fc" id="L178">            Map.Entry&lt;Table, RowId&gt; inserted = insertRow(table);</span>
+<span class="fc" id="L179">            restoreExplicitNulls(inserted.getKey(), inserted.getValue(), memento, colList);</span>
+<span class="fc" id="L180">            j = 0;</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">            for (Column col : colList) {</span>
+<span class="fc" id="L182">                ColumnImpl colImpl = (ColumnImpl) col;</span>
+<span class="fc bfc" id="L183" title="All 4 branches covered.">                if (colImpl.isAutoNumber() &amp;&amp; !memento[j].equals(newRow[j])</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                        &amp;&amp; !colImpl.getAutoNumberGenerator().getType().equals(DataType.COMPLEX_TYPE)) {</span>
+
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                    if (colImpl.getAutoNumberGenerator().getType().equals(DataType.LONG)) {</span>
+<span class="fc" id="L187">                        AutoNumberManager.reset(colImpl, (Integer) newRow[j]);</span>
+                    }
+<span class="fc" id="L189">                    ana = new AutoNumberAction(table, memento, newRow);</span>
+                }
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">                if (colImpl.getType() == DataType.COMPLEX_TYPE) {</span>
+<span class="fc" id="L193">                    ComplexValueForeignKey rowFk = (ComplexValueForeignKey) colImpl.getRowValue(newRow);</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                    if (memento[j] instanceof Attachment[]) {</span>
+<span class="fc" id="L195">                        Attachment[] atcs = (Attachment[]) memento[j];</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                        for (Attachment atc : atcs) {</span>
+<span class="fc" id="L197">                            rowFk.addAttachment(atc.getUrl(), atc.getName(), atc.getType(), atc.getData(),</span>
+<span class="fc" id="L198">                                    atc.getTimeStamp(), atc.getFlags());</span>
+
+                        }
+<span class="fc bfc" id="L201" title="All 2 branches covered.">                    } else if (memento[j] instanceof SingleValue[]) {</span>
+<span class="fc" id="L202">                        SingleValue[] vs = (SingleValue[]) memento[j];</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                        for (SingleValue v : vs) {</span>
+<span class="fc" id="L204">                            rowFk.addMultiValue(v.getValue());</span>
+                        }
+
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">                    } else if (memento[j] instanceof Version[]) {</span>
+<span class="fc" id="L208">                        Version[] vs = (Version[]) memento[j];</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                        for (Version v : vs) {</span>
+<span class="fc" id="L210">                            rowFk.addVersion(v.getValue(), v.getModifiedDate());</span>
+                        }
+                    }
+                }
+<span class="fc" id="L214">                ++j;</span>
+<span class="fc" id="L215">            }</span>
+<span class="fc" id="L216">            BlobAction ba = new BlobAction(table, newRow);</span>
+<span class="fc" id="L217">            ba.doAction(this);</span>
+<span class="fc" id="L218">            return ana;</span>
+<span class="fc" id="L219">        } catch (IOException ex) {</span>
+<span class="fc" id="L220">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public IFeedbackAction rollback() throws SQLException {
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (table != null) {</span>
+<span class="fc" id="L227">            DeleteCommand dc = new DeleteCommand(table, new Persist2Jet().getRowPattern(newRow, table),</span>
+                    execId);
+<span class="fc" id="L229">            return dc.persist();</span>
+        } else {
+            // a drop table cleans all
+<span class="nc" id="L232">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

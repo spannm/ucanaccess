@@ -24,15 +24,15 @@
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, String&gt; columnMap;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String              columnName;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="AddColumnCommand" href="../../../net/ucanaccess/commands/AddColumnCommand.html#AddColumnCommand">AddColumnCommand</a>(String _tableName, String _columnName, String _execId, Map&lt;String, String&gt; _columnMap,
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>              String[] _types, String[] _defaults, Boolean[] _notNulls) {
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>          tableName = _tableName;
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>          columnName = _columnName;
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>          types = _types;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>          defaults = _defaults;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>          notNulls = _notNulls;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>          columnMap = _columnMap;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>          execId = _execId;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="AddColumnCommand" href="../../../net/ucanaccess/commands/AddColumnCommand.html#AddColumnCommand">AddColumnCommand</a>(String tableName, String columnName, String execId, Map&lt;String, String&gt; columnMap,
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>              String[] types, String[] defaults, Boolean[] notNulls) {
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>          <strong class="jxr_keyword">this</strong>.tableName = tableName;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>          <strong class="jxr_keyword">this</strong>.columnName = columnName;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>          <strong class="jxr_keyword">this</strong>.types = types;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>          <strong class="jxr_keyword">this</strong>.defaults = defaults;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>          <strong class="jxr_keyword">this</strong>.notNulls = notNulls;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>          <strong class="jxr_keyword">this</strong>.columnMap = columnMap;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>          <strong class="jxr_keyword">this</strong>.execId = execId;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>      }
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>      @Override

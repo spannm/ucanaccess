@@ -31,8 +31,8 @@
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>      <strong class="jxr_keyword">private</strong> Index       bestIndex;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong>     primaryCursor;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">public</strong> <a name="IndexSelector" href="../../../net/ucanaccess/commands/IndexSelector.html#IndexSelector">IndexSelector</a>(Table _table) {
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>          table = _table;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">public</strong> <a name="IndexSelector" href="../../../net/ucanaccess/commands/IndexSelector.html#IndexSelector">IndexSelector</a>(Table table) {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>          <strong class="jxr_keyword">this</strong>.table = table;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>      }
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>      <strong class="jxr_keyword">public</strong> Index getBestIndex() {
@@ -79,49 +79,49 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ColumnMatcher <strong class="jxr_keyword">extends</strong> SimpleColumnMatcher {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>          @Override
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> matches(Table _table, String _columnName, Object _currVal, Object _dbVal) {
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> matches(Table table, String columnName, Object currVal, Object dbVal) {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>              <strong class="jxr_keyword">if</strong> (_currVal == <strong class="jxr_keyword">null</strong> &amp;&amp; _dbVal == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>              <strong class="jxr_keyword">if</strong> (currVal == <strong class="jxr_keyword">null</strong> &amp;&amp; dbVal == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>                  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal == <strong class="jxr_keyword">null</strong> || _dbVal == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal == <strong class="jxr_keyword">null</strong> || dbVal == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>                  <strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal instanceof Date &amp;&amp; _dbVal instanceof Date) {
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>                  <strong class="jxr_keyword">return</strong> ((Date) _currVal).compareTo((Date) _dbVal) == 0;
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal instanceof BigDecimal &amp;&amp; _dbVal instanceof BigDecimal) {
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) _currVal).compareTo((BigDecimal) _dbVal) == 0;
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_dbVal instanceof BigDecimal &amp;&amp; _currVal instanceof Number) {
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) _dbVal).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(_currVal.toString())) == 0;
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal instanceof BigDecimal &amp;&amp; _dbVal instanceof Number) {
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) _currVal).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(_dbVal.toString())) == 0;
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal instanceof Integer &amp;&amp; _dbVal instanceof Short) {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>                  <strong class="jxr_keyword">return</strong> (Integer) _currVal == ((Short) _dbVal).intValue();
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_dbVal instanceof Integer &amp;&amp; _currVal instanceof Short) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  <strong class="jxr_keyword">return</strong> (Integer) _dbVal == ((Short) _currVal).intValue();
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_currVal instanceof Integer &amp;&amp; _dbVal instanceof Byte) {
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>                  <strong class="jxr_keyword">return</strong> (Integer) _currVal == SQLConverter.asUnsigned((Byte) _dbVal);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (_dbVal instanceof Integer &amp;&amp; _currVal instanceof Byte) {
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>                  <strong class="jxr_keyword">return</strong> (Integer) _dbVal == SQLConverter.asUnsigned((Byte) _currVal);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof Date &amp;&amp; dbVal instanceof Date) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>                  <strong class="jxr_keyword">return</strong> ((Date) currVal).compareTo((Date) dbVal) == 0;
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof BigDecimal &amp;&amp; dbVal instanceof BigDecimal) {
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) currVal).compareTo((BigDecimal) dbVal) == 0;
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dbVal instanceof BigDecimal &amp;&amp; currVal instanceof Number) {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) dbVal).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(currVal.toString())) == 0;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof BigDecimal &amp;&amp; dbVal instanceof Number) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) currVal).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(dbVal.toString())) == 0;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof Integer &amp;&amp; dbVal instanceof Short) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>                  <strong class="jxr_keyword">return</strong> (Integer) currVal == ((Short) dbVal).intValue();
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dbVal instanceof Integer &amp;&amp; currVal instanceof Short) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  <strong class="jxr_keyword">return</strong> (Integer) dbVal == ((Short) currVal).intValue();
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof Integer &amp;&amp; dbVal instanceof Byte) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>                  <strong class="jxr_keyword">return</strong> (Integer) currVal == SQLConverter.asUnsigned((Byte) dbVal);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dbVal instanceof Integer &amp;&amp; currVal instanceof Byte) {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>                  <strong class="jxr_keyword">return</strong> (Integer) dbVal == SQLConverter.asUnsigned((Byte) currVal);
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>              }
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>              <strong class="jxr_keyword">if</strong> (_dbVal instanceof Float &amp;&amp; _currVal instanceof Double
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>                      || _dbVal instanceof Double &amp;&amp; _currVal instanceof Float) {
-<a class="jxr_linenumber" name="L100" href="#L100">100</a>                 <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">new</strong> BigDecimal(_dbVal.toString()).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(_currVal.toString())) == 0) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>              <strong class="jxr_keyword">if</strong> ((dbVal instanceof Float &amp;&amp; currVal instanceof Double)
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>                      || (dbVal instanceof Double &amp;&amp; currVal instanceof Float)) {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>                 <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">new</strong> BigDecimal(dbVal.toString()).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(currVal.toString())) == 0) {
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>                     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L102" href="#L102">102</a>                 }
-<a class="jxr_linenumber" name="L103" href="#L103">103</a>                 <strong class="jxr_keyword">if</strong> (_dbVal instanceof Float &amp;&amp; _currVal instanceof Double) {
-<a class="jxr_linenumber" name="L104" href="#L104">104</a>                     <strong class="jxr_keyword">return</strong> ((Float) _dbVal).doubleValue() == (Double) _currVal;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>                 <strong class="jxr_keyword">if</strong> (dbVal instanceof Float &amp;&amp; currVal instanceof Double) {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>                     <strong class="jxr_keyword">return</strong> ((Float) dbVal).doubleValue() == (Double) currVal;
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>                 }
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>             }
-<a class="jxr_linenumber" name="L107" href="#L107">107</a>             <strong class="jxr_keyword">if</strong> (_currVal instanceof byte[] &amp;&amp; _dbVal instanceof byte[]) {
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>             <strong class="jxr_keyword">if</strong> (currVal instanceof byte[] &amp;&amp; dbVal instanceof byte[]) {
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>             }
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 
-<a class="jxr_linenumber" name="L111" href="#L111">111</a>             <strong class="jxr_keyword">if</strong> (_currVal instanceof <a name="ComplexBase" href="../../../net/ucanaccess/complex/ComplexBase.html#ComplexBase">ComplexBase</a>[] &amp;&amp; _dbVal instanceof ComplexValueForeignKey) {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 <strong class="jxr_keyword">return</strong> Try.catching(() -&gt; Arrays.equals((<a name="ComplexBase" href="../../../net/ucanaccess/complex/ComplexBase.html#ComplexBase">ComplexBase</a>[]) _currVal, ComplexBase.convert((ComplexValueForeignKey) _dbVal)))
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>             <strong class="jxr_keyword">if</strong> (currVal instanceof <a name="ComplexBase" href="../../../net/ucanaccess/complex/ComplexBase.html#ComplexBase">ComplexBase</a>[] &amp;&amp; dbVal instanceof ComplexValueForeignKey) {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 <strong class="jxr_keyword">return</strong> Try.catching(() -&gt; Arrays.equals((<a name="ComplexBase" href="../../../net/ucanaccess/complex/ComplexBase.html#ComplexBase">ComplexBase</a>[]) currVal, ComplexBase.convert((ComplexValueForeignKey) dbVal)))
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>                     .orThrow(UcanaccessRuntimeException::<strong class="jxr_keyword">new</strong>);
 <a class="jxr_linenumber" name="L114" href="#L114">114</a>             }
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 
-<a class="jxr_linenumber" name="L116" href="#L116">116</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.matches(_table, _columnName, _currVal, _dbVal);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.matches(table, columnName, currVal, dbVal);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>         }
 <a class="jxr_linenumber" name="L118" href="#L118">118</a>     }
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> }

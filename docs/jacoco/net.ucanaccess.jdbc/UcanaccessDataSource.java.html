@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessDataSource.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessDataSource.java</span></div><h1>UcanaccessDataSource.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import static net.ucanaccess.converters.Metadata.Property.*;
+
+import net.ucanaccess.converters.Metadata;
+import net.ucanaccess.converters.Metadata.Property;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.type.AccessVersion;
+
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import javax.naming.Reference;
+import javax.naming.Referenceable;
+import javax.naming.StringRefAddr;
+import javax.sql.DataSource;
+
+@SuppressWarnings({&quot;PMD.UnnecessaryFullyQualifiedName&quot;, &quot;serial&quot;})
+public class UcanaccessDataSource implements Serializable, Referenceable, DataSource {
+    private static final long           serialVersionUID = -5622403376078548785L;
+
+    private String                      accessPath;
+<span class="fc" id="L30">    private int                         loginTimeout     = 0;</span>
+<span class="fc" id="L31">    private transient PrintWriter       logWriter        = new PrintWriter(System.out, false, Charset.defaultCharset());</span>
+    // declared as Map, but always an EnumMap, which is serializable
+<span class="fc" id="L33">    private final Map&lt;Property, String&gt; userPass         = new EnumMap&lt;&gt;(Property.class);</span>
+
+<span class="fc" id="L35">    private final Map&lt;Property, String&gt; props            = new EnumMap&lt;&gt;(Property.class);</span>
+
+<span class="fc" id="L37">    public UcanaccessDataSource() {</span>
+        // default constructor required for bean-style configuration
+<span class="fc" id="L39">    }</span>
+
+    /**
+     *
+     * See {@link #setAccessPath(String)} for details.
+     */
+    public String getAccessPath() {
+<span class="fc" id="L46">        return accessPath;</span>
+    }
+
+    public String getUser() {
+<span class="nc" id="L50">        return userPass.get(user);</span>
+    }
+
+    /**
+     * See {@link #setColumnOrder(String)} for details.
+     */
+    public String getColumnOrder() {
+<span class="nc" id="L57">        return getPropAsString(columnOrder);</span>
+    }
+
+    /**
+     * See {@link #setConcatNulls(Boolean)} for details.
+     */
+    public Boolean getConcatNulls() {
+<span class="nc" id="L64">        return getPropAsBoolean(concatNulls);</span>
+    }
+
+    /**
+     * Opens the connection to the Access database.
+     *
+     * @return java.sql.Connection object
+     */
+    @Override
+    public Connection getConnection() throws SQLException {
+<span class="fc" id="L74">        return getConnection(userPass.get(user), userPass.get(password));</span>
+    }
+
+    /**
+     * Opens the connection to the Access database using the provided user name and password.
+     *
+     * @param user user name
+     * @param pass password
+     * @return database connection
+     */
+    @Override
+    public Connection getConnection(String user, String pass) throws SQLException {
+        // do not store user/pass in member props
+<span class="fc" id="L87">        Properties copy = props.entrySet().stream()</span>
+<span class="pc" id="L88">            .collect(Collectors.toMap(e -&gt; e.getKey().name(), Entry::getValue, (v1, v2) -&gt; v1, Properties::new));</span>
+<span class="pc" id="L89">        Optional.ofNullable(user).ifPresent(u -&gt; copy.put(Property.user.name(), u));</span>
+<span class="pc" id="L90">        Optional.ofNullable(pass).ifPresent(p -&gt; copy.put(Property.password.name(), p));</span>
+<span class="fc" id="L91">        return new UcanaccessDriver().connect(UcanaccessDriver.URL_PREFIX + accessPath, copy);</span>
+    }
+
+    /**
+     * See {@link #setEncrypt(Boolean)} for details.
+     */
+    public Boolean getEncrypt() {
+<span class="nc" id="L98">        return getPropAsBoolean(encrypt);</span>
+    }
+
+    /**
+     * See {@link #setIgnoreCase(Boolean)} for details.
+     */
+    public Boolean getIgnoreCase() {
+<span class="nc" id="L105">        return getPropAsBoolean(ignoreCase);</span>
+    }
+
+    /**
+     * See {@link #setImmediatelyReleaseResources(Boolean)} for details.
+     */
+    public Boolean getImmediatelyReleaseResources() {
+<span class="fc" id="L112">        return getPropAsBoolean(immediatelyReleaseResources);</span>
+    }
+
+    /**
+     * See {@link #setInactivityTimeout(Integer)} for details.
+     */
+    public Integer getInactivityTimeout() {
+<span class="nc" id="L119">        return getPropAsInteger(inactivityTimeout);</span>
+    }
+
+    /**
+     * See {@link #setJackcessOpener(String)} for details.
+     */
+    public String getJackcessOpener() {
+<span class="nc" id="L126">        return getPropAsString(jackcessOpener);</span>
+    }
+
+    /**
+     * See {@link #setKeepMirror(String)} for details.
+     */
+    public String getKeepMirror() {
+<span class="nc" id="L133">        return getPropAsString(keepMirror);</span>
+    }
+
+    /**
+     * See {@link #setLobScale(Integer)} for details.
+     */
+    public Integer getLobScale() {
+<span class="fc" id="L140">        return getPropAsInteger(lobScale);</span>
+    }
+
+    @Override
+    public int getLoginTimeout() {
+<span class="nc" id="L145">        return loginTimeout;</span>
+    }
+
+    @Override
+    public PrintWriter getLogWriter() {
+<span class="nc" id="L150">        return logWriter;</span>
+    }
+
+    /**
+     * See {@link #setMemory(Boolean)} for details.
+     */
+    public Boolean getMemory() {
+<span class="nc" id="L157">        return getPropAsBoolean(memory);</span>
+    }
+
+    /**
+     * See {@link #setMirrorFolder(String)} for details.
+     */
+    public String getMirrorFolder() {
+<span class="nc" id="L164">        return getPropAsString(mirrorFolder);</span>
+    }
+
+    /**
+     * See {@link #setNewDatabaseVersion(String)} for details.
+     */
+    public String getNewDatabaseVersion() {
+<span class="fc" id="L171">        return getPropAsString(newDatabaseVersion);</span>
+    }
+
+    /**
+     * See {@link #setOpenExclusive(Boolean)} for details.
+     */
+    public Boolean getOpenExclusive() {
+<span class="nc" id="L178">        return getPropAsBoolean(openExclusive);</span>
+    }
+
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+<span class="nc" id="L183">        throw new SQLFeatureNotSupportedException(&quot;getParentLogger&quot;);</span>
+    }
+
+    /**
+     * See {@link #setPreventReloading(Boolean)} for details.
+     */
+    public Boolean getPreventReloading() {
+<span class="nc" id="L190">        return getPropAsBoolean(preventReloading);</span>
+    }
+
+    private Boolean getPropAsBoolean(Metadata.Property key) {
+<span class="fc" id="L194">        return Optional.ofNullable(getPropAsString(key))</span>
+<span class="fc" id="L195">            .map(Boolean::valueOf)</span>
+<span class="fc" id="L196">            .orElse(null);</span>
+    }
+
+    private Integer getPropAsInteger(Metadata.Property key) {
+<span class="fc" id="L200">        return Optional.ofNullable(getPropAsString(key))</span>
+<span class="fc" id="L201">            .map(Integer::valueOf)</span>
+<span class="fc" id="L202">            .orElse(null);</span>
+    }
+
+    private String getPropAsString(Metadata.Property key) {
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        return key == null ? null : props.get(key);</span>
+    }
+
+    @Override
+    public Reference getReference() {
+<span class="nc" id="L211">        String clazz = UcanaccessDataSourceFactory.class.getName();</span>
+<span class="nc" id="L212">        Reference ref = new Reference(getClass().getName(), clazz, null);</span>
+<span class="nc" id="L213">        ref.add(new StringRefAddr(&quot;accessPath&quot;, getAccessPath()));</span>
+<span class="nc" id="L214">        ref.add(new StringRefAddr(user.name(), userPass.get(user)));</span>
+<span class="nc" id="L215">        ref.add(new StringRefAddr(password.name(), userPass.get(password)));</span>
+
+<span class="nc" id="L217">        Arrays.stream(values())</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            .filter(e -&gt; e != user)</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            .filter(e -&gt; e != password)</span>
+<span class="nc" id="L220">            .forEach(e -&gt; ref.add(new StringRefAddr(e.name(), getPropAsString(e))));</span>
+
+<span class="nc" id="L222">        return ref;</span>
+    }
+
+    /**
+     * See {@link #setReMap(String)} for details.
+     */
+    public String getReMap() {
+<span class="nc" id="L229">        return getPropAsString(reMap);</span>
+    }
+
+    /**
+     * See {@link #setShowSchema(Boolean)} for details.
+     */
+    public Boolean getShowSchema() {
+<span class="nc" id="L236">        return getPropAsBoolean(showSchema);</span>
+    }
+
+    /**
+     * See {@link #setSkipIndexes(Boolean)} for details.
+     */
+    public Boolean getSkipIndexes() {
+<span class="nc" id="L243">        return getPropAsBoolean(skipIndexes);</span>
+    }
+
+    /**
+     * See {@link #setSysSchema(Boolean)} for details.
+     */
+    public Boolean getSysSchema() {
+<span class="nc" id="L250">        return getPropAsBoolean(sysSchema);</span>
+    }
+
+    @Override
+    public boolean isWrapperFor(Class&lt;?&gt; iface) {
+<span class="nc" id="L255">        throw new UnsupportedOperationException(&quot;Not supported yet.&quot;);</span>
+    }
+
+    /**
+     * Specifies the path to the Access database file.
+     * &lt;p&gt;
+     * For example: C:/folder/database.accdb
+     *
+     * @param accessPath path
+     */
+    public void setAccessPath(String accessPath) {
+<span class="fc" id="L266">        this.accessPath = accessPath;</span>
+<span class="fc" id="L267">    }</span>
+
+    public void setUser(String user) {
+<span class="nc" id="L270">        userPass.put(Property.user, user);</span>
+<span class="nc" id="L271">    }</span>
+
+    public void setPassword(String password) {
+<span class="nc" id="L274">        userPass.put(Property.password, password);</span>
+<span class="nc" id="L275">    }</span>
+
+    /**
+     * Controls the order in which columns are returned by operations like SELECT *. The default is &quot;DATA&quot;. See the
+     * UCanAccess website for details.
+     *
+     * @param value Valid values for this parameter are: &quot;DATA&quot;, or &quot;DISPLAY&quot;.
+     * @since 2.0.9
+     */
+    public void setColumnOrder(String value) {
+<span class="nc" id="L285">        setProp(columnOrder, value);</span>
+<span class="nc" id="L286">    }</span>
+
+    /**
+     * Controls what is returned by concatenations involving null values. This setting affects &lt;i&gt;all&lt;/i&gt; concatenation
+     * operators (&amp;amp;, +, ||).
+     *
+     * @param value
+     *            &lt;ul&gt;
+     *            &lt;li&gt;&lt;b&gt;false&lt;/b&gt; (the default): null &amp;amp; 'thing' returns 'thing'
+     *            &lt;li&gt;&lt;b&gt;true&lt;/b&gt;: null &amp;amp; 'thing' returns null
+     *            &lt;/ul&gt;
+     * @since 3.0.0
+     */
+    public void setConcatNulls(Boolean value) {
+<span class="nc" id="L300">        setProp(concatNulls, value);</span>
+<span class="nc" id="L301">    }</span>
+
+    /**
+     * Encrypts the backing database.
+     *
+     * @param value Setting this value to &lt;b&gt;true&lt;/b&gt; tells UCanAccess to encrypt the HSQLDB backing database.
+     * @since 1.0.4
+     */
+    public void setEncrypt(Boolean value) {
+<span class="nc" id="L310">        setProp(encrypt, value);</span>
+<span class="nc" id="L311">    }</span>
+
+    /**
+     * Enables case-insensitive string comparisons.
+     *
+     * @param value (default = true)
+     */
+    public void setIgnoreCase(Boolean value) {
+<span class="nc" id="L319">        setProp(ignoreCase, value);</span>
+<span class="nc" id="L320">    }</span>
+
+    /**
+     * Releases the Access database and shuts down HSQLDB immediately after the Connection is closed.
+     *
+     * @param value Setting this value to &lt;b&gt;true&lt;/b&gt; tells UCanAccess to close the Access database file, shut down
+     *            HSQLDB, and release all related resources (e.g., memory or disk space) as soon as the Connection is
+     *            closed. Otherwise, UCanAccess will &quot;hold on&quot; to those resources for the
+     *            {@link #setInactivityTimeout(Integer)} in case the Access database gets re-opened.
+     */
+    public void setImmediatelyReleaseResources(Boolean value) {
+<span class="fc" id="L331">        setProp(immediatelyReleaseResources, value);</span>
+<span class="fc" id="L332">    }</span>
+
+    /**
+     * For an in-memory backing database (memory=true), this parameter controls the time (in minutes, default=2), that
+     * HSQLDB remains active and the in-memory database remains available after the last connection is closed.
+     *
+     * @param value (in minutes)
+     * @since 0.1.1
+     */
+    public void setInactivityTimeout(Integer value) {
+<span class="nc" id="L342">        setProp(inactivityTimeout, value);</span>
+<span class="nc" id="L343">    }</span>
+
+    /**
+     * Specifies the name of the custom class to be used by Jackcess when opening the Access database. Mainly for use
+     * with Jackcess Encrypt to open encrypted databases. See the UCanAccess website for details.
+     *
+     * @param value name of custom class
+     * @since 0.0.2
+     */
+    public void setJackcessOpener(String value) {
+<span class="nc" id="L353">        setProp(jackcessOpener, value);</span>
+<span class="nc" id="L354">    }</span>
+
+    /**
+     * Specifies the path where a persistent copy of the HSQLDB backing database files should be stored. Implies
+     * memory=false. See the UCanAccess website for details.
+     *
+     * @param value path
+     * @since 2.0.2
+     */
+    public void setKeepMirror(String value) {
+<span class="nc" id="L364">        setProp(keepMirror, value);</span>
+<span class="nc" id="L365">    }</span>
+
+    /**
+     * Controls the allocation unit size for &quot;OLE Object&quot; (i.e., BLOB) data in the HSQLDB backing database. See the
+     * UCanAccess website for details.
+     *
+     * @param value Values allowed are 1, 2, 4, 8, 16, or 32 (the unit is kB). Default is 2 if memory=true, and 32 (the
+     *            HSQLDB default) otherwise.
+     * @since 2.0.9.4
+     */
+    public void setLobScale(Integer value) {
+<span class="fc" id="L376">        setProp(lobScale, value);</span>
+<span class="fc" id="L377">    }</span>
+
+    @Override
+    public void setLoginTimeout(int value) {
+<span class="nc" id="L381">        loginTimeout = value;</span>
+<span class="nc" id="L382">    }</span>
+
+    @Override
+    public void setLogWriter(PrintWriter logWriter) {
+<span class="nc" id="L386">        this.logWriter = logWriter;</span>
+<span class="nc" id="L387">    }</span>
+
+    /**
+     * Controls whether the HSQLDB backing database is created in memory (the default) or on disk.
+     *
+     * @param value Create the backing database in memory (value=true, the default) or on disk (value=false). Creating
+     *            the backing database on disk will be slower, but it can greatly reduce JVM memory usage.
+     */
+    public void setMemory(Boolean value) {
+<span class="nc" id="L396">        setProp(memory, value);</span>
+<span class="nc" id="L397">    }</span>
+
+    /**
+     * Specifies the path where the temporary HSQLDB backing database files should be stored. Implies memory=false. To
+     * create a persistent copy of the backing database, use {@link #setKeepMirror(String)} instead. See the UCanAccess
+     * website for details.
+     *
+     * @param value value
+     * @since 2.0.9.3
+     */
+    public void setMirrorFolder(String value) {
+<span class="nc" id="L408">        setProp(mirrorFolder, value);</span>
+<span class="nc" id="L409">    }</span>
+
+    /**
+     * Creates a new, empty Access database in the specified format
+     * if the database specified by {@link #setAccessPath(String)} does not exist.
+     *
+     * @param version database versions, valid values are defined in enum {@link AccessVersion} (&quot;V2000&quot;, &quot;V2003&quot;, &quot;V2007&quot; etc.).
+     */
+    public void setNewDatabaseVersion(String version) {
+<span class="fc" id="L418">        AccessVersion accVersion = null;</span>
+<span class="pc bpc" id="L419" title="1 of 4 branches missed.">        if (version != null &amp;&amp; !version.isEmpty()) {</span>
+<span class="fc" id="L420">            accVersion = AccessVersion.parse(version);</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">            if (accVersion == null) {</span>
+<span class="nc" id="L422">                UcanaccessRuntimeException.throwNow(&quot;Valid version required: &quot; + version);</span>
+            }
+        }
+<span class="fc" id="L425">        setNewDatabaseVersion(accVersion);</span>
+<span class="fc" id="L426">    }</span>
+
+    public void setNewDatabaseVersion(AccessVersion version) {
+<span class="fc bfc" id="L429" title="All 2 branches covered.">        setProp(newDatabaseVersion, version == null ? null : version.name());</span>
+<span class="fc" id="L430">    }</span>
+
+    /**
+     * Opens the Access database in &quot;exclusive&quot; mode.
+     *
+     * @param value Setting this value to &lt;b&gt;true&lt;/b&gt; tells UCanAccess to open the Access database as &quot;exclusive&quot;
+     *            (preventing other processes from opening it at the same time).
+     */
+    public void setOpenExclusive(Boolean value) {
+<span class="nc" id="L439">        setProp(openExclusive, value);</span>
+<span class="nc" id="L440">    }</span>
+
+    /**
+     * Prevents unnecessary re-loading of backing database under very specific circumstances.&lt;br&gt;
+     * USE WITH CAUTION! See the UCanAccess website for details.
+     *
+     * @param value Setting this value to &lt;b&gt;true&lt;/b&gt; prevents UCanAccess from unnecessarily re-loading the backing
+     *            database under very specific circumstances.
+     * @since 3.0.0
+     */
+    public void setPreventReloading(Boolean value) {
+<span class="nc" id="L451">        setProp(preventReloading, value);</span>
+<span class="nc" id="L452">    }</span>
+
+    private void setProp(Metadata.Property key, Object value) {
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">        if (key == null) {</span>
+<span class="nc" id="L456">            return;</span>
+<span class="fc bfc" id="L457" title="All 2 branches covered.">        } else if (value == null) {</span>
+<span class="fc" id="L458">            props.remove(key);</span>
+<span class="fc" id="L459">            return;</span>
+        }
+<span class="fc bfc" id="L461" title="All 2 branches covered.">        if (!key.isValidValue(value)) {</span>
+<span class="fc" id="L462">            throw new UcanaccessRuntimeException(&quot;Invalid value '&quot; + value + &quot;' for property &quot; + key);</span>
+        }
+<span class="fc" id="L464">        props.put(key, value.toString());</span>
+<span class="fc" id="L465">    }</span>
+
+    /**
+     * For this connection, temporarily re-directs linked tables in the Access database to point to a different Access
+     * database. See the UCanAccess website for details.
+     *
+     * @param value value
+     * @since 2.0.2
+     */
+    public void setReMap(String value) {
+<span class="nc" id="L475">        setProp(reMap, value);</span>
+<span class="nc" id="L476">    }</span>
+
+    /**
+     * Exposes the HSQLDB catalog and schema names (e.g., &quot;PUBLIC&quot;) in DatabaseMetadata.
+     *
+     * @param value (default = false)
+     */
+    public void setShowSchema(Boolean value) {
+<span class="nc" id="L484">        setProp(showSchema, value);</span>
+<span class="nc" id="L485">    }</span>
+
+    /**
+     * Reduces memory consumption by not creating simple indexes in the backing database.
+     *
+     * @param value Setting this value to &lt;b&gt;true&lt;/b&gt; tells UCanAccess to skip the creation of simple indexes (not
+     *            associated with a constraint). It doesn't have an effect on referential integrity constraints (i.e.,
+     *            Index Unique, Foreign Key or Primary Key).
+     * @since 2.0.9.4
+     */
+    public void setSkipIndexes(Boolean value) {
+<span class="nc" id="L496">        setProp(skipIndexes, value);</span>
+<span class="nc" id="L497">    }</span>
+
+    /**
+     * Exposes the Access system tables in a read-only schema named &quot;SYS&quot;.
+     *
+     * @param value (default = false)
+     */
+    public void setSysSchema(Boolean value) {
+<span class="nc" id="L505">        setProp(sysSchema, value);</span>
+<span class="nc" id="L506">    }</span>
+
+    @Override
+    public &lt;T&gt; T unwrap(Class&lt;T&gt; iface) {
+<span class="nc" id="L510">        throw new UnsupportedOperationException(&quot;Not supported yet&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

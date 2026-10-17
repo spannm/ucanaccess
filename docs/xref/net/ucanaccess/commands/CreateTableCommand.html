@@ -24,18 +24,18 @@
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>      <strong class="jxr_keyword">private</strong> Boolean[]           notNulls;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>      <strong class="jxr_keyword">private</strong> Map&lt;String, String&gt; columnMap;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="CreateTableCommand" href="../../../net/ucanaccess/commands/CreateTableCommand.html#CreateTableCommand">CreateTableCommand</a>(String _tableName, String _execId) {
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>          tableName = _tableName;
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>          execId = _execId;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>      <strong class="jxr_keyword">public</strong> <a name="CreateTableCommand" href="../../../net/ucanaccess/commands/CreateTableCommand.html#CreateTableCommand">CreateTableCommand</a>(String tableName, String execId) {
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>          <strong class="jxr_keyword">this</strong>.tableName = tableName;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>          <strong class="jxr_keyword">this</strong>.execId = execId;
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>      }
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">public</strong> <a name="CreateTableCommand" href="../../../net/ucanaccess/commands/CreateTableCommand.html#CreateTableCommand">CreateTableCommand</a>(String tn, String execId2, Map&lt;String, String&gt; _columnMap, String[] _types,
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>              String[] _defaults, Boolean[] _notNulls) {
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">public</strong> <a name="CreateTableCommand" href="../../../net/ucanaccess/commands/CreateTableCommand.html#CreateTableCommand">CreateTableCommand</a>(String tn, String execId2, Map&lt;String, String&gt; columnMap, String[] types,
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>              String[] defaults, Boolean[] notNulls) {
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>          <strong class="jxr_keyword">this</strong>(tn, execId2);
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>          types = _types;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>          defaults = _defaults;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>          notNulls = _notNulls;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>          columnMap = _columnMap;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>          <strong class="jxr_keyword">this</strong>.types = types;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>          <strong class="jxr_keyword">this</strong>.defaults = defaults;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>          <strong class="jxr_keyword">this</strong>.notNulls = notNulls;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>          <strong class="jxr_keyword">this</strong>.columnMap = columnMap;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>      }
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>      <strong class="jxr_keyword">public</strong> <a name="CreateTableCommand" href="../../../net/ucanaccess/commands/CreateTableCommand.html#CreateTableCommand">CreateTableCommand</a>(String tn, String execId2, Map&lt;String, String&gt; columnMap2) {
@@ -82,8 +82,8 @@
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>              <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a> p2a = <strong class="jxr_keyword">new</strong> <a name="Persist2Jet" href="../../../net/ucanaccess/converters/Persist2Jet.html#Persist2Jet">Persist2Jet</a>();
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>              p2a.createTable(tableName, columnMap, types, defaults, notNulls);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>          } <strong class="jxr_keyword">catch</strong> (IOException _ex) {
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(_ex);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          } <strong class="jxr_keyword">catch</strong> (IOException ex) {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(ex);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>          }
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>      }

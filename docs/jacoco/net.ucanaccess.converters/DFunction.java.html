@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DFunction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.converters</a> &gt; <span class="el_source">DFunction.java</span></div><h1>DFunction.java</h1><pre class="source lang-java linenums">package net.ucanaccess.converters;
+
+import static net.ucanaccess.type.SqlConstants.COLUMN_NAME;
+
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.util.Try;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class DFunction {
+<span class="fc" id="L16">    private static final Pattern      PAT_SELECT_FROM          = Pattern.compile(&quot;SELECT(.*\\W)FROM(.*)&quot;, Pattern.CASE_INSENSITIVE);</span>
+    private static final String       DFUNCTIONS_WHERE         = &quot;\\s*\\(\\s*['\&quot;](.*)['\&quot;]\\,\\s*['\&quot;](.*)['\&quot;]\\,\\s*['\&quot;](.*)['\&quot;]\\s*\\)&quot;;
+    private static final String       DFUNCTIONS_WHERE_DYNAMIC = &quot;\\s*\\(\\s*['\&quot;](.*)['\&quot;]\\,\\s*['\&quot;](.*)['\&quot;]\\,(.*)\\)&quot;;
+    private static final String       DFUNCTIONS_NO_WHERE      = &quot;\\s*\\(\\s*['\&quot;](.*)['\&quot;]\\,\\s*['\&quot;](.*)['\&quot;]\\s*\\)&quot;;
+<span class="fc" id="L20">    private static final List&lt;String&gt; DFUNCTION_LIST           = List.of(&quot;COUNT&quot;, &quot;MAX&quot;, &quot;MIN&quot;, &quot;SUM&quot;, &quot;AVG&quot;, &quot;LAST&quot;, &quot;FIRST&quot;, &quot;LOOKUP&quot;);</span>
+
+    private Connection                conn;
+    private final String              sql;
+
+<span class="fc" id="L25">    public DFunction(Connection conn, String sql) {</span>
+<span class="fc" id="L26">        this.conn = conn;</span>
+<span class="fc" id="L27">        this.sql = sql;</span>
+<span class="fc" id="L28">    }</span>
+
+    private String convertDFunctions() {
+<span class="fc" id="L31">        String sqlOut = sql;</span>
+<span class="fc" id="L32">        boolean hasFrom = sql.toUpperCase(Locale.ROOT).contains(&quot; FROM &quot;);</span>
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        String init = hasFrom ? &quot; (SELECT &quot; : &quot;&quot;;</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        String end = hasFrom ? &quot; ) &quot; : &quot;&quot;;</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for (String f : DFUNCTION_LIST) {</span>
+
+<span class="fc" id="L38">            String dfun = &quot;D&quot; + f;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">            if (&quot;lookup&quot;.equalsIgnoreCase(f)) {</span>
+<span class="fc" id="L40">                f = &quot; &quot;;</span>
+            }
+<span class="fc" id="L42">            sqlOut = Pattern.compile(dfun + DFUNCTIONS_WHERE, Pattern.CASE_INSENSITIVE).matcher(sqlOut).replaceAll(init + f + &quot;($1) FROM $2 WHERE $3&quot; + end);</span>
+<span class="fc" id="L43">            sqlOut = Pattern.compile(dfun + DFUNCTIONS_NO_WHERE, Pattern.CASE_INSENSITIVE).matcher(sqlOut).replaceAll(init + f + &quot;($1) FROM $2&quot; + end);</span>
+
+<span class="fc" id="L45">            Pattern patDfd = Pattern.compile(dfun + DFUNCTIONS_WHERE_DYNAMIC, Pattern.CASE_INSENSITIVE);</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">            for (Matcher mtc = patDfd.matcher(sqlOut); mtc.find(); mtc = patDfd.matcher(sqlOut)) {</span>
+<span class="nc" id="L47">                StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L48">                String g3 = mtc.group(3);</span>
+<span class="nc" id="L49">                String tableN = mtc.group(2).trim();</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">                String alias = tableN.startsWith(&quot;[&quot;) &amp;&amp; tableN.endsWith(&quot;]&quot;) ? &quot;[&quot; + unpad(tableN) + &quot;_DALIAS]&quot; : tableN + &quot;_DALIAS&quot;;</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">                String tn = tableN.startsWith(&quot;[&quot;) &amp;&amp; tableN.endsWith(&quot;]&quot;) ? unpad(tableN) : tableN;</span>
+<span class="nc" id="L52">                sb.append(init).append(f).append(&quot;(&quot;).append(mtc.group(1)).append(&quot;) FROM &quot;).append(tableN)</span>
+<span class="nc" id="L53">                  .append(&quot; AS &quot;).append(alias).append(&quot; WHERE &quot;);</span>
+<span class="nc" id="L54">                boolean accessConcat = g3.contains(&quot;&amp;&quot;);</span>
+<span class="nc" id="L55">                boolean sqlConcat = g3.contains(&quot;||&quot;);</span>
+<span class="nc bnc" id="L56" title="All 4 branches missed.">                if (accessConcat || sqlConcat) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                    String concat = accessConcat ? &quot;&amp;&quot; : Pattern.quote(&quot;||&quot;);</span>
+<span class="nc" id="L58">                    String[] pts = g3.split(concat, -1);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                    for (String tkn : pts) {</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                        if (isQuoted(tkn)) {</span>
+<span class="nc" id="L61">                            tkn = tkn.trim();</span>
+<span class="nc" id="L62">                            sb.append(unpad(tkn));</span>
+                        } else {
+<span class="nc" id="L64">                            tkn += &quot; &quot;;</span>
+                            try {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                                for (String cln : getColumnNames(tn.toUpperCase(Locale.ROOT))) {</span>
+<span class="nc" id="L67">                                    Pattern patOppn = Pattern.compile(&quot;(\\W)(&quot; + cln + &quot;)(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="nc" id="L68">                                    Matcher mtcop = patOppn.matcher(tkn);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                                    if (!mtcop.find()) {</span>
+<span class="nc" id="L70">                                        continue;</span>
+                                    }
+<span class="nc" id="L72">                                    String pref = mtcop.group(1);</span>
+<span class="nc bnc" id="L73" title="All 6 branches missed.">                                    if (&quot;.&quot;.equals(pref) || (&quot;[&quot;.equals(pref) &amp;&amp; mtcop.start(1) &gt; 0</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                                        &amp;&amp; tkn.charAt(mtcop.start(1) - 1) == '.')) {</span>
+<span class="nc" id="L75">                                        continue;</span>
+                                    }
+<span class="nc" id="L77">                                    tkn = tkn.replaceAll(&quot;(\\W)((?i)&quot; + cln + &quot;)(\\W)&quot;,</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                                        &quot;[&quot;.equals(pref) ? resolveAmbiguosTableName(cln) + &quot;.$1$2$3&quot;</span>
+<span class="nc" id="L79">                                            : &quot;$1&quot; + resolveAmbiguosTableName(cln) + &quot;.$2$3&quot;);</span>
+<span class="nc" id="L80">                                }</span>
+<span class="nc" id="L81">                            } catch (SQLException ignored) {</span>
+                                // metadata not available, keep the token unchanged
+<span class="nc" id="L83">                            }</span>
+<span class="nc" id="L84">                            sb.append(tkn);</span>
+                        }
+                    }
+                }
+<span class="nc" id="L88">                sb.append(end);</span>
+<span class="nc" id="L89">                sqlOut = sqlOut.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst(&quot;_&quot;, dfun), sb.toString());</span>
+            }
+<span class="fc" id="L91">        }</span>
+
+<span class="fc" id="L93">        return sqlOut;</span>
+    }
+
+    private String resolveAmbiguosTableName(String identifier) {
+<span class="nc" id="L97">        return Try.withResources(conn::createStatement, st -&gt; {</span>
+<span class="nc" id="L98">            String sqlOut = sql.replaceAll(&quot;[\\r\\n]+&quot;, &quot; &quot;);</span>
+<span class="nc" id="L99">            sqlOut = PAT_SELECT_FROM.matcher(sqlOut).replaceFirst(&quot;SELECT &quot; + identifier + &quot; FROM $2&quot;);</span>
+<span class="nc" id="L100">            String f4t = SQLConverter.convertSQL(sqlOut).getSql();</span>
+<span class="nc" id="L101">            ResultSetMetaData rsmd = st.executeQuery(f4t).getMetaData();</span>
+<span class="nc" id="L102">            String tableN = rsmd.getTableName(1);</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">            return tableN == null || tableN.isBlank() ? identifier : tableN;</span>
+<span class="nc" id="L104">        }).orElse(identifier);</span>
+    }
+
+    private List&lt;String&gt; getColumnNames(String tableName) throws SQLException {
+<span class="nc" id="L108">        List&lt;String&gt; ar = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (conn == null) {</span>
+<span class="nc" id="L110">            UcanaccessConnection conu = UcanaccessConnection.getCtxConnection();</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if (conu == null) {</span>
+<span class="nc" id="L112">                return ar;</span>
+            }
+<span class="nc" id="L114">            conn = conu.getHSQLDBConnection();</span>
+        }
+<span class="nc" id="L116">        DatabaseMetaData dbmd = conn.getMetaData();</span>
+<span class="nc" id="L117">        ResultSet rs = dbmd.getColumns(null, null, tableName, null);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        while (rs.next()) {</span>
+<span class="nc" id="L119">            ar.add(rs.getString(COLUMN_NAME));</span>
+        }
+<span class="nc" id="L121">        return ar;</span>
+    }
+
+    private static boolean isQuoted(String g3) {
+<span class="nc" id="L125">        g3 = g3.trim();</span>
+<span class="nc bnc" id="L126" title="All 6 branches missed.">        return (g3.startsWith(&quot;'&quot;) &amp;&amp; g3.endsWith(&quot;'&quot;) &amp;&amp; g3.substring(1, g3.length() - 1).indexOf('\'') &lt; 0)</span>
+<span class="nc bnc" id="L127" title="All 6 branches missed.">            || (g3.startsWith(&quot;\&quot;&quot;) &amp;&amp; g3.endsWith(&quot;\&quot;&quot;) &amp;&amp; g3.substring(1, g3.length() - 1).indexOf('&quot;') &lt; 0);</span>
+    }
+
+    private static String unpad(String tkn) {
+<span class="nc" id="L131">        return tkn.substring(1, tkn.length() - 1);</span>
+    }
+
+    public String toSQL() {
+<span class="fc" id="L135">        return convertDFunctions();</span>
+    }
+
+    public static String convertDFunctions(String sql, Connection conu) {
+<span class="fc" id="L139">        return new DFunction(conu, sql).toSQL();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

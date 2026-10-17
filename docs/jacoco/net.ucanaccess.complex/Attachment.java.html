@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Attachment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.complex</a> &gt; <span class="el_source">Attachment.java</span></div><h1>Attachment.java</h1><pre class="source lang-java linenums">package net.ucanaccess.complex;
+
+import io.github.spannm.jackcess.complex.ComplexValue;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
+public class Attachment extends ComplexBase {
+    private static final long serialVersionUID = 1L;
+    private String            url;
+    private String            name;
+    private String            type;
+    private byte[]            data;
+    private LocalDateTime     timeStamp;
+    private Integer           flags;
+
+    public Attachment(io.github.spannm.jackcess.complex.Attachment atc) throws IOException {
+<span class="fc" id="L19">        super(atc);</span>
+<span class="fc" id="L20">        url = atc.getFileUrl();</span>
+<span class="fc" id="L21">        name = atc.getFileName();</span>
+<span class="fc" id="L22">        type = atc.getFileType();</span>
+<span class="fc" id="L23">        data = atc.getFileData();</span>
+<span class="fc" id="L24">        timeStamp = atc.getFileLocalTimeStamp();</span>
+<span class="fc" id="L25">        flags = atc.getFileFlags();</span>
+<span class="fc" id="L26">    }</span>
+
+    public Attachment(ComplexValue.Id id, String tableName, String columnName, String url, String name, String type,
+            byte[] data, LocalDateTime timeStamp, Integer flags) {
+<span class="fc" id="L30">        super(id, tableName, columnName);</span>
+<span class="fc" id="L31">        this.url = url;</span>
+<span class="fc" id="L32">        this.name = name;</span>
+<span class="fc" id="L33">        this.type = type;</span>
+<span class="fc" id="L34">        this.data = data;</span>
+<span class="fc" id="L35">        this.timeStamp = handleJackcessLocalDateTimeResolution(timeStamp);</span>
+<span class="fc" id="L36">        this.flags = flags;</span>
+<span class="fc" id="L37">    }</span>
+
+    public Attachment(String url, String name, String type, byte[] data, LocalDateTime timeStamp, Integer flags) {
+<span class="fc" id="L40">        this(CREATE_ID, null, null, url, name, type, data, timeStamp, flags);</span>
+
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L47">            return true;</span>
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="nc" id="L49">            return false;</span>
+        }
+<span class="fc" id="L51">        Attachment other = (Attachment) obj;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (!Arrays.equals(data, other.data)) {</span>
+<span class="fc" id="L53">            return false;</span>
+        }
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (flags == null) {</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            if (other.flags != null) {</span>
+<span class="nc" id="L57">                return false;</span>
+            }
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        } else if (!flags.equals(other.flags)) {</span>
+<span class="nc" id="L60">            return false;</span>
+        }
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (name == null) {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (other.name != null) {</span>
+<span class="nc" id="L64">                return false;</span>
+            }
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        } else if (!name.equals(other.name)) {</span>
+<span class="nc" id="L67">            return false;</span>
+        }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (timeStamp == null) {</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if (other.timeStamp != null) {</span>
+<span class="nc" id="L71">                return false;</span>
+            }
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        } else if (!timeStamp.equals(other.timeStamp)) {</span>
+<span class="nc" id="L74">            return false;</span>
+        }
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (type == null) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (other.type != null) {</span>
+<span class="nc" id="L78">                return false;</span>
+            }
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        } else if (!type.equals(other.type)) {</span>
+<span class="nc" id="L81">            return false;</span>
+        }
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if (url == null) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            return other.url == null;</span>
+        }
+<span class="nc" id="L86">        return url.equals(other.url);</span>
+    }
+
+    public byte[] getData() {
+<span class="fc" id="L90">        return data;</span>
+    }
+
+    public Integer getFlags() {
+<span class="fc" id="L94">        return flags;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L98">        return name;</span>
+    }
+
+    public LocalDateTime getTimeStamp() {
+<span class="fc" id="L102">        return timeStamp;</span>
+    }
+
+    public String getType() {
+<span class="fc" id="L106">        return type;</span>
+    }
+
+    public String getUrl() {
+<span class="fc" id="L110">        return url;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L115">        final int prime = 31;</span>
+<span class="nc" id="L116">        int result = super.hashCode();</span>
+<span class="nc" id="L117">        result = prime * result + Arrays.hashCode(data);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        result = prime * result + (flags == null ? 0 : flags.hashCode());</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        result = prime * result + (name == null ? 0 : name.hashCode());</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        result = prime * result + (timeStamp == null ? 0 : timeStamp.hashCode());</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        result = prime * result + (type == null ? 0 : type.hashCode());</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        result = prime * result + (url == null ? 0 : url.hashCode());</span>
+<span class="nc" id="L123">        return result;</span>
+    }
+
+    public void setData(byte[] data) {
+<span class="nc" id="L127">        this.data = data;</span>
+<span class="nc" id="L128">    }</span>
+
+    public void setFlags(Integer flags) {
+<span class="nc" id="L131">        this.flags = flags;</span>
+<span class="nc" id="L132">    }</span>
+
+    public void setName(String name) {
+<span class="nc" id="L135">        this.name = name;</span>
+<span class="nc" id="L136">    }</span>
+
+    public void setTimeStamp(LocalDateTime timeStamp) {
+<span class="nc" id="L139">        this.timeStamp = timeStamp;</span>
+<span class="nc" id="L140">    }</span>
+
+    public void setType(String type) {
+<span class="nc" id="L143">        this.type = type;</span>
+<span class="nc" id="L144">    }</span>
+
+    public void setUrl(String url) {
+<span class="nc" id="L147">        this.url = url;</span>
+<span class="nc" id="L148">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L152">        return String.format(&quot;%s[url=%s, name=%s, type=%s, data=%s, timeStamp=%s, flags=%s]&quot;,</span>
+<span class="fc" id="L153">            getClass().getSimpleName(),  url, name, type, Arrays.toString(data), timeStamp, flags);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Sql.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.util</a> &gt; <span class="el_source">Sql.java</span></div><h1>Sql.java</h1><pre class="source lang-java linenums">package net.ucanaccess.util;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+/**
+ * &lt;p&gt;
+ *   An immutable sql statement string created from multiple tokens
+ *   in order to write inline sql statements in an easy-to-read fashion
+ *   spread out over multiple lines of code.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ *   The class implements {@link CharSequence} and thus can be used as a drop-in
+ *   alternative wherever API supports {@code CharSequence} rather than {@code String}.
+ * &lt;/p&gt;
+ *
+ * Please note that the validity of the statement is never checked,
+ * and that {@code null} or empty inputs are permitted (no run-time exceptions).&lt;br&gt;
+ *
+ * The input of multiple tokens is formatted into a single String by
+ * removing leading and trailing whitespace and concatenating
+ * non-empty tokens by a single space character.
+ * Further, any trailing semicolons are removed from the resulting sql string.
+ *
+ * &lt;p&gt;Example:&lt;/p&gt;
+ *
+ * &lt;pre&gt;
+ *     String tblName = &quot;table&quot;;
+ *     Sql.of(&quot;SELECT COUNT(*)&quot;,
+ *            &quot;FROM&quot;, tblName,
+ *            &quot; WHERE cond1 = :cond1&quot;,
+ *            &quot;   AND cond2 = :cond2&quot;);
+ * &lt;/pre&gt;
+ *
+ * @author Markus Spann
+ * @since v5.1.0
+ */
+public final class Sql implements CharSequence {
+
+<span class="fc" id="L43">    private static final Sql EMPTY_SQL = new Sql(&quot;&quot;);</span>
+
+    /** The internal sql string. Cannot be null. */
+    private final String str;
+
+<span class="fc" id="L48">    private Sql(String sql) {</span>
+<span class="fc" id="L49">        str = sql;</span>
+<span class="fc" id="L50">    }</span>
+
+    public static Sql of(CharSequence... tokens) {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        return tokens == null ? EMPTY_SQL : of(Arrays.asList(tokens));</span>
+    }
+
+    public static Sql of(Iterable&lt;? extends CharSequence&gt; tokens) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        return tokens == null ? EMPTY_SQL : new Sql(format(tokens));</span>
+    }
+
+    /**
+     * Formats an sql statement from multiple tokens.&lt;br&gt;
+     * Leading and trailing whitespace is removed from each token and empty tokens ignored.&lt;br&gt;
+     * The tokens are joined using a single blank character to create the sql string.&lt;br&gt;
+     * Finally, any trailing semicolons are removed from the resulting sql.
+     *
+     * @param tokens collection of tokens
+     * @return formatted sql string
+     */
+    static String format(Iterable&lt;? extends CharSequence&gt; tokens) {
+<span class="fc" id="L70">        String sql = StreamSupport.stream(Objects.requireNonNull(tokens).spliterator(), false)</span>
+<span class="fc" id="L71">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L72">            .map(CharSequence::toString)</span>
+<span class="fc" id="L73">            .map(String::trim)</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            .filter(s -&gt; !s.isEmpty())</span>
+<span class="fc" id="L75">            .collect(Collectors.joining(&quot; &quot;));</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        while (sql.endsWith(&quot;;&quot;)) {</span>
+<span class="fc" id="L77">            sql = sql.substring(0, sql.length() - 1);</span>
+        }
+<span class="fc" id="L79">        return sql;</span>
+    }
+
+    @Override
+    public int length() {
+<span class="fc" id="L84">        return str.length();</span>
+    }
+
+    @Override
+    public char charAt(int index) {
+<span class="fc" id="L89">        return str.charAt(index);</span>
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+<span class="fc" id="L94">        return str.subSequence(start, end);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L99">        return str.hashCode();</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L104" title="2 of 4 branches missed.">        if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="nc" id="L105">            return false;</span>
+        }
+<span class="fc" id="L107">        return str.equals(((Sql) obj).str);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L112">        return str;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

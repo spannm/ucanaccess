@@ -1,1 +1,1 @@
-moduleSearchIndex = [];updateSearchResults();
+moduleSearchIndex = [{"l":"io.github.spannm.ucanaccess"}];updateSearchResults();

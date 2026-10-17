@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessBlob.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessBlob.java</span></div><h1>UcanaccessBlob.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import io.github.spannm.jackcess.util.OleBlob;
+import io.github.spannm.jackcess.util.OleBlob.Content;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
+
+import java.io.*;
+import java.sql.Blob;
+import java.sql.SQLException;
+
+public class UcanaccessBlob implements Blob {
+    private Blob                       blob;
+    private boolean                    usingBlobKey;
+    private final UcanaccessConnection conn;
+
+<span class="fc" id="L17">    public UcanaccessBlob(Blob blob, UcanaccessConnection conn) throws SQLException {</span>
+<span class="fc" id="L18">        this.blob = blob;</span>
+<span class="fc" id="L19">        this.conn = conn;</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (blob.length() != 0) {</span>
+<span class="fc" id="L21">            BlobKey bk = BlobKey.getBlobKey(blob.getBinaryStream());</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            usingBlobKey = bk != null;</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">            if (usingBlobKey) {</span>
+<span class="fc" id="L24">                this.blob = bk.getOleBlob(this.conn.getDbIO());</span>
+            }
+        }
+<span class="fc" id="L27">    }</span>
+
+    public static Blob createBlob(File fl, UcanaccessConnection conn) throws UcanaccessSQLException {
+<span class="fc" id="L30">        return Try.catching(() -&gt; {</span>
+<span class="fc" id="L31">            Blob oleBlob = new OleBlob.Builder().withPackagePrettyName(fl.getName()).withSimplePackage(fl).toBlob();</span>
+<span class="fc" id="L32">            return new UcanaccessBlob(oleBlob, conn);</span>
+<span class="fc" id="L33">        }).orThrow(UcanaccessSQLException::new);</span>
+    }
+
+    public static Blob createBlob(UcanaccessConnection conn) throws SQLException {
+<span class="fc" id="L37">        return new UcanaccessBlob(conn.getHSQLDBConnection().createBlob(), conn);</span>
+    }
+
+    @Override
+    public void free() throws SQLException {
+        try {
+<span class="nc" id="L43">            blob.free();</span>
+<span class="nc" id="L44">        } catch (SQLException ex) {</span>
+<span class="nc" id="L45">            throw new UcanaccessSQLException(ex);</span>
+<span class="nc" id="L46">        }</span>
+<span class="nc" id="L47">    }</span>
+
+    @Override
+    public InputStream getBinaryStream() throws SQLException {
+        try {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (usingBlobKey) {</span>
+<span class="fc" id="L53">                OleBlob ole = (OleBlob) blob;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">                if (ole.getContent() instanceof OleBlob.EmbeddedContent) {</span>
+<span class="fc" id="L55">                    return ((OleBlob.EmbeddedContent) ole.getContent()).getStream();</span>
+                }
+            }
+<span class="fc" id="L58">            return blob.getBinaryStream();</span>
+<span class="nc" id="L59">        } catch (SQLException | IOException ex) {</span>
+<span class="nc" id="L60">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public InputStream getBinaryStream(long pos, long length) throws SQLException {
+        try {
+<span class="nc" id="L67">            return blob.getBinaryStream(pos, length);</span>
+<span class="nc" id="L68">        } catch (SQLException ex) {</span>
+<span class="nc" id="L69">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public byte[] getBytes(long pos, int length) throws SQLException {
+        try {
+<span class="nc" id="L76">            return blob.getBytes(pos, length);</span>
+<span class="nc" id="L77">        } catch (SQLException ex) {</span>
+<span class="nc" id="L78">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public long length() throws SQLException {
+        try {
+<span class="fc" id="L85">            return blob.length();</span>
+<span class="nc" id="L86">        } catch (SQLException ex) {</span>
+<span class="nc" id="L87">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public long position(Blob pattern, long start) throws SQLException {
+        try {
+<span class="nc" id="L94">            return blob.position(pattern, start);</span>
+<span class="nc" id="L95">        } catch (SQLException ex) {</span>
+<span class="nc" id="L96">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public long position(byte[] pattern, long start) throws SQLException {
+        try {
+<span class="nc" id="L103">            return blob.position(pattern, start);</span>
+<span class="nc" id="L104">        } catch (SQLException ex) {</span>
+<span class="nc" id="L105">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public OutputStream setBinaryStream(long pos) throws SQLException {
+        try {
+<span class="pc bpc" id="L112" title="3 of 4 branches missed.">            if (blob instanceof OleBlob &amp;&amp; pos == 1) {</span>
+<span class="nc" id="L113">                OleBlob ole = (OleBlob) blob;</span>
+<span class="nc" id="L114">                Content content = ole.getContent();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                if (content instanceof OleBlob.EmbeddedContent) {</span>
+<span class="nc" id="L116">                    ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L117">                    ((OleBlob.SimplePackageContent) content).writeTo(baos);</span>
+<span class="nc" id="L118">                    return baos;</span>
+                }
+            }
+<span class="fc" id="L121">            return blob.setBinaryStream(pos);</span>
+<span class="nc" id="L122">        } catch (SQLException | IOException ex) {</span>
+<span class="nc" id="L123">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int setBytes(long pos, byte[] bytes) throws SQLException {
+        try {
+<span class="fc" id="L130">            return blob.setBytes(pos, bytes);</span>
+<span class="nc" id="L131">        } catch (SQLException ex) {</span>
+<span class="nc" id="L132">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
+        try {
+<span class="nc" id="L139">            return blob.setBytes(pos, bytes, offset, len);</span>
+<span class="nc" id="L140">        } catch (SQLException ex) {</span>
+<span class="nc" id="L141">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public void truncate(long len) throws SQLException {
+        try {
+<span class="nc" id="L148">            blob.truncate(len);</span>
+<span class="nc" id="L149">        } catch (SQLException ex) {</span>
+<span class="nc" id="L150">            throw new UcanaccessSQLException(ex);</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

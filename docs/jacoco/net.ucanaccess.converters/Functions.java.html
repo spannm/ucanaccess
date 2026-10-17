@@ -1,0 +1,1662 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Functions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.converters</a> &gt; <span class="el_source">Functions.java</span></div><h1>Functions.java</h1><pre class="source lang-java linenums">package net.ucanaccess.converters;
+
+import static net.ucanaccess.converters.RegionalSettings.getRegionalSettings;
+
+import io.github.spannm.jackcess.DataType;
+import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.exception.InvalidFunctionParameterException;
+import net.ucanaccess.exception.InvalidIntervalValueException;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.ext.FunctionType;
+import net.ucanaccess.util.Try;
+
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.text.*;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public final class Functions {
+<span class="fc" id="L36">    private static final Logger LOGGER = System.getLogger(Functions.class.getName());</span>
+    private static SecureRandom random;
+    private static Double       rnd;
+    private static Double       lastRnd;
+    private static final double APPROX = 0.00000001;
+
+    private static final String GENERAL_DATE = &quot;general date&quot;;
+
+    /** Day zero of Access date values. */
+<span class="fc" id="L45">    private static final LocalDateTime ACCESS_BASE_DATE         = LocalDateTime.of(1899, 12, 30, 0, 0);</span>
+    /** Weeks as in Access by default: starting on Sunday, week 1 contains January 1st. */
+<span class="fc" id="L47">    private static final WeekFields    WEEK_FIELDS_SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);</span>
+
+    private Functions() {
+    }
+
+    static SimpleDateFormat createSimpleDateFormat(String pt) {
+<span class="fc" id="L53">        SimpleDateFormat sdf = new SimpleDateFormat(pt);</span>
+<span class="fc" id="L54">        ((GregorianCalendar) sdf.getCalendar()).setGregorianChange(new Date(Long.MIN_VALUE));</span>
+<span class="fc" id="L55">        return sdf;</span>
+    }
+
+    /**
+     * Returns an Integer representing the character code corresponding to the first letter in a string.
+     *
+     * @param s any valid string expression
+     * @return character code
+     */
+    @FunctionType(functionName = &quot;Asc&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer asc(String s) {
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        return s == null || s.isEmpty() ? null : (int) s.charAt(0);</span>
+    }
+
+    @FunctionType(functionName = &quot;Equals&quot;, argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
+    public static Boolean equals(Object obj1, Object obj2) {
+<span class="pc bpc" id="L71" title="1 of 6 branches missed.">        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {</span>
+<span class="fc" id="L72">            return false;</span>
+        }
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        if (obj1.getClass().isArray()) {</span>
+<span class="fc" id="L75">            return Arrays.equals((Object[]) obj1, (Object[]) obj2);</span>
+        }
+<span class="fc" id="L77">        return obj1.equals(obj2);</span>
+    }
+
+    @FunctionType(functionName = &quot;EqualsIgnoreOrder&quot;, argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
+    public static Boolean equalsIgnoreOrder(Object obj1, Object obj2) {
+<span class="pc bpc" id="L82" title="1 of 6 branches missed.">        if (obj1 == null || obj2 == null || !obj1.getClass().equals(obj2.getClass())) {</span>
+<span class="fc" id="L83">            return false;</span>
+        }
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (obj1.getClass().isArray()) {</span>
+<span class="fc" id="L86">            List&lt;Object&gt; lo1 = Arrays.asList((Object[]) obj1);</span>
+<span class="fc" id="L87">            List&lt;Object&gt; lo2 = Arrays.asList((Object[]) obj2);</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">            return lo1.containsAll(lo2) &amp;&amp; lo2.containsAll(lo1);</span>
+        }
+<span class="fc" id="L90">        return obj1.equals(obj2);</span>
+    }
+
+    @FunctionType(functionName = &quot;Contains&quot;, argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
+    public static Boolean contains(Object obj1, Object obj2) {
+<span class="fc bfc" id="L95" title="All 6 branches covered.">        if (obj1 == null || obj2 == null || !obj1.getClass().isArray()) {</span>
+<span class="fc" id="L96">            return false;</span>
+        }
+<span class="fc" id="L98">        List&lt;Object&gt; arr1 = Arrays.asList((Object[]) obj1);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        List&lt;Object&gt; arr2 = obj2.getClass().isArray() ? Arrays.asList((Object[]) obj2) : Arrays.asList(obj2);</span>
+<span class="fc" id="L100">        return arr1.containsAll(arr2);</span>
+    }
+
+    /**
+     * Returns a double specifying the arctangent of a number.
+     *
+     * @param number a double or any valid numeric expression.
+     * @return arctangent
+     */
+    @FunctionType(functionName = &quot;Atn&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double atn(double number) {
+<span class="fc" id="L111">        return Math.atan(number);</span>
+    }
+
+    /**
+     * Returns a double specifying the square root of a number.
+     *
+     * @param number a double greater than or equal to zero
+     * @return square root
+     */
+    @FunctionType(functionName = &quot;Sqr&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double sqr(double number) {
+<span class="fc" id="L122">        return Math.sqrt(number);</span>
+    }
+
+    @FunctionType(functionName = &quot;CBool&quot;, argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.YESNO)
+    public static boolean cbool(BigDecimal value) {
+<span class="fc" id="L127">        return cboolImpl(value);</span>
+    }
+
+    /**
+     * Converts a value to a boolean.
+     *
+     * @param value boolean input
+     * @return boolean
+     */
+    @FunctionType(functionName = &quot;CBool&quot;, argumentTypes = {AccessType.YESNO}, returnType = AccessType.YESNO)
+    public static boolean cbool(Boolean value) {
+<span class="fc" id="L138">        return cboolImpl(value);</span>
+    }
+
+    @FunctionType(functionName = &quot;CBool&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static boolean cbool(String value) {
+<span class="fc" id="L143">        return cboolImpl(value);</span>
+    }
+
+    private static boolean cboolImpl(Object obj) {
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if (obj == null) {</span>
+<span class="fc" id="L148">            return false;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        } else if (obj instanceof Boolean) {</span>
+<span class="fc" id="L150">            return (Boolean) obj;</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        } else if (obj instanceof String) {</span>
+<span class="fc" id="L152">            return Boolean.parseBoolean((String) obj);</span>
+        } else {
+<span class="pc bpc" id="L154" title="1 of 4 branches missed.">            return obj instanceof Number &amp;&amp; ((Number) obj).intValue() != 0;</span>
+        }
+    }
+
+    /**
+     * Converts an expression into a currency value.
+     */
+    @FunctionType(functionName = &quot;CCur&quot;, argumentTypes = {AccessType.CURRENCY}, returnType = AccessType.CURRENCY)
+    public static BigDecimal ccur(BigDecimal value) {
+<span class="fc" id="L163">        return value.setScale(4, RoundingMode.HALF_UP);</span>
+    }
+
+    /**
+     * Converts an expression into a date value.
+     */
+    @FunctionType(functionName = &quot;CDate&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp cdate(String dt) {
+<span class="fc" id="L171">        return dateValue(dt, false);</span>
+    }
+
+    /**
+     * Converts an expression to a double.
+     */
+    @FunctionType(functionName = &quot;CDbl&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double cdbl(Double number) {
+<span class="fc" id="L179">        return number;</span>
+    }
+
+    @FunctionType(functionName = &quot;CDec&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double cdec(Double number) {
+<span class="fc" id="L184">        return number;</span>
+    }
+
+    @FunctionType(functionName = &quot;CInt&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
+    public static Short cint(Double number) {
+<span class="fc" id="L189">        return new BigDecimal((long) Math.floor(number + 0.499999999999999d)).shortValueExact();</span>
+    }
+
+    @FunctionType(functionName = &quot;CInt&quot;, argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
+    public static Short cint(boolean bool) {
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        return (short) (bool ? -1 : 0);</span>
+    }
+
+    /**
+     * Converts an expression to a long integer.
+     */
+    @FunctionType(functionName = &quot;CLng&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer clng(Double value) {
+<span class="fc" id="L202">        return (int) Math.floor(value + 0.5d);</span>
+    }
+
+    @FunctionType(functionName = &quot;CLng&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer clng(String value) throws UcanaccessSQLException {
+<span class="fc" id="L207">        return Try.catching(() -&gt; clng(FormatCache.getNoArgs().parse(value).doubleValue()))</span>
+<span class="fc" id="L208">            .orThrow(UcanaccessSQLException::new);</span>
+    }
+
+    @FunctionType(functionName = &quot;CLng&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer clng(Integer value) {
+<span class="fc" id="L213">        return value;</span>
+    }
+
+    @FunctionType(functionName = &quot;CLong&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer clong(Double value) {
+<span class="fc" id="L218">        return clng(value);</span>
+    }
+
+    @FunctionType(functionName = &quot;CLong&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer clong(Integer value) {
+<span class="fc" id="L223">        return value;</span>
+    }
+
+    @FunctionType(functionName = &quot;CLong&quot;, argumentTypes = {AccessType.YESNO}, returnType = AccessType.LONG)
+    public static Integer clong(boolean value) {
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        return value ? -1 : 0;</span>
+    }
+
+    @FunctionType(functionName = &quot;CSign&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.SINGLE)
+    public static double csign(double value) {
+<span class="fc" id="L233">        MathContext mc = new MathContext(7);</span>
+<span class="fc" id="L234">        return new BigDecimal(Double.toString(value), mc).doubleValue();</span>
+    }
+
+    /**
+     * Converts a value to a string.
+     */
+    @FunctionType(functionName = &quot;CStr&quot;, argumentTypes = {AccessType.YESNO}, returnType = AccessType.MEMO)
+    public static String cstr(Boolean value) throws UcanaccessSQLException {
+<span class="fc" id="L242">        return cstrImpl(value);</span>
+    }
+
+    @FunctionType(functionName = &quot;CStr&quot;, argumentTypes = {AccessType.TEXT}, returnType = AccessType.MEMO)
+    public static String cstr(String value) {
+<span class="fc" id="L247">        return value;</span>
+    }
+
+    @FunctionType(functionName = &quot;CStr&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String cstr(double value) throws UcanaccessSQLException {
+<span class="fc" id="L252">        return cstrImpl(value);</span>
+    }
+
+    @FunctionType(functionName = &quot;CStr&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String cstr(int value) throws UcanaccessSQLException {
+<span class="fc" id="L257">        return cstrImpl(value);</span>
+    }
+
+    @FunctionType(functionName = &quot;CStr&quot;, argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
+    public static String cstr(Timestamp value) throws UcanaccessSQLException {
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        return value == null ? null : format(value, GENERAL_DATE);</span>
+    }
+
+    private static String cstrImpl(Object value) throws UcanaccessSQLException {
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        return value == null ? null : format(value.toString(), &quot;&quot;, true);</span>
+    }
+
+    @FunctionType(functionName = &quot;CVar&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String cvar(Double value) throws UcanaccessSQLException {
+<span class="fc" id="L271">        return format(value, &quot;general number&quot;);</span>
+    }
+
+    /**
+     * Returns a date containing a date to which a specified time interval has been added.
+     *
+     * @param intv interval of time
+     * @param vl number of intervals to add (to get dates in the future) or dedcut (to get dates in the past)
+     * @param dt date to which the interval is added
+     * @return calculated date
+     * @throws UcanaccessSQLException on invalid date interval input
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;DateAdd&quot;,
+        argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Date dateAdd(String intv, int vl, Date dt) throws UcanaccessSQLException {
+<span class="fc bfc" id="L286" title="All 4 branches covered.">        if (dt == null || intv == null) {</span>
+<span class="fc" id="L287">            return null;</span>
+        }
+<span class="fc" id="L289">        LocalDateTime ldt = toLocalDateTime(dt);</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">        if (&quot;yyyy&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L291">            ldt = ldt.plusYears(vl);</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">        } else if (&quot;q&quot;.equalsIgnoreCase(intv)) { // quarter</span>
+<span class="fc" id="L293">            ldt = ldt.plusMonths(vl * 3L);</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        } else if (&quot;m&quot;.equalsIgnoreCase(intv)) { // month</span>
+<span class="fc" id="L295">            ldt = ldt.plusMonths(vl);</span>
+<span class="fc bfc" id="L296" title="All 6 branches covered.">        } else if (&quot;y&quot;.equalsIgnoreCase(intv) || &quot;d&quot;.equalsIgnoreCase(intv) || &quot;w&quot;.equalsIgnoreCase(intv)) { // day of year, day, weekday</span>
+<span class="fc" id="L297">            ldt = ldt.plusDays(vl);</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">        } else if (&quot;ww&quot;.equalsIgnoreCase(intv)) { // week</span>
+<span class="fc" id="L299">            ldt = ldt.plusWeeks(vl);</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">        } else if (&quot;h&quot;.equalsIgnoreCase(intv)) { // hour</span>
+<span class="fc" id="L301">            ldt = ldt.plusHours(vl);</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        } else if (&quot;n&quot;.equalsIgnoreCase(intv)) { // minute</span>
+<span class="fc" id="L303">            ldt = ldt.plusMinutes(vl);</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        } else if (&quot;s&quot;.equalsIgnoreCase(intv)) { // second</span>
+<span class="fc" id="L305">            ldt = ldt.plusSeconds(vl);</span>
+        } else {
+<span class="fc" id="L307">            throw new InvalidIntervalValueException(intv);</span>
+        }
+<span class="fc" id="L309">        Timestamp result = Timestamp.valueOf(ldt);</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        return dt instanceof Timestamp ? result : new java.sql.Date(result.getTime());</span>
+    }
+
+    /**
+     * Converts a date to local date and time. Access stores dates without time zone,
+     * so date arithmetic must not be affected by daylight saving time changes.
+     */
+    private static LocalDateTime toLocalDateTime(Date dt) {
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        return dt instanceof Timestamp ? ((Timestamp) dt).toLocalDateTime() : new Timestamp(dt.getTime()).toLocalDateTime();</span>
+    }
+
+    private static int dayOfWeekSundayFirst(LocalDate date) {
+<span class="fc" id="L322">        return date.getDayOfWeek().getValue() % 7 + 1;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateAdd&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp dateAdd(String intv, int vl, Timestamp dt) throws UcanaccessSQLException {
+<span class="fc" id="L327">        return (Timestamp) dateAdd(intv, vl, (Date) dt);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateAdd&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp dateAdd(String intv, int vl, String dt) throws UcanaccessSQLException {
+<span class="fc" id="L332">        return (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt, false));</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateDiff&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer dateDiff(String intv, String dt1, String dt2) throws UcanaccessSQLException {
+<span class="fc" id="L337">        return dateDiff(intv, dateValue(dt1, false), dateValue(dt2, false));</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateDiff&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer dateDiff(String intv, String dt1, Timestamp dt2) throws UcanaccessSQLException {
+<span class="fc" id="L342">        return dateDiff(intv, dateValue(dt1, false), dt2);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateDiff&quot;, argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer dateDiff(String intv, Timestamp dt1, String dt2) throws UcanaccessSQLException {
+<span class="fc" id="L347">        return dateDiff(intv, dt1, dateValue(dt2, false));</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DateDiff&quot;, argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.LONG)
+    @SuppressWarnings(&quot;java:S8700&quot;) // Access dates have no time zone, so the difference is measured in wall-clock time
+    public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2) throws UcanaccessSQLException {
+<span class="fc bfc" id="L353" title="All 6 branches covered.">        if (dt1 == null || intv == null || dt2 == null) {</span>
+<span class="fc" id="L354">            return null;</span>
+        }
+<span class="fc bfc" id="L356" title="All 2 branches covered.">        int sign = dt1.after(dt2) ? -1 : 1;</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        LocalDateTime min = (sign == 1 ? dt1 : dt2).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        LocalDateTime max = (sign == 1 ? dt2 : dt1).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);</span>
+<span class="fc" id="L359">        int years = max.getYear() - min.getYear();</span>
+<span class="fc" id="L360">        long millis = Duration.between(min, max).toMillis();</span>
+        Integer result;
+<span class="fc bfc" id="L362" title="All 2 branches covered.">        if (&quot;yyyy&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L363">            result = years;</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">        } else if (&quot;q&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L365">            result = years * 4 + (max.getMonthValue() - 1) / 3 - (min.getMonthValue() - 1) / 3;</span>
+<span class="fc bfc" id="L366" title="All 4 branches covered.">        } else if (&quot;y&quot;.equalsIgnoreCase(intv) || &quot;d&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L367">            result = (int) Math.rint((double) millis / (1000 * 60 * 60 * 24));</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        } else if (&quot;m&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L369">            result = years * 12 + max.getMonthValue() - min.getMonthValue();</span>
+<span class="fc bfc" id="L370" title="All 4 branches covered.">        } else if (&quot;w&quot;.equalsIgnoreCase(intv) || &quot;ww&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L371">            result = (int) Math.floor((double) millis / (1000 * 60 * 60 * 24 * 7));</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">        } else if (&quot;h&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L373">            result = (int) Math.round(millis / (1000d * 60 * 60));</span>
+<span class="fc bfc" id="L374" title="All 2 branches covered.">        } else if (&quot;n&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L375">            result = (int) Math.rint((double) millis / (1000 * 60));</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">        } else if (&quot;s&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L377">            result = (int) Math.rint((double) millis / 1000);</span>
+        } else {
+<span class="fc" id="L379">            throw new InvalidIntervalValueException(intv);</span>
+        }
+<span class="fc" id="L381">        return result * sign;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer datePart(String intv, String dt, Integer firstDayOfWeek) throws UcanaccessSQLException {
+<span class="fc" id="L386">        return datePart(intv, dateValue(dt, false), firstDayOfWeek);</span>
+    }
+
+    /**
+     * Returns an integer containing the specified part of a given date.
+     *
+     * @param interval interval of time you want to return
+     * @param date value that you want to evaluate
+     * @param firstDayOfWeek constant that specifies the first day of the week
+     * @return date part
+     * @throws UcanaccessSQLException on invalid date interval input
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer datePart(String interval, Timestamp date, Integer firstDayOfWeek) throws UcanaccessSQLException {
+<span class="fc bfc" id="L400" title="All 2 branches covered.">        Integer ret = &quot;ww&quot;.equalsIgnoreCase(interval)</span>
+<span class="fc" id="L401">            ? datePart(interval, date, firstDayOfWeek, 1)</span>
+<span class="fc" id="L402">            : datePart(interval, date);</span>
+<span class="fc bfc" id="L403" title="All 4 branches covered.">        if (&quot;w&quot;.equalsIgnoreCase(interval) &amp;&amp; firstDayOfWeek &gt; 1) {</span>
+<span class="fc" id="L404">            ret = dayOfWeekSundayFirst(date.toLocalDateTime().toLocalDate()) - firstDayOfWeek + 1;</span>
+<span class="fc bfc" id="L405" title="All 2 branches covered.">            if (ret &lt;= 0) {</span>
+<span class="fc" id="L406">                ret = 7 + ret;</span>
+            }
+        }
+<span class="fc" id="L409">        return ret;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer datePart(String intv, String dt, Integer firstDayOfWeek, Integer firstWeekOfYear)
+        throws UcanaccessSQLException {
+<span class="fc" id="L415">        return datePart(intv, dateValue(dt, false), firstDayOfWeek, firstWeekOfYear);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer datePart(String intv, Timestamp dt, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+<span class="fc" id="L420">        Integer ret = datePart(intv, dt);</span>
+<span class="pc bpc" id="L421" title="2 of 8 branches missed.">        if (ret != null &amp;&amp; &quot;ww&quot;.equalsIgnoreCase(intv) &amp;&amp; (firstWeekOfYear &gt; 1 || firstDayOfWeek &gt; 1)) {</span>
+<span class="fc" id="L422">            LocalDate date = dt.toLocalDateTime().toLocalDate();</span>
+<span class="pc bpc" id="L423" title="1 of 2 branches missed.">            if (firstDayOfWeek == 0) {</span>
+<span class="nc" id="L424">                firstDayOfWeek = 1;</span>
+            }
+<span class="fc" id="L426">            int dow = dayOfWeekSundayFirst(date.withDayOfYear(1)) - firstDayOfWeek + 1;</span>
+<span class="fc bfc" id="L427" title="All 2 branches covered.">            if (dow &lt;= 0) {</span>
+<span class="fc" id="L428">                dow = 7 + dow;</span>
+<span class="fc bfc" id="L429" title="All 2 branches covered.">                if (dayOfWeekSundayFirst(date) - firstDayOfWeek &gt;= 0) {</span>
+<span class="fc" id="L430">                    ret++;</span>
+                }
+            }
+<span class="fc bfc" id="L433" title="All 4 branches covered.">            if (dow &gt; 4 &amp;&amp; firstWeekOfYear == 2) {</span>
+<span class="fc" id="L434">                ret--;</span>
+            }
+<span class="pc bpc" id="L436" title="1 of 4 branches missed.">            if (dow &gt; 1 &amp;&amp; firstWeekOfYear == 3) {</span>
+<span class="fc" id="L437">                ret--;</span>
+            }
+        }
+<span class="fc" id="L440">        return ret;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer datePart(String intv, String dt) throws UcanaccessSQLException {
+<span class="fc" id="L445">        return datePart(intv, dateValue(dt, false));</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;DatePart&quot;, argumentTypes = {AccessType.MEMO, AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer datePart(String intv, Timestamp dt) throws UcanaccessSQLException {
+<span class="fc bfc" id="L450" title="All 4 branches covered.">        if (intv == null || dt == null) {</span>
+<span class="fc" id="L451">            return null;</span>
+        }
+<span class="fc" id="L453">        LocalDateTime ldt = dt.toLocalDateTime();</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">        if (&quot;yyyy&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L455">            return ldt.getYear();</span>
+<span class="fc bfc" id="L456" title="All 2 branches covered.">        } else if (&quot;q&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L457">            return (ldt.getMonthValue() + 2) / 3;</span>
+<span class="fc bfc" id="L458" title="All 2 branches covered.">        } else if (&quot;d&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L459">            return ldt.getDayOfMonth();</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">        } else if (&quot;y&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L461">            return ldt.getDayOfYear();</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        } else if (&quot;m&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L463">            return ldt.getMonthValue();</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">        } else if (&quot;ww&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L465">            return ldt.get(WEEK_FIELDS_SUNDAY_START.weekOfWeekBasedYear());</span>
+<span class="fc bfc" id="L466" title="All 2 branches covered.">        } else if (&quot;w&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L467">            return dayOfWeekSundayFirst(ldt.toLocalDate());</span>
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        } else if (&quot;h&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L469">            return ldt.getHour();</span>
+<span class="fc bfc" id="L470" title="All 2 branches covered.">        } else if (&quot;n&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L471">            return ldt.getMinute();</span>
+<span class="fc bfc" id="L472" title="All 2 branches covered.">        } else if (&quot;s&quot;.equalsIgnoreCase(intv)) {</span>
+<span class="fc" id="L473">            return ldt.getSecond();</span>
+        } else {
+<span class="fc" id="L475">            throw new InvalidIntervalValueException(intv);</span>
+        }
+    }
+
+    /**
+     * Returns a date for a specified year, month, and day.
+     *
+     * @param year number between 100 and 9999, inclusive, or a numeric expression
+     * @param month any numeric expression
+     * @param day any numeric expression
+     * @return date
+     */
+    @FunctionType(functionName = &quot;DateSerial&quot;, argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
+    public static Timestamp dateSerial(int year, int month, int day) {
+        // month and day may lie outside their usual range and then roll over, like in Access
+<span class="fc" id="L490">        return Timestamp.valueOf(LocalDate.of(year, 1, 1).plusMonths(month - 1L).plusDays(day - 1L).atStartOfDay());</span>
+    }
+
+    @FunctionType(functionName = &quot;DateValue&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp dateValue(String dt) {
+<span class="fc" id="L495">        return dateValue(dt, true);</span>
+    }
+
+    @FunctionType(functionName = &quot;Timestamp0&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp timestamp0(String dt) {
+<span class="fc" id="L500">        GregorianCalendar gc = new GregorianCalendar();</span>
+<span class="fc" id="L501">        gc.setGregorianChange(new Date(Long.MIN_VALUE));</span>
+<span class="fc" id="L502">        Pattern patDate = Pattern.compile(SQLConverter.DATE_FORMAT + &quot;\\s&quot;);</span>
+<span class="fc" id="L503">        Pattern patTime = Pattern.compile(SQLConverter.HHMMSS_FORMAT);</span>
+<span class="fc" id="L504">        Matcher mtc = patDate.matcher(dt);</span>
+<span class="pc bpc" id="L505" title="1 of 2 branches missed.">        if (mtc.find()) {</span>
+<span class="fc" id="L506">            gc.set(Integer.parseInt(mtc.group(1)), Integer.parseInt(mtc.group(2)) - 1, Integer.parseInt(mtc.group(3)));</span>
+        } else {
+<span class="nc" id="L508">            UcanaccessRuntimeException.throwNow(&quot;internal error in parsing timestamp&quot;);</span>
+        }
+<span class="fc" id="L510">        mtc = patTime.matcher(dt);</span>
+<span class="pc bpc" id="L511" title="1 of 2 branches missed.">        if (mtc.find()) {</span>
+<span class="fc" id="L512">            gc.set(Calendar.HOUR_OF_DAY, Integer.parseInt(mtc.group(1)));</span>
+<span class="fc" id="L513">            gc.set(Calendar.MINUTE, Integer.parseInt(mtc.group(2)));</span>
+<span class="fc" id="L514">            gc.set(Calendar.SECOND, Integer.parseInt(mtc.group(3)));</span>
+        } else {
+<span class="nc" id="L516">            UcanaccessRuntimeException.throwNow(&quot;internal error in parsing timestamp&quot;);</span>
+        }
+<span class="fc" id="L518">        gc.set(Calendar.MILLISECOND, 0);</span>
+<span class="fc" id="L519">        return new Timestamp(gc.getTime().getTime());</span>
+    }
+
+    private static Timestamp dateValue(String dt, boolean onlyDate) {
+<span class="fc" id="L523">        RegionalSettings reg = getRegionalSettings();</span>
+<span class="pc bpc" id="L524" title="1 of 2 branches missed.">        if (!&quot;true&quot;.equalsIgnoreCase(reg.getRS())</span>
+<span class="pc bpc" id="L525" title="2 of 4 branches missed.">            &amp;&amp; (!&quot;PM&quot;.equalsIgnoreCase(reg.getPM()) || !&quot;AM&quot;.equalsIgnoreCase(reg.getAM()))) {</span>
+<span class="nc" id="L526">            dt = dt.replaceAll(&quot;(?i)&quot; + Pattern.quote(reg.getPM()), &quot;PM&quot;)</span>
+<span class="nc" id="L527">                .replaceAll(&quot;(?i)&quot; + Pattern.quote(reg.getAM()), &quot;AM&quot;);</span>
+        }
+
+<span class="fc bfc" id="L530" title="All 2 branches covered.">        for (Entry&lt;SimpleDateFormat, Boolean&gt; entry : reg.getDateFormats().entrySet()) {</span>
+<span class="fc" id="L531">            SimpleDateFormat sdf = entry.getKey();</span>
+<span class="fc" id="L532">            boolean yearOverride = entry.getValue();</span>
+
+            try {
+<span class="fc" id="L535">                Timestamp t = new Timestamp(sdf.parse(dt).getTime());</span>
+<span class="fc bfc" id="L536" title="All 2 branches covered.">                if (onlyDate) {</span>
+<span class="fc" id="L537">                    t = dateValue(t);</span>
+                }
+<span class="fc bfc" id="L539" title="All 2 branches covered.">                if (yearOverride) {</span>
+<span class="fc" id="L540">                    Calendar cl = Calendar.getInstance();</span>
+<span class="fc" id="L541">                    int y = cl.get(Calendar.YEAR);</span>
+<span class="fc" id="L542">                    cl.setTime(t);</span>
+<span class="fc" id="L543">                    cl.set(Calendar.YEAR, y);</span>
+<span class="fc" id="L544">                    t = new Timestamp(cl.getTime().getTime());</span>
+                }
+<span class="fc" id="L546">                return t;</span>
+<span class="fc" id="L547">            } catch (ParseException ignored) {</span>
+<span class="fc" id="L548">                LOGGER.log(Level.DEBUG, &quot;Ignoring {0}&quot;, ignored.toString());</span>
+            }
+<span class="fc" id="L550">        }</span>
+<span class="fc" id="L551">        return null;</span>
+    }
+
+    /**
+     * Returns a date based on a string. If the given string does not include a year component, this function will use the current year.
+     */
+    @FunctionType(functionName = &quot;DateValue&quot;, argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp dateValue(Timestamp dt) {
+<span class="fc" id="L559">        return Timestamp.valueOf(dt.toLocalDateTime().toLocalDate().atStartOfDay());</span>
+    }
+
+    @FunctionType(functionName = &quot;Format&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.TEXT}, returnType = AccessType.TEXT)
+    public static String format(Double d, String par) throws UcanaccessSQLException {
+<span class="fc bfc" id="L564" title="All 2 branches covered.">        if (d == null) {</span>
+<span class="fc" id="L565">            return &quot;&quot;;</span>
+<span class="fc bfc" id="L566" title="All 2 branches covered.">        } else if (&quot;percent&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L567">            return FormatCache.getZpzz().format(d * 100) + &quot;%&quot;;</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">        } else if (&quot;fixed&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L569">            return FormatCache.getZpzz().format(d);</span>
+<span class="fc bfc" id="L570" title="All 2 branches covered.">        } else if (&quot;standard&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L571">            return FormatCache.getSharp().format(d);</span>
+<span class="fc bfc" id="L572" title="All 2 branches covered.">        } else if (&quot;general number&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L573">            return FormatCache.getNoGrouping().format(d);</span>
+<span class="fc bfc" id="L574" title="All 2 branches covered.">        } else if (&quot;currency&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L575">            return FormatCache.getCurrencyDefault().format(d);</span>
+<span class="fc bfc" id="L576" title="All 2 branches covered.">        } else if (&quot;yes/no&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc bfc" id="L577" title="All 2 branches covered.">            return d == 0 ? &quot;No&quot; : &quot;Yes&quot;;</span>
+<span class="fc bfc" id="L578" title="All 2 branches covered.">        } else if (&quot;true/false&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc bfc" id="L579" title="All 2 branches covered.">            return d == 0 ? &quot;False&quot; : &quot;True&quot;;</span>
+<span class="fc bfc" id="L580" title="All 2 branches covered.">        } else if (&quot;On/Off&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc bfc" id="L581" title="All 2 branches covered.">            return d == 0 ? &quot;Off&quot; : &quot;On&quot;;</span>
+<span class="fc bfc" id="L582" title="All 2 branches covered.">        } else if (&quot;Scientific&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L583">            return String.format(&quot;%6.2E&quot;, d);</span>
+        }
+<span class="fc" id="L585">        return Try.catching(() -&gt; FormatCache.getDecimalFormat(par).format(d))</span>
+<span class="fc" id="L586">            .orThrow(UcanaccessSQLException::new);</span>
+    }
+
+    @FunctionType(functionName = &quot;Format&quot;, argumentTypes = {AccessType.TEXT, AccessType.TEXT}, returnType = AccessType.TEXT)
+    public static String format(String s, String par) throws UcanaccessSQLException {
+<span class="fc bfc" id="L591" title="All 2 branches covered.">        if (s == null) {</span>
+<span class="fc" id="L592">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L594">        return format(s, par, false);</span>
+    }
+
+    public static String format(String s, String par, boolean incl) throws UcanaccessSQLException {
+<span class="fc bfc" id="L598" title="All 2 branches covered.">        if (isNumeric(s)) {</span>
+<span class="fc bfc" id="L599" title="All 2 branches covered.">            if (incl) {</span>
+<span class="fc" id="L600">                return format(Double.parseDouble(s), par);</span>
+            }
+<span class="fc" id="L602">            return Try.catching(() -&gt; format(FormatCache.getNoArgs().parse(s).doubleValue(), par))</span>
+<span class="fc" id="L603">                .orThrow(UcanaccessSQLException::new);</span>
+<span class="fc bfc" id="L604" title="All 2 branches covered.">        } else if (isDate(s)) {</span>
+<span class="fc" id="L605">            return format(dateValue(s, false), par);</span>
+        }
+<span class="fc" id="L607">        return s;</span>
+    }
+
+    private static String formatDate(Timestamp t, String pattern) {
+<span class="fc" id="L611">        RegionalSettings reg = getRegionalSettings();</span>
+<span class="fc" id="L612">        SimpleDateFormat sdf = createSimpleDateFormat(pattern);</span>
+<span class="fc" id="L613">        String ret = sdf.format(t);</span>
+<span class="pc bpc" id="L614" title="1 of 2 branches missed.">        if (!reg.getRS().equalsIgnoreCase(&quot;true&quot;)) {</span>
+<span class="pc bpc" id="L615" title="1 of 2 branches missed.">            if (!reg.getAM().equals(&quot;AM&quot;)) {</span>
+<span class="nc" id="L616">                ret = ret.replace(&quot;AM&quot;, reg.getAM());</span>
+            }
+<span class="pc bpc" id="L618" title="1 of 2 branches missed.">            if (!reg.getPM().equals(&quot;PM&quot;)) {</span>
+<span class="nc" id="L619">                ret = ret.replace(&quot;PM&quot;, reg.getPM());</span>
+            }
+        } else {
+<span class="nc" id="L622">            ret = ret.replace(reg.getPM(), &quot;PM&quot;);</span>
+<span class="nc" id="L623">            ret = ret.replace(reg.getAM(), &quot;AM&quot;);</span>
+        }
+<span class="fc" id="L625">        return ret;</span>
+
+    }
+
+    @FunctionType(functionName = &quot;Format&quot;, argumentTypes = {AccessType.DATETIME, AccessType.TEXT}, returnType = AccessType.TEXT)
+    public static String format(Timestamp t, String par) throws UcanaccessSQLException {
+<span class="fc bfc" id="L631" title="All 2 branches covered.">        if (t == null) {</span>
+<span class="fc" id="L632">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L634">        RegionalSettings reg = getRegionalSettings();</span>
+
+<span class="fc bfc" id="L636" title="All 2 branches covered.">        if (&quot;long date&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L637">            return formatDate(t, reg.getLongDatePattern());</span>
+<span class="fc bfc" id="L638" title="All 2 branches covered.">        } else if (&quot;medium date&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L639">            return formatDate(t, reg.getMediumDatePattern());</span>
+<span class="fc bfc" id="L640" title="All 2 branches covered.">        } else if (&quot;short date&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L641">            return formatDate(t, reg.getShortDatePattern());</span>
+<span class="fc bfc" id="L642" title="All 2 branches covered.">        } else if (GENERAL_DATE.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L643">            return formatDate(t, reg.getGeneralPattern());</span>
+<span class="fc bfc" id="L644" title="All 2 branches covered.">        } else if (&quot;long time&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L645">            return formatDate(t, reg.getLongTimePattern());</span>
+<span class="fc bfc" id="L646" title="All 2 branches covered.">        } else if (&quot;medium time&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L647">            return formatDate(t, reg.getMediumTimePattern());</span>
+<span class="fc bfc" id="L648" title="All 2 branches covered.">        } else if (&quot;short time&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L649">            return formatDate(t, reg.getShortTimePattern());</span>
+<span class="fc bfc" id="L650" title="All 2 branches covered.">        } else if (&quot;q&quot;.equalsIgnoreCase(par)) {</span>
+<span class="fc" id="L651">            return String.valueOf(datePart(par, t));</span>
+        }
+<span class="fc" id="L653">        return createSimpleDateFormat(par</span>
+<span class="fc" id="L654">            .replace('m', 'M')</span>
+<span class="fc" id="L655">            .replace('n', 'm')</span>
+<span class="fc" id="L656">            .replace(&quot;(?i)AM/PM|A/P|AMPM&quot;, &quot;a&quot;)</span>
+<span class="fc" id="L657">            .replace(&quot;dddd&quot;, &quot;EEEE&quot;)).format(t);</span>
+    }
+
+    /**
+     * Returns one of two parts, depending on the evaluation of an expression.
+     */
+    @FunctionType(functionName = &quot;IIf&quot;, argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String iif(Boolean b, String o1, String o2) {
+<span class="fc" id="L665">        return iifImpl(b, o1, o2);</span>
+    }
+
+    @FunctionType(functionName = &quot;IIf&quot;, argumentTypes = {AccessType.YESNO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer iif(Boolean b, Integer o1, Integer o2) {
+<span class="fc" id="L670">        return iifImpl(b, o1, o2);</span>
+    }
+
+    @FunctionType(functionName = &quot;IIf&quot;, argumentTypes = {AccessType.YESNO, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double iif(Boolean b, Double o1, Double o2) {
+<span class="fc" id="L675">        return iifImpl(b, o1, o2);</span>
+    }
+
+    @FunctionType(functionName = &quot;IIf&quot;, argumentTypes = {AccessType.YESNO, AccessType.YESNO, AccessType.YESNO}, returnType = AccessType.YESNO)
+    public static Boolean iif(Boolean b, Boolean o1, Boolean o2) {
+<span class="fc" id="L680">        return iifImpl(b, o1, o2);</span>
+    }
+
+    @FunctionType(functionName = &quot;IIf&quot;, argumentTypes = {AccessType.YESNO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp iif(Boolean b, Timestamp o1, Timestamp o2) {
+<span class="fc" id="L685">        return iifImpl(b, o1, o2);</span>
+    }
+
+    private static &lt;T&gt; T iifImpl(Boolean b, T o1, T o2) {
+<span class="fc bfc" id="L689" title="All 4 branches covered.">        return b != null &amp;&amp; b ? o1 : o2;</span>
+    }
+
+    /**
+     * Returns the position of the first occurrence of a string in another string.
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;InStr&quot;, argumentTypes = {AccessType.LONG, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer instr(Integer start, String text, String search) {
+<span class="fc" id="L697">        return instr(start, text, search, -1);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;InStr&quot;, argumentTypes = {AccessType.LONG, AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer instr(Integer start, String text, String search, Integer compare) {
+<span class="fc" id="L702">        start--;</span>
+<span class="fc bfc" id="L703" title="All 2 branches covered.">        if (compare != 0) {</span>
+<span class="fc" id="L704">            text = text.toLowerCase(Locale.getDefault());</span>
+        }
+<span class="fc bfc" id="L706" title="All 2 branches covered.">        if (text.length() &lt;= start) {</span>
+<span class="fc" id="L707">            return 0;</span>
+        } else {
+<span class="fc" id="L709">            text = text.substring(start);</span>
+        }
+<span class="fc" id="L711">        return text.indexOf(search) + start + 1;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;InStr&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer instr(String text, String search) {
+<span class="fc" id="L716">        return instr(1, text, search, -1);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;InStr&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer instr(String text, String search, Integer compare) {
+<span class="nc" id="L721">        return instr(1, text, search, compare);</span>
+    }
+
+    /**
+     * Returns the position of the first occurrence of a string in another string, starting from the end of the string.
+     */
+    @FunctionType(functionName = &quot;InStrRev&quot;, argumentTypes = {AccessType.TEXT, AccessType.TEXT}, returnType = AccessType.LONG)
+    public static Integer instrrev(String text, String search) {
+<span class="fc" id="L729">        return instrrev(text, search, -1, -1);</span>
+    }
+
+    @FunctionType(functionName = &quot;InStrRev&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer instrrev(String text, String search, Integer start) {
+<span class="fc" id="L734">        return instrrev(text, search, start, -1);</span>
+    }
+
+    @FunctionType(functionName = &quot;InStrRev&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer instrrev(String text, String search, Integer start, Integer compare) {
+<span class="pc bpc" id="L739" title="1 of 2 branches missed.">        if (compare != 0) {</span>
+<span class="fc" id="L740">            text = text.toLowerCase(Locale.getDefault());</span>
+        }
+<span class="pc bpc" id="L742" title="1 of 2 branches missed.">        if (text.length() &lt;= start) {</span>
+<span class="nc" id="L743">            return 0;</span>
+        } else {
+<span class="fc bfc" id="L745" title="All 2 branches covered.">            if (start &gt; 0) {</span>
+<span class="fc" id="L746">                text = text.substring(0, start);</span>
+            }
+<span class="fc" id="L748">            return text.lastIndexOf(search) + 1;</span>
+        }
+    }
+
+    /**
+     * Returns {@code true} if the expression is a valid date, otherwise {@code false}.
+     */
+    @FunctionType(functionName = &quot;IsDate&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static boolean isDate(String value) {
+<span class="fc bfc" id="L757" title="All 2 branches covered.">        return dateValue(value) != null;</span>
+    }
+
+    @FunctionType(functionName = &quot;IsDate&quot;, argumentTypes = {AccessType.DATETIME}, returnType = AccessType.YESNO)
+    public static boolean isDate(Timestamp value) {
+<span class="fc" id="L762">        return true;</span>
+    }
+
+    /**
+     * Returns {@code true} if the expression is a {@code null} value, otherwise {@code false}.
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;IsNull&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static boolean isNull(String value) {
+<span class="fc bfc" id="L770" title="All 2 branches covered.">        return value == null;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;IsNull&quot;, argumentTypes = {AccessType.DATETIME}, returnType = AccessType.YESNO)
+    public static boolean isNull(Timestamp value) {
+<span class="fc bfc" id="L775" title="All 2 branches covered.">        return value == null;</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;IsNull&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.YESNO)
+    public static boolean isNull(Double value) {
+<span class="fc bfc" id="L780" title="All 2 branches covered.">        return value == null;</span>
+    }
+
+    /**
+     * Returns {@code true} if the expression is a valid number, otherwise {@code false}.
+     */
+    @FunctionType(functionName = &quot;IsNumeric&quot;, argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.YESNO)
+    public static boolean isNumeric(BigDecimal b) {
+<span class="fc" id="L788">        return true;</span>
+    }
+
+    @FunctionType(functionName = &quot;IsNumeric&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static boolean isNumeric(String str) {
+<span class="fc" id="L793">        return Try.catching(() -&gt; {</span>
+<span class="fc" id="L794">            Currency cr = Currency.getInstance(Locale.getDefault());</span>
+<span class="fc bfc" id="L795" title="All 2 branches covered.">            if (str.startsWith(cr.getSymbol())) {</span>
+<span class="fc" id="L796">                return isNumeric(str.substring(cr.getSymbol().length()));</span>
+            }
+<span class="fc bfc" id="L798" title="All 4 branches covered.">            if (str.startsWith(&quot;+&quot;) || str.startsWith(&quot;-&quot;)) {</span>
+<span class="fc" id="L799">                return isNumeric(str.substring(1));</span>
+            }
+<span class="fc" id="L801">            DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();</span>
+<span class="fc" id="L802">            String sep = dfs.getDecimalSeparator() + &quot;&quot;;</span>
+<span class="fc" id="L803">            String gs = dfs.getGroupingSeparator() + &quot;&quot;;</span>
+<span class="fc bfc" id="L804" title="All 2 branches covered.">            if (str.startsWith(gs)) {</span>
+<span class="fc" id="L805">                return false;</span>
+            }
+<span class="fc bfc" id="L807" title="All 2 branches covered.">            if (str.startsWith(sep)) {</span>
+<span class="fc" id="L808">                return isNumeric(str.substring(1));</span>
+            }
+
+            String s;
+<span class="pc bpc" id="L812" title="1 of 2 branches missed.">            if (&quot;.&quot;.equals(sep)) {</span>
+<span class="fc" id="L813">                s = str.replaceAll(gs, &quot;&quot;);</span>
+            } else {
+<span class="nc" id="L815">                s = str.replace(&quot;.&quot;, &quot;&quot;)</span>
+<span class="nc" id="L816">                    .replace(sep, &quot;.&quot;);</span>
+            }
+<span class="fc" id="L818">            new BigDecimal(s);</span>
+<span class="fc" id="L819">            return true;</span>
+<span class="fc" id="L820">        }).orElse(false);</span>
+    }
+
+    /**
+     * Extracts a substring from a string, starting from the left-most character.
+     */
+    @FunctionType(functionName = &quot;Left&quot;, namingConflict = true, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String left(String input, int i) {
+<span class="fc bfc" id="L828" title="All 4 branches covered.">        if (input == null || i &lt; 0) {</span>
+<span class="fc" id="L829">            return null;</span>
+<span class="fc bfc" id="L830" title="All 2 branches covered.">        } else if (i &gt;= input.length()) {</span>
+<span class="fc" id="L831">            return input;</span>
+        } else {
+<span class="fc" id="L833">            return input.substring(0, i);</span>
+        }
+    }
+
+    @FunctionType(functionName = &quot;\&quot;LEFT$\&quot;&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String leftS(String input, int i) {
+<span class="fc" id="L839">        return left(input, i);</span>
+    }
+
+    /**
+     * Returns the length of the specified string.
+     */
+    @FunctionType(functionName = &quot;Len&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer len(String value) {
+<span class="fc bfc" id="L847" title="All 2 branches covered.">        return value == null ? null : value.length();</span>
+    }
+
+    /**
+     * Extracts a substring from a string (starting at any position).
+     */
+    @FunctionType(functionName = &quot;Mid&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String mid(String value, int start) {
+<span class="fc" id="L855">        return mid(value, start, value.length());</span>
+    }
+
+    @FunctionType(functionName = &quot;Mid&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String mid(String value, int start, int length) {
+<span class="fc bfc" id="L860" title="All 2 branches covered.">        if (value == null) {</span>
+<span class="fc" id="L861">            return null;</span>
+        }
+<span class="fc" id="L863">        int len = start - 1 + length;</span>
+<span class="pc bpc" id="L864" title="1 of 2 branches missed.">        if (start &lt; 1) {</span>
+<span class="nc" id="L865">            UcanaccessRuntimeException.throwNow(&quot;Invalid function call&quot;);</span>
+        }
+<span class="fc bfc" id="L867" title="All 2 branches covered.">        if (len &gt; value.length()) {</span>
+<span class="fc" id="L868">            len = value.length();</span>
+        }
+<span class="fc" id="L870">        return value.substring(start - 1, len);</span>
+    }
+
+    /**
+     * Returns a string representing the month given a number from 1 to 12.
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;MonthName&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.TEXT)
+    public static String monthName(int number) throws UcanaccessSQLException {
+<span class="fc" id="L878">        return monthName(number, false);</span>
+    }
+
+    @FunctionType(namingConflict = true, functionName = &quot;MonthName&quot;, argumentTypes = {AccessType.LONG, AccessType.YESNO}, returnType = AccessType.TEXT)
+    public static String monthName(int number, boolean abbreviate) throws UcanaccessSQLException {
+<span class="fc bfc" id="L883" title="All 4 branches covered.">        if (number &gt;= 1 &amp;&amp; number &lt;= 12) {</span>
+<span class="fc" id="L884">            DateFormatSymbols dfs = new DateFormatSymbols();</span>
+<span class="fc bfc" id="L885" title="All 2 branches covered.">            return abbreviate ? dfs.getShortMonths()[number - 1] : dfs.getMonths()[number - 1];</span>
+        }
+<span class="fc" id="L887">        throw new UcanaccessSQLException(&quot;Invalid month number&quot;);</span>
+    }
+
+    /**
+     * Returns the current system date.
+     */
+    @FunctionType(functionName = &quot;Date&quot;, argumentTypes = {}, returnType = AccessType.DATETIME)
+    public static Timestamp date() {
+<span class="fc" id="L895">        return Timestamp.valueOf(LocalDate.now(ZoneId.systemDefault()).atStartOfDay());</span>
+    }
+
+    /**
+     * Returns the current system date and time.
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;Now&quot;, argumentTypes = {}, returnType = AccessType.DATETIME)
+    public static Timestamp now() {
+<span class="fc" id="L903">        return new Timestamp(System.currentTimeMillis() / 1000 * 1000);</span>
+    }
+
+    /**
+     * Returns the second argument if the first argument is {@code null}.
+     */
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String nz(String value) {
+<span class="fc bfc" id="L911" title="All 2 branches covered.">        return value == null ? &quot;&quot; : value;</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double nz(Double value) {
+<span class="fc bfc" id="L916" title="All 2 branches covered.">        return value == null ? 0 : value;</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer nz(Integer value) {
+<span class="fc bfc" id="L921" title="All 2 branches covered.">        return value == null ? 0 : value;</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.NUMERIC)
+    public static BigDecimal nz(BigDecimal value) {
+<span class="fc bfc" id="L926" title="All 2 branches covered.">        return value == null ? BigDecimal.ZERO : value;</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String nz(String value, String other) {
+<span class="fc" id="L931">        return (String) nz(value, (Object) other);</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.NUMERIC, AccessType.NUMERIC}, returnType = AccessType.NUMERIC)
+    public static BigDecimal nz(BigDecimal value, BigDecimal other) {
+<span class="fc" id="L936">        return (BigDecimal) nz(value, (Object) other);</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double nz(Double value, Double other) {
+<span class="fc" id="L941">        return (Double) nz(value, (Object) other);</span>
+    }
+
+    @FunctionType(functionName = &quot;Nz&quot;, argumentTypes = {AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer nz(Integer value, Integer other) {
+<span class="fc" id="L946">        return (Integer) nz(value, (Object) other);</span>
+    }
+
+    private static Object nz(Object value, Object other) {
+<span class="fc bfc" id="L950" title="All 2 branches covered.">        return value == null ? other : value;</span>
+    }
+
+    /**
+     * Returns the sign of a number. If number &amp;gt; 0, it returns 1. If number = 0, it returns 0.
+     */
+    @FunctionType(functionName = &quot;Sgn&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
+    public static short sgn(double n) {
+<span class="fc bfc" id="L958" title="All 4 branches covered.">        return (short) (n == 0 ? 0 : n &gt; 0 ? 1 : -1);</span>
+    }
+
+    @FunctionType(functionName = &quot;Sign&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
+    public static short sign(double n) {
+<span class="fc" id="L963">        return sgn(n);</span>
+    }
+
+    /**
+     * Returns a string with a specified number of spaces.
+     */
+    @FunctionType(functionName = &quot;Space&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String space(Integer nr) {
+<span class="fc" id="L971">        return &quot; &quot;.repeat(Math.max(0, Objects.requireNonNullElse(nr, 0)));</span>
+    }
+
+    /**
+     * Returns a string representation of a number.
+     */
+    @FunctionType(functionName = &quot;Str&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.TEXT)
+    public static String str(double d) {
+<span class="fc bfc" id="L979" title="All 2 branches covered.">        String pre = d &gt; 0 ? &quot; &quot; : &quot;&quot;;</span>
+<span class="fc bfc" id="L980" title="All 2 branches covered.">        return Math.round(d) == d ? pre + Math.round(d) : pre + d;</span>
+    }
+
+    /**
+     * Returns the current system time.
+     */
+    @FunctionType(functionName = &quot;Time&quot;, argumentTypes = {}, returnType = AccessType.DATETIME)
+    public static Timestamp time() {
+<span class="fc" id="L988">        return new Timestamp(LocalDateTime.now(ZoneId.systemDefault())</span>
+<span class="fc" id="L989">            .withYear(1899).withMonth(12).withDayOfMonth(30)</span>
+<span class="fc" id="L990">            .truncatedTo(ChronoUnit.SECONDS)</span>
+<span class="fc" id="L991">            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());</span>
+    }
+
+    /**
+     * Accepts a string as input and returns the numbers found in that string.
+     */
+    @FunctionType(functionName = &quot;Val&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double val(String val1) {
+<span class="fc" id="L999">        return val((Object) val1);</span>
+    }
+
+    @FunctionType(functionName = &quot;Val&quot;, argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.DOUBLE)
+    public static Double val(BigDecimal val1) {
+<span class="fc" id="L1004">        return val((Object) val1);</span>
+    }
+
+    private static Double val(Object val1) {
+<span class="fc bfc" id="L1008" title="All 2 branches covered.">        if (val1 == null) {</span>
+<span class="fc" id="L1009">            return null;</span>
+        }
+<span class="fc" id="L1011">        String val = val1.toString().trim();</span>
+<span class="fc" id="L1012">        int lp = val.lastIndexOf('.');</span>
+<span class="fc" id="L1013">        char[] ca = val.toCharArray();</span>
+<span class="fc" id="L1014">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L1015">        int minLength = 1;</span>
+<span class="fc bfc" id="L1016" title="All 2 branches covered.">        for (int i = 0; i &lt; ca.length; i++) {</span>
+<span class="fc" id="L1017">            char c = ca[i];</span>
+<span class="fc bfc" id="L1018" title="All 2 branches covered.">            if (c == ' ') {</span>
+<span class="fc" id="L1019">                continue;</span>
+            }
+<span class="pc bpc" id="L1021" title="2 of 6 branches missed.">            if ((c == '-' || c == '+') &amp;&amp; i == 0) {</span>
+<span class="fc" id="L1022">                minLength++;</span>
+<span class="fc" id="L1023">                sb.append(c);</span>
+<span class="fc bfc" id="L1024" title="All 2 branches covered.">            } else if (Character.isDigit(c)) {</span>
+<span class="fc" id="L1025">                sb.append(c);</span>
+<span class="pc bpc" id="L1026" title="1 of 4 branches missed.">            } else if (c == '.' &amp;&amp; i == lp) {</span>
+<span class="fc" id="L1027">                sb.append(c);</span>
+<span class="pc bpc" id="L1028" title="1 of 6 branches missed.">                if (i == 0 || (i == 1 &amp;&amp; minLength == 2)) {</span>
+<span class="fc" id="L1029">                    minLength++;</span>
+                }
+            } else {
+                break;
+            }
+        }
+<span class="fc bfc" id="L1035" title="All 2 branches covered.">        if (sb.length() &lt; minLength) {</span>
+<span class="fc" id="L1036">            return 0.0d;</span>
+        } else {
+<span class="fc" id="L1038">            return Double.parseDouble(sb.toString());</span>
+        }
+    }
+
+    /**
+     * Returns a string representing the day of the week given a number from 1 to 7.
+     */
+    @FunctionType(functionName = &quot;WeekdayName&quot;, argumentTypes = {AccessType.LONG}, returnType = AccessType.TEXT)
+    public static String weekdayName(int number) {
+<span class="fc" id="L1047">        return weekdayName(number, false);</span>
+    }
+
+    @FunctionType(functionName = &quot;WeekdayName&quot;, argumentTypes = {AccessType.LONG, AccessType.YESNO}, returnType = AccessType.TEXT)
+    public static String weekdayName(int number, boolean abbreviate) {
+<span class="fc" id="L1052">        int vbSunday = 1;</span>
+<span class="fc" id="L1053">        return weekdayName(number, abbreviate, vbSunday);</span>
+    }
+
+    @FunctionType(functionName = &quot;WeekdayName&quot;, argumentTypes = {AccessType.LONG, AccessType.YESNO, AccessType.LONG}, returnType = AccessType.TEXT)
+    public static String weekdayName(int num, boolean abbreviate, int firstDayOfWeek) {
+        // DayOfWeek starts with Monday, WeekdayName with Sunday (default)
+<span class="fc" id="L1059">        int fdow = Math.min(Math.max(1, firstDayOfWeek), 7);</span>
+<span class="fc bfc" id="L1060" title="All 2 branches covered.">        int offset = fdow == 1 ? -1 : fdow - 2;</span>
+<span class="fc" id="L1061">        int number = num;</span>
+<span class="fc bfc" id="L1062" title="All 2 branches covered.">        while (number &gt; 7) {</span>
+<span class="fc" id="L1063">            number -= 7;</span>
+        }
+<span class="fc" id="L1065">        return DayOfWeek.of(number).plus(offset)</span>
+<span class="fc bfc" id="L1066" title="All 2 branches covered.">            .getDisplayName(abbreviate ? TextStyle.SHORT : TextStyle.FULL, Locale.getDefault());</span>
+    }
+
+    /**
+     * Returns a number representing the day of the week (a number from 1 to 7) given a date value.
+     */
+    @FunctionType(functionName = &quot;WeekDay&quot;, argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer weekDay(Timestamp date) throws UcanaccessSQLException {
+<span class="fc" id="L1074">        return datePart(&quot;w&quot;, date);</span>
+    }
+
+    @FunctionType(functionName = &quot;WeekDay&quot;, argumentTypes = {AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer weekDay(Timestamp date, Integer firstDayOfWeek) throws UcanaccessSQLException {
+<span class="fc" id="L1079">        return datePart(&quot;w&quot;, date, firstDayOfWeek);</span>
+    }
+
+    /**
+     * Returns a Variant (String) containing a repeating character string of the length specified.
+     */
+    @FunctionType(functionName = &quot;String&quot;, argumentTypes = {AccessType.LONG, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String string(Integer nr, String str) {
+<span class="fc bfc" id="L1087" title="All 2 branches covered.">        if (str == null) {</span>
+<span class="fc" id="L1088">            return null;</span>
+<span class="fc bfc" id="L1089" title="All 2 branches covered.">        } else if (str.isEmpty()) {</span>
+<span class="fc" id="L1090">            return &quot;&quot;;</span>
+        }
+
+<span class="fc" id="L1093">        return str.substring(0, 1).repeat(nr);</span>
+    }
+
+    /**
+     * Returns a time given an hour, minute, and second value.
+     */
+    @FunctionType(functionName = &quot;TimeSerial&quot;, argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
+    public static Timestamp timeSerial(Integer h, Integer m, Integer s) {
+<span class="fc" id="L1101">        return new Timestamp(LocalDateTime.now(ZoneId.systemDefault())</span>
+<span class="fc" id="L1102">            .withYear(1899).withMonth(12).withDayOfMonth(30)</span>
+<span class="fc" id="L1103">            .truncatedTo(ChronoUnit.SECONDS)</span>
+<span class="fc" id="L1104">            .withHour(h).withMinute(m).withSecond(s)</span>
+<span class="fc" id="L1105">            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());</span>
+    }
+
+    /**
+     *  Generates a random number (integer value).
+     */
+    @FunctionType(functionName = &quot;Rnd&quot;, argumentTypes = {}, returnType = AccessType.DOUBLE)
+    public static Double rnd() {
+<span class="fc" id="L1113">        return rnd(null);</span>
+    }
+
+    @FunctionType(functionName = &quot;Rnd&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double rnd(Double d) {
+<span class="fc bfc" id="L1118" title="All 2 branches covered.">        if (random == null) {</span>
+<span class="fc" id="L1119">            random = new SecureRandom();</span>
+        }
+<span class="fc bfc" id="L1121" title="All 4 branches covered.">        if (d == null || d &gt; 0) {</span>
+<span class="fc" id="L1122">            lastRnd = random.nextDouble();</span>
+<span class="fc" id="L1123">            return lastRnd;</span>
+        }
+<span class="fc bfc" id="L1125" title="All 2 branches covered.">        if (d &lt; 0) {</span>
+<span class="fc bfc" id="L1126" title="All 2 branches covered.">            if (rnd == null) {</span>
+<span class="fc" id="L1127">                rnd = d;</span>
+            }
+<span class="fc" id="L1129">            return rnd;</span>
+        }
+<span class="pc bpc" id="L1131" title="1 of 2 branches missed.">        if (d == 0) {</span>
+<span class="pc bpc" id="L1132" title="1 of 2 branches missed.">            if (lastRnd == null) {</span>
+<span class="nc" id="L1133">                lastRnd = random.nextDouble();</span>
+            }
+<span class="fc" id="L1135">            return lastRnd;</span>
+        }
+<span class="nc" id="L1137">        return null;</span>
+    }
+
+    /**
+     * Returns a string whose characters are in reverse order.
+     */
+    @FunctionType(functionName = &quot;StrReverse&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String strReverse(String value) {
+<span class="fc bfc" id="L1145" title="All 2 branches covered.">        return value == null ? null : new StringBuilder(value).reverse().toString();</span>
+    }
+
+    /**
+     * Returns a string converted as specified.
+     */
+    @FunctionType(functionName = &quot;StrConv&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String strConv(String value, int conversion) {
+<span class="fc bfc" id="L1153" title="All 2 branches covered.">        if (value == null) {</span>
+<span class="fc" id="L1154">            return null;</span>
+<span class="fc bfc" id="L1155" title="All 2 branches covered.">        } else if (conversion == 1) { // vbUpperCase</span>
+<span class="fc" id="L1156">            return value.toUpperCase(Locale.getDefault());</span>
+<span class="fc bfc" id="L1157" title="All 2 branches covered.">        } else if (conversion == 2) { // vbLowerCase</span>
+<span class="fc" id="L1158">            return value.toLowerCase(Locale.getDefault());</span>
+<span class="fc bfc" id="L1159" title="All 2 branches covered.">        } else if (conversion == 3) { // vbProperCase: not implemented</span>
+<span class="fc" id="L1160">            return value;</span>
+        }
+<span class="fc" id="L1162">        return value;</span>
+    }
+
+    /**
+     * Returns an integer value representing the result of a string comparison.
+     */
+    @FunctionType(functionName = &quot;StrComp&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer strComp(String value1, String value2, Integer type) throws UcanaccessSQLException {
+<span class="fc bfc" id="L1170" title="All 3 branches covered.">        switch (type) {</span>
+            case 0:
+            case -1:
+            case 2:
+<span class="fc" id="L1174">                return value1.compareTo(value2);</span>
+            case 1:
+<span class="fc" id="L1176">                return value1.toUpperCase(Locale.getDefault()).compareTo(value2.toUpperCase(Locale.getDefault()));</span>
+            default:
+<span class="fc" id="L1178">                throw new InvalidFunctionParameterException(&quot;StrComp&quot;, type);</span>
+        }
+    }
+
+    @FunctionType(functionName = &quot;StrComp&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer strComp(String value1, String value2) throws UcanaccessSQLException {
+<span class="fc" id="L1184">        return strComp(value1, value2, 0);</span>
+    }
+
+    /**
+     * Returns the integer portion of a number.
+     */
+    @FunctionType(functionName = &quot;Int&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer mint(Double value) {
+<span class="fc" id="L1192">        return new BigDecimal((long) Math.floor(value)).intValueExact();</span>
+    }
+
+    @FunctionType(functionName = &quot;Int&quot;, argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
+    public static Short mint(boolean value) {
+<span class="fc bfc" id="L1197" title="All 2 branches covered.">        return (short) (value ? -1 : 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;DDB&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ddb(double cost, double salvage, double life, double period) {
+<span class="nc" id="L1202">        return ddb(cost, salvage, life, period, 2d);</span>
+    }
+
+    @FunctionType(functionName = &quot;DDB&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ddb(double cost, double salvage, double life, double period, double factor) {
+<span class="pc bpc" id="L1207" title="4 of 6 branches missed.">        if (cost &lt; 0 || (life == 2d &amp;&amp; period &gt; 1d)) {</span>
+<span class="nc" id="L1208">            return 0;</span>
+        }
+<span class="pc bpc" id="L1210" title="4 of 6 branches missed.">        if (life &lt; 2d || (life == 2d &amp;&amp; period &lt;= 1d)) {</span>
+<span class="nc" id="L1211">            return cost - salvage;</span>
+        }
+<span class="pc bpc" id="L1213" title="1 of 2 branches missed.">        if (period &lt;= 1d) {</span>
+<span class="nc" id="L1214">            return Math.min(cost * factor / life, cost - salvage);</span>
+        }
+<span class="fc" id="L1216">        double retk = Math.max(salvage - cost * Math.pow((life - factor) / life, period), 0);</span>
+
+<span class="fc" id="L1218">        return Math.max(factor * cost / life * Math.pow((life - factor) / life, period - 1d) - retk, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;FV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double fv(double rate, int periods, double payment) {
+<span class="nc" id="L1223">        return fv(rate, periods, payment, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;FV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double fv(double rate, int periods, double payment, double pv) {
+<span class="nc" id="L1228">        return fv(rate, periods, payment, pv, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;FV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double fv(double rate, int periods, double payment, double pv, double type) {
+<span class="fc bfc" id="L1233" title="All 2 branches covered.">        type = Math.abs(type) &gt;= 1 ? 1 : 0;</span>
+<span class="fc" id="L1234">        double fv = pv * Math.pow(1 + rate, periods);</span>
+<span class="fc bfc" id="L1235" title="All 2 branches covered.">        for (int i = 0; i &lt; periods; i++) {</span>
+<span class="fc" id="L1236">            fv += payment * Math.pow(1 + rate, i + type);</span>
+        }
+<span class="fc" id="L1238">        return -fv;</span>
+    }
+
+    @FunctionType(functionName = &quot;PMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pmt(double rate, double periods, double pv) {
+<span class="nc" id="L1243">        return pmt(rate, periods, pv, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;PMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pmt(double rate, double periods, double pv, double fv) {
+<span class="nc" id="L1248">        return pmt(rate, periods, pv, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;PMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pmt(double rate, double periods, double pv, double fv, double type) {
+<span class="pc bpc" id="L1253" title="1 of 2 branches missed.">        type = Math.abs(type) &gt;= 1 ? 1 : 0;</span>
+
+<span class="pc bpc" id="L1255" title="1 of 2 branches missed.">        if (rate == 0) {</span>
+<span class="nc" id="L1256">            return -1 * (fv + pv) / periods;</span>
+        } else {
+<span class="fc" id="L1258">            return (fv + pv * Math.pow(1 + rate, periods)) * rate</span>
+<span class="pc bpc" id="L1259" title="1 of 2 branches missed.">                / ((type == 1 ? 1 + rate : 1) * (1 - Math.pow(1 + rate, periods)));</span>
+        }
+
+    }
+
+    @FunctionType(functionName = &quot;NPER&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double nper(double rate, double pmt, double pv) {
+<span class="nc" id="L1266">        return nper(rate, pmt, pv, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;NPER&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double nper(double rate, double pmt, double pv, double fv) {
+
+<span class="nc" id="L1272">        return nper(rate, pmt, pv, fv, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;NPER&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double nper(double rate, double pmt, double pv, double fv, double type) {
+<span class="pc bpc" id="L1277" title="1 of 2 branches missed.">        type = Math.abs(type) &gt;= 1 ? 1 : 0;</span>
+<span class="fc" id="L1278">        double nper = 0;</span>
+<span class="pc bpc" id="L1279" title="1 of 2 branches missed.">        if (rate == 0) {</span>
+<span class="nc" id="L1280">            nper = -1 * (fv + pv) / pmt;</span>
+        } else {
+
+<span class="pc bpc" id="L1283" title="1 of 2 branches missed.">            double cr = (type == 1 ? 1 + rate : 1) * pmt / rate;</span>
+<span class="pc bpc" id="L1284" title="1 of 2 branches missed.">            double val1 = cr - fv &lt; 0 ? Math.log(fv - cr) : Math.log(cr - fv);</span>
+<span class="pc bpc" id="L1285" title="1 of 2 branches missed.">            double val2 = cr - fv &lt; 0 ? Math.log(-pv - cr) : Math.log(pv + cr);</span>
+<span class="fc" id="L1286">            double val3 = Math.log(1 + rate);</span>
+<span class="fc" id="L1287">            nper = (val1 - val2) / val3;</span>
+        }
+<span class="fc" id="L1289">        return nper;</span>
+    }
+
+    @FunctionType(functionName = &quot;IPMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ipmt(double rate, double per, double nper, double pv) {
+<span class="nc" id="L1294">        return ipmt(rate, per, nper, pv, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;IPMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ipmt(double rate, double per, double nper, double pv, double fv) {
+<span class="nc" id="L1299">        return ipmt(rate, per, nper, pv, fv, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;IPMT&quot;,
+        argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ipmt(double rate, double per, double nper, double pv, double fv, double type) {
+<span class="pc bpc" id="L1305" title="1 of 2 branches missed.">        type = Math.abs(type) &gt;= 1 ? 1 : 0;</span>
+<span class="fc" id="L1306">        double ipmt = fv(rate, (int) per - 1, pmt(rate, nper, pv, fv, type), pv, type) * rate;</span>
+<span class="pc bpc" id="L1307" title="1 of 2 branches missed.">        if (type == 1) {</span>
+<span class="nc" id="L1308">            ipmt = ipmt / (1 + rate);</span>
+        }
+<span class="fc" id="L1310">        return ipmt;</span>
+    }
+
+    @FunctionType(functionName = &quot;PV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt) {
+<span class="nc" id="L1315">        return pv(rate, nper, pmt, 0, 0);</span>
+
+    }
+
+    @FunctionType(functionName = &quot;PV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt, double fv) {
+<span class="nc" id="L1321">        return pv(rate, nper, pmt, fv, 0);</span>
+
+    }
+
+    @FunctionType(functionName = &quot;PV&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double pv(double rate, double nper, double pmt, double fv, double type) {
+<span class="pc bpc" id="L1327" title="1 of 2 branches missed.">        type = Math.abs(type) &gt;= 1 ? 1 : 0;</span>
+
+<span class="pc bpc" id="L1329" title="1 of 2 branches missed.">        if (rate == 0) {</span>
+<span class="fc" id="L1330">            return -1 * (nper * pmt + fv);</span>
+        } else {
+
+<span class="nc bnc" id="L1333" title="All 2 branches missed.">            return ((1 - Math.pow(1 + rate, nper)) / rate * (type == 1 ? 1 + rate : 1) * pmt - fv)</span>
+<span class="nc" id="L1334">                / Math.pow(1 + rate, nper);</span>
+        }
+
+    }
+
+    @FunctionType(functionName = &quot;PPMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ppmt(double rate, int per, int nper, double pv) {
+<span class="nc" id="L1341">        return ppmt(rate, per, nper, pv, 0, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;PPMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ppmt(double rate, int per, int nper, double pv, double fv) {
+<span class="fc" id="L1346">        return ppmt(rate, per, nper, pv, fv, 0);</span>
+    }
+
+    @FunctionType(functionName = &quot;PPMT&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double ppmt(double rate, int per, int nper, double pv, double fv, double type) {
+<span class="fc" id="L1351">        return pmt(rate, nper, pv, fv, type) - ipmt(rate, per, nper, pv, fv, type);</span>
+    }
+
+    @FunctionType(functionName = &quot;SLN&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double sln(double cost, double salvage, double life) {
+<span class="fc" id="L1356">        return (cost - salvage) / life;</span>
+    }
+
+    @FunctionType(functionName = &quot;SYD&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double syd(double cost, double salvage, double life, double per) {
+<span class="fc" id="L1361">        return (cost - salvage) * (life - per + 1) * 2 / (life * (life + 1));</span>
+    }
+
+    @FunctionType(functionName = &quot;RATE&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double rate(double nper, double pmt, double pv) {
+<span class="nc" id="L1366">        return rate(nper, pmt, pv, 0, 0, 0.1);</span>
+    }
+
+    @FunctionType(functionName = &quot;RATE&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double rate(double nper, double pmt, double pv, double fv) {
+<span class="nc" id="L1371">        return rate(nper, pmt, pv, fv, 0, 0.1);</span>
+    }
+
+    @FunctionType(functionName = &quot;RATE&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double rate(double nper, double pmt, double pv, double fv, double type) {
+<span class="fc" id="L1376">        return rate(nper, pmt, pv, fv, type, 0.1);</span>
+    }
+
+    @FunctionType(functionName = &quot;RATE&quot;,
+        argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double rate(double nper, double pmt, double pv, double fv, double type, double guess) {
+        // FROM MS http://office.microsoft.com/en-us/excel-help/rate-HP005209232.aspx
+
+<span class="fc bfc" id="L1384" title="All 2 branches covered.">        type = Math.abs(type) &gt;= 1 ? 1 : 0; // the only change to the implementation Apache POI</span>
+<span class="fc" id="L1385">        final int financialMaxIterations = 20; // Bet accuracy with 128</span>
+<span class="fc" id="L1386">        final double financialPrecision = 0.0000001; // 1.0e-8</span>
+
+        // the secant method starts from rates 0 and guess, so a guess of 0 gives no second point
+<span class="fc bfc" id="L1389" title="All 2 branches covered.">        double rate = Math.abs(guess) &lt; financialPrecision ? 0.1 : guess;</span>
+<span class="fc" id="L1390">        double f = Math.exp(nper * Math.log(1 + rate));</span>
+<span class="fc" id="L1391">        double y0 = pv + pmt * nper + fv;</span>
+<span class="fc" id="L1392">        double y1 = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;</span>
+
+        // find root by Newton secant method
+<span class="fc" id="L1395">        double i = 0.0;</span>
+<span class="fc" id="L1396">        double x0 = 0.0;</span>
+<span class="fc" id="L1397">        double x1 = rate;</span>
+<span class="pc bpc" id="L1398" title="1 of 4 branches missed.">        while (Math.abs(y0 - y1) &gt; financialPrecision &amp;&amp; i &lt; financialMaxIterations) {</span>
+<span class="fc" id="L1399">            rate = (y1 * x0 - y0 * x1) / (y1 - y0);</span>
+<span class="fc" id="L1400">            x0 = x1;</span>
+<span class="fc" id="L1401">            x1 = rate;</span>
+
+            double y;
+<span class="pc bpc" id="L1404" title="1 of 2 branches missed.">            if (Math.abs(rate) &lt; financialPrecision) {</span>
+<span class="nc" id="L1405">                y = pv * (1 + nper * rate) + pmt * (1 + rate * type) * nper + fv;</span>
+            } else {
+<span class="fc" id="L1407">                f = Math.exp(nper * Math.log(1 + rate));</span>
+<span class="fc" id="L1408">                y = pv * f + pmt * (1 / rate + type) * (f - 1) + fv;</span>
+            }
+
+<span class="fc" id="L1411">            y0 = y1;</span>
+<span class="fc" id="L1412">            y1 = y;</span>
+<span class="fc" id="L1413">            ++i;</span>
+<span class="fc" id="L1414">        }</span>
+
+<span class="fc" id="L1416">        return rate;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToNumeric&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double formulaToNumeric(Double res, String datatype) {
+<span class="fc" id="L1421">        return res;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToNumeric&quot;, argumentTypes = {AccessType.YESNO, AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double formulaToNumeric(Boolean res, String datatype) {
+<span class="nc bnc" id="L1426" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1427">            return null;</span>
+        }
+<span class="nc bnc" id="L1429" title="All 2 branches missed.">        return res ? -1d : 0d;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToNumeric&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double formulaToNumeric(String input, String datatype) {
+<span class="fc bfc" id="L1434" title="All 2 branches covered.">        if (input == null) {</span>
+<span class="fc" id="L1435">            return null;</span>
+        }
+<span class="fc" id="L1437">        return Try.catching(() -&gt; {</span>
+<span class="fc" id="L1438">            DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();</span>
+<span class="fc" id="L1439">            String sep = dfs.getDecimalSeparator() + &quot;&quot;;</span>
+<span class="fc" id="L1440">            String gs = dfs.getGroupingSeparator() + &quot;&quot;;</span>
+<span class="fc" id="L1441">            String res = input.replaceAll(Pattern.quote(gs), &quot;&quot;);</span>
+<span class="pc bpc" id="L1442" title="1 of 2 branches missed.">            if (!&quot;.&quot;.equalsIgnoreCase(sep)) {</span>
+<span class="nc" id="L1443">                res = res.replaceAll(Pattern.quote(sep), &quot;.&quot;);</span>
+            }
+<span class="fc" id="L1445">            double d = val(res);</span>
+<span class="fc" id="L1446">            DataType dt = DataType.valueOf(datatype);</span>
+<span class="pc bpc" id="L1447" title="2 of 6 branches missed.">            if (dt.equals(DataType.BYTE) || dt.equals(DataType.INT) || dt.equals(DataType.LONG)) {</span>
+<span class="fc" id="L1448">                d = Math.rint(d + APPROX);</span>
+            }
+<span class="fc" id="L1450">            return d;</span>
+<span class="fc" id="L1451">        }).orIgnore();</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToNumeric&quot;, argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double formulaToNumeric(Timestamp res, String datatype) throws UcanaccessSQLException {
+<span class="nc bnc" id="L1456" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1457">            return null;</span>
+        }
+<span class="nc" id="L1459">        return (double) dateDiff(&quot;y&quot;, Timestamp.valueOf(ACCESS_BASE_DATE), res);</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToBoolean&quot;, argumentTypes = {AccessType.YESNO, AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static Boolean formulaToBoolean(Boolean res, String datatype) {
+<span class="nc" id="L1464">        return res;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToBoolean&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static Boolean formulaToBoolean(Double res, String datatype) {
+<span class="nc bnc" id="L1469" title="All 4 branches missed.">        return res == null ? null : res != 0d;</span>
+    }
+
+    @SuppressWarnings(&quot;java:S2447&quot;) // null is the SQL NULL result of this function
+    @FunctionType(functionName = &quot;formulaToBoolean&quot;, argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static Boolean formulaToBoolean(Timestamp res, String datatype) {
+<span class="nc" id="L1475">        return null;</span>
+    }
+
+    @SuppressWarnings(&quot;java:S2447&quot;) // null is the SQL NULL result of this function
+    @FunctionType(functionName = &quot;formulaToBoolean&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.YESNO)
+    public static Boolean formulaToBoolean(String res, String datatype) {
+<span class="nc bnc" id="L1481" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1482">            return null;</span>
+<span class="nc bnc" id="L1483" title="All 2 branches missed.">        } else if (&quot;-1&quot;.equals(res)) {</span>
+<span class="nc" id="L1484">            return true;</span>
+<span class="nc bnc" id="L1485" title="All 2 branches missed.">        } else if (&quot;0&quot;.equals(res)) {</span>
+<span class="nc" id="L1486">            return false;</span>
+        }
+<span class="nc" id="L1488">        return null;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToText&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String formulaToText(String res, String datatype) {
+<span class="fc" id="L1493">        return res;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToText&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String formulaToText(Double res, String datatype) {
+<span class="nc bnc" id="L1498" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1499">            return null;</span>
+        }
+<span class="nc" id="L1501">        DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();</span>
+<span class="nc" id="L1502">        DecimalFormat df = new DecimalFormat(&quot;#&quot;, dfs);</span>
+<span class="nc" id="L1503">        df.setGroupingUsed(false);</span>
+<span class="nc" id="L1504">        df.setMaximumFractionDigits(100);</span>
+<span class="nc" id="L1505">        return df.format(res);</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToText&quot;, argumentTypes = {AccessType.YESNO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String formulaToText(Boolean res, String datatype) {
+<span class="nc bnc" id="L1510" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1511">            return null;</span>
+        }
+<span class="nc bnc" id="L1513" title="All 2 branches missed.">        return res ? &quot;-1&quot; : &quot;0&quot;;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToText&quot;, argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String formulaToText(Timestamp res, String datatype) throws UcanaccessSQLException {
+<span class="fc" id="L1518">        LocalDateTime ldt = res.toLocalDateTime();</span>
+<span class="pc bpc" id="L1519" title="5 of 6 branches missed.">        if (ldt.getHour() == 0 &amp;&amp; ldt.getMinute() == 0 &amp;&amp; ldt.getSecond() == 0) {</span>
+<span class="nc" id="L1520">            return format(res, &quot;short date&quot;);</span>
+        } else {
+<span class="fc" id="L1522">            return format(res, GENERAL_DATE);</span>
+        }
+    }
+
+    @FunctionType(functionName = &quot;formulaToDate&quot;, argumentTypes = {AccessType.DATETIME, AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp formulaToDate(Timestamp res, String datatype) {
+<span class="nc" id="L1528">        return res;</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToDate&quot;, argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp formulaToDate(String res, String datatype) {
+<span class="nc bnc" id="L1533" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1534">            return null;</span>
+        }
+<span class="nc" id="L1536">        return Try.catching(() -&gt; dateValue(res, false)).orIgnore();</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToDate&quot;, argumentTypes = {AccessType.YESNO, AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp formulaToDate(Boolean res, String datatype) throws UcanaccessSQLException {
+<span class="nc bnc" id="L1541" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1542">            return null;</span>
+        }
+<span class="nc bnc" id="L1544" title="All 2 branches missed.">        return dateAdd(&quot;y&quot;, res ? -1 : 0, Timestamp.valueOf(ACCESS_BASE_DATE));</span>
+    }
+
+    @FunctionType(functionName = &quot;orderJet&quot;, argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String orderJet(String s) {
+<span class="nc" id="L1549">        return s.replaceAll(&quot;([a-zA-Z0-9])[\\-–—]([a-zA-Z0-9])&quot;, &quot;$1$2&quot;);</span>
+    }
+
+    @FunctionType(functionName = &quot;formulaToDate&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp formulaToDate(Double res, String datatype) throws UcanaccessSQLException {
+<span class="nc bnc" id="L1554" title="All 2 branches missed.">        if (res == null) {</span>
+<span class="nc" id="L1555">            return null;</span>
+        }
+<span class="nc" id="L1557">        Double d = Math.floor(res);</span>
+<span class="nc" id="L1558">        Timestamp tr = dateAdd(&quot;y&quot;, d.intValue(), Timestamp.valueOf(ACCESS_BASE_DATE));</span>
+<span class="nc" id="L1559">        d = (res - res.intValue()) * 24;</span>
+<span class="nc" id="L1560">        tr = dateAdd(&quot;H&quot;, d.intValue(), tr);</span>
+<span class="nc" id="L1561">        d = (d - d.intValue()) * 60;</span>
+<span class="nc" id="L1562">        tr = dateAdd(&quot;N&quot;, d.intValue(), tr);</span>
+<span class="nc" id="L1563">        d = (d - d.intValue()) * 60;</span>
+<span class="nc" id="L1564">        tr = dateAdd(&quot;S&quot;, (int) Math.rint(d + APPROX), tr);</span>
+<span class="nc" id="L1565">        return tr;</span>
+    }
+
+    /**
+     * Extracts a substring from a string starting from the right-most character.
+     */
+    @FunctionType(functionName = &quot;Right&quot;, namingConflict = true, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String right(String input, int i) {
+<span class="pc bpc" id="L1573" title="1 of 4 branches missed.">        if (input == null || i &lt; 0) {</span>
+<span class="fc" id="L1574">            return null;</span>
+        }
+<span class="fc" id="L1576">        int ln = input.length();</span>
+<span class="fc bfc" id="L1577" title="All 2 branches covered.">        if (i &gt;= ln) {</span>
+<span class="fc" id="L1578">            return input;</span>
+        } else {
+<span class="fc" id="L1580">            return input.substring(ln - i, ln);</span>
+        }
+    }
+
+    @FunctionType(functionName = &quot;\&quot;RIGHT$\&quot;&quot;, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String rightS(String input, int i) {
+<span class="fc" id="L1586">        return right(input, i);</span>
+    }
+
+    /**
+     * Returns a number rounded to a specified number of decimal places.
+     */
+    @FunctionType(namingConflict = true, functionName = &quot;Round&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double round(double d, double p) {
+<span class="nc" id="L1594">        double f = Math.pow(10d, p);</span>
+<span class="nc" id="L1595">        return Math.round(d * f) / f;</span>
+    }
+
+    /**
+     * Returns the integer portion of a number.
+     *
+     * @param number a double or any valid numeric expression, if {@code null}, {@code null} is returned
+     * @return integer portion
+     */
+    @SuppressWarnings(&quot;PMD.UnnecessaryCast&quot;)
+    @FunctionType(namingConflict = true, functionName = &quot;Fix&quot;, argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double fix(Double number) {
+<span class="fc bfc" id="L1607" title="All 2 branches covered.">        return number == null</span>
+<span class="fc" id="L1608">            ? null</span>
+<span class="fc" id="L1609">            : sign(number) * (double) mint(Math.abs(number));</span>
+    }
+
+    @FunctionType(functionName = &quot;PARTITION&quot;, argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String partition(Double number, double start, double stop, double interval) {
+<span class="fc bfc" id="L1614" title="All 2 branches covered.">        if (number == null) {</span>
+<span class="fc" id="L1615">            return null;</span>
+        }
+<span class="fc" id="L1617">        number = Math.rint(number);</span>
+<span class="fc" id="L1618">        interval = Math.rint(interval);</span>
+
+<span class="fc" id="L1620">        String ul = String.valueOf(lrint(stop) + 1);</span>
+<span class="fc" id="L1621">        stop = lrint(stop);</span>
+<span class="fc" id="L1622">        start = lrint(start);</span>
+<span class="fc" id="L1623">        int h = ul.length();</span>
+<span class="fc bfc" id="L1624" title="All 2 branches covered.">        if (number &lt; start) {</span>
+<span class="fc" id="L1625">            return padLeft(&quot;&quot;, h) + &quot;:&quot; + padLeft(lrint(start) - 1, h);</span>
+        }
+<span class="fc bfc" id="L1627" title="All 2 branches covered.">        if (number &gt; stop) {</span>
+<span class="fc" id="L1628">            return ul + &quot;:&quot; + padLeft(&quot;&quot;, h);</span>
+        }
+
+<span class="pc bpc" id="L1631" title="1 of 2 branches missed.">        for (double d = start; d &lt;= stop; d += interval) {</span>
+<span class="pc bpc" id="L1632" title="1 of 4 branches missed.">            if (number &gt;= d &amp;&amp; number &lt; d + interval) {</span>
+<span class="fc" id="L1633">                return padLeft(lceil(d), h) + &quot;:&quot;</span>
+<span class="fc bfc" id="L1634" title="All 2 branches covered.">                    + padLeft(d + interval &lt;= stop ? lfloor(d + interval) : lrint(stop), h);</span>
+
+            }
+        }
+<span class="nc" id="L1638">        return &quot;&quot;;</span>
+    }
+
+    private static int lfloor(double d) {
+<span class="fc" id="L1642">        return (int) Math.floor(d - APPROX);</span>
+    }
+
+    private static int lceil(double d) {
+<span class="fc" id="L1646">        return (int) Math.ceil(d - APPROX);</span>
+    }
+
+    private static int lrint(double d) {
+<span class="fc" id="L1650">        return (int) Math.rint(d - APPROX);</span>
+    }
+
+    private static String padLeft(int value, int n) {
+<span class="fc" id="L1654">        return padLeft(String.valueOf(value), n);</span>
+    }
+
+    private static String padLeft(String value, int n) {
+<span class="fc" id="L1658">        return String.format(&quot;%1$&quot; + n + &quot;s&quot;, value);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

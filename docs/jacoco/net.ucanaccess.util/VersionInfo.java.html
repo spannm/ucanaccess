@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VersionInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.util</a> &gt; <span class="el_source">VersionInfo.java</span></div><h1>VersionInfo.java</h1><pre class="source lang-java linenums">package net.ucanaccess.util;
+
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+/**
+ * The purpose of this class is to find the project's version information by all means possible,
+ * &lt;ul&gt;
+ *     &lt;li&gt;while developing the project in an IDE&lt;/li&gt;
+ *     &lt;li&gt;while running Maven lifecycle goals or&lt;/li&gt;
+ *     &lt;li&gt;while executing or referencing the project at run-time, whether packaged or not.&lt;/li&gt;
+ * &lt;/ul&gt;
+ * &lt;p&gt;
+ * First this class attempts to read version information from key {@code Attributes.Name.IMPLEMENTATION_VERSION}
+ * in the Java manifest by using the Java api.
+ * &lt;p&gt;
+ * Should this operation fail, it looks for a {@code MANIFEST.MF} in the file system in order to
+ * read version information from the first file found.
+ * &lt;p&gt;
+ * In case this also fails, it looks for the project's Maven POM file to extract version information from the xml structure.
+ *
+ * @author Markus Spann
+ * @since v5.1.2
+ */
+public final class VersionInfo {
+
+<span class="fc" id="L50">    private static final Logger LOGGER = System.getLogger(VersionInfo.class.getName());</span>
+
+    /**
+     * Cache of version information by class.
+     */
+<span class="fc" id="L55">    private static final Map&lt;Class&lt;?&gt;, VersionInfo&gt; CACHE = new ConcurrentHashMap&lt;&gt;();</span>
+
+    private String version;
+    private int    majorVersion;
+    private int    minorVersion;
+
+    /**
+     * Finds and returns the version information for a given class.
+     * The method uses a cache to avoid redundant lookups.
+     *
+     * @param clazz The class to find the version for. Cannot be null.
+     * @return The VersionInfo instance for the given class.
+     * @throws NullPointerException if {@code class} is null.
+     */
+    public static VersionInfo find(Class&lt;?&gt; clazz) {
+<span class="fc" id="L70">        Objects.requireNonNull(clazz, &quot;Class required&quot;);</span>
+<span class="fc" id="L71">        return CACHE.computeIfAbsent(clazz, c -&gt; new VersionInfo().findVersion(c.getPackage()));</span>
+    }
+
+    /**
+     * Clears the internal cache of version information.
+     * This is primarily for testing purposes.
+     */
+    static void clearCache() {
+<span class="fc" id="L79">        CACHE.clear();</span>
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * Default constructor.
+     */
+<span class="fc" id="L85">    VersionInfo() {</span>
+<span class="fc" id="L86">    }</span>
+
+    /**
+     * Finds the version information by checking the package, manifest, or Maven POM file.
+     *
+     * @param p The package of the class to find the version for.
+     * @return This VersionInfo instance with the version details populated.
+     */
+    VersionInfo findVersion(Package p) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (p != null) {</span>
+<span class="fc" id="L96">            version = p.getImplementationVersion();</span>
+        }
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (version != null) {</span>
+<span class="fc" id="L99">            LOGGER.log(Level.DEBUG, &quot;Found version ''{0}'' in package&quot;, version);</span>
+        } else {
+<span class="fc" id="L101">            version = readFromManifest();</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            if (version == null) {</span>
+<span class="fc" id="L103">                version = readFromMavenPom();</span>
+            }
+        }
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (version != null) {</span>
+<span class="fc" id="L108">            Matcher matcher = Pattern.compile(&quot;^(\\d++)\\.?(\\d++)?.*&quot;).matcher(version);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (matcher.matches()) {</span>
+                try {
+<span class="fc" id="L111">                    majorVersion = Integer.parseInt(matcher.group(1));</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                    if (matcher.groupCount() &gt; 1) {</span>
+<span class="fc" id="L113">                        minorVersion = Integer.parseInt(matcher.group(2));</span>
+                    }
+<span class="fc" id="L115">                } catch (NumberFormatException ex) {</span>
+<span class="fc" id="L116">                    LOGGER.log(Level.WARNING, &quot;Failed to parse major/minor version from: {0}&quot;, version);</span>
+<span class="fc" id="L117">                }</span>
+            } else {
+<span class="fc" id="L119">                LOGGER.log(Level.WARNING, &quot;Unparsable implementation version: {0}&quot;, version);</span>
+            }
+        }
+
+<span class="fc" id="L123">        return this;</span>
+    }
+
+    /**
+     * Reads the version information from a MANIFEST.MF file in the file system.
+     *
+     * @return The version string, or null if not found.
+     */
+    String readFromManifest() {
+<span class="fc" id="L132">        String filename = &quot;MANIFEST.MF&quot;;</span>
+<span class="fc" id="L133">        Path currDir = Paths.get(&quot;&quot;).toAbsolutePath();</span>
+<span class="fc" id="L134">        LOGGER.log(Level.DEBUG, &quot;Searching manifest under current directory ''{0}''&quot;, currDir);</span>
+<span class="fc" id="L135">        try (Stream&lt;Path&gt; walk = Files.walk(currDir)) {</span>
+<span class="fc" id="L136">            Path manifest = walk.filter(p -&gt; p.getFileName().toString().equals(filename)).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">            if (manifest == null) {</span>
+<span class="fc" id="L138">                LOGGER.log(Level.DEBUG, &quot;Could not find ''{0}'' in path ''{1}''&quot;, filename, currDir);</span>
+            } else {
+<span class="nc" id="L140">                try (InputStream is = Files.newInputStream(manifest)) {</span>
+<span class="nc" id="L141">                    String ver = new Manifest(is).getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);</span>
+<span class="nc" id="L142">                    LOGGER.log(Level.DEBUG, &quot;Found version ''{0}'' in manifest&quot;, ver);</span>
+<span class="nc" id="L143">                    return ver;</span>
+                }
+            }
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } catch (IOException ex) {</span>
+<span class="nc" id="L147">            LOGGER.log(Level.WARNING, &quot;Failed to find version info in manifest: {0}&quot;, ex.getMessage());</span>
+<span class="fc" id="L148">        }</span>
+<span class="fc" id="L149">        return null;</span>
+    }
+
+    /**
+     * Reads the version information from a pom.xml file in the file system.
+     *
+     * @return The version string, or null if not found.
+     */
+    String readFromMavenPom() {
+<span class="fc" id="L158">        String filename = &quot;pom.xml&quot;;</span>
+<span class="fc" id="L159">        Path currDir = Paths.get(&quot;&quot;).toAbsolutePath();</span>
+<span class="fc" id="L160">        LOGGER.log(Level.DEBUG, &quot;Searching maven pom under current directory ''{0}''&quot;, currDir);</span>
+<span class="fc" id="L161">        try (Stream&lt;Path&gt; walk = Files.walk(currDir)) {</span>
+<span class="fc" id="L162">            Path pom = walk.filter(p -&gt; p.getFileName().toString().equals(filename)).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (pom == null) {</span>
+<span class="nc" id="L164">                LOGGER.log(Level.WARNING, &quot;Failed to find ''{0}'' in path ''{1}''&quot;, filename, currDir);</span>
+            } else {
+<span class="fc" id="L166">                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span>
+<span class="fc" id="L167">                dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, &quot;&quot;);</span>
+<span class="fc" id="L168">                dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, &quot;&quot;);</span>
+<span class="fc" id="L169">                Document document = dbf.newDocumentBuilder().parse(pom.toFile());</span>
+<span class="fc" id="L170">                document.getDocumentElement().normalize();</span>
+
+<span class="fc" id="L172">                String ver = (String) XPathFactory.newInstance().newXPath()</span>
+<span class="fc" id="L173">                    .evaluate(&quot;/project/version&quot;, document, XPathConstants.STRING);</span>
+
+<span class="pc bpc" id="L175" title="2 of 4 branches missed.">                if (ver != null &amp;&amp; !ver.isEmpty()) {</span>
+<span class="fc" id="L176">                    LOGGER.log(Level.DEBUG, &quot;Found version ''{0}'' in maven pom&quot;, ver);</span>
+<span class="fc" id="L177">                    return ver;</span>
+                }
+            }
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException ex) {</span>
+<span class="nc" id="L181">            LOGGER.log(Level.WARNING, &quot;Failed to find version info in maven pom: {0}&quot;, ex.getMessage());</span>
+<span class="nc" id="L182">        }</span>
+<span class="nc" id="L183">        return null;</span>
+    }
+
+    /**
+     * Returns the full version string.
+     *
+     * @return The version string, or null if not found.
+     */
+    public String getVersion() {
+<span class="fc" id="L192">        return version;</span>
+    }
+
+    /**
+     * Returns the major version number.
+     *
+     * @return The major version number, or 0 if not found or unparsable.
+     */
+    public int getMajorVersion() {
+<span class="fc" id="L201">        return majorVersion;</span>
+    }
+
+    /**
+     * Returns the minor version number.
+     *
+     * @return The minor version number, or 0 if not found or unparsable.
+     */
+    public int getMinorVersion() {
+<span class="fc" id="L210">        return minorVersion;</span>
+    }
+
+    /**
+     * Returns a string representation of the version info.
+     *
+     * @return A formatted string with version, major, and minor numbers.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L220">        return String.format(&quot;%s[version=%s, major=%d, minor=%d]&quot;,</span>
+<span class="nc" id="L221">            getClass().getSimpleName(), version, majorVersion, minorVersion);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessConnection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessConnection.java</span></div><h1>UcanaccessConnection.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Table;
+import net.ucanaccess.commands.CompositeCommand;
+import net.ucanaccess.commands.ICommand;
+import net.ucanaccess.commands.ICommand.CommandType;
+import net.ucanaccess.commands.ICursorCommand;
+import net.ucanaccess.commands.IFeedbackAction;
+import net.ucanaccess.converters.LoadJet;
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.Executor;
+
+public class UcanaccessConnection implements Connection {
+    static final String                       BATCH_ID      = &quot;BATCH_ID&quot;;
+
+<span class="fc" id="L26">    private static final ThreadLocal&lt;Context&gt; CTX           = new ThreadLocal&lt;&gt;();</span>
+
+<span class="fc" id="L28">    private final Logger                      logger        = System.getLogger(getClass().getName());</span>
+    private boolean                           feedbackState;
+<span class="fc" id="L30">    private final Deque&lt;ICommand&gt;             commands      = new ArrayDeque&lt;&gt;();</span>
+    private Connection                        hsqlDBConnection;
+<span class="fc" id="L32">    private final Map&lt;Savepoint, String&gt;      savepointsMap = new HashMap&lt;&gt;();</span>
+    private DBReference                       ref;
+<span class="fc" id="L34">    private boolean                           checkModified = false;</span>
+<span class="fc" id="L35">    private boolean                           autoCommit    = true;</span>
+    private Properties                        clientInfo;
+    private Session                           session;
+    private SQLWarning                        warnings;
+    private String                            url;
+    private UcanaccessStatement               currentStatement;
+    private Object                            lastGeneratedKey;
+    private String                            refId;
+
+    /**
+     * Returns the current database connection or {@code null} from the context.
+     * @return connection
+     */
+    public static synchronized UcanaccessConnection getCtxConnection() {
+<span class="fc" id="L49">        return Optional.ofNullable(CTX.get()).map(Context::getCurrentConnection).orElse(null);</span>
+    }
+
+    /**
+     * Returns the current database connection from the context.
+     * @return connection, never {@code null}
+     * @throws UcanaccessRuntimeException if no connection is bound to the current thread
+     */
+    public static UcanaccessConnection requireCtxConnection() {
+<span class="fc" id="L58">        return UcanaccessRuntimeException.requireNonNull(getCtxConnection(), &quot;No connection bound to the current thread&quot;);</span>
+    }
+
+    public static synchronized boolean hasContext() {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        return CTX.get() != null;</span>
+    }
+
+    public static synchronized String getCtxExcId() {
+<span class="fc" id="L66">        return Optional.ofNullable(CTX.get()).map(Context::getCurrentExecId).orElse(null);</span>
+    }
+
+    public static synchronized void setCtxConnection(UcanaccessConnection conn) {
+<span class="fc" id="L70">        CTX.set(new Context(conn));</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Removes the context of the current thread.
+     */
+    public static synchronized void clearCtx() {
+<span class="fc" id="L77">        CTX.remove();</span>
+<span class="fc" id="L78">    }</span>
+
+    public static synchronized void setCtxExecId(String id) {
+<span class="fc" id="L81">        Optional.ofNullable(CTX.get()).ifPresent(ctx -&gt; ctx.setCurrentExecId(id));</span>
+<span class="fc" id="L82">    }</span>
+
+<span class="fc" id="L84">    public UcanaccessConnection(DBReference ref, Properties clientInfo, Session session) throws UcanaccessSQLException {</span>
+        try {
+<span class="fc" id="L86">            this.ref = ref;</span>
+<span class="fc" id="L87">            refId = ref.getId();</span>
+<span class="fc" id="L88">            ref.incrementActiveConnection();</span>
+<span class="fc" id="L89">            this.session = session;</span>
+<span class="fc" id="L90">            hsqlDBConnection = ref.getHSQLDBConnection(session);</span>
+<span class="fc" id="L91">            this.clientInfo = clientInfo;</span>
+<span class="nc" id="L92">        } catch (SQLException ex) {</span>
+<span class="nc" id="L93">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L94">        }</span>
+<span class="fc" id="L95">    }</span>
+
+    Object getLastGeneratedKey() {
+<span class="fc" id="L98">        return lastGeneratedKey;</span>
+    }
+
+    String preprocess(String sql) {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (SQLConverter.hasIdentity(sql)) {</span>
+<span class="fc" id="L103">            return SQLConverter.preprocess(sql, lastGeneratedKey);</span>
+        }
+<span class="fc" id="L105">        return sql;</span>
+    }
+
+    void setCurrentStatement(UcanaccessStatement currentStatement) {
+<span class="fc" id="L109">        this.currentStatement = currentStatement;</span>
+<span class="fc" id="L110">    }</span>
+
+    public void setGeneratedKey(Object key) {
+<span class="fc" id="L113">        lastGeneratedKey = key;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (currentStatement != null) {</span>
+<span class="fc" id="L115">            currentStatement.setGeneratedKey(key);</span>
+        }
+<span class="fc" id="L117">    }</span>
+
+    public void addFunctions(Class&lt;?&gt; clazz) throws SQLException {
+<span class="fc" id="L120">        LoadJet lfa = new LoadJet(ref.getHSQLDBConnection(session), ref.getDbIO());</span>
+<span class="fc" id="L121">        lfa.addFunctions(clazz);</span>
+<span class="fc" id="L122">    }</span>
+
+    public void reloadDbIO() throws IOException {
+<span class="fc" id="L125">        synchronized (UcanaccessConnection.class) {</span>
+<span class="fc" id="L126">            ref.reloadDbIO();</span>
+<span class="fc" id="L127">        }</span>
+<span class="fc" id="L128">    }</span>
+
+    public synchronized boolean add(ICommand c4io) {
+<span class="fc bfc" id="L131" title="All 4 branches covered.">        if (c4io.getType().equals(CommandType.UPDATE) || c4io.getType().equals(CommandType.DELETE)) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            ICommand last = !commands.isEmpty() ? commands.getLast() : null;</span>
+<span class="fc" id="L133">            ICursorCommand c4ioc = (ICursorCommand) c4io;</span>
+<span class="fc bfc" id="L134" title="All 6 branches covered.">            if (last != null &amp;&amp; !last.getExecId().equals(BATCH_ID) &amp;&amp; last.getExecId().equals(c4io.getExecId())</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                    &amp;&amp; last.getTableName().equals(c4io.getTableName())) {</span>
+<span class="fc" id="L136">                return ((CompositeCommand) last).add(c4ioc);</span>
+            } else {
+<span class="fc" id="L138">                CompositeCommand cc4io = new CompositeCommand();</span>
+<span class="fc" id="L139">                cc4io.add(c4ioc);</span>
+<span class="fc" id="L140">                c4io = cc4io;</span>
+            }
+        }
+<span class="fc" id="L143">        return commands.add(c4io);</span>
+    }
+
+    @Override
+    public void clearWarnings() {
+<span class="nc" id="L148">        warnings = null;</span>
+<span class="nc" id="L149">    }</span>
+
+    @Override
+    public void close() throws SQLException {
+        try {
+<span class="fc" id="L154">            hsqlDBConnection.close();</span>
+<span class="fc" id="L155">            ref.decrementActiveConnection(session);</span>
+
+<span class="fc" id="L157">        } catch (SQLException ex) {</span>
+<span class="fc" id="L158">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L159">        }</span>
+<span class="fc" id="L160">    }</span>
+
+    @Override
+    public void commit() throws SQLException {
+<span class="fc" id="L164">        synchronized (UcanaccessConnection.class) {</span>
+
+            try {
+<span class="pc bpc" id="L167" title="3 of 4 branches missed.">                if (isReadOnly() &amp;&amp; !commands.isEmpty()) {</span>
+<span class="nc" id="L168">                    rollback();</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                    if (ref.isReadOnlyFileFormat()) {</span>
+<span class="nc" id="L170">                        throw new UcanaccessSQLException(&quot;Access 97 is supported in read-only&quot;);</span>
+                    }
+<span class="nc" id="L172">                    throw new UcanaccessSQLException(&quot;File marked as read only. &quot;</span>
+                        + &quot;Notice that only one process (one VM) at a time can access in writing mode&quot;);
+                }
+
+<span class="fc" id="L176">                flushIO();</span>
+<span class="fc" id="L177">                hsqlDBConnection.commit();</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                if (!commands.isEmpty()) {</span>
+<span class="fc" id="L179">                    ref.updateLastModified();</span>
+                }
+
+<span class="fc" id="L182">            } catch (SQLException ex) {</span>
+<span class="fc" id="L183">                throw new UcanaccessSQLException(ex);</span>
+            } finally {
+<span class="fc" id="L185">                finalizeEnlistedResources();</span>
+<span class="fc" id="L186">                checkModified = true;</span>
+            }
+<span class="fc" id="L188">        }</span>
+<span class="fc" id="L189">    }</span>
+
+    @Override
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        try {
+<span class="fc" id="L194">            checkConnection();</span>
+<span class="fc" id="L195">            return hsqlDBConnection.createArrayOf(typeName, elements);</span>
+<span class="fc" id="L196">        } catch (SQLException ex) {</span>
+<span class="fc" id="L197">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Blob createBlob() throws SQLException {
+        try {
+<span class="fc" id="L204">            checkConnection();</span>
+<span class="fc" id="L205">            return new UcanaccessBlob(UcanaccessBlob.createBlob(this), this);</span>
+<span class="nc" id="L206">        } catch (SQLException ex) {</span>
+<span class="nc" id="L207">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    public Blob createBlob(File fl) throws SQLException {
+        try {
+<span class="fc" id="L213">            checkConnection();</span>
+<span class="fc" id="L214">            return new UcanaccessBlob(UcanaccessBlob.createBlob(fl, this), this);</span>
+<span class="nc" id="L215">        } catch (SQLException ex) {</span>
+<span class="nc" id="L216">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    private void checkConnection() throws UcanaccessSQLException {
+<span class="fc bfc" id="L221" title="All 4 branches covered.">        if (autoCommit || isCheckModified()) {</span>
+<span class="fc" id="L222">            checkLastModified();</span>
+        }
+
+<span class="fc" id="L225">    }</span>
+
+    @Override
+    public Clob createClob() throws SQLException {
+<span class="nc" id="L229">        throw new SQLFeatureNotSupportedException(&quot;Clob&quot;);</span>
+    }
+
+    @Override
+    public NClob createNClob() throws SQLException {
+<span class="nc" id="L234">        throw new SQLFeatureNotSupportedException(&quot;NClob&quot;);</span>
+    }
+
+    @Override
+    public SQLXML createSQLXML() throws SQLException {
+<span class="nc" id="L239">        throw new SQLFeatureNotSupportedException(&quot;SQLXML&quot;);</span>
+    }
+
+    @Override
+    public UcanaccessStatement createStatement() throws SQLException {
+        try {
+<span class="fc" id="L245">            checkConnection();</span>
+<span class="fc" id="L246">            return new UcanaccessStatement(hsqlDBConnection.createStatement(), this);</span>
+<span class="fc" id="L247">        } catch (SQLException ex) {</span>
+<span class="fc" id="L248">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+        try {
+<span class="fc" id="L255">            checkConnection();</span>
+<span class="fc" id="L256">            return new UcanaccessStatement(hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency), this);</span>
+<span class="fc" id="L257">        } catch (SQLException ex) {</span>
+<span class="fc" id="L258">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public UcanaccessStatement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+            throws SQLException {
+        try {
+<span class="fc" id="L266">            checkConnection();</span>
+<span class="fc" id="L267">            return new UcanaccessStatement(</span>
+<span class="fc" id="L268">                    hsqlDBConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);</span>
+<span class="fc" id="L269">        } catch (SQLException ex) {</span>
+<span class="fc" id="L270">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        try {
+<span class="fc" id="L277">            checkConnection();</span>
+<span class="fc" id="L278">            return hsqlDBConnection.createStruct(typeName, attributes);</span>
+<span class="fc" id="L279">        } catch (SQLException ex) {</span>
+<span class="fc" id="L280">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @SuppressWarnings(&quot;java:S1181&quot;) // roll back on any failure, including errors, before rethrowing
+    private void flushIO() throws SQLException {
+<span class="fc" id="L286">        List&lt;IFeedbackAction&gt; ibal = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L287">        Deque&lt;ICommand&gt; executed = new ArrayDeque&lt;&gt;();</span>
+
+        try {
+
+<span class="fc bfc" id="L291" title="All 2 branches covered.">            for (ICommand command : commands) {</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">                for (IFeedbackAction ib : ibal) {</span>
+<span class="nc" id="L293">                    ib.doAction(command);</span>
+<span class="nc" id="L294">                }</span>
+<span class="fc" id="L295">                IFeedbackAction ib = command.persist();</span>
+<span class="fc" id="L296">                executed.add(command);</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">                if (ib != null) {</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">                    if (command instanceof CompositeCommand) {</span>
+<span class="fc" id="L299">                        ib.doAction(command);</span>
+                    } else {
+<span class="fc" id="L301">                        ibal.add(ib);</span>
+                    }
+                }
+
+<span class="fc" id="L305">            }</span>
+
+<span class="fc" id="L307">            afterFlushIoHook();</span>
+
+<span class="fc" id="L309">        } catch (Throwable ex) {</span>
+<span class="fc" id="L310">            logger.log(Level.WARNING, ex.toString());</span>
+<span class="fc" id="L311">            hsqlDBConnection.rollback();</span>
+<span class="fc" id="L312">            ibal.clear();</span>
+<span class="fc" id="L313">            Iterator&lt;ICommand&gt; it = executed.descendingIterator();</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">            while (it.hasNext()) {</span>
+<span class="fc" id="L315">                ICommand command = it.next();</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">                for (IFeedbackAction ib : ibal) {</span>
+<span class="nc" id="L317">                    ib.doAction(command);</span>
+<span class="nc" id="L318">                }</span>
+<span class="fc" id="L319">                IFeedbackAction ib = command.rollback();</span>
+
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">                if (ib != null) {</span>
+<span class="nc" id="L322">                    ibal.add(ib);</span>
+                }
+<span class="fc" id="L324">            }</span>
+<span class="fc" id="L325">            ref.updateLastModified();</span>
+            try {
+<span class="fc" id="L327">                ref.getDbIO().flush();</span>
+<span class="fc" id="L328">                unloadDB();</span>
+<span class="nc" id="L329">            } catch (IOException ex2) {</span>
+<span class="nc" id="L330">                logger.log(Level.WARNING, ex2.toString());</span>
+<span class="fc" id="L331">            }</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            throw ex instanceof UcanaccessSQLException ? (UcanaccessSQLException) ex : new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L333">        }</span>
+
+        try {
+<span class="fc" id="L336">            ref.getDbIO().flush();</span>
+<span class="nc" id="L337">        } catch (IOException ex) {</span>
+<span class="nc" id="L338">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L339">        }</span>
+
+<span class="fc" id="L341">    }</span>
+
+    /**
+     * Extension hook called towards end of {@link #flushIO()}.
+     */
+    void afterFlushIoHook() {
+        // no-op by default
+<span class="fc" id="L348">    }</span>
+
+    private void finalizeEnlistedResources() {
+<span class="fc" id="L351">        commands.clear();</span>
+<span class="fc" id="L352">        savepointsMap.clear();</span>
+<span class="fc" id="L353">        clearCtx();</span>
+<span class="fc" id="L354">    }</span>
+
+    @Override
+    public boolean getAutoCommit() {
+<span class="fc" id="L358">        return autoCommit;</span>
+    }
+
+    @Override
+    public String getCatalog() throws SQLException {
+        try {
+<span class="fc" id="L364">            return hsqlDBConnection.getCatalog();</span>
+<span class="fc" id="L365">        } catch (SQLException ex) {</span>
+<span class="fc" id="L366">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Properties getClientInfo() {
+<span class="nc" id="L372">        return clientInfo;</span>
+    }
+
+    @Override
+    public String getClientInfo(String name) {
+<span class="nc" id="L377">        return clientInfo.getProperty(name);</span>
+    }
+
+    public Database getDbIO() {
+<span class="fc" id="L381">        return ref.getDbIO();</span>
+    }
+
+    void pinAutoNumberTable(String tableName, Table table) {
+<span class="fc" id="L385">        ref.pinAutoNumberTable(tableName, table);</span>
+<span class="fc" id="L386">    }</span>
+
+    @Override
+    public int getHoldability() throws SQLException {
+        try {
+<span class="fc" id="L391">            return hsqlDBConnection.getHoldability();</span>
+<span class="fc" id="L392">        } catch (SQLException ex) {</span>
+<span class="fc" id="L393">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    public Connection getHSQLDBConnection() {
+<span class="fc" id="L398">        return hsqlDBConnection;</span>
+    }
+
+    @Override
+    public DatabaseMetaData getMetaData() throws SQLException {
+        try {
+<span class="fc" id="L404">            return new UcanaccessDatabaseMetadata(hsqlDBConnection.getMetaData(), this);</span>
+<span class="fc" id="L405">        } catch (SQLException ex) {</span>
+<span class="fc" id="L406">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public int getTransactionIsolation() throws SQLException {
+        try {
+<span class="fc" id="L413">            return hsqlDBConnection.getTransactionIsolation();</span>
+<span class="fc" id="L414">        } catch (SQLException ex) {</span>
+<span class="fc" id="L415">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Map&lt;String, Class&lt;?&gt;&gt; getTypeMap() throws SQLException {
+        try {
+<span class="fc" id="L422">            return hsqlDBConnection.getTypeMap();</span>
+<span class="fc" id="L423">        } catch (SQLException ex) {</span>
+<span class="fc" id="L424">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public SQLWarning getWarnings() {
+<span class="nc" id="L430">        return warnings;</span>
+    }
+
+    public void setWarnings(SQLWarning warnings) {
+<span class="fc" id="L434">        this.warnings = warnings;</span>
+<span class="fc" id="L435">    }</span>
+
+    public void addWarnings(SQLWarning warning) {
+<span class="pc bpc" id="L438" title="1 of 2 branches missed.">        if (warnings == null) {</span>
+<span class="fc" id="L439">            setWarnings(warning);</span>
+        } else {
+<span class="nc" id="L441">            warnings.setNextWarning(warning);</span>
+        }
+<span class="fc" id="L443">    }</span>
+
+    public boolean isFeedbackState() {
+<span class="fc" id="L446">        return feedbackState;</span>
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        try {
+<span class="fc" id="L452">            return hsqlDBConnection.isClosed();</span>
+<span class="fc" id="L453">        } catch (SQLException ex) {</span>
+<span class="fc" id="L454">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean isReadOnly() throws SQLException {
+<span class="fc" id="L460">        return ref.isReadOnly();</span>
+    }
+
+    @Override
+    public boolean isValid(int timeout) throws SQLException {
+        try {
+<span class="fc" id="L466">            return hsqlDBConnection.isValid(timeout);</span>
+<span class="fc" id="L467">        } catch (SQLException ex) {</span>
+<span class="fc" id="L468">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public boolean isWrapperFor(Class&lt;?&gt; arg0) throws SQLException {
+        try {
+<span class="fc" id="L475">            return hsqlDBConnection.isWrapperFor(arg0);</span>
+<span class="fc" id="L476">        } catch (SQLException ex) {</span>
+<span class="fc" id="L477">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String nativeSQL(String sql) {
+<span class="nc" id="L483">        return SQLConverter.convertSQL(sql).getSql();</span>
+    }
+
+    @Override
+    public CallableStatement prepareCall(String sql) throws SQLException {
+        try {
+<span class="fc" id="L489">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L490">            return new UcanaccessCallableStatement(nsql, hsqlDBConnection.prepareCall(sql), this);</span>
+<span class="fc" id="L491">        } catch (SQLException ex) {</span>
+<span class="fc" id="L492">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        try {
+<span class="fc" id="L499">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L500">            return new UcanaccessCallableStatement(nsql,</span>
+<span class="fc" id="L501">                    hsqlDBConnection.prepareCall(sql, resultSetType, resultSetConcurrency), this);</span>
+<span class="fc" id="L502">        } catch (SQLException ex) {</span>
+<span class="fc" id="L503">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+        try {
+<span class="fc" id="L511">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L512">            return new UcanaccessCallableStatement(nsql,</span>
+<span class="fc" id="L513">                    hsqlDBConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), this);</span>
+<span class="fc" id="L514">        } catch (SQLException ex) {</span>
+<span class="fc" id="L515">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    private NormalizedSQL prepare(String sql) throws SQLException {
+<span class="fc" id="L520">        checkConnection();</span>
+<span class="fc" id="L521">        return SQLConverter.convertSQL(sql, this);</span>
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        try {
+<span class="fc bfc" id="L527" title="All 2 branches covered.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="fc" id="L528">                logStatementWarning(sql);</span>
+<span class="fc" id="L529">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+
+<span class="fc" id="L532">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L533">            return new UcanaccessPreparedStatement(nsql, hsqlDBConnection.prepareStatement(preprocess(nsql.getSql())),</span>
+                    this);
+<span class="fc" id="L535">        } catch (SQLException ex) {</span>
+
+<span class="fc" id="L537">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    void logStatementWarning(String inputSql) {
+<span class="fc" id="L542">        String sql = inputSql;</span>
+<span class="pc bpc" id="L543" title="1 of 2 branches missed.">        if (inputSql.length() &gt; 100) {</span>
+<span class="nc" id="L544">            sql = inputSql.substring(0, 100) + &quot;...&quot;;</span>
+        }
+<span class="fc" id="L546">        logger.log(Level.WARNING, &quot;Please use a simple statement (not a PreparedStatement) to execute DDL (e.g. CREATE TABLE): {0}&quot;, sql);</span>
+<span class="fc" id="L547">    }</span>
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+        try {
+<span class="fc bfc" id="L552" title="All 2 branches covered.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="fc" id="L553">                logStatementWarning(sql);</span>
+<span class="fc" id="L554">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+<span class="fc" id="L556">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L557">            return new UcanaccessPreparedStatement(nsql,</span>
+<span class="fc" id="L558">                    hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), autoGeneratedKeys), this);</span>
+<span class="fc" id="L559">        } catch (SQLException ex) {</span>
+<span class="fc" id="L560">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+            throws SQLException {
+        try {
+<span class="fc bfc" id="L568" title="All 2 branches covered.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="fc" id="L569">                logStatementWarning(sql);</span>
+<span class="fc" id="L570">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+<span class="fc" id="L572">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L573">            return new UcanaccessPreparedStatement(nsql,</span>
+<span class="fc" id="L574">                    hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), resultSetType, resultSetConcurrency),</span>
+                    this);
+<span class="fc" id="L576">        } catch (SQLException ex) {</span>
+<span class="pc bpc" id="L577" title="3 of 4 branches missed.">            if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE</span>
+                    &amp;&amp; resultSetConcurrency == ResultSet.CONCUR_UPDATABLE) {
+<span class="nc" id="L579">                return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);</span>
+            }
+<span class="fc" id="L581">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+        try {
+<span class="fc bfc" id="L589" title="All 2 branches covered.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="fc" id="L590">                logStatementWarning(sql);</span>
+<span class="fc" id="L591">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+
+<span class="fc" id="L594">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L595">            return new UcanaccessPreparedStatement(nsql, hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()),</span>
+                    resultSetType, resultSetConcurrency, resultSetHoldability), this);
+<span class="fc" id="L597">        } catch (SQLException ex) {</span>
+<span class="fc" id="L598">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
+        try {
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="nc" id="L606">                logStatementWarning(sql);</span>
+<span class="nc" id="L607">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+<span class="fc" id="L609">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L610">            return new UcanaccessPreparedStatement(nsql,</span>
+<span class="fc" id="L611">                    hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), columnIndexes), this);</span>
+<span class="fc" id="L612">        } catch (SQLException ex) {</span>
+<span class="fc" id="L613">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+        try {
+<span class="pc bpc" id="L620" title="1 of 2 branches missed.">            if (SQLConverter.checkDDL(sql)) {</span>
+<span class="nc" id="L621">                logStatementWarning(sql);</span>
+<span class="nc" id="L622">                return new UcanaccessPreparedStatement(sql, this);</span>
+            }
+<span class="fc" id="L624">            NormalizedSQL nsql = prepare(sql);</span>
+<span class="fc" id="L625">            return new UcanaccessPreparedStatement(nsql,</span>
+<span class="fc" id="L626">                    hsqlDBConnection.prepareStatement(preprocess(nsql.getSql()), columnNames), this);</span>
+<span class="fc" id="L627">        } catch (SQLException ex) {</span>
+<span class="fc" id="L628">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        try {
+<span class="nc" id="L635">            hsqlDBConnection.releaseSavepoint(((UcanaccessSavepoint) savepoint).getWrapped());</span>
+<span class="nc" id="L636">            savepointsMap.remove(savepoint);</span>
+<span class="nc" id="L637">        } catch (SQLException ex) {</span>
+<span class="nc" id="L638">            throw new UcanaccessSQLException(ex);</span>
+<span class="nc" id="L639">        }</span>
+<span class="nc" id="L640">    }</span>
+
+    @Override
+    public void rollback() throws SQLException {
+        try {
+
+<span class="fc" id="L646">            hsqlDBConnection.rollback();</span>
+
+<span class="nc" id="L648">        } catch (SQLException ex) {</span>
+<span class="nc" id="L649">            throw new UcanaccessSQLException(ex);</span>
+        } finally {
+<span class="fc" id="L651">            finalizeEnlistedResources();</span>
+<span class="fc" id="L652">            checkModified = true;</span>
+        }
+<span class="fc" id="L654">    }</span>
+
+    @Override
+    public void rollback(Savepoint savepoint) throws SQLException {
+        try {
+
+<span class="fc" id="L660">            hsqlDBConnection.rollback(((UcanaccessSavepoint) savepoint).getWrapped());</span>
+<span class="fc" id="L661">            String lastId = savepointsMap.get(savepoint);</span>
+<span class="fc" id="L662">            boolean remove = false;</span>
+<span class="fc" id="L663">            Iterator&lt;ICommand&gt; it = commands.iterator();</span>
+<span class="fc bfc" id="L664" title="All 2 branches covered.">            while (it.hasNext()) {</span>
+<span class="fc" id="L665">                ICommand c4io = it.next();</span>
+<span class="pc bpc" id="L666" title="1 of 4 branches missed.">                if (remove &amp;&amp; !c4io.getExecId().equals(lastId)) {</span>
+<span class="fc" id="L667">                    it.remove();</span>
+                }
+<span class="pc bpc" id="L669" title="1 of 4 branches missed.">                remove = remove || c4io.getExecId().equals(lastId);</span>
+<span class="fc" id="L670">            }</span>
+<span class="fc" id="L671">            checkModified = true;</span>
+<span class="nc" id="L672">        } catch (SQLException ex) {</span>
+<span class="nc" id="L673">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L674">        }</span>
+<span class="fc" id="L675">    }</span>
+
+    @Override
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+<span class="pc bpc" id="L679" title="1 of 2 branches missed.">        if (!autoCommit) {</span>
+<span class="fc" id="L680">            checkLastModified();</span>
+        } else {
+<span class="nc" id="L682">            checkModified = false;</span>
+        }
+<span class="fc" id="L684">        this.autoCommit = autoCommit;</span>
+<span class="fc" id="L685">    }</span>
+
+    public void setFeedbackState(boolean feedbackState) {
+<span class="fc" id="L688">        this.feedbackState = feedbackState;</span>
+<span class="fc" id="L689">    }</span>
+
+    @Override
+    public void setCatalog(String catalog) throws SQLException {
+<span class="nc" id="L693">        throw new SQLFeatureNotSupportedException(&quot;setCatalog&quot;);</span>
+    }
+
+    @Override
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+<span class="fc" id="L698">        hsqlDBConnection.setClientInfo(properties);</span>
+<span class="fc" id="L699">    }</span>
+
+    @Override
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+<span class="fc" id="L703">        hsqlDBConnection.setClientInfo(name, value);</span>
+<span class="fc" id="L704">    }</span>
+
+    @Override
+    public void setHoldability(int holdability) throws SQLException {
+        try {
+<span class="fc" id="L709">            hsqlDBConnection.setHoldability(holdability);</span>
+<span class="fc" id="L710">        } catch (SQLException ex) {</span>
+<span class="fc" id="L711">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L712">        }</span>
+<span class="fc" id="L713">    }</span>
+
+    @Override
+    public void setReadOnly(boolean readOnly) throws SQLException {
+        try {
+<span class="fc" id="L718">            hsqlDBConnection.setReadOnly(readOnly);</span>
+<span class="fc" id="L719">        } catch (SQLException ex) {</span>
+<span class="fc" id="L720">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L721">        }</span>
+<span class="fc" id="L722">    }</span>
+
+    @Override
+    public Savepoint setSavepoint() throws SQLException {
+        try {
+<span class="fc" id="L727">            Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint());</span>
+<span class="fc bfc" id="L728" title="All 2 branches covered.">            if (!commands.isEmpty()) {</span>
+                // last to commit
+<span class="fc" id="L730">                savepointsMap.put(sp, commands.getLast().getExecId());</span>
+            }
+<span class="fc" id="L732">            return sp;</span>
+<span class="fc" id="L733">        } catch (SQLException ex) {</span>
+<span class="fc" id="L734">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public Savepoint setSavepoint(String name) throws SQLException {
+        try {
+<span class="fc" id="L741">            Savepoint sp = new UcanaccessSavepoint(hsqlDBConnection.setSavepoint(name));</span>
+
+<span class="fc bfc" id="L743" title="All 2 branches covered.">            if (!commands.isEmpty()) {</span>
+                // last to commit
+<span class="fc" id="L745">                savepointsMap.put(sp, commands.getLast().getExecId());</span>
+            }
+<span class="fc" id="L747">            return sp;</span>
+<span class="fc" id="L748">        } catch (SQLException ex) {</span>
+<span class="fc" id="L749">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+        try {
+<span class="fc" id="L756">            hsqlDBConnection.setTransactionIsolation(level);</span>
+<span class="fc" id="L757">        } catch (SQLException ex) {</span>
+<span class="fc" id="L758">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L759">        }</span>
+<span class="fc" id="L760">    }</span>
+
+    @Override
+    public void setTypeMap(Map&lt;String, Class&lt;?&gt;&gt; map) throws SQLException {
+        try {
+<span class="fc" id="L765">            hsqlDBConnection.setTypeMap(map);</span>
+<span class="fc" id="L766">        } catch (SQLException ex) {</span>
+<span class="fc" id="L767">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L768">        }</span>
+<span class="fc" id="L769">    }</span>
+
+    @Override
+    public &lt;T&gt; T unwrap(Class&lt;T&gt; arg0) throws SQLException {
+        try {
+<span class="fc" id="L774">            return hsqlDBConnection.unwrap(arg0);</span>
+<span class="fc" id="L775">        } catch (SQLException ex) {</span>
+<span class="fc" id="L776">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L782">        return super.toString() + &quot;[&quot; + ref.getDbFile() + &quot;]&quot;;</span>
+    }
+
+    @SuppressWarnings(&quot;LockOnNonEnclosingClassLiteral&quot;) // the driver class is the driver-wide lock
+    void checkLastModified() throws UcanaccessSQLException {
+        try {
+
+<span class="fc" id="L789">            checkModified = false;</span>
+<span class="pc bpc" id="L790" title="1 of 2 branches missed.">            if (!refId.equals(ref.getId())) {</span>
+<span class="nc" id="L791">                hsqlDBConnection = ref.getHSQLDBConnection(session);</span>
+            }
+<span class="fc" id="L793">            synchronized (UcanaccessDriver.class) {</span>
+<span class="fc" id="L794">                hsqlDBConnection = ref.checkLastModified(hsqlDBConnection, session);</span>
+<span class="fc" id="L795">            }</span>
+<span class="fc" id="L796">            refId = ref.getId();</span>
+
+<span class="nc" id="L798">        } catch (Exception ex) {</span>
+<span class="nc" id="L799">            throw UcanaccessSQLException.wrap(ex);</span>
+<span class="fc" id="L800">        }</span>
+
+<span class="fc" id="L802">    }</span>
+
+    public String getUrl() {
+<span class="nc" id="L805">        return url;</span>
+    }
+
+    public void setUrl(String url) {
+<span class="fc" id="L809">        this.url = url;</span>
+<span class="fc" id="L810">    }</span>
+
+    public boolean isShowSchema() {
+<span class="fc" id="L813">        return ref.isShowSchema();</span>
+    }
+
+    @Override
+    public void setSchema(String schema) {
+        // schemas are not supported, the call is ignored
+<span class="nc" id="L819">    }</span>
+
+    @Override
+    public String getSchema() {
+<span class="nc" id="L823">        return &quot;&quot;;</span>
+    }
+
+    @SuppressWarnings(&quot;LockOnNonEnclosingClassLiteral&quot;) // the driver class is the driver-wide lock
+    public void unloadDB() throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L829">            synchronized (UcanaccessDriver.class) {</span>
+<span class="fc" id="L830">                ref.shutdown(session);</span>
+<span class="fc" id="L831">            }</span>
+
+<span class="nc" id="L833">        } catch (Exception ex) {</span>
+<span class="nc" id="L834">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L835">        }</span>
+<span class="fc" id="L836">    }</span>
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        try {
+<span class="fc" id="L841">            hsqlDBConnection.abort(executor);</span>
+<span class="fc" id="L842">        } catch (Exception ex) {</span>
+<span class="fc" id="L843">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L844">        }</span>
+<span class="fc" id="L845">    }</span>
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) {
+        // local database file, network timeouts do not apply
+<span class="nc" id="L850">    }</span>
+
+    @Override
+    public int getNetworkTimeout() {
+<span class="nc" id="L854">        return 0;</span>
+    }
+
+    public boolean isCheckModified() {
+<span class="fc" id="L858">        return checkModified;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -18,9 +18,9 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> IThrowingConsumer&lt;ResultSet, SQLException&gt; executeConsumer;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">protected</strong> <a name="AbstractExecuteResultSet" href="../../../net/ucanaccess/jdbc/AbstractExecuteResultSet.html#AbstractExecuteResultSet">AbstractExecuteResultSet</a>(<a name="UcanaccessResultSet" href="../../../net/ucanaccess/jdbc/UcanaccessResultSet.html#UcanaccessResultSet">UcanaccessResultSet</a> _resultSet, IThrowingConsumer&lt;ResultSet, SQLException&gt; _executeConsumer) {
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>          <strong class="jxr_keyword">super</strong>(_resultSet);
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>          executeConsumer = Objects.requireNonNull(_executeConsumer, <span class="jxr_string">"Consumer required"</span>);
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>      <strong class="jxr_keyword">protected</strong> <a name="AbstractExecuteResultSet" href="../../../net/ucanaccess/jdbc/AbstractExecuteResultSet.html#AbstractExecuteResultSet">AbstractExecuteResultSet</a>(<a name="UcanaccessResultSet" href="../../../net/ucanaccess/jdbc/UcanaccessResultSet.html#UcanaccessResultSet">UcanaccessResultSet</a> resultSet, IThrowingConsumer&lt;ResultSet, SQLException&gt; executeConsumer) {
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>          <strong class="jxr_keyword">super</strong>(resultSet);
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>          <strong class="jxr_keyword">this</strong>.executeConsumer = Objects.requireNonNull(executeConsumer, <span class="jxr_string">"Consumer required"</span>);
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>      }
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> execute() <strong class="jxr_keyword">throws</strong> SQLException {

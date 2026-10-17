@@ -1,0 +1,720 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UcanaccessPreparedStatement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.jdbc</a> &gt; <span class="el_source">UcanaccessPreparedStatement.java</span></div><h1>UcanaccessPreparedStatement.java</h1><pre class="source lang-java linenums">package net.ucanaccess.jdbc;
+
+import net.ucanaccess.converters.SQLConverter;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.exception.UcanaccessSQLException;
+import net.ucanaccess.util.Try;
+
+import java.io.*;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+public class UcanaccessPreparedStatement extends UcanaccessStatement implements PreparedStatement {
+
+    private PreparedStatement                  wrappedPs;
+    private String                             sql;
+<span class="fc" id="L24">    private final Map&lt;Integer, ParameterReset&gt; memento = new HashMap&lt;&gt;();</span>
+
+    @SuppressWarnings(&quot;this-escape&quot;)
+    public UcanaccessPreparedStatement(NormalizedSQL nsql, PreparedStatement hidden, UcanaccessConnection conn) throws SQLException {
+<span class="fc" id="L28">        super(hidden, conn);</span>
+<span class="fc" id="L29">        sql = nsql.getSql();</span>
+<span class="fc" id="L30">        setAliases(nsql.getAliases());</span>
+<span class="fc" id="L31">        wrappedPs = hidden;</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (hidden == null) {</span>
+<span class="fc" id="L33">            super.wrapped = conn.createStatement();</span>
+        }
+<span class="fc" id="L35">    }</span>
+
+    public UcanaccessPreparedStatement(String sql, UcanaccessConnection connection) throws SQLException {
+<span class="fc" id="L38">        super(null, connection);</span>
+<span class="fc" id="L39">        this.sql = sql;</span>
+<span class="fc" id="L40">        super.wrapped = connection.createStatement();</span>
+<span class="fc" id="L41">    }</span>
+
+    private final class ParameterReset {
+        private final String     methodName;
+        private final Object[]   args;
+        private final Class&lt;?&gt;[] argClasses;
+
+<span class="fc" id="L48">        private ParameterReset(String methodName, Class&lt;?&gt;[] argClasses, Object... args) {</span>
+<span class="fc" id="L49">            this.methodName = methodName;</span>
+<span class="fc" id="L50">            this.args = args;</span>
+<span class="fc" id="L51">            this.argClasses = argClasses;</span>
+<span class="fc" id="L52">        }</span>
+
+        void execute() {
+<span class="nc" id="L55">            Try.catching(() -&gt; {</span>
+<span class="nc" id="L56">                Method mth = PreparedStatement.class.getDeclaredMethod(methodName, argClasses);</span>
+<span class="nc" id="L57">                mth.invoke(wrappedPs, args);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (args[1] instanceof StringReader) {</span>
+<span class="nc" id="L59">                    StringReader sr = (StringReader) args[1];</span>
+<span class="nc" id="L60">                    sr.reset();</span>
+                }
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                if (args[1] instanceof InputStream</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">                    &amp;&amp; (&quot;setAsciiStream&quot;.equals(methodName) || &quot;setUnicodeStream&quot;.equals(methodName))) {</span>
+<span class="nc" id="L64">                    ((InputStream) args[1]).reset();</span>
+                }
+<span class="nc" id="L66">            }).orThrow(UcanaccessRuntimeException::new);</span>
+<span class="nc" id="L67">        }</span>
+
+    }
+
+    private void addMementoEntry(String methodName, Class&lt;?&gt;[] argClasses, Object... args) {
+<span class="fc" id="L72">        Class&lt;?&gt;[] ac = new Class&lt;?&gt;[args.length];</span>
+<span class="fc" id="L73">        ac[0] = Integer.TYPE;</span>
+<span class="fc" id="L74">        System.arraycopy(argClasses, 0, ac, 1, ac.length - 1);</span>
+<span class="fc" id="L75">        memento.put((Integer) args[0], new ParameterReset(methodName, ac, args));</span>
+<span class="fc" id="L76">    }</span>
+
+    private void parametersReset() {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        for (ParameterReset pr : memento.values()) {</span>
+<span class="nc" id="L80">            pr.execute();</span>
+<span class="nc" id="L81">        }</span>
+<span class="fc" id="L82">    }</span>
+
+    private Reader markableReader(Reader r) throws UcanaccessSQLException {
+<span class="fc" id="L85">        return markableReader(r, -1);</span>
+    }
+
+    private Reader markableReader(Reader r, long l) throws UcanaccessSQLException {
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">        if (r.markSupported() &amp;&amp; l &lt; 0) {</span>
+<span class="fc" id="L90">            boolean marked = true;</span>
+            try {
+<span class="fc" id="L92">                r.mark(1000000);</span>
+<span class="nc" id="L93">            } catch (IOException ex) {</span>
+<span class="nc" id="L94">                marked = false;</span>
+<span class="fc" id="L95">            }</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (marked) {</span>
+<span class="fc" id="L97">                return r;</span>
+            }
+        }
+
+<span class="fc" id="L101">        StringBuilder sb = new StringBuilder();</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        int dim = l &gt;= 0 ? (int) l : 4096;</span>
+<span class="fc" id="L103">        char[] cb = new char[dim];</span>
+<span class="fc" id="L104">        return tryCatch(() -&gt; {</span>
+            int rd;
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">            while ((rd = r.read(cb)) &gt;= 0) {</span>
+<span class="nc" id="L107">                sb.append(Arrays.copyOf(cb, rd));</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                if (l &gt;= 0) {</span>
+<span class="nc" id="L109">                    break;</span>
+                }
+            }
+<span class="fc" id="L112">            StringReader sr = new StringReader(sb.toString());</span>
+<span class="fc" id="L113">            sr.mark(1000000);</span>
+<span class="fc" id="L114">            return sr;</span>
+        });
+    }
+
+    private InputStream markableInputStream(InputStream is) throws UcanaccessSQLException {
+<span class="fc" id="L119">        return markableInputStream(is, -1);</span>
+    }
+
+    private InputStream markableInputStream(InputStream is, long l) throws UcanaccessSQLException {
+<span class="pc bpc" id="L123" title="1 of 4 branches missed.">        if (is.markSupported() &amp;&amp; l &lt; 0) {</span>
+<span class="fc" id="L124">            is.mark(1000000);</span>
+<span class="fc" id="L125">            return is;</span>
+        }
+
+<span class="fc" id="L128">        ByteArrayOutputStream bos = new ByteArrayOutputStream();</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        int dim = l &gt;= 0 ? (int) l : 4096;</span>
+<span class="fc" id="L130">        byte[] buffer = new byte[dim];</span>
+        int rd;
+        try {
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            while ((rd = is.read(buffer)) &gt;= 0) {</span>
+<span class="nc" id="L134">                bos.write(buffer, 0, rd);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                if (l &gt;= 0) {</span>
+<span class="nc" id="L136">                    break;</span>
+                }
+            }
+<span class="fc" id="L139">            bos.flush();</span>
+<span class="fc" id="L140">            ByteArrayInputStream ir = new ByteArrayInputStream(bos.toByteArray());</span>
+<span class="fc" id="L141">            ir.mark(1000000);</span>
+<span class="fc" id="L142">            return ir;</span>
+<span class="nc" id="L143">        } catch (IOException ex) {</span>
+<span class="nc" id="L144">            throw new UcanaccessSQLException(ex);</span>
+        }
+    }
+
+    private void resetReader(Reader r) throws UcanaccessSQLException {
+<span class="fc" id="L149">        tryCatch(r::reset);</span>
+<span class="fc" id="L150">    }</span>
+
+    private void resetInputStream(InputStream is) throws UcanaccessSQLException {
+<span class="fc" id="L153">        tryCatch(is::reset);</span>
+<span class="fc" id="L154">    }</span>
+
+    private void preprocess() throws UcanaccessSQLException {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (SQLConverter.hasIdentity(sql)) {</span>
+<span class="fc" id="L158">            sql = SQLConverter.preprocess(sql, getConnection().getLastGeneratedKey());</span>
+<span class="fc" id="L159">            reset();</span>
+        }
+
+<span class="fc" id="L162">    }</span>
+
+    @Override
+    public void addBatch() throws UcanaccessSQLException {
+<span class="fc" id="L166">        tryCatch(() -&gt; wrappedPs.addBatch());</span>
+<span class="fc" id="L167">    }</span>
+
+    @Override
+    public void clearParameters() throws UcanaccessSQLException {
+<span class="fc" id="L171">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L172">            memento.clear();</span>
+<span class="fc" id="L173">            wrappedPs.clearParameters();</span>
+<span class="fc" id="L174">        });</span>
+<span class="fc" id="L175">    }</span>
+
+    @Override
+    public boolean execute() throws UcanaccessSQLException {
+<span class="fc" id="L179">        return tryCatch(() -&gt; {</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            if (wrappedPs == null) {</span>
+<span class="fc" id="L181">                return super.wrapped.execute(sql);</span>
+            }
+<span class="fc" id="L183">            preprocess();</span>
+<span class="fc" id="L184">            getConnection().setCurrentStatement(this);</span>
+<span class="fc" id="L185">            checkLastModified();</span>
+<span class="fc" id="L186">            return new Execute(this).execute();</span>
+        });
+    }
+
+    @Override
+    public ResultSet executeQuery() throws UcanaccessSQLException {
+<span class="fc" id="L192">        return tryCatch(() -&gt; {</span>
+<span class="fc" id="L193">            preprocess();</span>
+<span class="fc" id="L194">            getConnection().setCurrentStatement(this);</span>
+<span class="fc" id="L195">            checkLastModified();</span>
+<span class="fc" id="L196">            return new UcanaccessResultSet(wrappedPs.executeQuery(), this);</span>
+        });
+    }
+
+    @Override
+    public int executeUpdate() throws UcanaccessSQLException {
+<span class="fc" id="L202">        return tryCatch(() -&gt; {</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            if (wrappedPs == null) {</span>
+<span class="fc" id="L204">                return super.wrapped.executeUpdate(sql);</span>
+            }
+<span class="fc" id="L206">            preprocess();</span>
+<span class="fc" id="L207">            getConnection().setCurrentStatement(this);</span>
+<span class="fc" id="L208">            checkLastModified();</span>
+<span class="fc" id="L209">            return new ExecuteUpdate(this).execute();</span>
+        });
+    }
+
+    @Override
+    public ResultSetMetaData getMetaData() throws UcanaccessSQLException {
+<span class="fc" id="L215">        return tryCatch(wrappedPs::getMetaData);</span>
+    }
+
+    @Override
+    public ParameterMetaData getParameterMetaData() throws UcanaccessSQLException {
+<span class="fc" id="L220">        return tryCatch(wrappedPs::getParameterMetaData);</span>
+    }
+
+    @Override
+    public void setArray(int parmIdx, Array array) throws UcanaccessSQLException {
+<span class="fc" id="L225">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L226">            addMementoEntry(&quot;setArray&quot;, new Class&lt;?&gt;[] {Array.class}, parmIdx, array);</span>
+<span class="fc" id="L227">            wrappedPs.setArray(parmIdx, array);</span>
+<span class="fc" id="L228">        });</span>
+<span class="fc" id="L229">    }</span>
+
+    @Override
+    public void setAsciiStream(int parmIdx, InputStream is) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L234">            is = markableInputStream(is);</span>
+<span class="fc" id="L235">            addMementoEntry(&quot;setAsciiStream&quot;, new Class&lt;?&gt;[] {InputStream.class}, parmIdx, is);</span>
+<span class="fc" id="L236">            wrappedPs.setAsciiStream(parmIdx, is);</span>
+<span class="fc" id="L237">            resetInputStream(is);</span>
+<span class="fc" id="L238">        } catch (SQLException ex) {</span>
+<span class="fc" id="L239">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L240">        }</span>
+<span class="fc" id="L241">    }</span>
+
+    @Override
+    public void setAsciiStream(int parmIdx, InputStream is, int length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L246">            is = markableInputStream(is, length);</span>
+<span class="fc" id="L247">            addMementoEntry(&quot;setAsciiStream&quot;, new Class&lt;?&gt;[] {InputStream.class, Integer.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L248">            wrappedPs.setAsciiStream(parmIdx, is, length);</span>
+<span class="fc" id="L249">            resetInputStream(is);</span>
+<span class="fc" id="L250">        } catch (SQLException ex) {</span>
+<span class="fc" id="L251">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L252">        }</span>
+<span class="fc" id="L253">    }</span>
+
+    @Override
+    public void setAsciiStream(int parmIdx, InputStream is, long length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L258">            is = markableInputStream(is, length);</span>
+<span class="fc" id="L259">            addMementoEntry(&quot;setAsciiStream&quot;, new Class&lt;?&gt;[] {InputStream.class, Long.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L260">            wrappedPs.setAsciiStream(parmIdx, is, length);</span>
+<span class="fc" id="L261">            resetInputStream(is);</span>
+<span class="fc" id="L262">        } catch (SQLException ex) {</span>
+<span class="fc" id="L263">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L264">        }</span>
+<span class="fc" id="L265">    }</span>
+
+    @Override
+    public void setBigDecimal(int parmIdx, BigDecimal dec) throws UcanaccessSQLException {
+<span class="fc" id="L269">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L270">            addMementoEntry(&quot;setBigDecimal&quot;, new Class&lt;?&gt;[] {BigDecimal.class}, parmIdx, dec);</span>
+<span class="fc" id="L271">            wrappedPs.setBigDecimal(parmIdx, dec);</span>
+<span class="fc" id="L272">        });</span>
+<span class="fc" id="L273">    }</span>
+
+    @Override
+    public void setBinaryStream(int parmIdx, InputStream is) throws UcanaccessSQLException {
+<span class="fc" id="L277">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L278">            addMementoEntry(&quot;setBinaryStream&quot;, new Class&lt;?&gt;[] {InputStream.class}, parmIdx, is);</span>
+<span class="fc" id="L279">            wrappedPs.setBinaryStream(parmIdx, is);</span>
+<span class="fc" id="L280">        });</span>
+<span class="fc" id="L281">    }</span>
+
+    @Override
+    public void setBinaryStream(int parmIdx, InputStream is, int length) throws UcanaccessSQLException {
+<span class="fc" id="L285">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L286">            addMementoEntry(&quot;setBinaryStream&quot;, new Class&lt;?&gt;[] {InputStream.class, Integer.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L287">            wrappedPs.setBinaryStream(parmIdx, is, length);</span>
+<span class="fc" id="L288">        });</span>
+<span class="fc" id="L289">    }</span>
+
+    @Override
+    public void setBinaryStream(int parmIdx, InputStream is, long length) throws UcanaccessSQLException {
+<span class="fc" id="L293">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L294">            addMementoEntry(&quot;setBinaryStream&quot;, new Class&lt;?&gt;[] {InputStream.class, Long.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L295">            wrappedPs.setBinaryStream(parmIdx, is, length);</span>
+<span class="fc" id="L296">        });</span>
+<span class="fc" id="L297">    }</span>
+
+    @Override
+    public void setBlob(int parmIdx, Blob blob) throws UcanaccessSQLException {
+<span class="fc" id="L301">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L302">            addMementoEntry(&quot;setBlob&quot;, new Class&lt;?&gt;[] {Blob.class}, parmIdx, blob);</span>
+<span class="fc" id="L303">            wrappedPs.setBlob(parmIdx, blob);</span>
+<span class="fc" id="L304">        });</span>
+<span class="fc" id="L305">    }</span>
+
+    @Override
+    public void setBlob(int parmIdx, InputStream is) throws UcanaccessSQLException {
+<span class="fc" id="L309">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L310">            addMementoEntry(&quot;setBlob&quot;, new Class&lt;?&gt;[] {InputStream.class}, parmIdx, is);</span>
+<span class="fc" id="L311">            wrappedPs.setBlob(parmIdx, is);</span>
+<span class="fc" id="L312">        });</span>
+<span class="fc" id="L313">    }</span>
+
+    @Override
+    public void setBlob(int parmIdx, InputStream is, long length) throws UcanaccessSQLException {
+<span class="fc" id="L317">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L318">            addMementoEntry(&quot;setBlob&quot;, new Class&lt;?&gt;[] {InputStream.class, Long.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L319">            wrappedPs.setBlob(parmIdx, is, length);</span>
+<span class="fc" id="L320">        });</span>
+<span class="fc" id="L321">    }</span>
+
+    @Override
+    public void setBoolean(int parmIdx, boolean bool) throws UcanaccessSQLException {
+<span class="fc" id="L325">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L326">            addMementoEntry(&quot;setBoolean&quot;, new Class&lt;?&gt;[] {Boolean.TYPE}, parmIdx, bool);</span>
+<span class="fc" id="L327">            wrappedPs.setBoolean(parmIdx, bool);</span>
+<span class="fc" id="L328">        });</span>
+<span class="fc" id="L329">    }</span>
+
+    @Override
+    public void setByte(int parmIdx, byte b) throws UcanaccessSQLException {
+<span class="fc" id="L333">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L334">            addMementoEntry(&quot;setByte&quot;, new Class&lt;?&gt;[] {Byte.TYPE}, parmIdx, b);</span>
+<span class="fc" id="L335">            wrappedPs.setByte(parmIdx, b);</span>
+<span class="fc" id="L336">        });</span>
+<span class="fc" id="L337">    }</span>
+
+    @Override
+    public void setBytes(int parmIdx, byte[] bytes) throws UcanaccessSQLException {
+<span class="fc" id="L341">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L342">            addMementoEntry(&quot;setBytes&quot;, new Class&lt;?&gt;[] {byte[].class}, parmIdx, bytes);</span>
+<span class="fc" id="L343">            wrappedPs.setBytes(parmIdx, bytes);</span>
+<span class="fc" id="L344">        });</span>
+<span class="fc" id="L345">    }</span>
+
+    @Override
+    public void setCharacterStream(int parmIdx, Reader reader) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L350">            reader = markableReader(reader);</span>
+<span class="fc" id="L351">            addMementoEntry(&quot;setCharacterStream&quot;, new Class&lt;?&gt;[] {Reader.class}, parmIdx, reader);</span>
+
+<span class="fc" id="L353">            wrappedPs.setCharacterStream(parmIdx, reader);</span>
+<span class="fc" id="L354">            resetReader(reader);</span>
+<span class="fc" id="L355">        } catch (SQLException ex) {</span>
+<span class="fc" id="L356">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L357">        }</span>
+<span class="fc" id="L358">    }</span>
+
+    @Override
+    public void setCharacterStream(int parmIdx, Reader reader, int length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L363">            reader = markableReader(reader, length);</span>
+<span class="fc" id="L364">            addMementoEntry(&quot;setCharacterStream&quot;, new Class&lt;?&gt;[] {Reader.class, Integer.TYPE}, parmIdx, reader, length);</span>
+<span class="fc" id="L365">            wrappedPs.setCharacterStream(parmIdx, reader, length);</span>
+<span class="fc" id="L366">            resetReader(reader);</span>
+<span class="fc" id="L367">        } catch (SQLException ex) {</span>
+<span class="fc" id="L368">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L369">        }</span>
+<span class="fc" id="L370">    }</span>
+
+    @Override
+    public void setCharacterStream(int parmIdx, Reader reader, long length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L375">            reader = markableReader(reader, length);</span>
+<span class="fc" id="L376">            addMementoEntry(&quot;setCharacterStream&quot;, new Class&lt;?&gt;[] {Reader.class, Long.TYPE}, parmIdx, reader, length);</span>
+<span class="fc" id="L377">            wrappedPs.setCharacterStream(parmIdx, reader, length);</span>
+<span class="fc" id="L378">            resetReader(reader);</span>
+<span class="fc" id="L379">        } catch (SQLException ex) {</span>
+<span class="fc" id="L380">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L381">        }</span>
+<span class="fc" id="L382">    }</span>
+
+    @Override
+    public void setClob(int parmIdx, Clob clob) throws UcanaccessSQLException {
+<span class="fc" id="L386">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L387">            addMementoEntry(&quot;setClob&quot;, new Class&lt;?&gt;[] {Clob.class}, parmIdx, clob);</span>
+<span class="fc" id="L388">            wrappedPs.setClob(parmIdx, clob);</span>
+<span class="fc" id="L389">        });</span>
+<span class="fc" id="L390">    }</span>
+
+    @Override
+    public void setClob(int parmIdx, Reader reader) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L395">            reader = markableReader(reader);</span>
+<span class="fc" id="L396">            addMementoEntry(&quot;setClob&quot;, new Class&lt;?&gt;[] {Reader.class}, parmIdx, reader);</span>
+<span class="fc" id="L397">            wrappedPs.setClob(parmIdx, reader);</span>
+<span class="fc" id="L398">            resetReader(reader);</span>
+<span class="fc" id="L399">        } catch (SQLException ex) {</span>
+<span class="fc" id="L400">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L401">        }</span>
+<span class="fc" id="L402">    }</span>
+
+    @Override
+    public void setClob(int parmIdx, Reader reader, long length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L407">            reader = markableReader(reader, length);</span>
+<span class="fc" id="L408">            addMementoEntry(&quot;setClob&quot;, new Class&lt;?&gt;[] {Reader.class, Long.TYPE}, parmIdx, reader, length);</span>
+<span class="fc" id="L409">            wrappedPs.setClob(parmIdx, reader, length);</span>
+<span class="fc" id="L410">            resetReader(reader);</span>
+<span class="fc" id="L411">        } catch (SQLException ex) {</span>
+<span class="fc" id="L412">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L413">        }</span>
+<span class="fc" id="L414">    }</span>
+
+    @Override
+    public void setCursorName(String name) throws UcanaccessSQLException {
+<span class="fc" id="L418">        tryCatch(() -&gt; wrappedPs.setCursorName(name));</span>
+<span class="fc" id="L419">    }</span>
+
+    @Override
+    public void setDate(int parmIdx, Date date) throws UcanaccessSQLException {
+<span class="fc" id="L423">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L424">            addMementoEntry(&quot;setDate&quot;, new Class&lt;?&gt;[] {Date.class}, parmIdx, date);</span>
+<span class="fc" id="L425">            wrappedPs.setDate(parmIdx, date);</span>
+<span class="fc" id="L426">        });</span>
+<span class="fc" id="L427">    }</span>
+
+    @Override
+    public void setDate(int parmIdx, Date date, Calendar cal) throws UcanaccessSQLException {
+<span class="fc" id="L431">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L432">            addMementoEntry(&quot;setDate&quot;, new Class&lt;?&gt;[] {Date.class, Calendar.class}, parmIdx, date, cal);</span>
+<span class="fc" id="L433">            wrappedPs.setDate(parmIdx, date, cal);</span>
+<span class="fc" id="L434">        });</span>
+<span class="fc" id="L435">    }</span>
+
+    @Override
+    public void setDouble(int parmIdx, double d) throws UcanaccessSQLException {
+<span class="fc" id="L439">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L440">            addMementoEntry(&quot;setDouble&quot;, new Class&lt;?&gt;[] {Double.TYPE}, parmIdx, d);</span>
+<span class="fc" id="L441">            wrappedPs.setDouble(parmIdx, d);</span>
+<span class="fc" id="L442">        });</span>
+<span class="fc" id="L443">    }</span>
+
+    @Override
+    public void setFloat(int parmIdx, float f) throws UcanaccessSQLException {
+<span class="fc" id="L447">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L448">            addMementoEntry(&quot;setFloat&quot;, new Class&lt;?&gt;[] {Float.TYPE}, parmIdx, f);</span>
+<span class="fc" id="L449">            wrappedPs.setBigDecimal(parmIdx, new BigDecimal(Float.toString(f)));</span>
+<span class="fc" id="L450">        });</span>
+<span class="fc" id="L451">    }</span>
+
+    @Override
+    public void setInt(int parmIdx, int i) throws UcanaccessSQLException {
+<span class="fc" id="L455">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L456">            addMementoEntry(&quot;setInt&quot;, new Class&lt;?&gt;[] {Integer.TYPE}, parmIdx, i);</span>
+<span class="fc" id="L457">            wrappedPs.setInt(parmIdx, i);</span>
+<span class="fc" id="L458">        });</span>
+<span class="fc" id="L459">    }</span>
+
+    @Override
+    public void setLong(int parmIdx, long l) throws UcanaccessSQLException {
+<span class="fc" id="L463">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L464">            addMementoEntry(&quot;setLong&quot;, new Class&lt;?&gt;[] {Long.TYPE}, parmIdx, l);</span>
+<span class="fc" id="L465">            wrappedPs.setLong(parmIdx, l);</span>
+<span class="fc" id="L466">        });</span>
+<span class="fc" id="L467">    }</span>
+
+    @Override
+    public void setNCharacterStream(int parmIdx, Reader reader) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L472">            reader = markableReader(reader);</span>
+<span class="fc" id="L473">            addMementoEntry(&quot;setNCharacterStream&quot;, new Class&lt;?&gt;[] {Reader.class}, parmIdx, reader);</span>
+<span class="fc" id="L474">            wrappedPs.setNCharacterStream(parmIdx, reader);</span>
+<span class="fc" id="L475">            resetReader(reader);</span>
+<span class="fc" id="L476">        } catch (SQLException ex) {</span>
+<span class="fc" id="L477">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L478">        }</span>
+<span class="fc" id="L479">    }</span>
+
+    @Override
+    public void setNCharacterStream(int parmIdx, Reader reader, long l) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L484">            reader = markableReader(reader, l);</span>
+<span class="fc" id="L485">            addMementoEntry(&quot;setNCharacterStream&quot;, new Class&lt;?&gt;[] {Reader.class, Long.TYPE}, parmIdx, reader, l);</span>
+<span class="fc" id="L486">            wrappedPs.setNCharacterStream(parmIdx, reader, l);</span>
+<span class="fc" id="L487">            resetReader(reader);</span>
+<span class="fc" id="L488">        } catch (SQLException ex) {</span>
+<span class="fc" id="L489">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L490">        }</span>
+<span class="fc" id="L491">    }</span>
+
+    @Override
+    public void setNClob(int parmIdx, NClob nclob) throws UcanaccessSQLException {
+<span class="fc" id="L495">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L496">            addMementoEntry(&quot;setNClob&quot;, new Class&lt;?&gt;[] {NClob.class}, parmIdx, nclob);</span>
+<span class="fc" id="L497">            wrappedPs.setNClob(parmIdx, nclob);</span>
+<span class="fc" id="L498">        });</span>
+<span class="fc" id="L499">    }</span>
+
+    @Override
+    public void setNClob(int parmIdx, Reader reader) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L504">            reader = markableReader(reader);</span>
+<span class="fc" id="L505">            addMementoEntry(&quot;setNClob&quot;, new Class&lt;?&gt;[] {Reader.class}, parmIdx, reader);</span>
+<span class="fc" id="L506">            wrappedPs.setNClob(parmIdx, reader);</span>
+<span class="fc" id="L507">            resetReader(reader);</span>
+<span class="fc" id="L508">        } catch (SQLException ex) {</span>
+<span class="fc" id="L509">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L510">        }</span>
+<span class="fc" id="L511">    }</span>
+
+    @Override
+    public void setNClob(int parmIdx, Reader reader, long length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L516">            reader = markableReader(reader, length);</span>
+<span class="fc" id="L517">            addMementoEntry(&quot;setNClob&quot;, new Class&lt;?&gt;[] {Reader.class, Long.TYPE}, parmIdx, reader, length);</span>
+<span class="fc" id="L518">            wrappedPs.setNClob(parmIdx, reader, length);</span>
+<span class="fc" id="L519">            resetReader(reader);</span>
+<span class="fc" id="L520">        } catch (SQLException ex) {</span>
+<span class="fc" id="L521">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L522">        }</span>
+<span class="fc" id="L523">    }</span>
+
+    @Override
+    public void setNString(int parmIdx, String string) throws UcanaccessSQLException {
+<span class="fc" id="L527">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L528">            addMementoEntry(&quot;setNString&quot;, new Class&lt;?&gt;[] {String.class}, parmIdx, string);</span>
+<span class="fc" id="L529">            wrappedPs.setNString(parmIdx, string);</span>
+<span class="fc" id="L530">        });</span>
+<span class="fc" id="L531">    }</span>
+
+    @Override
+    public void setNull(int parmIdx, int sqlt) throws UcanaccessSQLException {
+<span class="fc" id="L535">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L536">            addMementoEntry(&quot;setNull&quot;, new Class&lt;?&gt;[] {Integer.TYPE}, parmIdx, sqlt);</span>
+<span class="fc" id="L537">            wrappedPs.setNull(parmIdx, sqlt);</span>
+<span class="fc" id="L538">        });</span>
+<span class="fc" id="L539">    }</span>
+
+    @Override
+    public void setNull(int parmIdx, int sqlt, String tn) throws UcanaccessSQLException {
+<span class="fc" id="L543">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L544">            addMementoEntry(&quot;setNull&quot;, new Class&lt;?&gt;[] {Integer.TYPE, String.class}, parmIdx, sqlt, tn);</span>
+<span class="fc" id="L545">            wrappedPs.setNull(parmIdx, sqlt, tn);</span>
+<span class="fc" id="L546">        });</span>
+<span class="fc" id="L547">    }</span>
+
+    private Object mapLocalTimeToLocalDateTime(Object x) {
+<span class="fc bfc" id="L550" title="All 2 branches covered.">        if (x instanceof LocalTime) {</span>
+<span class="fc" id="L551">            return ((LocalTime) x).atDate(LocalDate.of(1899, 12, 30));</span>
+        }
+<span class="fc" id="L553">        return x;</span>
+    }
+
+    private Object mapToBlob(Object x) throws UcanaccessSQLException {
+<span class="fc bfc" id="L557" title="All 2 branches covered.">        return tryCatch(() -&gt; x instanceof File ? UcanaccessBlob.createBlob((File) x, getConnection()) : x);</span>
+    }
+
+    @Override
+    public void setObject(int parmIdx, Object x) throws UcanaccessSQLException {
+<span class="fc" id="L562">        x = mapToBlob(mapLocalTimeToLocalDateTime(x));</span>
+        try {
+<span class="fc bfc" id="L564" title="All 2 branches covered.">            if (x instanceof Float) {</span>
+<span class="fc" id="L565">                setFloat(parmIdx, (Float) x);</span>
+            } else {
+<span class="fc" id="L567">                addMementoEntry(&quot;setObject&quot;, new Class&lt;?&gt;[] {Object.class}, parmIdx, x);</span>
+<span class="fc" id="L568">                wrappedPs.setObject(parmIdx, x);</span>
+            }
+<span class="fc" id="L570">        } catch (SQLException ex) {</span>
+<span class="fc" id="L571">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L572">        }</span>
+<span class="fc" id="L573">    }</span>
+
+    @Override
+    public void setObject(int parmIdx, Object obj, int tsqlt) throws UcanaccessSQLException {
+<span class="fc" id="L577">        Object object = mapToBlob(mapLocalTimeToLocalDateTime(obj));</span>
+<span class="fc" id="L578">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L579">            addMementoEntry(&quot;setObject&quot;, new Class&lt;?&gt;[] {Object.class, Integer.TYPE}, parmIdx, object, tsqlt);</span>
+<span class="fc" id="L580">            wrappedPs.setObject(parmIdx, object, tsqlt);</span>
+<span class="fc" id="L581">        });</span>
+<span class="fc" id="L582">    }</span>
+
+    @Override
+    public void setObject(int parmIdx, Object object, int tsqlt, int sol) throws UcanaccessSQLException {
+<span class="fc" id="L586">        Object obj = mapToBlob(mapLocalTimeToLocalDateTime(object));</span>
+<span class="fc" id="L587">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L588">            addMementoEntry(&quot;setObject&quot;, new Class&lt;?&gt;[] {Object.class, Integer.TYPE, Integer.TYPE}, parmIdx, obj, tsqlt, sol);</span>
+<span class="fc" id="L589">            wrappedPs.setObject(parmIdx, obj, tsqlt, sol);</span>
+<span class="fc" id="L590">        });</span>
+<span class="fc" id="L591">    }</span>
+
+    @Override
+    public void setRef(int parmIdx, Ref ref) throws UcanaccessSQLException {
+<span class="fc" id="L595">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L596">            addMementoEntry(&quot;setRef&quot;, new Class&lt;?&gt;[] {Ref.class}, parmIdx, ref);</span>
+<span class="fc" id="L597">            wrappedPs.setRef(parmIdx, ref);</span>
+<span class="fc" id="L598">        });</span>
+<span class="fc" id="L599">    }</span>
+
+    @Override
+    public void setRowId(int parmIdx, RowId rowId) throws UcanaccessSQLException {
+<span class="fc" id="L603">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L604">            addMementoEntry(&quot;setRowId&quot;, new Class&lt;?&gt;[] {RowId.class}, parmIdx, rowId);</span>
+<span class="fc" id="L605">            wrappedPs.setRowId(parmIdx, rowId);</span>
+<span class="fc" id="L606">        });</span>
+<span class="fc" id="L607">    }</span>
+
+    @Override
+    public void setShort(int parmIdx, short sht) throws UcanaccessSQLException {
+<span class="fc" id="L611">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L612">            addMementoEntry(&quot;setShort&quot;, new Class&lt;?&gt;[] {Short.TYPE}, parmIdx, sht);</span>
+<span class="fc" id="L613">            wrappedPs.setShort(parmIdx, sht);</span>
+<span class="fc" id="L614">        });</span>
+<span class="fc" id="L615">    }</span>
+
+    @Override
+    public void setSQLXML(int parmIdx, SQLXML sx) throws UcanaccessSQLException {
+<span class="fc" id="L619">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L620">            addMementoEntry(&quot;setSQLXML&quot;, new Class&lt;?&gt;[] {SQLXML.class}, parmIdx, sx);</span>
+<span class="fc" id="L621">            wrappedPs.setSQLXML(parmIdx, sx);</span>
+<span class="fc" id="L622">        });</span>
+<span class="fc" id="L623">    }</span>
+
+    @Override
+    public void setString(int parmIdx, String string) throws UcanaccessSQLException {
+<span class="fc" id="L627">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L628">            addMementoEntry(&quot;setString&quot;, new Class&lt;?&gt;[] {String.class}, parmIdx, string);</span>
+<span class="fc" id="L629">            wrappedPs.setString(parmIdx, string);</span>
+<span class="fc" id="L630">        });</span>
+<span class="fc" id="L631">    }</span>
+
+    @Override
+    public void setTime(int parmIdx, Time time) throws UcanaccessSQLException {
+<span class="nc" id="L635">        tryCatch(() -&gt; {</span>
+<span class="nc" id="L636">            Calendar cl = Calendar.getInstance();</span>
+<span class="nc" id="L637">            cl.setTime(time);</span>
+<span class="nc" id="L638">            cl.set(1899, 11, 30);</span>
+<span class="nc" id="L639">            cl.set(Calendar.MILLISECOND, 0);</span>
+<span class="nc" id="L640">            Timestamp ts = new Timestamp(cl.getTimeInMillis());</span>
+<span class="nc" id="L641">            addMementoEntry(&quot;setTimestamp&quot;, new Class&lt;?&gt;[] {Timestamp.class}, parmIdx, ts);</span>
+<span class="nc" id="L642">            wrappedPs.setTimestamp(parmIdx, ts);</span>
+<span class="nc" id="L643">        });</span>
+<span class="nc" id="L644">    }</span>
+
+    @Override
+    public void setTime(int parmIdx, Time time, Calendar cal) throws UcanaccessSQLException {
+<span class="nc" id="L648">        tryCatch(() -&gt; {</span>
+<span class="nc" id="L649">            Calendar cl = Calendar.getInstance();</span>
+<span class="nc" id="L650">            cal.setTime(time);</span>
+<span class="nc" id="L651">            cl.set(1899, 11, 30, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));</span>
+<span class="nc" id="L652">            cl.set(Calendar.MILLISECOND, 0);</span>
+<span class="nc" id="L653">            Timestamp ts = new Timestamp(cl.getTimeInMillis());</span>
+<span class="nc" id="L654">            addMementoEntry(&quot;setTimestamp&quot;, new Class&lt;?&gt;[] {Timestamp.class}, parmIdx, ts);</span>
+<span class="nc" id="L655">            wrappedPs.setTimestamp(parmIdx, ts);</span>
+<span class="nc" id="L656">        });</span>
+<span class="nc" id="L657">    }</span>
+
+    @Override
+    public void setTimestamp(int parmIdx, Timestamp ts) throws UcanaccessSQLException {
+<span class="fc" id="L661">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L662">            addMementoEntry(&quot;setTimestamp&quot;, new Class&lt;?&gt;[] {Timestamp.class}, parmIdx, ts);</span>
+<span class="fc" id="L663">            wrappedPs.setTimestamp(parmIdx, ts);</span>
+<span class="fc" id="L664">        });</span>
+<span class="fc" id="L665">    }</span>
+
+    @Override
+    public void setTimestamp(int parmIdx, Timestamp ts, Calendar cal) throws UcanaccessSQLException {
+<span class="fc" id="L669">        tryCatch(() -&gt; {</span>
+<span class="fc" id="L670">            addMementoEntry(&quot;setTimestamp&quot;, new Class&lt;?&gt;[] {Timestamp.class, Calendar.class}, parmIdx, ts, cal);</span>
+<span class="fc" id="L671">            wrappedPs.setTimestamp(parmIdx, ts, cal);</span>
+<span class="fc" id="L672">        });</span>
+<span class="fc" id="L673">    }</span>
+
+    /**
+     * @deprecated Use {@code setCharacterStream}
+     */
+    @Override
+    @SuppressWarnings({&quot;java:S1133&quot;, &quot;java:S6355&quot;}) // implements a method deprecated in the JDBC API
+    @Deprecated
+    public void setUnicodeStream(int parmIdx, InputStream is, int length) throws UcanaccessSQLException {
+        try {
+<span class="fc" id="L683">            is = markableInputStream(is, length);</span>
+<span class="fc" id="L684">            addMementoEntry(&quot;setUnicodeStream&quot;, new Class&lt;?&gt;[] {InputStream.class, Integer.TYPE}, parmIdx, is, length);</span>
+<span class="fc" id="L685">            wrappedPs.setUnicodeStream(parmIdx, is, length);</span>
+<span class="fc" id="L686">            resetInputStream(is);</span>
+<span class="fc" id="L687">        } catch (SQLException ex) {</span>
+<span class="fc" id="L688">            throw new UcanaccessSQLException(ex);</span>
+<span class="fc" id="L689">        }</span>
+<span class="fc" id="L690">    }</span>
+
+    @Override
+    public void setURL(int parmIdx, URL url) throws UcanaccessSQLException {
+<span class="nc" id="L694">        tryCatch(() -&gt; {</span>
+<span class="nc" id="L695">            String arg = &quot;#&quot; + url.toString() + &quot;#&quot;;</span>
+<span class="nc" id="L696">            addMementoEntry(&quot;setString&quot;, new Class&lt;?&gt;[] {String.class}, parmIdx, arg);</span>
+<span class="nc" id="L697">            wrappedPs.setString(parmIdx, arg);</span>
+<span class="nc" id="L698">        });</span>
+<span class="nc" id="L699">    }</span>
+
+    @Override
+    public &lt;T&gt; T unwrap(Class&lt;T&gt; iface) throws UcanaccessSQLException {
+<span class="fc" id="L703">        return tryCatch(() -&gt; wrappedPs.unwrap(iface));</span>
+    }
+
+    @Override
+    protected void reset() throws UcanaccessSQLException {
+<span class="pc bpc" id="L708" title="1 of 2 branches missed.">        if (wrappedPs == null) {</span>
+<span class="nc" id="L709">            return;</span>
+        }
+<span class="fc" id="L711">        PreparedStatement old = wrappedPs;</span>
+<span class="fc" id="L712">        wrappedPs = tryCatch(() -&gt; getConnection().getHSQLDBConnection().prepareStatement(sql,</span>
+<span class="fc" id="L713">            wrappedPs.getResultSetType(), wrappedPs.getResultSetConcurrency(), wrappedPs.getResultSetHoldability()));</span>
+<span class="fc" id="L714">        reset(wrappedPs);</span>
+<span class="fc" id="L715">        parametersReset();</span>
+<span class="fc" id="L716">        tryCatch(old::close);</span>
+<span class="fc" id="L717">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

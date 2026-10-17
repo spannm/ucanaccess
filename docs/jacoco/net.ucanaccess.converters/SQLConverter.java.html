@@ -1,0 +1,1201 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLConverter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.converters</a> &gt; <span class="el_source">SQLConverter.java</span></div><h1>SQLConverter.java</h1><pre class="source lang-java linenums">package net.ucanaccess.converters;
+
+import io.github.spannm.jackcess.TableBuilder;
+import net.ucanaccess.exception.InvalidCreateStatementException;
+import net.ucanaccess.jdbc.NormalizedSQL;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+@SuppressWarnings({&quot;PMD.FieldDeclarationsShouldBeAtStartOfClass&quot;, &quot;PMD.UnnecessaryFullyQualifiedName&quot;})
+public final class SQLConverter {
+
+    public static final class Patterns {
+<span class="fc" id="L20">        private static final Pattern       SELECT_FROM_START          = Pattern.compile(&quot;\\s*SELECT\\s+&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L21">        private static final Pattern       SELECT_FROM_END            = Pattern.compile(&quot;\\s*FROM[\\s\\[]+&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L22">        private static final Pattern       UNESCAPED_ALIAS            = Pattern.compile(&quot;\\s*AS\\s*&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L23">        private static final Pattern       QUOTE_S                    = Pattern.compile(&quot;(')+&quot;);</span>
+<span class="fc" id="L24">        private static final Pattern       DOUBLE_QUOTE_S             = Pattern.compile(&quot;(\&quot;)+&quot;);</span>
+<span class="fc" id="L25">        private static final Pattern       QUOTE_M                    = Pattern.compile(&quot;'(([^'])*)'&quot;);</span>
+<span class="fc" id="L26">        private static final Pattern       DOUBLE_QUOTE_M             = Pattern.compile(&quot;\&quot;(([^\&quot;])*)\&quot;&quot;);</span>
+        // the leading lookarounds skip start positions inside a word or whitespace run, which can never begin the leftmost match
+<span class="fc" id="L28">        private static final Pattern       FIND_LIKE                  = Pattern.compile(</span>
+            &quot;(?!(?&lt;=[\\w.])[\\w.])(?!(?&lt;=[\\s(])[\\s(])[\\s\\(]*+([\\w\\.]*)([\\s\\)]*+)((?:NOT\\s*)*)LIKE\\s*+'([^']*+(?:'')*)'&quot;, Pattern.CASE_INSENSITIVE);
+<span class="fc" id="L30">        private static final Pattern       ACCESS_LIKE_CHARINTERVAL   = Pattern.compile(&quot;\\[(?:\\!*[a-zA-Z0-9]\\-[a-zA-Z0-9])+\\]&quot;);</span>
+<span class="fc" id="L31">        private static final Pattern       ACCESS_LIKE_ESCAPE         = Pattern.compile(&quot;\\[[\\*_#]\\]&quot;);</span>
+<span class="fc" id="L32">        private static final Pattern       CHECK_DDL                  = Pattern.compile(&quot;^(\\s*(CREATE|ALTER|DROP|ENABLE|DISABLE))\\s+.*&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L33">        private static final Pattern       KIND_OF_SUBQUERY           = Pattern.compile(&quot;(\\[)([^\\]]*+)(\\]\\.\\s)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L34">        private static final Pattern       NO_DATA                    = Pattern.compile(&quot; WITH\\s+NO\\s+DATA&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L35">        private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile(&quot;\\W&quot;);</span>
+<span class="fc" id="L36">        private static final Pattern       IDENTITY                   = Pattern.compile(&quot;(\\W+)(@@identity)(\\W*)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L37">        private static final Pattern       SELECT_IDENTITY            = Pattern.compile(&quot;SELECT\\s+@@identity.*&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L38">        private static final Pattern       HAS_FROM                   = Pattern.compile(&quot;\\s+FROM\\s+&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L39">        private static final Pattern       FORMULA_DEPS               = Pattern.compile(&quot;\\[([^\\]]*)\\]&quot;);</span>
+<span class="fc" id="L40">        private static final Pattern       EXCLAM_POINT               = Pattern.compile(&quot;(\\!)(\\s*)([^\\=])&quot;);</span>
+<span class="fc" id="L41">        private static final Pattern       YES                        = Pattern.compile(&quot;(\\W)YES(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L42">        private static final Pattern       NO                         = Pattern.compile(&quot;(\\W)NO(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L43">        private static final Pattern       WITH_OWNERACCESS_OPTION    = Pattern.compile(&quot;(\\W)WITH\\s+OWNERACCESS\\s+OPTION(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L44">        private static final Pattern       DIGIT_STARTING_IDENTIFIERS = Pattern.compile(&quot;(\\W)(\\d+[_A-Z][_A-Z0-9]*)(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L45">        private static final Pattern       UNDERSCORE_IDENTIFIERS     = Pattern.compile(&quot;(\\W)(_[_A-Z0-9]++)(\\W)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L46">        private static final List&lt;Pattern&gt; DEFAULT_CATCH              = List.of(</span>
+<span class="fc" id="L47">            Pattern.compile(&quot;(\\s*DEFAULT\\s+)('[^']*+(?:''[^']*+)*+')([\\s\\)\\,])&quot;, Pattern.CASE_INSENSITIVE),</span>
+<span class="fc" id="L48">            Pattern.compile(&quot;(\\s*DEFAULT\\s+)(\&quot;[^\&quot;]*+(?:\&quot;\&quot;[^\&quot;]*+)*+\&quot;)([\\s\\)\\,])&quot;, Pattern.CASE_INSENSITIVE),</span>
+<span class="fc" id="L49">            Pattern.compile(&quot;(\\s*DEFAULT\\s+)([0-9\\.\\-\\+]+)([\\s\\)\\,])&quot;, Pattern.CASE_INSENSITIVE),</span>
+<span class="fc" id="L50">            Pattern.compile(&quot;(\\s*DEFAULT\\s+)([_0-9A-Z]*\\([^\\)]*\\))([\\s\\)\\,])&quot;, Pattern.CASE_INSENSITIVE));</span>
+<span class="fc" id="L51">        private static final Pattern       DEFAULT_CATCH_0            = Pattern.compile(&quot;(\\s*DEFAULT\\s+)&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L52">        public static final Pattern        NOT_NULL                   = Pattern.compile(&quot;\\sNOT\\sNULL&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L53">        private static final Pattern       QUOTED_ALIAS               = Pattern.compile(</span>
+            &quot;(\\s+AS\\s*)(\\[[^\\]]*\\])(\\W)&quot;, Pattern.CASE_INSENSITIVE);
+<span class="fc" id="L55">        private static final Pattern       DISTINCT_ROW               = Pattern.compile(&quot;\\s+DISTINCTROW\\s+&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L56">        private static final Pattern       DEFAULT_VARCHAR            = Pattern.compile(&quot;(\\W)VARCHAR([\\s,\\)])&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L57">        private static final Pattern       DEFAULT_VARCHAR_0          = Pattern.compile(&quot;(\\W)VARCHAR([^\\(])&quot;, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L58">        private static final Pattern       ESPRESSION_DIGIT           = Pattern.compile(&quot;([\\d]+)(?![\\.\\d])&quot;);</span>
+
+        private static final String        POWER_OPERAND_REGEX        =
+                &quot;(?:&quot;
+              + &quot;\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b&quot; // column name/identifier
+              + '|'
+              + &quot;[+-]?\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?&quot; // numeric term
+              + '|'
+              + &quot;\\([^()]+?\\)&quot; // simple parenthesized expressions WITHOUT nested parentheses
+              + '|'
+              + &quot;\\?&quot; // parameter marker for PreparedStatements
+              + &quot;)&quot;;
+
+        // the main pattern to find &quot;operand1 ^ operand2&quot;
+<span class="fc" id="L72">        private static final Pattern         POWER_OPERATION            = Pattern.compile(</span>
+            &quot;(&quot; + POWER_OPERAND_REGEX + &quot;)\\s*\\^\\s*(&quot; + POWER_OPERAND_REGEX + &quot;)&quot;,
+            // match case-insensitively for keywords/identifiers if they were part of regex
+            Pattern.CASE_INSENSITIVE);
+
+        private Patterns() {
+        }
+    }
+
+    private static final String              NAME_PAT                       = &quot;(([_a-zA-Z0-9])+|\\[([^\\]])*\\]|`([^`])*`)&quot;;
+    private static final int                 NAME_PAT_STEP                  = 4;
+    private static final String              UNION                          = &quot;(;)(\\s*)((?i)UNION)(\\s*)&quot;;
+    private static final String              BACKTICK                       = &quot;(`)([^`]*)(`)&quot;;
+    private static final String              DELETE_ALL                     = &quot;((?i)DELETE\\s+)(\\*)(\\s+(?i)FROM\\s+)&quot;;
+    private static final String              PARAMETERS                     = &quot;(?i)PARAMETERS([^;]*);&quot;;
+    private static final String              BIG_BANG                       = &quot;1899-12-30&quot;;
+<span class="fc" id="L88">    private static final List&lt;String&gt;        KEYWORDS_LIST                  = List.of(</span>
+        &quot;ALL&quot;, &quot;ALTER&quot;, &quot;AND&quot;, &quot;ANY&quot;, &quot;AS&quot;, &quot;AT&quot;, &quot;AVG&quot;, &quot;BETWEEN&quot;, &quot;BOTH&quot;, &quot;BY&quot;, &quot;CALL&quot;, &quot;CASE&quot;, &quot;CAST&quot;, &quot;CHECK&quot;, &quot;COALESCE&quot;, &quot;CONSTRAINT&quot;,
+        &quot;CONVERT&quot;, &quot;CORRESPONDING&quot;, &quot;COUNT&quot;, &quot;CREATE&quot;, &quot;CROSS&quot;, &quot;DEFAULT&quot;, &quot;DISTINCT&quot;, &quot;DO&quot;, &quot;DROP&quot;, &quot;ELSE&quot;, &quot;END&quot;, &quot;EVERY&quot;, &quot;EXCEPT&quot;, &quot;EXISTS&quot;,
+        &quot;FOR&quot;, &quot;FOREIGN&quot;, &quot;FROM&quot;, &quot;FULL&quot;, &quot;GRANT&quot;, &quot;GROUP&quot;, &quot;HAVING&quot;, &quot;IN&quot;, &quot;INNER&quot;, &quot;INTERSECT&quot;, &quot;INTO&quot;, &quot;IS&quot;, &quot;JOIN&quot;, &quot;LEADING&quot;, &quot;LEAVE&quot;,
+        &quot;LEFT&quot;, &quot;LIKE&quot;, &quot;MAX&quot;, &quot;MIN&quot;, &quot;NATURAL&quot;, &quot;NOT&quot;, &quot;NULLIF&quot;, &quot;ON&quot;, &quot;OR&quot;, &quot;ORDER&quot;, &quot;OUTER&quot;, &quot;PRIMARY&quot;, &quot;REFERENCES&quot;, &quot;RIGHT&quot;, &quot;ROW&quot;,
+        &quot;SELECT&quot;, &quot;SET&quot;, &quot;SOME&quot;, &quot;STDDEV_POP&quot;, &quot;STDDEV_SAMP&quot;, &quot;SUM&quot;, &quot;TABLE&quot;, &quot;THEN&quot;, &quot;TO&quot;, &quot;TRAILING&quot;, &quot;TRIGGER&quot;, &quot;UNION&quot;, &quot;UNIQUE&quot;,
+        &quot;USER&quot;, &quot;USING&quot;, &quot;VALUES&quot;, &quot;VAR_POP&quot;, &quot;VAR_SAMP&quot;, &quot;WHEN&quot;, &quot;WHERE&quot;, &quot;WITH&quot;);
+<span class="fc" id="L95">    private static final Pattern             PAT_KEYWORD_ALIAS              = Pattern.compile(</span>
+        &quot;(\\s+AS\\s+)(&quot;
+<span class="fc" id="L97">        + KEYWORDS_LIST.stream()</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            .filter(s -&gt; !&quot;SELECT&quot;.equals(s))</span>
+<span class="fc" id="L99">            .collect(Collectors.joining(&quot;|&quot;))</span>
+        + &quot;)(\\W)&quot;, Pattern.CASE_INSENSITIVE);
+
+    public static final String               DATE_ACCESS_FORMAT             = &quot;(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12]\\d|3[01])/(\\d\\d\\d\\d)&quot;;
+    public static final String               DATE_FORMAT                    = &quot;(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12]\\d|3[01])&quot;;
+    public static final String               HHMMSS_ACCESS_FORMAT           = &quot;(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):(\\d|[0-5]\\d)&quot;;
+    public static final String               HHMMSS_FORMAT                  = &quot;(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):([0-5]\\d|\\d)&quot;;
+
+<span class="fc" id="L107">    private static final List&lt;String&gt;        PROCEDURE_KEYWORDS             = List.of(&quot;NEW&quot;, &quot;ROW&quot;);</span>
+<span class="fc" id="L108">    private static final List&lt;String&gt;        WHITE_SPACED_TABLE_NAMES       = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L109">    private static final Set&lt;String&gt;         ESCAPED_IDENTIFIERS            = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L110">    private static final Set&lt;String&gt;         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L111">    private static final Map&lt;String, String&gt; IDENTIFIERS_CONTAINING_KEYWORD = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L112">    private static final Set&lt;String&gt;         APOSTROPHISED_NAMES            = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L113">    private static final Set&lt;String&gt;         WORKAROUND_FUNCTIONS           = new HashSet&lt;&gt;();</span>
+
+<span class="fc" id="L115">    private static boolean                   supportsAccessLike             = true;</span>
+<span class="fc" id="L116">    private static boolean                   dualUsedAsTableName            = false;</span>
+
+    private SQLConverter() {
+    }
+
+    public static boolean hasIdentity(String sql) {
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">        return sql.contains(&quot;@@&quot;) &amp;&amp; sql.toUpperCase(Locale.US).contains(&quot;@@IDENTITY&quot;);</span>
+    }
+
+    private static void aliases(String sql, NormalizedSQL nsql) {
+<span class="fc" id="L126">        Matcher m = Patterns.SELECT_FROM_START.matcher(sql);</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (m.find()) {</span>
+
+<span class="fc" id="L129">            int init = m.end();</span>
+<span class="fc" id="L130">            sql = sql.substring(init);</span>
+<span class="fc" id="L131">            m = Patterns.SELECT_FROM_END.matcher(sql);</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            if (m.find()) {</span>
+<span class="fc" id="L133">                int end = m.start();</span>
+<span class="fc" id="L134">                sql = sql.substring(0, end);</span>
+
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                for (m = Patterns.UNESCAPED_ALIAS.matcher(sql); m.find(); m = Patterns.UNESCAPED_ALIAS.matcher(sql)) {</span>
+<span class="fc" id="L137">                    int e = m.end();</span>
+
+<span class="fc" id="L139">                    sql = sql.substring(e) + &quot; &quot;;</span>
+<span class="fc" id="L140">                    char[] sqlc = sql.toCharArray();</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">                    if (sqlc[0] == '[') {</span>
+<span class="fc" id="L142">                        continue;</span>
+                    }
+<span class="fc" id="L144">                    StringBuilder sb = new StringBuilder();</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                    for (char c : sqlc) {</span>
+<span class="pc bpc" id="L146" title="2 of 8 branches missed.">                        if (c == ' ' || c == '\n' || c == '\r' || c == ',') {</span>
+<span class="fc" id="L147">                            String key = preEscapingIdentifier(sb.toString());</span>
+<span class="fc" id="L148">                            nsql.put(key, sb.toString());</span>
+<span class="fc" id="L149">                            break;</span>
+                        } else {
+<span class="fc" id="L151">                            sb.append(c);</span>
+                        }
+                    }
+                }
+
+            }
+        }
+<span class="fc" id="L158">    }</span>
+
+    public static String preprocess(String sql, Object key) {
+<span class="fc" id="L161">        Matcher m1 = Patterns.SELECT_IDENTITY.matcher(sql);</span>
+<span class="fc" id="L162">        Matcher m2 = Patterns.HAS_FROM.matcher(sql);</span>
+<span class="pc bpc" id="L163" title="2 of 4 branches missed.">        String end = m1.matches() &amp;&amp; !m2.find() ? &quot; FROM DUAL&quot; : &quot;&quot;;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (key instanceof String) {</span>
+<span class="fc" id="L165">            key = &quot;'&quot; + key + &quot;'&quot;;</span>
+        }
+<span class="fc" id="L167">        return Patterns.IDENTITY.matcher(sql).replaceAll(&quot;$1&quot; + key + &quot;$3&quot;) + end;</span>
+    }
+
+    public static boolean isListedAsKeyword(String s) {
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">        return s != null &amp;&amp; KEYWORDS_LIST.contains(s.toUpperCase(Locale.ROOT));</span>
+    }
+
+    private static int[] getQuoteGroup(String s) {
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (!s.contains(&quot;''&quot;)) {</span>
+<span class="fc" id="L176">            Matcher m = Patterns.QUOTE_M.matcher(s);</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            if (m.find()) {</span>
+<span class="fc" id="L178">                return new int[] {m.start(), m.end()};</span>
+            }
+<span class="fc" id="L180">        } else {</span>
+<span class="fc" id="L181">            int[] ret = new int[] {-1, -1};</span>
+<span class="fc" id="L182">            Matcher m = Patterns.QUOTE_S.matcher(s);</span>
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">            while (m.find()) {</span>
+<span class="fc" id="L184">                int start = m.start();</span>
+<span class="fc" id="L185">                int end = m.end();</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                if ((end - start) % 2 == 0) {</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">                    if (ret[0] == -1) {</span>
+<span class="fc" id="L188">                        return new int[] {m.start(), m.end()};</span>
+                    }
+                } else {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                    if (ret[0] == -1) {</span>
+<span class="fc" id="L192">                        ret[0] = m.start();</span>
+                    } else {
+<span class="fc" id="L194">                        ret[1] = m.end();</span>
+<span class="fc" id="L195">                        return ret;</span>
+                    }
+                }
+<span class="fc" id="L198">            }</span>
+        }
+<span class="fc" id="L200">        return new int[0];</span>
+    }
+
+    private static int[] getDoubleQuoteGroup(String s) {
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (!s.contains(&quot;\&quot;\&quot;&quot;)) {</span>
+<span class="fc" id="L205">            Matcher m = Patterns.DOUBLE_QUOTE_M.matcher(s);</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            if (m.find()) {</span>
+<span class="fc" id="L207">                return new int[] {m.start(), m.end()};</span>
+            }
+<span class="fc" id="L209">        } else {</span>
+<span class="fc" id="L210">            int[] ret = new int[] {-1, -1};</span>
+<span class="fc" id="L211">            Matcher mc = Patterns.DOUBLE_QUOTE_S.matcher(s);</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            while (mc.find()) {</span>
+<span class="fc" id="L213">                int start = mc.start();</span>
+<span class="fc" id="L214">                int end = mc.end();</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">                if ((end - start) % 2 == 0) {</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">                    if (ret[0] == -1) {</span>
+<span class="fc" id="L217">                        return new int[] {mc.start(), mc.end()};</span>
+                    }
+                } else {
+<span class="fc bfc" id="L220" title="All 2 branches covered.">                    if (ret[0] == -1) {</span>
+<span class="fc" id="L221">                        ret[0] = mc.start();</span>
+                    } else {
+<span class="fc" id="L223">                        ret[1] = mc.end();</span>
+<span class="fc" id="L224">                        return ret;</span>
+                    }
+                }
+<span class="fc" id="L227">            }</span>
+        }
+<span class="fc" id="L229">        return new int[0];</span>
+    }
+
+<span class="fc" id="L232">    public enum DDLType {</span>
+<span class="fc" id="L233">        CREATE_TABLE_AS_SELECT(&quot;\\s*create\\s+table\\s+&quot; + NAME_PAT + &quot;\\s*(?)AS\\s*\\(\\s*((?)SELECT)&quot;),</span>
+<span class="fc" id="L234">        CREATE_TABLE(&quot;\\s*create\\s+table\\s+&quot; + NAME_PAT),</span>
+<span class="fc" id="L235">        DROP_TABLE_CASCADE(&quot;\\s*drop\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+cascade&quot;),</span>
+<span class="fc" id="L236">        DROP_TABLE(&quot;\\s*drop\\s+table\\s+&quot; + NAME_PAT),</span>
+<span class="fc" id="L237">        ALTER_RENAME(&quot;\\s*alter\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+rename\\s+to\\s+&quot; + NAME_PAT),</span>
+<span class="fc" id="L238">        CREATE_PRIMARY_KEY(&quot;\\s*alter\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+add\\s+(?:constraint\\s+&quot; + NAME_PAT + &quot;\\s+)?primary\\s+key(.*)&quot;),</span>
+<span class="fc" id="L239">        CREATE_FOREIGN_KEY(&quot;\\s*alter\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+add\\s+(?:constraint\\s+&quot; + NAME_PAT</span>
+            + &quot;\\s+)?foreign\\s+key\\s+&quot; + &quot;(?:\\(.*\\))\\s*references\\s+&quot; + NAME_PAT + &quot;(.*)&quot;),
+<span class="fc" id="L241">        DROP_FOREIGN_KEY(&quot;\\s*alter\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+drop\\s+constraint\\s+&quot; + NAME_PAT),</span>
+<span class="fc" id="L242">        ADD_COLUMN(&quot;\\s*alter\\s+table\\s+&quot; + NAME_PAT + &quot;\\s+add\\s+(?:column\\s+)?&quot; + NAME_PAT + &quot;(.*)&quot;),</span>
+<span class="fc" id="L243">        CREATE_INDEX(&quot;CREATE\\s+(?:unique)?\\s*index\\s+&quot; + NAME_PAT + &quot;\\s+ON\\s+&quot; + NAME_PAT + &quot;\\s+&quot;),</span>
+<span class="fc" id="L244">        DISABLE_AUTOINCREMENT(&quot;\\s*disable\\s+autoincrement\\s+on\\s*&quot; + NAME_PAT),</span>
+<span class="fc" id="L245">        ENABLE_AUTOINCREMENT(&quot;\\s*enable\\s+autoincrement\\s+on\\s*&quot; + NAME_PAT);</span>
+
+        private final Pattern pattern;
+
+<span class="fc" id="L249">        DDLType(String regex) {</span>
+<span class="fc" id="L250">            pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L251">        }</span>
+
+        public boolean in(DDLType... types) {
+<span class="fc bfc" id="L254" title="All 2 branches covered.">            for (DDLType type : types) {</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">                if (equals(type)) {</span>
+<span class="fc" id="L256">                    return true;</span>
+                }
+            }
+<span class="fc" id="L259">            return false;</span>
+        }
+
+        public static DDLType getDDLType(String s) {
+<span class="fc" id="L263">            DDLType[] dts = DDLType.values();</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            for (DDLType cand : dts) {</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">                if (cand.pattern.matcher(s).find()) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">                    if (cand.equals(DDLType.DROP_TABLE_CASCADE)) {</span>
+<span class="fc" id="L267">                        return null;</span>
+                    }
+<span class="fc" id="L269">                    return cand;</span>
+                }
+            }
+<span class="fc" id="L272">            return null;</span>
+        }
+
+        private static String elab(String s) {
+<span class="pc bpc" id="L276" title="1 of 4 branches missed.">            if (!s.contains(&quot;[&quot;) || !s.contains(&quot;]&quot;)) {</span>
+<span class="fc" id="L277">                return s;</span>
+            }
+<span class="fc" id="L279">            return s.replaceAll(&quot;\\[([^\\]]*)\\]&quot;, &quot; $0 &quot;);</span>
+        }
+
+        /**
+         * Returns the name of the first database object in the given DDL statement, usually the table.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getDBObjectName(String sql) {
+<span class="fc" id="L289">            return group(sql, 1);</span>
+        }
+
+        /**
+         * Returns the name of the second database object in the given DDL statement, e.g. a column or constraint.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getSecondDBObjectName(String sql) {
+<span class="fc" id="L299">            return group(sql, 1 + NAME_PAT_STEP);</span>
+        }
+
+        /**
+         * Returns the name of the third database object in the given DDL statement, e.g. the referenced table.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getThirdDBObjectName(String sql) {
+<span class="fc" id="L309">            return group(sql, 1 + 2 * NAME_PAT_STEP);</span>
+        }
+
+        /**
+         * Returns the column definition in the given DDL statement.
+         *
+         * @param sql the DDL statement
+         * @return the matched text or {@code null}
+         */
+        public String getColumnDefinition(String sql) {
+<span class="fc" id="L319">            return group(sql, 2 * NAME_PAT_STEP + 1);</span>
+        }
+
+        /**
+         * Returns the given group of this type's pattern matched against the given DDL statement, or {@code null} if it does not match.
+         *
+         * @param sql   the DDL statement
+         * @param group the index of the capturing group
+         * @return the captured text or {@code null}
+         */
+        private String group(String sql, int group) {
+<span class="fc" id="L330">            Matcher m = pattern.matcher(elab(sql));</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">            return m.find() ? m.group(group) : null;</span>
+        }
+
+        public String getSelect(String s) {
+<span class="fc" id="L335">            Matcher m = pattern.matcher(s);</span>
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">            if (m.find()) {</span>
+<span class="fc" id="L337">                return s.substring(m.start(m.groupCount()), s.lastIndexOf(')'));</span>
+            }
+<span class="nc" id="L339">            return null;</span>
+        }
+    }
+
+    static void addWAFunctionName(String name) {
+<span class="fc" id="L344">        WORKAROUND_FUNCTIONS.add(name);</span>
+<span class="fc" id="L345">    }</span>
+
+    public static DDLType getDDLType(String s) {
+<span class="fc" id="L348">        return DDLType.getDDLType(s);</span>
+    }
+
+    private static String replaceWorkAroundFunctions(String sql) {
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        for (String waFun : WORKAROUND_FUNCTIONS) {</span>
+<span class="fc" id="L353">            sql = sql.replaceAll(&quot;(\\W)(?i)&quot; + waFun + &quot;\\s*\\(&quot;, &quot;$1&quot; + waFun + &quot;WA(&quot;);</span>
+<span class="fc" id="L354">        }</span>
+<span class="fc" id="L355">        sql = sql.replaceAll(&quot;(\\W)(?i)STDEV\\s*\\(&quot;, &quot;$1STDDEV_SAMP(&quot;);</span>
+<span class="fc" id="L356">        sql = sql.replaceAll(&quot;(\\W)(?i)STDEVP\\s*\\(&quot;, &quot;$1STDDEV_POP(&quot;);</span>
+<span class="fc" id="L357">        sql = sql.replaceAll(&quot;(\\W)(?i)VAR\\s*\\(&quot;, &quot;$1VAR_SAMP(&quot;);</span>
+<span class="fc" id="L358">        sql = sql.replaceAll(&quot;(\\W)(?i)VARP\\s*\\(&quot;, &quot;$1VAR_POP(&quot;);</span>
+<span class="fc" id="L359">        return sql.replaceAll(&quot;(\\W)(?i)currentUser\\s*\\(&quot;, &quot;$1user(&quot;);</span>
+    }
+
+    public static String restoreWorkAroundFunctions(String sql) {
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        for (String waFun : WORKAROUND_FUNCTIONS) {</span>
+<span class="fc" id="L364">            sql = sql.replaceAll(&quot;(\\W)(?i)&quot; + waFun + &quot;WA\\s*\\(&quot;, &quot;$1&quot; + waFun + &quot;(&quot;);</span>
+<span class="fc" id="L365">        }</span>
+<span class="fc" id="L366">        sql = sql.replaceAll(&quot;(\\W)(?i)STDDEV_SAMP\\s*\\(&quot;, &quot;$1STDEV(&quot;);</span>
+<span class="fc" id="L367">        sql = sql.replaceAll(&quot;(\\W)(?i)STDDEV_POP\\s*\\(&quot;, &quot;$1STDEVP(&quot;);</span>
+<span class="fc" id="L368">        sql = sql.replaceAll(&quot;(\\W)(?i)VAR_SAMP\\s*\\(&quot;, &quot;$1VAR(&quot;);</span>
+<span class="fc" id="L369">        sql = sql.replaceAll(&quot;(\\W)(?i)VAR_POP\\s*\\(&quot;, &quot;$1VARP(&quot;);</span>
+<span class="fc" id="L370">        return sql.replaceAll(&quot;(\\W)(?i)user\\s*\\(&quot;, &quot;$1currentUser(&quot;);</span>
+    }
+
+    private static String replaceBacktick(String sql) {
+<span class="fc" id="L374">        return sql.replaceAll(BACKTICK, &quot;[$2]&quot;);</span>
+    }
+
+    private static String replaceAposNames(String sql) {
+<span class="fc bfc" id="L378" title="All 2 branches covered.">        for (String an : APOSTROPHISED_NAMES) {</span>
+<span class="fc" id="L379">            sql = sql.replaceAll(&quot;(?i)&quot; + Pattern.quote('[' + an + ']'), '[' + basicEscapingIdentifier(an) + ']');</span>
+<span class="fc" id="L380">        }</span>
+<span class="fc" id="L381">        return sql;</span>
+    }
+
+    public static NormalizedSQL convertSQL(String sql, boolean creatingQuery) {
+<span class="fc" id="L385">        return convertSQL(sql, null, creatingQuery);</span>
+    }
+
+    public static NormalizedSQL convertSQL(String inputSql, UcanaccessConnection conn, boolean creatingQuery) {
+<span class="fc" id="L389">        NormalizedSQL nsql = new NormalizedSQL();</span>
+<span class="fc" id="L390">        String sql = inputSql + &quot; &quot;;</span>
+<span class="fc" id="L391">        aliases(sql, nsql);</span>
+<span class="fc" id="L392">        sql = replaceBacktick(sql);</span>
+<span class="fc" id="L393">        sql = convertUnion(sql);</span>
+<span class="fc" id="L394">        sql = convertAccessDate(sql);</span>
+        // quoted aliases first, so that apostrophised aliases are not mangled by replaceAposNames
+<span class="fc" id="L396">        sql = convertQuotedAliases(sql, nsql);</span>
+<span class="fc" id="L397">        sql = replaceAposNames(sql);</span>
+<span class="fc" id="L398">        sql = escape(sql);</span>
+<span class="fc" id="L399">        sql = convertLike(sql);</span>
+<span class="fc" id="L400">        sql = replaceWhiteSpacedTables(sql);</span>
+<span class="fc" id="L401">        sql = translateAccessPowerOperators(sql);</span>
+<span class="fc bfc" id="L402" title="All 2 branches covered.">        if (!creatingQuery) {</span>
+<span class="fc" id="L403">            Pivot.checkAndRefreshPivot(sql, conn);</span>
+<span class="fc" id="L404">            sql = DFunction.convertDFunctions(sql, conn);</span>
+        }
+<span class="fc" id="L406">        sql = sql.trim();</span>
+
+<span class="fc" id="L408">        nsql.setSql(sql);</span>
+
+<span class="fc" id="L410">        return nsql;</span>
+    }
+
+    private static String replaceExclamationPoints(String sql) {
+<span class="fc" id="L414">        return Patterns.EXCLAM_POINT.matcher(sql).replaceAll(&quot;.$2$3&quot;);</span>
+    }
+
+    private static String convertOwnerAccess(String sql) {
+<span class="fc" id="L418">        return Patterns.WITH_OWNERACCESS_OPTION.matcher(sql).replaceAll(&quot;&quot;);</span>
+    }
+
+    private static String convertDeleteAll(String sql) {
+<span class="fc" id="L422">        return sql.replaceAll(DELETE_ALL, &quot;$1$3&quot;);</span>
+    }
+
+    private static String convertUnion(String sql) {
+<span class="fc" id="L426">        return sql.replaceAll(UNION, &quot;$2$3$4&quot;);</span>
+    }
+
+    private static String convertYesNo(String sql) {
+<span class="fc" id="L430">        sql = Patterns.YES.matcher(sql).replaceAll(&quot;$1true$2&quot;);</span>
+<span class="fc" id="L431">        Matcher m = Patterns.NO_DATA.matcher(sql);</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">        if (m.find()) {</span>
+<span class="fc" id="L433">            sql = Patterns.NO.matcher(sql.substring(0, m.start())).replaceAll(&quot;$1false$2&quot;) + sql.substring(m.start());</span>
+        } else {
+<span class="fc" id="L435">            sql = Patterns.NO.matcher(sql).replaceAll(&quot;$1false$2&quot;);</span>
+        }
+<span class="fc" id="L437">        return sql;</span>
+    }
+
+    private static String convertQuotedAliases(String sql, NormalizedSQL nsql) {
+<span class="fc bfc" id="L441" title="All 2 branches covered.">        for (Matcher m = Patterns.KIND_OF_SUBQUERY.matcher(sql); m.find(); m = Patterns.KIND_OF_SUBQUERY.matcher(sql)) {</span>
+<span class="fc" id="L442">            String g2 = m.group(2).trim();</span>
+<span class="pc bpc" id="L443" title="1 of 2 branches missed.">            if (g2.endsWith(&quot;;&quot;)) {</span>
+<span class="nc" id="L444">                g2 = g2.substring(0, g2.length() - 1);</span>
+            }
+<span class="fc" id="L446">            sql = sql.substring(0, m.start()) + &quot;(&quot; + g2 + &quot;)&quot; + sql.substring(m.end());</span>
+        }
+<span class="fc" id="L448">        Set&lt;String&gt; hs = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L449">        String sqle = sql;</span>
+<span class="fc" id="L450">        String sqlN = &quot;&quot;;</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">        for (Matcher m = Patterns.QUOTED_ALIAS.matcher(sqle); m.find(); m = Patterns.QUOTED_ALIAS.matcher(sqle)) {</span>
+<span class="fc" id="L452">            String g2 = m.group(2);</span>
+<span class="fc bfc" id="L453" title="All 4 branches covered.">            if (g2.indexOf('\'') &gt;= 0 || g2.indexOf('&quot;') &gt;= 0) {</span>
+<span class="fc" id="L454">                hs.add(g2);</span>
+            }
+<span class="fc" id="L456">            String value = g2.substring(1, g2.length() - 1);</span>
+<span class="fc" id="L457">            nsql.put(preEscapingIdentifier(value), value);</span>
+<span class="fc" id="L458">            sqlN += sqle.substring(0, m.start()) + m.group(1) + g2.replaceAll(&quot;['\&quot;]&quot;, &quot;&quot;) + m.group(3);</span>
+<span class="fc" id="L459">            sqle = sqle.substring(m.end());</span>
+        }
+<span class="fc" id="L461">        sql = sqlN + sqle;</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        for (String escaped : hs) {</span>
+<span class="fc" id="L463">            sql = sql.replaceAll(&quot;\\[&quot; + escaped.substring(1, escaped.length() - 1) + &quot;\\]&quot;,</span>
+<span class="fc" id="L464">                    escaped.replaceAll(&quot;['\&quot;]&quot;, &quot;&quot;));</span>
+<span class="fc" id="L465">        }</span>
+<span class="fc" id="L466">        return sql;</span>
+    }
+
+    private static String replaceDistinctRow(String sql) {
+<span class="fc" id="L470">        return Patterns.DISTINCT_ROW.matcher(sql).replaceAll(&quot; DISTINCT &quot;);</span>
+    }
+
+    static void addWhiteSpacedTableNames(String input) {
+<span class="pc bpc" id="L474" title="1 of 2 branches missed.">        if (input == null) {</span>
+<span class="nc" id="L475">            return;</span>
+        }
+<span class="fc" id="L477">        String name = basicEscapingIdentifier(input);</span>
+<span class="pc bpc" id="L478" title="1 of 4 branches missed.">        if (name == null || WHITE_SPACED_TABLE_NAMES.contains(name)) {</span>
+<span class="fc" id="L479">            return;</span>
+        }
+<span class="fc bfc" id="L481" title="All 2 branches covered.">        for (String alrIn : WHITE_SPACED_TABLE_NAMES) {</span>
+<span class="fc bfc" id="L482" title="All 2 branches covered.">            if (name.contains(alrIn)) {</span>
+<span class="fc" id="L483">                WHITE_SPACED_TABLE_NAMES.add(WHITE_SPACED_TABLE_NAMES.indexOf(alrIn), name);</span>
+<span class="fc" id="L484">                return;</span>
+            }
+<span class="fc" id="L486">        }</span>
+<span class="fc" id="L487">        WHITE_SPACED_TABLE_NAMES.add(name);</span>
+<span class="fc" id="L488">    }</span>
+
+    public static NormalizedSQL convertSQL(String sql) {
+<span class="fc" id="L491">        return convertSQL(sql, null, false);</span>
+    }
+
+    public static NormalizedSQL convertSQL(String sql, UcanaccessConnection conn) {
+<span class="fc" id="L495">        return convertSQL(sql, conn, false);</span>
+    }
+
+    public static String convertAccessDate(String sql) {
+<span class="fc" id="L499">        sql = sql.replaceAll(&quot;#&quot; + DATE_ACCESS_FORMAT + &quot;#&quot;, &quot;Timestamp('$3-$1-$2 00:00:00')&quot;)</span>
+                // FORMAT MM/dd/yyyy
+<span class="fc" id="L501">                .replaceAll(&quot;#&quot; + DATE_ACCESS_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)#&quot;, &quot;Timestamp0('$3-$1-$2 $4')&quot;)</span>
+
+<span class="fc" id="L503">                .replaceAll(&quot;#&quot; + DATE_ACCESS_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)AM#&quot;, &quot;Timestamp0('$3-$1-$2 $4')&quot;)</span>
+
+<span class="fc" id="L505">                .replaceAll(&quot;#&quot; + DATE_ACCESS_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)PM#&quot;, &quot;(Timestamp0('$3-$1-$2 $4')+ 12 Hour) &quot;)</span>
+                // FORMAT yyyy-MM-dd
+<span class="fc" id="L507">                .replaceAll(&quot;#&quot; + DATE_FORMAT + &quot;#&quot;, &quot;Timestamp0('$1-$2-$3 00:00:00')&quot;)</span>
+
+<span class="fc" id="L509">                .replaceAll(&quot;#&quot; + DATE_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)#&quot;, &quot;Timestamp0('$1-$2-$3 $4')&quot;)</span>
+
+<span class="fc" id="L511">                .replaceAll(&quot;#&quot; + DATE_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)AM#&quot;, &quot;Timestamp0('$1-$2-$3 $4')&quot;)</span>
+
+<span class="fc" id="L513">                .replaceAll(&quot;#&quot; + DATE_FORMAT + &quot;\\s*(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)PM#&quot;, &quot;(Timestamp0('$1-$2-$3 $4')+ 12 Hour)&quot;)</span>
+
+<span class="fc" id="L515">                .replaceAll(&quot;#(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)#&quot;, &quot;Timestamp'&quot; + BIG_BANG + &quot; $1'&quot;)</span>
+<span class="fc" id="L516">                .replaceAll(&quot;#(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)AM#&quot;, &quot;Timestamp'&quot; + BIG_BANG + &quot; $1'&quot;)</span>
+<span class="fc" id="L517">                .replaceAll(&quot;#(&quot; + HHMMSS_ACCESS_FORMAT + &quot;)\\s*(?i)PM#&quot;, &quot;(Timestamp'&quot; + BIG_BANG + &quot; $1'+ 12 Hour)&quot;);</span>
+
+<span class="fc" id="L519">        return sql;</span>
+    }
+
+    private static String replaceWhiteSpacedTables(String sql) {
+<span class="fc" id="L523">        String[] sqls = sql.split(&quot;'&quot;, -1);</span>
+<span class="fc" id="L524">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L525">        String cm = &quot;&quot;;</span>
+<span class="fc bfc" id="L526" title="All 2 branches covered.">        for (int i = 0; i &lt; sqls.length; ++i) {</span>
+<span class="fc bfc" id="L527" title="All 2 branches covered.">            sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTables(sqls[i], &quot;\&quot;&quot;) : sqls[i]);</span>
+<span class="fc" id="L528">            cm = &quot;'&quot;;</span>
+        }
+<span class="fc" id="L530">        return sb.toString();</span>
+    }
+
+    private static String replaceWhiteSpacedTables(String sql, String character) {
+<span class="fc" id="L534">        String[] sqls = sql.split(character, -1);</span>
+<span class="fc" id="L535">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L536">        String cm = &quot;&quot;;</span>
+<span class="fc bfc" id="L537" title="All 2 branches covered.">        for (int i = 0; i &lt; sqls.length; ++i) {</span>
+<span class="fc bfc" id="L538" title="All 2 branches covered.">            sb.append(cm).append(i % 2 == 0 ? replaceWhiteSpacedTableNames0(sqls[i]) : sqls[i]);</span>
+<span class="fc" id="L539">            cm = character;</span>
+        }
+<span class="fc" id="L541">        return sb.toString();</span>
+    }
+
+    private static String replaceWhiteSpacedTableNames0(String sql) {
+<span class="fc bfc" id="L545" title="All 2 branches covered.">        if (WHITE_SPACED_TABLE_NAMES.isEmpty()) {</span>
+<span class="fc" id="L546">            return sql;</span>
+        }
+<span class="fc" id="L548">        StringBuilder sb = new StringBuilder(&quot;(&quot;);</span>
+<span class="fc" id="L549">        String or = &quot;&quot;;</span>
+<span class="fc bfc" id="L550" title="All 2 branches covered.">        for (String bst : WHITE_SPACED_TABLE_NAMES) {</span>
+<span class="fc" id="L551">            sb.append(or).append(&quot;(?i)&quot;).append(Pattern.quote(bst));</span>
+<span class="fc" id="L552">            or = &quot;|&quot;;</span>
+<span class="fc" id="L553">        }</span>
+        // workaround o.o. and l.o.
+<span class="fc bfc" id="L555" title="All 2 branches covered.">        for (String bst : WHITE_SPACED_TABLE_NAMES) {</span>
+<span class="fc" id="L556">            String dw = bst.replace(&quot; &quot;, &quot;  &quot;);</span>
+<span class="fc" id="L557">            sql = sql.replaceAll(Pattern.quote(dw), bst);</span>
+<span class="fc" id="L558">        }</span>
+<span class="fc" id="L559">        sb.append(&quot;)&quot;);</span>
+<span class="fc" id="L560">        sql = sql.replaceAll(&quot;([^A-Za-z0-9\&quot;])&quot; + sb + &quot;([^A-Za-z0-9\&quot;])&quot;, &quot; $1\&quot;$2\&quot;$3&quot;);</span>
+<span class="fc" id="L561">        return sql;</span>
+    }
+
+    /**
+     * Translates MS Access SQL expressions using the '^' (power) operator
+     * into the standard SQL POWER(base, exponent) function.
+     * &lt;p&gt;
+     * This is a simplified implementation based on regular expressions and might not
+     * cover all edge cases or complex SQL constructs. For robust parsing and
+     * modification of SQL, we should use a dedicated SQL parser library e.g. JSqlParser.
+     *
+     * &lt;p&gt;The current implementation's {@code POWER_OPERAND_REGEX} is designed to identify:&lt;/p&gt;
+     * &lt;ul&gt;
+     *   &lt;li&gt;Simple column names or identifiers (e.g., {@code myColumn}, {@code Table.Column}).&lt;/li&gt;
+     *   &lt;li&gt;Numeric literals (integers, decimals, scientific notation, with optional sign).&lt;/li&gt;
+     *   &lt;li&gt;Simple parenthesized expressions without nested parentheses (e.g., {@code (num + 1)}).&lt;/li&gt;
+     *   &lt;li&gt;Parameter markers ({@code ?}) for use in {@code PreparedStatement} scenarios.&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;It explicitly **does NOT reliably handle** operands that are:&lt;/p&gt;
+     * &lt;ul&gt;
+     *   &lt;li&gt;Complex parenthesized expressions with nested parentheses (e.g., {@code (num + (val - 2))})&lt;/li&gt;
+     *   &lt;li&gt;Function calls (e.g., {@code ABS(value)})&lt;/li&gt;
+     *   &lt;li&gt;Subqueries&lt;/li&gt;
+     *   &lt;li&gt;String literals containing the {@code ^} character&lt;/li&gt;
+     *   &lt;li&gt;SQL comments containing the {@code ^} character&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;It specifically targets patterns like {@code &quot;operand ^ exponent&quot;} where both operands
+     * strictly conform to the defined {@code POWER_OPERAND_REGEX}.&lt;/p&gt;
+     *
+     * @param sql the SQL string containing MS Access power operators.
+     * @return the translated SQL string using the POWER function.
+     */
+    static String translateAccessPowerOperators(String sql) {
+<span class="fc bfc" id="L594" title="All 4 branches covered.">        if (sql == null || !sql.contains(&quot;^&quot;)) {</span>
+<span class="fc" id="L595">            return sql;</span>
+        }
+
+<span class="fc" id="L598">        Matcher matcher = Patterns.POWER_OPERATION.matcher(sql);</span>
+<span class="fc" id="L599">        StringBuffer translatedSql = new StringBuffer();</span>
+
+<span class="fc bfc" id="L601" title="All 2 branches covered.">        while (matcher.find()) {</span>
+<span class="fc" id="L602">            String base = matcher.group(1);     // extract base operand</span>
+<span class="fc" id="L603">            String exponent = matcher.group(2); // extract exponent operand</span>
+
+            // replace the matched &quot;base ^ exponent&quot; with &quot;POWER(base, exponent)&quot;
+            // appendReplacement is crucial for correctly handling multiple matches and non-matched parts
+<span class="fc" id="L607">            matcher.appendReplacement(translatedSql, &quot;POWER(&quot; + base + &quot;, &quot; + exponent + &quot;)&quot;);</span>
+<span class="fc" id="L608">        }</span>
+        // append any remaining portion of the string after the last match
+<span class="fc" id="L610">        matcher.appendTail(translatedSql);</span>
+
+<span class="fc" id="L612">        return translatedSql.toString();</span>
+    }
+
+    private static String convertIdentifiers(String sql) {
+<span class="fc" id="L616">        int init = sql.indexOf('[');</span>
+<span class="fc bfc" id="L617" title="All 2 branches covered.">        if (init != -1) {</span>
+<span class="fc" id="L618">            int end = sql.indexOf(']');</span>
+<span class="fc bfc" id="L619" title="All 2 branches covered.">            if (end &lt; init) {</span>
+<span class="fc" id="L620">                return convertResidualSql(sql);</span>
+            }
+<span class="fc" id="L622">            String content = sql.substring(init + 1, end);</span>
+<span class="fc bfc" id="L623" title="All 2 branches covered.">            if (content.contains(&quot; &quot;)) {</span>
+<span class="fc" id="L624">                String tryContent = &quot; &quot; + content + &quot; &quot;;</span>
+<span class="fc" id="L625">                String tryConversion = convertXescaped(tryContent);</span>
+<span class="pc bpc" id="L626" title="1 of 2 branches missed.">                if (!tryConversion.equalsIgnoreCase(tryContent)) {</span>
+<span class="nc" id="L627">                    IDENTIFIERS_CONTAINING_KEYWORD.put(tryConversion.trim(), content.toUpperCase(Locale.ROOT));</span>
+                }
+            }
+<span class="fc" id="L630">            boolean isKeyword = isListedAsKeyword(content);</span>
+
+<span class="fc" id="L632">            content = basicEscapingIdentifier(content).toUpperCase(Locale.ROOT);</span>
+<span class="fc" id="L633">            String subs = &quot; &quot;;</span>
+<span class="pc bpc" id="L634" title="1 of 8 branches missed.">            if (content != null &amp;&amp; !isKeyword &amp;&amp; (content.contains(&quot; &quot;) || Patterns.NO_ALPHANUMERIC.matcher(content).find())) {</span>
+<span class="fc" id="L635">                subs = &quot;\&quot;&quot;;</span>
+            }
+<span class="fc" id="L637">            sql = convertResidualSql(sql.substring(0, init)) + subs + content + subs</span>
+<span class="fc" id="L638">                    + convertIdentifiers(sql.substring(end + 1));</span>
+<span class="fc" id="L639">        } else {</span>
+<span class="fc" id="L640">            sql = convertResidualSql(sql);</span>
+        }
+<span class="fc" id="L642">        return sql;</span>
+    }
+
+    private static String convertResidualSql(String sql) {
+<span class="fc" id="L646">        sql = convertSQLTokens(sql);</span>
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">        if (&quot;!&quot;.equals(sql)) {</span>
+<span class="nc" id="L648">            return &quot;.&quot;;</span>
+        }
+<span class="fc" id="L650">        return replaceExclamationPoints(</span>
+<span class="fc" id="L651">                replaceDigitStartingIdentifiers(Patterns.UNDERSCORE_IDENTIFIERS.matcher(sql).replaceAll(&quot;$1Z$2$3&quot;)));</span>
+    }
+
+    private static String convertSQLTokens(String sql) {
+<span class="fc" id="L655">        return convertDeleteAll(replaceWorkAroundFunctions(</span>
+<span class="fc" id="L656">                convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replace(&quot;&amp;&quot;, &quot;||&quot;))))));</span>
+    }
+
+    private static String replaceDigitStartingIdentifiers(String sql) {
+
+<span class="fc" id="L661">        Matcher m = Patterns.DIGIT_STARTING_IDENTIFIERS.matcher(sql);</span>
+<span class="fc bfc" id="L662" title="All 2 branches covered.">        if (m.find()) {</span>
+<span class="fc" id="L663">            String grp0 = m.group(0);</span>
+<span class="fc bfc" id="L664" title="All 2 branches covered.">            if (Character.isLetter(grp0.charAt(0))) {</span>
+<span class="fc" id="L665">                return sql;</span>
+            }
+<span class="pc bpc" id="L667" title="2 of 4 branches missed.">            String prefix = grp0.matches(&quot;\\.(\\d)+[Ee](\\d)+\\s&quot;) || grp0.matches(&quot;\\.(\\d)+[Ee][-+]&quot;) ? &quot;&quot; : &quot;Z_&quot;;</span>
+<span class="fc" id="L668">            String build = m.group(1) + prefix + m.group(2);</span>
+<span class="fc" id="L669">            sql = sql.substring(0, m.start()) + build</span>
+<span class="fc" id="L670">                    + replaceDigitStartingIdentifiers(m.group(3) + sql.substring(m.end()));</span>
+        }
+
+<span class="fc" id="L673">        return sql;</span>
+    }
+
+    private static String convertXescaped(String sqlc) {
+<span class="fc bfc" id="L677" title="All 2 branches covered.">        for (String xidt : ESCAPED_IDENTIFIERS) {</span>
+<span class="fc" id="L678">            sqlc = sqlc.replaceAll(&quot;(\\W)((?i)X)((?i)_)(\\W)&quot;.replace(&quot;_&quot;, xidt), &quot;$1$3$4&quot;);</span>
+<span class="fc" id="L679">        }</span>
+<span class="fc" id="L680">        return sqlc;</span>
+    }
+
+    private static String convertPartIdentifiers(String sql) {
+<span class="fc" id="L684">        String sqlc = convertIdentifiers(sql);</span>
+<span class="fc" id="L685">        sqlc = convertXescaped(sqlc);</span>
+<span class="pc bpc" id="L686" title="1 of 2 branches missed.">        for (Map.Entry&lt;String, String&gt; entry : IDENTIFIERS_CONTAINING_KEYWORD.entrySet()) {</span>
+<span class="nc" id="L687">            sqlc = sqlc.replaceAll(&quot;(?i)&quot; + '&quot;' + entry.getKey() + '&quot;', '&quot;' + entry.getValue() + '&quot;');</span>
+<span class="nc" id="L688">        }</span>
+<span class="fc" id="L689">        sqlc = PAT_KEYWORD_ALIAS.matcher(sqlc).replaceAll(&quot;$1\&quot;$2\&quot;$3&quot;);</span>
+<span class="fc" id="L690">        return sqlc;</span>
+    }
+
+    private static String escape(String sql) {
+<span class="fc" id="L694">        int li = Math.max(sql.lastIndexOf('&quot;'), sql.lastIndexOf('\''));</span>
+<span class="fc bfc" id="L695" title="All 4 branches covered.">        boolean enddq = sql.endsWith(&quot;\&quot;&quot;) || sql.endsWith(&quot;'&quot;);</span>
+<span class="fc bfc" id="L696" title="All 2 branches covered.">        String suff = enddq ? &quot;&quot; : sql.substring(li + 1);</span>
+<span class="fc" id="L697">        suff = convertPartIdentifiers(suff);</span>
+<span class="fc bfc" id="L698" title="All 2 branches covered.">        String tsql = enddq ? sql : sql.substring(0, li + 1);</span>
+<span class="fc" id="L699">        int[] fd = getDoubleQuoteGroup(tsql);</span>
+<span class="fc" id="L700">        int[] fs = getQuoteGroup(tsql);</span>
+<span class="fc bfc" id="L701" title="All 4 branches covered.">        if (fd.length &gt; 0 || fs.length &gt; 0) {</span>
+<span class="fc bfc" id="L702" title="All 6 branches covered.">            boolean inid = fs.length == 0 || (fd.length &gt; 0 &amp;&amp; fd[0] &lt; fs[0]);</span>
+            String group;
+            String str;
+<span class="fc bfc" id="L705" title="All 2 branches covered.">            int[] mcr = inid ? fd : fs;</span>
+<span class="fc" id="L706">            group = tsql.substring(mcr[0] + 1, mcr[1] - 1);</span>
+<span class="fc bfc" id="L707" title="All 2 branches covered.">            if (inid) {</span>
+<span class="fc" id="L708">                group = group.replace(&quot;'&quot;, &quot;''&quot;).replace(&quot;\&quot;\&quot;&quot;, &quot;\&quot;&quot;);</span>
+            }
+<span class="fc" id="L710">            str = tsql.substring(0, mcr[0]);</span>
+<span class="fc" id="L711">            str = convertPartIdentifiers(str);</span>
+<span class="fc" id="L712">            tsql = str + &quot;'&quot; + group + &quot;'&quot; + escape(tsql.substring(mcr[1]));</span>
+<span class="fc" id="L713">        } else {</span>
+<span class="fc" id="L714">            tsql = convertPartIdentifiers(tsql);</span>
+        }
+<span class="fc" id="L716">        return tsql + suff;</span>
+    }
+
+    public static void cleanEscaped() {
+<span class="fc" id="L720">        ESCAPED_IDENTIFIERS.removeAll(ALREADY_ESCAPED_IDENTIFIERS);</span>
+<span class="fc" id="L721">    }</span>
+
+    public static String procedureEscapingIdentifier(String name) {
+<span class="pc bpc" id="L724" title="1 of 2 branches missed.">        if (PROCEDURE_KEYWORDS.contains(name.toUpperCase(Locale.ROOT))) {</span>
+<span class="nc" id="L725">            name = '&quot;' + name.toUpperCase(Locale.ROOT) + '&quot;';</span>
+
+        }
+<span class="fc" id="L728">        return name;</span>
+    }
+
+    public static String preEscapingIdentifier(String name) {
+<span class="fc bfc" id="L732" title="All 2 branches covered.">        if (name.isEmpty()) {</span>
+<span class="fc" id="L733">            return name;</span>
+        }
+<span class="fc bfc" id="L735" title="All 2 branches covered.">        if (name.startsWith(&quot;~&quot;)) {</span>
+<span class="fc" id="L736">            return null;</span>
+        }
+<span class="fc" id="L738">        String nl = name.toUpperCase(Locale.US);</span>
+<span class="fc bfc" id="L739" title="All 2 branches covered.">        if (TableBuilder.isReservedWord(nl)) {</span>
+<span class="fc" id="L740">            ESCAPED_IDENTIFIERS.add(nl);</span>
+        }
+<span class="fc bfc" id="L742" title="All 4 branches covered.">        if (name.contains(&quot;'&quot;) || name.contains(&quot;\&quot;&quot;)) {</span>
+<span class="fc" id="L743">            APOSTROPHISED_NAMES.add(name);</span>
+        }
+
+<span class="pc bpc" id="L746" title="1 of 4 branches missed.">        if (nl.startsWith(&quot;X&quot;) &amp;&amp; TableBuilder.isReservedWord(nl.substring(1))) {</span>
+<span class="nc" id="L747">            ALREADY_ESCAPED_IDENTIFIERS.add(nl.substring(1));</span>
+        }
+
+<span class="fc" id="L750">        String escaped = name.replace(&quot;'&quot;, &quot;&quot;).replace(&quot;\&quot;&quot;, &quot;&quot;).replace('\\', '_');</span>
+
+<span class="pc bpc" id="L752" title="1 of 4 branches missed.">        if (!escaped.isEmpty() &amp;&amp; Character.isDigit(escaped.trim().charAt(0))) {</span>
+<span class="fc" id="L753">            escaped = &quot;Z_&quot; + escaped.trim();</span>
+        }
+<span class="pc bpc" id="L755" title="1 of 4 branches missed.">        if (!escaped.isEmpty() &amp;&amp; escaped.charAt(0) == '_') {</span>
+<span class="fc" id="L756">            escaped = &quot;Z&quot; + escaped;</span>
+        }
+<span class="pc bpc" id="L758" title="3 of 4 branches missed.">        if (dualUsedAsTableName &amp;&amp; &quot;DUAL&quot;.equalsIgnoreCase(escaped)) {</span>
+<span class="nc" id="L759">            escaped = &quot;DUAL_13031971&quot;;</span>
+        }
+
+<span class="fc" id="L762">        return escaped.toUpperCase(Locale.US);</span>
+    }
+
+    private static String escapeKeywordIdentifier(String escaped, boolean quote) {
+<span class="fc bfc" id="L766" title="All 2 branches covered.">        if (isListedAsKeyword(escaped)) {</span>
+<span class="pc bpc" id="L767" title="1 of 2 branches missed.">            return quote ? '&quot;' + escaped + '&quot;' : '[' + escaped + ']';</span>
+        }
+<span class="fc" id="L769">        return escaped;</span>
+    }
+
+    public static String basicEscapingIdentifier(String name) {
+<span class="fc" id="L773">        return escapeKeywordIdentifier(preEscapingIdentifier(name), true);</span>
+
+    }
+
+    public static String escapeIdentifier(String name, Connection conn) {
+<span class="fc" id="L778">        return checkLang(escapeIdentifier(name), conn, true);</span>
+    }
+
+    public static String completeEscaping(String escaped, boolean quote) {
+<span class="fc" id="L782">        return hsqlEscape(escapeKeywordIdentifier(escaped, quote), quote);</span>
+    }
+
+    public static String completeEscaping(String escaped) {
+<span class="fc" id="L786">        return completeEscaping(escaped, true);</span>
+    }
+
+    private static String hsqlEscape(String escaped, boolean quote) {
+<span class="pc bpc" id="L790" title="1 of 6 branches missed.">        if (escaped != null &amp;&amp; (escaped.contains(&quot; &quot;) || escaped.contains(&quot;$&quot;))) {</span>
+<span class="fc bfc" id="L791" title="All 2 branches covered.">            escaped = quote ? '&quot;' + escaped + '&quot;' : '[' + escaped + ']';</span>
+        }
+<span class="fc" id="L793">        return escaped;</span>
+    }
+
+    public static String checkLang(String name, Connection conn) {
+<span class="fc" id="L797">        return checkLang(name, conn, true);</span>
+    }
+
+    @SuppressWarnings(&quot;java:S2077&quot;) // probes whether an escaped identifier is accepted as column alias
+    public static String checkLang(String name, Connection conn, boolean quote) {
+<span class="fc" id="L802">        String n = name;</span>
+<span class="fc bfc" id="L803" title="All 2 branches covered.">        if (!quote) {</span>
+<span class="fc" id="L804">            n = name.replace('[', '&quot;').replace(']', '&quot;');</span>
+        }
+<span class="fc" id="L806">        try (Statement st = conn.createStatement()) {</span>
+<span class="fc" id="L807">            st.execute(String.format(&quot;SELECT 1 AS %s FROM dual&quot;, n));</span>
+<span class="fc" id="L808">            return name;</span>
+<span class="fc" id="L809">        } catch (SQLException ex) {</span>
+<span class="pc bpc" id="L810" title="1 of 2 branches missed.">            return quote ? '&quot;' + name + '&quot;' : '[' + name + ']';</span>
+        }
+    }
+
+    public static String escapeIdentifier(String name) {
+<span class="fc" id="L815">        String escaped = basicEscapingIdentifier(name);</span>
+
+<span class="pc bpc" id="L817" title="1 of 2 branches missed.">        if (escaped == null) {</span>
+<span class="nc" id="L818">            return null;</span>
+        }
+<span class="fc" id="L820">        return hsqlEscape(escaped, true);</span>
+    }
+
+    public static boolean couldNeedDefault(String typeDeclaration) {
+<span class="fc" id="L824">        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDeclaration);</span>
+<span class="fc bfc" id="L825" title="All 4 branches covered.">        return !m.find() &amp;&amp; Patterns.NOT_NULL.matcher(typeDeclaration).find();</span>
+
+    }
+
+    public static String convertAddColumn(String tableName, String columnName, String typeDeclaration) {
+<span class="fc" id="L830">        String typeDecl = convertTypeDeclaration(typeDeclaration);</span>
+<span class="fc" id="L831">        typeDecl = Patterns.NOT_NULL.matcher(typeDecl).replaceAll(&quot;&quot;);</span>
+<span class="fc" id="L832">        Matcher m = Patterns.DEFAULT_CATCH_0.matcher(typeDecl);</span>
+<span class="fc bfc" id="L833" title="All 2 branches covered.">        if (m.find()) {</span>
+<span class="fc" id="L834">            typeDecl = typeDecl.substring(0, m.start());</span>
+        }
+
+<span class="fc" id="L837">        return &quot;ALTER TABLE &quot; + tableName + &quot; ADD COLUMN &quot; + columnName + typeDecl;</span>
+    }
+
+    private static String convertTypeDeclaration(String typeDecl) {
+<span class="fc" id="L841">        typeDecl = &quot; &quot; + typeDecl + &quot; &quot;; // padding for a generic RE use</span>
+<span class="fc bfc" id="L842" title="All 2 branches covered.">        for (Map.Entry&lt;String, String&gt; entry : TypesMap.getAccess2HsqlTypesMap().entrySet()) {</span>
+<span class="fc" id="L843">            typeDecl = typeDecl.replaceAll(&quot;(\\s+)((?i)&quot; + entry.getKey() + &quot;)([\\s\\(]+)&quot;,</span>
+<span class="fc" id="L844">                    &quot;$1&quot; + entry.getValue() + &quot;$3&quot;);</span>
+<span class="fc" id="L845">        }</span>
+<span class="fc" id="L846">        return Patterns.DEFAULT_VARCHAR_0.matcher(typeDecl).replaceAll(&quot;$1VARCHAR(255)$2&quot;);</span>
+    }
+
+    private static String convertCreateTable(String inputSql, Map&lt;String, String&gt; types2Convert) throws SQLException {
+<span class="pc bpc" id="L850" title="2 of 4 branches missed.">        if (inputSql == null || inputSql.isBlank()) {</span>
+<span class="nc" id="L851">            return inputSql;</span>
+        }
+
+        // padding for detecting the right exception
+<span class="fc" id="L855">        String sql = inputSql + &quot; &quot;;</span>
+<span class="pc bpc" id="L856" title="1 of 2 branches missed.">        if (!sql.contains(&quot;(&quot;)) {</span>
+<span class="nc" id="L857">            return sql;</span>
+        }
+<span class="fc" id="L859">        String pre = sql.substring(0, sql.indexOf('('));</span>
+<span class="fc" id="L860">        sql = sql.substring(sql.indexOf('('));</span>
+
+<span class="fc" id="L862">        String exprTypesTranslate = &quot;(?i)_(\\W)&quot;;</span>
+<span class="fc bfc" id="L863" title="All 2 branches covered.">        for (Map.Entry&lt;String, String&gt; entry : types2Convert.entrySet()) {</span>
+<span class="fc" id="L864">            sql = sql.replaceAll(&quot;([,\\(]\\s*)&quot; + exprTypesTranslate.replace(&quot;_&quot;, entry.getKey()), &quot;$1___&quot; + entry.getKey() + &quot;___$2&quot;)</span>
+<span class="fc" id="L865">                     .replaceAll(&quot;(\\W)&quot; + exprTypesTranslate.replace(&quot;_&quot;, entry.getKey()), &quot;$1&quot; + entry.getValue() + &quot;$2&quot;)</span>
+<span class="fc" id="L866">                     .replaceAll(&quot;(\\W)&quot; + exprTypesTranslate.replace(&quot;_&quot;, &quot;___&quot; + entry.getKey() + &quot;___&quot;), &quot;$1&quot; + entry.getKey() + &quot;$2&quot;);</span>
+<span class="fc" id="L867">        }</span>
+<span class="fc" id="L868">        sql = Patterns.DEFAULT_VARCHAR.matcher(sql).replaceAll(&quot;$1VARCHAR(255)$2&quot;);</span>
+
+<span class="fc" id="L870">        sql = clearDefaultsCreateStatement(pre + sql);</span>
+<span class="fc" id="L871">        return sql;</span>
+    }
+
+    public static String getDDLDefault(String ddlf) {
+<span class="fc bfc" id="L875" title="All 2 branches covered.">        for (Pattern pat : Patterns.DEFAULT_CATCH) {</span>
+<span class="fc" id="L876">            Matcher m = pat.matcher(ddlf + &quot; &quot;);</span>
+<span class="fc bfc" id="L877" title="All 2 branches covered.">            if (m.find()) {</span>
+<span class="fc" id="L878">                return m.group(2);</span>
+            }
+
+<span class="fc" id="L881">        }</span>
+<span class="fc" id="L882">        return null;</span>
+    }
+
+    private static String clearDefaultsCreateStatement(String sql) throws SQLException {
+<span class="fc bfc" id="L886" title="All 2 branches covered.">        if (!sql.toUpperCase(Locale.ROOT).contains(&quot;DEFAULT&quot;)) {</span>
+<span class="fc" id="L887">            return sql;</span>
+        }
+<span class="fc" id="L889">        int startDecl = sql.indexOf('(');</span>
+<span class="fc" id="L890">        int endDecl = sql.lastIndexOf(')');</span>
+<span class="pc bpc" id="L891" title="1 of 2 branches missed.">        if (startDecl &gt;= endDecl) {</span>
+<span class="nc" id="L892">            throw new InvalidCreateStatementException(sql);</span>
+        }
+<span class="fc bfc" id="L894" title="All 2 branches covered.">        for (Pattern pat : Patterns.DEFAULT_CATCH) {</span>
+<span class="fc" id="L895">            sql = pat.matcher(sql).replaceAll(&quot;$3&quot;);</span>
+<span class="fc" id="L896">        }</span>
+
+<span class="fc" id="L898">        return sql;</span>
+    }
+
+    public static String convertCreateTable(String sql) throws SQLException {
+<span class="fc" id="L902">        return convertCreateTable(sql, TypesMap.getAccess2HsqlTypesMap());</span>
+    }
+
+    public static boolean checkDDL(String sql) {
+<span class="fc bfc" id="L906" title="All 4 branches covered.">        return sql != null &amp;&amp; Patterns.CHECK_DDL.matcher(sql.replaceAll(&quot;\\s+&quot;, &quot; &quot;)).matches();</span>
+    }
+
+    private static String convertLike(String sql) {
+<span class="fc" id="L910">        Matcher matcher = Patterns.FIND_LIKE.matcher(sql);</span>
+<span class="fc bfc" id="L911" title="All 2 branches covered.">        if (matcher.find()) {</span>
+<span class="fc" id="L912">            return sql.substring(0, matcher.start(1))</span>
+<span class="fc" id="L913">                    + convertLike(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4))</span>
+<span class="fc" id="L914">                    + convertLike(sql.substring(matcher.end(0)));</span>
+        } else {
+<span class="fc" id="L916">            return sql;</span>
+        }
+    }
+
+    static String convertToRegexMatches(String likeContent) {
+<span class="fc bfc" id="L921" title="All 4 branches covered.">        if (likeContent == null || likeContent.isEmpty()) {</span>
+<span class="fc" id="L922">            return likeContent;</span>
+        }
+
+<span class="fc" id="L925">        Matcher m = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);</span>
+<span class="fc bfc" id="L926" title="All 2 branches covered.">        if (m.find()) {</span>
+<span class="fc" id="L927">            String p1 = likeContent.substring(0, m.start(0));</span>
+<span class="fc" id="L928">            char p2 = m.group(0).charAt(1);</span>
+<span class="fc" id="L929">            String p3 = likeContent.substring(m.end(0));</span>
+<span class="fc" id="L930">            return convertToRegexMatches(p1)</span>
+                + p2
+<span class="fc" id="L932">                + convertToRegexMatches(p3);</span>
+        }
+
+<span class="fc" id="L935">        return likeContent</span>
+
+        // 1. Handle Access-specific escapes with tilde (~)
+<span class="fc" id="L938">            .replace(&quot;~*&quot;, &quot;*&quot;).replace(&quot;~#&quot;, &quot;#&quot;).replace(&quot;~_&quot;, &quot;_&quot;)</span>
+<span class="fc" id="L939">            .replace(&quot;~[&quot;, &quot;\\[&quot;)</span>
+
+        // 2. Handle standard wildcards, but only if not escaped
+<span class="fc" id="L942">            .replace(&quot;#&quot;, &quot;\\d&quot;)</span>
+<span class="fc" id="L943">            .replace(&quot;*&quot;, &quot;.*&quot;)</span>
+<span class="fc" id="L944">            .replace('_', '.')</span>
+
+        // 3. Handle character classes and negation
+<span class="fc" id="L947">            .replaceAll(&quot;\\[\\!([^\\]]+)\\]&quot;, &quot;[^$1]&quot;); // handles [!abc], [!1-9] etc.</span>
+    }
+
+    private static String convertToLikeCondition(String likeContent) {
+<span class="fc" id="L951">        Matcher mtc = Patterns.ACCESS_LIKE_ESCAPE.matcher(likeContent);</span>
+<span class="fc bfc" id="L952" title="All 2 branches covered.">        if (mtc.find()) {</span>
+<span class="fc" id="L953">            return convertToLikeCondition(likeContent.substring(0, mtc.start(0)))</span>
+<span class="fc" id="L954">                + mtc.group(0).charAt(1)</span>
+<span class="fc" id="L955">                + convertToLikeCondition(likeContent.substring(mtc.end(0)));</span>
+        }
+<span class="fc" id="L957">        return likeContent.replace('*', '%').replace('?', '_');</span>
+    }
+
+    private static String convertLike(String conditionField, String closePar, String not, String likeContent) {
+<span class="fc" id="L961">        int i = likeContent.replace(&quot;[#]&quot;, &quot;&quot;).indexOf('#');</span>
+<span class="fc bfc" id="L962" title="All 2 branches covered.">        not = not.isEmpty() ? &quot;&quot; : &quot; NOT &quot;;</span>
+<span class="fc bfc" id="L963" title="All 4 branches covered.">        if (i &gt;= 0 || Patterns.ACCESS_LIKE_CHARINTERVAL.matcher(likeContent).find()) {</span>
+<span class="fc" id="L964">            return not + &quot;REGEXP_MATCHES(&quot; + conditionField + &quot;,'&quot; + convertToRegexMatches(likeContent) + &quot;')&quot; + closePar</span>
+                    + &quot; &quot;;
+        }
+<span class="fc" id="L967">        return &quot; &quot; + conditionField + closePar + not + &quot; like '&quot; + convertToLikeCondition(likeContent) + &quot;'&quot;;</span>
+    }
+
+    public static boolean isSupportsAccessLike() {
+<span class="nc" id="L971">        return supportsAccessLike;</span>
+    }
+
+    public static void setSupportsAccessLike(boolean supportsAccessLike) {
+<span class="nc" id="L975">        SQLConverter.supportsAccessLike = supportsAccessLike;</span>
+<span class="nc" id="L976">    }</span>
+
+    public static boolean isXescaped(String identifier) {
+<span class="fc" id="L979">        return ESCAPED_IDENTIFIERS.contains(identifier);</span>
+    }
+
+    public static String convertFormula(String sql) {
+        // white space to allow replaceWorkAroundFunction pattern to work fine
+<span class="fc" id="L984">        sql = convertFormula0(convertSQL(&quot; &quot; + sql).getSql());</span>
+<span class="fc" id="L985">        return sql;</span>
+    }
+
+    private static String convertDigit(String sql) {
+<span class="fc" id="L989">        Matcher mtc = Patterns.ESPRESSION_DIGIT.matcher(sql);</span>
+<span class="fc" id="L990">        char[] cq = sql.toCharArray();</span>
+<span class="fc bfc" id="L991" title="All 2 branches covered.">        if (mtc.find()) {</span>
+<span class="fc" id="L992">            int idx = mtc.start();</span>
+<span class="fc" id="L993">            int idxe = mtc.end();</span>
+<span class="fc" id="L994">            boolean replace = true;</span>
+<span class="pc bpc" id="L995" title="1 of 2 branches missed.">            for (int j = idx; j &gt;= 0; j--) {</span>
+<span class="fc bfc" id="L996" title="All 2 branches covered.">                if (!Character.isDigit(cq[j])) {</span>
+<span class="pc bpc" id="L997" title="1 of 2 branches missed.">                    replace = !Character.isLetter(cq[j]);</span>
+<span class="fc" id="L998">                    break;</span>
+                }
+            }
+<span class="pc bpc" id="L1001" title="1 of 2 branches missed.">            if (replace) {</span>
+<span class="fc" id="L1002">                return sql.substring(0, idx) + mtc.group(1) + &quot;E0&quot; + convertDigit(sql.substring(idxe));</span>
+            } else {
+<span class="nc" id="L1004">                return sql.substring(0, idxe) + convertDigit(sql.substring(idxe));</span>
+            }
+        } else {
+<span class="fc" id="L1007">            return sql;</span>
+        }
+
+    }
+
+    private static String convertFormula0(String sql) {
+<span class="fc" id="L1013">        int li = Math.max(sql.lastIndexOf('\&quot;'), sql.lastIndexOf('\''));</span>
+<span class="pc bpc" id="L1014" title="1 of 4 branches missed.">        boolean enddq = sql.endsWith(&quot;\&quot;&quot;) || sql.endsWith(&quot;'&quot;);</span>
+<span class="fc bfc" id="L1015" title="All 2 branches covered.">        String suff = enddq ? &quot;&quot; : sql.substring(li + 1);</span>
+<span class="fc" id="L1016">        suff = convertDigit(suff);</span>
+<span class="fc bfc" id="L1017" title="All 2 branches covered.">        String tsql = enddq ? sql : sql.substring(0, li + 1);</span>
+<span class="fc" id="L1018">        int[] fd = getDoubleQuoteGroup(tsql);</span>
+<span class="fc" id="L1019">        int[] fs = getQuoteGroup(tsql);</span>
+<span class="pc bpc" id="L1020" title="1 of 4 branches missed.">        if (fd.length &gt; 0 || fs.length &gt; 0) {</span>
+<span class="pc bpc" id="L1021" title="1 of 6 branches missed.">            boolean inid = fs.length == 0 || (fd.length &gt; 0 &amp;&amp; fd[0] &lt; fs[0]);</span>
+            String group;
+            String str;
+<span class="fc bfc" id="L1024" title="All 2 branches covered.">            int[] mcr = inid ? fd : fs;</span>
+<span class="fc" id="L1025">            group = tsql.substring(mcr[0], mcr[1]);</span>
+<span class="fc" id="L1026">            str = tsql.substring(0, mcr[0]);</span>
+<span class="fc" id="L1027">            str = convertDigit(str);</span>
+<span class="fc" id="L1028">            tsql = str + group + convertFormula0(tsql.substring(mcr[1]));</span>
+<span class="fc" id="L1029">        } else {</span>
+<span class="fc" id="L1030">            tsql = convertDigit(tsql);</span>
+        }
+<span class="fc" id="L1032">        return tsql + suff;</span>
+    }
+
+    public static String convertPowOperator(String sql) {
+<span class="fc" id="L1036">        int i = sql.indexOf('^');</span>
+<span class="pc bpc" id="L1037" title="1 of 2 branches missed.">        if (i &lt; 0) {</span>
+<span class="fc" id="L1038">            return sql;</span>
+        }
+<span class="nc bnc" id="L1040" title="All 2 branches missed.">        while ((i = sql.indexOf('^')) &gt;= 0) {</span>
+<span class="nc" id="L1041">            int foi = firstOperandIndex(sql, i);</span>
+<span class="nc" id="L1042">            int loi = i + secondOperandIndex(sql, i) + 1;</span>
+<span class="nc" id="L1043">            sql = sql.substring(0, foi) + &quot; (power(&quot; + sql.substring(foi, i) + &quot;,&quot; + sql.substring(i + 1, loi + 1)</span>
+<span class="nc" id="L1044">                    + &quot;))&quot; + sql.substring(loi + 1);</span>
+<span class="nc" id="L1045">        }</span>
+
+<span class="nc" id="L1047">        return sql;</span>
+    }
+
+    private static int secondOperandIndex(String sql, int i) {
+<span class="nc" id="L1051">        sql = sql.substring(i + 1);</span>
+<span class="nc" id="L1052">        char[] ca = sql.toCharArray();</span>
+<span class="nc" id="L1053">        boolean foundType = false;</span>
+<span class="nc" id="L1054">        boolean field = false;</span>
+<span class="nc" id="L1055">        boolean group = false;</span>
+<span class="nc" id="L1056">        boolean digit = false;</span>
+<span class="nc" id="L1057">        int countPar = 0;</span>
+        int j;
+
+<span class="nc bnc" id="L1060" title="All 2 branches missed.">        for (j = 0; j &lt; ca.length; j++) {</span>
+<span class="nc" id="L1061">            char c = ca[j];</span>
+<span class="nc bnc" id="L1062" title="All 2 branches missed.">            if (c == ' ') {</span>
+<span class="nc" id="L1063">                continue;</span>
+            }
+
+<span class="nc bnc" id="L1066" title="All 2 branches missed.">            if (foundType) {</span>
+<span class="nc bnc" id="L1067" title="All 4 branches missed.">                if (field &amp;&amp; c == ']') {</span>
+<span class="nc" id="L1068">                    return j;</span>
+<span class="nc bnc" id="L1069" title="All 6 branches missed.">                } else if (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {</span>
+<span class="nc" id="L1070">                    return j - 1;</span>
+<span class="nc bnc" id="L1071" title="All 2 branches missed.">                } else if (group) {</span>
+<span class="nc bnc" id="L1072" title="All 2 branches missed.">                    if (c == '(') {</span>
+<span class="nc" id="L1073">                        countPar++;</span>
+                    }
+<span class="nc bnc" id="L1075" title="All 2 branches missed.">                    if (c == ')') {</span>
+<span class="nc" id="L1076">                        countPar--;</span>
+<span class="nc bnc" id="L1077" title="All 2 branches missed.">                        if (countPar == 0) {</span>
+<span class="nc" id="L1078">                            return j;</span>
+                        }
+                    }
+                }
+            } else {
+<span class="nc bnc" id="L1083" title="All 2 branches missed.">                if (c == '[') {</span>
+<span class="nc" id="L1084">                    foundType = true;</span>
+<span class="nc" id="L1085">                    field = true;</span>
+<span class="nc bnc" id="L1086" title="All 2 branches missed.">                } else if (c == '(') {</span>
+<span class="nc" id="L1087">                    foundType = true;</span>
+<span class="nc" id="L1088">                    group = true;</span>
+<span class="nc" id="L1089">                    countPar++;</span>
+<span class="nc bnc" id="L1090" title="All 12 branches missed.">                } else if (Character.isDigit(c)</span>
+                    || ((c == '+' || c == '-') &amp;&amp; j + 1 &lt; ca.length &amp;&amp; ca[j + 1] != '(' &amp;&amp; ca[j + 1] != '[')) {
+<span class="nc" id="L1092">                    foundType = true;</span>
+<span class="nc" id="L1093">                    digit = true;</span>
+                }
+
+            }
+
+        }
+<span class="nc" id="L1099">        return j - 1;</span>
+    }
+
+    private static int firstOperandIndex(String sql, int i) {
+<span class="nc" id="L1103">        sql = sql.substring(0, i);</span>
+
+<span class="nc" id="L1105">        char[] ca = sql.toCharArray();</span>
+<span class="nc" id="L1106">        boolean foundType = false;</span>
+<span class="nc" id="L1107">        boolean field = false;</span>
+<span class="nc" id="L1108">        boolean group = false;</span>
+<span class="nc" id="L1109">        boolean digit = false;</span>
+<span class="nc" id="L1110">        int countPar = 0;</span>
+        int j;
+<span class="nc bnc" id="L1112" title="All 2 branches missed.">        for (j = ca.length - 1; j &gt;= 0; j--) {</span>
+<span class="nc" id="L1113">            char c = ca[j];</span>
+
+<span class="nc bnc" id="L1115" title="All 2 branches missed.">            if (c == ' ') {</span>
+<span class="nc" id="L1116">                continue;</span>
+            }
+<span class="nc bnc" id="L1118" title="All 2 branches missed.">            if (foundType) {</span>
+<span class="nc bnc" id="L1119" title="All 4 branches missed.">                if (field &amp;&amp; c == '[') {</span>
+<span class="nc" id="L1120">                    return j;</span>
+<span class="nc bnc" id="L1121" title="All 6 branches missed.">                } else if (digit &amp;&amp; !Character.isDigit(c) &amp;&amp; c != '.') {</span>
+<span class="nc bnc" id="L1122" title="All 10 branches missed.">                    if ((c == '+' || c == '-') &amp;&amp; j &gt; 0 &amp;&amp; (ca[j - 1] == '+' || ca[j - 1] == '-')) {</span>
+<span class="nc" id="L1123">                        return j;</span>
+                    }
+
+<span class="nc" id="L1126">                    return j + 1;</span>
+<span class="nc bnc" id="L1127" title="All 2 branches missed.">                } else if (group) {</span>
+<span class="nc bnc" id="L1128" title="All 2 branches missed.">                    if (c == ')') {</span>
+<span class="nc" id="L1129">                        countPar++;</span>
+                    }
+
+<span class="nc bnc" id="L1132" title="All 2 branches missed.">                    if (c == '(') {</span>
+<span class="nc" id="L1133">                        countPar--;</span>
+<span class="nc bnc" id="L1134" title="All 2 branches missed.">                        if (countPar == 0) {</span>
+<span class="nc" id="L1135">                            return j;</span>
+                        }
+                    }
+                }
+            } else {
+<span class="nc bnc" id="L1140" title="All 2 branches missed.">                if (c == ']') {</span>
+<span class="nc" id="L1141">                    foundType = true;</span>
+<span class="nc" id="L1142">                    field = true;</span>
+<span class="nc bnc" id="L1143" title="All 2 branches missed.">                } else if (c == ')') {</span>
+<span class="nc" id="L1144">                    foundType = true;</span>
+<span class="nc" id="L1145">                    group = true;</span>
+<span class="nc" id="L1146">                    countPar++;</span>
+<span class="nc bnc" id="L1147" title="All 2 branches missed.">                } else if (Character.isDigit(c)) {</span>
+<span class="nc" id="L1148">                    foundType = true;</span>
+<span class="nc" id="L1149">                    digit = true;</span>
+                }
+
+            }
+
+        }
+<span class="nc" id="L1155">        return j + 1;</span>
+    }
+
+    public static int asUnsigned(byte a) {
+<span class="fc" id="L1159">        return a &amp; 0xFF;</span>
+    }
+
+    public static Set&lt;String&gt; getFormulaDependencies(String formula) {
+<span class="fc" id="L1163">        Matcher mtc = Patterns.FORMULA_DEPS.matcher(formula);</span>
+<span class="fc" id="L1164">        Set&lt;String&gt; fd = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L1165" title="All 2 branches covered.">        while (mtc.find()) {</span>
+<span class="fc" id="L1166">            fd.add(escapeIdentifier(mtc.group(1)));</span>
+        }
+<span class="fc" id="L1168">        return fd;</span>
+    }
+
+    static boolean isDualUsedAsTableName() {
+<span class="nc" id="L1172">        return dualUsedAsTableName;</span>
+    }
+
+    static void setDualUsedAsTableName(boolean dualUsedAsTableName) {
+<span class="nc" id="L1176">        SQLConverter.dualUsedAsTableName = dualUsedAsTableName;</span>
+<span class="nc" id="L1177">    }</span>
+
+    public static String removeParameters(String qtxt) {
+<span class="fc" id="L1180">        return qtxt.replaceAll(PARAMETERS, &quot;&quot;);</span>
+    }
+
+    public static String getPreparedStatement(String qtxt, List&lt;String&gt; l) {
+<span class="nc" id="L1184">        String s = qtxt;</span>
+<span class="nc bnc" id="L1185" title="All 2 branches missed.">        for (String p : l) {</span>
+<span class="nc" id="L1186">            s = s.replaceAll(&quot;(\\W)((?i)&quot; + Pattern.quote(p) + &quot;)(\\W)&quot;, &quot;$1?$3&quot;);</span>
+<span class="nc" id="L1187">        }</span>
+<span class="nc" id="L1188">        return s.replaceAll(Pattern.quote(&quot;[?]&quot;), &quot;?&quot;);</span>
+    }
+
+    public static List&lt;String&gt; getParameters(String s) {
+<span class="fc" id="L1192">        List&lt;String&gt; ar = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L1194" title="All 2 branches covered.">        for (Matcher m = Patterns.FORMULA_DEPS.matcher(s); m.find(); m = Patterns.FORMULA_DEPS.matcher(s)) {</span>
+<span class="fc" id="L1195">            ar.add(m.group());</span>
+<span class="fc" id="L1196">            s = s.substring(m.end());</span>
+        }
+<span class="fc" id="L1198">        return ar;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

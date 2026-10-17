@@ -1,0 +1,791 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Persist2Jet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.converters</a> &gt; <span class="el_source">Persist2Jet.java</span></div><h1>Persist2Jet.java</h1><pre class="source lang-java linenums">package net.ucanaccess.converters;
+
+import static net.ucanaccess.type.SqlConstants.*;
+
+import io.github.spannm.jackcess.*;
+import io.github.spannm.jackcess.impl.DatabaseImpl;
+import net.ucanaccess.commands.InsertCommand;
+import net.ucanaccess.complex.ComplexBase;
+import net.ucanaccess.complex.UnsupportedValue;
+import net.ucanaccess.converters.TypesMap.AccessType;
+import net.ucanaccess.exception.UnsupportedTypeException;
+import net.ucanaccess.jdbc.DBReference;
+import net.ucanaccess.jdbc.UcanaccessConnection;
+import net.ucanaccess.jdbc.UcanaccessDatabaseMetadata;
+import net.ucanaccess.jdbc.UcanaccessStatement;
+import net.ucanaccess.type.ObjectType;
+import net.ucanaccess.util.HibernateSupport;
+import org.hsqldb.SessionInterface;
+import org.hsqldb.jdbc.JDBCConnection;
+import org.hsqldb.types.BlobData;
+import org.hsqldb.types.JavaObjectData;
+import org.hsqldb.types.TimestampData;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L32">public class Persist2Jet {</span>
+
+    /**
+     * Cache of columns names per table name and database file.
+     */
+<span class="fc" id="L37">    private static final Map&lt;File, Map&lt;String, List&lt;String&gt;&gt;&gt; COL_NAMES_CACHE = new LinkedHashMap&lt;&gt;();</span>
+
+    private static final String SYS_RELATIONSHIPS        = &quot;MSysRelationships&quot;;
+    private static final String COL_OBJECT_ID            = &quot;ObjectId&quot;;
+    private static final String COL_SZ_OBJECT            = &quot;szObject&quot;;
+    private static final String COL_SZ_REFERENCED_OBJECT = &quot;szReferencedObject&quot;;
+    static {
+<span class="fc" id="L44">        DBReference.addOnReloadRefListener(COL_NAMES_CACHE::clear);</span>
+<span class="fc" id="L45">    }</span>
+
+    public Map&lt;String, Object&gt; getRowPattern(Object[] varr, Table t) throws SQLException {
+<span class="fc" id="L48">        String ntn = SQLConverter.basicEscapingIdentifier(t.getName()).toUpperCase(Locale.ROOT);</span>
+<span class="fc" id="L49">        Map&lt;String, Object&gt; vl = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L50">        int i = 0;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        for (String s : getCreateColumnNamesCache(ntn)) {</span>
+<span class="fc" id="L52">            vl.put(s, varr[i++]);</span>
+<span class="fc" id="L53">        }</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (i == 0) {</span>
+<span class="nc" id="L55">            throw new SQLException(&quot;Could not read metadata of table &quot; + t.getName());</span>
+        }
+<span class="fc" id="L57">        return escapeIdentifiers(vl, t);</span>
+    }
+
+    public Object[] getValues(Map&lt;String, Object&gt; rowPattern) {
+<span class="fc" id="L61">        return rowPattern.values().toArray();</span>
+    }
+
+    public List&lt;String&gt; getCreateColumnNamesCache(String tableName) throws SQLException {
+<span class="fc" id="L65">        String nname = SQLConverter.basicEscapingIdentifier(tableName).toUpperCase(Locale.ROOT);</span>
+<span class="fc" id="L66">        nname = UcanaccessDatabaseMetadata.normalizeName(nname);</span>
+<span class="fc" id="L67">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L68">        Map&lt;String, List&lt;String&gt;&gt; dbFileObjMap = COL_NAMES_CACHE.computeIfAbsent(conn.getDbIO().getFile(), k -&gt; new LinkedHashMap&lt;&gt;());</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (!dbFileObjMap.containsKey(nname)) {</span>
+<span class="fc" id="L70">            try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, nname, null)) {</span>
+<span class="fc" id="L71">                Map&lt;Integer, String&gt; colsByPos = new TreeMap&lt;&gt;();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L73">                    Integer pos = rs.getInt(ORDINAL_POSITION);</span>
+<span class="fc" id="L74">                    String name = rs.getString(COLUMN_NAME);</span>
+<span class="fc" id="L75">                    colsByPos.put(pos, name.toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L76">                }</span>
+<span class="fc" id="L77">                List&lt;String&gt; colList = colsByPos.values().stream().collect(Collectors.toUnmodifiableList());</span>
+<span class="fc" id="L78">                dbFileObjMap.put(nname, colList);</span>
+            }
+        }
+<span class="fc" id="L81">        return dbFileObjMap.get(nname);</span>
+    }
+
+    private List&lt;String&gt; getColumnNamesCreate(String ntn) throws SQLException {
+<span class="fc" id="L85">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L86">        List&lt;String&gt; ar = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L87">        ResultSet rs = conn.getMetaData().getColumns(null, PUBLIC, ntn, null);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        while (rs.next()) {</span>
+<span class="fc" id="L89">            String cbase = rs.getString(COLUMN_NAME);</span>
+<span class="fc" id="L90">            ar.add(cbase);</span>
+<span class="fc" id="L91">        }</span>
+<span class="fc" id="L92">        return ar;</span>
+    }
+
+    /**
+     * Converts HSQLDB-specific data types to types compatible with the Jackcess persistence layer.
+     * &lt;p&gt;
+     * This method iterates through all columns of a table and transforms values (e.g., {@link TimestampData},
+     * {@link BlobData}) into their corresponding Java types (e.g., {@link LocalDateTime}, {@code byte[]}).
+     *
+     * @param values the array of values to be converted, modified in place
+     * @param t the target Access {@link Table}
+     * @throws SQLException if a type conversion fails or a value is out of range
+     */
+    public void convertRowTypes(Object[] values, Table t) throws SQLException {
+        try {
+<span class="fc" id="L107">            List&lt;? extends Column&gt; columns = t.getColumns();</span>
+<span class="fc" id="L108">            Iterator&lt;? extends Column&gt; it = columns.iterator();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            for (int i = 0; i &lt; values.length; ++i) {</span>
+<span class="fc" id="L110">                Object value = values[i];</span>
+<span class="fc" id="L111">                Column column = it.next();</span>
+
+<span class="fc bfc" id="L113" title="All 2 branches covered.">                if (value == null) {</span>
+<span class="fc" id="L114">                    continue;</span>
+                }
+
+<span class="pc bpc" id="L117" title="1 of 4 branches missed.">                if (value instanceof TimestampData &amp;&amp; column.getType().equals(DataType.SHORT_DATE_TIME)) {</span>
+<span class="fc" id="L118">                    TimestampData ts = (TimestampData) value;</span>
+
+                    // Access supports only millisecond precision for Date/Time.
+                    // Truncating to millis ensures that the row pattern match
+                    // in UpdateCommand/CompositeCommand does not fail due to nano-precision
+
+<span class="fc" id="L124">                    LocalDateTime val = LocalDateTime.of(1970, 1, 1, 0, 0)</span>
+<span class="fc" id="L125">                            .plusSeconds(ts.getSeconds())</span>
+<span class="fc" id="L126">                            .plusNanos(ts.getNanos())</span>
+<span class="fc" id="L127">                            .truncatedTo(ChronoUnit.MILLIS);</span>
+<span class="fc" id="L128">                    values[i] = val;</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                } else if (value instanceof BlobData) {</span>
+<span class="fc" id="L130">                    BlobData bd = (BlobData) value;</span>
+                    JDBCConnection hsqlConn =
+<span class="fc" id="L132">                            (JDBCConnection) UcanaccessConnection.requireCtxConnection().getHSQLDBConnection();</span>
+<span class="fc" id="L133">                    SessionInterface si = hsqlConn.getSession();</span>
+<span class="fc" id="L134">                    long length = bd.length(si);</span>
+<span class="fc" id="L135">                    values[i] = ((BlobData) value).getBytes(si, 0, (int) length);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                }  else if (value instanceof JavaObjectData) {</span>
+<span class="fc" id="L137">                    JavaObjectData jod = (JavaObjectData) value;</span>
+<span class="fc" id="L138">                    Object obj = jod.getObject();</span>
+<span class="pc bpc" id="L139" title="2 of 4 branches missed.">                    if (obj instanceof ComplexBase[] &amp;&amp; !(obj instanceof UnsupportedValue[])) {</span>
+<span class="fc" id="L140">                        values[i] = obj;</span>
+                    } else {
+<span class="nc" id="L142">                        throw new UnsupportedTypeException(Optional.ofNullable(obj).map(o -&gt; o.getClass().getName()).orElse(&quot;null&quot;));</span>
+                    }
+                }
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                if (column.getType().equals(DataType.BYTE)) {</span>
+<span class="fc" id="L147">                    int vl = (Integer) value;</span>
+<span class="pc bpc" id="L148" title="2 of 4 branches missed.">                    if (vl &lt; 0 || vl &gt; 256) {</span>
+<span class="nc" id="L149">                        throw new SQLException(&quot;Data out of range&quot;);</span>
+                    }
+                }
+            }
+<span class="nc" id="L153">        } catch (Exception ex) {</span>
+<span class="nc" id="L154">            throw new SQLException(ex);</span>
+<span class="fc" id="L155">        }</span>
+<span class="fc" id="L156">    }</span>
+
+    private Map&lt;String, Object&gt; escapeIdentifiers(Map&lt;String, Object&gt; map, Table t) {
+<span class="fc" id="L159">        List&lt;? extends Column&gt; colums = t.getColumns();</span>
+<span class="fc" id="L160">        Map&lt;String, Object&gt; vl = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        for (Column col : colums) {</span>
+<span class="fc" id="L162">            String key = col.getName();</span>
+<span class="fc" id="L163">            String keyu = key.toUpperCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            String ekey = map.containsKey(keyu) ? keyu : SQLConverter.escapeIdentifier(key).toUpperCase(Locale.ROOT);</span>
+<span class="pc bpc" id="L165" title="1 of 4 branches missed.">            if (!map.containsKey(ekey) &amp;&amp; map.containsKey(ekey.substring(1, ekey.length() - 1))) {</span>
+<span class="fc" id="L166">                ekey = ekey.substring(1, ekey.length() - 1);</span>
+            }
+<span class="fc" id="L168">            vl.put(key, map.get(ekey));</span>
+<span class="fc" id="L169">        }</span>
+<span class="fc" id="L170">        return vl;</span>
+    }
+
+    private String getNormalizedName(String name, Map&lt;String, String&gt; columnMap) {
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        return columnMap == null ? name : columnMap.getOrDefault(name, name);</span>
+    }
+
+    private ColumnBuilder getColumn(ResultSet rs, int seq, Map&lt;String, String&gt; columnMap, String[] types) throws SQLException, IOException {
+<span class="fc" id="L178">        String name = rs.getString(COLUMN_NAME);</span>
+<span class="fc" id="L179">        String nname = getNormalizedName(name, columnMap);</span>
+<span class="fc" id="L180">        ColumnBuilder cb = new ColumnBuilder(nname);</span>
+<span class="fc" id="L181">        short length = (short) rs.getInt(COLUMN_SIZE);</span>
+<span class="fc" id="L182">        byte scale = (byte) rs.getInt(DECIMAL_DIGITS);</span>
+<span class="fc" id="L183">        DataType dt = null;</span>
+<span class="pc bpc" id="L184" title="1 of 4 branches missed.">        if (length == 0 &amp;&amp; types != null) {</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">            if (types[seq].equalsIgnoreCase(AccessType.MEMO.name())</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                    || types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {</span>
+<span class="fc" id="L187">                dt = DataType.MEMO;</span>
+<span class="fc" id="L188">                cb.withType(dt);</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">                if (types[seq].equalsIgnoreCase(AccessType.HYPERLINK.name())) {</span>
+<span class="fc" id="L190">                    cb.withHyperlink(true);</span>
+                }
+            }
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">            if (types[seq].equalsIgnoreCase(AccessType.TEXT.name())) {</span>
+<span class="nc" id="L194">                dt = DataType.TEXT;</span>
+<span class="nc" id="L195">                cb.withType(dt);</span>
+            }
+        }
+
+<span class="pc bpc" id="L199" title="1 of 6 branches missed.">        if (types != null &amp;&amp; seq &lt; types.length &amp;&amp; types[seq] != null</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">                &amp;&amp; (types[seq].equalsIgnoreCase(AccessType.LONG.name())</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.BYTE.name())</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.CURRENCY.name())</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.INTEGER.name())</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.SINGLE.name())</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.DOUBLE.name())</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.YESNO.name())</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.DATETIME.name())</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.COUNTER.name())</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                        || types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name()))) {</span>
+<span class="fc" id="L210">            dt = TypesMap.map2Jackcess(AccessType.valueOf(types[seq].toUpperCase(Locale.US)));</span>
+<span class="fc" id="L211">            cb.withType(dt)</span>
+<span class="fc" id="L212">              .withLengthInUnits((short) dt.getFixedSize());</span>
+        }
+
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (dt == null) {</span>
+<span class="pc bpc" id="L216" title="1 of 6 branches missed.">            if (types != null &amp;&amp; seq &lt; types.length &amp;&amp; types[seq] != null</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                    &amp;&amp; types[seq].equalsIgnoreCase(AccessType.NUMERIC.name())) {</span>
+<span class="fc" id="L218">                dt = DataType.NUMERIC;</span>
+            } else {
+<span class="fc" id="L220">                dt = DataType.fromSQLType(</span>
+<span class="fc" id="L221">                        rs.getInt(DATA_TYPE),</span>
+                        length,
+<span class="fc" id="L223">                        UcanaccessConnection.requireCtxConnection().getDbIO().getFileFormat());</span>
+            }
+<span class="fc" id="L225">            cb.withType(dt);</span>
+<span class="fc bfc" id="L226" title="All 4 branches covered.">            if (length &gt; 0 &amp;&amp; dt.equals(DataType.TEXT)) {</span>
+<span class="fc" id="L227">                cb.withLengthInUnits(length);</span>
+            }
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            if (scale &gt; 0) {</span>
+<span class="fc" id="L230">                cb.withScale(scale);</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                if (length &gt; 0) {</span>
+<span class="fc" id="L232">                    cb.withPrecision(length);</span>
+                }
+            }
+        }
+
+<span class="fc bfc" id="L237" title="All 4 branches covered.">        if (types != null &amp;&amp; seq &lt; types.length) {</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">            if (types[seq].equalsIgnoreCase(AccessType.COUNTER.name())</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">                    || types[seq].equalsIgnoreCase(AccessType.AUTOINCREMENT.name())) {</span>
+<span class="fc" id="L240">                cb.withAutoNumber(true)</span>
+<span class="fc" id="L241">                  .withProperty(PropertyMap.REQUIRED_PROP, false); // re: Ticket #2</span>
+            }
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            if (types[seq].equalsIgnoreCase(AccessType.GUID.name())) {</span>
+<span class="fc" id="L244">                cb.withType(DataType.GUID)</span>
+<span class="fc" id="L245">                  .withAutoNumber(true);</span>
+            }
+        }
+<span class="fc" id="L248">        return cb;</span>
+    }
+
+    private ColumnBuilder getColumn(String tableName, Map&lt;String, String&gt; columnMap, String[] types)
+            throws SQLException, IOException {
+<span class="fc" id="L253">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L254">        String columnName = columnMap.keySet().iterator().next();</span>
+<span class="fc" id="L255">        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableName.toUpperCase(Locale.ROOT),</span>
+<span class="fc" id="L256">                SQLConverter.preEscapingIdentifier(columnName));</span>
+
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if (rs.next()) {</span>
+<span class="fc" id="L259">            return getColumn(rs, 0, columnMap, types);</span>
+
+        }
+<span class="nc" id="L262">        return null;</span>
+    }
+
+    private Collection&lt;ColumnBuilder&gt; getColumns(String tableName, Map&lt;String, String&gt; columnMap, String[] types)
+            throws SQLException, IOException {
+<span class="fc" id="L267">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L268">        Map&lt;Integer, ColumnBuilder&gt; ordm = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L269">        String tableNamePattern = tableName.toUpperCase(Locale.US).replace(&quot;_&quot;, &quot;\\_&quot;);</span>
+<span class="fc" id="L270">        ResultSet rs = conn.getHSQLDBConnection().getMetaData().getColumns(null, PUBLIC, tableNamePattern, null);</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        while (rs.next()) {</span>
+<span class="fc" id="L272">            int seq = rs.getInt(ORDINAL_POSITION) - 1;</span>
+<span class="fc" id="L273">            ordm.put(seq, getColumn(rs, seq, columnMap, types));</span>
+<span class="fc" id="L274">        }</span>
+<span class="fc" id="L275">        return ordm.values();</span>
+    }
+
+    private List&lt;IndexBuilder&gt; getIndexBuilders(String tableName, Map&lt;String, String&gt; columnMap) throws SQLException {
+<span class="fc" id="L279">        List&lt;IndexBuilder&gt; arcl = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L280">        addIndexBuildersSimple(tableName, columnMap, arcl);</span>
+<span class="fc" id="L281">        return arcl;</span>
+    }
+
+    private void checkPK(List&lt;IndexBuilder&gt; arcl, IndexBuilder ibpk) {
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if (ibpk == null) {</span>
+<span class="fc" id="L286">            return;</span>
+        }
+<span class="fc" id="L288">        Iterator&lt;IndexBuilder&gt; itib = arcl.iterator();</span>
+<span class="fc" id="L289">        List&lt;IndexBuilder.Column&gt; clspk = ibpk.getColumns();</span>
+<span class="fc" id="L290">        List&lt;String&gt; columnNamesPK = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        for (IndexBuilder.Column clpk : clspk) {</span>
+<span class="fc" id="L292">            columnNamesPK.add(clpk.getName().toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L293">        }</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        while (itib.hasNext()) {</span>
+<span class="fc" id="L295">            IndexBuilder ib = itib.next();</span>
+<span class="fc" id="L296">            List&lt;IndexBuilder.Column&gt; cls = ib.getColumns();</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">            if (cls.size() != clspk.size()) {</span>
+<span class="fc" id="L298">                continue;</span>
+            }
+<span class="fc" id="L300">            boolean clsPK = true;</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">            for (IndexBuilder.Column cl : cls) {</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">                if (!columnNamesPK.contains(cl.getName().toUpperCase(Locale.ROOT))) {</span>
+<span class="fc" id="L303">                    clsPK = false;</span>
+<span class="fc" id="L304">                    break;</span>
+                }
+<span class="fc" id="L306">            }</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">            if (clsPK) {</span>
+<span class="fc" id="L308">                itib.remove();</span>
+            }
+<span class="fc" id="L310">        }</span>
+<span class="fc" id="L311">    }</span>
+
+    private IndexBuilder getIndexBuilderPK(String tableName, Map&lt;String, String&gt; columnMap) throws SQLException {
+<span class="fc" id="L314">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L315">        ResultSet pkrs = conn.getMetaData().getPrimaryKeys(null, PUBLIC, tableName.toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L316">        IndexBuilder indpk = null;</span>
+<span class="fc bfc" id="L317" title="All 2 branches covered.">        while (pkrs.next()) {</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">            if (indpk == null) {</span>
+<span class="fc" id="L319">                String indexName = IndexBuilder.PRIMARY_KEY_NAME;</span>
+<span class="fc" id="L320">                indpk = new IndexBuilder(indexName)</span>
+<span class="fc" id="L321">                    .withPrimaryKey();</span>
+
+            }
+<span class="fc" id="L324">            indpk.withColumns(getNormalizedName(pkrs.getString(COLUMN_NAME), columnMap));</span>
+        }
+<span class="fc" id="L326">        return indpk;</span>
+    }
+
+    private void addIndexBuildersSimple(String tableName, Map&lt;String, String&gt; columnMap, List&lt;IndexBuilder&gt; arcl)
+            throws SQLException {
+<span class="fc" id="L331">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L332">        ResultSet idxrs = conn.getMetaData().getIndexInfo(null, PUBLIC, tableName, false, false);</span>
+<span class="fc" id="L333">        Map&lt;String, IndexBuilder&gt; hi = new HashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        for (IndexBuilder ib : arcl) {</span>
+<span class="nc" id="L335">            hi.put(ib.getName(), ib);</span>
+<span class="nc" id="L336">        }</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        while (idxrs.next()) {</span>
+<span class="fc" id="L338">            String colName = getNormalizedName(idxrs.getString(COLUMN_NAME), columnMap);</span>
+<span class="fc" id="L339">            String indexName = idxrs.getString(INDEX_NAME);</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">            boolean unique = !idxrs.getBoolean(NON_UNIQUE);</span>
+<span class="fc" id="L341">            String ad = idxrs.getString(ASC_OR_DESC);</span>
+<span class="pc bpc" id="L342" title="2 of 4 branches missed.">            boolean asc = ad == null || &quot;A&quot;.equals(ad);</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">            if (!hi.containsKey(indexName)) {</span>
+<span class="fc" id="L344">                IndexBuilder ib = new IndexBuilder(indexName);</span>
+<span class="fc bfc" id="L345" title="All 2 branches covered.">                if (unique) {</span>
+<span class="fc" id="L346">                    ib.withUnique();</span>
+                }
+<span class="fc" id="L348">                arcl.add(ib);</span>
+<span class="fc" id="L349">                hi.put(indexName, ib);</span>
+            }
+<span class="fc" id="L351">            IndexBuilder toIdx = hi.get(indexName);</span>
+<span class="fc" id="L352">            toIdx.withColumns(asc, colName);</span>
+<span class="fc" id="L353">        }</span>
+<span class="fc" id="L354">    }</span>
+
+    private void saveColumnsDefaults(String[] defaults, Boolean[] required, Column cl, int j) throws IOException {
+
+<span class="fc" id="L358">        PropertyMap map = cl.getProperties();</span>
+<span class="pc bpc" id="L359" title="1 of 6 branches missed.">        if (defaults != null &amp;&amp; j &lt; defaults.length &amp;&amp; defaults[j] != null) {</span>
+<span class="fc" id="L360">            map.put(PropertyMap.DEFAULT_VALUE_PROP, DataType.TEXT, defaults[j]);</span>
+        }
+
+<span class="pc bpc" id="L363" title="2 of 8 branches missed.">        if (required != null &amp;&amp; j &lt; required.length &amp;&amp; required[j] != null &amp;&amp; !cl.isAutoNumber()) {</span>
+<span class="fc" id="L364">            map.put(PropertyMap.REQUIRED_PROP, DataType.BOOLEAN, required[j]);</span>
+        }
+
+<span class="fc" id="L367">        map.save();</span>
+<span class="fc" id="L368">    }</span>
+
+    private void saveColumnsDefaults(String[] defaults, Boolean[] required, Table table) throws IOException {
+<span class="fc" id="L371">        List&lt;? extends Column&gt; cols = table.getColumns();</span>
+<span class="fc" id="L372">        int j = 0;</span>
+
+<span class="pc bpc" id="L374" title="1 of 4 branches missed.">        if (defaults != null || required != null) {</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">            for (Column col : cols) {</span>
+<span class="fc" id="L376">                saveColumnsDefaults(defaults, required, col, j);</span>
+<span class="fc" id="L377">                j++;</span>
+<span class="fc" id="L378">            }</span>
+        }
+
+<span class="fc" id="L381">    }</span>
+
+    private String escape4Hsqldb(String tn) {
+
+<span class="pc bpc" id="L385" title="2 of 8 branches missed.">        if ((tn.startsWith(&quot;[&quot;) &amp;&amp; tn.endsWith(&quot;]&quot;)) || (tn.startsWith(&quot;`&quot;) &amp;&amp; tn.endsWith(&quot;`&quot;))) {</span>
+<span class="fc" id="L386">            tn = tn.substring(1, tn.length() - 1);</span>
+<span class="fc" id="L387">            return SQLConverter.preEscapingIdentifier(tn);</span>
+        }
+<span class="fc" id="L389">        return tn;</span>
+    }
+
+    private String escape4Access(String tn) {
+
+<span class="pc bpc" id="L394" title="2 of 8 branches missed.">        if ((tn.startsWith(&quot;[&quot;) &amp;&amp; tn.endsWith(&quot;]&quot;)) || (tn.startsWith(&quot;`&quot;) &amp;&amp; tn.endsWith(&quot;`&quot;))) {</span>
+<span class="fc" id="L395">            return tn.substring(1, tn.length() - 1);</span>
+        }
+<span class="fc" id="L397">        return tn;</span>
+    }
+
+    private String getUcaMetadataTypeName(int colIdx, ColumnBuilder cb, String[] types) {
+<span class="fc" id="L401">        String ucaMetadataTypeName = cb.getType().name();</span>
+<span class="fc bfc" id="L402" title="All 6 branches covered.">        if (types != null &amp;&amp; colIdx &lt; types.length &amp;&amp; types[colIdx].toUpperCase(Locale.US).equals(&quot;HYPERLINK&quot;)) {</span>
+<span class="fc" id="L403">            ucaMetadataTypeName = types[colIdx].toUpperCase(Locale.US);</span>
+        }
+<span class="fc" id="L405">        return ucaMetadataTypeName;</span>
+    }
+
+    @SuppressWarnings(&quot;java:S2077&quot;) // table name stems from the CREATE TABLE statement executed by the caller
+    public void createTable(String tableName, Map&lt;String, String&gt; columnMap, String[] types, String[] defaults,
+            Boolean[] notNulls) throws IOException, SQLException {
+
+<span class="fc" id="L412">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L413">        final Database db = conn.getDbIO();</span>
+<span class="fc" id="L414">        String tn = escape4Access(tableName);</span>
+<span class="fc" id="L415">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L416">        Metadata mtd = new Metadata(conn.getHSQLDBConnection());</span>
+<span class="fc" id="L417">        TableBuilder tb = new TableBuilder(tn);</span>
+<span class="fc" id="L418">        int idTable = mtd.newTable(tn, ntn, ObjectType.TABLE);</span>
+<span class="fc" id="L419">        Collection&lt;ColumnBuilder&gt; lcb = getColumns(ntn, columnMap, types);</span>
+<span class="fc" id="L420">        tb.addColumns(lcb);</span>
+<span class="fc" id="L421">        int colIdx = 0;</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">        for (ColumnBuilder cb : lcb) {</span>
+<span class="fc" id="L423">            mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),</span>
+<span class="fc" id="L424">                    getUcaMetadataTypeName(colIdx, cb, types), idTable);</span>
+<span class="fc" id="L425">            colIdx++;</span>
+<span class="fc" id="L426">        }</span>
+
+<span class="fc" id="L428">        List&lt;IndexBuilder&gt; arcl = getIndexBuilders(ntn, columnMap);</span>
+
+<span class="fc" id="L430">        IndexBuilder ibpk = getIndexBuilderPK(ntn, columnMap);</span>
+
+<span class="fc" id="L432">        checkPK(arcl, ibpk);</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">        if (ibpk != null) {</span>
+<span class="fc" id="L434">            arcl.add(ibpk);</span>
+        }
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        for (IndexBuilder ixb : arcl) {</span>
+<span class="fc" id="L437">            tb.addIndex(ixb);</span>
+<span class="fc" id="L438">        }</span>
+<span class="fc" id="L439">        Table table = tb.toTable(db);</span>
+<span class="fc" id="L440">        saveColumnsDefaults(defaults, notNulls, table);</span>
+<span class="fc" id="L441">        LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), db);</span>
+<span class="fc" id="L442">        lj.loadDefaultValues(table);</span>
+<span class="fc" id="L443">        createForeignKeys(tableName);</span>
+<span class="fc" id="L444">        try (UcanaccessStatement st = conn.createStatement()) {</span>
+<span class="fc" id="L445">            ResultSet rs = st.executeQuery(String.format(&quot;SELECT * FROM %s&quot;, tableName));</span>
+<span class="fc" id="L446">            List&lt;String&gt; clns = getColumnNamesCreate(tn);</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L448">                Object[] rec = new Object[clns.size()];</span>
+<span class="fc" id="L449">                int i = 0;</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">                for (String columnName : clns) {</span>
+<span class="fc" id="L451">                    rec[i++] = rs.getObject(columnName);</span>
+<span class="fc" id="L452">                }</span>
+<span class="fc" id="L453">                new InsertCommand(table, rec, null).persist();</span>
+<span class="fc" id="L454">            }</span>
+        }
+<span class="fc" id="L456">    }</span>
+
+    public void dropTable(String tableName) throws IOException, SQLException {
+<span class="fc" id="L459">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L460">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L461">        tableName = escape4Access(tableName);</span>
+<span class="fc" id="L462">        Table t = db.getTable(tableName);</span>
+
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">        if (t == null) {</span>
+<span class="nc" id="L465">            return;</span>
+        }
+<span class="fc" id="L467">        Metadata mt = new Metadata(conn.getHSQLDBConnection());</span>
+<span class="fc" id="L468">        mt.dropTable(t.getName());</span>
+<span class="pc bpc" id="L469" title="1 of 2 branches missed.">        if (!HibernateSupport.isActive()) {</span>
+<span class="fc" id="L470">            Cursor c = t.getDefaultCursor();</span>
+<span class="fc bfc" id="L471" title="All 2 branches covered.">            while (c.getNextRow() != null) {</span>
+<span class="fc" id="L472">                c.deleteCurrentRow();</span>
+            }
+        }
+<span class="fc" id="L475">        DatabaseImpl dbi = (DatabaseImpl) db;</span>
+<span class="fc" id="L476">        Table cat = dbi.getSystemCatalog();</span>
+        Map&lt;String, Object&gt; row;
+<span class="fc" id="L478">        Cursor catc = cat.getDefaultCursor();</span>
+<span class="fc bfc" id="L479" title="All 2 branches covered.">        while ((row = catc.getNextRow()) != null) {</span>
+<span class="fc" id="L480">            String name = (String) row.get(&quot;Name&quot;);</span>
+<span class="pc bpc" id="L481" title="1 of 4 branches missed.">            if (name != null &amp;&amp; name.equalsIgnoreCase(tableName)) {</span>
+<span class="fc" id="L482">                Integer id = (Integer) row.get(&quot;Id&quot;);</span>
+<span class="fc" id="L483">                Table tsa = db.getSystemTable(&quot;MSysACEs&quot;);</span>
+<span class="fc" id="L484">                Map&lt;String, Object&gt; rowtsa = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L485">                rowtsa.put(COL_OBJECT_ID, id);</span>
+<span class="fc" id="L486">                Cursor cur = tsa.getDefaultCursor();</span>
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">                if (cur.findNextRow(rowtsa)) {</span>
+<span class="fc" id="L488">                    cur.deleteCurrentRow();</span>
+                }
+<span class="fc" id="L490">                catc.deleteCurrentRow();</span>
+<span class="fc" id="L491">                Table srs = db.getSystemTable(SYS_RELATIONSHIPS);</span>
+<span class="fc" id="L492">                Cursor srsc = srs.getDefaultCursor();</span>
+<span class="fc bfc" id="L493" title="All 2 branches covered.">                while ((row = srsc.getNextRow()) != null) {</span>
+<span class="fc" id="L494">                    String szObject = (String) row.get(COL_SZ_OBJECT);</span>
+<span class="fc" id="L495">                    String szReferencedObject = (String) row.get(COL_SZ_REFERENCED_OBJECT);</span>
+<span class="pc bpc" id="L496" title="2 of 6 branches missed.">                    if ((szObject != null &amp;&amp; szObject.equalsIgnoreCase(tableName))</span>
+<span class="pc bpc" id="L497" title="1 of 2 branches missed.">                            || (szReferencedObject != null &amp;&amp; szReferencedObject.equalsIgnoreCase(tableName))) {</span>
+<span class="fc" id="L498">                        srsc.deleteCurrentRow();</span>
+                    }
+<span class="fc" id="L500">                }</span>
+            }
+<span class="fc" id="L502">        }</span>
+
+<span class="fc" id="L504">        conn.reloadDbIO();</span>
+
+<span class="fc" id="L506">    }</span>
+
+    public void renameTable(String oldTableName, String newTableName) throws IOException, SQLException {
+<span class="fc" id="L509">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L510">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L511">        oldTableName = escape4Access(oldTableName);</span>
+<span class="fc" id="L512">        String tn = escape4Access(newTableName);</span>
+<span class="fc" id="L513">        String ntn = escape4Hsqldb(newTableName);</span>
+<span class="fc" id="L514">        Table t = db.getTable(oldTableName);</span>
+
+<span class="pc bpc" id="L516" title="1 of 2 branches missed.">        if (t == null) {</span>
+<span class="nc" id="L517">            return;</span>
+        }
+<span class="fc" id="L519">        Metadata mt = new Metadata(conn.getHSQLDBConnection());</span>
+<span class="fc" id="L520">        mt.rename(t.getName(), tn, ntn);</span>
+<span class="fc" id="L521">        DatabaseImpl dbi = (DatabaseImpl) db;</span>
+<span class="fc" id="L522">        Table cat = dbi.getSystemCatalog();</span>
+        Map&lt;String, Object&gt; row;
+<span class="fc" id="L524">        Cursor catc = cat.getDefaultCursor();</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">        while ((row = catc.getNextRow()) != null) {</span>
+<span class="fc" id="L526">            String name = (String) row.get(&quot;Name&quot;);</span>
+<span class="pc bpc" id="L527" title="1 of 4 branches missed.">            if (name != null &amp;&amp; name.equalsIgnoreCase(oldTableName)) {</span>
+<span class="fc" id="L528">                Row r = catc.getCurrentRow();</span>
+<span class="fc" id="L529">                r.put(&quot;Name&quot;, tn);</span>
+<span class="fc" id="L530">                catc.updateCurrentRowFromMap(r);</span>
+<span class="fc" id="L531">                Table srs = db.getSystemTable(SYS_RELATIONSHIPS);</span>
+<span class="fc" id="L532">                Cursor srsc = srs.getDefaultCursor();</span>
+
+<span class="fc bfc" id="L534" title="All 2 branches covered.">                while ((row = srsc.getNextRow()) != null) {</span>
+<span class="fc" id="L535">                    String szObject = (String) row.get(COL_SZ_OBJECT);</span>
+<span class="fc" id="L536">                    String szReferencedObject = (String) row.get(COL_SZ_REFERENCED_OBJECT);</span>
+<span class="fc" id="L537">                    boolean updated = false;</span>
+<span class="pc bpc" id="L538" title="2 of 4 branches missed.">                    if (szObject != null &amp;&amp; szObject.equalsIgnoreCase(oldTableName)) {</span>
+<span class="nc" id="L539">                        row.put(COL_SZ_OBJECT, tn);</span>
+<span class="nc" id="L540">                        updated = true;</span>
+                    }
+
+<span class="pc bpc" id="L543" title="1 of 4 branches missed.">                    if (szReferencedObject != null &amp;&amp; szReferencedObject.equalsIgnoreCase(oldTableName)) {</span>
+<span class="fc" id="L544">                        row.put(COL_SZ_REFERENCED_OBJECT, tn);</span>
+<span class="fc" id="L545">                        updated = true;</span>
+                    }
+<span class="fc bfc" id="L547" title="All 2 branches covered.">                    if (updated) {</span>
+<span class="fc" id="L548">                        srsc.updateCurrentRowFromMap(row);</span>
+                    }
+<span class="fc" id="L550">                }</span>
+            }
+<span class="fc" id="L552">        }</span>
+
+<span class="fc" id="L554">        conn.reloadDbIO();</span>
+
+<span class="fc" id="L556">    }</span>
+
+    public void addColumn(String tableName, String columnName, Map&lt;String, String&gt; columnMap, String[] types,
+        String[] defaults, Boolean[] notNulls) throws IOException, SQLException {
+<span class="fc" id="L560">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L561">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L562">        String tn = escape4Access(tableName);</span>
+<span class="fc" id="L563">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L564">        Metadata mtd = new Metadata(conn.getHSQLDBConnection());</span>
+<span class="fc" id="L565">        ColumnBuilder cb = getColumn(ntn, columnMap, types);</span>
+<span class="pc bpc" id="L566" title="1 of 2 branches missed.">        if (cb == null) {</span>
+<span class="nc" id="L567">            return;</span>
+        }
+<span class="fc" id="L569">        Table t = db.getTable(tn);</span>
+<span class="fc" id="L570">        Column col = cb.addToTable(t);</span>
+<span class="fc" id="L571">        int idTable = mtd.getTableId(ntn.toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L572">        mtd.newColumn(cb.getName(), SQLConverter.preEscapingIdentifier(cb.getName()),</span>
+<span class="fc" id="L573">            getUcaMetadataTypeName(0, cb, types), idTable);</span>
+<span class="fc" id="L574">        saveColumnsDefaults(defaults, notNulls, col, 0);</span>
+<span class="fc" id="L575">        updateNewColumnToDefault(tableName, columnName, t, col);</span>
+<span class="fc" id="L576">        setHsqldbNotNull(tableName, columnName, col);</span>
+<span class="fc" id="L577">        conn.reloadDbIO();</span>
+<span class="fc" id="L578">    }</span>
+
+    private void setHsqldbNotNull(String tableName, String columnName, Column cl) throws SQLException, IOException {
+<span class="fc" id="L581">        boolean req = Optional.ofNullable(cl.getProperties().getValue(PropertyMap.REQUIRED_PROP))</span>
+<span class="fc" id="L582">            .map(Boolean.class::cast).orElse(false);</span>
+<span class="fc bfc" id="L583" title="All 2 branches covered.">        if (req) {</span>
+<span class="fc" id="L584">            UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L585">            try (Statement stNN = conn.getHSQLDBConnection().createStatement()) {</span>
+<span class="fc" id="L586">                stNN.execute(SQLConverter.convertSQL(</span>
+<span class="fc" id="L587">                    &quot;ALTER TABLE &quot; + tableName + &quot; ALTER COLUMN &quot; + columnName + &quot; SET NOT NULL &quot;).getSql());</span>
+            }
+        }
+<span class="fc" id="L590">    }</span>
+
+    private void updateNewColumnToDefault(String tableName, String columnName, Table t, Column col)
+        throws SQLException, IOException {
+<span class="fc" id="L594">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L595">        LoadJet lj = new LoadJet(conn.getHSQLDBConnection(), conn.getDbIO());</span>
+<span class="fc" id="L596">        lj.loadDefaultValues(col);</span>
+<span class="fc" id="L597">        String default4SQL = lj.defaultValue4SQL(col);</span>
+
+<span class="fc" id="L599">        Object defObj = lj.tryDefault(default4SQL);</span>
+<span class="fc" id="L600">        conn.setFeedbackState(true);</span>
+<span class="fc bfc" id="L601" title="All 2 branches covered.">        if (default4SQL != null) {</span>
+<span class="fc bfc" id="L602" title="All 2 branches covered.">            for (Row row : t) {</span>
+<span class="fc" id="L603">                row.put(col.getName(), defObj);</span>
+<span class="fc" id="L604">                t.updateRow(row);</span>
+<span class="fc" id="L605">            }</span>
+<span class="fc" id="L606">            conn.getDbIO().flush();</span>
+
+        }
+
+<span class="fc bfc" id="L610" title="All 4 branches covered.">        if (default4SQL != null || col.getType().equals(DataType.BOOLEAN)) {</span>
+<span class="pc bpc" id="L611" title="1 of 4 branches missed.">            if (default4SQL == null &amp;&amp; col.getType().equals(DataType.BOOLEAN)) {</span>
+<span class="fc" id="L612">                defObj = false;</span>
+            }
+<span class="fc" id="L614">            try (PreparedStatement ps = conn.getHSQLDBConnection().prepareStatement(</span>
+<span class="fc" id="L615">                SQLConverter.convertSQL(&quot;UPDATE &quot; + tableName + &quot; SET &quot; + columnName + &quot;= ?&quot;).getSql())) {</span>
+<span class="fc" id="L616">                ps.setObject(1, defObj);</span>
+<span class="fc" id="L617">                ps.executeUpdate();</span>
+            }
+        }
+
+<span class="fc" id="L621">        conn.setFeedbackState(false);</span>
+<span class="fc" id="L622">    }</span>
+
+    public void createIndex(String tableName, String indexName) throws IOException, SQLException {
+<span class="fc" id="L625">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L626">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L627">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L628">        String idn = escape4Hsqldb(indexName);</span>
+<span class="fc" id="L629">        String tn = escape4Access(tableName);</span>
+<span class="fc" id="L630">        String in = escape4Access(indexName);</span>
+<span class="fc" id="L631">        Table t = db.getTable(tn);</span>
+
+<span class="fc" id="L633">        ResultSet idxrs = conn.getHSQLDBConnection().getMetaData().getIndexInfo(null, PUBLIC, ntn.toUpperCase(Locale.ROOT), false, false);</span>
+<span class="fc" id="L634">        boolean asc = false;</span>
+<span class="fc" id="L635">        List&lt;String&gt; cols = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L636">        IndexBuilder ib = new IndexBuilder(in);</span>
+<span class="fc bfc" id="L637" title="All 2 branches covered.">        while (idxrs.next()) {</span>
+<span class="fc" id="L638">            String dbIdxName = idxrs.getString(INDEX_NAME);</span>
+<span class="fc bfc" id="L639" title="All 2 branches covered.">            if (dbIdxName.equalsIgnoreCase(idn)) {</span>
+
+<span class="fc bfc" id="L641" title="All 2 branches covered.">                boolean unique = !idxrs.getBoolean(NON_UNIQUE);</span>
+
+<span class="fc bfc" id="L643" title="All 2 branches covered.">                if (unique) {</span>
+<span class="fc" id="L644">                    ib.withUnique();</span>
+                }
+<span class="fc" id="L646">                String colName = idxrs.getString(COLUMN_NAME);</span>
+<span class="fc" id="L647">                Metadata mt = new Metadata(conn);</span>
+<span class="fc" id="L648">                colName = mt.getColumnName(ntn, colName);</span>
+<span class="fc" id="L649">                String ad = idxrs.getString(ASC_OR_DESC);</span>
+<span class="pc bpc" id="L650" title="2 of 4 branches missed.">                asc = ad == null || &quot;A&quot;.equals(ad);</span>
+<span class="fc" id="L651">                cols.add(colName);</span>
+
+            }
+<span class="fc" id="L654">        }</span>
+<span class="fc" id="L655">        ib.withColumns(asc, cols.toArray(new String[0])).addToTable(t);</span>
+<span class="fc" id="L656">    }</span>
+
+    public void createPrimaryKey(String tableName) throws IOException, SQLException {
+<span class="fc" id="L659">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L660">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L661">        Table t = conn.getDbIO().getTable(escape4Access(tableName));</span>
+<span class="fc" id="L662">        Metadata md = new Metadata(conn);</span>
+
+<span class="fc" id="L664">        Map&lt;Short, String&gt; cols = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L665">        try (ResultSet rs = conn.getHSQLDBConnection().getMetaData().getPrimaryKeys(null, null, ntn.toUpperCase(Locale.ROOT))) {</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L667">                cols.put(rs.getShort(KEY_SEQ), md.getColumnName(ntn, rs.getString(COLUMN_NAME)));</span>
+            }
+        }
+
+<span class="fc" id="L671">        new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME)</span>
+<span class="fc" id="L672">            .withPrimaryKey()</span>
+<span class="fc" id="L673">            .withColumns(cols.values())</span>
+<span class="fc" id="L674">            .addToTable(t);</span>
+<span class="fc" id="L675">    }</span>
+
+    public void createForeignKey(String tableName, String referencedTable) throws IOException, SQLException {
+<span class="nc" id="L678">        createForeignKey(tableName, referencedTable, null);</span>
+<span class="nc" id="L679">    }</span>
+
+    public void createForeignKey(String tableName, String referencedTable, String relationshipName)
+            throws IOException, SQLException {
+<span class="fc" id="L683">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L684">        String rntn = escape4Hsqldb(referencedTable);</span>
+<span class="fc" id="L685">        String tn = escape4Access(tableName);</span>
+<span class="fc" id="L686">        String rtn = escape4Access(referencedTable);</span>
+<span class="fc" id="L687">        String relName = null;</span>
+<span class="fc bfc" id="L688" title="All 2 branches covered.">        if (relationshipName != null) {</span>
+<span class="fc" id="L689">            relName = escape4Access(relationshipName);</span>
+        }
+<span class="fc" id="L691">        createForeignKey(ntn, rntn, tn, rtn, relName);</span>
+<span class="fc" id="L692">    }</span>
+
+    public void createForeignKeys(String tableName) throws IOException, SQLException {
+<span class="fc" id="L695">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L696">        String ntn = escape4Hsqldb(tableName);</span>
+<span class="fc" id="L697">        String tn = escape4Access(tableName);</span>
+<span class="fc" id="L698">        ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getImportedKeys(null, null, ntn.toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L699">        Set&lt;String&gt; hs = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L700" title="All 2 branches covered.">        while (fkrs.next()) {</span>
+<span class="fc" id="L701">            hs.add(fkrs.getString(PKTABLE_NAME));</span>
+        }
+<span class="fc" id="L703">        Metadata mt = new Metadata(conn);</span>
+<span class="fc bfc" id="L704" title="All 2 branches covered.">        for (String rntn : hs) {</span>
+<span class="fc" id="L705">            createForeignKey(ntn, rntn, tn, mt.getTableName(rntn), null);</span>
+<span class="fc" id="L706">        }</span>
+<span class="fc" id="L707">    }</span>
+
+    private void createForeignKey(String tn4Hsqldb, String refTn4Hsqldb, String tn4Access, String refTn4Access,
+            String relationshipName) throws IOException, SQLException {
+<span class="fc" id="L711">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L712">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L713">        Table t = db.getTable(tn4Access);</span>
+<span class="fc" id="L714">        Table rt = db.getTable(refTn4Access);</span>
+<span class="fc" id="L715">        RelationshipBuilder rb = new RelationshipBuilder(rt, t)</span>
+<span class="fc" id="L716">            .withName(relationshipName)</span>
+<span class="fc" id="L717">            .withReferentialIntegrity();</span>
+<span class="fc" id="L718">        ResultSet fkrs = conn.getHSQLDBConnection().getMetaData().getCrossReference(null, null,</span>
+<span class="fc" id="L719">                refTn4Hsqldb.toUpperCase(Locale.ROOT), null, null, tn4Hsqldb.toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L720">        Metadata mt = new Metadata(conn);</span>
+<span class="fc bfc" id="L721" title="All 2 branches covered.">        while (fkrs.next()) {</span>
+            /*
+             * The following check was added for ticket #16.
+             *
+             * Limitation: If the user wants to create more than one relationship between the same two tables
+             * then all of the relationships must be explicitly named.
+             */
+<span class="fc bfc" id="L728" title="All 4 branches covered.">            if (relationshipName == null || fkrs.getString(FK_NAME).equalsIgnoreCase(tn4Hsqldb + &quot;_&quot; + relationshipName)) {</span>
+<span class="fc" id="L729">                String colName = fkrs.getString(FKCOLUMN_NAME);</span>
+<span class="fc" id="L730">                colName = mt.getColumnName(tn4Hsqldb, colName);</span>
+<span class="fc" id="L731">                String rcolName = fkrs.getString(PKCOLUMN_NAME);</span>
+<span class="fc" id="L732">                rcolName = mt.getColumnName(refTn4Hsqldb, rcolName);</span>
+<span class="fc" id="L733">                rb.addColumns(rcolName, colName);</span>
+<span class="fc" id="L734">                short dr = fkrs.getShort(&quot;DELETE_RULE&quot;);</span>
+<span class="fc" id="L735">                short ur = fkrs.getShort(&quot;UPDATE_RULE&quot;);</span>
+<span class="fc bfc" id="L736" title="All 3 branches covered.">                switch (dr) {</span>
+                case DatabaseMetaData.importedKeyCascade:
+<span class="fc" id="L738">                    rb.withCascadeDeletes();</span>
+<span class="fc" id="L739">                    break;</span>
+                case DatabaseMetaData.importedKeySetNull:
+<span class="fc" id="L741">                    rb.withCascadeNullOnDelete();</span>
+<span class="fc" id="L742">                    break;</span>
+                default:
+                    break;
+                }
+<span class="pc bpc" id="L746" title="1 of 2 branches missed.">                if (ur == DatabaseMetaData.importedKeyCascade) {</span>
+<span class="nc" id="L747">                    rb.withCascadeUpdates();</span>
+                }
+<span class="fc" id="L749">            }</span>
+        }
+<span class="fc" id="L751">        rb.toRelationship(db);</span>
+
+<span class="fc" id="L753">    }</span>
+
+    public void dropForeignKey(String relationshipName) throws IOException {
+<span class="fc" id="L756">        relationshipName = escape4Access(relationshipName);</span>
+<span class="fc" id="L757">        UcanaccessConnection conn = UcanaccessConnection.requireCtxConnection();</span>
+<span class="fc" id="L758">        Database db = conn.getDbIO();</span>
+<span class="fc" id="L759">        Table tbl = db.getSystemTable(SYS_RELATIONSHIPS);</span>
+<span class="fc" id="L760">        IndexCursor crsr = CursorBuilder.createCursor(tbl.getIndex(&quot;szRelationship&quot;));</span>
+<span class="fc" id="L761">        Row r = crsr.findRowByEntry(relationshipName);</span>
+<span class="pc bpc" id="L762" title="1 of 2 branches missed.">        if (r != null) {</span>
+<span class="fc bfc" id="L763" title="All 2 branches covered.">            while (r != null) {</span>
+<span class="fc" id="L764">                tbl.deleteRow(r);</span>
+<span class="fc" id="L765">                r = crsr.findRowByEntry(relationshipName);</span>
+            }
+<span class="fc" id="L767">            tbl = db.getSystemTable(&quot;MSysObjects&quot;);</span>
+<span class="fc" id="L768">            crsr = CursorBuilder.createCursor(tbl.getIndex(&quot;ParentIdName&quot;));</span>
+<span class="fc" id="L769">            Map&lt;String, Object&gt; rowPattern = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L770">            rowPattern.put(&quot;Name&quot;, &quot;Relationships&quot;);</span>
+<span class="fc" id="L771">            rowPattern.put(&quot;Type&quot;, 3);</span>
+<span class="pc bpc" id="L772" title="1 of 2 branches missed.">            if (crsr.findFirstRow(rowPattern)) {</span>
+<span class="fc" id="L773">                Integer relationshipsId = crsr.getCurrentRow().getInt(&quot;Id&quot;);</span>
+<span class="fc" id="L774">                r = crsr.findRowByEntry(relationshipsId, relationshipName);</span>
+<span class="pc bpc" id="L775" title="1 of 2 branches missed.">                if (r != null) {</span>
+<span class="fc" id="L776">                    Integer relationshipId = r.getInt(&quot;Id&quot;);</span>
+<span class="fc" id="L777">                    tbl.deleteRow(r);</span>
+<span class="fc" id="L778">                    tbl = db.getSystemTable(&quot;MSysACEs&quot;);</span>
+<span class="fc" id="L779">                    crsr = CursorBuilder.createCursor(tbl.getIndex(&quot;ObjectId&quot;));</span>
+<span class="fc" id="L780">                    r = crsr.findRowByEntry(relationshipId);</span>
+<span class="fc bfc" id="L781" title="All 2 branches covered.">                    while (r != null) {</span>
+<span class="fc" id="L782">                        tbl.deleteRow(r);</span>
+<span class="fc" id="L783">                        r = crsr.findRowByEntry(relationshipId);</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L788">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

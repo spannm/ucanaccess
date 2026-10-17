@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppendQueryTemp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">UCanAccess</a> &gt; <a href="index.source.html" class="el_package">net.ucanaccess.converters</a> &gt; <span class="el_source">AppendQueryTemp.java</span></div><h1>AppendQueryTemp.java</h1><pre class="source lang-java linenums">package net.ucanaccess.converters;
+
+import static io.github.spannm.jackcess.impl.query.QueryFormat.NEWLINE;
+
+import io.github.spannm.jackcess.impl.query.AppendQueryImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AppendQueryTemp extends AppendQueryImpl {
+
+    public AppendQueryTemp(AppendQueryImpl impl) {
+<span class="fc" id="L13">        super(impl.getName(), impl.getRows(), impl.getObjectId(), impl.getObjectFlag());</span>
+<span class="fc" id="L14">    }</span>
+
+    @Override
+    protected void toSQLString(StringBuilder builder) {
+<span class="fc" id="L18">        builder.append(&quot;INSERT INTO &quot;);</span>
+<span class="fc" id="L19">        toOptionalQuotedExpr(builder, getTargetTable(), true);</span>
+<span class="fc" id="L20">        toRemoteDb(builder, getRemoteDbPath(), getRemoteDbType());</span>
+<span class="fc" id="L21">        builder.append(NEWLINE);</span>
+<span class="fc" id="L22">        List&lt;String&gt; values = getValues();</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (!values.isEmpty()) {</span>
+<span class="fc" id="L24">            List&lt;String&gt; decl = getInsertDeclaration();</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if (!decl.isEmpty()) {</span>
+<span class="fc" id="L26">                builder.append(&quot;(&quot;).append(getInsertDeclaration()).append(&quot;)&quot;);</span>
+            }
+<span class="fc" id="L28">            builder.append(&quot; VALUES (&quot;).append(values).append(')');</span>
+<span class="fc" id="L29">        } else {</span>
+<span class="fc" id="L30">            List&lt;String&gt; decl = getSelectDeclaration();</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if (!decl.isEmpty()) {</span>
+<span class="fc" id="L32">                builder.append(&quot;(&quot;).append(getSelectDeclaration()).append(&quot;)&quot;);</span>
+            }
+<span class="fc" id="L34">            toSQLSelectString(builder, true);</span>
+        }
+<span class="fc" id="L36">    }</span>
+
+    private List&lt;String&gt; getInsertDeclaration() {
+<span class="fc" id="L39">        return new RowFormatter(getDeclaration(getValueRows())) {</span>
+            @Override
+            protected void format(StringBuilder builder, Row row) {
+<span class="fc" id="L42">                String column = row.name2;</span>
+<span class="pc bpc" id="L43" title="3 of 4 branches missed.">                if (!(column.startsWith(&quot;[&quot;) &amp;&amp; column.endsWith(&quot;]&quot;))) {</span>
+<span class="fc" id="L44">                    column = &quot;[&quot; + row.name2 + &quot;]&quot;;</span>
+                }
+<span class="fc" id="L46">                builder.append(column);</span>
+<span class="fc" id="L47">            }</span>
+<span class="fc" id="L48">        }.format();</span>
+    }
+
+    private List&lt;String&gt; getSelectDeclaration() {
+<span class="fc" id="L52">        return new RowFormatter(getDeclaration(getColumnRows())) {</span>
+            @Override
+            protected void format(StringBuilder builder, Row row) {
+<span class="fc" id="L55">                String column = row.name2;</span>
+<span class="pc bpc" id="L56" title="3 of 4 branches missed.">                if (!(column.startsWith(&quot;[&quot;) &amp;&amp; column.endsWith(&quot;]&quot;))) {</span>
+<span class="fc" id="L57">                    column = &quot;[&quot; + row.name2 + &quot;]&quot;;</span>
+                }
+<span class="fc" id="L59">                builder.append(column);</span>
+<span class="fc" id="L60">            }</span>
+<span class="fc" id="L61">        }.format();</span>
+    }
+
+    private List&lt;Row&gt; getDeclaration(List&lt;Row&gt; valueRows) {
+<span class="fc" id="L65">        List&lt;Row&gt; ardc = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (Row row : valueRows) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (row.name2 != null) {</span>
+<span class="fc" id="L68">                ardc.add(row);</span>
+            }
+<span class="fc" id="L70">        }</span>
+<span class="fc" id="L71">        return ardc;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
