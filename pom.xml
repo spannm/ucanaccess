@@ -88,6 +88,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.outputTimestamp>2026-10-16T14:00:00Z</project.build.outputTimestamp>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The minimum JDK version required to build. -->
@@ -148,6 +149,9 @@
 
         <basepom.site.scm.branch>master</basepom.site.scm.branch>
         <basepom.site.skip-deploy>false</basepom.site.skip-deploy>
+        <!-- test and coverage reports change on every run, CI and Sonar cover them -->
+        <basepom.site.test.skip>true</basepom.site.test.skip>
+        <basepom.site.skip-coverage>true</basepom.site.skip-coverage>
     </properties>
 
     <dependencies>
@@ -323,6 +327,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <configuration>
+                        <notimestamp>true</notimestamp>
                         <additionalOptions combine.children="append">
                             <additionalOption>--add-exports</additionalOption>
                             <additionalOption>org.hsqldb/org.hsqldb=${module.name}</additionalOption>
