@@ -54,6 +54,12 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             parameter are: V2000, V2003, V2007, V2010, V2016.
         </p>
         <p>
+            <strong>charset</strong>: the character set Jackcess uses to read and write text, e.g.
+            <code>charset=windows-1252</code>. Mostly relevant for Access 97 files, which don't store text as Unicode
+            and are otherwise read with the JVM's default charset (UTF-8 since Java 18). A custom <i>jackcessOpener</i>
+            only honors this setting if it overrides <code>open(File, String, Charset)</code>.
+        </p>
+        <p>
             <strong>openExclusive</strong> (replaces the deprecated <i>lockMdb</i>): if openExclusive is enabled (
             <code>openExclusive=true</code>
             ), UCanAccess locks the mdb/accdb file to prevent updates from other processes. Default=false.<br/> <br/> <strong>showSchema</strong>:
@@ -100,6 +106,14 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             <br/>Original path and new path must be separated by '|', different pairs must be separated by '&amp;'.
         </p>
         <p>
+            <strong>allowRemoteLinks</strong>: if true, linked tables that point to a network/UNC path (e.g.
+            <code>\\server\share\linked.accdb</code>) are opened automatically. Default=false, such links are rejected
+            with an <code>AccessDeniedException</code>. The link path is taken from the database file as is, so a file
+            from an untrusted source could otherwise make the JVM connect to an arbitrary host. Enable it only for
+            databases whose linked network paths you trust. Local linked paths and paths mapped via <i>remap</i> are not
+            affected.
+        </p>
+        <p>
             <strong>mirrorFolder</strong>: it allows users to set the directory in which the mirror db will be created.<br/> It
             forces <i>memory=false</i>.<br/> Simply use
             <code>mirrorFolder=java.io.tmpdir</code>
@@ -130,6 +144,11 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
         <p>Caution! - If the access database is modified by a different program (so not using UCanAccess) after the
             HSQLDB creates the mirror database, UCanAccess recreates and repopulates the whole mirror database for avoiding
             unchecked misalignments.
+        </p>
+        <p>
+            <strong>readOnlyMirror</strong>: only used together with <i>keepMirror</i>. If true, the kept HSQLDB mirror is
+            opened read-only and reused without being initialized again, which makes the first connection faster.
+            Any statement that modifies data fails, so use it only for read-only access. Default=false.
         </p>
         <p>
             <strong>columnOrder</strong>: use the "DISPLAY" order of columns with
