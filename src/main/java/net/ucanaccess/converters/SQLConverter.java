@@ -112,7 +112,6 @@ public final class SQLConverter {
     private static final Set<String>         APOSTROPHISED_NAMES            = new HashSet<>();
     private static final Set<String>         WORKAROUND_FUNCTIONS           = new HashSet<>();
 
-    private static boolean                   supportsAccessLike             = true;
     private static boolean                   dualUsedAsTableName            = false;
 
     private SQLConverter() {
@@ -965,14 +964,6 @@ public final class SQLConverter {
                     + " ";
         }
         return " " + conditionField + closePar + not + " like '" + convertToLikeCondition(likeContent) + "'";
-    }
-
-    public static boolean isSupportsAccessLike() {
-        return supportsAccessLike;
-    }
-
-    public static void setSupportsAccessLike(boolean supportsAccessLike) {
-        SQLConverter.supportsAccessLike = supportsAccessLike;
     }
 
     public static boolean isXescaped(String identifier) {

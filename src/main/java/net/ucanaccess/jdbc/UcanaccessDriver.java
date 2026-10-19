@@ -5,7 +5,6 @@ import static net.ucanaccess.converters.Metadata.Property.*;
 import io.github.spannm.jackcess.Database.FileFormat;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
-import net.ucanaccess.converters.SQLConverter;
 import net.ucanaccess.exception.AuthenticationException;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
@@ -158,9 +157,6 @@ public final class UcanaccessDriver implements Driver {
                         Map<String, String> map = Arrays.stream(knownProps.get(reMap).split("&")).map(s -> s.split("\\|")).filter(arr -> arr.length == 2)
                             .collect(Collectors.toMap(k1 -> k1[0], v1 -> v1[1], (v1, v2) -> v1, LinkedHashMap::new));
                         dbRef.setExternalResourcesMapping(map);
-                    }
-                    if (knownProps.containsKey(supportsAccessLike)) {
-                        SQLConverter.setSupportsAccessLike(Boolean.parseBoolean(knownProps.get(supportsAccessLike)));
                     }
                     if (knownProps.containsKey(columnOrder)
                         && ColumnOrder.DISPLAY == ColumnOrder.parse(knownProps.get(columnOrder))) {
