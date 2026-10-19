@@ -21,12 +21,11 @@
 &lt;dependency&gt;
     &lt;groupId&gt;io.github.spannm&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
-    &lt;version&gt;5.1.7&lt;/version&gt;
+    &lt;version&gt;5.2.0&lt;/version&gt;
 &lt;/dependency&gt;</pre>
 
         <h2>Establishing a UCanAccess connection</h2>
         <pre>
-Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);
 Connection connTemplate = DriverManager.getConnection(&quot;jdbc:ucanaccess://&lt;mdb or accdb file path&gt;&quot;, user, password);
 
 // for example:
@@ -52,7 +51,7 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
         <p>
             <strong>newDatabaseVersion</strong>: UCanAccess will create a new Access database file in the specified version if this
             parameter is set and the file specified in the JDBC connection URL does not exist. Valid values for this
-            parameter are: V2000, V2003, V2007, V2010.
+            parameter are: V2000, V2003, V2007, V2010, V2016.
         </p>
         <p>
             <strong>openExclusive</strong> (replaces the deprecated <i>lockMdb</i>): if openExclusive is enabled (
@@ -62,15 +61,14 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             implementation. Default=false. Using <i>showSchema=true</i> is recommended with SQuirreL SQL.
         </p>
         <p>
-            <strong>inactivityTimeout</strong> (since UcanAccess 0.1.1): it is used only with the default memory mode (memory=true).
+            <strong>inactivityTimeout</strong>: it is used only with the default memory mode (memory=true).
             If there are no active connections for the inactivityTimeout period (in minutes) HSQLDB will be temporarily shut
             down and any file system resources will be released. It will be restarted at the next connection. Setting
             <code>inactivityTimeout=0</code>
             can be used for avoiding this behavior. Default = 2 minutes.
         </p>
         <p>
-            <strong>immediatelyReleaseResources</strong> (replaces <i>singleConnection</i> which has been deprecated since UCanAccess
-            3.0.6): it is used for for ETL jobs, scheduled tasks, or "one-shot" use of UCanAccess with only one connection
+            <strong>immediatelyReleaseResources</strong> (replaces the deprecated <i>singleConnection</i>): it is used for ETL jobs, scheduled tasks, or "one-shot" use of UCanAccess with only one connection
             open. All resources (memory and file system) will be released at the closing of the connection. Default=false.
         </p>
         <p>
@@ -151,16 +149,11 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             <code>null &amp; 'thing'</code>
             -&gt;
             <code>'thing'</code>
-            . (It gave
-            <code>null</code>
-            prior to version 3.0.0.) <br/>
+            .<br/>
             <code>null + 'thing'</code>
             -&gt;
             <code>'thing'</code>
-            . (It gave
-            <code>null</code>
-            prior to version 3.0.0.) <br/> If you want to switch to the old behavior, you have to set the new connection
-            property
+            .<br/> If you want <code>null</code> as the result instead, set the connection property
             <code>concatNulls=true</code>
             .
         </p>
@@ -217,7 +210,6 @@ public class CryptCodecOpener implements IJackcessOpenerInterface {
 }</pre>
 
         <pre>
-Class.forName(&quot;net.ucanaccess.jdbc.UcanaccessDriver&quot;);
 Connection conn = DriverManager.getConnection(&quot;jdbc:ucanaccess:///opt/prova1.mny;jackcessOpener=yourPackage.example.CryptCodecOpener&quot;, &quot;sa&quot;, password);
 ...</pre>
 
@@ -262,7 +254,7 @@ ResultSet rs1 = st.executeQuery(&quot;SELECT IIf(descr='Show must go off', 'tizi
 // Domain aggregate functions:
 ResultSet rs2 = st.executeQuery(&quot;select id, DCount('*','t234','1=1') from t234&quot;);</pre>
         <p>
-            More complete examples of access functions implementation are shown in the <i>net.ucanaccess.test.FunctionsTest</i>
+            More complete examples of access functions implementation are shown in the <i>net.ucanaccess.jdbc.FunctionsTest</i>
             JUnit test suite.<br/>
             The following functions are already implemented:
         </p>
@@ -270,7 +262,7 @@ ResultSet rs2 = st.executeQuery(&quot;select id, DCount('*','t234','1=1') from t
             ASC, ATN, CBOOL, CCUR, CDATE,
             CDBL, CDEC, CINT, CLONG, CSIGN, CSTR, CVAR, DATEADD, DATEDIFF, DATEPART, DATE, DATESERIAL, DATEVALUE, FIX,
             FORMAT, IIF, INSTR, INSTRREV, ISDATE, ISNUMERIC, INT, IsNull, LEN, MID, MONTHNAME, NOW, NZ, PARTITION, SIGN,
-            SPACE, SQR, STR,, STRING, STRCOMP, STRCONV, STRREVERSE, SWITCH, RND, TIME, TIMESERIAL, VAL, WEEKDAY, WEEKDAYNAME
+            SPACE, SQR, STR, STRING, STRCOMP, STRCONV, STRREVERSE, SWITCH, RND, TIME, TIMESERIAL, VAL, WEEKDAY, WEEKDAYNAME
         </p>
         <p>
             Aggregate and Domain Functions:
@@ -282,7 +274,7 @@ ResultSet rs2 = st.executeQuery(&quot;select id, DCount('*','t234','1=1') from t
             Financial Functions:
         </p>
         <p>
-            MT, NPER, IPMT, PPMT, RATE, PV, FV, DDB, SYD, SLN
+            PMT, NPER, IPMT, PPMT, RATE, PV, FV, DDB, SYD, SLN
         </p>
         <p>
             Also you can use the following functions from the hsqldb implementation:
@@ -426,7 +418,7 @@ while (rs.next()) {
 }
 ...</pre>
 
-        <h2>Filtering on Complex Type Columns (since v2.0.9)</h2>
+        <h2>Filtering on Complex Type Columns</h2>
         <p>
             The equality operator (=) can't be used on complex type columns, use the following functions instead.
         </p>
@@ -463,11 +455,11 @@ ps.setObject(1, SingleValue.multipleValue("value1", "value3"));
 ResultSet rs = ps.executeQuery();
 ...</pre>
 
-        <h2>Table renaming (since v4.0.0)</h2>
+        <h2>Table renaming</h2>
         <pre>
 st.execute("ALTER TABLE [My old name] RENAME TO [My new name]");</pre>
 
-        <h2>Add new Column to Existing Table (since v4.0.0)</h2>
+        <h2>Add new Column to Existing Table</h2>
         <pre>
 st.execute("ALTER TABLE xxx ADD COLUMN yyy TEXT");</pre>
         <pre>
@@ -476,23 +468,23 @@ st.execute("ALTER TABLE zzz ADD COLUMN kkk DATETIME NOT NULL DEFAULT now()");</p
         <pre>
 st.execute("ALTER TABLE [222 crazy name] ADD COLUMN [another crazy name] numeric (23,6) default 13.031955 not null");</pre>
 
-        <h2>Add new Index to Existing Table (since v4.0.0)</h2>
+        <h2>Add new Index to Existing Table</h2>
         <pre>
 st.execute("CREATE unique INDEX [index name] on [table name] (a ASC,c ASC )");</pre>
         <pre>
 st.execute("CREATE INDEX [index name] on bbb (a ASC,c ASC )");</pre>
 
-        <h2>Add Primary Key to Existing Table (since v4.0.0)</h2>
+        <h2>Add Primary Key to Existing Table</h2>
         <pre>
 st.execute("ALTER TABLE xxx ADD PRIMARY KEY (column1,column2)");</pre>
 
-        <h2>Foreign Key creation (since v4.0.0)</h2>
+        <h2>Foreign Key creation</h2>
         <pre>
 st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE CASCADE");
 // or
 st.execute("ALTER TABLE x ADD CONSTRAINT constr FOREIGN KEY (colx1,colx2) REFERENCES y (coly1, coly2) ON DELETE SET NULL");</pre>
 
-        <h2>Counters handling (since v3.0.0)</h2>
+        <h2>Counters handling</h2>
         <pre>
 st.execute("DISABLE AUTOINCREMENT ON TABLE_NAME");
 st.execute("ENABLE AUTOINCREMENT ON TABLE_NAME");</pre>
