@@ -4,114 +4,162 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UCanAccess, the JDBC driver for MS Access, has moved to GitHub</title>
-<meta name="description" content="UCanAccess, the pure Java JDBC driver for Microsoft Access databases (.mdb, .accdb), is developed at https://github.com/spannm/ucanaccess. Maven coordinates: io.github.spannm:ucanaccess.">
+<meta name="description"
+    content="UCanAccess, the pure Java JDBC driver for Microsoft Access databases (.mdb, .accdb), is developed at https://github.com/spannm/ucanaccess. Maven coordinates: io.github.spannm:ucanaccess.">
 <link rel="canonical" href="https://github.com/spannm/ucanaccess/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="UCanAccess has moved to GitHub">
-<meta property="og:description" content="The pure Java JDBC driver for Microsoft Access is developed at https://github.com/spannm/ucanaccess.">
+<meta property="og:description"
+    content="The pure Java JDBC driver for Microsoft Access is developed at https://github.com/spannm/ucanaccess.">
 <meta property="og:url" content="https://github.com/spannm/ucanaccess/">
 <meta http-equiv="refresh" content="10; url=https://github.com/spannm/ucanaccess/">
 <style>
 :root {
-  --fg: #1d2329;
-  --muted: #5b6670;
-  --bg: #ffffff;
-  --panel: #f4f6f8;
-  --accent: #e37d34;
-  --accent-dark: #c2631f;
-  --link: #0b5cad;
+    --fg: #1d2329;
+    --muted: #5b6670;
+    --bg: #ffffff;
+    --panel: #f4f6f8;
+    --accent: #e37d34;
+    --accent-dark: #c2631f;
+    --link: #0b5cad;
 }
-* { box-sizing: border-box; }
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.55;
-  color: var(--fg);
-  background: var(--bg);
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+        Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--fg);
+    background: var(--bg);
 }
+
 main {
-  max-width: 44em;
-  margin: 0 auto;
-  padding: 3em 16px 4em;
+    max-width: 44em;
+    margin: 0 auto;
+    padding: 3em 16px 4em;
 }
-.logo { display: block; width: 220px; max-width: 70%; height: auto; margin-bottom: 1.5em; }
+
+.logo {
+    display: block;
+    width: 220px;
+    max-width: 70%;
+    height: auto;
+    margin-bottom: 1.5em;
+}
+
 .tag {
-  display: inline-block;
-  padding: 0.15em 0.6em;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.8em;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
-h1 { font-size: 2.2em; line-height: 1.15; margin: 0.4em 0 0.5em; }
-.lead { font-size: 1.15em; }
+
+h1 {
+    font-size: 2.2em;
+    line-height: 1.15;
+    margin: 0.4em 0 0.5em;
+}
+
+.lead {
+    font-size: 1.15em;
+}
+
 .cta {
-  display: inline-block;
-  margin: 1em 0 0.5em;
-  padding: 0.75em 1.4em;
-  border-radius: 6px;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
+    display: inline-block;
+    margin: 1em 0 0.5em;
+    padding: 0.75em 1.4em;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
 }
-.cta:hover { background: var(--accent-dark); }
-a { color: var(--link); }
-ul.links { padding-left: 1.2em; }
-ul.links li { margin: 0.3em 0; }
+
+.cta:hover {
+    background: var(--accent-dark);
+}
+
+a {
+    color: var(--link);
+}
+
+ul.links {
+    padding-left: 1.2em;
+}
+
+ul.links li {
+    margin: 0.3em 0;
+}
+
 .panel {
-  margin: 2em 0;
-  padding: 1em 1.2em;
-  border-left: 4px solid var(--accent);
-  background: var(--panel);
-  border-radius: 0 6px 6px 0;
+    margin: 2em 0;
+    padding: 1em 1.2em;
+    border-left: 4px solid var(--accent);
+    background: var(--panel);
+    border-radius: 0 6px 6px 0;
 }
-.panel h2 { font-size: 1.1em; margin: 0 0 0.5em; }
+
+.panel h2 {
+    font-size: 1.1em;
+    margin: 0 0 0.5em;
+}
+
 pre {
-  margin: 0.5em 0 0;
-  padding: 0.8em 1em;
-  overflow-x: auto;
-  background: #1d2329;
-  color: #e8edf1;
-  border-radius: 6px;
-  font-size: 14px;
+    margin: 0.5em 0 0;
+    padding: 0.8em 1em;
+    overflow-x: auto;
+    background: #1d2329;
+    color: #e8edf1;
+    border-radius: 6px;
+    font-size: 14px;
 }
-.small { color: var(--muted); font-size: 0.9em; }
+
+.small {
+    color: var(--muted);
+    font-size: 0.9em;
+}
 </style>
 </head>
 <body>
-<main>
-<img class="logo" src="ucanaccess-logo.svg" alt="UCanAccess">
-<span class="tag">Abandoned site</span>
-<h1>This site is dead. UCanAccess is not.</h1>
-<p class="lead">You are on the old SourceForge home of UCanAccess. Nothing here gets updated anymore.
-Its last release, 5.0.1, dates back to January 2021.</p>
-<p>UCanAccess is an open-source, pure Java JDBC driver that reads and writes Microsoft Access
-databases (.mdb and .accdb) without ODBC.
-Development continues on GitHub. Since moving there, UCanAccess has shipped 10 releases with current
-Jackcess and HSQLDB versions and support for Java 11, 17 and 21. The current version is 5.2.0.</p>
-<a class="cta" href="https://github.com/spannm/ucanaccess/">Go to UCanAccess on GitHub</a>
-<ul class="links">
-<li><a href="https://github.com/spannm/ucanaccess/releases">Releases and downloads</a></li>
-<li><a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess/versions">All versions on Maven Central</a></li>
-<li><a href="https://spannm.github.io/ucanaccess/">Documentation</a></li>
-<li><a href="https://github.com/spannm/jackcess/">Jackcess</a>, the maintained fork UCanAccess builds on</li>
-<li><a href="https://hsqldb.org/">HSQLDB</a>, the SQL engine behind UCanAccess</li>
-</ul>
-<div class="panel">
-<h2>Still using net.sf.ucanaccess? Switch now.</h2>
-<p>The Maven coordinates have changed.</p>
-<pre>&lt;dependency&gt;
+    <main>
+        <img class="logo" src="ucanaccess-logo.svg" alt="UCanAccess"> <span class="tag">Abandoned site</span>
+        <h1>This site is dead. UCanAccess is not.</h1>
+        <p class="lead">You are on the old SourceForge home of UCanAccess. Nothing here gets updated anymore. Its
+            last release, 5.0.1, dates back to January 2021.</p>
+        <p>UCanAccess is an open-source, pure Java JDBC driver that reads and writes Microsoft Access databases
+            (.mdb and .accdb) without ODBC. Development continues on GitHub, with regular releases that keep up with
+            current Jackcess and HSQLDB versions and support Java 11, 17 and 21.</p>
+        <a class="cta" href="https://github.com/spannm/ucanaccess/">Go to UCanAccess on GitHub</a>
+        <ul class="links">
+            <li><a href="https://github.com/spannm/ucanaccess/releases">Releases and downloads</a></li>
+            <li><a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess/versions">All
+                    versions on Maven Central</a></li>
+            <li><a href="https://spannm.github.io/ucanaccess/">Documentation</a></li>
+            <li><a href="https://github.com/spannm/jackcess/">Jackcess</a>, the maintained fork UCanAccess builds
+                on</li>
+            <li><a href="https://hsqldb.org/">HSQLDB</a>, the SQL engine behind UCanAccess</li>
+        </ul>
+        <div class="panel">
+            <h2>Still using net.sf.ucanaccess? Switch now.</h2>
+            <p>The Maven coordinates have changed. Use the latest version from
+                <a href="https://central.sonatype.com/artifact/io.github.spannm/ucanaccess">Maven Central</a>.</p>
+            <pre>&lt;dependency&gt;
     &lt;groupId&gt;io.github.spannm&lt;/groupId&gt;
     &lt;artifactId&gt;ucanaccess&lt;/artifactId&gt;
     &lt;version&gt;5.2.0&lt;/version&gt;
 &lt;/dependency&gt;</pre>
-</div>
-<p class="small">You will be taken to GitHub in 10 seconds.</p>
-</main>
+        </div>
+        <p class="small">You will be taken to GitHub in 10 seconds.</p>
+    </main>
 </body>
 </html>
