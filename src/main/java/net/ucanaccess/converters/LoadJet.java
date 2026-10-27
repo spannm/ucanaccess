@@ -20,6 +20,7 @@ import net.ucanaccess.jdbc.DBReference;
 import net.ucanaccess.triggers.*;
 import net.ucanaccess.type.ObjectType;
 import net.ucanaccess.util.Try;
+import net.ucanaccess.util.WarningLog;
 import org.hsqldb.error.ErrorCode;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
     private final Logger               logger;
+    private final WarningLog           warnings;
     private final Connection           conn;
     private final Database             dbIO;
     private boolean                    err;
@@ -62,22 +64,31 @@ public class LoadJet {
 
     public LoadJet(Connection conn, Database dbIO) {
         logger = System.getLogger(getClass().getName());
+        warnings = new WarningLog(logger);
         this.conn = conn;
         this.dbIO = dbIO;
         try {
             ff1997 = FileFormat.V1997.equals(dbIO.getFileFormat());
-        } catch (Exception ignored) {
-            logger.log(Level.WARNING, ignored.getMessage());
+        } catch (Exception ex) {
+            warnings.warn(ex, "Cannot determine the file format of {0}: {1}", dbIO, ex.getMessage());
         }
         metadata = new Metadata(conn);
     }
 
     public void loadDefaultValues(Table t) throws SQLException, IOException {
-        tablesLoader.addTriggersColumnDefault(t);
+        try {
+            tablesLoader.addTriggersColumnDefault(t);
+        } finally {
+            warnings.summarize();
+        }
     }
 
     public void loadDefaultValues(Column cl) throws SQLException, IOException {
-        tablesLoader.addTriggerColumnDefault(cl);
+        try {
+            tablesLoader.addTriggerColumnDefault(cl);
+        } finally {
+            warnings.summarize();
+        }
     }
 
     public String defaultValue4SQL(Column cl) throws IOException {
@@ -90,7 +101,11 @@ public class LoadJet {
     }
 
     public void addFunctions(Class<?> clazz) {
-        functionsLoader.addFunctions(clazz, false);
+        try {
+            functionsLoader.addFunctions(clazz, false);
+        } finally {
+            warnings.summarize();
+        }
     }
 
     private void exec(String expression, boolean logging) throws SQLException {
@@ -101,7 +116,7 @@ public class LoadJet {
             st.executeUpdate(expression);
         } catch (SQLException ex) {
             if (logging && ex.getErrorCode() != TablesLoader.HSQL_FK_ALREADY_EXISTS) {
-                logger.log(Level.WARNING, "Cannot execute {0}: {1}", expression, ex.getMessage());
+                warnings.warn(ex, "Cannot execute {0}: {1}", expression, ex.getMessage());
             }
             throw ex;
         }
@@ -160,6 +175,7 @@ public class LoadJet {
             logger.log(Level.DEBUG, "Loaded queries: {0}", loadedQueries);
             logger.log(Level.DEBUG, "Loaded procedures: {0}", loadedProcedures);
             logger.log(Level.DEBUG, "Loaded indexes: {0}", loadedIndexes);
+            warnings.summarize();
             conn.close();
         }
     }
@@ -302,7 +318,7 @@ public class LoadJet {
         private void createFunctions() {
             for (String functionDef : functionDefinitions) {
                 Try.catching(() -> exec(functionDef, true))
-                    .orElse(e -> logger.log(Level.WARNING, "Failed to create function {0}: {1}", functionDef, e.toString()));
+                    .orElse(e -> warnings.warn(e, "Failed to create function {0}: {1}", functionDef, e.toString()));
             }
 
             functionDefinitions.clear();
@@ -332,7 +348,7 @@ public class LoadJet {
                     header.append(") RETURNS ").append(type).append(" RETURN").append(body);
 
                     Try.catching(() -> exec(header.toString(), true))
-                        .orElse(ex -> logger.log(Level.WARNING, "Failed to create function {0}: {1}", header, ex.toString()));
+                        .orElse(ex -> warnings.warn(ex, "Failed to create function {0}: {1}", header, ex.toString()));
                 }
             }
 
@@ -506,7 +522,7 @@ public class LoadJet {
             String comma = "";
             for (Column col : t.getColumns()) {
                 if ("USER".equalsIgnoreCase(col.getName())) {
-                    logger.log(Level.WARNING, "You should not use the ''user'' reserved word as column name in table {0} "
+                    warnings.warn("You should not use the ''user'' reserved word as column name in table {0} "
                         + "(it refers to the database user). "
                         + "Escape it in your SQL e.g. SELECT [user] FROM table WHERE [user] = ''Joe''", t.getName());
                 }
@@ -643,7 +659,7 @@ public class LoadJet {
                 boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
                 if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
 
-                    logger.log(Level.WARNING, "Unknown expression: {0} (default value of column {1} table {2})",
+                    warnings.warn("Unknown expression: {0} (default value of column {1} table {2})",
                         defVal, col.getName(), col.getTable().getName());
                 } else {
                     if (defFound != null && !defIsFunction) {
@@ -652,7 +668,7 @@ public class LoadJet {
                     if (col.getType() == DataType.TEXT && defVal.toString().startsWith("'")
                         && defVal.toString().endsWith("'")
                         && defVal.toString().length() > col.getLengthInUnits()) {
-                        logger.log(Level.WARNING, "Default values should start and end with a double quote, "
+                        warnings.warn("Default values should start and end with a double quote, "
                             + "the single quote is considered as part of the default value {0} "
                             + "(column {1}, table {2}). It may result in a data truncation error at run-time due to max column size {3}",
                             defVal, col.getName(), col.getTable().getName(), col.getLengthInUnits());
@@ -823,7 +839,7 @@ public class LoadJet {
                 exec(ci.toString(), true);
             } catch (SQLException ex) {
                 if (ex.getErrorCode() == HSQL_FK_ALREADY_EXISTS) {
-                    logger.log(Level.WARNING, ex.getMessage());
+                    warnings.warn(ex, "Cannot create foreign key {0} on table {1}: {2}", nin, ntn, ex.getMessage());
                 } else {
                     throw ex;
                 }
@@ -879,11 +895,10 @@ public class LoadJet {
                         }
                     }
                 }
-                logger.log(Level.WARNING, ex.getMessage());
+                warnings.warn(ex, "Cannot create index {0} on table {1}: {2}", nin, ntn, ex.getMessage());
                 return;
             } catch (Exception ex) {
-
-                logger.log(Level.WARNING, ex.getMessage());
+                warnings.warn(ex, "Cannot create index {0} on table {1}: {2}", nin, ntn, ex.getMessage());
                 return;
             }
             String pre;
@@ -933,7 +948,7 @@ public class LoadJet {
                 default:
                     break;
             }
-            logger.log(Level.WARNING, "Detected {0} constraint breach, table {1}, record {2}: making the table {3} read-only",
+            warnings.warn("Detected {0} constraint breach, table {1}, record {2}: making the table {3} read-only",
                 type, t.getName(), rec, t.getName());
 
             dropTable(t, systemTable);
@@ -1009,7 +1024,7 @@ public class LoadJet {
                             } else {
                                 if (ec == HSQL_NOT_NULL || ec == HSQL_FK_VIOLATION || ec == HSQL_UK_VIOLATION) {
                                     if (ec == HSQL_FK_VIOLATION) {
-                                        logger.log(Level.WARNING, ex.getMessage());
+                                        warnings.warn(ex, "Foreign key violation in table {0}: {1}", t.getName(), ex.getMessage());
                                     }
                                     recreate(t, systemTable, row, ex.getErrorCode());
                                 } else {
@@ -1027,7 +1042,7 @@ public class LoadJet {
 
                 }
                 if (i != t.getRowCount() && step != 1) {
-                    logger.log(Level.WARNING, "Error in the metadata of the table {0}: the table''s row count in metadata is {1} "
+                    warnings.warn("Error in the metadata of the table {0}: the table''s row count in metadata is {1} "
                         + "but {2} records have been found and loaded by UCanAccess. "
                         + "All will work fine, but it''s better to repair your database",
                         t.getName(), t.getRowCount(), i);
@@ -1062,7 +1077,7 @@ public class LoadJet {
 
         private void createCalculatedFieldsTriggers() {
             calculatedFieldsTriggers.forEach(t -> Try.catching(() -> exec(t, false))
-                .orElse(e -> logger.log(Level.WARNING, e.getMessage())));
+                .orElse(e -> warnings.warn(e, "Cannot create calculated field trigger: {0}", e.getMessage())));
         }
 
         private void loadTableIndexesUK(String tn) throws IOException, SQLException {
@@ -1104,14 +1119,14 @@ public class LoadJet {
                 try {
                     Table jt = dbIO.getTable(tn);
                     if (jt == null) {
-                        logger.log(Level.WARNING, "No table ''{0}'' in database ''{1}''", tn, dbIO);
+                        warnings.warn("No table ''{0}'' in database ''{1}''", tn, dbIO);
                         continue;
                     }
 
                     UcanaccessTable ut = new UcanaccessTable(jt, tn);
 
                     if (TableMetaData.Type.LINKED_ODBC == jt.getDatabase().getTableMetaData(tn).getType()) {
-                        logger.log(Level.WARNING, "Skipping table ''{0}'' (linked to an ODBC table)", tn);
+                        warnings.warn("Skipping table ''{0}'' (linked to an ODBC table)", tn);
                         unresolvedTables.add(tn);
                         continue;
                     }
@@ -1120,7 +1135,7 @@ public class LoadJet {
                     loadingOrder.add(ut.getName());
 
                 } catch (Exception ex) {
-                    logger.log(Level.WARNING, "Failed to create table ''{0}'': {1}", tn, ex.getMessage());
+                    warnings.warn(ex, "Failed to create table ''{0}'': {1}", tn, ex.getMessage());
                     unresolvedTables.add(tn);
                 }
 
@@ -1439,7 +1454,7 @@ public class LoadJet {
                 notLoaded.put(query.getName(), ": " + cause);
 
                 if (!err) {
-                    logger.log(Level.WARNING, "Error at first loading attempt of view \''{0}\'', converted view \''{1}\'', error {2}",
+                    warnings.warn(ex, "Error at first loading attempt of view \''{0}\'', converted view \''{1}\'', error {2}",
                         query.getName(), v, ex.toString());
                     err = true;
                 }

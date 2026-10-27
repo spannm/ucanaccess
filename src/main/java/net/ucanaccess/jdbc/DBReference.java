@@ -399,7 +399,7 @@ public final class DBReference {
             }
 
         } catch (Exception ex) {
-            logger.log(Level.WARNING, ex.toString());
+            logger.log(Level.WARNING, "Cannot apply HSQLDB settings: {0}", ex.toString());
         }
     }
 
@@ -491,7 +491,7 @@ public final class DBReference {
                             finalizeHsqlDb(session);
                         }
                     } catch (Exception ex) {
-                        logger.log(Level.WARNING, ex.toString());
+                        logger.log(Level.WARNING, "Cannot close the HSQLDB mirror on shutdown: {0}", ex.toString());
                     }
                 }));
             }

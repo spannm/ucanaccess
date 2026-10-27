@@ -106,7 +106,7 @@ public class Pivot {
                         st.executeUpdate(v);
                     }
                 } catch (Exception ex) {
-                    System.getLogger(Pivot.class.getName()).log(Level.WARNING, ex.getMessage());
+                    System.getLogger(Pivot.class.getName()).log(Level.WARNING, "Cannot update crosstab query {0}: {1}", name, ex.getMessage());
                 }
             }
         }

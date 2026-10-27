@@ -307,7 +307,7 @@ public class UcanaccessConnection implements Connection {
             afterFlushIoHook();
 
         } catch (Throwable ex) {
-            logger.log(Level.WARNING, ex.toString());
+            logger.log(Level.WARNING, "Failed to write changes to the Access file, rolling back: {0}", ex.toString());
             hsqlDBConnection.rollback();
             ibal.clear();
             Iterator<ICommand> it = executed.descendingIterator();
@@ -327,7 +327,7 @@ public class UcanaccessConnection implements Connection {
                 ref.getDbIO().flush();
                 unloadDB();
             } catch (IOException ex2) {
-                logger.log(Level.WARNING, ex2.toString());
+                logger.log(Level.WARNING, "Failed to flush the Access file after rollback: {0}", ex2.toString());
             }
             throw ex instanceof UcanaccessSQLException ? (UcanaccessSQLException) ex : new UcanaccessSQLException(ex);
         }
