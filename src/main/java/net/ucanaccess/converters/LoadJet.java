@@ -376,11 +376,11 @@ public class LoadJet {
         private static final String SYSTEM_SCHEMA            = "SYS";
         private static final int    DEFAULT_STEP             = 2000;
 
-        private final List<String>  unresolvedTables         = new ArrayList<>();
-        private final List<String>  calculatedFieldsTriggers = new ArrayList<>();
-        private final List<String>  loadingOrder             = new ArrayList<>();
-        private final Set<Column>   alreadyIndexed           = new LinkedHashSet<>();
-        private final Set<String>   readOnlyTables           = new LinkedHashSet<>();
+        private final List<String>              unresolvedTables         = new ArrayList<>();
+        private final Map<String, List<String>> calculatedFieldsTriggers = new LinkedHashMap<>();
+        private final List<String>              loadingOrder             = new ArrayList<>();
+        private final Set<Column>               alreadyIndexed           = new LinkedHashSet<>();
+        private final Set<String>               readOnlyTables           = new LinkedHashSet<>();
 
         private String commaSeparated(List<? extends Index.Column> columns, boolean escape) {
             String comma = "";
@@ -530,10 +530,11 @@ public class LoadJet {
                 if (expr != null && constraints) {
                     String tgrI = getCalculatedFieldTrigger(ntn, col, true);
                     String tgrU = getCalculatedFieldTrigger(ntn, col, false);
-                    calculatedFieldsTriggers.add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
+                    List<String> triggers = calculatedFieldsTriggers.computeIfAbsent(tn, k -> new ArrayList<>());
+                    triggers.add(String.format(tgrI, NAMING_COUNTER.getAndIncrement(), SQLConverter.convertFormula(expr)));
                     String uc = getUpdateConditions(col);
                     if (!uc.isEmpty()) {
-                        calculatedFieldsTriggers.add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
+                        triggers.add(String.format(tgrU, NAMING_COUNTER.getAndIncrement(), uc, SQLConverter.convertFormula(expr)));
                     }
 
                 }
@@ -1051,8 +1052,8 @@ public class LoadJet {
                 if (ps != null) {
                     ps.close();
                 }
+                t.getDatabase().setTimeZone(prevJackcessTimeZone);
             }
-            t.getDatabase().setTimeZone(prevJackcessTimeZone);
         }
 
         private void loadTableFKs(String tn, boolean autoref) throws IOException, SQLException {
@@ -1076,8 +1077,12 @@ public class LoadJet {
         }
 
         private void createCalculatedFieldsTriggers() {
-            calculatedFieldsTriggers.forEach(t -> Try.catching(() -> exec(t, false))
-                .orElse(e -> warnings.warn(e, "Cannot create calculated field trigger: {0}", e.getMessage())));
+            calculatedFieldsTriggers.forEach((tn, triggers) -> {
+                if (!unresolvedTables.contains(tn)) {
+                    triggers.forEach(t -> Try.catching(() -> exec(t, false))
+                        .orElse(e -> warnings.warn(e, "Cannot create calculated field trigger on table {0}: {1}", tn, e.getMessage())));
+                }
+            });
         }
 
         private void loadTableIndexesUK(String tn) throws IOException, SQLException {
@@ -1189,11 +1194,26 @@ public class LoadJet {
             for (String tn : loadingOrder) {
                 if (!unresolvedTables.contains(tn)) {
                     UcanaccessTable t = new UcanaccessTable(dbIO.getTable(tn), tn);
-                    loadTableData(t, false);
-                    conn.commit();
-
+                    try {
+                        loadTableData(t, false);
+                        conn.commit();
+                    } catch (Exception ex) {
+                        skipUnreadableTable(t, ex);
+                    }
                 }
             }
+        }
+
+        /**
+         * Drops a table whose data cannot be read, so that the remaining tables can still be loaded.
+         */
+        private void skipUnreadableTable(Table t, Exception ex) throws SQLException {
+            String tn = t.getName();
+            warnings.warn(ex, "Failed to load data of table ''{0}'', skipping it: {1}", tn, ex.getMessage());
+            conn.rollback();
+            dropTable(t, false);
+            readOnlyTables.remove(tn);
+            unresolvedTables.add(tn);
         }
 
         private void createTriggers() throws IOException, SQLException {
