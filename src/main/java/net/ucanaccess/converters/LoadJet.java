@@ -506,9 +506,9 @@ public class LoadJet {
             String comma = "";
             for (Column col : t.getColumns()) {
                 if ("USER".equalsIgnoreCase(col.getName())) {
-                    logger.log(Level.WARNING, "You should not use the 'user' reserved word as column name in table {0} "
+                    logger.log(Level.WARNING, "You should not use the ''user'' reserved word as column name in table {0} "
                         + "(it refers to the database user). "
-                        + "Escape it in your SQL e.g. SELECT [user] FROM table WHERE [user] = 'Joe'", t.getName());
+                        + "Escape it in your SQL e.g. SELECT [user] FROM table WHERE [user] = ''Joe''", t.getName());
                 }
                 String expr = getExpression(col);
                 if (expr != null && constraints) {
@@ -1027,9 +1027,9 @@ public class LoadJet {
 
                 }
                 if (i != t.getRowCount() && step != 1) {
-                    logger.log(Level.WARNING, "Error in the metadata of the table {0}: the table's row count in metadata is {1} "
+                    logger.log(Level.WARNING, "Error in the metadata of the table {0}: the table''s row count in metadata is {1} "
                         + "but {2} records have been found and loaded by UCanAccess. "
-                        + "All will work fine, but it's better to repair your database",
+                        + "All will work fine, but it''s better to repair your database",
                         t.getName(), t.getRowCount(), i);
                 }
             } finally {

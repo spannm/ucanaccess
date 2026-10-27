@@ -175,7 +175,7 @@ public final class UcanaccessDriver implements Driver {
                     }
 
                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -> {
-                        if (cl.getType().isTextual()) {
+                        if (cl.getType().isTextual() && bt != null) {
                             LOGGER.log(Level.WARNING, "Invalid textual value in table {0}, column {1}: it might look like {2}",
                                 cl.getTable().getName(), cl.getName(), new String(bt, cl.getDatabase().getCharset()));
                         }
