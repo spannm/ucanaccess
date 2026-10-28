@@ -137,6 +137,8 @@
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
         <dep.checkstyle.version>14.3.0</dep.checkstyle.version>
+        <!-- fail before lengthy test execution -->
+        <basepom.check.phase-checkstyle>test-compile</basepom.check.phase-checkstyle>
         <basepom.check.checkstyle-config-location>${project.rootDirectory}/build/checkstyle-rules.xml</basepom.check.checkstyle-config-location>
         <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
         <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
@@ -284,6 +286,19 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <configuration>
+                        <rules combine.children="append">
+                            <requirePluginVersions>
+                                <message>Best practice is to always define Maven plugin versions</message>
+                                <banTimestamps>true</banTimestamps>
+                            </requirePluginVersions>
+                        </rules>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <configuration>
                         <scmReleaseCommitComment>chore(release): prepare release @{releaseLabel}</scmReleaseCommitComment>
@@ -368,6 +383,18 @@
         </pluginManagement>
 
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>basepom.default</id>
+                        <!-- fail before lengthy test execution -->
+                        <phase>test-compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <!-- agent is prepared by basepom; add an XML report for the Sonar coverage import -->
