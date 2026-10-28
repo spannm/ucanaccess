@@ -642,13 +642,13 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <!-- skip _compiling_ the tests -->
+                <!-- skip _compiling_ the tests, not just running them -->
                 <maven.test.skip>true</maven.test.skip>
-                <!-- skip execution of tests -->
-                <skipTests>true</skipTests>
 
-                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <basepom.javadoc.skip>true</basepom.javadoc.skip>
                 <basepom.check.skip-extended>true</basepom.check.skip-extended>
+                <basepom.check.skip-checkstyle>true</basepom.check.skip-checkstyle>
+                <basepom.check.skip-pmd>true</basepom.check.skip-pmd>
                 <cyclonedx.skip>true</cyclonedx.skip>
             </properties>
         </profile>
