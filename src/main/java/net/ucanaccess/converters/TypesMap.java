@@ -16,7 +16,8 @@ public final class TypesMap {
         TEXT(SqlConstants.VARCHAR),
         OLE(SqlConstants.BLOB),
         MEMO(SqlConstants.LONGVARCHAR),
-        CURRENCY("DECIMAL(" + DataType.MONEY.getFixedSize() + ", 4)"),
+        // like the columns of existing tables, see JACKCESS_TO_HSQLDB_TYPES_MAP
+        CURRENCY("DECIMAL(100, 4)"),
         GUID("CHAR(38)"),
         COUNTER(SqlConstants.INTEGER),
         AUTOINCREMENT(SqlConstants.INTEGER),
