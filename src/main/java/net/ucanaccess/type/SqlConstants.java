@@ -11,6 +11,7 @@ public final class SqlConstants {
     public static final String ALTER                 = "ALTER";
     public static final String AND                   = "AND";
     public static final String ASC_OR_DESC           = "ASC_OR_DESC";
+    public static final String BIGINT                = "BIGINT";
     public static final String BLOB                  = "BLOB";
     public static final String BOOLEAN               = "BOOLEAN";
     public static final String COLUMN_NAME           = "COLUMN_NAME";

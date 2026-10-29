@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
+import net.ucanaccess.exception.InvalidFunctionParameterException;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AbstractBaseTest;
@@ -178,6 +179,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
     void dateAdd_nullOrUnknownInterval_returnsNullOrThrows() throws UcanaccessSQLException {
         assertThat(Functions.dateAdd(null, 1, TS1)).isNull();
         assertThat(Functions.dateAdd("d", 1, (Timestamp) null)).isNull();
+        assertThat(Functions.dateAdd("d", 1, (String) null)).isNull();
         assertThat(Functions.dateAdd("d", 1, java.sql.Date.valueOf("2026-01-15"))).isEqualTo(java.sql.Date.valueOf("2026-01-16"));
         assertThatThrownBy(() -> Functions.dateAdd("x", 1, TS1)).isInstanceOf(UcanaccessSQLException.class);
     }
@@ -315,6 +317,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.left("abc", 5)).isEqualTo("abc");
         assertThat(Functions.left("abc", 2)).isEqualTo("ab");
         assertThat(Functions.mid("abc", 2)).isEqualTo("bc");
+        assertThat(Functions.mid(null, 2)).isNull();
     }
 
     @Test
@@ -341,8 +344,10 @@ class FunctionsUnitTest extends AbstractBaseTest {
         ",    1, ",
         "aBc, 1, ABC",
         "aBc, 2, abc",
-        "aBc, 3, aBc",
-        "aBc, 4, aBc"
+        "aBc, 4, aBc",
+        "hello WORLD, 3, Hello World",
+        "'a  b', 3, 'A  B'",
+        "o'neil-SMITH x, 3, O'neil-smith X"
     })
     void strConv_conversion_changesCase(String value, int conversion, String expected) {
         assertThat(Functions.strConv(value, conversion)).isEqualTo(expected);
@@ -445,13 +450,116 @@ class FunctionsUnitTest extends AbstractBaseTest {
     @Test
     void numericFunctions_value_computeResult() {
         assertThat(Functions.sgn(2.5)).isEqualTo((short) 1);
-        assertThat(Functions.sgn(0)).isEqualTo((short) 0);
+        assertThat(Functions.sgn(0.0)).isEqualTo((short) 0);
+        assertThat(Functions.sgn(null)).isNull();
         assertThat(Functions.sign(-2.5)).isEqualTo((short) -1);
         assertThat(Functions.val((BigDecimal) null)).isNull();
         assertThat(Functions.val(new BigDecimal("12.5"))).isEqualTo(12.5);
         assertThat(Functions.fix(null)).isNull();
         assertThat(Functions.fix(2.7)).isEqualTo(2.0);
         assertThat(Functions.fix(-2.7)).isEqualTo(-2.0);
+        assertThat(Functions.fix(-2147483649.5)).isEqualTo(-2147483649.0);
+        assertThat(Functions.mint(null)).isNull();
+        assertThat(Functions.mint(-2.5)).isEqualTo(-3L);
+        assertThat(Functions.mint(2147483648.5)).isEqualTo(2147483648L);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => \"{1}\"")
+    @CsvSource(delimiter = '|', quoteCharacter = '"', value = {
+        "0       | \" 0\"",
+        "1       | \" 1\"",
+        "1.5     | \" 1.5\"",
+        "-0.5    | -.5",
+        "0.25    | \" .25\"",
+        "-1110.5 | -1110.5"
+    })
+    void str_number_signOrSpaceWithoutLeadingZero(double value, String expected) {
+        assertThat(Functions.str(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
+        "255,   FF",
+        "-1,    FFFFFFFF",
+        "255.5, 100",
+        "254.5, FE",
+        "4294967296, 100000000"
+    })
+    void hex_number_upperCaseRounded(double value, String expected) {
+        assertThat(Functions.hex(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] \"{0}\" => {1}")
+    @CsvSource(delimiter = '|', quoteCharacter = '"', value = {
+        "&HFF       | 255",
+        "&hFFFF     | -1",
+        "&HFFFFFFFF | -1",
+        "&H10000    | 65536",
+        "&O17       | 15",
+        "&17        | 15",
+        "&H         | 0",
+        "1e3        | 1000",
+        "1d3        | 1000",
+        "-.5E1      | -5",
+        "1e         | 1",
+        "\" 1 2 3\"   | 123",
+        "1.5.3      | 1.5",
+        "+          | 0"
+    })
+    void val_radixExponentOrSeparators_parsesLikeAccess(String value, double expected) {
+        assertThat(Functions.val(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] \"{0}\" => {1}")
+    @CsvSource({
+        "1,      true",
+        "-1,     true",
+        "' 0.5', true",
+        "0,      false",
+        "True,   true",
+        "FALSE,  false"
+    })
+    void cbool_string_numberOrTrueFalse(String value, boolean expected) {
+        assertThat(Functions.cbool(value)).isEqualTo(expected);
+    }
+
+    @Test
+    void cbool_invalidString_throws() {
+        assertThatThrownBy(() -> Functions.cbool("Wahr")).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] Replace({0}, {1}, {2}, {3}, {4}, {5}) => {6}")
+    @CsvSource({
+        "abcb, b,  x,   1, -1, -1, axcx",
+        "aBc,  b,  x,   1, -1, -1, axc",
+        "aBc,  b,  x,   1, -1,  0, aBc",
+        "abcb, b,  x,   1,  1, -1, axcb",
+        "abcb, b,  x,   3, -1, -1, cx",
+        "abcb, b,  x,   5, -1, -1, ''",
+        "abcb, '', x,   1, -1, -1, abcb",
+        "abcb, b,  '',  1, -1, -1, ac",
+        "aaa,  aa, b,   1, -1, -1, ba",
+        "abc,  b,  x,   1,  0, -1, abc",
+        ",     b,  x,   1, -1, -1, "
+    })
+    void replace_startCountAndCompare_replacesLikeAccess(String expression, String find, String replacement, int start, int count,
+        int compare, String expected) throws UcanaccessSQLException {
+        assertThat(Functions.replace(expression, find, replacement, start, count, compare)).isEqualTo(expected);
+    }
+
+    @Test
+    void replace_invalidStart_throws() {
+        assertThatThrownBy(() -> Functions.replace("abc", "b", "x", 0)).isInstanceOf(InvalidFunctionParameterException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] Format(\"{0}\", \"{1}\") => {2}")
+    @CsvSource({
+        "abc, >, ABC",
+        "ABC, <, abc",
+        "a1,  >, A1"
+    })
+    void format_caseSymbol_changesCase(String value, String format, String expected) throws UcanaccessSQLException {
+        assertThat(Functions.format(value, format)).isEqualTo(expected);
     }
 
     @Test
@@ -506,6 +614,19 @@ class FunctionsUnitTest extends AbstractBaseTest {
     @Test
     void timeSerial_hourMinuteSecond_timeOnBaseDate() {
         assertThat(Functions.timeSerial(13, 14, 15)).isEqualTo(Timestamp.valueOf(LocalDateTime.of(1899, 12, 30, 13, 14, 15)));
+        assertThat(Functions.timeSerial(null, 14, 15)).isNull();
+    }
+
+    // values out of range carry over like in Access, a negative total keeps the absolute time of day
+    @ParameterizedTest(name = "[{index}] TimeSerial({0}, {1}, {2}) => {3}")
+    @CsvSource({
+        "25,  0,  0, 1899-12-31 01:00:00",
+        "0,   90, 0, 1899-12-30 01:30:00",
+        "0,   0, -1, 1899-12-30 00:00:01",
+        "-25, 0,  0, 1899-12-29 01:00:00"
+    })
+    void timeSerial_outOfRange_carriesOver(int h, int m, int s, String expected) {
+        assertThat(Functions.timeSerial(h, m, s)).isEqualTo(Timestamp.valueOf(expected));
     }
 
     // Access dates have no time zone, so a daylight saving time change must not affect the result

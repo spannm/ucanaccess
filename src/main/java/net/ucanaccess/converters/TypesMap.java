@@ -12,6 +12,7 @@ public final class TypesMap {
         BYTE(SqlConstants.SMALLINT),
         INTEGER(SqlConstants.SMALLINT),
         LONG(SqlConstants.INTEGER),
+        BIGINT(SqlConstants.BIGINT),
         TEXT(SqlConstants.VARCHAR),
         OLE(SqlConstants.BLOB),
         MEMO(SqlConstants.LONGVARCHAR),
@@ -49,6 +50,7 @@ public final class TypesMap {
 
     static {
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.AUTOINCREMENT, DataType.LONG);
+        ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.BIGINT, DataType.BIG_INT);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.BYTE, DataType.BYTE);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.COUNTER, DataType.LONG);
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.CURRENCY, DataType.MONEY);
@@ -66,7 +68,7 @@ public final class TypesMap {
         ACCESS_TO_JACKCESS_TYPES_MAP.put(AccessType.YESNO, DataType.BOOLEAN);
 
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BIG_BINARY, "BLOB");
-        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BIG_INT, "BIGINT");
+        JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BIG_INT, SqlConstants.BIGINT);
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BINARY, "BLOB");
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BOOLEAN, "BOOLEAN");
         JACKCESS_TO_HSQLDB_TYPES_MAP.put(DataType.BYTE, SqlConstants.SMALLINT);

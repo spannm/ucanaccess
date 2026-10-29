@@ -46,6 +46,11 @@ public final class Functions {
     /** Weeks as in Access by default: starting on Sunday, week 1 contains January 1st. */
     private static final WeekFields    WEEK_FIELDS_SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);
 
+    /** Hexadecimal ({@code &H}) or octal ({@code &O} or just {@code &}) number at the start of a string, as in Val. */
+    private static final Pattern VAL_RADIX   = Pattern.compile("&(?:[Hh]([0-9A-Fa-f]*)|[Oo]?([0-7]*))");
+    /** Decimal number with optional exponent at the start of a string, as in Val. */
+    private static final Pattern VAL_DECIMAL = Pattern.compile("([+-]?\\d*(?:\\.\\d*)?)([eEdD][+-]?\\d+)?");
+
     private Functions() {
     }
 
@@ -149,9 +154,27 @@ public final class Functions {
         } else if (obj instanceof Boolean) {
             return (Boolean) obj;
         } else if (obj instanceof String) {
-            return Boolean.parseBoolean((String) obj);
+            return cboolImpl((String) obj);
         } else {
             return obj instanceof Number && ((Number) obj).intValue() != 0;
+        }
+    }
+
+    /**
+     * Converts a string to a boolean like Access: "True" and "False" in any case, otherwise a number, which is true
+     * unless it is zero.
+     */
+    private static boolean cboolImpl(String value) {
+        String s = value.trim();
+        if ("true".equalsIgnoreCase(s)) {
+            return true;
+        } else if ("false".equalsIgnoreCase(s)) {
+            return false;
+        }
+        try {
+            return new BigDecimal(s).signum() != 0;
+        } catch (NumberFormatException ex) {
+            throw new UcanaccessRuntimeException(String.format("Type mismatch in function CBool: %s", value), ex);
         }
     }
 
@@ -333,7 +356,7 @@ public final class Functions {
 
     @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.MEMO}, returnType = AccessType.DATETIME)
     public static Timestamp dateAdd(String intv, int vl, String dt) throws UcanaccessSQLException {
-        return (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt, false));
+        return dt == null ? null : (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt, false));
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
@@ -599,7 +622,11 @@ public final class Functions {
     }
 
     public static String format(String s, String par, boolean incl) throws UcanaccessSQLException {
-        if (isNumeric(s)) {
+        if (">".equals(par)) {
+            return s.toUpperCase(Locale.getDefault());
+        } else if ("<".equals(par)) {
+            return s.toLowerCase(Locale.getDefault());
+        } else if (isNumeric(s)) {
             if (incl) {
                 return format(Double.parseDouble(s), par);
             }
@@ -898,7 +925,7 @@ public final class Functions {
      */
     @FunctionType(functionName = "Mid", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
     public static String mid(String value, int start) {
-        return mid(value, start, value.length());
+        return value == null ? null : mid(value, start, value.length());
     }
 
     @FunctionType(functionName = "Mid", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
@@ -1000,12 +1027,12 @@ public final class Functions {
      * Returns the sign of a number. If number &gt; 0, it returns 1. If number = 0, it returns 0.
      */
     @FunctionType(functionName = "Sgn", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
-    public static short sgn(double n) {
-        return (short) (n == 0 ? 0 : n > 0 ? 1 : -1);
+    public static Short sgn(Double n) {
+        return n == null ? null : (short) Math.signum(n);
     }
 
     @FunctionType(functionName = "Sign", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
-    public static short sign(double n) {
+    public static Short sign(Double n) {
         return sgn(n);
     }
 
@@ -1018,12 +1045,19 @@ public final class Functions {
     }
 
     /**
-     * Returns a string representation of a number.
+     * Returns a string representation of a number. Like in Access, a positive number or zero has a leading space for
+     * the sign and the zero before the decimal point is left out, so 0.5 becomes " .5".
      */
     @FunctionType(functionName = "Str", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.TEXT)
-    public static String str(double d) {
-        String pre = d > 0 ? " " : "";
-        return Math.round(d) == d ? pre + Math.round(d) : pre + d;
+    public static String str(Double d) {
+        if (d == null) {
+            return null;
+        }
+        String digits = BigDecimal.valueOf(Math.abs(d)).round(new MathContext(15)).stripTrailingZeros().toPlainString();
+        if (digits.startsWith("0.")) {
+            digits = digits.substring(1);
+        }
+        return (d < 0 ? "-" : " ") + digits;
     }
 
     /**
@@ -1054,35 +1088,25 @@ public final class Functions {
         if (val1 == null) {
             return null;
         }
-        String val = val1.toString().trim();
-        int lp = val.lastIndexOf('.');
-        char[] ca = val.toCharArray();
-        StringBuilder sb = new StringBuilder();
-        int minLength = 1;
-        for (int i = 0; i < ca.length; i++) {
-            char c = ca[i];
-            if (c == ' ') {
-                continue;
+        // like Access, ignore blanks, tabs and line feeds anywhere in the string
+        String val = val1.toString().replaceAll("[ \\t\\n\\r]", "");
+        Matcher radix = VAL_RADIX.matcher(val);
+        if (radix.lookingAt()) {
+            boolean hex = radix.group(1) != null;
+            String digits = hex ? radix.group(1) : radix.group(2);
+            if (digits.isEmpty()) {
+                return 0.0d;
             }
-            if ((c == '-' || c == '+') && i == 0) {
-                minLength++;
-                sb.append(c);
-            } else if (Character.isDigit(c)) {
-                sb.append(c);
-            } else if (c == '.' && i == lp) {
-                sb.append(c);
-                if (i == 0 || (i == 1 && minLength == 2)) {
-                    minLength++;
-                }
-            } else {
-                break;
-            }
+            long l = Long.parseLong(digits, hex ? 16 : 8);
+            // like VBA literals, &HFFFF is an integer (-1) and &HFFFFFFFF a long integer (-1)
+            return l <= 0xFFFFL ? (double) (short) l : l <= 0xFFFFFFFFL ? (double) (int) l : (double) l;
         }
-        if (sb.length() < minLength) {
+        Matcher decimal = VAL_DECIMAL.matcher(val);
+        if (!decimal.lookingAt() || !decimal.group(1).matches(".*\\d.*")) {
             return 0.0d;
-        } else {
-            return Double.parseDouble(sb.toString());
         }
+        String number = decimal.group(1) + Objects.toString(decimal.group(2), "").replaceFirst("[dD]", "e");
+        return Double.parseDouble(number);
     }
 
     /**
@@ -1102,13 +1126,12 @@ public final class Functions {
     @FunctionType(functionName = "WeekdayName", argumentTypes = {AccessType.LONG, AccessType.YESNO, AccessType.LONG}, returnType = AccessType.TEXT)
     public static String weekdayName(int num, boolean abbreviate, int firstDayOfWeek) {
         // DayOfWeek starts with Monday, WeekdayName with Sunday (default)
+        if (num < 1 || num > 7) {
+            UcanaccessRuntimeException.throwNow(String.format("Invalid weekday number for function WeekdayName: %d", num));
+        }
         int fdow = Math.min(Math.max(1, firstDayOfWeek), 7);
         int offset = fdow == 1 ? -1 : fdow - 2;
-        int number = num;
-        while (number > 7) {
-            number -= 7;
-        }
-        return DayOfWeek.of(number).plus(offset)
+        return DayOfWeek.of(num).plus(offset)
             .getDisplayName(abbreviate ? TextStyle.SHORT : TextStyle.FULL, Locale.getDefault());
     }
 
@@ -1140,15 +1163,19 @@ public final class Functions {
     }
 
     /**
-     * Returns a time given an hour, minute, and second value.
+     * Returns a time given an hour, minute, and second value. Like in Access, values out of range carry over into the
+     * next unit, so 25 hours are one day and one hour after the base date 1899-12-30. A negative total keeps its days
+     * before the base date, while the time of day is the absolute remainder, as Access stores negative dates.
      */
     @FunctionType(functionName = "TimeSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
     public static Timestamp timeSerial(Integer h, Integer m, Integer s) {
-        return new Timestamp(LocalDateTime.now(ZoneId.systemDefault())
-            .withYear(1899).withMonth(12).withDayOfMonth(30)
-            .truncatedTo(ChronoUnit.SECONDS)
-            .withHour(h).withMinute(m).withSecond(s)
-            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        if (h == null || m == null || s == null) {
+            return null;
+        }
+        long seconds = h * 3600L + m * 60L + s;
+        return Timestamp.valueOf(ACCESS_BASE_DATE
+            .plusDays(seconds / 86400)
+            .plusSeconds(Math.abs(seconds % 86400)));
     }
 
     /**
@@ -1192,6 +1219,96 @@ public final class Functions {
     }
 
     /**
+     * Returns the hexadecimal representation of a number, rounded to a whole number first. Like in Access, negative
+     * numbers in the range of a long integer are shown as 32-bit two's complement.
+     *
+     * @param number number to convert, if {@code null}, {@code null} is returned
+     * @return upper case hexadecimal digits
+     */
+    @FunctionType(namingConflict = true, functionName = "Hex", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String hex(Double number) {
+        if (number == null) {
+            return null;
+        }
+        long l = (long) Math.rint(number);
+        String hex = l == (int) l ? Integer.toHexString((int) l) : Long.toHexString(l);
+        return hex.toUpperCase(Locale.ROOT);
+    }
+
+    /**
+     * Replaces all occurrences of a substring, ignoring case like Access queries do by default.
+     */
+    @FunctionType(namingConflict = true, functionName = "Replace", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String replace(String expression, String find, String replacement) throws UcanaccessSQLException {
+        return replace(expression, find, replacement, 1, -1, -1);
+    }
+
+    /**
+     * Replaces all occurrences of a substring, returning the string from the start position on.
+     */
+    @FunctionType(namingConflict = true, functionName = "Replace", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String replace(String expression, String find, String replacement, Integer start) throws UcanaccessSQLException {
+        return replace(expression, find, replacement, start, -1, -1);
+    }
+
+    /**
+     * Replaces at most the given number of occurrences of a substring, returning the string from the start position on.
+     */
+    @FunctionType(namingConflict = true, functionName = "Replace", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String replace(String expression, String find, String replacement, Integer start, Integer count) throws UcanaccessSQLException {
+        return replace(expression, find, replacement, start, count, -1);
+    }
+
+    /**
+     * Replaces occurrences of a substring like the Access function Replace.
+     *
+     * @param expression  string to search in, if {@code null}, {@code null} is returned
+     * @param find        substring to replace
+     * @param replacement replacement string
+     * @param start       position to start at, the part before it is left out of the result
+     * @param count       maximum number of replacements, -1 for all
+     * @param compare     0 for binary comparison, -1, 1 or 2 for text comparison ignoring case
+     * @return string from the start position on with the replacements made
+     * @throws UcanaccessSQLException if start, count or compare are invalid
+     */
+    @FunctionType(namingConflict = true, functionName = "Replace",
+        argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String replace(String expression, String find, String replacement, Integer start, Integer count, Integer compare)
+        throws UcanaccessSQLException {
+        if (expression == null || find == null || replacement == null || start == null || count == null || compare == null) {
+            return null;
+        } else if (start < 1) {
+            throw new InvalidFunctionParameterException("Replace", start);
+        } else if (count < -1) {
+            throw new InvalidFunctionParameterException("Replace", count);
+        } else if (compare < -1 || compare > 2) {
+            throw new InvalidFunctionParameterException("Replace", compare);
+        } else if (start > expression.length()) {
+            return "";
+        }
+        String text = expression.substring(start - 1);
+        if (find.isEmpty() || count == 0) {
+            return text;
+        }
+        boolean ignoreCase = compare != 0;
+        StringBuilder sb = new StringBuilder(text.length());
+        int replaced = 0;
+        int pos = 0;
+        int i = 0;
+        while (i <= text.length() - find.length() && (count == -1 || replaced < count)) {
+            if (text.regionMatches(ignoreCase, i, find, 0, find.length())) {
+                sb.append(text, pos, i).append(replacement);
+                i += find.length();
+                pos = i;
+                replaced++;
+            } else {
+                i++;
+            }
+        }
+        return sb.append(text, pos, text.length()).toString();
+    }
+
+    /**
      * Returns a string converted as specified.
      */
     @FunctionType(functionName = "StrConv", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
@@ -1202,10 +1319,24 @@ public final class Functions {
             return value.toUpperCase(Locale.getDefault());
         } else if (conversion == 2) { // vbLowerCase
             return value.toLowerCase(Locale.getDefault());
-        } else if (conversion == 3) { // vbProperCase: not implemented
-            return value;
+        } else if (conversion == 3) { // vbProperCase
+            return properCase(value);
         }
         return value;
+    }
+
+    /**
+     * Converts the first letter of every word to upper case and all other letters to lower case.
+     */
+    private static String properCase(String value) {
+        StringBuilder sb = new StringBuilder(value.length());
+        boolean wordStart = true;
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            sb.append(wordStart ? Character.toUpperCase(c) : Character.toLowerCase(c));
+            wordStart = Character.isWhitespace(c) || c == '\0';
+        }
+        return sb.toString();
     }
 
     /**
@@ -1248,11 +1379,12 @@ public final class Functions {
     }
 
     /**
-     * Returns the integer portion of a number.
+     * Returns the integer portion of a number, rounding negative numbers down like Access. The result is a 64-bit
+     * integer, so unlike a long integer it also holds values beyond 2147483647, as Access does.
      */
-    @FunctionType(functionName = "Int", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
-    public static Integer mint(Double value) {
-        return new BigDecimal((long) Math.floor(value)).intValueExact();
+    @FunctionType(functionName = "Int", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.BIGINT)
+    public static Long mint(Double value) {
+        return value == null ? null : BigDecimal.valueOf(Math.floor(value)).longValueExact();
     }
 
     @FunctionType(functionName = "Int", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
@@ -1667,12 +1799,9 @@ public final class Functions {
      * @param number a double or any valid numeric expression, if {@code null}, {@code null} is returned
      * @return integer portion
      */
-    @SuppressWarnings("PMD.UnnecessaryCast")
     @FunctionType(namingConflict = true, functionName = "Fix", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static Double fix(Double number) {
-        return number == null
-            ? null
-            : sign(number) * (double) mint(Math.abs(number));
+        return number == null ? null : number < 0 ? Math.ceil(number) : Math.floor(number);
     }
 
     @FunctionType(functionName = "PARTITION", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.MEMO)

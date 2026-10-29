@@ -1,8 +1,10 @@
 package net.ucanaccess.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import net.ucanaccess.converters.Functions;
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.test.AccessVersionSource;
 import net.ucanaccess.test.UcanaccessBaseTest;
 import net.ucanaccess.type.AccessVersion;
@@ -409,6 +411,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testReplace(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT Replace('alphabet', 'bet', 'hydr') FROM t_funcs", singleRec("alphahydr"));
+        checkQuery("SELECT Replace('aBcb', 'b', 'x'), Replace('abcb', 'b', 'x', 3), Replace('abcb', 'b', 'x', 1, 1), "
+            + "Replace('aBc', 'b', 'x', 1, -1, 0) FROM t_funcs", singleRec("axcx", "cx", "axcb", "aBc"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -588,7 +592,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         assertEquals("Monday", Functions.weekdayName(2, false, 1));
         assertEquals("Monday", Functions.weekdayName(1, false, 2));
         assertEquals("Tuesday", Functions.weekdayName(2, false, 2));
-        assertEquals("Sat", Functions.weekdayName(14, true, 1));
+        assertThatThrownBy(() -> Functions.weekdayName(8, true, 1)).isInstanceOf(UcanaccessRuntimeException.class);
 
         init(accessVersion);
         checkQuery("SELECT WeekDayName(3) FROM t_funcs", singleRec("Tuesday"));
@@ -638,7 +642,14 @@ class FunctionsTest extends UcanaccessBaseTest {
     @AccessVersionSource
     void testInt(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
-        checkQuery("SELECT int(1111112.5), int(-2.5) FROM t_funcs", singleRec(1111112, -3));
+        checkQuery("SELECT int(1111112.5), int(-2.5), int(2147483648.5) FROM t_funcs", singleRec(1111112L, -3L, 2147483648L));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testHex(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Hex(255), Hex(-1), Hex(255.5) FROM t_funcs", singleRec("FF", "FFFFFFFF", "100"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
