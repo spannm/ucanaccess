@@ -588,6 +588,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT DateSerial(1998,5, 10) FROM t_funcs", recs(rec(sdf.parse("1998-05-10 00:00:00"))));
+        checkQuery("SELECT DateSerial(26, 1, 1), DateSerial(99, 12, 31), DateSerial(2026, 1.5, 1) FROM t_funcs",
+            singleRec(Timestamp.valueOf("2026-01-01 00:00:00"), Timestamp.valueOf("1999-12-31 00:00:00"), Timestamp.valueOf("2026-02-01 00:00:00")));
         checkQuery("SELECT 'It works, I can''t believe it.' FROM t_funcs" + " WHERE #05/13/1992#=dateserial(1992,05,13)",
             singleRec("It works, I can't believe it."));
     }

@@ -11,8 +11,6 @@ import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.ext.FunctionType;
 import net.ucanaccess.util.Try;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -36,7 +34,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Functions {
-    private static final Logger LOGGER = System.getLogger(Functions.class.getName());
     private static SecureRandom random;
     private static Double       rnd;
     private static Double       lastRnd;
@@ -48,11 +45,13 @@ public final class Functions {
     private static final LocalDateTime ACCESS_BASE_DATE = LocalDateTime.of(1899, 12, 30, 0, 0);
 
     /** Hexadecimal ({@code &H}) or octal ({@code &O} or just {@code &}) number at the start of a string, as in Val. */
-    private static final Pattern VAL_RADIX   = Pattern.compile("&(?:[Hh]([0-9A-Fa-f]*)|[Oo]?([0-7]*))");
-    /** Time of day with optional seconds and AM/PM, as in TimeValue. */
-    private static final Pattern TIME_VALUE  = Pattern.compile("(\\d{1,2}):(\\d{1,2})(?::(\\d{1,2}))?\\s*([AaPp][Mm]?)?");
+    private static final Pattern VAL_RADIX            = Pattern.compile("&(?:[Hh]([0-9A-Fa-f]*)|[Oo]?([0-7]*))");
+    /** Time of day with optional minutes, seconds and AM/PM, as in TimeValue. */
+    private static final Pattern TIME_VALUE           = Pattern.compile("(\\d{1,2})(?::(\\d{1,2})(?::(\\d{1,2}))?)?\\s*([AaPp][Mm]?)?");
+    /** Time without seconds at the end of a date string, optionally with AM or PM. */
+    private static final Pattern TIME_WITHOUT_SECONDS = Pattern.compile("(?<![:\\d])(\\d{1,2}:\\d{1,2})(\\s*(?:[AaPp][Mm])?)$");
     /** Decimal number with optional exponent at the start of a string, as in Val. */
-    private static final Pattern VAL_DECIMAL = Pattern.compile("([+-]?\\d*(?:\\.\\d*)?)([eEdD][+-]?\\d+)?");
+    private static final Pattern VAL_DECIMAL          = Pattern.compile("([+-]?\\d*(?:\\.\\d*)?)([eEdD][+-]?\\d+)?");
 
     private Functions() {
     }
@@ -704,17 +703,31 @@ public final class Functions {
     }
 
     /**
-     * Returns a date for a specified year, month, and day.
+     * Returns a date for a specified year, month, and day. Like in Access, the arguments are rounded to whole numbers,
+     * month and day may lie outside their usual range and then roll over, and a year from 0 to 99 means 2000 to 2049
+     * or 1950 to 1999, the default of Windows.
      *
-     * @param year number between 100 and 9999, inclusive, or a numeric expression
-     * @param month any numeric expression
-     * @param day any numeric expression
-     * @return date
+     * @param year  year from 100 to 9999, or 0 to 99 for a two-digit year
+     * @param month month, rolling over into other years
+     * @param day   day, rolling over into other months
+     * @return date, {@code null} if an argument is {@code null}
      */
-    @FunctionType(functionName = "DateSerial", argumentTypes = {AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.DATETIME)
-    public static Timestamp dateSerial(int year, int month, int day) {
-        // month and day may lie outside their usual range and then roll over, like in Access
-        return Timestamp.valueOf(LocalDate.of(year, 1, 1).plusMonths(month - 1L).plusDays(day - 1L).atStartOfDay());
+    @FunctionType(functionName = "DateSerial", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DATETIME)
+    public static Timestamp dateSerial(Double year, Double month, Double day) {
+        if (year == null || month == null || day == null) {
+            return null;
+        }
+        long y = (long) Math.rint(year);
+        if (y >= 0 && y <= 99) {
+            y += y < 50 ? 2000 : 1900;
+        }
+        LocalDate date = LocalDate.of(1, 1, 1).plusYears(y - 1)
+            .plusMonths((long) Math.rint(month) - 1)
+            .plusDays((long) Math.rint(day) - 1);
+        if (date.getYear() < 100 || date.getYear() > 9999) {
+            UcanaccessRuntimeException.throwNow(String.format("Date out of range in function DateSerial: %s", date));
+        }
+        return Timestamp.valueOf(date.atStartOfDay());
     }
 
     @FunctionType(functionName = "DateValue", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
@@ -747,6 +760,29 @@ public final class Functions {
     }
 
     private static Timestamp dateValue(String dt, boolean onlyDate) {
+        if (dt == null) {
+            return null;
+        }
+        String s = dt.trim();
+        if (isTime(TIME_VALUE.matcher(s))) {
+            // a time alone is a time on the base date, as in Access
+            return onlyDate ? Timestamp.valueOf(ACCESS_BASE_DATE) : timeValue(s);
+        }
+        Timestamp t = parseDate(s, onlyDate);
+        if (t == null && TIME_WITHOUT_SECONDS.matcher(s).find()) {
+            t = parseDate(TIME_WITHOUT_SECONDS.matcher(s).replaceFirst("$1:00$2"), onlyDate);
+        }
+        return t;
+    }
+
+    /**
+     * Parses a date with the first date format of the regional settings that matches the whole string.
+     *
+     * @param dt       string to parse
+     * @param onlyDate whether to drop the time
+     * @return date, or {@code null} if no format matches
+     */
+    private static Timestamp parseDate(String dt, boolean onlyDate) {
         RegionalSettings reg = getRegionalSettings();
         if (!"true".equalsIgnoreCase(reg.getRS())
             && (!"PM".equalsIgnoreCase(reg.getPM()) || !"AM".equalsIgnoreCase(reg.getAM()))) {
@@ -758,8 +794,10 @@ public final class Functions {
             SimpleDateFormat sdf = entry.getKey();
             boolean yearOverride = entry.getValue();
 
-            try {
-                Timestamp t = new Timestamp(sdf.parse(dt).getTime());
+            ParsePosition pos = new ParsePosition(0);
+            Date parsed = sdf.parse(dt, pos);
+            if (parsed != null && pos.getIndex() == dt.length()) {
+                Timestamp t = new Timestamp(parsed.getTime());
                 if (onlyDate) {
                     t = dateValue(t);
                 }
@@ -771,8 +809,6 @@ public final class Functions {
                     t = new Timestamp(cl.getTime().getTime());
                 }
                 return t;
-            } catch (ParseException ignored) {
-                LOGGER.log(Level.DEBUG, "Ignoring {0}", ignored.toString());
             }
         }
         return null;
@@ -1680,15 +1716,13 @@ public final class Functions {
         RegionalSettings reg = getRegionalSettings();
         String s = value.trim().replace(reg.getAM(), "AM").replace(reg.getPM(), "PM");
         Matcher m = TIME_VALUE.matcher(s);
-        if (m.matches()) {
+        if (isTime(m)) {
             int hour = Integer.parseInt(m.group(1));
-            int minute = Integer.parseInt(m.group(2));
+            int minute = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
             int second = m.group(3) == null ? 0 : Integer.parseInt(m.group(3));
             String amPm = m.group(4);
-            if (amPm != null) {
-                if (hour < 1 || hour > 12) {
-                    UcanaccessRuntimeException.throwNow(String.format("Type mismatch in function TimeValue: %s", value));
-                }
+            // like Access, AM and PM only apply to hours up to 12
+            if (amPm != null && hour <= 12) {
                 hour = hour % 12 + (Character.toUpperCase(amPm.charAt(0)) == 'P' ? 12 : 0);
             }
             if (hour > 23 || minute > 59 || second > 59) {
@@ -1701,6 +1735,13 @@ public final class Functions {
             UcanaccessRuntimeException.throwNow(String.format("Type mismatch in function TimeValue: %s", value));
         }
         return timeValue(dt);
+    }
+
+    /**
+     * Returns whether a matcher of {@link #TIME_VALUE} matches a time, which needs minutes or AM/PM after the hour.
+     */
+    private static boolean isTime(Matcher m) {
+        return m.matches() && (m.group(2) != null || m.group(4) != null);
     }
 
     /**

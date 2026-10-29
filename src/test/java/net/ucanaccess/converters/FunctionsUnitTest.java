@@ -737,6 +737,28 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.nz(TS1, TS2)).isEqualTo(TS1);
     }
 
+    // a time without seconds used to be dropped, and a time alone was not recognized
+    @ParameterizedTest(name = "[{index}] CDate(\"{0}\") => {1}")
+    @CsvSource({
+        "2026-10-29 13:14,       2026-10-29 13:14:00",
+        "2026-10-29 13:14:15,    2026-10-29 13:14:15",
+        "10/29/2026 1:14 PM,     2026-10-29 13:14:00",
+        "13:14,                  1899-12-30 13:14:00",
+        "1:14 PM,                1899-12-30 13:14:00",
+        "' 2026-10-29 ',         2026-10-29 00:00:00"
+    })
+    void cdate_textWithTime_keepsTime(String value, String expected) {
+        assertThat(Functions.cdate(value)).isEqualTo(Timestamp.valueOf(expected));
+    }
+
+    @Test
+    void dateValue_textWithTimeOrTimeAlone_dateOnly() {
+        assertThat(Functions.dateValue("2026-10-29 13:14")).isEqualTo(Timestamp.valueOf("2026-10-29 00:00:00"));
+        assertThat(Functions.dateValue("13:14")).isEqualTo(Timestamp.valueOf("1899-12-30 00:00:00"));
+        assertThat(Functions.isDate("13:14")).isTrue();
+        assertThat(Functions.isDate("2026-10-29x")).isFalse();
+    }
+
     // the fraction of a negative date value is a positive time, as Access stores negative dates
     @ParameterizedTest(name = "[{index}] CDate({0}) => {1}")
     @CsvSource({
@@ -938,6 +960,8 @@ class FunctionsUnitTest extends AbstractBaseTest {
         "' 1:14 PM ',            1899-12-30 13:14:00",
         "12:30 am,               1899-12-30 00:30:00",
         "12:00 PM,               1899-12-30 12:00:00",
+        "13:00 PM,               1899-12-30 13:00:00",
+        "8 PM,                   1899-12-30 20:00:00",
         "8:05,                   1899-12-30 08:05:00",
         "2026-10-29 13:14:15,    1899-12-30 13:14:15",
         "10/29/2026 1:14:15 PM,  1899-12-30 13:14:15"
@@ -947,7 +971,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
     }
 
     @ParameterizedTest(name = "[{index}] TimeValue(\"{0}\")")
-    @ValueSource(strings = {"25:00", "10:60", "13:00 PM", "abc"})
+    @ValueSource(strings = {"25:00", "24:00", "10:60", "8", "08:15:30.5", "abc"})
     void timeValue_invalidText_throws(String value) {
         assertThatThrownBy(() -> Functions.timeValue(value)).isInstanceOf(UcanaccessRuntimeException.class);
     }
@@ -958,6 +982,29 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.timeValue((Timestamp) null)).isNull();
         assertThat(Functions.timeValue((String) null)).isNull();
         assertThat(Functions.timer()).isBetween(0.0, 86400.0);
+    }
+
+    @ParameterizedTest(name = "[{index}] DateSerial({0}, {1}, {2}) => {3}")
+    @CsvSource({
+        "2026, 13,  1,  2027-01-01",
+        "2026, 0,   0,  2025-11-30",
+        "2026, -1,  -1, 2025-10-30",
+        "2026, 1.5, 1,  2026-02-01",
+        "26,   1,   1,  2026-01-01",
+        "49,   1,   1,  2049-01-01",
+        "50,   1,   1,  1950-01-01",
+        "99,   12,  31, 1999-12-31",
+        "100,  1,   1,  0100-01-01"
+    })
+    void dateSerial_rollOverAndTwoDigitYear_likeAccess(double year, double month, double day, String expected) {
+        assertThat(Functions.dateSerial(year, month, day)).isEqualTo(Timestamp.valueOf(expected + " 00:00:00"));
+    }
+
+    @Test
+    void dateSerial_nullOrOutOfRange_nullOrThrows() {
+        assertThat(Functions.dateSerial(null, 1.0, 1.0)).isNull();
+        assertThatThrownBy(() -> Functions.dateSerial(10000.0, 1.0, 1.0)).isInstanceOf(UcanaccessRuntimeException.class);
+        assertThatThrownBy(() -> Functions.dateSerial(9999.0, 12.0, 32.0)).isInstanceOf(UcanaccessRuntimeException.class);
     }
 
     // values out of range carry over like in Access, a negative total keeps the absolute time of day

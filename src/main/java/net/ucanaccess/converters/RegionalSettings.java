@@ -53,8 +53,12 @@ public final class RegionalSettings {
 
         addDateP("MMM dd,yyyy", false, false);
         addDateP("MM dd,yyyy", false, false);
+        addDateP("MMM dd hh:mm:ss a", false, true);
+        addDateP("MM dd hh:mm:ss a", false, true);
         addDateP("MMM dd hh:mm:ss", false, true);
         addDateP("MM dd hh:mm:ss", false, true);
+        addDateP("MMM yy hh:mm:ss a", false, false);
+        addDateP("MM yy hh:mm:ss a", false, false);
         addDateP("MMM yy hh:mm:ss", false, false);
         addDateP("MM yy hh:mm:ss", false, false);
         // locale is MM/dd/yyyy like in US but user is trying to parse something like 22/11/2003
