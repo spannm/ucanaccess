@@ -76,6 +76,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT id / 1000, 10 / 4, 0.09 / 12, 8 / 4 / 2, 1 + 6 / 3 * 2 FROM t_funcs", singleRec(1.234, 2.5, 0.0075, 1.0, 5.0));
         checkQuery("SELECT Pmt(0.09 / 12, 252, 140233) FROM t_funcs", singleRec(-1240.474495757593));
+        checkQuery("SELECT 1E2 + id, CStr(1E-5) FROM t_funcs", singleRec(1334.0, "0.00001"));
     }
 
     // a NUMERIC function argument used to lose its decimal places

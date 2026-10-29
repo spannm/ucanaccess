@@ -171,6 +171,19 @@ class SQLConverterTest extends AbstractBaseTest {
         void convertSQL_division_floatingPoint(String sql, String expected) {
             assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
         }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT #2026-01-01 23:59# FROM t      | SELECT Timestamp0('2026-01-01 23:59:00') FROM t",
+                "SELECT #1/2/2026 1:14 PM# FROM t      | SELECT (Timestamp0('2026-1-2 1:14:00')+ 12 Hour)  FROM t",
+                "SELECT #2026-01-01 23:59:58# FROM t   | SELECT Timestamp0('2026-01-01 23:59:58') FROM t"
+            }
+        )
+        void convertSQL_dateLiteralWithoutSeconds_secondsAdded(String sql, String expected) {
+            assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
+        }
     }
 
     @Nested
@@ -183,7 +196,10 @@ class SQLConverterTest extends AbstractBaseTest {
             value = {
                 "SELECT 1abc2, x FROM t | SELECT Z_1abc2, x FROM t",
                 "SELECT 1a1a1 FROM t    | SELECT Z_1a1a1 FROM t",
-                "SELECT 123 FROM t      | SELECT 123 FROM t"
+                "SELECT 123 FROM t      | SELECT 123 FROM t",
+                "SELECT 1E20 FROM t     | SELECT 1E20 FROM t",
+                "SELECT 1e-5, 2E+3 FROM t | SELECT 1e-5, 2E+3 FROM t",
+                "SELECT 1E2x FROM t     | SELECT Z_1E2x FROM t"
             }
         )
         void testDigitStartingIdentifiers(String sql, String expected) {

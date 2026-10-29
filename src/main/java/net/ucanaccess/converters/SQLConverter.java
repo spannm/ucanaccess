@@ -34,6 +34,9 @@ public final class SQLConverter {
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
         private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
+        // time without seconds in a date literal
+        private static final Pattern       DATE_NO_SECONDS            = Pattern.compile(
+            "#([^#]*?)(?<![:\\d])(\\d{1,2}:\\d{1,2})(\\s*(?:AM|PM)?)#", Pattern.CASE_INSENSITIVE);
         // division operator, but not the start or end of a comment
         private static final Pattern       DIVISION                   = Pattern.compile("(?<![/*])/(?![/*])");
         // text variants of string functions, which behave like the base function except for Null
@@ -503,6 +506,8 @@ public final class SQLConverter {
     }
 
     public static String convertAccessDate(String sql) {
+        // a time without seconds like in #2026-01-01 23:59# gets seconds, which the patterns below require
+        sql = Patterns.DATE_NO_SECONDS.matcher(sql).replaceAll("#$1$2:00$3#");
         sql = sql.replaceAll("#" + DATE_ACCESS_FORMAT + "#", "Timestamp('$3-$1-$2 00:00:00')")
                 // FORMAT MM/dd/yyyy
                 .replaceAll("#" + DATE_ACCESS_FORMAT + "\\s*(" + HHMMSS_ACCESS_FORMAT + ")#", "Timestamp0('$3-$1-$2 $4')")
@@ -679,13 +684,25 @@ public final class SQLConverter {
             if (Character.isLetter(grp0.charAt(0))) {
                 return sql;
             }
-            String prefix = grp0.matches("\\.(\\d)+[Ee](\\d)+\\s") || grp0.matches("\\.(\\d)+[Ee][-+]") ? "" : "Z_";
+            String prefix = isExponentLiteral(m.group(2), m.group(3)) ? "" : "Z_";
             String build = m.group(1) + prefix + m.group(2);
             sql = sql.substring(0, m.start()) + build
                     + replaceDigitStartingIdentifiers(m.group(3) + sql.substring(m.end()));
         }
 
         return sql;
+    }
+
+    /**
+     * Returns whether a word starting with a digit is a number with exponent like 1E20, rather than an identifier. The
+     * word ends before the sign of a negative or explicitly positive exponent like in 1E-5.
+     *
+     * @param word word starting with a digit
+     * @param next character after the word
+     * @return true for a number with exponent
+     */
+    private static boolean isExponentLiteral(String word, String next) {
+        return word.matches("\\d+[Ee]\\d+") || (word.matches("\\d+[Ee]") && ("-".equals(next) || "+".equals(next)));
     }
 
     private static String convertXescaped(String sqlc) {
