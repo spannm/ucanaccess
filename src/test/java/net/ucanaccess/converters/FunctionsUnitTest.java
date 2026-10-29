@@ -810,6 +810,30 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.str(value)).isEqualTo(expected);
     }
 
+    // like Access, both operands are rounded first and the result has the sign of the dividend
+    @ParameterizedTest(name = "[{index}] {0} Mod {1} = {2}, {0} \\ {1} = {3}")
+    @CsvSource({
+        "5,    3, 2,  1",
+        "-5,   3, -2, -1",
+        "5,    -3, 2, -1",
+        "5.5,  2, 0,  3",
+        "2.5,  2, 0,  1",
+        "7.6,  2, 0,  4",
+        "-7,   2, -1, -3"
+    })
+    void accessModIntDiv_operands_roundedLikeAccess(double dividend, double divisor, int mod, int quotient) {
+        assertThat(Functions.accessMod(dividend, divisor)).isEqualTo(mod);
+        assertThat(Functions.accessIntDiv(dividend, divisor)).isEqualTo(quotient);
+    }
+
+    @Test
+    void accessModIntDiv_nullOrZero_nullOrThrows() {
+        assertThat(Functions.accessMod(null, 2.0)).isNull();
+        assertThat(Functions.accessIntDiv(5.0, null)).isNull();
+        assertThatThrownBy(() -> Functions.accessMod(5.0, 0.4)).isInstanceOf(UcanaccessRuntimeException.class);
+        assertThatThrownBy(() -> Functions.accessIntDiv(5.0, 0.0)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
     @ParameterizedTest(name = "[{index}] {0} => {1}")
     @CsvSource({
         "255,   FF",

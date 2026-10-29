@@ -95,6 +95,29 @@ class SQLConverterTest extends AbstractBaseTest {
             assertEquals(expectedSql, SQLConverter.translateAccessPowerOperators(inputSql), "Failed for: " + description);
         }
 
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '"',
+            value = {
+                "SELECT 5 Mod 3 FROM t           | SELECT AccessMod(5, 3) FROM t",
+                "SELECT a - 5 mod 3 FROM t       | SELECT a - AccessMod(5, 3) FROM t",
+                "SELECT Len(x) Mod 2 FROM t      | SELECT AccessMod(Len(x), 2) FROM t",
+                "SELECT a Mod b Mod c FROM t     | SELECT AccessMod(AccessMod(a, b), c) FROM t",
+                "SELECT 7 \\ 2, (a+1)\\2 FROM t   | SELECT AccessIntDiv(7, 2), AccessIntDiv((a+1), 2) FROM t",
+                "SELECT 'a Mod b', modus FROM t  | SELECT 'a Mod b', modus FROM t"
+            }
+        )
+        void translateAccessIntegerOperators_modAndBackslash_functionCalls(String sql, String expected) {
+            assertThat(SQLConverter.translateAccessIntegerOperators(sql)).isEqualTo(expected);
+        }
+
+        @Test
+        void translateAccessPowerOperators_textLiteral_unchanged() {
+            assertThat(SQLConverter.translateAccessPowerOperators("SELECT x ^ 2, '2^3' FROM t")).isEqualTo("SELECT POWER(x, 2), '2^3' FROM t");
+            assertThat(SQLConverter.translateAccessPowerOperators("SELECT 'it''s ^ 2', a^b FROM t")).isEqualTo("SELECT 'it''s ^ 2', POWER(a, b) FROM t");
+        }
+
     }
 
     @Nested

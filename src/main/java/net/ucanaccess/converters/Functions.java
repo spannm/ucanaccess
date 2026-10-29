@@ -1809,6 +1809,49 @@ public final class Functions {
     }
 
     /**
+     * Returns the remainder of a division like the Access operator Mod: both operands are rounded to whole numbers
+     * first, and the result has the sign of the dividend.
+     *
+     * @param dividend number to divide
+     * @param divisor  number to divide by
+     * @return remainder, {@code null} if an operand is {@code null}
+     */
+    @FunctionType(functionName = "AccessMod", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer accessMod(Double dividend, Double divisor) {
+        if (dividend == null || divisor == null) {
+            return null;
+        }
+        return Math.toIntExact((long) Math.rint(dividend) % wholeDivisor(divisor));
+    }
+
+    /**
+     * Divides two numbers like the Access operator \\: both operands are rounded to whole numbers first, and the
+     * result is truncated towards zero.
+     *
+     * @param dividend number to divide
+     * @param divisor  number to divide by
+     * @return whole quotient, {@code null} if an operand is {@code null}
+     */
+    @FunctionType(functionName = "AccessIntDiv", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer accessIntDiv(Double dividend, Double divisor) {
+        if (dividend == null || divisor == null) {
+            return null;
+        }
+        return Math.toIntExact((long) Math.rint(dividend) / wholeDivisor(divisor));
+    }
+
+    /**
+     * Rounds a divisor to a whole number and rejects zero.
+     */
+    private static long wholeDivisor(double divisor) {
+        long d = (long) Math.rint(divisor);
+        if (d == 0) {
+            UcanaccessRuntimeException.throwNow("Division by zero");
+        }
+        return d;
+    }
+
+    /**
      * Returns the hexadecimal representation of a number, rounded to a whole number first. Like in Access, negative
      * numbers in the range of a long integer are shown as 32-bit two's complement.
      *

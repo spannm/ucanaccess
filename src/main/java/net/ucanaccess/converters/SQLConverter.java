@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public final class SQLConverter {
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
         private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
+        // text literal in single quotes, with doubled quotes inside
+        private static final Pattern       TEXT_LITERAL               = Pattern.compile("'(?:[^']|'')*+'");
         // time without seconds in a date literal
         private static final Pattern       DATE_NO_SECONDS            = Pattern.compile(
             "#([^#]*?)(?<![:\\d])(\\d{1,2}:\\d{1,2})(\\s*(?:AM|PM)?)#", Pattern.CASE_INSENSITIVE);
@@ -81,6 +84,22 @@ public final class SQLConverter {
             "(" + POWER_OPERAND_REGEX + ")\\s*\\^\\s*(" + POWER_OPERAND_REGEX + ")",
             // match case-insensitively for keywords/identifiers if they were part of regex
             Pattern.CASE_INSENSITIVE);
+
+        // operand of Mod and integer division: a function call, an identifier, an unsigned number or an expression in
+        // parentheses without nested parentheses; a sign is left out, as it would swallow a minus operator before
+        private static final String          INTEGER_OPERAND_REGEX      =
+                "(?:"
+              + "\\b[a-zA-Z_]\\w*\\s*\\([^()]*\\)"
+              + "|\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b"
+              + "|\"[^\"]+\""
+              + "|\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?"
+              + "|\\([^()]+?\\)"
+              + "|\\?"
+              + ")";
+        private static final Pattern         MOD_OPERATION              = Pattern.compile(
+            "(" + INTEGER_OPERAND_REGEX + ")\\s+MOD\\s+(" + INTEGER_OPERAND_REGEX + ")", Pattern.CASE_INSENSITIVE);
+        private static final Pattern         INTEGER_DIVISION           = Pattern.compile(
+            "(" + INTEGER_OPERAND_REGEX + ")\\s*\\\\\\s*(" + INTEGER_OPERAND_REGEX + ")", Pattern.CASE_INSENSITIVE);
 
         private Patterns() {
         }
@@ -409,6 +428,7 @@ public final class SQLConverter {
         sql = convertLike(sql);
         sql = replaceWhiteSpacedTables(sql);
         sql = translateAccessPowerOperators(sql);
+        sql = translateAccessIntegerOperators(sql);
         if (!creatingQuery) {
             Pivot.checkAndRefreshPivot(sql, conn);
             sql = DFunction.convertDFunctions(sql, conn);
@@ -593,7 +613,6 @@ public final class SQLConverter {
      *   <li>Complex parenthesized expressions with nested parentheses (e.g., {@code (num + (val - 2))})</li>
      *   <li>Function calls (e.g., {@code ABS(value)})</li>
      *   <li>Subqueries</li>
-     *   <li>String literals containing the {@code ^} character</li>
      *   <li>SQL comments containing the {@code ^} character</li>
      * </ul>
      * <p>It specifically targets patterns like {@code "operand ^ exponent"} where both operands
@@ -606,6 +625,13 @@ public final class SQLConverter {
         if (sql == null || !sql.contains("^")) {
             return sql;
         }
+        return replaceOutsideTextLiterals(sql, SQLConverter::translatePowerOperators);
+    }
+
+    /**
+     * Translates the power operators of an SQL part without text literals.
+     */
+    private static String translatePowerOperators(String sql) {
 
         Matcher matcher = Patterns.POWER_OPERATION.matcher(sql);
         StringBuffer translatedSql = new StringBuffer();
@@ -622,6 +648,49 @@ public final class SQLConverter {
         matcher.appendTail(translatedSql);
 
         return translatedSql.toString();
+    }
+
+    /**
+     * Translates the Access operators Mod and \\ (integer division) into calls of functions that round the operands
+     * to whole numbers first, like Access. Operands follow the same rules as for the power operator, plus function
+     * calls without nested parentheses.
+     *
+     * @param sql SQL string
+     * @return translated SQL string
+     */
+    static String translateAccessIntegerOperators(String sql) {
+        if (sql == null || (!sql.contains("\\") && !sql.toUpperCase(Locale.ROOT).contains("MOD"))) {
+            return sql;
+        }
+        return replaceOutsideTextLiterals(sql, part -> {
+            String translated = part;
+            String previous;
+            // repeat for chains like a Mod b Mod c, whose first call is the operand of the next
+            do {
+                previous = translated;
+                translated = Patterns.MOD_OPERATION.matcher(translated).replaceAll("AccessMod($1, $2)");
+                translated = Patterns.INTEGER_DIVISION.matcher(translated).replaceAll("AccessIntDiv($1, $2)");
+            } while (!translated.equals(previous));
+            return translated;
+        });
+    }
+
+    /**
+     * Applies a conversion to the parts of an SQL string outside text literals in single quotes.
+     *
+     * @param sql        SQL string
+     * @param conversion conversion of a part without text literals
+     * @return converted SQL string
+     */
+    static String replaceOutsideTextLiterals(String sql, UnaryOperator<String> conversion) {
+        Matcher m = Patterns.TEXT_LITERAL.matcher(sql);
+        StringBuilder sb = new StringBuilder(sql.length());
+        int pos = 0;
+        while (m.find()) {
+            sb.append(conversion.apply(sql.substring(pos, m.start()))).append(m.group());
+            pos = m.end();
+        }
+        return sb.append(conversion.apply(sql.substring(pos))).toString();
     }
 
     private static String convertIdentifiers(String sql) {
