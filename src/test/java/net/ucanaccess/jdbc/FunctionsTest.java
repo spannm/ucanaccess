@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -75,6 +76,14 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT id / 1000, 10 / 4, 0.09 / 12, 8 / 4 / 2, 1 + 6 / 3 * 2 FROM t_funcs", singleRec(1.234, 2.5, 0.0075, 1.0, 5.0));
         checkQuery("SELECT Pmt(0.09 / 12, 252, 140233) FROM t_funcs", singleRec(-1240.474495757593));
+    }
+
+    // a NUMERIC function argument used to lose its decimal places
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testNumericArgument(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Val(1.00015), Val(-0.1), Nz(1.123456789) FROM t_funcs", singleRec(1.00015, -0.1, new BigDecimal("1.123456789")));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -186,6 +195,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT CCur(123.4567812), CCur(123.4547812) FROM t_funcs", singleRec(123.4568, 123.4548));
         checkQuery("SELECT CCur(0.552222211) * 100 FROM t_funcs", singleRec(55.22));
         checkQuery("SELECT CCur(1.23455), CCur(1.23465) FROM t_funcs", singleRec(1.2346, 1.2346));
+        // the argument used to be cut to four decimal places and to 9999.9999 before rounding
+        checkQuery("SELECT CCur(1.00015), CCur(12345.5), CCur(CDbl(1.00015)) FROM t_funcs", singleRec(1.0002, 12345.5, 1.0002));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

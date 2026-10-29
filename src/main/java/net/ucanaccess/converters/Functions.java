@@ -209,9 +209,17 @@ public final class Functions {
      * Converts an expression into a currency value with four decimal places, rounding halves to the even digit like
      * Access.
      */
-    @FunctionType(functionName = "CCur", argumentTypes = {AccessType.CURRENCY}, returnType = AccessType.CURRENCY)
+    @FunctionType(functionName = "CCur", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.CURRENCY)
     public static BigDecimal ccur(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_EVEN);
+        return value == null ? null : value.setScale(4, RoundingMode.HALF_EVEN);
+    }
+
+    /**
+     * Converts a floating point number into a currency value, rounding halves to the even digit like Access.
+     */
+    @FunctionType(functionName = "CCur", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.CURRENCY)
+    public static BigDecimal ccur(Double value) {
+        return value == null ? null : BigDecimal.valueOf(value).setScale(4, RoundingMode.HALF_EVEN);
     }
 
     /**

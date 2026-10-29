@@ -267,19 +267,10 @@ public class LoadJet {
                     String methodName = clazz.getName() + '.' + method.getName();
                     String functionName = Objects.requireNonNullElse(func.functionName(), methodName);
                     AccessType[] acts = func.argumentTypes();
-                    AccessType ret = func.returnType();
-                    String retTypeName = ret.name();
-                    String returnType = tmap.getOrDefault(retTypeName, retTypeName);
-                    if (AccessType.TEXT.equals(ret)) {
-                        returnType += "(255)";
-                    }
+                    String returnType = functionType(tmap, func.returnType());
                     String[] args = new String[acts.length];
                     for (int i = 0; i < args.length; i++) {
-                        String typeName = acts[i].name();
-                        args[i] = tmap.getOrDefault(typeName, typeName);
-                        if (AccessType.TEXT.equals(acts[i])) {
-                            args[i] += "(255)";
-                        }
+                        args[i] = functionType(tmap, acts[i]);
                     }
                     if (func.namingConflict()) {
                         SQLConverter.addWAFunctionName(functionName);
@@ -294,6 +285,18 @@ public class LoadJet {
                 createSwitch();
                 createChoose();
             }
+        }
+
+        /**
+         * Returns the HSQLDB type of a function argument or result. A plain DECIMAL has the scale 0 in HSQLDB, which
+         * would cut off the decimal places of every NUMERIC argument, so functions use the largest scale of Access.
+         */
+        private String functionType(Map<String, String> tmap, AccessType type) {
+            if (AccessType.NUMERIC.equals(type)) {
+                return "DECIMAL(100, 28)";
+            }
+            String hsqlType = tmap.getOrDefault(type.name(), type.name());
+            return AccessType.TEXT.equals(type) ? hsqlType + "(255)" : hsqlType;
         }
 
         private void resetDefault() {

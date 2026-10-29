@@ -340,11 +340,19 @@ class FunctionsUnitTest extends AbstractBaseTest {
     @CsvSource({
         "1.23455,   1.2346",
         "1.23465,   1.2346",
+        "1.00015,   1.0002",
         "-1.23465,  -1.2346",
         "123.45678, 123.4568"
     })
     void ccur_fourDecimals_halfRoundsToEven(BigDecimal value, BigDecimal expected) {
         assertThat(Functions.ccur(value)).isEqualTo(expected);
+        assertThat(Functions.ccur(value.doubleValue())).isEqualTo(expected);
+    }
+
+    @Test
+    void ccur_null_returnsNull() {
+        assertThat(Functions.ccur((BigDecimal) null)).isNull();
+        assertThat(Functions.ccur((Double) null)).isNull();
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
