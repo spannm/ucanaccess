@@ -182,7 +182,7 @@ public final class Functions {
         } else if (obj instanceof String) {
             return cboolImpl((String) obj);
         } else {
-            return obj instanceof Number && ((Number) obj).intValue() != 0;
+            return obj instanceof Number && ((Number) obj).doubleValue() != 0;
         }
     }
 
@@ -402,11 +402,11 @@ public final class Functions {
     }
 
     /**
-     * Converts a value to a string.
+     * Converts a boolean to text like in Access queries, where True is -1 and False is 0.
      */
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.YESNO}, returnType = AccessType.MEMO)
-    public static String cstr(Boolean value) throws UcanaccessSQLException {
-        return cstrImpl(value);
+    public static String cstr(Boolean value) {
+        return value == null ? null : value ? "-1" : "0";
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.TEXT}, returnType = AccessType.MEMO)
@@ -444,10 +444,6 @@ public final class Functions {
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
     public static String cstr(Timestamp value) throws UcanaccessSQLException {
         return value == null ? null : format(value, GENERAL_DATE);
-    }
-
-    private static String cstrImpl(Object value) throws UcanaccessSQLException {
-        return value == null ? null : format(value.toString(), "", true);
     }
 
     @FunctionType(functionName = "CVar", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
@@ -899,6 +895,13 @@ public final class Functions {
         } else if ("short date".equalsIgnoreCase(par)) {
             return formatDate(t, reg.getShortDatePattern());
         } else if (GENERAL_DATE.equalsIgnoreCase(par)) {
+            // like Access, leave out a midnight time and the base date
+            LocalDateTime ldt = t.toLocalDateTime();
+            if (ldt.toLocalTime().equals(LocalTime.MIDNIGHT)) {
+                return formatDate(t, reg.getShortDatePattern());
+            } else if (ldt.toLocalDate().equals(ACCESS_BASE_DATE.toLocalDate())) {
+                return formatDate(t, reg.getLongTimePattern());
+            }
             return formatDate(t, reg.getGeneralPattern());
         } else if ("long time".equalsIgnoreCase(par)) {
             return formatDate(t, reg.getLongTimePattern());
@@ -1110,12 +1113,6 @@ public final class Functions {
         }
         switch (format) {
             case 0:
-                LocalDateTime ldt = t.toLocalDateTime();
-                if (ldt.toLocalTime().equals(LocalTime.MIDNIGHT)) {
-                    return format(t, "short date");
-                } else if (ldt.toLocalDate().equals(ACCESS_BASE_DATE.toLocalDate())) {
-                    return format(t, "long time");
-                }
                 return format(t, GENERAL_DATE);
             case 1:
                 return format(t, "long date");

@@ -126,6 +126,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT CBool(id), CBool(1=2), CBool('true'), CBool('false'), CBool(0), CBool(-3) FROM t_funcs",
             singleRec(true, false, true, false, false, true));
+        checkQuery("SELECT CBool(-0.1), CBool(0.0) FROM t_funcs", singleRec(true, false));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -140,7 +141,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testCstr(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT CStr(date0) FROM t_funcs", singleRec("11/22/2003 10:42:58 PM"));
-        checkQuery("SELECT CStr(false) FROM t_funcs", singleRec("false"));
+        checkQuery("SELECT CStr(false), CStr(true) FROM t_funcs", singleRec("0", "-1"));
         checkQuery("SELECT CStr(8) FROM t_funcs", singleRec("8"));
         checkQuery("SELECT CStr(8.78787878) FROM t_funcs", singleRec("8.78787878"));
         checkQuery("SELECT CStr(0.5), CStr(1234567.5), CStr(1234567) FROM t_funcs", singleRec("0.5", "1234567.5", "1234567"));

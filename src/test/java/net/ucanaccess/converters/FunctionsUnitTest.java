@@ -133,6 +133,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.cbool((BigDecimal) null)).isFalse();
         assertThat(Functions.cbool(BigDecimal.ZERO)).isFalse();
         assertThat(Functions.cbool(BigDecimal.ONE)).isTrue();
+        assertThat(Functions.cbool(new BigDecimal("-0.1"))).isTrue();
         assertThat(Functions.cbool(Boolean.TRUE)).isTrue();
         assertThat(Functions.cbool("true")).isTrue();
     }
@@ -156,6 +157,8 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.cstr("abc")).isEqualTo("abc");
         assertThat(Functions.cstr((Timestamp) null)).isNull();
         assertThat(Functions.cstr((Boolean) null)).isNull();
+        assertThat(Functions.cstr(Boolean.TRUE)).isEqualTo("-1");
+        assertThat(Functions.cstr(Boolean.FALSE)).isEqualTo("0");
         assertThat(Functions.cstr(TS1)).isNotNull();
     }
 
@@ -288,6 +291,20 @@ class FunctionsUnitTest extends AbstractBaseTest {
     })
     void formatDateTime_namedFormat_formattedLikeAccess(String date, int format, String expected) throws UcanaccessSQLException {
         assertThat(Functions.formatDateTime(Timestamp.valueOf(date), format)).isEqualTo(expected);
+    }
+
+    // like Access, the general date leaves out a midnight time and the base date
+    @ParameterizedTest(name = "[{index}] CStr(#{0}#) => {1}")
+    @CsvSource(delimiter = '|', value = {
+        "2026-10-29 13:14:15 | 10/29/2026 1:14:15 PM",
+        "2026-10-29 00:00:00 | 10/29/2026",
+        "1899-12-30 13:14:15 | 1:14:15 PM"
+    })
+    void cstrFormat_date_generalDate(String date, String expected) throws UcanaccessSQLException {
+        Timestamp t = Timestamp.valueOf(date);
+        assertThat(Functions.cstr(t)).isEqualTo(expected);
+        assertThat(Functions.format(t)).isEqualTo(expected);
+        assertThat(Functions.format(t, "General Date")).isEqualTo(expected);
     }
 
     @Test
