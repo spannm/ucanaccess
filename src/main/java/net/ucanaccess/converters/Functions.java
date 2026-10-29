@@ -703,16 +703,19 @@ public final class Functions {
 
     @FunctionType(namingConflict = true, functionName = "InStr", argumentTypes = {AccessType.LONG, AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
     public static Integer instr(Integer start, String text, String search, Integer compare) {
-        start--;
-        if (compare != 0) {
-            text = text.toLowerCase(Locale.getDefault());
+        if (start < 1) {
+            UcanaccessRuntimeException.throwNow("Invalid function call");
         }
-        if (text.length() <= start) {
+        if (text == null || search == null) {
+            return null;
+        } else if (text.isEmpty()) {
             return 0;
-        } else {
-            text = text.substring(start);
+        } else if (search.isEmpty()) {
+            return start;
+        } else if (start > text.length()) {
+            return 0;
         }
-        return text.indexOf(search) + start + 1;
+        return indexOf(text, search, start - 1, compare != 0) + 1;
     }
 
     @FunctionType(namingConflict = true, functionName = "InStr", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
@@ -740,17 +743,56 @@ public final class Functions {
 
     @FunctionType(functionName = "InStrRev", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
     public static Integer instrrev(String text, String search, Integer start, Integer compare) {
-        if (compare != 0) {
-            text = text.toLowerCase(Locale.getDefault());
+        if (start == 0 || start < -1) {
+            UcanaccessRuntimeException.throwNow("Invalid function call");
         }
-        if (text.length() <= start) {
+        if (text == null || search == null) {
+            return null;
+        }
+        int end = start == -1 ? text.length() : start;
+        if (end > text.length()) {
             return 0;
-        } else {
-            if (start > 0) {
-                text = text.substring(0, start);
-            }
-            return text.lastIndexOf(search) + 1;
+        } else if (search.isEmpty()) {
+            return end;
         }
+        return lastIndexOf(text, search, end, compare != 0) + 1;
+    }
+
+    /**
+     * Returns the index of the first occurrence of {@code search} in {@code text} at or after {@code from}, or -1.
+     *
+     * @param text       the text to search in
+     * @param search     the text to search for
+     * @param from       the index to start at
+     * @param ignoreCase whether to ignore case
+     * @return index of the match or -1
+     */
+    private static int indexOf(String text, String search, int from, boolean ignoreCase) {
+        for (int i = from; i <= text.length() - search.length(); i++) {
+            if (text.regionMatches(ignoreCase, i, search, 0, search.length())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the index of the last occurrence of {@code search} in {@code text} that ends at or before {@code end},
+     * or -1.
+     *
+     * @param text       the text to search in
+     * @param search     the text to search for
+     * @param end        the index the match must end at or before
+     * @param ignoreCase whether to ignore case
+     * @return index of the match or -1
+     */
+    private static int lastIndexOf(String text, String search, int end, boolean ignoreCase) {
+        for (int i = end - search.length(); i >= 0; i--) {
+            if (text.regionMatches(ignoreCase, i, search, 0, search.length())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -1171,21 +1213,38 @@ public final class Functions {
      */
     @FunctionType(functionName = "StrComp", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
     public static Integer strComp(String value1, String value2, Integer type) throws UcanaccessSQLException {
+        if (value1 == null || value2 == null) {
+            return null;
+        }
         switch (type) {
             case 0:
+                return Integer.signum(value1.compareTo(value2));
             case -1:
-            case 2:
-                return value1.compareTo(value2);
             case 1:
-                return value1.toUpperCase(Locale.getDefault()).compareTo(value2.toUpperCase(Locale.getDefault()));
+            case 2:
+                return Integer.signum(textCollator().compare(value1, value2));
             default:
                 throw new InvalidFunctionParameterException("StrComp", type);
         }
     }
 
+    /**
+     * Returns a collator for text comparison like in Access, which ignores case but not accents.
+     *
+     * @return new collator for the default locale
+     */
+    private static Collator textCollator() {
+        Collator collator = Collator.getInstance();
+        collator.setStrength(Collator.SECONDARY);
+        return collator;
+    }
+
+    /**
+     * Compares two strings like Access queries do by default, that is ignoring case.
+     */
     @FunctionType(functionName = "StrComp", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
     public static Integer strComp(String value1, String value2) throws UcanaccessSQLException {
-        return strComp(value1, value2, 0);
+        return strComp(value1, value2, -1);
     }
 
     /**
@@ -1249,7 +1308,7 @@ public final class Functions {
 
     @FunctionType(functionName = "PMT", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static double pmt(double rate, double periods, double pv, double fv) {
-        return pmt(rate, periods, pv, 0, 0);
+        return pmt(rate, periods, pv, fv, 0);
     }
 
     @FunctionType(functionName = "PMT", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)

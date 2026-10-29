@@ -250,6 +250,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT InStr(1, 'Found on the Net', 'f',1) FROM t_funcs", singleRec(1));
         checkQuery("SELECT InStr(1, 'Found on the Net', 't',0) FROM t_funcs", singleRec(10));
         checkQuery("SELECT InStr(31, 'Found on the Net', 'f',0) FROM t_funcs", singleRec(0));
+        checkQuery("SELECT InStr(1, 'Found on the Net', 'NET', 1), InStr(2, 'Found on the Net', 'x') FROM t_funcs", singleRec(14, 0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -663,6 +664,8 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testStrComp(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT StrComp('Cia', 'Cia') FROM t_funcs", singleRec(0));
+        checkQuery("SELECT StrComp('Cia', 'CIA'), StrComp('a', 'c', 0) FROM t_funcs", singleRec(0, -1));
+        checkQuery("SELECT StrComp('\u00e4', 'b', 1), StrComp('a-b', 'ab', 1) FROM t_funcs", singleRec(-1, 1));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
+import net.ucanaccess.exception.UcanaccessRuntimeException;
 import net.ucanaccess.exception.UcanaccessSQLException;
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.AfterAll;
@@ -347,12 +348,84 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.strConv(value, conversion)).isEqualTo(expected);
     }
 
+    @ParameterizedTest(name = "[{index}] {0}, {1}, {2} => {3}")
+    @CsvSource({
+        "abc, abc, -1, 0",
+        "abc, ABC, -1, 0",
+        "abc, ABC,  0, 1",
+        "abc, ABC,  1, 0",
+        "abc, ABC,  2, 0",
+        "a,   c,    0, -1",
+        "c,   A,    1, 1",
+        "\u00e4, b,  1, -1",
+        "\u00e4, a,  1, 1",
+        "\u00c4, \u00e4, 1, 0",
+        "a-b, ab,   1, 1",
+        "\u00df, ss, 1, 0",
+        ",    a,    0, ",
+        "a,   ,     1, "
+    })
+    void strComp_compareType_minusOneZeroOrOne(String value1, String value2, int compare, Integer expected) throws UcanaccessSQLException {
+        assertThat(Functions.strComp(value1, value2, compare)).isEqualTo(expected);
+    }
+
     @Test
-    void strComp_compareType_comparesStrings() throws UcanaccessSQLException {
-        assertThat(Functions.strComp("abc", "abc")).isZero();
-        assertThat(Functions.strComp("abc", "ABC", 0)).isPositive();
-        assertThat(Functions.strComp("abc", "ABC", 1)).isZero();
+    void strComp_noCompareTypeOrInvalid_ignoresCaseOrThrows() throws UcanaccessSQLException {
+        assertThat(Functions.strComp("abc", "ABC")).isZero();
+        assertThat(Functions.strComp("a", "B")).isEqualTo(-1);
         assertThatThrownBy(() -> Functions.strComp("a", "b", 5)).isInstanceOf(UcanaccessSQLException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}, {1}, {2}, {3} => {4}")
+    @CsvSource({
+        "1, Found on the Net, the, -1, 10",
+        "1, Found on the Net, THE, -1, 10",
+        "1, Found on the Net, THE,  0, 0",
+        "1, Found on the Net, f,    1, 1",
+        "1, Found on the Net, f,    0, 0",
+        "2, Found on the Net, x,   -1, 0",
+        "4, Found on the Net, n,   -1, 4",
+        "5, Found on the Net, n,   -1, 8",
+        "17, Found on the Net, t,  -1, 0",
+        "3, abc,              '',  -1, 3",
+        "5, abc,              '',  -1, 5",
+        "1, '',               '',  -1, 0",
+        "1, '',               a,   -1, 0",
+        "1, ,                 a,   -1, ",
+        "1, abc,              ,    -1, "
+    })
+    void instr_startAndCompare_positionOrZero(int start, String text, String search, int compare, Integer expected) {
+        assertThat(Functions.instr(start, text, search, compare)).isEqualTo(expected);
+    }
+
+    @Test
+    void instr_startBelowOne_throws() {
+        assertThatThrownBy(() -> Functions.instr(0, "abc", "a")).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}, {1}, {2}, {3} => {4}")
+    @CsvSource({
+        "alphabet, a,  -1, -1, 5",
+        "alphabet, A,  -1, -1, 5",
+        "alphabet, A,  -1,  0, 0",
+        "alphabet, a,   4, -1, 1",
+        "alphabet, a,   5, -1, 5",
+        "alphabet, et,  8, -1, 7",
+        "alphabet, et,  7, -1, 0",
+        "alphabet, a,   9, -1, 0",
+        "alphabet, x,  -1, -1, 0",
+        "alphabet, '',  3, -1, 3",
+        ",         a,  -1, -1, ",
+        "alphabet, ,   -1, -1, "
+    })
+    void instrrev_startAndCompare_positionOrZero(String text, String search, int start, int compare, Integer expected) {
+        assertThat(Functions.instrrev(text, search, start, compare)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(ints = {0, -2})
+    void instrrev_invalidStart_throws(int start) {
+        assertThatThrownBy(() -> Functions.instrrev("abc", "a", start)).isInstanceOf(UcanaccessRuntimeException.class);
     }
 
     @Test
@@ -379,6 +452,12 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.fix(null)).isNull();
         assertThat(Functions.fix(2.7)).isEqualTo(2.0);
         assertThat(Functions.fix(-2.7)).isEqualTo(-2.0);
+    }
+
+    @Test
+    void pmt_futureValue_includedInPayment() {
+        assertThat(Functions.pmt(0.01, 12, 1000, 500)).isEqualTo(Functions.pmt(0.01, 12, 1000, 500, 0))
+            .isCloseTo(-128.2731830175125, within(1e-9));
     }
 
     @Test
