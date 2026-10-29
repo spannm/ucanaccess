@@ -148,6 +148,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT CCur(123.4567812), CCur(123.4547812) FROM t_funcs", singleRec(123.4568, 123.4548));
         checkQuery("SELECT CCur(0.552222211) * 100 FROM t_funcs", singleRec(55.22));
+        checkQuery("SELECT CCur(1.23455), CCur(1.23465) FROM t_funcs", singleRec(1.2346, 1.2346));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -155,6 +156,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testCint(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT CInt(8.51), CInt(4.5) FROM t_funcs", singleRec(9, 4));
+        checkQuery("SELECT CInt(3.5), CInt(-2.5), CLng(2.5) FROM t_funcs", singleRec(4, -2, 2));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -636,6 +638,13 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testInt(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT int(1111112.5), int(-2.5) FROM t_funcs", singleRec(1111112, -3));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testRound(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Round(2.5, 0), Round(3.5, 0), Round(0.125, 2) FROM t_funcs", singleRec(2.0, 4.0, 0.12));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

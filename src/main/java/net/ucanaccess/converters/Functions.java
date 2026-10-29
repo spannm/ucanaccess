@@ -156,11 +156,12 @@ public final class Functions {
     }
 
     /**
-     * Converts an expression into a currency value.
+     * Converts an expression into a currency value with four decimal places, rounding halves to the even digit like
+     * Access.
      */
     @FunctionType(functionName = "CCur", argumentTypes = {AccessType.CURRENCY}, returnType = AccessType.CURRENCY)
     public static BigDecimal ccur(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_UP);
+        return value.setScale(4, RoundingMode.HALF_EVEN);
     }
 
     /**
@@ -184,9 +185,12 @@ public final class Functions {
         return number;
     }
 
+    /**
+     * Converts an expression to an integer, rounding halves to the nearest even number like Access.
+     */
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
     public static Short cint(Double number) {
-        return new BigDecimal((long) Math.floor(number + 0.499999999999999d)).shortValueExact();
+        return BigDecimal.valueOf(Math.rint(number)).shortValueExact();
     }
 
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
@@ -195,11 +199,11 @@ public final class Functions {
     }
 
     /**
-     * Converts an expression to a long integer.
+     * Converts an expression to a long integer, rounding halves to the nearest even number like Access.
      */
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
     public static Integer clng(Double value) {
-        return (int) Math.floor(value + 0.5d);
+        return (int) Math.rint(value);
     }
 
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
@@ -1587,12 +1591,15 @@ public final class Functions {
     }
 
     /**
-     * Returns a number rounded to a specified number of decimal places.
+     * Returns a number rounded to a specified number of decimal places. Like Access, halves are rounded to the nearest
+     * even digit.
      */
     @FunctionType(namingConflict = true, functionName = "Round", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static double round(double d, double p) {
-        double f = Math.pow(10d, p);
-        return Math.round(d * f) / f;
+        if (!Double.isFinite(d)) {
+            return d;
+        }
+        return BigDecimal.valueOf(d).setScale((int) p, RoundingMode.HALF_EVEN).doubleValue();
     }
 
     /**

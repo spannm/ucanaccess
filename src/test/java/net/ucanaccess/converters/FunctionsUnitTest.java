@@ -110,11 +110,49 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.cdbl(1.5)).isEqualTo(1.5);
         assertThat(Functions.clng(Integer.valueOf(7))).isEqualTo(7);
         assertThat(Functions.clong(Integer.valueOf(7))).isEqualTo(7);
-        assertThat(Functions.clng("1,234.5")).isEqualTo(1235);
+        assertThat(Functions.clng("1,234.5")).isEqualTo(1234);
         assertThat(Functions.cstr("abc")).isEqualTo("abc");
         assertThat(Functions.cstr((Timestamp) null)).isNull();
         assertThat(Functions.cstr((Boolean) null)).isNull();
         assertThat(Functions.cstr(TS1)).isNotNull();
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
+        "2.5,  2",
+        "3.5,  4",
+        "-2.5, -2",
+        "4.51, 5",
+        "8.49, 8"
+    })
+    void cint_cLng_halfRoundsToEven(double value, int expected) {
+        assertThat(Functions.cint(value)).isEqualTo((short) expected);
+        assertThat(Functions.clng(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}, {1} => {2}")
+    @CsvSource({
+        "2.5,       0, 2.0",
+        "3.5,       0, 4.0",
+        "-2.5,      0, -2.0",
+        "0.125,     2, 0.12",
+        "0.375,     2, 0.38",
+        "1234.5678, 2, 1234.57",
+        "-1.005,    1, -1.0"
+    })
+    void round_decimals_halfRoundsToEven(double value, double decimals, double expected) {
+        assertThat(Functions.round(value, decimals)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
+        "1.23455,   1.2346",
+        "1.23465,   1.2346",
+        "-1.23465,  -1.2346",
+        "123.45678, 123.4568"
+    })
+    void ccur_fourDecimals_halfRoundsToEven(BigDecimal value, BigDecimal expected) {
+        assertThat(Functions.ccur(value)).isEqualTo(expected);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
