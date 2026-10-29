@@ -23,6 +23,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
@@ -48,6 +49,8 @@ public final class Functions {
 
     /** Hexadecimal ({@code &H}) or octal ({@code &O} or just {@code &}) number at the start of a string, as in Val. */
     private static final Pattern VAL_RADIX   = Pattern.compile("&(?:[Hh]([0-9A-Fa-f]*)|[Oo]?([0-7]*))");
+    /** Time of day with optional seconds and AM/PM, as in TimeValue. */
+    private static final Pattern TIME_VALUE  = Pattern.compile("(\\d{1,2}):(\\d{1,2})(?::(\\d{1,2}))?\\s*([AaPp][Mm]?)?");
     /** Decimal number with optional exponent at the start of a string, as in Val. */
     private static final Pattern VAL_DECIMAL = Pattern.compile("([+-]?\\d*(?:\\.\\d*)?)([eEdD][+-]?\\d+)?");
 
@@ -69,6 +72,29 @@ public final class Functions {
     @FunctionType(functionName = "Asc", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
     public static Integer asc(String s) {
         return s == null || s.isEmpty() ? null : (int) s.charAt(0);
+    }
+
+    /**
+     * Returns the Unicode code of the first character of a string. Like in VBA, the result is a 16-bit integer, so
+     * codes above 32767 are negative.
+     */
+    @FunctionType(functionName = "AscW", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer ascW(String s) {
+        return s == null || s.isEmpty() ? null : (int) (short) s.charAt(0);
+    }
+
+    /**
+     * Returns the character with the given Unicode code. Negative codes down to -32768 are taken as 16-bit integers,
+     * as AscW returns them.
+     */
+    @FunctionType(functionName = "ChrW", argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String chrW(Integer code) {
+        if (code == null) {
+            return null;
+        } else if (code < Short.MIN_VALUE || code > 0xFFFF) {
+            UcanaccessRuntimeException.throwNow(String.format("Invalid character code for function ChrW: %d", code));
+        }
+        return String.valueOf((char) (code & 0xFFFF));
     }
 
     @FunctionType(functionName = "Equals", argumentTypes = {AccessType.COMPLEX, AccessType.COMPLEX}, returnType = AccessType.YESNO)
@@ -196,6 +222,38 @@ public final class Functions {
     }
 
     /**
+     * Returns a date unchanged.
+     */
+    @FunctionType(functionName = "CDate", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp cdate(Timestamp dt) {
+        return dt;
+    }
+
+    /**
+     * Returns a date unchanged, like CDate.
+     */
+    @FunctionType(functionName = "CVDate", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp cvdate(Timestamp dt) {
+        return dt;
+    }
+
+    /**
+     * Converts an expression into a date value, like CDate.
+     */
+    @FunctionType(functionName = "CVDate", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp cvdate(String dt) {
+        return cdate(dt);
+    }
+
+    /**
+     * Converts an Access date value to a date, like CDate.
+     */
+    @FunctionType(functionName = "CVDate", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DATETIME)
+    public static Timestamp cvdate(Double value) {
+        return cdate(value);
+    }
+
+    /**
      * Converts an Access date value to a date: the whole part counts the days since 1899-12-30, the fraction is the
      * time of day. As in Access, the fraction of a negative value is taken as a positive time.
      */
@@ -309,8 +367,30 @@ public final class Functions {
 
     @FunctionType(functionName = "CSign", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.SINGLE)
     public static double csign(double value) {
-        MathContext mc = new MathContext(7);
-        return new BigDecimal(Double.toString(value), mc).doubleValue();
+        return csng(value);
+    }
+
+    /**
+     * Converts an expression to a single precision number, which has about seven significant digits.
+     */
+    @FunctionType(functionName = "CSng", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.SINGLE)
+    public static Double csng(Double value) {
+        return value == null ? null : new BigDecimal(value.toString(), new MathContext(7)).doubleValue();
+    }
+
+    /**
+     * Converts an expression to a byte from 0 to 255, rounding halves to the nearest even number like Access.
+     */
+    @FunctionType(functionName = "CByte", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.BYTE)
+    public static Short cbyte(Double value) {
+        if (value == null) {
+            return null;
+        }
+        double d = Math.rint(value);
+        if (d < 0 || d > 255) {
+            UcanaccessRuntimeException.throwNow(String.format("Overflow in function CByte: %s", value));
+        }
+        return (short) d;
     }
 
     /**
@@ -782,6 +862,220 @@ public final class Functions {
     }
 
     /**
+     * Formats a number with the decimal and grouping separators of the default locale, by default with two decimal places.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String formatNumber(Double value) {
+        return formatNumberImpl(value, NumberStyle.NUMBER, -1, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number with the given number of decimal places.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatNumber(Double value, Integer digits) {
+        return formatNumberImpl(value, NumberStyle.NUMBER, digits, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number choosing whether to show a leading zero.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatNumber(Double value, Integer digits, Integer leadingDigit) {
+        return formatNumberImpl(value, NumberStyle.NUMBER, digits, leadingDigit, -2, -2);
+    }
+
+    /**
+     * Formats a number choosing whether to put negative numbers in parentheses.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatNumber(Double value, Integer digits, Integer leadingDigit, Integer parens) {
+        return formatNumberImpl(value, NumberStyle.NUMBER, digits, leadingDigit, parens, -2);
+    }
+
+    /**
+     * Formats a number choosing whether to group digits.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatNumber(Double value, Integer digits, Integer leadingDigit, Integer parens, Integer group) {
+        return formatNumberImpl(value, NumberStyle.NUMBER, digits, leadingDigit, parens, group);
+    }
+
+    /**
+     * Formats a number as currency of the default locale, by default with two decimal places.
+     */
+    @FunctionType(functionName = "FormatCurrency", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String formatCurrency(Double value) {
+        return formatNumberImpl(value, NumberStyle.CURRENCY, -1, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number as currency with the given number of decimal places.
+     */
+    @FunctionType(functionName = "FormatCurrency", argumentTypes = {AccessType.DOUBLE, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatCurrency(Double value, Integer digits) {
+        return formatNumberImpl(value, NumberStyle.CURRENCY, digits, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number as currency choosing whether to show a leading zero.
+     */
+    @FunctionType(functionName = "FormatCurrency", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatCurrency(Double value, Integer digits, Integer leadingDigit) {
+        return formatNumberImpl(value, NumberStyle.CURRENCY, digits, leadingDigit, -2, -2);
+    }
+
+    /**
+     * Formats a number as currency choosing whether to put negative numbers in parentheses.
+     */
+    @FunctionType(functionName = "FormatCurrency", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatCurrency(Double value, Integer digits, Integer leadingDigit, Integer parens) {
+        return formatNumberImpl(value, NumberStyle.CURRENCY, digits, leadingDigit, parens, -2);
+    }
+
+    /**
+     * Formats a number as currency choosing whether to group digits.
+     */
+    @FunctionType(functionName = "FormatCurrency", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatCurrency(Double value, Integer digits, Integer leadingDigit, Integer parens, Integer group) {
+        return formatNumberImpl(value, NumberStyle.CURRENCY, digits, leadingDigit, parens, group);
+    }
+
+    /**
+     * Formats a number multiplied by 100 with a trailing percent sign, by default with two decimal places.
+     */
+    @FunctionType(functionName = "FormatPercent", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String formatPercent(Double value) {
+        return formatNumberImpl(value, NumberStyle.PERCENT, -1, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number as percentage with the given number of decimal places.
+     */
+    @FunctionType(functionName = "FormatPercent", argumentTypes = {AccessType.DOUBLE, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatPercent(Double value, Integer digits) {
+        return formatNumberImpl(value, NumberStyle.PERCENT, digits, -2, -2, -2);
+    }
+
+    /**
+     * Formats a number as percentage choosing whether to show a leading zero.
+     */
+    @FunctionType(functionName = "FormatPercent", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatPercent(Double value, Integer digits, Integer leadingDigit) {
+        return formatNumberImpl(value, NumberStyle.PERCENT, digits, leadingDigit, -2, -2);
+    }
+
+    /**
+     * Formats a number as percentage choosing whether to put negative numbers in parentheses.
+     */
+    @FunctionType(functionName = "FormatPercent", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatPercent(Double value, Integer digits, Integer leadingDigit, Integer parens) {
+        return formatNumberImpl(value, NumberStyle.PERCENT, digits, leadingDigit, parens, -2);
+    }
+
+    /**
+     * Formats a number as percentage choosing whether to group digits.
+     */
+    @FunctionType(functionName = "FormatPercent", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatPercent(Double value, Integer digits, Integer leadingDigit, Integer parens, Integer group) {
+        return formatNumberImpl(value, NumberStyle.PERCENT, digits, leadingDigit, parens, group);
+    }
+
+    /** Kind of number formatting of FormatNumber, FormatCurrency and FormatPercent. */
+    private enum NumberStyle {
+        NUMBER, CURRENCY, PERCENT
+    }
+
+    /**
+     * Formats a number like FormatNumber, FormatCurrency and FormatPercent. The tristate arguments are -1 for true, 0
+     * for false and -2 for the default of the regional settings.
+     *
+     * @param value        number to format, if {@code null}, {@code null} is returned
+     * @param style        number, currency or percent
+     * @param digits       number of decimal places, -1 for the default of two
+     * @param leadingDigit tristate whether to show a zero before the decimal separator, default true
+     * @param parens       tristate whether to put negative numbers in parentheses, default false
+     * @param group        tristate whether to group digits, default true
+     * @return formatted number
+     */
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    private static String formatNumberImpl(Double value, NumberStyle style, Integer digits, Integer leadingDigit, Integer parens,
+        Integer group) {
+        if (value == null) {
+            return null;
+        } else if (digits == null || digits < -1) {
+            throw new UcanaccessRuntimeException(String.format("Invalid number of decimal places: %s", digits));
+        }
+        int decimals = digits == -1 ? 2 : digits;
+        DecimalFormat df = style == NumberStyle.CURRENCY
+            ? (DecimalFormat) NumberFormat.getCurrencyInstance()
+            : (DecimalFormat) NumberFormat.getNumberInstance();
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        df.setMinimumFractionDigits(decimals);
+        df.setMaximumFractionDigits(decimals);
+        df.setMinimumIntegerDigits(Objects.equals(leadingDigit, 0) ? 0 : 1);
+        df.setGroupingUsed(!Objects.equals(group, 0));
+        BigDecimal number = BigDecimal.valueOf(value);
+        if (style == NumberStyle.PERCENT) {
+            number = number.movePointRight(2);
+        }
+        String text = df.format(number.abs());
+        if (style == NumberStyle.CURRENCY) {
+            // Java separates the currency symbol with a non-breaking space, Access with a normal one
+            text = text.replace('\u00a0', ' ');
+        } else if (style == NumberStyle.PERCENT) {
+            text += "%";
+        }
+        if (number.setScale(decimals, RoundingMode.HALF_UP).signum() >= 0) {
+            return text;
+        }
+        return Objects.equals(parens, -1) ? "(" + text + ")" : "-" + text;
+    }
+
+    /**
+     * Formats a date as general date, showing only the date when there is no time and only the time on the base date.
+     */
+    @FunctionType(functionName = "FormatDateTime", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
+    public static String formatDateTime(Timestamp t) throws UcanaccessSQLException {
+        return formatDateTime(t, 0);
+    }
+
+    /**
+     * Formats a date with a named format: 0 general date, 1 long date, 2 short date, 3 long time, 4 short time.
+     *
+     * @param t      date to format, if {@code null}, {@code null} is returned
+     * @param format named format from 0 to 4
+     * @return formatted date
+     * @throws UcanaccessSQLException if the named format is invalid
+     */
+    @FunctionType(functionName = "FormatDateTime", argumentTypes = {AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatDateTime(Timestamp t, Integer format) throws UcanaccessSQLException {
+        if (t == null || format == null) {
+            return null;
+        }
+        switch (format) {
+            case 0:
+                LocalDateTime ldt = t.toLocalDateTime();
+                if (ldt.toLocalTime().equals(LocalTime.MIDNIGHT)) {
+                    return format(t, "short date");
+                } else if (ldt.toLocalDate().equals(ACCESS_BASE_DATE.toLocalDate())) {
+                    return format(t, "long time");
+                }
+                return format(t, GENERAL_DATE);
+            case 1:
+                return format(t, "long date");
+            case 2:
+                return format(t, "short date");
+            case 3:
+                return format(t, "long time");
+            case 4:
+                return format(t, "HH:nn");
+            default:
+                throw new InvalidFunctionParameterException("FormatDateTime", format);
+        }
+    }
+
+    /**
      * Returns one of two parts, depending on the evaluation of an expression.
      */
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
@@ -1141,6 +1435,9 @@ public final class Functions {
         return (Integer) nz(value, (Object) other);
     }
 
+    /**
+     * Returns the second date if the first one is {@code null}.
+     */
     @FunctionType(functionName = "Nz", argumentTypes = {AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
     public static Timestamp nz(Timestamp value, Timestamp other) {
         return (Timestamp) nz(value, (Object) other);
@@ -1309,6 +1606,60 @@ public final class Functions {
     }
 
     /**
+     * Returns the time of day of a string, on the base date 1899-12-30 like in Access. The string may contain a date,
+     * which is ignored.
+     *
+     * @param value time like "13:14:15" or "1:14 PM", or a date with time
+     * @return time on the base date, {@code null} if value is {@code null}
+     */
+    @FunctionType(functionName = "TimeValue", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DATETIME)
+    public static Timestamp timeValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        RegionalSettings reg = getRegionalSettings();
+        String s = value.trim().replace(reg.getAM(), "AM").replace(reg.getPM(), "PM");
+        Matcher m = TIME_VALUE.matcher(s);
+        if (m.matches()) {
+            int hour = Integer.parseInt(m.group(1));
+            int minute = Integer.parseInt(m.group(2));
+            int second = m.group(3) == null ? 0 : Integer.parseInt(m.group(3));
+            String amPm = m.group(4);
+            if (amPm != null) {
+                if (hour < 1 || hour > 12) {
+                    UcanaccessRuntimeException.throwNow(String.format("Type mismatch in function TimeValue: %s", value));
+                }
+                hour = hour % 12 + (Character.toUpperCase(amPm.charAt(0)) == 'P' ? 12 : 0);
+            }
+            if (hour > 23 || minute > 59 || second > 59) {
+                UcanaccessRuntimeException.throwNow(String.format("Type mismatch in function TimeValue: %s", value));
+            }
+            return Timestamp.valueOf(ACCESS_BASE_DATE.withHour(hour).withMinute(minute).withSecond(second));
+        }
+        Timestamp dt = dateValue(value, false);
+        if (dt == null) {
+            UcanaccessRuntimeException.throwNow(String.format("Type mismatch in function TimeValue: %s", value));
+        }
+        return timeValue(dt);
+    }
+
+    /**
+     * Returns the time of day of a date, on the base date 1899-12-30 like in Access.
+     */
+    @FunctionType(functionName = "TimeValue", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp timeValue(Timestamp value) {
+        return value == null ? null : Timestamp.valueOf(ACCESS_BASE_DATE.with(value.toLocalDateTime().toLocalTime()));
+    }
+
+    /**
+     * Returns the number of seconds since midnight, with fractions of a second.
+     */
+    @FunctionType(functionName = "Timer", argumentTypes = {}, returnType = AccessType.DOUBLE)
+    public static double timer() {
+        return LocalTime.now(ZoneId.systemDefault()).toNanoOfDay() / 1_000_000_000d;
+    }
+
+    /**
      *  Generates a random number (integer value).
      */
     @FunctionType(functionName = "Rnd", argumentTypes = {}, returnType = AccessType.DOUBLE)
@@ -1363,6 +1714,22 @@ public final class Functions {
         long l = (long) Math.rint(number);
         String hex = l == (int) l ? Integer.toHexString((int) l) : Long.toHexString(l);
         return hex.toUpperCase(Locale.ROOT);
+    }
+
+    /**
+     * Returns the octal representation of a number, rounded to a whole number first. Like in Access, negative numbers
+     * in the range of a long integer are shown as 32-bit two's complement.
+     *
+     * @param number number to convert, if {@code null}, {@code null} is returned
+     * @return octal digits
+     */
+    @FunctionType(functionName = "Oct", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String oct(Double number) {
+        if (number == null) {
+            return null;
+        }
+        long l = (long) Math.rint(number);
+        return l == (int) l ? Integer.toOctalString((int) l) : Long.toOctalString(l);
     }
 
     /**

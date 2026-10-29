@@ -59,6 +59,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT Asc('A') FROM t_funcs", singleRec(65));
         checkQuery("SELECT Asc('1') FROM t_funcs", singleRec(49));
         checkQuery("SELECT Asc('u') FROM t_funcs", singleRec(117));
+        checkQuery("SELECT AscW('\u20ac'), ChrW(8364), Oct(8), Oct(-1) FROM t_funcs", singleRec(8364, "\u20ac", "10", "37777777777"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -66,6 +67,15 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testSwitch(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT Switch('1'='1', 1, false, 2, true, 1) FROM t_funcs");
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testChoose(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Choose(2, 'a', 'b', 'c'), Choose(4, 'a', 'b', 'c'), Choose(1.6, 'a', 'b'), Choose(0, 'a') FROM t_funcs",
+            singleRec("b", null, "a", null));
+        checkQuery("SELECT Choose(2, 10, 20), Choose(1, 1.5, 2.5) FROM t_funcs", singleRec(20, 1.5));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -114,6 +124,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testCsign(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT CSign(8.53453543) FROM t_funcs", singleRec(8.534535));
+        checkQuery("SELECT CSng(1.23456789), CByte(13.5) FROM t_funcs", singleRec(1.234568, 14));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -125,6 +136,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT CDate('1582-10-15') FROM t_funcs", recs(rec(sdf.parse("1582-10-15 00:00:00.0"))));
         checkQuery("SELECT CDate(45000.5), Nz(null, #2026-10-29#) FROM t_funcs",
             singleRec(Timestamp.valueOf("2023-03-15 12:00:00"), Timestamp.valueOf("2026-10-29 00:00:00")));
+        checkQuery("SELECT CDate(#2026-10-29#), CVDate('2026-10-29'), CVDate(45000) FROM t_funcs",
+            singleRec(Timestamp.valueOf("2026-10-29 00:00:00"), Timestamp.valueOf("2026-10-29 00:00:00"), Timestamp.valueOf("2023-03-15 00:00:00")));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -390,6 +403,14 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
+    void testTimeValue(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT TimeValue('1:14 PM'), TimeValue(#2026-10-29 08:09:10#), Timer() >= 0 FROM t_funcs",
+            singleRec(Timestamp.valueOf("1899-12-30 13:14:00"), Timestamp.valueOf("1899-12-30 08:09:10"), true));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
     void testTime(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         sleepUntilStartOfNewSecond();
@@ -549,6 +570,10 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT Format(num, 'standard') FROM t_funcs", singleRec("-1,110.55"));
         checkQuery("SELECT Format(num, 'general number') FROM t_funcs", singleRec("-1110.554"));
         checkQuery("SELECT Format(1.5), Format(num), Format('abc') FROM t_funcs", singleRec("1.5", "-1110.554", "abc"));
+        checkQuery("SELECT FormatNumber(1234.5), FormatNumber(0.5, 2, 0), FormatCurrency(1234.5), FormatPercent(0.255, 1) FROM t_funcs",
+            singleRec("1,234.50", ".50", "$1,234.50", "25.5%"));
+        checkQuery("SELECT FormatDateTime(#2026-10-29 13:14:15#), FormatDateTime(#2026-10-29 13:14:15#, 4) FROM t_funcs",
+            singleRec("10/29/2026 1:14:15 PM", "13:14"));
         checkQuery("SELECT Format(num, 'on/off') FROM t_funcs", singleRec("On"));
         checkQuery("SELECT Format(num, 'true/false') FROM t_funcs", singleRec("True"));
         checkQuery("SELECT Format(num, 'yes/no') FROM t_funcs", singleRec("Yes"));

@@ -59,6 +59,46 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.asc(value)).isEqualTo(expected);
     }
 
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource(delimiter = '|', value = {
+        "    |",
+        "''  |",
+        "AB  | 65",
+        "\u20ac   | 8364",
+        "\uffff   | -1"
+    })
+    void ascW_string_unicodeAsShort(String value, Integer expected) {
+        assertThat(Functions.ascW(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
+        "65,     A",
+        "8364,   \u20ac",
+        "-1,     \uffff",
+        "65535,  \uffff"
+    })
+    void chrW_code_character(int code, String expected) {
+        assertThat(Functions.chrW(code)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(ints = {65536, -32769})
+    void chrW_outOfRange_throws(int code) {
+        assertThatThrownBy(() -> Functions.chrW(code)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
+        "8,   10",
+        "-1,  37777777777",
+        "8.5, 10",
+        "9.5, 12"
+    })
+    void oct_number_roundedOctal(double value, String expected) {
+        assertThat(Functions.oct(value)).isEqualTo(expected);
+    }
+
     @Test
     void equals_objectsAndArrays_comparesInOrder() {
         assertThat(Functions.equals(null, "a")).isFalse();
@@ -173,6 +213,87 @@ class FunctionsUnitTest extends AbstractBaseTest {
     void cdblCint_nullText_returnsNull() throws UcanaccessSQLException {
         assertThat(Functions.cdbl((String) null)).isNull();
         assertThat(Functions.cint((String) null)).isNull();
+    }
+
+    @Test
+    void csng_number_sevenSignificantDigits() {
+        assertThat(Functions.csng(1.23456789)).isEqualTo(1.234568);
+        assertThat(Functions.csng(123456789.0)).isEqualTo(123456800.0);
+        assertThat(Functions.csng(null)).isNull();
+    }
+
+    @ParameterizedTest(name = "[{index}] CByte({0}) => {1}")
+    @CsvSource({
+        "12.5,  12",
+        "13.5,  14",
+        "0,     0",
+        "255.4, 255"
+    })
+    void cbyte_number_roundedHalfEven(double value, short expected) {
+        assertThat(Functions.cbyte(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] CByte({0})")
+    @ValueSource(doubles = {256, 255.5, -1, -0.6})
+    void cbyte_outOfRange_throws(double value) {
+        assertThatThrownBy(() -> Functions.cbyte(value)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @ParameterizedTest(name = "[{index}] FormatNumber({0}, {1}, {2}, {3}, {4}) => {5}")
+    @CsvSource(delimiter = '|', value = {
+        "1234.5   | -1 | -2 | -2 | -2 | 1,234.50",
+        "1234.5   |  0 | -2 | -2 | -2 | 1,235",
+        "0.5      |  2 |  0 | -2 | -2 | .50",
+        "-1234.5  |  1 | -1 | -1 |  0 | (1234.5)",
+        "-1234.5  |  1 | -1 |  0 | -1 | -1,234.5",
+        "2.345    |  2 | -2 | -2 | -2 | 2.35",
+        "-0.004   |  2 | -2 | -2 | -2 | 0.00"
+    })
+    void formatNumber_options_formattedLikeAccess(double value, int digits, int leadingDigit, int parens, int group, String expected) {
+        assertThat(Functions.formatNumber(value, digits, leadingDigit, parens, group)).isEqualTo(expected);
+    }
+
+    @Test
+    void formatCurrencyPercent_number_formattedInDefaultLocale() {
+        assertThat(Functions.formatCurrency(1234.5)).isEqualTo("$1,234.50");
+        assertThat(Functions.formatCurrency(1234.5, 0)).isEqualTo("$1,235");
+        assertThat(Functions.formatPercent(0.25)).isEqualTo("25.00%");
+        assertThat(Functions.formatPercent(0.255, 1)).isEqualTo("25.5%");
+        assertThat(Functions.formatPercent(-0.5, 0, -1, -1)).isEqualTo("(50%)");
+        assertThat(Functions.formatNumber(null)).isNull();
+        assertThatThrownBy(() -> Functions.formatNumber(1.0, -3)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @Test
+    void formatCurrencyPercent_germanLocale_likeGermanAccess() {
+        Locale.setDefault(Locale.GERMANY);
+        try {
+            assertThat(Functions.formatNumber(1234.5)).isEqualTo("1.234,50");
+            assertThat(Functions.formatCurrency(1234.5)).isEqualTo("1.234,50 \u20ac");
+            assertThat(Functions.formatPercent(0.255, 1)).isEqualTo("25,5%");
+        } finally {
+            Locale.setDefault(Locale.US);
+        }
+    }
+
+    @ParameterizedTest(name = "[{index}] FormatDateTime({0}, {1}) => {2}")
+    @CsvSource(delimiter = '|', value = {
+        "2026-10-29 13:14:15 | 0 | 10/29/2026 1:14:15 PM",
+        "2026-10-29 00:00:00 | 0 | 10/29/2026",
+        "1899-12-30 13:14:15 | 0 | 1:14:15 PM",
+        "2026-10-29 13:14:15 | 1 | Thursday, October 29, 2026",
+        "2026-10-29 13:14:15 | 2 | 10/29/2026",
+        "2026-10-29 13:14:15 | 3 | 1:14:15 PM",
+        "2026-10-29 13:14:15 | 4 | 13:14"
+    })
+    void formatDateTime_namedFormat_formattedLikeAccess(String date, int format, String expected) throws UcanaccessSQLException {
+        assertThat(Functions.formatDateTime(Timestamp.valueOf(date), format)).isEqualTo(expected);
+    }
+
+    @Test
+    void formatDateTime_nullOrInvalidFormat_nullOrThrows() throws UcanaccessSQLException {
+        assertThat(Functions.formatDateTime(null)).isNull();
+        assertThatThrownBy(() -> Functions.formatDateTime(TS1, 5)).isInstanceOf(InvalidFunctionParameterException.class);
     }
 
     @Test
@@ -702,6 +823,34 @@ class FunctionsUnitTest extends AbstractBaseTest {
     void timeSerial_hourMinuteSecond_timeOnBaseDate() {
         assertThat(Functions.timeSerial(13, 14, 15)).isEqualTo(Timestamp.valueOf(LocalDateTime.of(1899, 12, 30, 13, 14, 15)));
         assertThat(Functions.timeSerial(null, 14, 15)).isNull();
+    }
+
+    @ParameterizedTest(name = "[{index}] TimeValue(\"{0}\") => {1}")
+    @CsvSource({
+        "13:14:15,               1899-12-30 13:14:15",
+        "' 1:14 PM ',            1899-12-30 13:14:00",
+        "12:30 am,               1899-12-30 00:30:00",
+        "12:00 PM,               1899-12-30 12:00:00",
+        "8:05,                   1899-12-30 08:05:00",
+        "2026-10-29 13:14:15,    1899-12-30 13:14:15",
+        "10/29/2026 1:14:15 PM,  1899-12-30 13:14:15"
+    })
+    void timeValue_text_timeOnBaseDate(String value, String expected) {
+        assertThat(Functions.timeValue(value)).isEqualTo(Timestamp.valueOf(expected));
+    }
+
+    @ParameterizedTest(name = "[{index}] TimeValue(\"{0}\")")
+    @ValueSource(strings = {"25:00", "10:60", "13:00 PM", "abc"})
+    void timeValue_invalidText_throws(String value) {
+        assertThatThrownBy(() -> Functions.timeValue(value)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
+    @Test
+    void timeValueTimer_dateOrNull_timeOfDay() {
+        assertThat(Functions.timeValue(TS1)).isEqualTo(Timestamp.valueOf("1899-12-30 10:30:45"));
+        assertThat(Functions.timeValue((Timestamp) null)).isNull();
+        assertThat(Functions.timeValue((String) null)).isNull();
+        assertThat(Functions.timer()).isBetween(0.0, 86400.0);
     }
 
     // values out of range carry over like in Access, a negative total keeps the absolute time of day

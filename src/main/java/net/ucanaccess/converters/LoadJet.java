@@ -292,6 +292,7 @@ public class LoadJet {
             createFunctions();
             if (cswitch) {
                 createSwitch();
+                createChoose();
             }
         }
 
@@ -352,6 +353,34 @@ public class LoadJet {
                 }
             }
 
+        }
+
+        /**
+         * Creates the function Choose for up to nine values of the same type. Like in Access, the index is truncated
+         * to a whole number and an index out of range returns {@code null}.
+         */
+        private void createChoose() {
+            List<DataType> dtypes = List.of(
+                DataType.BOOLEAN, DataType.SHORT_DATE_TIME,
+                DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.MONEY, DataType.NUMERIC, DataType.MEMO);
+
+            for (DataType dtype : dtypes) {
+                String type = TypesMap.map2hsqldb(dtype);
+
+                for (int i = 1; i < 10; i++) {
+                    StringBuilder header = new StringBuilder("CREATE FUNCTION CHOOSE(I DOUBLE");
+                    StringBuilder body = new StringBuilder(" (CASE CAST(FLOOR(I) AS INTEGER)");
+                    for (int j = 0; j < i; j++) {
+                        header.append(", V").append(j).append(' ').append(type);
+                        body.append(" WHEN ").append(j + 1).append(" THEN V").append(j);
+                    }
+                    body.append(" END)");
+                    header.append(") RETURNS ").append(type).append(" RETURN").append(body);
+
+                    Try.catching(() -> exec(header.toString(), true))
+                        .orElse(ex -> warnings.warn(ex, "Failed to create function {0}: {1}", header, ex.toString()));
+                }
+            }
         }
 
         private String getAggregate(String functionName, String type) {
