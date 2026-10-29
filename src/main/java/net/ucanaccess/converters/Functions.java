@@ -2326,10 +2326,23 @@ public final class Functions {
         return number == null ? null : number < 0 ? Math.ceil(number) : Math.floor(number);
     }
 
+    /**
+     * Returns the range of the given size, like "11: 20", into which a number falls.
+     *
+     * @param number   number to find the range for, if {@code null}, {@code null} is returned
+     * @param start    start of the overall range, at least 0
+     * @param stop     end of the overall range, greater than start
+     * @param interval size of each range, at least 1
+     * @return range of the number, padded to the width of the largest value
+     * @throws UcanaccessSQLException if start, stop or interval are invalid
+     */
     @FunctionType(functionName = "PARTITION", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.MEMO)
-    public static String partition(Double number, double start, double stop, double interval) {
+    public static String partition(Double number, double start, double stop, double interval) throws UcanaccessSQLException {
         if (number == null) {
             return null;
+        } else if (start < 0 || stop <= start || Math.rint(interval) < 1) {
+            // like Access, and an interval below 1 would never end the loop below
+            throw new InvalidFunctionParameterException("Partition", String.format("%s, %s, %s", start, stop, interval));
         }
         number = Math.rint(number);
         interval = Math.rint(interval);

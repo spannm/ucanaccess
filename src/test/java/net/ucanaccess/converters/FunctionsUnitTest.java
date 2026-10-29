@@ -803,13 +803,26 @@ class FunctionsUnitTest extends AbstractBaseTest {
         "-1  | 0  | 5  | \"   : -1\"",
         "0   | 1  | 10 | \"   :  0\""
     })
-    void partition_number_returnsRange(double number, double start, double interval, String expected) {
+    void partition_number_returnsRange(double number, double start, double interval, String expected) throws UcanaccessSQLException {
         assertThat(Functions.partition(number, start, 100, interval)).isEqualTo(expected);
     }
 
     @Test
-    void partition_null_returnsNull() {
+    void partition_null_returnsNull() throws UcanaccessSQLException {
         assertThat(Functions.partition(null, 1, 100, 10)).isNull();
+    }
+
+    // an interval of 0 used to loop forever
+    @ParameterizedTest(name = "[{index}] Partition(5, {0}, {1}, {2})")
+    @CsvSource({
+        "0,   100, 0",
+        "0,   100, 0.4",
+        "10,  0,   5",
+        "10,  10,  5",
+        "-10, 10,  5"
+    })
+    void partition_invalidRangeOrInterval_throws(double start, double stop, double interval) {
+        assertThatThrownBy(() -> Functions.partition(5.0, start, stop, interval)).isInstanceOf(InvalidFunctionParameterException.class);
     }
 
     @Test
