@@ -34,6 +34,8 @@ public final class SQLConverter {
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
         private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
+        // division operator, but not the start or end of a comment
+        private static final Pattern       DIVISION                   = Pattern.compile("(?<![/*])/(?![/*])");
         // text variants of string functions, which behave like the base function except for Null
         private static final Pattern       DOLLAR_FUNCTIONS           = Pattern.compile(
             "(\\W)(ChrW|Chr|Format|Hex|LCase|LTrim|Mid|Oct|RTrim|Space|Str|String|Trim|UCase)\\$\\s*\\(", Pattern.CASE_INSENSITIVE);
@@ -102,6 +104,7 @@ public final class SQLConverter {
             .collect(Collectors.joining("|"))
         + ")(\\W)", Pattern.CASE_INSENSITIVE);
 
+    private static final String              DOUBLE_DIVISION                = " * CAST(1 AS DOUBLE) / ";
     public static final String               DATE_ACCESS_FORMAT             = "(0[1-9]|[1-9]|1[012])/(0[1-9]|[1-9]|[12]\\d|3[01])/(\\d\\d\\d\\d)";
     public static final String               DATE_FORMAT                    = "(\\d\\d\\d\\d)-(0[1-9]|[1-9]|1[012])-(0[1-9]|[1-9]|[12]\\d|3[01])";
     public static final String               HHMMSS_ACCESS_FORMAT           = "(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):(\\d|[0-5]\\d)";
@@ -363,6 +366,7 @@ public final class SQLConverter {
     }
 
     public static String restoreWorkAroundFunctions(String sql) {
+        sql = sql.replace(DOUBLE_DIVISION, "/");
         for (String waFun : WORKAROUND_FUNCTIONS) {
             sql = sql.replaceAll("(\\W)(?i)" + waFun + "WA\\s*\\(", "$1" + waFun + "(");
         }
@@ -656,7 +660,15 @@ public final class SQLConverter {
 
     private static String convertSQLTokens(String sql) {
         return convertDeleteAll(replaceWorkAroundFunctions(
-                convertOwnerAccess(replaceDistinctRow(convertYesNo(sql.replace("&", "||"))))));
+                convertOwnerAccess(replaceDistinctRow(convertYesNo(convertDivision(sql.replace("&", "||")))))));
+    }
+
+    /**
+     * Makes the division operator always divide as floating point numbers, like in Access. HSQLDB divides integers as
+     * integers and keeps the scale of the dividend for decimals, so 10 / 4 would be 2 and 0.09 / 12 would be 0.
+     */
+    private static String convertDivision(String sql) {
+        return sql.indexOf('/') < 0 ? sql : Patterns.DIVISION.matcher(sql).replaceAll(Matcher.quoteReplacement(DOUBLE_DIVISION));
     }
 
     private static String replaceDigitStartingIdentifiers(String sql) {

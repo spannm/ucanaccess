@@ -71,6 +71,14 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
+    void testDivision(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT id / 1000, 10 / 4, 0.09 / 12, 8 / 4 / 2, 1 + 6 / 3 * 2 FROM t_funcs", singleRec(1.234, 2.5, 0.0075, 1.0, 5.0));
+        checkQuery("SELECT Pmt(0.09 / 12, 252, 140233) FROM t_funcs", singleRec(-1240.474495757593));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
     void testDollarFunctions(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT Mid$('abc', 2, 1), '[' & Trim$(' a ') & ']', LCase$('AB'), UCase$('ab'), Chr$(65), String$(3, 'x'), "

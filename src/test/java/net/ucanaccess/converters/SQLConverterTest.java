@@ -156,6 +156,21 @@ class SQLConverterTest extends AbstractBaseTest {
         void convertSQL_likeCondition_convertedToLikeOrRegexp(String sql, String expected) {
             assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
         }
+
+        // HSQLDB divides integers as integers, Access always as floating point numbers
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT a/b FROM t           | SELECT a * CAST(1 AS DOUBLE) / b FROM t",
+                "SELECT 'a/b' FROM t         | SELECT 'a/b' FROM t",
+                "SELECT a /* x */ FROM t     | SELECT a /* x */ FROM t",
+                "SELECT #1/2/2026# FROM t    | SELECT Timestamp('2026-1-2 00:00:00') FROM t"
+            }
+        )
+        void convertSQL_division_floatingPoint(String sql, String expected) {
+            assertThat(SQLConverter.convertSQL(sql, true).getSql()).isEqualTo(expected);
+        }
     }
 
     @Nested
