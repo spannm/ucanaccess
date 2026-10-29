@@ -34,6 +34,9 @@ public final class SQLConverter {
         private static final Pattern       NO_DATA                    = Pattern.compile(" WITH\\s+NO\\s+DATA", Pattern.CASE_INSENSITIVE);
         private static final Pattern       NO_ALPHANUMERIC            = Pattern.compile("\\W");
         private static final Pattern       IDENTITY                   = Pattern.compile("(\\W+)(@@identity)(\\W*)", Pattern.CASE_INSENSITIVE);
+        // text variants of string functions, which behave like the base function except for Null
+        private static final Pattern       DOLLAR_FUNCTIONS           = Pattern.compile(
+            "(\\W)(ChrW|Chr|Format|Hex|LCase|LTrim|Mid|Oct|RTrim|Space|Str|String|Trim|UCase)\\$\\s*\\(", Pattern.CASE_INSENSITIVE);
         private static final Pattern       SELECT_IDENTITY            = Pattern.compile("SELECT\\s+@@identity.*", Pattern.CASE_INSENSITIVE);
         private static final Pattern       HAS_FROM                   = Pattern.compile("\\s+FROM\\s+", Pattern.CASE_INSENSITIVE);
         private static final Pattern       FORMULA_DEPS               = Pattern.compile("\\[([^\\]]*)\\]");
@@ -348,6 +351,7 @@ public final class SQLConverter {
     }
 
     private static String replaceWorkAroundFunctions(String sql) {
+        sql = Patterns.DOLLAR_FUNCTIONS.matcher(sql).replaceAll("$1$2(");
         for (String waFun : WORKAROUND_FUNCTIONS) {
             sql = sql.replaceAll("(\\W)(?i)" + waFun + "\\s*\\(", "$1" + waFun + "WA(");
         }

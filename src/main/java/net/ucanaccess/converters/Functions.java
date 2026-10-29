@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
@@ -1385,6 +1386,14 @@ public final class Functions {
     }
 
     /**
+     * Returns the current system date as text in the format mm-dd-yyyy, like Date$ in Access.
+     */
+    @FunctionType(functionName = "\"DATE$\"", argumentTypes = {}, returnType = AccessType.MEMO)
+    public static String dateS() {
+        return LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+    }
+
+    /**
      * Returns the current system date and time.
      */
     @FunctionType(namingConflict = true, functionName = "Now", argumentTypes = {}, returnType = AccessType.DATETIME)
@@ -1649,6 +1658,14 @@ public final class Functions {
     @FunctionType(functionName = "TimeValue", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
     public static Timestamp timeValue(Timestamp value) {
         return value == null ? null : Timestamp.valueOf(ACCESS_BASE_DATE.with(value.toLocalDateTime().toLocalTime()));
+    }
+
+    /**
+     * Returns the current system time as text in the format hh:mm:ss, like Time$ in Access.
+     */
+    @FunctionType(functionName = "\"TIME$\"", argumentTypes = {}, returnType = AccessType.MEMO)
+    public static String timeS() {
+        return LocalTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
     }
 
     /**

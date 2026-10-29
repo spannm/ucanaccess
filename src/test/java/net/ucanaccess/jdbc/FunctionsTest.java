@@ -71,6 +71,16 @@ class FunctionsTest extends UcanaccessBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
+    void testDollarFunctions(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Mid$('abc', 2, 1), '[' & Trim$(' a ') & ']', LCase$('AB'), UCase$('ab'), Chr$(65), String$(3, 'x'), "
+            + "Str$(1), Format$(1.5, '0.00'), Hex$(255), Oct$(8), mid$ ('abc', 2), 'Mid$(x)' FROM t_funcs",
+            singleRec("b", "[a]", "ab", "AB", "A", "xxx", " 1", "1.50", "FF", "10", "bc", "Mid$(x)"));
+        checkQuery("SELECT Len(Date$()), Len(Time$()) FROM t_funcs", singleRec(10, 8));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
     void testChoose(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT Choose(2, 'a', 'b', 'c'), Choose(4, 'a', 'b', 'c'), Choose(1.6, 'a', 'b'), Choose(0, 'a') FROM t_funcs",
