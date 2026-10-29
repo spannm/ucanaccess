@@ -547,6 +547,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT DateDiff('m',#11/22/2007 11:00:00 AM#,#11/22/2007 10:00:00 AM#) FROM t_funcs", singleRec(0));
         checkQuery("SELECT DateDiff('m',#11/22/1992 11:00:00 AM#,#08/22/2007 12:00:00 AM#) FROM t_funcs", singleRec(177));
         checkQuery("SELECT DateDiff('d',#1/1/2004 11:00:00 AM#,#1/3/2004 11:00:00 AM#) FROM t_funcs", singleRec(2));
+        checkQuery("SELECT DateDiff('n', #2026-01-01 00:00:59#, #2026-01-01 00:01:00#), DateDiff('ww', #2026-10-25#, #2026-11-01#, 2) FROM t_funcs",
+            singleRec(1, 1));
         checkQuery("SELECT DateDiff('d',#11/22/1992 11:00:00 AM#,#11/22/2007 10:00:00 AM#) FROM t_funcs", singleRec(5478));
         checkQuery("SELECT DateDiff('d',#11/22/1992 11:00:00 AM#,#11/22/2007 12:00:00 AM#) FROM t_funcs", singleRec(5478));
         checkQuery("SELECT DateDiff('w',#11/22/1992 11:00:00 AM#,#11/22/2007 10:00:00 AM#) FROM t_funcs", singleRec(782));

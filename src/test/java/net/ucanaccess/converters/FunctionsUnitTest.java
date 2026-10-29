@@ -414,6 +414,35 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.dateDiff("q", Timestamp.valueOf(dt1), Timestamp.valueOf(dt2))).isEqualTo(expected);
     }
 
+    // like Access, the difference counts the interval boundaries crossed, not the time elapsed
+    @ParameterizedTest(name = "[{index}] DateDiff({0}, {1}, {2}) => {3}")
+    @CsvSource({
+        "d,  2026-01-01 23:59:00, 2026-01-02 00:01:00,  1",
+        "d,  2026-01-02 00:01:00, 2026-01-01 23:59:00, -1",
+        "h,  2026-01-01 10:59:00, 2026-01-01 11:00:00,  1",
+        "h,  2026-01-01 10:00:00, 2026-01-01 10:59:59,  0",
+        "n,  2026-01-01 00:00:59, 2026-01-01 00:01:00,  1",
+        "s,  2026-01-01 00:00:00, 2026-01-01 00:00:59, 59",
+        "w,  2026-10-25 00:00:00, 2026-10-30 00:00:00,  0",
+        "w,  2026-10-24 00:00:00, 2026-10-31 00:00:00,  1",
+        "ww, 2026-10-24 00:00:00, 2026-10-25 00:00:00,  1",
+        "ww, 2026-10-25 00:00:00, 2026-10-31 00:00:00,  0",
+        "ww, 2026-11-01 00:00:00, 2026-10-24 00:00:00, -2"
+    })
+    void dateDiff_boundaries_countedLikeAccess(String interval, String dt1, String dt2, int expected) throws UcanaccessSQLException {
+        assertThat(Functions.dateDiff(interval, Timestamp.valueOf(dt1), Timestamp.valueOf(dt2))).isEqualTo(expected);
+    }
+
+    @Test
+    void dateDiff_weeksWithFirstDayOfWeek_countsThatDay() throws UcanaccessSQLException {
+        Timestamp sunday = Timestamp.valueOf("2026-10-25 00:00:00");
+        Timestamp nextSunday = Timestamp.valueOf("2026-11-01 00:00:00");
+        assertThat(Functions.dateDiff("ww", sunday, nextSunday, 1)).isEqualTo(1);
+        assertThat(Functions.dateDiff("ww", sunday, nextSunday, 2)).isEqualTo(1);
+        assertThat(Functions.dateDiff("ww", sunday, Timestamp.valueOf("2026-10-26 00:00:00"), 2)).isEqualTo(1);
+        assertThatThrownBy(() -> Functions.dateDiff("ww", sunday, nextSunday, 8)).isInstanceOf(InvalidFunctionParameterException.class);
+    }
+
     @Test
     void dateDiff_nullOrUnknownInterval_returnsNullOrThrows() throws UcanaccessSQLException {
         assertThat(Functions.dateDiff(null, TS1, TS2)).isNull();
@@ -450,6 +479,46 @@ class FunctionsUnitTest extends AbstractBaseTest {
     void datePart_weekOfYearWithOptions_returnsWeek(int firstDayOfWeek, int firstWeekOfYear, int expected) throws UcanaccessSQLException {
         assertThat(Functions.datePart("ww", TS1, firstDayOfWeek, firstWeekOfYear)).isEqualTo(expected);
         assertThat(Functions.datePart("ww", DT1, firstDayOfWeek, firstWeekOfYear)).isEqualTo(expected);
+    }
+
+    // weeks around the turn of the year, as returned by Access
+    @ParameterizedTest(name = "[{index}] DatePart(\"ww\", {0}, {1}, {2}) => {3}")
+    @CsvSource({
+        "2026-01-01, 1, 1,  1",
+        "2026-01-01, 2, 2,  1",
+        "2026-01-01, 2, 3, 52",
+        "2026-01-01, 1, 3, 52",
+        "2026-01-01, 7, 2, 52",
+        "2027-01-01, 1, 1,  1",
+        "2027-01-01, 2, 2, 53",
+        "2027-01-01, 2, 3, 52",
+        "2027-01-01, 1, 3, 52",
+        "2027-01-01, 7, 2, 52",
+        "2026-12-31, 1, 1, 53",
+        "2026-12-31, 2, 2, 53",
+        "2026-12-31, 2, 3, 52",
+        "2026-12-31, 1, 3, 52",
+        "2026-12-31, 7, 2, 52",
+        "2024-12-30, 1, 1, 53",
+        "2024-12-30, 2, 2,  1",
+        "2024-12-30, 2, 3, 53",
+        "2024-12-30, 1, 3, 52",
+        "2024-12-30, 7, 2, 53",
+        "2021-01-03, 1, 1,  2",
+        "2021-01-03, 2, 2, 53",
+        "2021-01-03, 2, 3, 52",
+        "2021-01-03, 1, 3,  1",
+        "2021-01-03, 7, 2,  1"
+    })
+    void datePart_weekAtTurnOfYear_likeAccess(String date, int firstDayOfWeek, int firstWeekOfYear, int expected) throws UcanaccessSQLException {
+        assertThat(Functions.datePart("ww", Timestamp.valueOf(date + " 00:00:00"), firstDayOfWeek, firstWeekOfYear)).isEqualTo(expected);
+    }
+
+    @Test
+    void datePart_weekDefaultsAtEndOfYear_week53() throws UcanaccessSQLException {
+        assertThat(Functions.datePart("ww", Timestamp.valueOf("2026-12-31 00:00:00"))).isEqualTo(53);
+        assertThatThrownBy(() -> Functions.datePart("ww", TS1, 8, 1)).isInstanceOf(InvalidFunctionParameterException.class);
+        assertThatThrownBy(() -> Functions.datePart("ww", TS1, 1, 4)).isInstanceOf(InvalidFunctionParameterException.class);
     }
 
     @Test

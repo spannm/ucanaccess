@@ -20,7 +20,6 @@ import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.text.*;
 import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,6 +27,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.Map.Entry;
@@ -44,9 +45,7 @@ public final class Functions {
     private static final String GENERAL_DATE = "general date";
 
     /** Day zero of Access date values. */
-    private static final LocalDateTime ACCESS_BASE_DATE         = LocalDateTime.of(1899, 12, 30, 0, 0);
-    /** Weeks as in Access by default: starting on Sunday, week 1 contains January 1st. */
-    private static final WeekFields    WEEK_FIELDS_SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);
+    private static final LocalDateTime ACCESS_BASE_DATE = LocalDateTime.of(1899, 12, 30, 0, 0);
 
     /** Hexadecimal ({@code &H}) or octal ({@code &O} or just {@code &}) number at the start of a string, as in Val. */
     private static final Pattern VAL_RADIX   = Pattern.compile("&(?:[Hh]([0-9A-Fa-f]*)|[Oo]?([0-7]*))");
@@ -533,37 +532,60 @@ public final class Functions {
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.LONG)
-    @SuppressWarnings("java:S8700") // Access dates have no time zone, so the difference is measured in wall-clock time
     public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2) throws UcanaccessSQLException {
-        if (dt1 == null || intv == null || dt2 == null) {
+        return dateDiff(intv, dt1, dt2, 1);
+    }
+
+    /**
+     * Returns the number of interval boundaries between two dates, like Access. For example, the difference in
+     * minutes between 00:00:59 and 00:01:00 is 1, and the difference in weeks (ww) counts the first days of the week
+     * in between. Only the interval w counts whole periods of seven days.
+     *
+     * @param intv           interval: yyyy, q, m, y, d, w, ww, h, n or s
+     * @param dt1            first date
+     * @param dt2            second date, the result is negative if it is before the first date
+     * @param firstDayOfWeek 1 for Sunday to 7 for Saturday, 0 for the default locale, only used for ww
+     * @return number of intervals, {@code null} if an argument is {@code null}
+     * @throws UcanaccessSQLException on an invalid interval or first day of week
+     */
+    @FunctionType(namingConflict = true, functionName = "DateDiff",
+        argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.LONG)
+    @SuppressWarnings("java:S8700") // Access dates have no time zone, so the difference is measured in wall-clock time
+    public static Integer dateDiff(String intv, Timestamp dt1, Timestamp dt2, Integer firstDayOfWeek) throws UcanaccessSQLException {
+        if (dt1 == null || intv == null || dt2 == null || firstDayOfWeek == null) {
             return null;
+        } else if (firstDayOfWeek < 0 || firstDayOfWeek > 7) {
+            throw new InvalidFunctionParameterException("DateDiff", firstDayOfWeek);
         }
-        int sign = dt1.after(dt2) ? -1 : 1;
-        LocalDateTime min = (sign == 1 ? dt1 : dt2).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);
-        LocalDateTime max = (sign == 1 ? dt2 : dt1).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS);
-        int years = max.getYear() - min.getYear();
-        long millis = Duration.between(min, max).toMillis();
-        Integer result;
+        LocalDateTime from = dt1.toLocalDateTime();
+        LocalDateTime to = dt2.toLocalDateTime();
+        long result;
         if ("yyyy".equalsIgnoreCase(intv)) {
-            result = years;
+            result = (long) to.getYear() - from.getYear();
         } else if ("q".equalsIgnoreCase(intv)) {
-            result = years * 4 + (max.getMonthValue() - 1) / 3 - (min.getMonthValue() - 1) / 3;
-        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) millis / (1000 * 60 * 60 * 24));
+            result = (to.getYear() - from.getYear()) * 4L + (to.getMonthValue() - 1) / 3 - (from.getMonthValue() - 1) / 3;
         } else if ("m".equalsIgnoreCase(intv)) {
-            result = years * 12 + max.getMonthValue() - min.getMonthValue();
-        } else if ("w".equalsIgnoreCase(intv) || "ww".equalsIgnoreCase(intv)) {
-            result = (int) Math.floor((double) millis / (1000 * 60 * 60 * 24 * 7));
+            result = (to.getYear() - from.getYear()) * 12L + to.getMonthValue() - from.getMonthValue();
+        } else if ("y".equalsIgnoreCase(intv) || "d".equalsIgnoreCase(intv)) {
+            result = ChronoUnit.DAYS.between(from.toLocalDate(), to.toLocalDate());
+        } else if ("w".equalsIgnoreCase(intv)) {
+            result = ChronoUnit.DAYS.between(from.toLocalDate(), to.toLocalDate()) / 7;
+        } else if ("ww".equalsIgnoreCase(intv)) {
+            DayOfWeek firstDay = firstDayOfWeek == 0
+                ? WeekFields.of(Locale.getDefault()).getFirstDayOfWeek()
+                : DayOfWeek.SUNDAY.plus(firstDayOfWeek - 1L);
+            TemporalAdjuster weekStart = TemporalAdjusters.previousOrSame(firstDay);
+            result = ChronoUnit.WEEKS.between(from.toLocalDate().with(weekStart), to.toLocalDate().with(weekStart));
         } else if ("h".equalsIgnoreCase(intv)) {
-            result = (int) Math.round(millis / (1000d * 60 * 60));
+            result = ChronoUnit.HOURS.between(from.truncatedTo(ChronoUnit.HOURS), to.truncatedTo(ChronoUnit.HOURS));
         } else if ("n".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) millis / (1000 * 60));
+            result = ChronoUnit.MINUTES.between(from.truncatedTo(ChronoUnit.MINUTES), to.truncatedTo(ChronoUnit.MINUTES));
         } else if ("s".equalsIgnoreCase(intv)) {
-            result = (int) Math.rint((double) millis / 1000);
+            result = ChronoUnit.SECONDS.between(from.truncatedTo(ChronoUnit.SECONDS), to.truncatedTo(ChronoUnit.SECONDS));
         } else {
             throw new InvalidIntervalValueException(intv);
         }
-        return result * sign;
+        return Math.toIntExact(result);
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.LONG}, returnType = AccessType.LONG)
@@ -602,27 +624,51 @@ public final class Functions {
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.DATETIME, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
     public static Integer datePart(String intv, Timestamp dt, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
-        Integer ret = datePart(intv, dt);
-        if (ret != null && "ww".equalsIgnoreCase(intv) && (firstWeekOfYear > 1 || firstDayOfWeek > 1)) {
-            LocalDate date = dt.toLocalDateTime().toLocalDate();
-            if (firstDayOfWeek == 0) {
-                firstDayOfWeek = 1;
-            }
-            int dow = dayOfWeekSundayFirst(date.withDayOfYear(1)) - firstDayOfWeek + 1;
-            if (dow <= 0) {
-                dow = 7 + dow;
-                if (dayOfWeekSundayFirst(date) - firstDayOfWeek >= 0) {
-                    ret++;
-                }
-            }
-            if (dow > 4 && firstWeekOfYear == 2) {
-                ret--;
-            }
-            if (dow > 1 && firstWeekOfYear == 3) {
-                ret--;
-            }
+        if ("ww".equalsIgnoreCase(intv) && dt != null) {
+            return weekOfYear(dt.toLocalDateTime().toLocalDate(), firstDayOfWeek, firstWeekOfYear);
         }
-        return ret;
+        return datePart(intv, dt);
+    }
+
+    /**
+     * Returns the week of the year like Access. Week 1 is the week with January 1st (firstWeekOfYear 1), the first
+     * week with at least four days (2) or the first full week (3) of the year. Days before week 1 belong to the last
+     * week of the previous year. Days at the end of the year belong to week 1 of the next year only for 2 and 3, as
+     * Access counts week 53 then instead for 1.
+     *
+     * @param date            date to get the week for
+     * @param firstDayOfWeek  1 for Sunday to 7 for Saturday, 0 for the default locale
+     * @param firstWeekOfYear 1, 2 or 3 as described above, 0 for the default locale
+     * @return week of the year from 1 to 54
+     * @throws UcanaccessSQLException if a constant is out of range
+     */
+    private static int weekOfYear(LocalDate date, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+        if (firstDayOfWeek == null || firstDayOfWeek < 0 || firstDayOfWeek > 7) {
+            throw new InvalidFunctionParameterException("DatePart", firstDayOfWeek);
+        } else if (firstWeekOfYear == null || firstWeekOfYear < 0 || firstWeekOfYear > 3) {
+            throw new InvalidFunctionParameterException("DatePart", firstWeekOfYear);
+        }
+        WeekFields system = WeekFields.of(Locale.getDefault());
+        DayOfWeek firstDay = firstDayOfWeek == 0 ? system.getFirstDayOfWeek() : DayOfWeek.SUNDAY.plus(firstDayOfWeek - 1L);
+        int fwoy = firstWeekOfYear == 0 ? (system.getMinimalDaysInFirstWeek() >= 4 ? 2 : 1) : firstWeekOfYear;
+        int minDays = fwoy == 1 ? 1 : fwoy == 2 ? 4 : 7;
+        if (fwoy != 1 && !date.isBefore(firstWeekStart(date.getYear() + 1, firstDay, minDays))) {
+            return 1;
+        }
+        LocalDate start = firstWeekStart(date.getYear(), firstDay, minDays);
+        if (date.isBefore(start)) {
+            start = firstWeekStart(date.getYear() - 1, firstDay, minDays);
+        }
+        return (int) ChronoUnit.DAYS.between(start, date) / 7 + 1;
+    }
+
+    /**
+     * Returns the first day of week 1 of a year, that is of the first week with at least the given days in the year.
+     */
+    private static LocalDate firstWeekStart(int year, DayOfWeek firstDay, int minDays) {
+        LocalDate jan1 = LocalDate.of(year, 1, 1);
+        LocalDate start = jan1.with(TemporalAdjusters.previousOrSame(firstDay));
+        return 7 - ChronoUnit.DAYS.between(start, jan1) < minDays ? start.plusWeeks(1) : start;
     }
 
     @FunctionType(namingConflict = true, functionName = "DatePart", argumentTypes = {AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
@@ -647,7 +693,7 @@ public final class Functions {
         } else if ("m".equalsIgnoreCase(intv)) {
             return ldt.getMonthValue();
         } else if ("ww".equalsIgnoreCase(intv)) {
-            return ldt.get(WEEK_FIELDS_SUNDAY_START.weekOfWeekBasedYear());
+            return weekOfYear(ldt.toLocalDate(), 1, 1);
         } else if ("w".equalsIgnoreCase(intv)) {
             return dayOfWeekSundayFirst(ldt.toLocalDate());
         } else if ("h".equalsIgnoreCase(intv)) {
