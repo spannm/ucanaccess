@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -105,6 +106,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT CStr(false) FROM t_funcs", singleRec("false"));
         checkQuery("SELECT CStr(8) FROM t_funcs", singleRec("8"));
         checkQuery("SELECT CStr(8.78787878) FROM t_funcs", singleRec("8.78787878"));
+        checkQuery("SELECT CStr(0.5), CStr(1234567.5), CStr(1234567) FROM t_funcs", singleRec("0.5", "1234567.5", "1234567"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -121,6 +123,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         checkQuery("SELECT CDate('Apr 6, 2003') FROM t_funcs", recs(rec(sdf.parse("2003-04-06 00:00:00.0"))));
         checkQuery("SELECT CDate('1582-10-15') FROM t_funcs", recs(rec(sdf.parse("1582-10-15 00:00:00.0"))));
+        checkQuery("SELECT CDate(45000.5), Nz(null, #2026-10-29#) FROM t_funcs",
+            singleRec(Timestamp.valueOf("2023-03-15 12:00:00"), Timestamp.valueOf("2026-10-29 00:00:00")));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -159,6 +163,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT CInt(8.51), CInt(4.5) FROM t_funcs", singleRec(9, 4));
         checkQuery("SELECT CInt(3.5), CInt(-2.5), CLng(2.5) FROM t_funcs", singleRec(4, -2, 2));
+        checkQuery("SELECT CInt('3.5'), CDbl('1,234.5') FROM t_funcs", singleRec(4, 1234.5));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -240,6 +245,7 @@ class FunctionsTest extends UcanaccessBaseTest {
             + "FROM t_funcs", singleRec("pl'uto\" \" cccc", "pl'uto\" \" cccc"));
         checkQuery("SELECT IIf(true, false, true) FROM t_funcs", singleRec(false));
         checkQuery("SELECT IIf('pippo'=null, 'capra', 'd''una capra') FROM t_funcs", singleRec("d'una capra"));
+        checkQuery("SELECT IIf(1>0, 1, 'n'), IIf(1<0, 1, 'n'), IIf(1>0, 'n', 2.5) FROM t_funcs", singleRec("1", "n", "n"));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -340,6 +346,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testLen(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT len('1222sssss.3hhh'), len(null) FROM t_funcs", singleRec(14, null));
+        checkQuery("SELECT Len(123), Len(1.5), Len(id) FROM t_funcs", singleRec(3, 3, 4));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -541,6 +548,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT Format(num, 'fixed') FROM t_funcs", singleRec("-1110.55"));
         checkQuery("SELECT Format(num, 'standard') FROM t_funcs", singleRec("-1,110.55"));
         checkQuery("SELECT Format(num, 'general number') FROM t_funcs", singleRec("-1110.554"));
+        checkQuery("SELECT Format(1.5), Format(num), Format('abc') FROM t_funcs", singleRec("1.5", "-1110.554", "abc"));
         checkQuery("SELECT Format(num, 'on/off') FROM t_funcs", singleRec("On"));
         checkQuery("SELECT Format(num, 'true/false') FROM t_funcs", singleRec("True"));
         checkQuery("SELECT Format(num, 'yes/no') FROM t_funcs", singleRec("Yes"));
@@ -657,6 +665,7 @@ class FunctionsTest extends UcanaccessBaseTest {
     void testRound(AccessVersion accessVersion) throws Exception {
         init(accessVersion);
         checkQuery("SELECT Round(2.5, 0), Round(3.5, 0), Round(0.125, 2) FROM t_funcs", singleRec(2.0, 4.0, 0.12));
+        checkQuery("SELECT Round(2.5), Round(3.5), Round(num) FROM t_funcs", singleRec(2.0, 4.0, -1111.0));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -196,11 +196,54 @@ public final class Functions {
     }
 
     /**
+     * Converts an Access date value to a date: the whole part counts the days since 1899-12-30, the fraction is the
+     * time of day. As in Access, the fraction of a negative value is taken as a positive time.
+     */
+    @FunctionType(functionName = "CDate", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DATETIME)
+    public static Timestamp cdate(Double value) {
+        if (value == null) {
+            return null;
+        }
+        long days = value.longValue();
+        long millis = Math.round(Math.abs(value - days) * 86_400_000L);
+        return Timestamp.valueOf(ACCESS_BASE_DATE.plusDays(days).plus(millis, ChronoUnit.MILLIS));
+    }
+
+    /**
      * Converts an expression to a double.
      */
     @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static Double cdbl(Double number) {
         return number;
+    }
+
+    /**
+     * Converts a text to a double, using the decimal and grouping separators of the default locale like Access.
+     */
+    @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.MEMO}, returnType = AccessType.DOUBLE)
+    public static Double cdbl(String value) throws UcanaccessSQLException {
+        return parseNumber("CDbl", value);
+    }
+
+    /**
+     * Parses a whole text as a number in the format of the default locale.
+     *
+     * @param function name of the calling function, for the error message
+     * @param value    text to parse, if {@code null}, {@code null} is returned
+     * @return parsed number
+     * @throws UcanaccessSQLException if the text is not a number
+     */
+    private static Double parseNumber(String function, String value) throws UcanaccessSQLException {
+        if (value == null) {
+            return null;
+        }
+        String s = value.trim();
+        ParsePosition pos = new ParsePosition(0);
+        Number number = NumberFormat.getNumberInstance().parse(s, pos);
+        if (number == null || pos.getIndex() != s.length()) {
+            throw new InvalidFunctionParameterException(function, value);
+        }
+        return number.doubleValue();
     }
 
     @FunctionType(functionName = "CDec", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
@@ -214,6 +257,15 @@ public final class Functions {
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.INTEGER)
     public static Short cint(Double number) {
         return BigDecimal.valueOf(Math.rint(number)).shortValueExact();
+    }
+
+    /**
+     * Converts a text to an integer, using the number format of the default locale and rounding halves to even.
+     */
+    @FunctionType(functionName = "CInt", argumentTypes = {AccessType.MEMO}, returnType = AccessType.INTEGER)
+    public static Short cint(String value) throws UcanaccessSQLException {
+        Double number = parseNumber("CInt", value);
+        return number == null ? null : cint(number);
     }
 
     @FunctionType(functionName = "CInt", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
@@ -274,14 +326,31 @@ public final class Functions {
         return value;
     }
 
+    /**
+     * Converts a number to text like Access: up to 15 significant digits, the decimal separator of the default locale
+     * and no grouping, so 0.5 becomes "0.5" and 1234567.5 becomes "1234567.5" in an English locale.
+     */
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
-    public static String cstr(double value) throws UcanaccessSQLException {
-        return cstrImpl(value);
+    public static String cstr(Double value) {
+        if (value == null) {
+            return null;
+        } else if (!Double.isFinite(value)) {
+            return value.toString();
+        }
+        char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+        return plainDigits(value).replace('.', separator);
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.LONG}, returnType = AccessType.MEMO)
-    public static String cstr(int value) throws UcanaccessSQLException {
-        return cstrImpl(value);
+    public static String cstr(Integer value) {
+        return value == null ? null : value.toString();
+    }
+
+    /**
+     * Returns a number rounded to 15 significant digits as plain text with a point as decimal separator.
+     */
+    private static String plainDigits(double value) {
+        return BigDecimal.valueOf(value).round(new MathContext(15)).stripTrailingZeros().toPlainString();
     }
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
@@ -657,6 +726,30 @@ public final class Functions {
 
     }
 
+    /**
+     * Converts a number to text without a format, like CStr.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.TEXT)
+    public static String format(Double d) {
+        return d == null ? null : cstr(d);
+    }
+
+    /**
+     * Returns a text unchanged, as Format does without a format.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.TEXT}, returnType = AccessType.TEXT)
+    public static String format(String s) {
+        return s;
+    }
+
+    /**
+     * Converts a date to text without a format, like CStr.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.TEXT)
+    public static String format(Timestamp t) throws UcanaccessSQLException {
+        return cstr(t);
+    }
+
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME, AccessType.TEXT}, returnType = AccessType.TEXT)
     public static String format(Timestamp t, String par) throws UcanaccessSQLException {
         if (t == null) {
@@ -716,6 +809,27 @@ public final class Functions {
         return iifImpl(b, o1, o2);
     }
 
+    /**
+     * Returns a number or a text, depending on the evaluation of an expression. Access returns a variant here, which
+     * UCanAccess represents as text.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String iif(Boolean b, Double o1, String o2) {
+        return iifImpl(b, o1 == null ? null : cstr(o1), o2);
+    }
+
+    /**
+     * Returns a text or a number, depending on the evaluation of an expression. Access returns a variant here, which
+     * UCanAccess represents as text.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String iif(Boolean b, String o1, Double o2) {
+        return iifImpl(b, o1, o2 == null ? null : cstr(o2));
+    }
+
+    /**
+     * Returns the first or second value, depending on the condition.
+     */
     private static <T> T iifImpl(Boolean b, T o1, T o2) {
         return b != null && b ? o1 : o2;
     }
@@ -921,6 +1035,14 @@ public final class Functions {
     }
 
     /**
+     * Returns the length of a number converted to text, like Access does for numeric expressions.
+     */
+    @FunctionType(functionName = "Len", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer len(Double value) {
+        return value == null ? null : cstr(value).length();
+    }
+
+    /**
      * Extracts a substring from a string (starting at any position).
      */
     @FunctionType(functionName = "Mid", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
@@ -1019,6 +1141,14 @@ public final class Functions {
         return (Integer) nz(value, (Object) other);
     }
 
+    @FunctionType(functionName = "Nz", argumentTypes = {AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp nz(Timestamp value, Timestamp other) {
+        return (Timestamp) nz(value, (Object) other);
+    }
+
+    /**
+     * Returns the second argument if the first argument is {@code null}.
+     */
     private static Object nz(Object value, Object other) {
         return value == null ? other : value;
     }
@@ -1053,7 +1183,7 @@ public final class Functions {
         if (d == null) {
             return null;
         }
-        String digits = BigDecimal.valueOf(Math.abs(d)).round(new MathContext(15)).stripTrailingZeros().toPlainString();
+        String digits = plainDigits(Math.abs(d));
         if (digits.startsWith("0.")) {
             digits = digits.substring(1);
         }
@@ -1779,6 +1909,14 @@ public final class Functions {
     @FunctionType(functionName = "\"RIGHT$\"", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
     public static String rightS(String input, int i) {
         return right(input, i);
+    }
+
+    /**
+     * Returns a number rounded to a whole number, rounding halves to the nearest even number like Access.
+     */
+    @FunctionType(namingConflict = true, functionName = "Round", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static double round(double d) {
+        return round(d, 0);
     }
 
     /**

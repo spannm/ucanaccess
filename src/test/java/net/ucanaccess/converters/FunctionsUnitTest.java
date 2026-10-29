@@ -121,6 +121,75 @@ class FunctionsUnitTest extends AbstractBaseTest {
 
     @ParameterizedTest(name = "[{index}] {0} => {1}")
     @CsvSource({
+        "0.5,                 0.5",
+        "-0.5,                -0.5",
+        "8,                   8",
+        "100,                 100",
+        "1234567.5,           1234567.5",
+        "8.78787878,          8.78787878",
+        "1.23456789012345678, 1.23456789012346"
+    })
+    void cstr_number_plainWithoutGrouping(double value, String expected) {
+        assertThat(Functions.cstr(value)).isEqualTo(expected);
+    }
+
+    @Test
+    void cstr_numberNullOrInteger_convertsLikeAccess() {
+        assertThat(Functions.cstr((Double) null)).isNull();
+        assertThat(Functions.cstr((Integer) null)).isNull();
+        assertThat(Functions.cstr(1234567)).isEqualTo("1234567");
+    }
+
+    // the test runs with Locale.US, so the comma groups thousands like in an English Access
+    @ParameterizedTest(name = "[{index}] \"{0}\" => {1}")
+    @CsvSource({
+        "1.5,     1.5",
+        "' 2.5 ', 2.5",
+        "'1,234.5', 1234.5",
+        "-3,      -3"
+    })
+    void cdbl_text_parsedInDefaultLocale(String value, double expected) throws UcanaccessSQLException {
+        assertThat(Functions.cdbl(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] \"{0}\" => {1}")
+    @CsvSource({
+        "2.5, 2",
+        "3.5, 4",
+        "-7,  -7"
+    })
+    void cint_text_roundedHalfEven(String value, short expected) throws UcanaccessSQLException {
+        assertThat(Functions.cint(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] \"{0}\"")
+    @ValueSource(strings = {"1.5x", "abc", ""})
+    void cdbl_noNumber_throws(String value) {
+        assertThatThrownBy(() -> Functions.cdbl(value)).isInstanceOf(InvalidFunctionParameterException.class);
+        assertThatThrownBy(() -> Functions.cint(value)).isInstanceOf(InvalidFunctionParameterException.class);
+    }
+
+    @Test
+    void cdblCint_nullText_returnsNull() throws UcanaccessSQLException {
+        assertThat(Functions.cdbl((String) null)).isNull();
+        assertThat(Functions.cint((String) null)).isNull();
+    }
+
+    @Test
+    void lenFormatRound_numberWithoutSecondArgument_likeAccess() throws UcanaccessSQLException {
+        assertThat(Functions.len(123.0)).isEqualTo(3);
+        assertThat(Functions.len(1.5)).isEqualTo(3);
+        assertThat(Functions.len((Double) null)).isNull();
+        assertThat(Functions.format(1.5)).isEqualTo("1.5");
+        assertThat(Functions.format((Double) null)).isNull();
+        assertThat(Functions.format("abc")).isEqualTo("abc");
+        assertThat(Functions.format((Timestamp) null)).isNull();
+        assertThat(Functions.round(2.5)).isEqualTo(2.0);
+        assertThat(Functions.round(-3.5)).isEqualTo(-4.0);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} => {1}")
+    @CsvSource({
         "2.5,  2",
         "3.5,  4",
         "-2.5, -2",
@@ -284,6 +353,10 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.iif(true, 1, 2)).isEqualTo(1);
         assertThat(Functions.iif(false, 1.5, 2.5)).isEqualTo(2.5);
         assertThat(Functions.iif(true, TS1, TS2)).isEqualTo(TS1);
+        assertThat(Functions.iif(true, 1.0, "n")).isEqualTo("1");
+        assertThat(Functions.iif(false, 1.5, "n")).isEqualTo("n");
+        assertThat(Functions.iif(false, "n", 1.5)).isEqualTo("1.5");
+        assertThat(Functions.iif(true, (Double) null, "n")).isNull();
     }
 
     @Test
@@ -445,6 +518,20 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.nz(BigDecimal.TEN)).isEqualTo(BigDecimal.TEN);
         assertThat(Functions.nz(null, BigDecimal.ONE)).isEqualTo(BigDecimal.ONE);
         assertThat(Functions.nz(BigDecimal.TEN, BigDecimal.ONE)).isEqualTo(BigDecimal.TEN);
+        assertThat(Functions.nz(null, TS2)).isEqualTo(TS2);
+        assertThat(Functions.nz(TS1, TS2)).isEqualTo(TS1);
+    }
+
+    // the fraction of a negative date value is a positive time, as Access stores negative dates
+    @ParameterizedTest(name = "[{index}] CDate({0}) => {1}")
+    @CsvSource({
+        "45000,   2023-03-15 00:00:00",
+        "45000.5, 2023-03-15 12:00:00",
+        "0,       1899-12-30 00:00:00",
+        "-1.25,   1899-12-29 06:00:00"
+    })
+    void cdate_number_daysSinceBaseDate(double value, String expected) {
+        assertThat(Functions.cdate(value)).isEqualTo(Timestamp.valueOf(expected));
     }
 
     @Test
