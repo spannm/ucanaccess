@@ -2391,8 +2391,8 @@ public final class Functions {
      * Returns a number rounded to a whole number, rounding halves to the nearest even number like Access.
      */
     @FunctionType(namingConflict = true, functionName = "Round", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static double round(double d) {
-        return round(d, 0);
+    public static Double round(Double d) {
+        return round(d, 0.0);
     }
 
     /**
@@ -2400,11 +2400,19 @@ public final class Functions {
      * even digit.
      */
     @FunctionType(namingConflict = true, functionName = "Round", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
-    public static double round(double d, double p) {
+    public static Double round(Double d, Double p) {
+        if (d == null || p == null) {
+            return null;
+        }
+        // like Access, the number of decimal places is rounded as well and must not be negative
+        int decimals = (int) Math.rint(p);
+        if (decimals < 0) {
+            UcanaccessRuntimeException.throwNow(String.format("Invalid number of decimal places in function Round: %s", p));
+        }
         if (!Double.isFinite(d)) {
             return d;
         }
-        return BigDecimal.valueOf(d).setScale((int) p, RoundingMode.HALF_EVEN).doubleValue();
+        return BigDecimal.valueOf(d).setScale(decimals, RoundingMode.HALF_EVEN).doubleValue();
     }
 
     /**

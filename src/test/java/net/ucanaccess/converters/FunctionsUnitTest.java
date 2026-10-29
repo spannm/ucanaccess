@@ -353,6 +353,15 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.round(value, decimals)).isEqualTo(expected);
     }
 
+    @Test
+    void round_fractionalNegativeOrNullDecimals_likeAccess() {
+        assertThat(Functions.round(1.5, 0.6)).isEqualTo(1.5);
+        assertThat(Functions.round(1.25, 1.5)).isEqualTo(1.25);
+        assertThat(Functions.round(1.25, 1.4)).isEqualTo(1.2);
+        assertThat(Functions.round(null, 1.0)).isNull();
+        assertThatThrownBy(() -> Functions.round(1234.5678, -1.0)).isInstanceOf(UcanaccessRuntimeException.class);
+    }
+
     @ParameterizedTest(name = "[{index}] {0} => {1}")
     @CsvSource({
         "1.23455,   1.2346",
