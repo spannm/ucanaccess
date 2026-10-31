@@ -56,8 +56,8 @@ class SQLConverterTest extends AbstractBaseTest {
                 // Scientific notation numbers
                 "SELECT 1.23e-4^5.67E+2 FROM T | SELECT POWER(1.23e-4, 5.67E+2) FROM T | Scientific notation numbers",
                 // Signed numbers
-                "SELECT -2^-3 FROM T | SELECT POWER(-2, -3) FROM T | Signed numbers (negative base, negative exponent)",
-                "SELECT +5^+1.5 FROM T | SELECT POWER(+5, +1.5) FROM T | Signed numbers (positive base, positive exponent)",
+                "SELECT -2^-3 FROM T | SELECT -POWER(2, -3) FROM T | Signed numbers (sign of the base binds weaker than ^)",
+                "SELECT +5^+1.5 FROM T | SELECT +POWER(5, +1.5) FROM T | Signed numbers (positive base, positive exponent)",
                 // Simple parenthesized expressions (as per regex definition)
                 "SELECT (ColA + 1)^(ColB - 2) FROM T | SELECT POWER((ColA + 1), (ColB - 2)) FROM T | Simple parenthesized expressions",
                 "SELECT (10 - 5)^ColX FROM T | SELECT POWER((10 - 5), ColX) FROM T | Simple parenthesized expression (base)",
@@ -110,6 +110,45 @@ class SQLConverterTest extends AbstractBaseTest {
         )
         void translateAccessIntegerOperators_modAndBackslash_functionCalls(String sql, String expected) {
             assertThat(SQLConverter.translateAccessIntegerOperators(sql)).isEqualTo(expected);
+        }
+
+        // in Access * and / bind stronger than \, which binds stronger than Mod, and a sign binds weaker than ^
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            quoteCharacter = '"',
+            value = {
+                "SELECT a * b Mod c FROM t         | SELECT AccessMod(a * b, c) FROM t",
+                "SELECT a Mod b * c FROM t         | SELECT AccessMod(a, b * c) FROM t",
+                "SELECT a / 2 \\ b FROM t          | SELECT AccessIntDiv(a / 2, b) FROM t",
+                "SELECT a \\ b * c FROM t          | SELECT AccessIntDiv(a, b * c) FROM t",
+                "SELECT a Mod b \\ c FROM t        | SELECT AccessMod(a, AccessIntDiv(b, c)) FROM t",
+                "SELECT a \\ b Mod c \\ d FROM t   | SELECT AccessMod(AccessIntDiv(a, b), AccessIntDiv(c, d)) FROM t",
+                "SELECT a + b * c Mod d - e FROM t | SELECT a + AccessMod(b * c, d) - e FROM t",
+                "SELECT x - 7 Mod -2 FROM t        | SELECT x - AccessMod(7, -2) FROM t",
+                "SELECT a * -b \\ c FROM t         | SELECT AccessIntDiv(a * -b, c) FROM t",
+                "SELECT Len(Trim(x)) Mod 2 FROM t  | SELECT AccessMod(Len(Trim(x)), 2) FROM t",
+                "SELECT .5 Mod 2 FROM t            | SELECT AccessMod(.5, 2) FROM t",
+                "SELECT * FROM t WHERE (a) Mod 2=1 | SELECT * FROM t WHERE AccessMod((a), 2)=1"
+            }
+        )
+        void translateAccessIntegerOperators_precedence_likeAccess(String sql, String expected) {
+            assertThat(SQLConverter.translateAccessIntegerOperators(sql)).isEqualTo(expected);
+        }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
+                "SELECT a -2^2 FROM t        | SELECT a -POWER(2, 2) FROM t",
+                "SELECT -x^2 FROM t          | SELECT -POWER(x, 2) FROM t",
+                "SELECT 2^3^2 FROM t         | SELECT POWER(POWER(2, 3), 2) FROM t",
+                "SELECT Abs(x)^2 FROM t      | SELECT POWER(Abs(x), 2) FROM t",
+                "SELECT ((a+1)*2)^-x FROM t  | SELECT POWER(((a+1)*2), -x) FROM t"
+            }
+        )
+        void translateAccessPowerOperators_precedence_likeAccess(String sql, String expected) {
+            assertThat(SQLConverter.translateAccessPowerOperators(sql)).isEqualTo(expected);
         }
 
         @Test

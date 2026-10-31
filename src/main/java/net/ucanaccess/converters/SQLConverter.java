@@ -68,38 +68,30 @@ public final class SQLConverter {
         private static final Pattern       DEFAULT_VARCHAR_0          = Pattern.compile("(\\W)VARCHAR([^\\(])", Pattern.CASE_INSENSITIVE);
         private static final Pattern       ESPRESSION_DIGIT           = Pattern.compile("([\\d]+)(?![\\.\\d])");
 
-        private static final String        POWER_OPERAND_REGEX        =
-                "(?:"
-              + "\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b" // column name/identifier
-              + '|'
-              + "[+-]?\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?" // numeric term
-              + '|'
-              + "\\([^()]+?\\)" // simple parenthesized expressions WITHOUT nested parentheses
-              + '|'
-              + "\\?" // parameter marker for PreparedStatements
-              + ")";
-
-        // the main pattern to find "operand1 ^ operand2"
-        private static final Pattern         POWER_OPERATION            = Pattern.compile(
-            "(" + POWER_OPERAND_REGEX + ")\\s*\\^\\s*(" + POWER_OPERAND_REGEX + ")",
-            // match case-insensitively for keywords/identifiers if they were part of regex
-            Pattern.CASE_INSENSITIVE);
-
-        // operand of Mod and integer division: a function call, an identifier, an unsigned number or an expression in
-        // parentheses without nested parentheses; a sign is left out, as it would swallow a minus operator before
-        private static final String          INTEGER_OPERAND_REGEX      =
-                "(?:"
-              + "\\b[a-zA-Z_]\\w*\\s*\\([^()]*\\)"
+        // operand of the operators ^, Mod and \: a function call, an identifier, a quoted identifier, an unsigned
+        // number, an expression in parentheses or a parameter marker; calls and parentheses may nest one level deep.
+        // A sign is left out, as it would swallow a minus operator before and binds weaker than ^ in Access
+        private static final String          OPERAND_REGEX              =
+                "(?!(?i:AND|OR|NOT|IN|IS|LIKE|BETWEEN|SELECT|FROM|WHERE|ON|WHEN|THEN|ELSE|HAVING|BY|AS|EXISTS|VALUES|SET"
+              + "|ALL|ANY|SOME|DISTINCT)\\b)(?:"
+              + "\\b[a-zA-Z_]\\w*\\s*\\((?:[^()]++|\\([^()]*+\\))*+\\)"
               + "|\\b[a-zA-Z_][a-zA-Z0-9_.]*\\b"
               + "|\"[^\"]+\""
-              + "|\\d+(?:\\.\\d*)?(?:e[+-]?\\d+)?"
-              + "|\\([^()]+?\\)"
+              + "|(?<![\\w.])(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?"
+              + "|\\((?:[^()]++|\\([^()]*+\\))*+\\)"
               + "|\\?"
               + ")";
+        // operands joined by * and /, which bind stronger than Mod and \; only a term on the right of an operator may
+        // start with a sign
+        private static final String          TERM_REGEX                 =
+            OPERAND_REGEX + "(?:\\s*[*/]\\s*[+-]?\\s*" + OPERAND_REGEX + ")*+";
+
+        private static final Pattern         POWER_OPERATION            = Pattern.compile(
+            "(" + OPERAND_REGEX + ")\\s*\\^\\s*([+-]?\\s*" + OPERAND_REGEX + ")");
         private static final Pattern         MOD_OPERATION              = Pattern.compile(
-            "(" + INTEGER_OPERAND_REGEX + ")\\s+MOD\\s+(" + INTEGER_OPERAND_REGEX + ")", Pattern.CASE_INSENSITIVE);
+            "(" + TERM_REGEX + ")\\s+MOD\\s+([+-]?\\s*" + TERM_REGEX + ")", Pattern.CASE_INSENSITIVE);
         private static final Pattern         INTEGER_DIVISION           = Pattern.compile(
-            "(" + INTEGER_OPERAND_REGEX + ")\\s*\\\\\\s*(" + INTEGER_OPERAND_REGEX + ")", Pattern.CASE_INSENSITIVE);
+            "(" + TERM_REGEX + ")\\s*\\\\\\s*([+-]?\\s*" + TERM_REGEX + ")");
 
         private Patterns() {
         }
@@ -607,66 +599,27 @@ public final class SQLConverter {
     }
 
     /**
-     * Translates MS Access SQL expressions using the '^' (power) operator
-     * into the standard SQL POWER(base, exponent) function.
+     * Translates the Access power operator ^ into calls of the function POWER. Like in Access, ^ binds stronger than a
+     * sign and chains from left to right, so -2^2 becomes -POWER(2, 2) and 2^3^2 becomes POWER(POWER(2, 3), 2).
      * <p>
-     * This is a simplified implementation based on regular expressions and might not
-     * cover all edge cases or complex SQL constructs. For robust parsing and
-     * modification of SQL, we should use a dedicated SQL parser library e.g. JSqlParser.
+     * Operands are found with regular expressions, so they cannot be nested deeper than one level of parentheses and
+     * cannot be subqueries.
      *
-     * <p>The current implementation's {@code POWER_OPERAND_REGEX} is designed to identify:</p>
-     * <ul>
-     *   <li>Simple column names or identifiers (e.g., {@code myColumn}, {@code Table.Column}).</li>
-     *   <li>Numeric literals (integers, decimals, scientific notation, with optional sign).</li>
-     *   <li>Simple parenthesized expressions without nested parentheses (e.g., {@code (num + 1)}).</li>
-     *   <li>Parameter markers ({@code ?}) for use in {@code PreparedStatement} scenarios.</li>
-     * </ul>
-     * <p>It explicitly **does NOT reliably handle** operands that are:</p>
-     * <ul>
-     *   <li>Complex parenthesized expressions with nested parentheses (e.g., {@code (num + (val - 2))})</li>
-     *   <li>Function calls (e.g., {@code ABS(value)})</li>
-     *   <li>Subqueries</li>
-     *   <li>SQL comments containing the {@code ^} character</li>
-     * </ul>
-     * <p>It specifically targets patterns like {@code "operand ^ exponent"} where both operands
-     * strictly conform to the defined {@code POWER_OPERAND_REGEX}.</p>
-     *
-     * @param sql the SQL string containing MS Access power operators.
-     * @return the translated SQL string using the POWER function.
+     * @param sql SQL string
+     * @return translated SQL string
      */
     static String translateAccessPowerOperators(String sql) {
         if (sql == null || !sql.contains("^")) {
             return sql;
         }
-        return replaceOutsideTextLiterals(sql, SQLConverter::translatePowerOperators);
-    }
-
-    /**
-     * Translates the power operators of an SQL part without text literals.
-     */
-    private static String translatePowerOperators(String sql) {
-
-        Matcher matcher = Patterns.POWER_OPERATION.matcher(sql);
-        StringBuffer translatedSql = new StringBuffer();
-
-        while (matcher.find()) {
-            String base = matcher.group(1);     // extract base operand
-            String exponent = matcher.group(2); // extract exponent operand
-
-            // replace the matched "base ^ exponent" with "POWER(base, exponent)"
-            // appendReplacement is crucial for correctly handling multiple matches and non-matched parts
-            matcher.appendReplacement(translatedSql, "POWER(" + base + ", " + exponent + ")");
-        }
-        // append any remaining portion of the string after the last match
-        matcher.appendTail(translatedSql);
-
-        return translatedSql.toString();
+        return replaceOutsideTextLiterals(sql, part -> replaceRepeatedly(part, Patterns.POWER_OPERATION, "POWER($1, $2)"));
     }
 
     /**
      * Translates the Access operators Mod and \\ (integer division) into calls of functions that round the operands
-     * to whole numbers first, like Access. Operands follow the same rules as for the power operator, plus function
-     * calls without nested parentheses.
+     * to whole numbers first, like Access. As in Access, * and / bind stronger than \\, which binds stronger than Mod,
+     * so a * b Mod c \\ d becomes AccessMod(a * b, AccessIntDiv(c, d)). Operands follow the same rules as for the
+     * power operator.
      *
      * @param sql SQL string
      * @return translated SQL string
@@ -675,17 +628,26 @@ public final class SQLConverter {
         if (sql == null || (!sql.contains("\\") && !sql.toUpperCase(Locale.ROOT).contains("MOD"))) {
             return sql;
         }
-        return replaceOutsideTextLiterals(sql, part -> {
-            String translated = part;
-            String previous;
-            // repeat for chains like a Mod b Mod c, whose first call is the operand of the next
-            do {
-                previous = translated;
-                translated = Patterns.MOD_OPERATION.matcher(translated).replaceAll("AccessMod($1, $2)");
-                translated = Patterns.INTEGER_DIVISION.matcher(translated).replaceAll("AccessIntDiv($1, $2)");
-            } while (!translated.equals(previous));
-            return translated;
-        });
+        return replaceOutsideTextLiterals(sql, part -> replaceRepeatedly(
+            replaceRepeatedly(part, Patterns.INTEGER_DIVISION, "AccessIntDiv($1, $2)"), Patterns.MOD_OPERATION, "AccessMod($1, $2)"));
+    }
+
+    /**
+     * Replaces all matches of a binary operation until none is left, so that in chains like a Mod b Mod c the call
+     * for the first operation becomes the left operand of the next one.
+     *
+     * @param sql         SQL string
+     * @param operation   pattern of the operation with both operands as groups
+     * @param replacement replacement referring to the operands as $1 and $2
+     * @return SQL string without matches
+     */
+    private static String replaceRepeatedly(String sql, Pattern operation, String replacement) {
+        String previous;
+        do {
+            previous = sql;
+            sql = operation.matcher(sql).replaceAll(replacement);
+        } while (!sql.equals(previous));
+        return sql;
     }
 
     /**
