@@ -199,6 +199,19 @@ class SQLConverterTest extends AbstractBaseTest {
         @CsvSource(
             delimiter = '|',
             value = {
+                "SELECT '#13:14:15#' FROM t                  | SELECT '#13:14:15#' FROM t",
+                "SELECT 'it''s #1/2/2026#' FROM t            | SELECT 'it''s #1/2/2026#' FROM t",
+                "SELECT '#2026-01-02#', #2026-01-02# FROM t  | SELECT '#2026-01-02#', Timestamp0('2026-01-02 00:00:00') FROM t"
+            }
+        )
+        void convertAccessDate_textLiteral_unchanged(String sql, String expected) {
+            assertThat(SQLConverter.convertAccessDate(sql)).isEqualTo(expected);
+        }
+
+        @ParameterizedTest(name = "{index}: {0}")
+        @CsvSource(
+            delimiter = '|',
+            value = {
                 "SELECT #2026-01-01 23:59# FROM t      | SELECT Timestamp0('2026-01-01 23:59:00') FROM t",
                 "SELECT #1/2/2026 1:14 PM# FROM t      | SELECT (Timestamp0('2026-1-2 1:14:00')+ 12 Hour)  FROM t",
                 "SELECT #2026-01-01 23:59:58# FROM t   | SELECT Timestamp0('2026-01-01 23:59:58') FROM t"

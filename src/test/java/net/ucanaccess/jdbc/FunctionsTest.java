@@ -625,6 +625,7 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT #2006-12-11#=timestamp '2006-12-11 00:00:00' FROM dual", singleRec(true));
         checkQuery("SELECT #2006-12-11 1:2:3#=timestamp '2006-12-11 01:02:03' FROM dual", singleRec(true));
+        checkQuery("SELECT '#13:14:15#', '#1/2/2026#' & 'x' FROM dual", singleRec("#13:14:15#", "#1/2/2026#x"));
         checkQuery("SELECT #2006-2-1 1:2:3#=timestamp '2006-02-01 01:02:03' FROM dual", singleRec(true));
         checkQuery("SELECT #2/1/2006 1:2:3#=timestamp '2006-02-01 01:02:03' FROM dual", singleRec(true));
         checkQuery("SELECT #12/11/2006 1:2:3#=timestamp '2006-12-11 01:02:03' FROM dual", singleRec(true));

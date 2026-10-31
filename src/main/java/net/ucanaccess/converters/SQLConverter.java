@@ -525,7 +525,20 @@ public final class SQLConverter {
         return convertSQL(sql, conn, false);
     }
 
+    /**
+     * Converts Access date literals like {@code #12/31/2026#} into timestamps, leaving text literals untouched.
+     *
+     * @param sql SQL string
+     * @return converted SQL string
+     */
     public static String convertAccessDate(String sql) {
+        return replaceOutsideTextLiterals(sql, SQLConverter::convertDateLiterals);
+    }
+
+    /**
+     * Converts the Access date literals of an SQL part without text literals.
+     */
+    private static String convertDateLiterals(String sql) {
         // a time without seconds like in #2026-01-01 23:59# gets seconds, which the patterns below require
         sql = Patterns.DATE_NO_SECONDS.matcher(sql).replaceAll("#$1$2:00$3#");
         sql = sql.replaceAll("#" + DATE_ACCESS_FORMAT + "#", "Timestamp('$3-$1-$2 00:00:00')")
