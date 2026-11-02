@@ -26,11 +26,13 @@ jobs:
         # what's outdated. No pull requests, no issues - just a workflow summary.
         -   name: Report outdated dependencies & plugins
             run: |
+                set -o pipefail
+                mvn --batch-mode --file pom.xml versions:display-dependency-updates versions:display-plugin-updates | tee report.txt
                 {
                     echo "## Outdated dependencies & plugins"
                     echo
                     echo '```text'
-                    mvn --batch-mode --file pom.xml versions:display-dependency-updates versions:display-plugin-updates
+                    cat report.txt
                     echo '```'
                 } >> "$GITHUB_STEP_SUMMARY"
 
