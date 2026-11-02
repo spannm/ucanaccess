@@ -540,6 +540,30 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT YEAR(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(2003));
     }
 
+    // like Access, the date part functions accept Null, text and Access date values (45000 is 2023-03-15)
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testDatePartsOfNullTextAndNumber(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Year(Null), Month(Null), Day(Null), Hour(Null), Minute(Null), Second(Null) FROM t_funcs",
+            singleRec(null, null, null, null, null, null));
+        checkQuery("SELECT Year('2026-10-29'), Month('2026-10-29'), Day('2026-10-29'), Hour('13:14:15'), Minute('13:14:15'), Second('13:14:15') "
+            + "FROM t_funcs", singleRec(2026, 10, 29, 13, 14, 15));
+        checkQuery("SELECT Year(45000), Month(45000), Day(45000), Hour(0.75), Minute(0.76), Second(0.5) FROM t_funcs",
+            singleRec(2023, 3, 15, 18, 14, 0));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testSecondReturnsInteger(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        try (UcanaccessStatement st = ucanaccess.createStatement();
+            ResultSet rs = st.executeQuery("SELECT Second(#10:42:58 PM#) FROM t_funcs")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getObject(1)).isEqualTo(58);
+        }
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
     void testDateDiff(AccessVersion accessVersion) throws Exception {

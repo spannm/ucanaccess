@@ -703,6 +703,150 @@ public final class Functions {
     }
 
     /**
+     * Returns the year of a date.
+     */
+    @FunctionType(namingConflict = true, functionName = "Year", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer year(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("yyyy", dt);
+    }
+
+    /**
+     * Returns the year of a date given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Year", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer year(String dt) throws UcanaccessSQLException {
+        return datePart("yyyy", dt);
+    }
+
+    /**
+     * Returns the year of an Access date value.
+     */
+    @FunctionType(namingConflict = true, functionName = "Year", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer year(Double value) throws UcanaccessSQLException {
+        return datePart("yyyy", cdate(value));
+    }
+
+    /**
+     * Returns the month of a date, from 1 to 12.
+     */
+    @FunctionType(namingConflict = true, functionName = "Month", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer month(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("m", dt);
+    }
+
+    /**
+     * Returns the month of a date given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Month", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer month(String dt) throws UcanaccessSQLException {
+        return datePart("m", dt);
+    }
+
+    /**
+     * Returns the month of an Access date value.
+     */
+    @FunctionType(namingConflict = true, functionName = "Month", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer month(Double value) throws UcanaccessSQLException {
+        return datePart("m", cdate(value));
+    }
+
+    /**
+     * Returns the day of the month of a date, from 1 to 31.
+     */
+    @FunctionType(namingConflict = true, functionName = "Day", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer day(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("d", dt);
+    }
+
+    /**
+     * Returns the day of the month of a date given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Day", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer day(String dt) throws UcanaccessSQLException {
+        return datePart("d", dt);
+    }
+
+    /**
+     * Returns the day of the month of an Access date value.
+     */
+    @FunctionType(namingConflict = true, functionName = "Day", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer day(Double value) throws UcanaccessSQLException {
+        return datePart("d", cdate(value));
+    }
+
+    /**
+     * Returns the hour of a time, from 0 to 23.
+     */
+    @FunctionType(namingConflict = true, functionName = "Hour", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer hour(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("h", dt);
+    }
+
+    /**
+     * Returns the hour of a time given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Hour", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer hour(String dt) throws UcanaccessSQLException {
+        return datePart("h", dt);
+    }
+
+    /**
+     * Returns the hour of an Access date value, whose fraction is the time of day.
+     */
+    @FunctionType(namingConflict = true, functionName = "Hour", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer hour(Double value) throws UcanaccessSQLException {
+        return datePart("h", cdate(value));
+    }
+
+    /**
+     * Returns the minute of a time, from 0 to 59.
+     */
+    @FunctionType(namingConflict = true, functionName = "Minute", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer minute(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("n", dt);
+    }
+
+    /**
+     * Returns the minute of a time given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Minute", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer minute(String dt) throws UcanaccessSQLException {
+        return datePart("n", dt);
+    }
+
+    /**
+     * Returns the minute of an Access date value.
+     */
+    @FunctionType(namingConflict = true, functionName = "Minute", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer minute(Double value) throws UcanaccessSQLException {
+        return datePart("n", cdate(value));
+    }
+
+    /**
+     * Returns the second of a time, from 0 to 59, as a whole number like in Access.
+     */
+    @FunctionType(namingConflict = true, functionName = "Second", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer second(Timestamp dt) throws UcanaccessSQLException {
+        return datePart("s", dt);
+    }
+
+    /**
+     * Returns the second of a time given as text.
+     */
+    @FunctionType(namingConflict = true, functionName = "Second", argumentTypes = {AccessType.MEMO}, returnType = AccessType.LONG)
+    public static Integer second(String dt) throws UcanaccessSQLException {
+        return datePart("s", dt);
+    }
+
+    /**
+     * Returns the second of an Access date value.
+     */
+    @FunctionType(namingConflict = true, functionName = "Second", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
+    public static Integer second(Double value) throws UcanaccessSQLException {
+        return datePart("s", cdate(value));
+    }
+
+    /**
      * Returns a date for a specified year, month, and day. Like in Access, the arguments are rounded to whole numbers,
      * month and day may lie outside their usual range and then roll over, and a year from 0 to 99 means 2000 to 2049
      * or 1950 to 1999, the default of Windows.
