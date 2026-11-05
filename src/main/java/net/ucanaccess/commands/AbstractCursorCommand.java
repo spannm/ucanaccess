@@ -19,8 +19,10 @@ public abstract class AbstractCursorCommand implements ICursorCommand {
     public boolean currentRowMatches(Cursor cur, Map<String, Object> currentRow) {
         Map<String, Object> rowPattern = getRowPattern();
         if (rowPattern.size() != currentRow.size()) {
-            LOGGER.log(Level.DEBUG, "Row size mismatch: expected {0}, found {1}",
-                new Object[] {rowPattern.size(), currentRow.size()});
+            if (LOGGER.isLoggable(Level.TRACE)) {
+                LOGGER.log(Level.TRACE, "Row size mismatch: expected {0}, found {1}",
+                    new Object[] {rowPattern.size(), currentRow.size()});
+            }
             return false;
         }
 
@@ -30,8 +32,10 @@ public abstract class AbstractCursorCommand implements ICursorCommand {
             Object actualValue = e.getValue();
 
             if (!cur.getColumnMatcher().matches(cur.getTable(), columnName, expectedValue, actualValue)) {
-                LOGGER.log(Level.WARNING, "Column value mismatch in table ''{0}'', column ''{1}'', expected ''{2}'', actual ''{3}''",
-                    new Object[] {cur.getTable().getName(), columnName, expectedValue, actualValue});
+                if (LOGGER.isLoggable(Level.TRACE)) {
+                    LOGGER.log(Level.TRACE, "Column value mismatch in table ''{0}'', column ''{1}'', expected ''{2}'', actual ''{3}''",
+                        new Object[] {cur.getTable().getName(), columnName, expectedValue, actualValue});
+                }
                 return false;
             }
         }
