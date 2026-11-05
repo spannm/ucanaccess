@@ -57,9 +57,10 @@ public class CompositeCommand implements ICommand {
     /**
      * Persists the composite commands by iterating over the table cursor and matching rows.
      * <p>
-     * For each row in the table, it checks if any command in the composite list matches
-     * the current row's data pattern. If a match is found, the command is executed
-     * against the current row.
+     * If the table has a suitable index, each command first looks up its row through that index.
+     * For the remaining commands, the table is scanned: for each row in the table, it checks
+     * if any command in the composite list matches the current row's data pattern. If a match
+     * is found, the command is executed against the current row.
      *
      * @return a composite feedback action containing all individual feedback actions
      * @throws SQLException if a critical persistence mismatch occurs or database access fails
@@ -69,8 +70,11 @@ public class CompositeCommand implements ICommand {
         return Try.catching(() -> {
             CompositeFeedbackAction cfa = new CompositeFeedbackAction();
             Cursor cur = indexSelector.getCursor();
-            cur.beforeFirst();
             Set<String> columnNames = composite.get(0).getRowPattern().keySet();
+            if (indexSelector.getBestIndex() != null) {
+                persistByIndex(cur, columnNames, cfa);
+            }
+            cur.beforeFirst();
             while (!composite.isEmpty() && moveToNextRow(cur, columnNames)) {
                 Iterator<ICursorCommand> it = composite.iterator();
                 while (it.hasNext()) {
@@ -93,6 +97,27 @@ public class CompositeCommand implements ICommand {
 
             return cfa;
         }).orThrow(UcanaccessSQLException::new);
+    }
+
+    /**
+     * Looks up the row of each command through the index of the cursor instead of scanning the whole table.
+     * Commands whose row cannot be found this way are left in the composite list for the table scan.
+     *
+     * @param cur         cursor based on the best index of the table
+     * @param columnNames names of the columns in the row patterns
+     * @param cfa         collects the feedback actions of the persisted commands
+     * @throws IOException if the Access file cannot be read or written
+     */
+    private void persistByIndex(Cursor cur, Set<String> columnNames, CompositeFeedbackAction cfa) throws IOException {
+        Iterator<ICursorCommand> it = composite.iterator();
+        while (it.hasNext()) {
+            ICursorCommand comm = it.next();
+            if (cur.findFirstRow(comm.getRowPattern()) && comm.currentRowMatches(cur, cur.getCurrentRow(columnNames))) {
+                cfa.add(comm.persistCurrentRow(cur));
+                it.remove();
+                rollbackCache.add(comm);
+            }
+        }
     }
 
     @Override
