@@ -59,8 +59,8 @@
     <scm>
         <connection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
-        <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
         <tag>HEAD</tag>
+        <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
     </scm>
 
     <issueManagement>
@@ -69,16 +69,16 @@
     </issueManagement>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-central</id>
-            <name>Sonatype Central Snapshots</name>
-            <url>${basepom.deploy.snapshot.url}</url>
-        </snapshotRepository>
         <repository>
             <id>sonatype-central</id>
             <name>Sonatype Central Staging Repository</name>
             <url>https://central.sonatype.com</url>
         </repository>
+        <snapshotRepository>
+            <id>sonatype-central</id>
+            <name>Sonatype Central Snapshots</name>
+            <url>${basepom.deploy.snapshot.url}</url>
+        </snapshotRepository>
         <site>
             <id>local</id>
             <name>Local Maven site</name>
@@ -100,6 +100,8 @@
 
         <developerId>spannm</developerId>
         <githubBaseUrl>https://github.com/${developerId}/</githubBaseUrl>
+        <!-- keep links to GitHub absolute, the site is not hosted under project.url -->
+        <relativizeSiteLinks>false</relativizeSiteLinks>
 
         <module.name>${project.groupId}.${project.artifactId}</module.name>
 
@@ -109,7 +111,7 @@
         <dep.jackcess.version>5.2.0</dep.jackcess.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
-        <dep.hsqldb.classifier />
+        <dep.hsqldb.classifier/>
 
         <dep.slf4j.version>2.0.20</dep.slf4j.version>
 
@@ -243,7 +245,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <systemPropertyVariables>
-                            <user.timezone />
+                            <user.timezone/>
                         </systemPropertyVariables>
 
                         <failIfNoTests>true</failIfNoTests>
@@ -360,6 +362,13 @@
                     <groupId>org.cyclonedx</groupId>
                     <artifactId>cyclonedx-maven-plugin</artifactId>
                     <version>${dep.plugin.cyclonedx.version}</version>
+                    <configuration>
+                        <projectType>library</projectType>
+                        <skipNotDeployed>false</skipNotDeployed>
+                        <outputFormat>xml</outputFormat>
+                        <outputName>sbom</outputName>
+                        <verbose>false</verbose>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>cyclonedx-makebom</id>
@@ -369,13 +378,6 @@
                             <phase>package</phase>
                         </execution>
                     </executions>
-                    <configuration>
-                        <projectType>library</projectType>
-                        <skipNotDeployed>false</skipNotDeployed>
-                        <outputFormat>xml</outputFormat>
-                        <outputName>sbom</outputName>
-                        <verbose>false</verbose>
-                    </configuration>
                 </plugin>
 
             </plugins>
@@ -421,6 +423,13 @@
                 <groupId>io.github.spannm</groupId>
                 <artifactId>figlet-maven-plugin</artifactId>
                 <version>${dep.plugin.figlet.version}</version>
+                <configuration>
+                    <content><![CDATA[
+                         <lineBreak/><lineBreak/>
+                         <figletFont name="slant">${project.name}</figletFont>
+                         <preserveWhitespace>    v${project.version}</preserveWhitespace><lineBreak/><lineBreak/>
+                     ]]></content>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -428,13 +437,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                     <content><![CDATA[
-                         <lineBreak/><lineBreak/>
-                         <figletFont name="slant">${project.name}</figletFont>
-                         <preserveWhitespace>    v${project.version}</preserveWhitespace><lineBreak/><lineBreak/>
-                     ]]></content>
-                </configuration>
             </plugin>
 
             <plugin>
