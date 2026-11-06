@@ -10,7 +10,7 @@
 
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.3.0</version>
+    <version>5.3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>UCanAccess</name>
@@ -60,7 +60,7 @@
         <connection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${developerId}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${developerId}/${project.artifactId}/tree/master</url>
-        <tag>ucanaccess-5.3.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
@@ -88,7 +88,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.outputTimestamp>2026-11-06T10:39:03Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-11-06T10:41:15Z</project.build.outputTimestamp>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The minimum JDK version required to build. -->
