@@ -17,7 +17,7 @@ import java.util.Map;
  * <p>
  * Instances are not thread-safe.
  *
- * @since 5.2.1
+ * @since 5.3.0
  */
 public final class WarningLog {
     private static final int DEFAULT_LIMIT = 5;

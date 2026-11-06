@@ -32,7 +32,8 @@
             <item name="UCanAccess" href="/10-ucanaccess.html" />
             <item name="Getting Started" href="/20-getting-started.html" />
             <item name="JDBC Client Tools" href="/30-jdbc-client-tools.html" />
-            <item name="Change Log" href="/40-change-log.html" />
+            <item name="Releases (GitHub)" href="https://github.com/spannm/ucanaccess/releases" target="_blank"/>
+            <item name="Change Log (until 5.2.0)" href="/40-change-log.html" />
             <item name="Links/License Info" href="/50-links-license.html" />
             <item name="About" href="60-about.html" />
         </menu>
