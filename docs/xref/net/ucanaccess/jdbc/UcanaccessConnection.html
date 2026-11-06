@@ -315,7 +315,7 @@
 <a class="jxr_linenumber" name="L307" href="#L307">307</a>             afterFlushIoHook();
 <a class="jxr_linenumber" name="L308" href="#L308">308</a> 
 <a class="jxr_linenumber" name="L309" href="#L309">309</a>         } <strong class="jxr_keyword">catch</strong> (Throwable ex) {
-<a class="jxr_linenumber" name="L310" href="#L310">310</a>             logger.log(Level.WARNING, ex.toString());
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>             logger.log(Level.WARNING, <span class="jxr_string">"Failed to write changes to the Access file, rolling back: {0}"</span>, ex.toString());
 <a class="jxr_linenumber" name="L311" href="#L311">311</a>             hsqlDBConnection.rollback();
 <a class="jxr_linenumber" name="L312" href="#L312">312</a>             ibal.clear();
 <a class="jxr_linenumber" name="L313" href="#L313">313</a>             Iterator&lt;ICommand&gt; it = executed.descendingIterator();
@@ -335,7 +335,7 @@
 <a class="jxr_linenumber" name="L327" href="#L327">327</a>                 ref.getDbIO().flush();
 <a class="jxr_linenumber" name="L328" href="#L328">328</a>                 unloadDB();
 <a class="jxr_linenumber" name="L329" href="#L329">329</a>             } <strong class="jxr_keyword">catch</strong> (IOException ex2) {
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>                 logger.log(Level.WARNING, ex2.toString());
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                 logger.log(Level.WARNING, <span class="jxr_string">"Failed to flush the Access file after rollback: {0}"</span>, ex2.toString());
 <a class="jxr_linenumber" name="L331" href="#L331">331</a>             }
 <a class="jxr_linenumber" name="L332" href="#L332">332</a>             <strong class="jxr_keyword">throw</strong> ex instanceof <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a> ? (<a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>) ex : <strong class="jxr_keyword">new</strong> <a name="UcanaccessSQLException" href="../../../net/ucanaccess/exception/UcanaccessSQLException.html#UcanaccessSQLException">UcanaccessSQLException</a>(ex);
 <a class="jxr_linenumber" name="L333" href="#L333">333</a>         }

@@ -183,7 +183,7 @@
 <a class="jxr_linenumber" name="L175" href="#L175">175</a>                     }
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>                     dbRef.getDbIO().setErrorHandler((cl, bt, location, ex) -&gt; {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a>                         <strong class="jxr_keyword">if</strong> (cl.getType().isTextual()) {
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>                         <strong class="jxr_keyword">if</strong> (cl.getType().isTextual() &amp;&amp; bt != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L179" href="#L179">179</a>                             LOGGER.log(Level.WARNING, <span class="jxr_string">"Invalid textual value in table {0}, column {1}: it might look like {2}"</span>,
 <a class="jxr_linenumber" name="L180" href="#L180">180</a>                                 cl.getTable().getName(), cl.getName(), <strong class="jxr_keyword">new</strong> String(bt, cl.getDatabase().getCharset()));
 <a class="jxr_linenumber" name="L181" href="#L181">181</a>                         }

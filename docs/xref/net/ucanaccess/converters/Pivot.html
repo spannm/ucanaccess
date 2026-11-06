@@ -114,7 +114,7 @@
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>                         st.executeUpdate(v);
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>                     }
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>                 } <strong class="jxr_keyword">catch</strong> (Exception ex) {
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>                     System.getLogger(Pivot.<strong class="jxr_keyword">class</strong>.getName()).log(Level.WARNING, ex.getMessage());
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>                     System.getLogger(Pivot.<strong class="jxr_keyword">class</strong>.getName()).log(Level.WARNING, <span class="jxr_string">"Cannot update crosstab query {0}: {1}"</span>, name, ex.getMessage());
 <a class="jxr_linenumber" name="L110" href="#L110">110</a>                 }
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>             }
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>         }
