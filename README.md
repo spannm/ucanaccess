@@ -65,20 +65,20 @@ To use UCanAccess in your project, add the following dependency.
 <dependency>
     <groupId>io.github.spannm</groupId>
     <artifactId>ucanaccess</artifactId>
-    <version>5.2.0</version>
+    <version>5.3.0</version>
 </dependency>
 ```
 
 ### Gradle (Groovy / `build.gradle`)
 
 ```groovy
-implementation 'io.github.spannm:ucanaccess:5.2.0'
+implementation 'io.github.spannm:ucanaccess:5.3.0'
 ```
 
 ### Gradle (Kotlin DSL / `build.gradle.kts`)
 
 ```kotlin
-implementation("io.github.spannm:ucanaccess:5.2.0")
+implementation("io.github.spannm:ucanaccess:5.3.0")
 ```
 
 <p style="height: 20px;">&nbsp;</p>
@@ -92,7 +92,7 @@ Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has 
 + <groupId>io.github.spannm</groupId>
   <artifactId>ucanaccess</artifactId>
 - <version>5.0.1</version>
-+ <version>5.2.0</version>
++ <version>5.3.0</version>
 ```
 
 If you pass your own class with the `jackcessOpener` connection property, adapt it as well:
