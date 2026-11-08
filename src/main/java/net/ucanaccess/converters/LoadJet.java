@@ -251,28 +251,53 @@ public class LoadJet {
 
         private final Set<String> functionDefinitions = new LinkedHashSet<>();
 
+        /**
+         * Adds the aggregates First and Last for the column types of Access. Without an exact match, HSQLDB takes the last
+         * suitable overload, which made First of a number column return a boolean; SMALLINT is written in SQL, as HSQLDB
+         * passes a Short that the Java aggregate cannot take.
+         */
         private void addAggregates() {
             functionDefinitions.addAll(List.of(
                 getAggregate("last", "LONGVARCHAR"),
                 getAggregate("last", "DECIMAL(100,10)"),
                 getAggregate("last", "BOOLEAN"),
+                getAggregate("last", "DOUBLE"),
+                getAggregate("last", "BIGINT"),
+                getAggregate("last", "INTEGER"),
                 getAggregate("first", "LONGVARCHAR"),
                 getAggregate("first", "DECIMAL(100,10)"),
                 getAggregate("first", "BOOLEAN"),
-                getLastTimestamp(),
-                getFirstTimestamp()));
+                getAggregate("first", "DOUBLE"),
+                getAggregate("first", "BIGINT"),
+                getAggregate("first", "INTEGER"),
+                getLastSql("TIMESTAMP"),
+                getLastSql("SMALLINT"),
+                getFirstSql("TIMESTAMP"),
+                getFirstSql("SMALLINT")));
         }
 
-        private String getLastTimestamp() {
-            return "CREATE AGGREGATE FUNCTION last(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP, INOUT counter INT) "
-                 + "RETURNS TIMESTAMP CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
+        /**
+         * Returns an aggregate Last in SQL for a type that HSQLDB does not pass to a Java aggregate.
+         *
+         * @param type SQL type
+         * @return statement creating the aggregate
+         */
+        private String getLastSql(String type) {
+            return "CREATE AGGREGATE FUNCTION last(IN val " + type + ", IN flag boolean, INOUT ts " + type + ", INOUT counter INT) "
+                 + "RETURNS " + type + " CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
                  + "ELSE IF counter IS NULL THEN SET counter = 0; END IF; SET counter = counter + 1; "
                  + "SET ts = val; RETURN NULL; END IF; END";
         }
 
-        private String getFirstTimestamp() {
-            return "CREATE AGGREGATE FUNCTION First(IN val TIMESTAMP, IN flag boolean, INOUT ts TIMESTAMP , INOUT counter INT) "
-                 + "RETURNS TIMESTAMP CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
+        /**
+         * Returns an aggregate First in SQL for a type that HSQLDB does not pass to a Java aggregate.
+         *
+         * @param type SQL type
+         * @return statement creating the aggregate
+         */
+        private String getFirstSql(String type) {
+            return "CREATE AGGREGATE FUNCTION First(IN val " + type + ", IN flag boolean, INOUT ts " + type + " , INOUT counter INT) "
+                 + "RETURNS " + type + " CONTAINS SQL BEGIN ATOMIC IF flag THEN RETURN ts; "
                  + "ELSE IF counter IS NULL THEN SET counter = 0; END IF; SET counter = counter + 1; "
                  + "IF counter = 1 THEN SET ts = val; END IF; RETURN NULL; END IF; END";
         }

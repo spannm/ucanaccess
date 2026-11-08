@@ -40,6 +40,27 @@ public final class FunctionsAggregate {
         return (Timestamp) first(in, flag, (Object[]) register, counter);
     }
 
+    /**
+     * Returns the first value of a group of integer values, see {@link #first(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Integer first(Integer in, Boolean flag, Integer[] register, Integer[] counter) {
+        return (Integer) first(in, flag, (Object[]) register, counter);
+    }
+
+    /**
+     * Returns the first value of a group of long values, see {@link #first(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Long first(Long in, Boolean flag, Long[] register, Integer[] counter) {
+        return (Long) first(in, flag, (Object[]) register, counter);
+    }
+
+    /**
+     * Returns the first value of a group of double values, see {@link #first(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Double first(Double in, Boolean flag, Double[] register, Integer[] counter) {
+        return (Double) first(in, flag, (Object[]) register, counter);
+    }
+
     public static Object last(Object in, Boolean flag, Object[] register, Integer[] counter) {
         if (Boolean.TRUE.equals(flag)) {
             return register[0];
@@ -68,5 +89,26 @@ public final class FunctionsAggregate {
 
     public static Timestamp last(Timestamp in, Boolean flag, Timestamp[] register, Integer[] counter) {
         return (Timestamp) last(in, flag, (Object[]) register, counter);
+    }
+
+    /**
+     * Returns the last value of a group of integer values, see {@link #last(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Integer last(Integer in, Boolean flag, Integer[] register, Integer[] counter) {
+        return (Integer) last(in, flag, (Object[]) register, counter);
+    }
+
+    /**
+     * Returns the last value of a group of long values, see {@link #last(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Long last(Long in, Boolean flag, Long[] register, Integer[] counter) {
+        return (Long) last(in, flag, (Object[]) register, counter);
+    }
+
+    /**
+     * Returns the last value of a group of double values, see {@link #last(Object, Boolean, Object[], Integer[])}.
+     */
+    public static Double last(Double in, Boolean flag, Double[] register, Integer[] counter) {
+        return (Double) last(in, flag, (Object[]) register, counter);
     }
 }

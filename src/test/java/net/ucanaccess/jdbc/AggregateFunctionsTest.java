@@ -86,6 +86,20 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         dumpQueryResult("SELECT first(date0) FROM t_aggrfunc");
     }
 
+    // First and Last of number columns used to return a boolean or fail, as no overload matched
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testFirstLastOfNumbers(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
+        executeStatements(
+            "CREATE TABLE t_firstlast (l LONG, b BYTE, i INTEGER, d DOUBLE, s SINGLE)",
+            "INSERT INTO t_firstlast VALUES (3, 4, 5, 1.5, 2.5)",
+            "INSERT INTO t_firstlast VALUES (8, 9, 10, 6.5, 7.5)");
+        checkQuery("SELECT First(l), First(b), First(i), First(d), First(s) FROM t_firstlast", singleRec(3, 4, 5, 1.5, 2.5));
+        checkQuery("SELECT Last(l), Last(b), Last(i), Last(d), Last(s) FROM t_firstlast", singleRec(8, 9, 10, 6.5, 7.5));
+        checkQuery("SELECT first(id), last(id) FROM t_aggrfunc", singleRec(1234, 12344));
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
     void testDLast(AccessVersion accessVersion) throws SQLException {
