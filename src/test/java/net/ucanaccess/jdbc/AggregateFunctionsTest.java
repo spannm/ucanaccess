@@ -38,6 +38,20 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT id, DCount('*', 't_aggrfunc', 'id <= ' & id) FROM t_aggrfunc ORDER BY id", recs(rec(1234, 1), rec(12344, 2)));
         checkQuery("SELECT id, DLookup('descr', 't_aggrfunc', 'id = ' & id) FROM t_aggrfunc ORDER BY id",
             recs(rec(1234, "Show must go off"), rec(12344, "Show must go up and down")));
+        checkQuery("SELECT id, DLookup(\"id\", \"t_aggrfunc\", \"descr='\" & descr & \"'\") FROM t_aggrfunc ORDER BY id",
+            recs(rec(1234, 1234), rec(12344, 12344)));
+    }
+
+    // the arguments end at their own parenthesis, and quotes in a criterion are doubled inside the literal
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testSeveralDomainFunctionsAndQuotedCriteria(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
+
+        checkQuery("SELECT DSum('id', 't_aggrfunc'), DAvg('id', 't_aggrfunc'), DCount('*', 't_aggrfunc', 'id > 2000')",
+            singleRec(13578, 6789, 1));
+        checkQuery("SELECT DLookup(\"id\", \"t_aggrfunc\", \"descr='Show must go off'\")", singleRec(1234));
+        checkQuery("SELECT DCount('*', 't_aggrfunc', 'descr IN (''Show must go off'', ''x'')')", singleRec(1));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

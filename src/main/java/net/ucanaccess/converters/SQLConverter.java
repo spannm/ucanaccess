@@ -698,7 +698,7 @@ public final class SQLConverter {
      * @param sql SQL string
      * @return {@code true} for each quoted position
      */
-    private static boolean[] quotedPositions(String sql) {
+    static boolean[] quotedPositions(String sql) {
         boolean[] quoted = new boolean[sql.length()];
         char quote = 0;
         for (int i = 0; i < sql.length(); i++) {
