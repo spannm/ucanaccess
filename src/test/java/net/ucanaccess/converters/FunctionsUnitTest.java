@@ -627,7 +627,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
 
     @Test
     void stringFunctions_nullOrValue_buildText() {
-        assertThat(Functions.string(3, null)).isNull();
+        assertThat(Functions.string(3, (String) null)).isNull();
         assertThat(Functions.string(3, "")).isEmpty();
         assertThat(Functions.string(3, "xyz")).isEqualTo("xxx");
         assertThat(Functions.space(3)).isEqualTo("   ");
@@ -792,7 +792,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.fix(2.7)).isEqualTo(2.0);
         assertThat(Functions.fix(-2.7)).isEqualTo(-2.0);
         assertThat(Functions.fix(-2147483649.5)).isEqualTo(-2147483649.0);
-        assertThat(Functions.mint(null)).isNull();
+        assertThat(Functions.mint((Double) null)).isNull();
         assertThat(Functions.mint(-2.5)).isEqualTo(-3L);
         assertThat(Functions.mint(2147483648.5)).isEqualTo(2147483648L);
     }

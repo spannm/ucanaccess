@@ -48,6 +48,8 @@ public final class Functions {
     private static final Pattern TIME_VALUE           = Pattern.compile("(\\d{1,2})(?::(\\d{1,2})(?::(\\d{1,2}))?)?\\s*([AaPp][Mm]?)?");
     /** Time without seconds at the end of a date string, optionally with AM or PM. */
     private static final Pattern TIME_WITHOUT_SECONDS = Pattern.compile("(?<![:\\d])(\\d{1,2}:\\d{1,2})(\\s*(?:[AaPp][Mm])?)$");
+    /** Number with an exponent like 1e3 or 1,5E-2, the mantissa in the format of the default locale. */
+    private static final Pattern NUMBER_EXPONENT      = Pattern.compile("(.*\\d)[eEdD]([+-]?\\d+)");
     /** Decimal number with optional exponent at the start of a string, as in Val. */
     private static final Pattern VAL_DECIMAL          = Pattern.compile("([+-]?\\d*(?:\\.\\d*)?)([eEdD][+-]?\\d+)?");
 
@@ -194,11 +196,11 @@ public final class Functions {
         } else if ("false".equalsIgnoreCase(s)) {
             return false;
         }
-        try {
-            return new BigDecimal(s).signum() != 0;
-        } catch (NumberFormatException ex) {
-            throw new UcanaccessRuntimeException(String.format("Type mismatch in function CBool: %s", value), ex);
+        Double number = parseNumberOrNull(s);
+        if (number == null) {
+            throw new UcanaccessRuntimeException(String.format("Type mismatch in function CBool: %s", value));
         }
+        return number != 0;
     }
 
     /**
@@ -216,6 +218,15 @@ public final class Functions {
     @FunctionType(functionName = "CCur", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.CURRENCY)
     public static BigDecimal ccur(Double value) {
         return value == null ? null : BigDecimal.valueOf(value).setScale(4, RoundingMode.HALF_EVEN);
+    }
+
+    /**
+     * Converts a text in the number format of the default locale into a currency value.
+     */
+    @FunctionType(functionName = "CCur", argumentTypes = {AccessType.MEMO}, returnType = AccessType.CURRENCY)
+    public static BigDecimal ccur(String value) throws UcanaccessSQLException {
+        Double d = parseNumber("CCur", value);
+        return d == null ? null : ccur(d);
     }
 
     /**
@@ -273,6 +284,14 @@ public final class Functions {
     }
 
     /**
+     * Converts a boolean to a date like the number -1 for {@code true} or 0 for {@code false}, so True is 1899-12-29.
+     */
+    @FunctionType(functionName = "CDate", argumentTypes = {AccessType.YESNO}, returnType = AccessType.DATETIME)
+    public static Timestamp cdate(Boolean value) {
+        return value == null ? null : cdate(value ? -1d : 0d);
+    }
+
+    /**
      * Converts an expression to a double.
      */
     @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
@@ -289,6 +308,22 @@ public final class Functions {
     }
 
     /**
+     * Converts a boolean to -1 for {@code true} or 0 for {@code false}.
+     */
+    @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.YESNO}, returnType = AccessType.DOUBLE)
+    public static Double cdbl(Boolean value) {
+        return value == null ? null : value ? -1d : 0d;
+    }
+
+    /**
+     * Converts a date to the Access date value, the days since 1899-12-30 with the time as fraction.
+     */
+    @FunctionType(functionName = "CDbl", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DOUBLE)
+    public static Double cdbl(Timestamp value) {
+        return value == null ? null : AccessFormat.toSerial(value);
+    }
+
+    /**
      * Parses a whole text as a number in the format of the default locale.
      *
      * @param function name of the calling function, for the error message
@@ -300,13 +335,33 @@ public final class Functions {
         if (value == null) {
             return null;
         }
-        String s = value.trim();
-        ParsePosition pos = new ParsePosition(0);
-        Number number = NumberFormat.getNumberInstance().parse(s, pos);
-        if (number == null || pos.getIndex() != s.length()) {
+        Double number = parseNumberOrNull(value);
+        if (number == null) {
             throw new InvalidFunctionParameterException(function, value);
         }
-        return number.doubleValue();
+        return number;
+    }
+
+    /**
+     * Parses a whole text as a number like Access: in the format of the default locale, optionally with an exponent
+     * as in 1e3, or as hexadecimal or octal number as in &amp;H10 or &amp;O17.
+     *
+     * @param value text to parse
+     * @return parsed number, {@code null} if the text is not a number
+     */
+    private static Double parseNumberOrNull(String value) {
+        String s = value.trim();
+        if (VAL_RADIX.matcher(s).matches() && s.length() > 1) {
+            return val(s);
+        }
+        Matcher exponent = NUMBER_EXPONENT.matcher(s);
+        String mantissa = exponent.matches() ? exponent.group(1) : s;
+        ParsePosition pos = new ParsePosition(0);
+        Number number = NumberFormat.getNumberInstance().parse(mantissa, pos);
+        if (number == null || pos.getIndex() != mantissa.length()) {
+            return null;
+        }
+        return exponent.matches() ? number.doubleValue() * Math.pow(10, Integer.parseInt(exponent.group(2))) : number.doubleValue();
     }
 
     @FunctionType(functionName = "CDec", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
@@ -348,6 +403,14 @@ public final class Functions {
     public static Integer clng(String value) throws UcanaccessSQLException {
         return Try.catching(() -> clng(FormatCache.getNoArgs().parse(value).doubleValue()))
             .orThrow(UcanaccessSQLException::new);
+    }
+
+    /**
+     * Converts a boolean to -1 for {@code true} or 0 for {@code false}.
+     */
+    @FunctionType(functionName = "CLng", argumentTypes = {AccessType.YESNO}, returnType = AccessType.LONG)
+    public static Integer clng(Boolean value) {
+        return value == null ? null : value ? -1 : 0;
     }
 
     @FunctionType(functionName = "CLng", argumentTypes = {AccessType.LONG}, returnType = AccessType.LONG)
@@ -399,6 +462,14 @@ public final class Functions {
     }
 
     /**
+     * Converts a text in the number format of the default locale to a byte.
+     */
+    @FunctionType(functionName = "CByte", argumentTypes = {AccessType.MEMO}, returnType = AccessType.BYTE)
+    public static Short cbyte(String value) throws UcanaccessSQLException {
+        return cbyte(parseNumber("CByte", value));
+    }
+
+    /**
      * Converts a boolean to text like in Access queries, where True is -1 and False is 0.
      */
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.YESNO}, returnType = AccessType.MEMO)
@@ -446,6 +517,14 @@ public final class Functions {
     @FunctionType(functionName = "CVar", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
     public static String cvar(Double value) throws UcanaccessSQLException {
         return format(value, "general number");
+    }
+
+    /**
+     * Returns a text unchanged, as a variant of a text is the text itself.
+     */
+    @FunctionType(functionName = "CVar", argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String cvar(String value) {
+        return value;
     }
 
     /**
@@ -507,6 +586,14 @@ public final class Functions {
     @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.LONG, AccessType.MEMO}, returnType = AccessType.DATETIME)
     public static Timestamp dateAdd(String intv, int vl, String dt) throws UcanaccessSQLException {
         return dt == null ? null : (Timestamp) dateAdd(intv, vl, (Date) dateValue(dt, false));
+    }
+
+    /**
+     * Adds a number with a fraction of intervals; like in Access, the fraction is cut off, so 1.6 days are one day.
+     */
+    @FunctionType(namingConflict = true, functionName = "DateAdd", argumentTypes = {AccessType.MEMO, AccessType.DOUBLE, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp dateAdd(String intv, Double vl, Timestamp dt) throws UcanaccessSQLException {
+        return vl == null ? null : dateAdd(intv, vl.intValue(), dt);
     }
 
     @FunctionType(namingConflict = true, functionName = "DateDiff", argumentTypes = {AccessType.MEMO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.LONG)
@@ -1068,6 +1155,14 @@ public final class Functions {
     }
 
     /**
+     * Formats a text in the number format of the default locale with the given number of decimal places.
+     */
+    @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatNumber(String value, Integer digits) throws UcanaccessSQLException {
+        return formatNumber(parseNumber("FormatNumber", value), digits);
+    }
+
+    /**
      * Formats a number choosing whether to show a leading zero.
      */
     @FunctionType(functionName = "FormatNumber", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
@@ -1262,6 +1357,26 @@ public final class Functions {
     }
 
     /**
+     * Formats a text that is a date with a named format, see {@link #formatDateTime(Timestamp, Integer)}.
+     */
+    @FunctionType(functionName = "FormatDateTime", argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatDateTime(String value, Integer format) throws UcanaccessSQLException {
+        Timestamp t = value == null ? null : dateValue(value, false);
+        if (value != null && t == null) {
+            throw new InvalidFunctionParameterException("FormatDateTime", value);
+        }
+        return formatDateTime(t, format);
+    }
+
+    /**
+     * Formats an Access date value with a named format, see {@link #formatDateTime(Timestamp, Integer)}.
+     */
+    @FunctionType(functionName = "FormatDateTime", argumentTypes = {AccessType.DOUBLE, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String formatDateTime(Double value, Integer format) throws UcanaccessSQLException {
+        return formatDateTime(cdate(value), format);
+    }
+
+    /**
      * Returns one of two parts, depending on the evaluation of an expression.
      */
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
@@ -1305,6 +1420,72 @@ public final class Functions {
     @FunctionType(functionName = "IIf", argumentTypes = {AccessType.YESNO, AccessType.MEMO, AccessType.DOUBLE}, returnType = AccessType.MEMO)
     public static String iif(Boolean b, String o1, Double o2) {
         return iifImpl(b, o1, o2 == null ? null : cstr(o2));
+    }
+
+    /**
+     * Returns one of two texts; like in Access, a number as condition is true unless it is zero.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.MEMO, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String iif(Double d, String o1, String o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns one of two long integers, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.LONG, AccessType.LONG}, returnType = AccessType.LONG)
+    public static Integer iif(Double d, Integer o1, Integer o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns one of two numbers, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
+    public static Double iif(Double d, Double o1, Double o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns one of two booleans, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.YESNO, AccessType.YESNO}, returnType = AccessType.YESNO)
+    public static Boolean iif(Double d, Boolean o1, Boolean o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns one of two dates, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.DATETIME, AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp iif(Double d, Timestamp o1, Timestamp o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns a number or a text as text, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String iif(Double d, Double o1, String o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Returns a text or a number as text, with a number as condition.
+     */
+    @FunctionType(functionName = "IIf", argumentTypes = {AccessType.DOUBLE, AccessType.MEMO, AccessType.DOUBLE}, returnType = AccessType.MEMO)
+    public static String iif(Double d, String o1, Double o2) {
+        return iif(isTrue(d), o1, o2);
+    }
+
+    /**
+     * Tells whether a number is true as a condition, that is not zero; Null is false.
+     *
+     * @param d number
+     * @return {@code true} unless the number is zero or {@code null}
+     */
+    private static boolean isTrue(Double d) {
+        return d != null && d != 0;
     }
 
     /**
@@ -1430,6 +1611,14 @@ public final class Functions {
     }
 
     /**
+     * Returns {@code false}, as Access does not take a number for a date in IsDate.
+     */
+    @FunctionType(functionName = "IsDate", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.YESNO)
+    public static boolean isDate(Double value) {
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the expression is a {@code null} value, otherwise {@code false}.
      */
     @FunctionType(namingConflict = true, functionName = "IsNull", argumentTypes = {AccessType.MEMO}, returnType = AccessType.YESNO)
@@ -1488,6 +1677,22 @@ public final class Functions {
     }
 
     /**
+     * Returns {@code true}, as a boolean is the number -1 or 0 in Access.
+     */
+    @FunctionType(functionName = "IsNumeric", argumentTypes = {AccessType.YESNO}, returnType = AccessType.YESNO)
+    public static boolean isNumeric(Boolean value) {
+        return value != null;
+    }
+
+    /**
+     * Returns {@code false}, as Access does not take a date for a number in IsNumeric.
+     */
+    @FunctionType(functionName = "IsNumeric", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.YESNO)
+    public static boolean isNumeric(Timestamp value) {
+        return false;
+    }
+
+    /**
      * Extracts a substring from a string, starting from the left-most character.
      */
     @FunctionType(functionName = "Left", namingConflict = true, argumentTypes = {AccessType.MEMO, AccessType.LONG}, returnType = AccessType.MEMO)
@@ -1519,6 +1724,22 @@ public final class Functions {
      */
     @FunctionType(functionName = "Len", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.LONG)
     public static Integer len(Double value) {
+        return value == null ? null : cstr(value).length();
+    }
+
+    /**
+     * Returns the length of a boolean converted to text, so 2 for {@code true} ("-1") and 1 for {@code false}.
+     */
+    @FunctionType(functionName = "Len", argumentTypes = {AccessType.YESNO}, returnType = AccessType.LONG)
+    public static Integer len(Boolean value) {
+        return value == null ? null : cstr(value).length();
+    }
+
+    /**
+     * Returns the length of a date converted to text in the general date format.
+     */
+    @FunctionType(functionName = "Len", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.LONG)
+    public static Integer len(Timestamp value) throws UcanaccessSQLException {
         return value == null ? null : cstr(value).length();
     }
 
@@ -1682,6 +1903,14 @@ public final class Functions {
     }
 
     /**
+     * Converts a boolean to text like the number -1 for {@code true} or 0 for {@code false}.
+     */
+    @FunctionType(functionName = "Str", argumentTypes = {AccessType.YESNO}, returnType = AccessType.TEXT)
+    public static String str(Boolean value) {
+        return value == null ? null : str(value ? -1d : 0d);
+    }
+
+    /**
      * Returns the current system time.
      */
     @FunctionType(functionName = "Time", argumentTypes = {}, returnType = AccessType.DATETIME)
@@ -1703,6 +1932,14 @@ public final class Functions {
     @FunctionType(functionName = "Val", argumentTypes = {AccessType.NUMERIC}, returnType = AccessType.DOUBLE)
     public static Double val(BigDecimal val1) {
         return val((Object) val1);
+    }
+
+    /**
+     * Returns -1 for {@code true} or 0 for {@code false}.
+     */
+    @FunctionType(functionName = "Val", argumentTypes = {AccessType.YESNO}, returnType = AccessType.DOUBLE)
+    public static Double val(Boolean value) {
+        return value == null ? null : value ? -1d : 0d;
     }
 
     private static Double val(Object val1) {
@@ -1784,6 +2021,14 @@ public final class Functions {
     }
 
     /**
+     * Returns a character repeated, given by its character code; like in Access, codes above 255 count modulo 256.
+     */
+    @FunctionType(functionName = "String", argumentTypes = {AccessType.LONG, AccessType.LONG}, returnType = AccessType.MEMO)
+    public static String string(Integer nr, Integer charCode) {
+        return nr == null || charCode == null ? null : String.valueOf((char) Math.floorMod(charCode, 256)).repeat(nr);
+    }
+
+    /**
      * Returns a time given an hour, minute, and second value. Like in Access, values out of range carry over into the
      * next unit, so 25 hours are one day and one hour after the base date 1899-12-30. A negative total keeps its days
      * before the base date, while the time of day is the absolute remainder, as Access stores negative dates.
@@ -1797,6 +2042,18 @@ public final class Functions {
         return Timestamp.valueOf(ACCESS_BASE_DATE
             .plusDays(seconds / 86400)
             .plusSeconds(Math.abs(seconds % 86400)));
+    }
+
+    /**
+     * Returns a time given hours, minutes and seconds with fractions, which are rounded to whole numbers first,
+     * halves to even like Access, so TimeSerial(1.5, 0, 0) is 02:00:00.
+     */
+    @FunctionType(functionName = "TimeSerial", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DATETIME)
+    public static Timestamp timeSerial(Double h, Double m, Double s) {
+        if (h == null || m == null || s == null) {
+            return null;
+        }
+        return timeSerial((int) Math.rint(h), (int) Math.rint(m), (int) Math.rint(s));
     }
 
     /**
@@ -1964,6 +2221,14 @@ public final class Functions {
         long l = (long) Math.rint(number);
         String hex = l == (int) l ? Integer.toHexString((int) l) : Long.toHexString(l);
         return hex.toUpperCase(Locale.ROOT);
+    }
+
+    /**
+     * Returns the hexadecimal representation of a text in the number format of the default locale.
+     */
+    @FunctionType(namingConflict = true, functionName = "Hex", argumentTypes = {AccessType.MEMO}, returnType = AccessType.MEMO)
+    public static String hex(String value) throws UcanaccessSQLException {
+        return hex(parseNumber("Hex", value));
     }
 
     /**
@@ -2137,6 +2402,14 @@ public final class Functions {
     @FunctionType(functionName = "Int", argumentTypes = {AccessType.YESNO}, returnType = AccessType.INTEGER)
     public static Short mint(boolean value) {
         return (short) (value ? -1 : 0);
+    }
+
+    /**
+     * Returns the date without the time, as Int of a date value in Access.
+     */
+    @FunctionType(functionName = "Int", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.DATETIME)
+    public static Timestamp mint(Timestamp value) {
+        return value == null ? null : cdate(Math.floor(AccessFormat.toSerial(value)));
     }
 
     @FunctionType(functionName = "DDB", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)

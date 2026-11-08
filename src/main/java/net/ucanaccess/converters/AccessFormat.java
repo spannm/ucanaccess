@@ -291,7 +291,7 @@ final class AccessFormat {
      * @param t date
      * @return date value
      */
-    private static double toSerial(Timestamp t) {
+    static double toSerial(Timestamp t) {
         LocalDateTime ldt = t.toLocalDateTime();
         long days = ChronoUnit.DAYS.between(BASE_DATE.toLocalDate(), ldt.toLocalDate());
         double time = ldt.toLocalTime().toNanoOfDay() / 86_400_000_000_000d;

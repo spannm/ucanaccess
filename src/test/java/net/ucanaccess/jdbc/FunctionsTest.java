@@ -560,6 +560,25 @@ class FunctionsTest extends UcanaccessBaseTest {
             singleRec("", "", "", "", ""));
     }
 
+    // overloads for argument types Access converts, values checked in Access
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testConvertedArgumentTypes(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT CByte('12'), CCur('1.23456'), CVar('abc'), CDbl('1e3'), CDbl('&H10'), CBool('0.0'), CBool('1.5') FROM t_funcs",
+            singleRec(12, new BigDecimal("1.2346"), "abc", 1000.0, 16.0, false, true));
+        checkQuery("SELECT CDbl(True), CLng(False), CDate(True), Len(True), Str(True), Val(True), IsNumeric(True) FROM t_funcs",
+            singleRec(-1.0, 0, Timestamp.valueOf("1899-12-29 00:00:00"), 2, "-1", -1.0, true));
+        checkQuery("SELECT Len(#10/29/2026#), Int(#10/29/2026 13:14:15#), CDbl(#10/29/2026 12:00:00#), IsNumeric(#10/29/2026#) FROM t_funcs",
+            singleRec(10, Timestamp.valueOf("2026-10-29 00:00:00"), 46324.5, false));
+        checkQuery("SELECT String(3, 65), String(3, 321), Hex('255'), FormatNumber('1.5', 1), FormatDateTime(45000, 2), IsDate(45000) FROM t_funcs",
+            singleRec("AAA", "AAA", "FF", "1.5", "3/15/2023", false));
+        checkQuery("SELECT DateAdd('d', 1.6, #1/1/2026#), DateAdd('d', -1.6, #1/1/2026#), TimeSerial(1.5, 0, 0) FROM t_funcs",
+            singleRec(Timestamp.valueOf("2026-01-02 00:00:00"), Timestamp.valueOf("2025-12-31 00:00:00"), Timestamp.valueOf("1899-12-30 02:00:00")));
+        checkQuery("SELECT IIf(0, 'a', 'b'), IIf(-1, 'a', 'b'), IIf(5, 1, 2), IIf(Null, 1, 2) FROM t_funcs",
+            singleRec("b", "a", 1, 2));
+    }
+
     // like Access, the date part functions accept Null, text and Access date values (45000 is 2023-03-15)
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
