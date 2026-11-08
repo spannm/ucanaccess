@@ -114,4 +114,15 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT DFirst('descr', 't_aggrfunc') ", singleRec("Show must go off"));
     }
 
+    // sample and population standard deviation and variance, (1234, 12344) differ by 11110
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testDStDevDVar(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
+        checkQuery("SELECT DStDev('id', 't_aggrfunc')", singleRec(11110 / Math.sqrt(2)));
+        checkQuery("SELECT DStDevP('id', 't_aggrfunc')", singleRec(5555.0));
+        checkQuery("SELECT DVar('id', 't_aggrfunc')", singleRec(11110.0 * 11110 / 2));
+        checkQuery("SELECT DVarP('id', 't_aggrfunc', 'id > 0')", singleRec(5555.0 * 5555));
+    }
+
 }

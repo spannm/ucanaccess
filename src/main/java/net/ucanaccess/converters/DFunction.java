@@ -9,18 +9,23 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DFunction {
-    private static final Pattern      PAT_SELECT_FROM          = Pattern.compile("SELECT(.*\\W)FROM(.*)", Pattern.CASE_INSENSITIVE);
-    private static final String       DFUNCTIONS_WHERE         = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
-    private static final String       DFUNCTIONS_WHERE_DYNAMIC = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,(.*)\\)";
-    private static final String       DFUNCTIONS_NO_WHERE      = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
-    private static final List<String> DFUNCTION_LIST           = List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST", "LOOKUP");
+    private static final Pattern             PAT_SELECT_FROM          = Pattern.compile("SELECT(.*\\W)FROM(.*)", Pattern.CASE_INSENSITIVE);
+    private static final String              DFUNCTIONS_WHERE         = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
+    private static final String              DFUNCTIONS_WHERE_DYNAMIC = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\,(.*)\\)";
+    private static final String              DFUNCTIONS_NO_WHERE      = "\\s*\\(\\s*['\"](.*)['\"]\\,\\s*['\"](.*)['\"]\\s*\\)";
+    private static final List<String>        DFUNCTION_LIST           = List.of("COUNT", "MAX", "MIN", "SUM", "AVG", "LAST", "FIRST",
+        "LOOKUP", "STDEV", "STDEVP", "VAR", "VARP");
+    /** Aggregates of HSQLDB for the domain functions whose name differs from the Access aggregate. */
+    private static final Map<String, String> AGGREGATES               = Map.of("LOOKUP", " ", "STDEV", "STDDEV_SAMP",
+        "STDEVP", "STDDEV_POP", "VAR", "VAR_SAMP", "VARP", "VAR_POP");
 
-    private Connection                conn;
-    private final String              sql;
+    private Connection                       conn;
+    private final String                     sql;
 
     public DFunction(Connection conn, String sql) {
         this.conn = conn;
@@ -36,9 +41,7 @@ public class DFunction {
         for (String f : DFUNCTION_LIST) {
 
             String dfun = "D" + f;
-            if ("lookup".equalsIgnoreCase(f)) {
-                f = " ";
-            }
+            f = AGGREGATES.getOrDefault(f, f);
             sqlOut = Pattern.compile(dfun + DFUNCTIONS_WHERE, Pattern.CASE_INSENSITIVE).matcher(sqlOut).replaceAll(init + f + "($1) FROM $2 WHERE $3" + end);
             sqlOut = Pattern.compile(dfun + DFUNCTIONS_NO_WHERE, Pattern.CASE_INSENSITIVE).matcher(sqlOut).replaceAll(init + f + "($1) FROM $2" + end);
 
