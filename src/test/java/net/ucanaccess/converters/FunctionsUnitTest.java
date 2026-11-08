@@ -263,7 +263,7 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.formatPercent(0.25)).isEqualTo("25.00%");
         assertThat(Functions.formatPercent(0.255, 1)).isEqualTo("25.5%");
         assertThat(Functions.formatPercent(-0.5, 0, -1, -1)).isEqualTo("(50%)");
-        assertThat(Functions.formatNumber(null)).isNull();
+        assertThat(Functions.formatNumber(null)).isEmpty();
         assertThatThrownBy(() -> Functions.formatNumber(1.0, -3)).isInstanceOf(UcanaccessRuntimeException.class);
     }
 
@@ -308,8 +308,8 @@ class FunctionsUnitTest extends AbstractBaseTest {
     }
 
     @Test
-    void formatDateTime_nullOrInvalidFormat_nullOrThrows() throws UcanaccessSQLException {
-        assertThat(Functions.formatDateTime(null)).isNull();
+    void formatDateTime_nullOrInvalidFormat_emptyOrThrows() throws UcanaccessSQLException {
+        assertThat(Functions.formatDateTime(null)).isEmpty();
         assertThatThrownBy(() -> Functions.formatDateTime(TS1, 5)).isInstanceOf(InvalidFunctionParameterException.class);
     }
 

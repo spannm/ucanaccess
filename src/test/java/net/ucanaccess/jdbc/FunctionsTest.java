@@ -547,6 +547,8 @@ class FunctionsTest extends UcanaccessBaseTest {
         init(accessVersion);
         checkQuery("SELECT Abs(Null), Fix(Null), Int(Null), Sgn(Null), Len(Null), IsNumeric(Null), IsDate(Null) FROM t_funcs",
             singleRec(null, null, null, null, null, false, false));
+        checkQuery("SELECT FormatNumber(Null), FormatCurrency(Null), FormatPercent(Null), FormatDateTime(Null), Format(Null) FROM t_funcs",
+            singleRec("", "", "", "", ""));
     }
 
     // like Access, the date part functions accept Null, text and Access date values (45000 is 2023-03-15)

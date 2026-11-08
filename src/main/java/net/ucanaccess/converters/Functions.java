@@ -1180,7 +1180,7 @@ public final class Functions {
      * Formats a number like FormatNumber, FormatCurrency and FormatPercent. The tristate arguments are -1 for true, 0
      * for false and -2 for the default of the regional settings.
      *
-     * @param value        number to format, if {@code null}, {@code null} is returned
+     * @param value        number to format, if {@code null}, an empty text is returned like in Access
      * @param style        number, currency or percent
      * @param digits       number of decimal places, -1 for the default of two
      * @param leadingDigit tristate whether to show a zero before the decimal separator, default true
@@ -1192,7 +1192,7 @@ public final class Functions {
     private static String formatNumberImpl(Double value, NumberStyle style, Integer digits, Integer leadingDigit, Integer parens,
         Integer group) {
         if (value == null) {
-            return null;
+            return "";
         } else if (digits == null || digits < -1) {
             throw new UcanaccessRuntimeException(String.format("Invalid number of decimal places: %s", digits));
         }
@@ -1233,14 +1233,16 @@ public final class Functions {
     /**
      * Formats a date with a named format: 0 general date, 1 long date, 2 short date, 3 long time, 4 short time.
      *
-     * @param t      date to format, if {@code null}, {@code null} is returned
+     * @param t      date to format, if {@code null}, an empty text is returned like in Access
      * @param format named format from 0 to 4
      * @return formatted date
      * @throws UcanaccessSQLException if the named format is invalid
      */
     @FunctionType(functionName = "FormatDateTime", argumentTypes = {AccessType.DATETIME, AccessType.LONG}, returnType = AccessType.MEMO)
     public static String formatDateTime(Timestamp t, Integer format) throws UcanaccessSQLException {
-        if (t == null || format == null) {
+        if (t == null) {
+            return "";
+        } else if (format == null) {
             return null;
         }
         switch (format) {
