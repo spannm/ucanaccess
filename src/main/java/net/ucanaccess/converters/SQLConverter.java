@@ -432,11 +432,12 @@ public final class SQLConverter {
         sql = replaceWhiteSpacedTables(sql);
         sql = translateAccessPowerOperators(sql);
         sql = translateAccessIntegerOperators(sql);
-        sql = translateAccessConcatenation(sql);
         if (!creatingQuery) {
             Pivot.checkAndRefreshPivot(sql, conn);
             sql = DFunction.convertDFunctions(sql, conn);
         }
+        // after the domain functions, which split dynamic criteria at &
+        sql = translateAccessConcatenation(sql);
         sql = sql.trim();
 
         nsql.setSql(sql);

@@ -86,7 +86,7 @@ public class DFunction {
                     }
                 }
                 sb.append(end);
-                sqlOut = sqlOut.replaceFirst(DFUNCTIONS_WHERE_DYNAMIC.replaceFirst("_", dfun), sb.toString());
+                sqlOut = sqlOut.substring(0, mtc.start()) + sb + sqlOut.substring(mtc.end());
             }
         }
 

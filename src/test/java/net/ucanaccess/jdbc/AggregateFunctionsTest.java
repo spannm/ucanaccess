@@ -29,6 +29,17 @@ class AggregateFunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT DCount('*', 't_aggrfunc', '1=1') ", singleRec(2));
     }
 
+    // a criterion built with & refers to the outer row
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testDynamicCriteria(AccessVersion accessVersion) throws SQLException {
+        init(accessVersion);
+
+        checkQuery("SELECT id, DCount('*', 't_aggrfunc', 'id <= ' & id) FROM t_aggrfunc ORDER BY id", recs(rec(1234, 1), rec(12344, 2)));
+        checkQuery("SELECT id, DLookup('descr', 't_aggrfunc', 'id = ' & id) FROM t_aggrfunc ORDER BY id",
+            recs(rec(1234, "Show must go off"), rec(12344, "Show must go up and down")));
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource
     void testDSum(AccessVersion accessVersion) throws SQLException {
