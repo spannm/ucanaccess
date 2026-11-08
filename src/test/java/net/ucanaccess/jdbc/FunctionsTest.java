@@ -540,6 +540,15 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT YEAR(#11/22/2003 10:42:58 PM#) FROM t_funcs", singleRec(2003));
     }
 
+    // with a Null literal HSQLDB takes the first overload, which used to depend on the order of getDeclaredMethods
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testOverloadsWithNull(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT Abs(Null), Fix(Null), Int(Null), Sgn(Null), Len(Null), IsNumeric(Null), IsDate(Null) FROM t_funcs",
+            singleRec(null, null, null, null, null, false, false));
+    }
+
     // like Access, the date part functions accept Null, text and Access date values (45000 is 2023-03-15)
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource

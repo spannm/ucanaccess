@@ -44,6 +44,24 @@ import java.util.stream.Stream;
 public class LoadJet {
     private static final AtomicInteger NAMING_COUNTER = new AtomicInteger(0);
 
+    /**
+     * Order of argument types for overloaded functions. HSQLDB takes the first overload when an argument is a Null
+     * literal; with text first, the results come closest to Access, e.g. IsNumeric(Null) and IsDate(Null) are false.
+     */
+    private static final List<AccessType>                            ARGUMENT_TYPE_ORDER = List.of(
+        AccessType.MEMO, AccessType.TEXT,
+        AccessType.DOUBLE, AccessType.NUMERIC, AccessType.LONG,
+        AccessType.DATETIME, AccessType.YESNO);
+    /**
+     * Order in which functions are created: getDeclaredMethods returns the methods in no particular order, which made
+     * the overload chosen for a Null argument change from run to run.
+     */
+    private static final Comparator<Map.Entry<Method, FunctionType>> FUNCTION_ORDER      =
+        Comparator.<Map.Entry<Method, FunctionType>, String>comparing(e -> e.getValue().functionName().toUpperCase(Locale.ROOT))
+            .thenComparingInt(e -> e.getValue().argumentTypes().length)
+            .thenComparing(e -> argumentTypeRanks(e.getValue()))
+            .thenComparing(e -> e.getKey().toGenericString());
+
     private final Logger               logger;
     private final WarningLog           warnings;
     private final Connection           conn;
@@ -206,6 +224,29 @@ public class LoadJet {
         this.skipIndexes = skipIndexes;
     }
 
+    /**
+     * Returns the ranks of the argument types of a function as text, two digits per argument. The rank is the position
+     * in {@link #ARGUMENT_TYPE_ORDER}, from 00 for MEMO to 06 for YESNO; all other types share the rank 07. As
+     * {@link #FUNCTION_ORDER} compares only overloads with the same number of arguments, the texts have the same length
+     * and sort like the ranks, argument by argument from the left. For example:
+     * <ul>
+     * <li>{@code (MEMO)} gives {@code "00"}, {@code (DOUBLE)} gives {@code "02"}, so Len(MEMO) comes before Len(DOUBLE)
+     * and Len(Null) calls the text overload,</li>
+     * <li>{@code (MEMO, DOUBLE)} gives {@code "0002"} and {@code (DATETIME, MEMO)} gives {@code "0500"}, so the first
+     * argument decides,</li>
+     * <li>{@code (DOUBLE, COMPLEX)} gives {@code "0207"}, as COMPLEX is not in the list.</li>
+     * </ul>
+     *
+     * @param func function annotation
+     * @return two digits per argument
+     */
+    private static String argumentTypeRanks(FunctionType func) {
+        return Stream.of(func.argumentTypes())
+            .map(t -> ARGUMENT_TYPE_ORDER.contains(t) ? ARGUMENT_TYPE_ORDER.indexOf(t) : ARGUMENT_TYPE_ORDER.size())
+            .map(r -> String.format("%02d", r))
+            .collect(Collectors.joining());
+    }
+
     private final class FunctionsLoader {
 
         private final Set<String> functionDefinitions = new LinkedHashSet<>();
@@ -256,29 +297,29 @@ public class LoadJet {
         private void addFunctions(Class<?> clazz, boolean cswitch) {
             Map<String, String> tmap = TypesMap.getAccess2HsqlTypesMap();
 
+            List<Map.Entry<Method, FunctionType>> entries = new ArrayList<>();
             for (Method method : clazz.getDeclaredMethods()) {
-
-                List<FunctionType> functionTypes = Stream.of(method.getAnnotations())
+                Stream.of(method.getAnnotations())
                     .filter(ant -> ant.annotationType().equals(FunctionType.class))
                     .map(FunctionType.class::cast)
-                    .collect(Collectors.toList());
-
-                for (FunctionType func : functionTypes) {
-                    String methodName = clazz.getName() + '.' + method.getName();
-                    String functionName = Objects.requireNonNullElse(func.functionName(), methodName);
-                    AccessType[] acts = func.argumentTypes();
-                    String returnType = functionType(tmap, func.returnType());
-                    String[] args = new String[acts.length];
-                    for (int i = 0; i < args.length; i++) {
-                        args[i] = functionType(tmap, acts[i]);
-                    }
-                    if (func.namingConflict()) {
-                        SQLConverter.addWAFunctionName(functionName);
-                        functionName += "WA";
-                    }
-                    addFunction(functionName, methodName, returnType, args);
+                    .forEach(func -> entries.add(Map.entry(method, func)));
+            }
+            entries.sort(FUNCTION_ORDER);
+            for (Map.Entry<Method, FunctionType> entry : entries) {
+                FunctionType func = entry.getValue();
+                String methodName = clazz.getName() + '.' + entry.getKey().getName();
+                String functionName = Objects.requireNonNullElse(func.functionName(), methodName);
+                AccessType[] acts = func.argumentTypes();
+                String returnType = functionType(tmap, func.returnType());
+                String[] args = new String[acts.length];
+                for (int i = 0; i < args.length; i++) {
+                    args[i] = functionType(tmap, acts[i]);
                 }
-
+                if (func.namingConflict()) {
+                    SQLConverter.addWAFunctionName(functionName);
+                    functionName += "WA";
+                }
+                addFunction(functionName, methodName, returnType, args);
             }
             createFunctions();
             if (cswitch) {
