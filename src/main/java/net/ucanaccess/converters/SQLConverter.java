@@ -131,6 +131,11 @@ public final class SQLConverter {
     public static final String               HHMMSS_FORMAT                  = "(\\d|0\\d|1\\d|2[0-4]):(\\d|[0-5]\\d):([0-5]\\d|\\d)";
 
     private static final List<String>        PROCEDURE_KEYWORDS             = List.of("NEW", "ROW");
+    /** Keywords that end an operand of the concatenation operator &amp;. */
+    private static final Set<String>         CONCAT_BOUNDARIES              = Set.of("SELECT", "FROM", "WHERE", "AND",
+        "OR", "NOT", "AS", "ON", "CASE", "WHEN", "THEN", "ELSE", "END", "HAVING", "GROUP", "ORDER", "BY", "LIKE", "BETWEEN",
+        "IS", "IN", "VALUES", "SET", "UNION", "JOIN", "INNER", "LEFT", "RIGHT", "OUTER", "INTO", "ASC", "DESC", "LIMIT",
+        "TOP", "DISTINCT", "ALL", "EXISTS", "ESCAPE");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
     private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<>();
     private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<>();
@@ -427,6 +432,7 @@ public final class SQLConverter {
         sql = replaceWhiteSpacedTables(sql);
         sql = translateAccessPowerOperators(sql);
         sql = translateAccessIntegerOperators(sql);
+        sql = translateAccessConcatenation(sql);
         if (!creatingQuery) {
             Pivot.checkAndRefreshPivot(sql, conn);
             sql = DFunction.convertDFunctions(sql, conn);
@@ -623,6 +629,189 @@ public final class SQLConverter {
     }
 
     /**
+     * Translates the Access concatenation operator &amp; into ||. Like in Access, &amp; binds weaker than + and -, so
+     * {@code 1 & 2 + 3} is "15" and {@code 1 + 2 & 3} is "33", and it converts numbers to text. HSQLDB gives || the
+     * same precedence as + and cannot concatenate two numbers, so each chain of operands joined by &amp; is put in
+     * parentheses and its first operand is cast to text: {@code a & b + c} becomes
+     * {@code CAST((a) AS LONGVARCHAR) || (b + c)}. An operand ends at a comma, a comparison, an unmatched parenthesis
+     * or a keyword like AND or AS.
+     *
+     * @param sql SQL string with text literals in single quotes and identifiers in double quotes
+     * @return translated SQL string
+     */
+    static String translateAccessConcatenation(String sql) {
+        if (sql == null || sql.indexOf('&') < 0) {
+            return sql;
+        }
+        String s = sql;
+        for (int amp = findConcatOperator(s, 0); amp >= 0; amp = findConcatOperator(s, 0)) {
+            boolean[] quoted = quotedPositions(s);
+            int start = concatOperandStart(s, quoted, amp);
+            List<String> operands = new ArrayList<>();
+            operands.add(s.substring(start, amp).trim());
+            int end = amp;
+            int next = amp;
+            while (next < s.length() && s.charAt(next) == '&' && !quoted[next]) {
+                end = concatOperandEnd(s, quoted, next + 1);
+                operands.add(s.substring(next + 1, end).trim());
+                next = end;
+                while (next < s.length() && Character.isWhitespace(s.charAt(next))) {
+                    next++;
+                }
+            }
+            String replacement;
+            if (operands.stream().anyMatch(String::isEmpty)) {
+                replacement = String.join(" || ", operands);
+            } else {
+                replacement = "CAST((" + operands.get(0) + ") AS LONGVARCHAR)" + operands.stream().skip(1)
+                    .map(o -> " || (" + o + ")").collect(Collectors.joining());
+            }
+            String before = s.substring(0, start);
+            String after = s.substring(end);
+            s = before + (before.isEmpty() || Character.isWhitespace(before.charAt(before.length() - 1)) ? "" : " ")
+                + replacement + (after.isEmpty() || Character.isWhitespace(after.charAt(0)) ? "" : " ") + after;
+        }
+        return s;
+    }
+
+    /**
+     * Returns the position of the first &amp; outside text literals and quoted identifiers.
+     *
+     * @param sql  SQL string
+     * @param from position to start at
+     * @return position of the operator, -1 if there is none
+     */
+    private static int findConcatOperator(String sql, int from) {
+        boolean[] quoted = quotedPositions(sql);
+        for (int i = from; i < sql.length(); i++) {
+            if (sql.charAt(i) == '&' && !quoted[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Marks the positions of text literals in single quotes and of identifiers in double quotes, including the quotes.
+     *
+     * @param sql SQL string
+     * @return {@code true} for each quoted position
+     */
+    private static boolean[] quotedPositions(String sql) {
+        boolean[] quoted = new boolean[sql.length()];
+        char quote = 0;
+        for (int i = 0; i < sql.length(); i++) {
+            char c = sql.charAt(i);
+            if (quote == 0 && (c == '\'' || c == '"')) {
+                quote = c;
+                quoted[i] = true;
+            } else if (quote != 0) {
+                quoted[i] = true;
+                if (c == quote) {
+                    if (i + 1 < sql.length() && sql.charAt(i + 1) == quote) {
+                        quoted[++i] = true;
+                    } else {
+                        quote = 0;
+                    }
+                }
+            }
+        }
+        return quoted;
+    }
+
+    /**
+     * Finds the start of the operand left of an &amp;.
+     *
+     * @param sql    SQL string
+     * @param quoted quoted positions, see {@link #quotedPositions(String)}
+     * @param amp    position of the operator
+     * @return start of the operand
+     */
+    private static int concatOperandStart(String sql, boolean[] quoted, int amp) {
+        int depth = 0;
+        int i = amp - 1;
+        while (i >= 0) {
+            char c = sql.charAt(i);
+            if (quoted[i]) {
+                i--;
+            } else if (c == ')') {
+                depth++;
+                i--;
+            } else if (c == '(') {
+                if (depth == 0) {
+                    return i + 1;
+                }
+                depth--;
+                i--;
+            } else if (Character.isLetterOrDigit(c) || c == '_' || c == '$') {
+                int wordEnd = i + 1;
+                while (i >= 0 && !quoted[i] && (Character.isLetterOrDigit(sql.charAt(i)) || sql.charAt(i) == '_' || sql.charAt(i) == '$')) {
+                    i--;
+                }
+                if (depth == 0 && isConcatBoundary(sql.substring(i + 1, wordEnd))) {
+                    return wordEnd;
+                }
+            } else if (depth == 0 && ",=<>;".indexOf(c) >= 0) {
+                return i + 1;
+            } else {
+                i--;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Finds the end of the operand right of an &amp;.
+     *
+     * @param sql    SQL string
+     * @param quoted quoted positions, see {@link #quotedPositions(String)}
+     * @param from   position after the operator
+     * @return end of the operand, exclusive
+     */
+    private static int concatOperandEnd(String sql, boolean[] quoted, int from) {
+        int depth = 0;
+        int i = from;
+        while (i < sql.length()) {
+            char c = sql.charAt(i);
+            if (quoted[i]) {
+                i++;
+            } else if (c == '(') {
+                depth++;
+                i++;
+            } else if (c == ')') {
+                if (depth == 0) {
+                    return i;
+                }
+                depth--;
+                i++;
+            } else if (Character.isLetterOrDigit(c) || c == '_' || c == '$') {
+                int wordStart = i;
+                while (i < sql.length() && !quoted[i] && (Character.isLetterOrDigit(sql.charAt(i)) || sql.charAt(i) == '_' || sql.charAt(i) == '$')) {
+                    i++;
+                }
+                if (depth == 0 && isConcatBoundary(sql.substring(wordStart, i))) {
+                    return wordStart;
+                }
+            } else if (depth == 0 && ",=<>;&".indexOf(c) >= 0) {
+                return i;
+            } else {
+                i++;
+            }
+        }
+        return sql.length();
+    }
+
+    /**
+     * Tells whether a word ends an operand of &amp;, as it is a keyword that binds weaker or starts a new clause.
+     *
+     * @param word word
+     * @return {@code true} for such a keyword
+     */
+    private static boolean isConcatBoundary(String word) {
+        return CONCAT_BOUNDARIES.contains(word.toUpperCase(Locale.ROOT));
+    }
+
+    /**
      * Translates the Access operators Mod and \\ (integer division) into calls of functions that round the operands
      * to whole numbers first, like Access. As in Access, * and / bind stronger than \\, which binds stronger than Mod,
      * so a * b Mod c \\ d becomes AccessMod(a * b, AccessIntDiv(c, d)). Operands follow the same rules as for the
@@ -716,7 +905,7 @@ public final class SQLConverter {
 
     private static String convertSQLTokens(String sql) {
         return convertDeleteAll(replaceWorkAroundFunctions(
-                convertOwnerAccess(replaceDistinctRow(convertYesNo(convertDivision(sql.replace("&", "||")))))));
+                convertOwnerAccess(replaceDistinctRow(convertYesNo(convertDivision(sql))))));
     }
 
     /**

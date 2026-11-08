@@ -81,6 +81,15 @@ class FunctionsTest extends UcanaccessBaseTest {
         checkQuery("SELECT 3 * 5 Mod 4, 7 \\ 2 * 2, 1 + -2^2, 2^3^2, -2^2, -(2)^2 FROM t_funcs", singleRec(3, 1, 5.0, 64.0, 4.0, -4.0));
     }
 
+    // & binds weaker than + and - and converts numbers to text, while Null & Null stays Null
+    @ParameterizedTest(name = "[{index}] {0}")
+    @AccessVersionSource
+    void testConcatenation(AccessVersion accessVersion) throws Exception {
+        init(accessVersion);
+        checkQuery("SELECT 1 & 2, 1 + 2 & 3, 1 & 2 + 3, 'Total: ' & 3 * 2, '[' & Trim(' a ') & ']', Null & Null FROM t_funcs",
+            singleRec("12", "33", "15", "Total: 6", "[a]", null));
+    }
+
     // a NUMERIC function argument used to lose its decimal places
     @ParameterizedTest(name = "[{index}] {0}")
     @AccessVersionSource

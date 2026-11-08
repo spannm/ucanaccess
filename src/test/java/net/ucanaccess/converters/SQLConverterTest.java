@@ -341,4 +341,27 @@ class SQLConverterTest extends AbstractBaseTest {
         }
     }
 
+    /**
+     * Translates &amp; with the Access precedence below + and -, casting the first operand of a chain to text.
+     */
+    @ParameterizedTest(name = "{index}: {0}")
+    @CsvSource(
+        delimiterString = " -> ",
+        quoteCharacter = '`',
+        value = {
+            "SELECT 1 & 2 FROM t                  -> SELECT CAST((1) AS LONGVARCHAR) || (2) FROM t",
+            "SELECT 1 + 2 & 3 FROM t              -> SELECT CAST((1 + 2) AS LONGVARCHAR) || (3) FROM t",
+            "SELECT 1 & 2 + 3 FROM t              -> SELECT CAST((1) AS LONGVARCHAR) || (2 + 3) FROM t",
+            "SELECT '[' & Trim(a) & ']' FROM t    -> SELECT CAST(('[') AS LONGVARCHAR) || (Trim(a)) || (']') FROM t",
+            "SELECT Len(a & 'x'), b FROM t        -> SELECT Len( CAST((a) AS LONGVARCHAR) || ('x') ), b FROM t",
+            "SELECT a & 'x' AS y FROM t           -> SELECT CAST((a) AS LONGVARCHAR) || ('x') AS y FROM t",
+            "SELECT * FROM t WHERE a<>'b'&c AND d -> SELECT * FROM t WHERE a<> CAST(('b') AS LONGVARCHAR) || (c) AND d",
+            "SELECT 'a & b', \"x&y\" FROM t       -> SELECT 'a & b', \"x&y\" FROM t",
+            "SELECT 'it''s' & a FROM t            -> SELECT CAST(('it''s') AS LONGVARCHAR) || (a) FROM t"
+        }
+    )
+    void translateAccessConcatenation_ampersand_likeAccess(String sql, String expected) {
+        assertThat(SQLConverter.translateAccessConcatenation(sql)).isEqualTo(expected);
+    }
+
 }
