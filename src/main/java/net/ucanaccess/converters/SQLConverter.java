@@ -70,7 +70,8 @@ public final class SQLConverter {
 
         // operand of the operators ^, Mod and \: a function call, an identifier, a quoted identifier, an unsigned
         // number, an expression in parentheses or a parameter marker; calls and parentheses may nest one level deep.
-        // A sign is left out, as it would swallow a minus operator before and binds weaker than ^ in Access
+        // A sign is left out, as it would swallow a minus operator before and binds weaker than ^ in Access, except
+        // for the sign of a number literal, see SIGNED_NUMBER_REGEX
         private static final String          OPERAND_REGEX              =
                 "(?!(?i:AND|OR|NOT|IN|IS|LIKE|BETWEEN|SELECT|FROM|WHERE|ON|WHEN|THEN|ELSE|HAVING|BY|AS|EXISTS|VALUES|SET"
               + "|ALL|ANY|SOME|DISTINCT)\\b)(?:"
@@ -81,13 +82,18 @@ public final class SQLConverter {
               + "|\\((?:[^()]++|\\([^()]*+\\))*+\\)"
               + "|\\?"
               + ")";
+        // number literal with a sign that cannot be a binary operator, as nothing or an operator, a comma, an opening
+        // parenthesis or a keyword comes before; Access reads it as one negative number, so -2^2 is 4, but -(2)^2 is -4
+        private static final String          SIGNED_NUMBER_REGEX        =
+                "(?<=(?:^|[(,=<>+\\-*/&^\\\\]|\\b(?i:SELECT|WHERE|AND|OR|NOT|WHEN|THEN|ELSE|ON|HAVING|SET|VALUES|BY|IN|LIKE"
+              + "|BETWEEN|IS|MOD|RETURN))\\s{0,20})[+-](?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?";
         // operands joined by * and /, which bind stronger than Mod and \; only a term on the right of an operator may
         // start with a sign
         private static final String          TERM_REGEX                 =
             OPERAND_REGEX + "(?:\\s*[*/]\\s*[+-]?\\s*" + OPERAND_REGEX + ")*+";
 
         private static final Pattern         POWER_OPERATION            = Pattern.compile(
-            "(" + OPERAND_REGEX + ")\\s*\\^\\s*([+-]?\\s*" + OPERAND_REGEX + ")");
+            "(" + SIGNED_NUMBER_REGEX + '|' + OPERAND_REGEX + ")\\s*\\^\\s*([+-]?\\s*" + OPERAND_REGEX + ")");
         private static final Pattern         MOD_OPERATION              = Pattern.compile(
             "(" + TERM_REGEX + ")\\s+MOD\\s+([+-]?\\s*" + TERM_REGEX + ")", Pattern.CASE_INSENSITIVE);
         private static final Pattern         INTEGER_DIVISION           = Pattern.compile(
@@ -600,7 +606,8 @@ public final class SQLConverter {
 
     /**
      * Translates the Access power operator ^ into calls of the function POWER. Like in Access, ^ binds stronger than a
-     * sign and chains from left to right, so -2^2 becomes -POWER(2, 2) and 2^3^2 becomes POWER(POWER(2, 3), 2).
+     * sign and chains from left to right, so -x^2 becomes -POWER(x, 2) and 2^3^2 becomes POWER(POWER(2, 3), 2). A
+     * number literal keeps its sign, so -2^2 becomes POWER(-2, 2), unless the minus is a binary operator as in a -2^2.
      * <p>
      * Operands are found with regular expressions, so they cannot be nested deeper than one level of parentheses and
      * cannot be subqueries.
