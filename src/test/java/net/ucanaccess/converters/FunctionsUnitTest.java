@@ -319,9 +319,9 @@ class FunctionsUnitTest extends AbstractBaseTest {
         assertThat(Functions.len(1.5)).isEqualTo(3);
         assertThat(Functions.len((Double) null)).isNull();
         assertThat(Functions.format(1.5)).isEqualTo("1.5");
-        assertThat(Functions.format((Double) null)).isNull();
+        assertThat(Functions.format((Double) null)).isEmpty();
         assertThat(Functions.format("abc")).isEqualTo("abc");
-        assertThat(Functions.format((Timestamp) null)).isNull();
+        assertThat(Functions.format((Timestamp) null)).isEmpty();
         assertThat(Functions.round(2.5)).isEqualTo(2.0);
         assertThat(Functions.round(-3.5)).isEqualTo(-4.0);
     }

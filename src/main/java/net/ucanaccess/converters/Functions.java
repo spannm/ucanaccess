@@ -39,8 +39,6 @@ public final class Functions {
     private static Double       lastRnd;
     private static final double APPROX = 0.00000001;
 
-    private static final String GENERAL_DATE = "general date";
-
     /** Day zero of Access date values. */
     private static final LocalDateTime ACCESS_BASE_DATE = LocalDateTime.of(1899, 12, 30, 0, 0);
 
@@ -442,7 +440,7 @@ public final class Functions {
 
     @FunctionType(functionName = "CStr", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.MEMO)
     public static String cstr(Timestamp value) throws UcanaccessSQLException {
-        return value == null ? null : format(value, GENERAL_DATE);
+        return value == null ? null : format(value, AccessFormat.GENERAL_DATE);
     }
 
     @FunctionType(functionName = "CVar", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.MEMO)
@@ -637,7 +635,7 @@ public final class Functions {
      * @return week of the year from 1 to 54
      * @throws UcanaccessSQLException if a constant is out of range
      */
-    private static int weekOfYear(LocalDate date, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+    static int weekOfYear(LocalDate date, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
         if (firstDayOfWeek == null || firstDayOfWeek < 0 || firstDayOfWeek > 7) {
             throw new InvalidFunctionParameterException("DatePart", firstDayOfWeek);
         } else if (firstWeekOfYear == null || firstWeekOfYear < 0 || firstWeekOfYear > 3) {
@@ -903,7 +901,14 @@ public final class Functions {
         return new Timestamp(gc.getTime().getTime());
     }
 
-    private static Timestamp dateValue(String dt, boolean onlyDate) {
+    /**
+     * Parses a date or a time alone with the regional settings.
+     *
+     * @param dt       text to parse
+     * @param onlyDate whether to drop the time
+     * @return date, or {@code null} if the text is no date
+     */
+    static Timestamp dateValue(String dt, boolean onlyDate) {
         if (dt == null) {
             return null;
         }
@@ -966,83 +971,36 @@ public final class Functions {
         return Timestamp.valueOf(dt.toLocalDateTime().toLocalDate().atStartOfDay());
     }
 
+    /**
+     * Formats a number like the Access function Format, see {@link AccessFormat}.
+     */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DOUBLE, AccessType.TEXT}, returnType = AccessType.TEXT)
     public static String format(Double d, String par) throws UcanaccessSQLException {
-        if (d == null) {
-            return "";
-        } else if ("percent".equalsIgnoreCase(par)) {
-            return FormatCache.getZpzz().format(d * 100) + "%";
-        } else if ("fixed".equalsIgnoreCase(par)) {
-            return FormatCache.getZpzz().format(d);
-        } else if ("standard".equalsIgnoreCase(par)) {
-            return FormatCache.getSharp().format(d);
-        } else if ("general number".equalsIgnoreCase(par)) {
-            return FormatCache.getNoGrouping().format(d);
-        } else if ("currency".equalsIgnoreCase(par)) {
-            return FormatCache.getCurrencyDefault().format(d);
-        } else if ("yes/no".equalsIgnoreCase(par)) {
-            return d == 0 ? "No" : "Yes";
-        } else if ("true/false".equalsIgnoreCase(par)) {
-            return d == 0 ? "False" : "True";
-        } else if ("On/Off".equalsIgnoreCase(par)) {
-            return d == 0 ? "Off" : "On";
-        } else if ("Scientific".equalsIgnoreCase(par)) {
-            return String.format("%6.2E", d);
-        }
-        return Try.catching(() -> FormatCache.getDecimalFormat(par).format(d))
-            .orThrow(UcanaccessSQLException::new);
+        return AccessFormat.format(d, par, 1, 1);
     }
 
+    /**
+     * Formats a text like the Access function Format; a text that is a number or a date is formatted as such.
+     */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.TEXT, AccessType.TEXT}, returnType = AccessType.TEXT)
     public static String format(String s, String par) throws UcanaccessSQLException {
-        if (s == null) {
-            return "";
-        }
-        return format(s, par, false);
+        return AccessFormat.format(s, par, 1, 1);
     }
 
-    public static String format(String s, String par, boolean incl) throws UcanaccessSQLException {
-        if (">".equals(par)) {
-            return s.toUpperCase(Locale.getDefault());
-        } else if ("<".equals(par)) {
-            return s.toLowerCase(Locale.getDefault());
-        } else if (isNumeric(s)) {
-            if (incl) {
-                return format(Double.parseDouble(s), par);
-            }
-            return Try.catching(() -> format(FormatCache.getNoArgs().parse(s).doubleValue(), par))
-                .orThrow(UcanaccessSQLException::new);
-        } else if (isDate(s)) {
-            return format(dateValue(s, false), par);
-        }
-        return s;
-    }
-
-    private static String formatDate(Timestamp t, String pattern) {
-        RegionalSettings reg = getRegionalSettings();
-        SimpleDateFormat sdf = createSimpleDateFormat(pattern);
-        String ret = sdf.format(t);
-        if (!reg.getRS().equalsIgnoreCase("true")) {
-            if (!reg.getAM().equals("AM")) {
-                ret = ret.replace("AM", reg.getAM());
-            }
-            if (!reg.getPM().equals("PM")) {
-                ret = ret.replace("PM", reg.getPM());
-            }
-        } else {
-            ret = ret.replace(reg.getPM(), "PM");
-            ret = ret.replace(reg.getAM(), "AM");
-        }
-        return ret;
-
+    /**
+     * Formats a boolean like the number -1 for {@code true} or 0 for {@code false}.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.YESNO, AccessType.TEXT}, returnType = AccessType.TEXT)
+    public static String format(Boolean b, String par) throws UcanaccessSQLException {
+        return AccessFormat.format(b, par, 1, 1);
     }
 
     /**
      * Converts a number to text without a format, like CStr.
      */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DOUBLE}, returnType = AccessType.TEXT)
-    public static String format(Double d) {
-        return d == null ? null : cstr(d);
+    public static String format(Double d) throws UcanaccessSQLException {
+        return AccessFormat.format(d, null, 1, 1);
     }
 
     /**
@@ -1050,7 +1008,15 @@ public final class Functions {
      */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.TEXT}, returnType = AccessType.TEXT)
     public static String format(String s) {
-        return s;
+        return s == null ? "" : s;
+    }
+
+    /**
+     * Converts a boolean to text without a format, as -1 or 0.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.YESNO}, returnType = AccessType.TEXT)
+    public static String format(Boolean b) throws UcanaccessSQLException {
+        return AccessFormat.format(b, null, 1, 1);
     }
 
     /**
@@ -1058,45 +1024,31 @@ public final class Functions {
      */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME}, returnType = AccessType.TEXT)
     public static String format(Timestamp t) throws UcanaccessSQLException {
-        return cstr(t);
+        return AccessFormat.format(t, null, 1, 1);
     }
 
+    /**
+     * Formats a date like the Access function Format, see {@link AccessFormat}.
+     */
     @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME, AccessType.TEXT}, returnType = AccessType.TEXT)
     public static String format(Timestamp t, String par) throws UcanaccessSQLException {
-        if (t == null) {
-            return "";
-        }
-        RegionalSettings reg = getRegionalSettings();
+        return AccessFormat.format(t, par, 1, 1);
+    }
 
-        if ("long date".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getLongDatePattern());
-        } else if ("medium date".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getMediumDatePattern());
-        } else if ("short date".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getShortDatePattern());
-        } else if (GENERAL_DATE.equalsIgnoreCase(par)) {
-            // like Access, leave out a midnight time and the base date
-            LocalDateTime ldt = t.toLocalDateTime();
-            if (ldt.toLocalTime().equals(LocalTime.MIDNIGHT)) {
-                return formatDate(t, reg.getShortDatePattern());
-            } else if (ldt.toLocalDate().equals(ACCESS_BASE_DATE.toLocalDate())) {
-                return formatDate(t, reg.getLongTimePattern());
-            }
-            return formatDate(t, reg.getGeneralPattern());
-        } else if ("long time".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getLongTimePattern());
-        } else if ("medium time".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getMediumTimePattern());
-        } else if ("short time".equalsIgnoreCase(par)) {
-            return formatDate(t, reg.getShortTimePattern());
-        } else if ("q".equalsIgnoreCase(par)) {
-            return String.valueOf(datePart(par, t));
-        }
-        return createSimpleDateFormat(par
-            .replace('m', 'M')
-            .replace('n', 'm')
-            .replace("(?i)AM/PM|A/P|AMPM", "a")
-            .replace("dddd", "EEEE")).format(t);
+    /**
+     * Formats a date with the first day of the week for the tokens w and ww.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME, AccessType.TEXT, AccessType.LONG}, returnType = AccessType.TEXT)
+    public static String format(Timestamp t, String par, Integer firstDayOfWeek) throws UcanaccessSQLException {
+        return AccessFormat.format(t, par, firstDayOfWeek == null ? 1 : firstDayOfWeek, 1);
+    }
+
+    /**
+     * Formats a date with the first day of the week and the first week of the year for the tokens w and ww.
+     */
+    @FunctionType(functionName = "Format", argumentTypes = {AccessType.DATETIME, AccessType.TEXT, AccessType.LONG, AccessType.LONG}, returnType = AccessType.TEXT)
+    public static String format(Timestamp t, String par, Integer firstDayOfWeek, Integer firstWeekOfYear) throws UcanaccessSQLException {
+        return AccessFormat.format(t, par, firstDayOfWeek == null ? 1 : firstDayOfWeek, firstWeekOfYear == null ? 1 : firstWeekOfYear);
     }
 
     /**
@@ -1293,7 +1245,7 @@ public final class Functions {
         }
         switch (format) {
             case 0:
-                return format(t, GENERAL_DATE);
+                return format(t, AccessFormat.GENERAL_DATE);
             case 1:
                 return format(t, "long date");
             case 2:
@@ -2507,7 +2459,7 @@ public final class Functions {
         if (ldt.getHour() == 0 && ldt.getMinute() == 0 && ldt.getSecond() == 0) {
             return format(res, "short date");
         } else {
-            return format(res, GENERAL_DATE);
+            return format(res, AccessFormat.GENERAL_DATE);
         }
     }
 
