@@ -45,6 +45,12 @@
                 and Access-specific <code>?</code> as single-character wildcards, <code>#</code> for single digit and <code>[xxx][!xxx]</code> for character
                 intervals (Access).
             </li>
+            <li>Access arithmetic operators <code>^</code>, <code>Mod</code> and <code>\</code> are supported with
+                the Access precedence: <code>^</code> binds strongest and chains from left to right, then
+                <code>*</code> and <code>/</code>, then <code>\</code>, then <code>Mod</code>. Like in Access,
+                a minus directly in front of a number belongs to the number, so <code>-2^2</code> is 4,
+                while <code>-(2)^2</code> is -4.
+            </li>
             <li>Both <code>&amp;</code> and <code>+</code> (Access SQL) as well
                 as <code>||</code> (ANSI SQL) for string concatenation.
             </li>
