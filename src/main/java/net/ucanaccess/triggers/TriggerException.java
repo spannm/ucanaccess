@@ -8,4 +8,14 @@ public class TriggerException extends RuntimeException {
         super(msg);
     }
 
+    /**
+     * Creates a trigger exception that keeps the exception it was caused by.
+     *
+     * @param msg   the detail message
+     * @param cause the original exception
+     */
+    public TriggerException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
 }

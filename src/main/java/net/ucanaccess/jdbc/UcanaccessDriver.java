@@ -41,9 +41,9 @@ public final class UcanaccessDriver implements Driver {
 
         } catch (ClassNotFoundException ex) {
             LOGGER.log(Level.WARNING, "Unable to find hsqldb driver (version 2.x.x. or later) on your classpath");
-            throw new UcanaccessRuntimeException(ex.getMessage());
+            throw new UcanaccessRuntimeException(ex.getMessage(), ex);
         } catch (SQLException ex) {
-            throw new UcanaccessRuntimeException(ex.getMessage());
+            throw new UcanaccessRuntimeException(ex.getMessage(), ex);
         }
     }
 

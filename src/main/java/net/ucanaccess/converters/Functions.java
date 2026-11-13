@@ -1655,11 +1655,11 @@ public final class Functions {
                 return isNumeric(str.substring(1));
             }
             DecimalFormatSymbols dfs = DecimalFormatSymbols.getInstance();
-            String sep = dfs.getDecimalSeparator() + "";
             String gs = dfs.getGroupingSeparator() + "";
             if (str.startsWith(gs)) {
                 return false;
             }
+            String sep = dfs.getDecimalSeparator() + "";
             if (str.startsWith(sep)) {
                 return isNumeric(str.substring(1));
             }
@@ -2490,7 +2490,7 @@ public final class Functions {
     @FunctionType(functionName = "NPER", argumentTypes = {AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE, AccessType.DOUBLE}, returnType = AccessType.DOUBLE)
     public static double nper(double rate, double pmt, double pv, double fv, double type) {
         type = Math.abs(type) >= 1 ? 1 : 0;
-        double nper = 0;
+        double nper;
         if (rate == 0) {
             nper = -1 * (fv + pv) / pmt;
         } else {

@@ -83,8 +83,7 @@ public abstract class AbstractExecute {
         UcanaccessConnection conn = statement.getConnection();
         try (UcanaccessStatement st = conn.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT COUNT(*) FROM %s", tableName))) {
-            rs.next();
-            return rs.getInt(1);
+            return rs.next() ? rs.getInt(1) : 0;
         }
     }
 
@@ -137,7 +136,7 @@ public abstract class AbstractExecute {
                 return enableDisable(ddlType);
             }
 
-            String ddlExpr = null;
+            String ddlExpr;
             if (ddlType.in(DDLType.CREATE_TABLE, DDLType.CREATE_TABLE_AS_SELECT)) {
                 ddlExpr = SQLConverter.convertCreateTable(sql0);
             } else if (ddlType.equals(DDLType.CREATE_FOREIGN_KEY)) {

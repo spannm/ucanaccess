@@ -131,7 +131,7 @@ public class UcanaccessConnection implements Connection {
         if (c4io.getType().equals(CommandType.UPDATE) || c4io.getType().equals(CommandType.DELETE)) {
             ICommand last = !commands.isEmpty() ? commands.getLast() : null;
             ICursorCommand c4ioc = (ICursorCommand) c4io;
-            if (last != null && !last.getExecId().equals(BATCH_ID) && last.getExecId().equals(c4io.getExecId())
+            if (last != null && !BATCH_ID.equals(last.getExecId()) && last.getExecId().equals(c4io.getExecId())
                     && last.getTableName().equals(c4io.getTableName())) {
                 return ((CompositeCommand) last).add(c4ioc);
             } else {

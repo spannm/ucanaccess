@@ -30,7 +30,7 @@ public final class HibernateSupport {
      */
     public static boolean isActive() {
         if (active == null) {
-            active = System.getProperty(UCA_HIBERNATE_ISACTIVE_PROPERTY, "false").equalsIgnoreCase("true");
+            active = Boolean.parseBoolean(System.getProperty(UCA_HIBERNATE_ISACTIVE_PROPERTY));
         }
         return active;
     }

@@ -69,11 +69,10 @@ public class Main {
                 fl = new File(file);
                 size = fl.length();
                 if (args.length > 1) {
-                    int arg = 1;
                     if (hasPassword(fl)) {
-                       passwordEntry = args[arg++];
+                       passwordEntry = args[1];
                     } else {
-                       commands = Arrays.copyOfRange(args, arg++, args.length);
+                       commands = Arrays.copyOfRange(args, 1, args.length);
                     }
                 }
             }
@@ -180,7 +179,7 @@ public class Main {
             }
             return ret.trim();
         } catch (IOException ex) {
-            throw new UcanaccessRuntimeException(ex.getMessage());
+            throw new UcanaccessRuntimeException(ex.getMessage(), ex);
         }
     }
 

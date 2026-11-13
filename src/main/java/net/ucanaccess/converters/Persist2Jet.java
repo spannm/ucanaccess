@@ -399,7 +399,7 @@ public class Persist2Jet {
 
     private String getUcaMetadataTypeName(int colIdx, ColumnBuilder cb, String[] types) {
         String ucaMetadataTypeName = cb.getType().name();
-        if (types != null && colIdx < types.length && types[colIdx].toUpperCase(Locale.US).equals("HYPERLINK")) {
+        if (types != null && colIdx < types.length && "HYPERLINK".equalsIgnoreCase(types[colIdx])) {
             ucaMetadataTypeName = types[colIdx].toUpperCase(Locale.US);
         }
         return ucaMetadataTypeName;

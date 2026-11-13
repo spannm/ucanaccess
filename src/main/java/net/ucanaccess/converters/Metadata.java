@@ -259,10 +259,9 @@ public class Metadata {
             ps.setString(2, escaped);
             ps.setString(3, type.name());
             ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
-
-            return rs.getInt(1);
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : getTableId(escaped);
+            }
         } catch (SQLException ex) {
             return getTableId(escaped);
         }

@@ -46,7 +46,7 @@ public class TriggerAppendOnly extends TriggerBase {
                 ++i;
             }
         } catch (Exception ex) {
-            throw new TriggerException(ex.getMessage());
+            throw new TriggerException(ex.getMessage(), ex);
         }
     }
 }

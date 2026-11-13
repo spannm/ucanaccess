@@ -43,10 +43,10 @@ public class ParametricQuery {
     }
 
     private List<String> queryParameters() {
-        List<String> l = qi.getParameters();
         if (aposMap != null) {
             return parameterList;
         }
+        List<String> l = qi.getParameters();
         aposMap = new HashMap<>();
         int i = 0;
         parameterList = new ArrayList<>();
@@ -71,7 +71,7 @@ public class ParametricQuery {
 
     public void createProcedure() {
         isProcedure = true;
-        String sql = null;
+        String sql;
         try {
 
             List<String> l = queryParameters();
@@ -112,8 +112,8 @@ public class ParametricQuery {
     }
 
     public void createSelect() {
-        String qnn = null;
-        String sql = null;
+        String qnn;
+        String sql;
         try {
             List<String> l = queryParameters();
             qnn = SQLConverter.escapeIdentifier(qi.getName(), hsqldb);
@@ -340,7 +340,7 @@ public class ParametricQuery {
 
     // now something truly naif, yeah! It was about time!!!
     private void doParametersEmpiric(Map<String, Integer> psmp, List<String> paramNames, Map<String, String> parem, String sql) {
-        String psTxt = null;
+        String psTxt;
         try {
             psTxt = convertSQL(sql, paramNames);
 

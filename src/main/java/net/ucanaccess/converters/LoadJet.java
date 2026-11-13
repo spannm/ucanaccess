@@ -754,9 +754,9 @@ public class LoadJet {
                 if (defIsFunction) {
                     metadata.columnDef(col.getTable().getName(), col.getName(), defVal.toString());
                 }
-                Object defFound = default4SQL;
-                boolean isNull = (default4SQL + "").equalsIgnoreCase("null");
-                if (!isNull && (defFound = tryDefault(default4SQL)) == null) {
+                boolean isNull = "null".equalsIgnoreCase(String.valueOf(default4SQL));
+                Object defFound = isNull ? default4SQL : tryDefault(default4SQL);
+                if (!isNull && defFound == null) {
 
                     warnings.warn("Unknown expression: {0} (default value of column {1} table {2})",
                         defVal, col.getName(), col.getTable().getName());
@@ -1487,7 +1487,7 @@ public class LoadJet {
                         if (name.endsWith("]")) {
                             name = name.substring(0, name.length() - 1);
                         }
-                        if (name.contentEquals("*")) {
+                        if ("*".equals(name)) {
                             String table = row.expression.substring(0, beginIndex);
                             List<String> result = metadata.getColumnNames(table);
                             if (result != null) {
@@ -1525,11 +1525,13 @@ public class LoadJet {
             if (isPivot) {
                 pivot = new Pivot(conn);
 
-                if (!pivot.parsePivot(querySql) || (querySql = pivot.toSQL(query.getName())) == null) {
+                String pivotSql = pivot.parsePivot(querySql) ? pivot.toSQL(query.getName()) : null;
+                if (pivotSql == null) {
                     notLoaded.put(query.getName(), "cannot load this query");
 
                     return false;
                 }
+                querySql = pivotSql;
 
             }
             querySql = new DFunction(conn, querySql).toSQL();
@@ -1630,10 +1632,9 @@ public class LoadJet {
         }
 
         private void loadViews() throws SQLException {
-            List<Query> lq = null;
             List<Query> procedures = new ArrayList<>();
             try {
-                lq = dbIO.getQueries();
+                List<Query> lq = dbIO.getQueries();
                 Iterator<Query> it = lq.iterator();
                 while (it.hasNext()) {
                     Query q = it.next();

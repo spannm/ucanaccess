@@ -86,9 +86,9 @@ public final class IndexSelector {
             } else if (currVal instanceof BigDecimal && dbVal instanceof Number) {
                 return ((BigDecimal) currVal).compareTo(new BigDecimal(dbVal.toString())) == 0;
             } else if (currVal instanceof Integer && dbVal instanceof Short) {
-                return (Integer) currVal == ((Short) dbVal).intValue();
+                return (Integer) currVal == (short) dbVal;
             } else if (dbVal instanceof Integer && currVal instanceof Short) {
-                return (Integer) dbVal == ((Short) currVal).intValue();
+                return (Integer) dbVal == (short) currVal;
             } else if (currVal instanceof Integer && dbVal instanceof Byte) {
                 return (Integer) currVal == SQLConverter.asUnsigned((Byte) dbVal);
             } else if (dbVal instanceof Integer && currVal instanceof Byte) {
@@ -101,7 +101,7 @@ public final class IndexSelector {
                     return true;
                 }
                 if (dbVal instanceof Float && currVal instanceof Double) {
-                    return ((Float) dbVal).doubleValue() == (Double) currVal;
+                    return (float) dbVal == (double) currVal;
                 }
             }
             if (currVal instanceof byte[] && dbVal instanceof byte[]) {
