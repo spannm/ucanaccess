@@ -128,7 +128,7 @@
         <dep.plugin.cyclonedx.version>2.9.3</dep.plugin.cyclonedx.version>
         <dep.plugin.versions.version>2.23.0</dep.plugin.versions.version>
         <dep.plugin.figlet.version>1.2.0</dep.plugin.figlet.version>
-        <dep.plugin.error-prone.version>2.51.0</dep.plugin.error-prone.version>
+        <dep.plugin.error-prone.version>2.52.0</dep.plugin.error-prone.version>
 
         <basepom.deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</basepom.deploy.snapshot.url>
         <basepom.central-publishing.repo-id>sonatype-central</basepom.central-publishing.repo-id>
@@ -138,7 +138,7 @@
 
         <basepom.check.skip-checkstyle>false</basepom.check.skip-checkstyle>
         <basepom.check.skip-pmd>false</basepom.check.skip-pmd>
-        <dep.checkstyle.version>14.3.0</dep.checkstyle.version>
+        <dep.checkstyle.version>14.4.0</dep.checkstyle.version>
         <!-- fail before lengthy test execution -->
         <basepom.check.phase-checkstyle>test-compile</basepom.check.phase-checkstyle>
         <basepom.check.checkstyle-config-location>${project.rootDirectory}/build/checkstyle-rules.xml</basepom.check.checkstyle-config-location>
