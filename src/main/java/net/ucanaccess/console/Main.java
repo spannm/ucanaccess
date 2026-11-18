@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("java:S106") // interactive console that prints its results to standard output
 public class Main {
@@ -137,7 +138,19 @@ public class Main {
      * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.
      */
     public void consoleDump(ResultSet resultSet, PrintStream printStream) throws SQLException {
-        new TableFormat(resultSet).output(printStream);
+        consoleDump(resultSet, printStream, false);
+    }
+
+    /**
+     * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.
+     *
+     * @param resultSet         result set to print
+     * @param printStream       stream to print to
+     * @param hideEmptyColumns  whether to leave out the columns without a value in any row, they are named below the table
+     * @since 5.3.1
+     */
+    public void consoleDump(ResultSet resultSet, PrintStream printStream, boolean hideEmptyColumns) throws SQLException {
+        new TableFormat(resultSet).hideEmptyColumns(hideEmptyColumns).output(printStream);
     }
 
     private void executeStatement(String sql) throws SQLException {
@@ -429,16 +442,143 @@ public class Main {
             List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
                 Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
         private static final int         MAX_COL_WIDTH      = 50;
+        // the table is indented to set it off from the text before
+        private static final String      INDENT             = "  ";
+        // wider tables are printed with one block of column names and values per row
+        private static final int         MAX_TABLE_WIDTH    = 200;
+        // code points displayed in two console columns, after the ranges of Markus Kuhn's wcwidth
+        private static final int[][]     WIDE_RANGES        = {
+            {0x1100, 0x115F}, // Hangul Jamo
+            {0x2E80, 0xA4CF}, // CJK radicals ... Yi
+            {0xAC00, 0xD7A3}, // Hangul syllables
+            {0xF900, 0xFAFF}, // CJK compatibility ideographs
+            {0xFE30, 0xFE4F}, // CJK compatibility forms
+            {0xFF00, 0xFF60}, // fullwidth forms
+            {0xFFE0, 0xFFE6}, // fullwidth signs
+            {0x1F300, 0x1F64F}, // emoji
+            {0x1F900, 0x1F9FF}, // supplemental symbols and pictographs
+            {0x20000, 0x3FFFD} // CJK extensions
+        };
+
+        private final Border             border;
         private final List<String>       colNames;
         private final List<Integer>      colWidths;
         private final List<Integer>      colTypes;
         private final List<List<String>> records            = new ArrayList<>();
+        private boolean                  hideEmptyColumns;
+        private int                      maxTableWidth      = MAX_TABLE_WIDTH;
 
-        TableFormat(ResultSet resultSet) throws SQLException {
-            this(resultSet, -1);
+        /**
+         * Characters to draw the table border with.
+         */
+        enum Border {
+            ASCII('|', "+-++", "+=++", "+-++", "+-++"),
+            UNICODE('│', "┌─┬┐", "╞═╪╡", "├─┼┤", "└─┴┘");
+
+            private final char   vertical;
+            // each line given by its left junction, horizontal character, inner and right junction
+            private final String top;
+            private final String header;
+            private final String middle;
+            private final String bottom;
+
+            /**
+             * Creates a border of the given characters.
+             *
+             * @param vertical  character of the vertical lines
+             * @param top       characters of the top line
+             * @param header    characters of the line below the header
+             * @param middle    characters of the line between two rows
+             * @param bottom    characters of the bottom line
+             */
+            Border(char vertical, String top, String header, String middle, String bottom) {
+                this.vertical = vertical;
+                this.top = top;
+                this.header = header;
+                this.middle = middle;
+                this.bottom = bottom;
+            }
+
+            /**
+             * Returns the unicode border if the given charset can encode its characters, the ascii border otherwise.
+             */
+            static Border forCharset(Charset charset) {
+                String characters = UNICODE.vertical + UNICODE.top + UNICODE.header + UNICODE.middle + UNICODE.bottom;
+                return charset.canEncode() && charset.newEncoder().canEncode(characters) ? UNICODE : ASCII;
+            }
+
+            /**
+             * Returns the border that the standard output can display.
+             */
+            static Border forConsole() {
+                return forCharset(consoleCharset());
+            }
+
+            /**
+             * Returns the charset of the standard output, as far as the running Java version tells it.
+             */
+            private static Charset consoleCharset() {
+                // stdout.encoding exists since Java 19, sun.stdout.encoding on Windows consoles before, native.encoding
+                // since Java 17 is what System.out uses on Java 18 when not writing to a console, sun.jnu.encoding is the
+                // platform encoding on older versions, unlike the default charset not changed by -Dfile.encoding
+                for (String property : new String[] {"stdout.encoding", "sun.stdout.encoding", "native.encoding", "sun.jnu.encoding"}) {
+                    String name = System.getProperty(property);
+                    try {
+                        if (name != null && Charset.isSupported(name)) {
+                            return Charset.forName(name);
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                        // an illegal charset name, try the next property
+                    }
+                }
+                return Charset.defaultCharset();
+            }
+
+            /**
+             * Returns a horizontal line of the table.
+             *
+             * @param chars   left junction, horizontal character, inner and right junction of the line
+             * @param widths  widths of the column contents
+             */
+            static String line(String chars, List<Integer> widths) {
+                StringJoiner line = new StringJoiner(chars.substring(2, 3), chars.substring(0, 1), chars.substring(3, 4));
+                // one blank on either side of the content
+                widths.forEach(w -> line.add(chars.substring(1, 2).repeat(w + 2)));
+                return line.toString();
+            }
+
+            /**
+             * Returns a horizontal line of the table with the given label at its start.
+             *
+             * @param chars   left junction, horizontal character, inner and right junction of the line
+             * @param widths  widths of the column contents, the first one wide enough for the label
+             * @param label   text to show in the line
+             */
+            static String line(String chars, List<Integer> widths, String label) {
+                String line = line(chars, widths);
+                String text = chars.charAt(1) + " " + label + " ";
+                return line.charAt(0) + text + line.substring(1 + text.length());
+            }
         }
 
-        TableFormat(ResultSet resultSet, int maxRows) throws SQLException {
+        /**
+         * Reads all rows of the given result set, drawing the border the console can display.
+         *
+         * @param resultSet  result set to format
+         */
+        TableFormat(ResultSet resultSet) throws SQLException {
+            this(resultSet, -1, Border.forConsole());
+        }
+
+        /**
+         * Reads the rows of the given result set.
+         *
+         * @param resultSet  result set to format
+         * @param maxRows    maximum number of rows to read, negative for all rows
+         * @param border     characters to draw the table border with
+         */
+        TableFormat(ResultSet resultSet, int maxRows, Border border) throws SQLException {
+            this.border = border;
             ResultSetMetaData meta = resultSet.getMetaData();
             int columnCount = meta.getColumnCount();
 
@@ -446,14 +586,14 @@ public class Main {
             colWidths = new ArrayList<>(columnCount);
             colTypes = new ArrayList<>(columnCount);
             for (int col = 1; col <= columnCount; ++col) {
-                String colLabel = meta.getColumnLabel(col);
+                String colLabel = printable(meta.getColumnLabel(col));
                 colNames.add(colLabel);
-                colWidths.add(Math.min(colLabel.length(), MAX_COL_WIDTH));
+                colWidths.add(Math.min(displayWidth(colLabel), MAX_COL_WIDTH));
                 colTypes.add(meta.getColumnType(col));
             }
 
             records.add(colNames); // header record
-            while (resultSet.next() && (maxRows < 0 || maxRows < records.size())) {
+            while ((maxRows < 0 || maxRows >= records.size()) && resultSet.next()) {
                 List<String> rec = new ArrayList<>();
                 records.add(rec);
                 for (int col = 1; col <= columnCount; ++col) {
@@ -462,69 +602,228 @@ public class Main {
                         obj = Arrays.toString((Object[]) obj);
                     }
 
-                    String s = obj == null ? "" : obj.toString();
+                    String s = obj == null ? "" : printable(obj.toString());
                     rec.add(s);
 
-                    int colWidth = colWidths.get(col - 1);
-                    if (colWidth < s.length() && colWidth < MAX_COL_WIDTH) {
-                        colWidths.set(col - 1, s.length());
+                    int width = Math.min(displayWidth(s), MAX_COL_WIDTH);
+                    if (colWidths.get(col - 1) < width) {
+                        colWidths.set(col - 1, width);
                     }
                 }
             }
         }
 
+        /**
+         * Sets whether to leave out the columns without a value in any row.
+         *
+         * @param hide  whether to leave out empty columns
+         */
+        TableFormat hideEmptyColumns(boolean hide) {
+            hideEmptyColumns = hide;
+            return this;
+        }
+
+        /**
+         * Sets the width above which the table is printed with one block of column names and values per row.
+         *
+         * @param width  maximum width of a table with one line per row
+         */
+        TableFormat maxTableWidth(int width) {
+            maxTableWidth = width;
+            return this;
+        }
+
+        /**
+         * Prints the table to the given stream, followed by the number of rows and the hidden columns.
+         *
+         * @param printStream  stream to print to
+         */
         void output(PrintStream printStream) {
-            String interline = null;
-            String divider = "|";
-            for (int idx = 0; idx < records.size(); idx++) {
-                List<String> rec = records.get(idx);
-                String line = " " + joinWithLen(" " + divider + " ", rec) + " ";
-                if (idx == 0) { // index 0 holds header
-                    interline = line.replaceAll("[^\\" + divider + "]", "-").replace(divider, "+");
-                    interline = "·" + interline + "·";
-                    printStream.println();
-                    printStream.println(interline);
-                    printStream.println(divider + line + divider);
-                    printStream.println(interline);
+            List<Integer> columns = visibleColumns();
+            List<Integer> widths = columns.stream().map(colWidths::get).collect(Collectors.toList());
+            List<List<String>> rows = records.subList(1, records.size()); // index 0 holds header
 
+            printStream.println();
+            // each column takes its width plus one blank on either side and a vertical line
+            if (widths.stream().mapToInt(w -> w + 3).sum() + 1 > maxTableWidth) {
+                if (rows.isEmpty()) {
+                    printStream.println(INDENT + String.format("(0 rows, columns: %s)", String.join(", ", colNames)));
                 } else {
-                    printStream.println(divider + line + divider);
+                    outputVertical(printStream, rows, columns);
                 }
+                return;
             }
-
-            if (records.size() > 1) {
-                printStream.println(interline);
+            printStream.println(INDENT + Border.line(border.top, widths));
+            printStream.println(INDENT + row(colNames, columns));
+            if (!rows.isEmpty()) {
+                printStream.println(INDENT + Border.line(border.header, widths));
             }
+            rows.forEach(r -> printStream.println(INDENT + row(r, columns)));
+            printStream.println(INDENT + Border.line(border.bottom, widths));
+            printStream.println(INDENT + footer(rows.size(), columns));
         }
 
-        String joinWithLen(CharSequence delim, List<String> elems) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < elems.size(); i++) {
-                int width = colWidths.get(i);
-                int type = colTypes.get(i);
-                String str = elems.get(i);
-                sb.append(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
-                if (i < elems.size() - 1) {
-                    sb.append(delim);
+        /**
+         * Prints one block per row, listing the column names and values of the row line by line.
+         *
+         * @param printStream  stream to print to
+         * @param rows         rows to print
+         * @param columns      indexes of the columns to print
+         */
+        void outputVertical(PrintStream printStream, List<List<String>> rows, List<Integer> columns) {
+            // the name column is wide enough for the row label in the line above each block
+            String lastLabel = String.format("Row %d", rows.size());
+            int nameWidth = Math.min(MAX_COL_WIDTH, columns.stream()
+                .mapToInt(col -> displayWidth(colNames.get(col)))
+                .reduce(lastLabel.length() + 1, Math::max));
+            int valueWidth = Math.min(MAX_COL_WIDTH, rows.stream()
+                .flatMap(row -> columns.stream().map(row::get))
+                .mapToInt(TableFormat::displayWidth)
+                .max().orElse(0));
+            List<Integer> widths = List.of(nameWidth, valueWidth);
+
+            for (int idx = 0; idx < rows.size(); idx++) {
+                String label = String.format("Row %d", idx + 1);
+                printStream.println(INDENT + Border.line(idx == 0 ? border.top : border.middle, widths, label));
+                for (int col : columns) {
+                    printStream.println(INDENT + cells(List.of(fit(colNames.get(col), nameWidth, false),
+                        fit(rows.get(idx).get(col), valueWidth, false))));
                 }
             }
-            return sb.toString();
+            printStream.println(INDENT + Border.line(border.bottom, widths));
+            printStream.println(INDENT + footer(rows.size(), columns));
         }
 
+        /**
+         * Returns the indexes of the columns to print, which are all columns unless empty columns are hidden. All
+         * columns are printed if every one is empty.
+         */
+        List<Integer> visibleColumns() {
+            List<Integer> all = IntStream.range(0, colNames.size()).boxed().collect(Collectors.toList());
+            if (!hideEmptyColumns) {
+                return all;
+            }
+            List<Integer> filled = all.stream()
+                .filter(col -> records.stream().skip(1).anyMatch(rec -> !rec.get(col).isEmpty()))
+                .collect(Collectors.toList());
+            return filled.isEmpty() ? all : filled;
+        }
+
+        /**
+         * Returns the line below the table with the number of rows and the names of the hidden columns.
+         *
+         * @param rowCount  number of rows printed
+         * @param columns   indexes of the columns printed
+         */
+        String footer(int rowCount, List<Integer> columns) {
+            StringJoiner footer = new StringJoiner(", ", "(", ")");
+            footer.add(rowCount == 1 ? "1 row" : String.format("%d rows", rowCount));
+            List<String> hidden = IntStream.range(0, colNames.size())
+                .filter(col -> !columns.contains(col))
+                .mapToObj(colNames::get)
+                .collect(Collectors.toList());
+            if (!hidden.isEmpty()) {
+                footer.add(String.format("%d empty %s hidden: %s", hidden.size(), hidden.size() == 1 ? "column" : "columns",
+                    String.join(", ", hidden)));
+            }
+            return footer.toString();
+        }
+
+        /**
+         * Returns one row of the table with the values padded or cut to their column width.
+         *
+         * @param values   values of the row
+         * @param columns  indexes of the columns to print
+         */
+        String row(List<String> values, List<Integer> columns) {
+            return cells(columns.stream()
+                .map(col -> fit(values.get(col), colWidths.get(col), isNumericJdbcType(colTypes.get(col))))
+                .collect(Collectors.toList()));
+        }
+
+        /**
+         * Returns a line of the table with the given cells between vertical lines.
+         *
+         * @param cells  cell contents, already fit to their column width
+         */
+        String cells(List<String> cells) {
+            String vertical = String.valueOf(border.vertical);
+            return cells.stream().collect(Collectors.joining(" " + vertical + " ", vertical + " ", " " + vertical));
+        }
+
+        /**
+         * Returns whether values of the given JDBC type are aligned right.
+         */
         static boolean isNumericJdbcType(int type) {
             return NUMERIC_JDBC_TYPES.contains(type);
         }
 
-        static String rightPad(String str, int width) {
-            return (str + repeat(" ", width - str.length())).substring(0, width);
+        /**
+         * Replaces control characters such as line breaks and tabs and the unicode line and paragraph separators with a
+         * blank, as they would break the table.
+         */
+        static String printable(String str) {
+            return str.codePoints()
+                .map(cp -> Character.isISOControl(cp) || Character.getType(cp) == Character.LINE_SEPARATOR
+                    || Character.getType(cp) == Character.PARAGRAPH_SEPARATOR ? ' ' : cp)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
         }
 
-        static String leftPad(String str, int width) {
-            return (repeat(" ", width - str.length()) + str).substring(0, width);
+        /**
+         * Returns the number of console columns the given string takes up.
+         */
+        static int displayWidth(String str) {
+            return str.codePoints().map(TableFormat::displayWidth).sum();
         }
 
-        static String repeat(String str, int count) {
-            return count > 0 ? String.format("%0" + count + "d", 0).replace("0", str) : "";
+        /**
+         * Returns the number of console columns the given code point takes up: 0 for combining marks, 2 for wide East
+         * Asian characters and emoji, 1 otherwise.
+         */
+        static int displayWidth(int codePoint) {
+            int type = Character.getType(codePoint);
+            if (type == Character.NON_SPACING_MARK || type == Character.ENCLOSING_MARK || type == Character.FORMAT) {
+                return 0;
+            }
+            return isWide(codePoint) ? 2 : 1;
+        }
+
+        /**
+         * Returns whether the given code point is displayed in two console columns.
+         */
+        static boolean isWide(int cp) {
+            if (cp == 0x303F) { // ideographic half fill space
+                return false;
+            }
+            for (int[] range : WIDE_RANGES) {
+                if (cp >= range[0] && cp <= range[1]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Pads or cuts the given string to exactly the given display width.
+         *
+         * @param str         string to fit
+         * @param width       display width of the result
+         * @param alignRight  whether to pad on the left
+         */
+        static String fit(String str, int width, boolean alignRight) {
+            StringBuilder sb = new StringBuilder();
+            int used = 0;
+            for (int cp : str.codePoints().toArray()) {
+                int w = displayWidth(cp);
+                if (used + w > width) {
+                    break;
+                }
+                sb.appendCodePoint(cp);
+                used += w;
+            }
+            String padding = " ".repeat(width - used);
+            return alignRight ? padding + sb : sb + padding;
         }
 
     }

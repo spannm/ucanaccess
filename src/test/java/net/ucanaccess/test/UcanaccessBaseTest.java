@@ -22,6 +22,7 @@ import java.io.UncheckedIOException;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -314,9 +315,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     protected void dumpQueryResult(IThrowingSupplier<ResultSet, SQLException> supplier) throws SQLException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (PrintStream ps = new PrintStream(baos, true)) {
-            new Main(ucanaccess, null).consoleDump(supplier.get(), ps);
-            getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos);
+        try (PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8)) {
+            new Main(ucanaccess, null).consoleDump(supplier.get(), ps, true);
+            getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos.toString(StandardCharsets.UTF_8));
         }
     }
 
@@ -324,9 +325,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         try (UcanaccessStatement st = ucanaccess.createStatement()) {
             ResultSet resultSet = st.executeQuery(query == null ? null : query.toString());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try (PrintStream ps = new PrintStream(baos, true)) {
-                new Main(ucanaccess, null).consoleDump(resultSet, ps);
-                getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos);
+            try (PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8)) {
+                new Main(ucanaccess, null).consoleDump(resultSet, ps, true);
+                getLogger().log(Level.INFO, "dumpQueryResult: {0}", baos.toString(StandardCharsets.UTF_8));
             }
         }
     }
