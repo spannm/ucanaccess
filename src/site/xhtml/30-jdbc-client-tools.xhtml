@@ -18,6 +18,24 @@
             <code>UCanAccess&gt;SELECT * FROM License;</code>
         </p>
         <p>
+            The console prints the result as a table, followed by the number of rows:
+        </p>
+        <pre>
+UCanAccess&gt;SELECT * FROM License;
+
+  ┌────┬────────────┬───────┐
+  │ ID │ NAME       │ SEATS │
+  ╞════╪════════════╪═══════╡
+  │  1 │ Standard   │     5 │
+  │  2 │ Enterprise │   250 │
+  └────┴────────────┴───────┘
+  (2 rows)</pre>
+        <p>
+            Tables wider than 200 characters are printed with one block of column names and values per row. If the
+            console cannot display box drawing characters, the table is drawn with <code>+</code>, <code>-</code>
+            and <code>|</code>.
+        </p>
+        <p>
             You can export the result of the most recent SQL query to a CSV file using the <code>export</code>
             command:
             <code>UCanAccess&gt;export License.csv;</code>
