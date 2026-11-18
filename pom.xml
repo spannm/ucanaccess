@@ -126,7 +126,7 @@
         <!-- additional plugins not defined in parent -->
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version>
         <dep.plugin.cyclonedx.version>2.9.3</dep.plugin.cyclonedx.version>
-        <dep.plugin.versions.version>2.23.0</dep.plugin.versions.version>
+        <dep.plugin.versions.version>2.25.2</dep.plugin.versions.version>
         <dep.plugin.figlet.version>1.2.0</dep.plugin.figlet.version>
         <dep.plugin.error-prone.version>2.52.0</dep.plugin.error-prone.version>
 
