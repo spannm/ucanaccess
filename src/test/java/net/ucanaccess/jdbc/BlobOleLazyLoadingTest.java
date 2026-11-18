@@ -32,7 +32,7 @@ class BlobOleLazyLoadingTest extends UcanaccessBaseFileTest {
         @SuppressWarnings("unused")
         Object obj = rs.getObject(1);
         try (InputStream isFromDb = rs.getBlob(1).getBinaryStream()) {
-            copyFile(isFromDb, file).deleteOnExit();
+            copyFile(isFromDb, file);
         }
         assertEquals(file.length(), binaryFileSize);
         getLogger().log(Level.INFO, "File was created in {0}, size: {1} bytes", file.getAbsolutePath(), file.length());

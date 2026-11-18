@@ -55,7 +55,7 @@ class BlobOleTest extends UcanaccessBaseTest {
             try (InputStream isFromDb = rs.getBinaryStream(1)) {
 
                 File imgFileTemp = createTempFileName(imgFileName, null);
-                copyFile(isFromDb, imgFileTemp).deleteOnExit();
+                copyFile(isFromDb, imgFileTemp);
                 getLogger().log(Level.INFO, "Image file was created in {0}", imgFileTemp.getAbsolutePath());
 
                 byte[] fileBytes = Files.readAllBytes(imgFileTemp.toPath());
@@ -76,7 +76,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         try (PreparedStatement ps = ucanaccess.prepareStatement("UPDATE t_ole_test SET c_ole=? WHERE c_descr=?")) {
             File file = createTempFileName(binFileName, null);
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName.replace('/', File.separatorChar))) {
-                copyFile(is, file).deleteOnExit();
+                copyFile(is, file);
             }
             blob = ucanaccess.createBlob(file);
             ps.setObject(1, file);
@@ -119,7 +119,7 @@ class BlobOleTest extends UcanaccessBaseTest {
         File file = createTempFileName(binFileName.replace('/', File.separatorChar), null);
 
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(binFileName)) {
-            copyFile(is, file).deleteOnExit();
+            copyFile(is, file);
         }
         Blob blob = ucanaccess.createBlob(file);
         PreparedStatement ps = ucanaccess.prepareStatement("INSERT INTO t_ole_test (c_descr, c_ole) VALUES( ?,?)");

@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import java.io.File;
 import java.lang.System.Logger.Level;
 import java.sql.ResultSet;
+import java.util.stream.Stream;
 
 class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
 
@@ -19,9 +20,10 @@ class ReloadPersistentMirrorTest extends UcanaccessBaseTest {
         init(accessVersion);
 
         File dbFile = createTempFileName(getClass().getSimpleName(), getFileExtension());
-        dbFile.deleteOnExit();
         File mirrorFile = new File(dbFile.getAbsolutePath().substring(0, dbFile.getAbsolutePath().lastIndexOf(getFileExtension())));
-        mirrorFile.deleteOnExit();
+        // HSQLDB keeps the persistent mirror in several files named after it
+        Stream.of("", ".properties", ".script", ".data", ".log", ".lck", ".tmp")
+            .forEach(ext -> deleteAfterTest(new File(mirrorFile.getPath() + ext)));
 
         // create the database
         try (UcanaccessConnection conn = buildConnection()

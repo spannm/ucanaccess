@@ -15,12 +15,6 @@ import java.sql.SQLException;
 class PhysicalRollbackTest extends UcanaccessBaseTest {
 
     @Override
-    protected String getAccessPath() {
-        // this db does not exist!
-        return getClass().getSimpleName() + getFileExtension();
-    }
-
-    @Override
     protected void init(AccessVersion accessVersion) throws SQLException {
         super.init(accessVersion);
         executeStatements("CREATE TABLE t_pr (id LONG, descr VARCHAR(400))");
@@ -50,7 +44,8 @@ class PhysicalRollbackTest extends UcanaccessBaseTest {
             .isInstanceOf(SQLException.class)
             .hasMessageContaining(getClass().getSimpleName());
 
-        ucanaccess = createUcanaccessConnection();
+        // reopen the same database file to see what was written to it
+        ucanaccess = buildConnection().withDbPath(getFileAccDb().getAbsolutePath()).build();
         dumpQueryResult("SELECT * FROM t_pr");
 
         assertEquals(0, getVerifyCount("SELECT COUNT(*) FROM t_pr"));

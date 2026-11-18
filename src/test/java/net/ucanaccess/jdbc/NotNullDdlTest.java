@@ -34,7 +34,6 @@ class NotNullDdlTest extends UcanaccessBaseTest {
         ucanaccess.close();
 
         File vbsFile = createTempFileName(getClass().getSimpleName(), ".vbs");
-        vbsFile.deleteOnExit();
         Files.write(vbsFile.toPath(), List.of(
             "Set conn = CreateObject(\"ADODB.Connection\")",
             "conn.Open \"DRIVER={Microsoft Access Driver (*.mdb)};DBQ=" + mdbPath + '\"',

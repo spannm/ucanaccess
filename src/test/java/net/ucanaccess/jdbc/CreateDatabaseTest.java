@@ -16,7 +16,6 @@ class CreateDatabaseTest extends UcanaccessBaseTest {
         init(accessVersion);
 
         File fileMdb = createTempFileName(getClass().getSimpleName());
-        fileMdb.deleteOnExit();
 
         UcanaccessConnectionBuilder bldr = buildConnection()
             .withDbPath(fileMdb.getAbsolutePath())

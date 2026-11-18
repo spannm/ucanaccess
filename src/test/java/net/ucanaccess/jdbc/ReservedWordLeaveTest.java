@@ -23,7 +23,6 @@ class ReservedWordLeaveTest extends UcanaccessBaseFileTest {
     void testCreateTable() throws SQLException {
         AccessVersion accessVersion = AccessVersion.V2010;
         File fileMdb = createTempFileName(getClass().getSimpleName(), accessVersion.getFileFormat().getFileExtension());
-        fileMdb.deleteOnExit();
 
         UcanaccessConnectionBuilder builderNew = buildConnection()
             .withDbPath(fileMdb.getAbsolutePath())

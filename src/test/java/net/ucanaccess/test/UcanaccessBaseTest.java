@@ -56,6 +56,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     protected UcanaccessConnection ucanaccess;
     private UcanaccessConnection   verifyConnection;
+    private final List<File>       tempFiles     = new ArrayList<>();
 
     protected UcanaccessBaseTest() {
     }
@@ -349,10 +350,9 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
         } else {
             fileAccDb = copyResourceToTempFile(accessPath);
             if (fileAccDb == null) {
-                fileAccDb = new File(getTestTempDir(), accessPath);
+                fileAccDb = deleteAfterTest(new File(getTestTempDir(), accessPath));
                 if (!fileAccDb.exists()) {
                     createNewDatabase(getFileFormat(), fileAccDb);
-                    fileAccDb.deleteOnExit();
                 }
             }
         }
@@ -400,11 +400,12 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     /**
      * Creates a unique temporary file name using the given prefix and suffix, but does not create the file.
+     * The file is deleted after the test.
      * @param prefix file name prefix
      * @param suffixArg file name suffix
      * @return temporary file object
      */
-    protected static File createTempFileName(String prefix, String suffixArg) {
+    protected File createTempFileName(String prefix, String suffixArg) {
         String name = Optional.ofNullable(prefix).map(p -> p.replace(File.separatorChar, '_')).orElse("");
         if (!name.isBlank() && !name.endsWith("-")) {
             name += "-";
@@ -420,7 +421,32 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
             }
         }
         name += new TempFileNameString() + suffix;
-        return new File(getTestTempDir(), name);
+        return deleteAfterTest(new File(getTestTempDir(), name));
+    }
+
+    /**
+     * Deletes the given file or directory after the test, or on JVM exit if it is still in use then.
+     *
+     * @param file  file or directory to delete
+     * @return the given file
+     */
+    protected final File deleteAfterTest(File file) {
+        tempFiles.add(file);
+        return file;
+    }
+
+    /**
+     * Deletes the given file or directory with its content, falling back to deletion on JVM exit.
+     */
+    private void delete(File file) {
+        File[] children = file.listFiles();
+        if (children != null) {
+            Stream.of(children).forEach(this::delete);
+        }
+        Try.catching(() -> Files.deleteIfExists(file.toPath())).orElse(e -> {
+            getLogger().log(Level.DEBUG, "Could not delete {0}: {1}", file, e);
+            file.deleteOnExit();
+        });
     }
 
     /**
@@ -434,7 +460,7 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
     /**
      * Creates a unique temporary file using the given prefix.<p>
-     * The file is marked for deletion on JVM exit.
+     * The file is deleted after the test.
      *
      * @param prefix file name prefix
      * @return temporary file object
@@ -444,8 +470,6 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
 
         getLogger().log(Level.DEBUG, "Creating temp file {0}", f);
         Try.catching(() -> Files.createFile(f.toPath())).orThrow(e -> new UncheckedIOException((IOException) e));
-
-        f.deleteOnExit();
         return f;
     }
 
@@ -598,5 +622,8 @@ public abstract class UcanaccessBaseTest extends AbstractBaseTest {
                 }
             }).orElse(e -> getLogger().log(Level.WARNING, "Verify connection {0} already closed: {1}", verifyConnection, e));
         }
+
+        tempFiles.forEach(this::delete);
+        tempFiles.clear();
     }
 }
