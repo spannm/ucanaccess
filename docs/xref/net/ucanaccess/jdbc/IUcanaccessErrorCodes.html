@@ -10,9 +10,10 @@
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> org.hsqldb.error.ErrorCode;
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IUcanaccessErrorCodes" href="../../../net/ucanaccess/jdbc/IUcanaccessErrorCodes.html#IUcanaccessErrorCodes">IUcanaccessErrorCodes</a> <strong class="jxr_keyword">extends</strong> ErrorCode {
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>       <strong class="jxr_keyword">int</strong> UCANACCESS_GENERIC_ERROR = 15000; <em class="jxr_comment">// Ucanaccess Error</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   }
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   @SuppressWarnings({<span class="jxr_string">"PMD.ConstantsInInterface"</span>, <span class="jxr_string">"checkstyle:InterfaceIsType"</span>}) <em class="jxr_comment">// public API, extends the HSQLDB error codes</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> IUcanaccessErrorCodes <strong class="jxr_keyword">extends</strong> ErrorCode {
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>       <strong class="jxr_keyword">int</strong> UCANACCESS_GENERIC_ERROR = 15000; <em class="jxr_comment">// Ucanaccess Error</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   }
 </pre>
 <hr/>
 <div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>

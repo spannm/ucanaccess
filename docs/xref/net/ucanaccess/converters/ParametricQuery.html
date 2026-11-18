@@ -51,10 +51,10 @@
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>      }
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">private</strong> List&lt;String&gt; queryParameters() {
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>          List&lt;String&gt; l = qi.getParameters();
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>          <strong class="jxr_keyword">if</strong> (aposMap != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>              <strong class="jxr_keyword">return</strong> parameterList;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>          }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>          <strong class="jxr_keyword">if</strong> (aposMap != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>              <strong class="jxr_keyword">return</strong> parameterList;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          }
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>          List&lt;String&gt; l = qi.getParameters();
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>          aposMap = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>          <strong class="jxr_keyword">int</strong> i = 0;
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>          parameterList = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
@@ -79,7 +79,7 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> createProcedure() {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>          isProcedure = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>          String sql = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          String sql;
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>          <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>              List&lt;String&gt; l = queryParameters();
@@ -120,8 +120,8 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>     }
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> createSelect() {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a>         String qnn = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L116" href="#L116">116</a>         String sql = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>         String qnn;
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         String sql;
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>         <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L118" href="#L118">118</a>             List&lt;String&gt; l = queryParameters();
 <a class="jxr_linenumber" name="L119" href="#L119">119</a>             qnn = SQLConverter.escapeIdentifier(qi.getName(), hsqldb);
@@ -348,7 +348,7 @@
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> 
 <a class="jxr_linenumber" name="L341" href="#L341">341</a>     <em class="jxr_comment">// now something truly naif, yeah! It was about time!!!</em>
 <a class="jxr_linenumber" name="L342" href="#L342">342</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> doParametersEmpiric(Map&lt;String, Integer&gt; psmp, List&lt;String&gt; paramNames, Map&lt;String, String&gt; parem, String sql) {
-<a class="jxr_linenumber" name="L343" href="#L343">343</a>         String psTxt = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         String psTxt;
 <a class="jxr_linenumber" name="L344" href="#L344">344</a>         <strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L345" href="#L345">345</a>             psTxt = convertSQL(sql, paramNames);
 <a class="jxr_linenumber" name="L346" href="#L346">346</a> 

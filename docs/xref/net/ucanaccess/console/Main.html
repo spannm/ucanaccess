@@ -23,65 +23,65 @@
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> java.sql.*;
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> java.util.*;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> java.util.stream.Collectors;
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  @SuppressWarnings(<span class="jxr_string">"java:S106"</span>) <em class="jxr_comment">// interactive console that prints its results to standard output</em>
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="Main" href="../../../net/ucanaccess/console/Main.html#Main">Main</a> {
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String  EXPORT_USAGE  = <span class="jxr_string">"export [--help] [--bom] [-d &lt;delimiter&gt;] [-t &lt;table&gt;] "</span>
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>          + <span class="jxr_string">"[--big_query_schema &lt;pathToSchemaFile&gt;] "</span> + <span class="jxr_string">"[--newlines] &lt;pathToCsv&gt;"</span>;
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String  EXPORT_PROMPT = <span class="jxr_string">"Export command syntax is: "</span> + EXPORT_USAGE;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong>       batchMode     = false;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Connection     conn;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong>              connected     = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> BufferedReader input;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>      <strong class="jxr_keyword">private</strong> String               lastSqlQuery;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>      <strong class="jxr_keyword">public</strong> <a name="Main" href="../../../net/ucanaccess/console/Main.html#Main">Main</a>(Connection conn, BufferedReader input) {
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>          <strong class="jxr_keyword">this</strong>.conn = conn;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>          <strong class="jxr_keyword">this</strong>.input = input;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>      }
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> hasPassword(File f) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>          <strong class="jxr_keyword">try</strong> (Database db = Try.catching(() -&gt; DatabaseBuilder.open(f))
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>              .orElseGet(() -&gt; Try.catching(() -&gt; <strong class="jxr_keyword">new</strong> DatabaseBuilder()
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>                  .withReadOnly(<strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>                  .withFile(f).open()).orThrow())) {
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>              <strong class="jxr_keyword">return</strong> db.getDatabasePassword() != <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>          }
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>      }
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>          BufferedReader input = <strong class="jxr_keyword">new</strong> BufferedReader(<strong class="jxr_keyword">new</strong> InputStreamReader(System.in, Charset.defaultCharset()));
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>          <em class="jxr_comment">// password properties info</em>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>          Properties props = <strong class="jxr_keyword">new</strong> Properties();
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>          File fl = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>          <strong class="jxr_keyword">long</strong> size = 0;
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>          String passwordEntry = <span class="jxr_string">""</span>;
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          String[] commands = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>          <strong class="jxr_keyword">if</strong> (args.length &gt; 0) {
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>              String file = args[0];
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>              <strong class="jxr_keyword">if</strong> (file.endsWith(<span class="jxr_string">".properties"</span>)) {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>                  File pfl = <strong class="jxr_keyword">new</strong> File(args[0]);
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>                  <strong class="jxr_keyword">if</strong> (pfl.exists()) {
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>                      <strong class="jxr_keyword">try</strong> (FileInputStream fis = <strong class="jxr_keyword">new</strong> FileInputStream(pfl)) {
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>                          props.load(fis);
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>                      }
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>                      <em class="jxr_comment">// convert keys to enum name or lower-case</em>
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>                      props = props.stringPropertyNames().stream()
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>                          .collect(Collectors.toMap(
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>                              k -&gt; Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase(Locale.ROOT)),
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>                              props::getProperty, (v1, v2) -&gt; v1, Properties::<strong class="jxr_keyword">new</strong>));
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>                  }
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (file.endsWith(<span class="jxr_string">".accdb"</span>) || file.endsWith(<span class="jxr_string">".mdb"</span>)) {
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>                  fl = <strong class="jxr_keyword">new</strong> File(file);
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>                  size = fl.length();
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>                  <strong class="jxr_keyword">if</strong> (args.length &gt; 1) {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>                      <strong class="jxr_keyword">int</strong> arg = 1;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> java.util.stream.IntStream;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  @SuppressWarnings(<span class="jxr_string">"java:S106"</span>) <em class="jxr_comment">// interactive console that prints its results to standard output</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="Main" href="../../../net/ucanaccess/console/Main.html#Main">Main</a> {
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String  EXPORT_USAGE  = <span class="jxr_string">"export [--help] [--bom] [-d &lt;delimiter&gt;] [-t &lt;table&gt;] "</span>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>          + <span class="jxr_string">"[--big_query_schema &lt;pathToSchemaFile&gt;] "</span> + <span class="jxr_string">"[--newlines] &lt;pathToCsv&gt;"</span>;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String  EXPORT_PROMPT = <span class="jxr_string">"Export command syntax is: "</span> + EXPORT_USAGE;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong>       batchMode     = false;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Connection     conn;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong>              connected     = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> BufferedReader input;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>      <strong class="jxr_keyword">private</strong> String               lastSqlQuery;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>      <strong class="jxr_keyword">public</strong> <a name="Main" href="../../../net/ucanaccess/console/Main.html#Main">Main</a>(Connection conn, BufferedReader input) {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>          <strong class="jxr_keyword">this</strong>.conn = conn;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>          <strong class="jxr_keyword">this</strong>.input = input;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>      }
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> hasPassword(File f) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>          <strong class="jxr_keyword">try</strong> (Database db = Try.catching(() -&gt; DatabaseBuilder.open(f))
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>              .orElseGet(() -&gt; Try.catching(() -&gt; <strong class="jxr_keyword">new</strong> DatabaseBuilder()
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>                  .withReadOnly(<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>                  .withFile(f).open()).orThrow())) {
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>              <strong class="jxr_keyword">return</strong> db.getDatabasePassword() != <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>          }
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          BufferedReader input = <strong class="jxr_keyword">new</strong> BufferedReader(<strong class="jxr_keyword">new</strong> InputStreamReader(System.in, Charset.defaultCharset()));
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>          <em class="jxr_comment">// password properties info</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>          Properties props = <strong class="jxr_keyword">new</strong> Properties();
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          File fl = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          <strong class="jxr_keyword">long</strong> size = 0;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          String passwordEntry = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          String[] commands = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          <strong class="jxr_keyword">if</strong> (args.length &gt; 0) {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>              String file = args[0];
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>              <strong class="jxr_keyword">if</strong> (file.endsWith(<span class="jxr_string">".properties"</span>)) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>                  File pfl = <strong class="jxr_keyword">new</strong> File(args[0]);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>                  <strong class="jxr_keyword">if</strong> (pfl.exists()) {
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>                      <strong class="jxr_keyword">try</strong> (FileInputStream fis = <strong class="jxr_keyword">new</strong> FileInputStream(pfl)) {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>                          props.load(fis);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>                      }
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>                      <em class="jxr_comment">// convert keys to enum name or lower-case</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>                      props = props.stringPropertyNames().stream()
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>                          .collect(Collectors.toMap(
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>                              k -&gt; Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase(Locale.ROOT)),
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>                              props::getProperty, (v1, v2) -&gt; v1, Properties::<strong class="jxr_keyword">new</strong>));
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>                  }
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (file.endsWith(<span class="jxr_string">".accdb"</span>) || file.endsWith(<span class="jxr_string">".mdb"</span>)) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>                  fl = <strong class="jxr_keyword">new</strong> File(file);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>                  size = fl.length();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>                  <strong class="jxr_keyword">if</strong> (args.length &gt; 1) {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>                      <strong class="jxr_keyword">if</strong> (hasPassword(fl)) {
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>                         passwordEntry = args[arg++];
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>                         passwordEntry = args[1];
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>                      } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>                         commands = Arrays.copyOfRange(args, arg++, args.length);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>                         commands = Arrays.copyOfRange(args, 1, args.length);
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>                      }
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>                  }
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>              }
@@ -146,398 +146,696 @@
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">     * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.</em>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L140" href="#L140">140</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> consoleDump(ResultSet resultSet, PrintStream printStream) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L141" href="#L141">141</a>         <strong class="jxr_keyword">new</strong> TableFormat(resultSet).output(printStream);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         consoleDump(resultSet, printStream, false);
 <a class="jxr_linenumber" name="L142" href="#L142">142</a>     }
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 
-<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> executeStatement(String sql) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">try</strong> (Statement st = conn.createStatement()) {
-<a class="jxr_linenumber" name="L146" href="#L146">146</a>             <strong class="jxr_keyword">if</strong> (st.execute(sql)) {
-<a class="jxr_linenumber" name="L147" href="#L147">147</a>                 ResultSet rs = st.getResultSet();
-<a class="jxr_linenumber" name="L148" href="#L148">148</a>                 <strong class="jxr_keyword">if</strong> (rs != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L149" href="#L149">149</a>                     consoleDump(rs, System.out);
-<a class="jxr_linenumber" name="L150" href="#L150">150</a>                     lastSqlQuery = sql;
-<a class="jxr_linenumber" name="L151" href="#L151">151</a>                 } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L152" href="#L152">152</a>                     System.out.println(<span class="jxr_string">"Ok!"</span>);
-<a class="jxr_linenumber" name="L153" href="#L153">153</a>                 }
-<a class="jxr_linenumber" name="L154" href="#L154">154</a>             } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L155" href="#L155">155</a>                 <strong class="jxr_keyword">int</strong> num = st.getUpdateCount();
-<a class="jxr_linenumber" name="L156" href="#L156">156</a>                 prompt(num == 0 ? <span class="jxr_string">"No rows affected"</span> : num + <span class="jxr_string">" row(s) affected"</span>);
-<a class="jxr_linenumber" name="L157" href="#L157">157</a>             }
-<a class="jxr_linenumber" name="L158" href="#L158">158</a>         }
-<a class="jxr_linenumber" name="L159" href="#L159">159</a>     }
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
-<a class="jxr_linenumber" name="L161" href="#L161">161</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> prompt() {
-<a class="jxr_linenumber" name="L162" href="#L162">162</a>         System.out.println();
-<a class="jxr_linenumber" name="L163" href="#L163">163</a>         <strong class="jxr_keyword">if</strong> (!batchMode) {
-<a class="jxr_linenumber" name="L164" href="#L164">164</a>             System.out.print(<span class="jxr_string">"UCanAccess&gt;"</span>);
-<a class="jxr_linenumber" name="L165" href="#L165">165</a>         }
-<a class="jxr_linenumber" name="L166" href="#L166">166</a>     }
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
-<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> prompt(String content) {
-<a class="jxr_linenumber" name="L169" href="#L169">169</a>         <strong class="jxr_keyword">if</strong> (!batchMode) {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a>             System.out.println(<span class="jxr_string">"UCanAccess&gt;"</span> + content);
-<a class="jxr_linenumber" name="L171" href="#L171">171</a>         }
-<a class="jxr_linenumber" name="L172" href="#L172">172</a>     }
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
-<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <strong class="jxr_keyword">private</strong> String readInput() {
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L176" href="#L176">176</a>             String ret = input.readLine();
-<a class="jxr_linenumber" name="L177" href="#L177">177</a>             <strong class="jxr_keyword">if</strong> (ret == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a>                 prompt(<span class="jxr_string">"Ciao!"</span>);
-<a class="jxr_linenumber" name="L179" href="#L179">179</a>                 System.exit(0);
-<a class="jxr_linenumber" name="L180" href="#L180">180</a>             }
-<a class="jxr_linenumber" name="L181" href="#L181">181</a>             <strong class="jxr_keyword">return</strong> ret.trim();
-<a class="jxr_linenumber" name="L182" href="#L182">182</a>         } <strong class="jxr_keyword">catch</strong> (IOException ex) {
-<a class="jxr_linenumber" name="L183" href="#L183">183</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage());
-<a class="jxr_linenumber" name="L184" href="#L184">184</a>         }
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
-<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> sayHello(String version) {
-<a class="jxr_linenumber" name="L188" href="#L188">188</a>         prompt(<span class="jxr_string">""</span>);
-<a class="jxr_linenumber" name="L189" href="#L189">189</a>         System.out.println(<span class="jxr_string">"UCanAccess version "</span> + version);
-<a class="jxr_linenumber" name="L190" href="#L190">190</a>         System.out.println(<span class="jxr_string">"You are connected!! "</span>);
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
-<a class="jxr_linenumber" name="L192" href="#L192">192</a>         System.out.println(<span class="jxr_string">"Type quit to exit "</span>);
-<a class="jxr_linenumber" name="L193" href="#L193">193</a>         System.out.println();
-<a class="jxr_linenumber" name="L194" href="#L194">194</a>         System.out.println(<span class="jxr_string">"Commands end with ; "</span>);
-<a class="jxr_linenumber" name="L195" href="#L195">195</a>         System.out.println();
-<a class="jxr_linenumber" name="L196" href="#L196">196</a>         System.out.println(<span class="jxr_string">"Use:   "</span>);
-<a class="jxr_linenumber" name="L197" href="#L197">197</a>         System.out.printf(<span class="jxr_string">"   %s;%n"</span>, EXPORT_USAGE);
-<a class="jxr_linenumber" name="L198" href="#L198">198</a>         System.out.println(
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>                 <span class="jxr_string">"for exporting the result set from the last executed query or a specific table into a .csv file"</span>);
-<a class="jxr_linenumber" name="L200" href="#L200">200</a>         prompt();
-<a class="jxr_linenumber" name="L201" href="#L201">201</a>     }
-<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
-<a class="jxr_linenumber" name="L203" href="#L203">203</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> printExportHelp() {
-<a class="jxr_linenumber" name="L204" href="#L204">204</a>         System.out.printf(<span class="jxr_string">"Usage: %s;%n"</span>, EXPORT_USAGE);
-<a class="jxr_linenumber" name="L205" href="#L205">205</a>         System.out.println(<span class="jxr_string">"Export the most recent SQL query to the given &lt;pathToCsv&gt; file."</span>);
-<a class="jxr_linenumber" name="L206" href="#L206">206</a>         System.out.println(<span class="jxr_string">"  -d &lt;delimiter&gt; Set the CSV column delimiter (default: ';')."</span>);
-<a class="jxr_linenumber" name="L207" href="#L207">207</a>         System.out.println(<span class="jxr_string">"  -t &lt;table&gt;     Output the &lt;table&gt; instead of the previous query."</span>);
-<a class="jxr_linenumber" name="L208" href="#L208">208</a>         System.out.println(<span class="jxr_string">"  --big_query_schema &lt;schemaFile&gt;  Output the BigQuery schema"</span> + <span class="jxr_string">" to &lt;schemaFile&gt;."</span>);
-<a class="jxr_linenumber" name="L209" href="#L209">209</a>         System.out.println(<span class="jxr_string">"  --bom          Output the UTF-8 byte order mark."</span>);
-<a class="jxr_linenumber" name="L210" href="#L210">210</a>         System.out.println(<span class="jxr_string">"  --newlines     Preserve embedded newlines (&#92;&#92;r, &#92;&#92;n)."</span>);
-<a class="jxr_linenumber" name="L211" href="#L211">211</a>         System.out.println(<span class="jxr_string">"  --help         Print this help message."</span>);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a>         System.out.println(<span class="jxr_string">"Single (') or double (\&quot;) quoted strings are supported."</span>);
-<a class="jxr_linenumber" name="L213" href="#L213">213</a>         System.out.println(<span class="jxr_string">"Backslash (&#92;&#92;) escaping (e.g. &#92;&#92;n, &#92;&#92;t) is enabled within quotes."</span>);
-<a class="jxr_linenumber" name="L214" href="#L214">214</a>         System.out.println(<span class="jxr_string">"Use two backslashes (&#92;&#92;&#92;&#92;) to insert one backslash within quotes "</span>
-<a class="jxr_linenumber" name="L215" href="#L215">215</a>                 + <span class="jxr_string">"(e.g. \&quot;c:&#92;&#92;&#92;&#92;temp&#92;&#92;&#92;&#92;newfile.csv\&quot;)."</span>);
-<a class="jxr_linenumber" name="L216" href="#L216">216</a>     }
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
-<a class="jxr_linenumber" name="L218" href="#L218">218</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> start(String[] commands) {
-<a class="jxr_linenumber" name="L219" href="#L219">219</a>         StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L220" href="#L220">220</a>         <strong class="jxr_keyword">boolean</strong> exit = false;
-<a class="jxr_linenumber" name="L221" href="#L221">221</a>         <strong class="jxr_keyword">while</strong> (connected) {
-<a class="jxr_linenumber" name="L222" href="#L222">222</a>             String userInput;
-<a class="jxr_linenumber" name="L223" href="#L223">223</a>             <strong class="jxr_keyword">if</strong> (commands != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L224" href="#L224">224</a>                 userInput = String.join(<span class="jxr_string">" "</span>, commands);
-<a class="jxr_linenumber" name="L225" href="#L225">225</a>                 <strong class="jxr_keyword">if</strong> (!userInput.endsWith(<span class="jxr_string">";"</span>)) {
-<a class="jxr_linenumber" name="L226" href="#L226">226</a>                    userInput += <span class="jxr_string">";"</span>;
-<a class="jxr_linenumber" name="L227" href="#L227">227</a>                 }
-<a class="jxr_linenumber" name="L228" href="#L228">228</a>                 commands = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L229" href="#L229">229</a>                 exit = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L230" href="#L230">230</a>             } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L231" href="#L231">231</a>                 userInput = readInput();
-<a class="jxr_linenumber" name="L232" href="#L232">232</a>             }
-<a class="jxr_linenumber" name="L233" href="#L233">233</a>             <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"quit"</span>.equalsIgnoreCase(userInput)) {
-<a class="jxr_linenumber" name="L234" href="#L234">234</a>                 connected = false;
-<a class="jxr_linenumber" name="L235" href="#L235">235</a>                 <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L236" href="#L236">236</a>             }
-<a class="jxr_linenumber" name="L237" href="#L237">237</a>             sb.append(<span class="jxr_string">" "</span>).append(userInput);
-<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
-<a class="jxr_linenumber" name="L239" href="#L239">239</a>             <em class="jxr_comment">// If the current userInput ends with ';', then execute the buffered command.</em>
-<a class="jxr_linenumber" name="L240" href="#L240">240</a>             <strong class="jxr_keyword">if</strong> (userInput.endsWith(<span class="jxr_string">";"</span>)) {
-<a class="jxr_linenumber" name="L241" href="#L241">241</a>                 String cmd = sb.substring(0, sb.length() - 1).trim();
-<a class="jxr_linenumber" name="L242" href="#L242">242</a>                 <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L243" href="#L243">243</a>                     <strong class="jxr_keyword">if</strong> (cmd.toLowerCase(Locale.ROOT).startsWith(<span class="jxr_string">"export "</span>)) {
-<a class="jxr_linenumber" name="L244" href="#L244">244</a>                         executeExport(cmd);
-<a class="jxr_linenumber" name="L245" href="#L245">245</a>                     } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L246" href="#L246">246</a>                         executeStatement(cmd);
-<a class="jxr_linenumber" name="L247" href="#L247">247</a>                     }
-<a class="jxr_linenumber" name="L248" href="#L248">248</a>                 } <strong class="jxr_keyword">catch</strong> (Exception ex) {
-<a class="jxr_linenumber" name="L249" href="#L249">249</a>                     prompt(ex.getMessage());
-<a class="jxr_linenumber" name="L250" href="#L250">250</a>                 }
-<a class="jxr_linenumber" name="L251" href="#L251">251</a>                 <strong class="jxr_keyword">if</strong> (exit) {
-<a class="jxr_linenumber" name="L252" href="#L252">252</a>                    connected = false;
-<a class="jxr_linenumber" name="L253" href="#L253">253</a>                    <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L254" href="#L254">254</a>                 }
-<a class="jxr_linenumber" name="L255" href="#L255">255</a>                 sb.setLength(0);
-<a class="jxr_linenumber" name="L256" href="#L256">256</a>                 prompt();
-<a class="jxr_linenumber" name="L257" href="#L257">257</a>             }
-<a class="jxr_linenumber" name="L258" href="#L258">258</a>         }
-<a class="jxr_linenumber" name="L259" href="#L259">259</a>         System.out.println(<span class="jxr_string">"Cheers! Thank you for using the UCanAccess JDBC Driver."</span>);
-<a class="jxr_linenumber" name="L260" href="#L260">260</a>     }
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
-<a class="jxr_linenumber" name="L262" href="#L262">262</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">     * Parse the {@code cmd} to handle command line flags of the form: "export [-d delimiter] [-t table] pathToCsv". For</em>
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">     * example:</em>
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
-<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">     * export -d , -t License License.csv</em>
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">     *</em>
-<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">     * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The</em>
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">     * {@code -t License} option dumps the {@code License} table using the SQL statement "SELECT * FROM [License]".</em>
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L273" href="#L273">273</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> executeExport(String cmd) <strong class="jxr_keyword">throws</strong> SQLException, IOException {
-<a class="jxr_linenumber" name="L274" href="#L274">274</a>         List&lt;String&gt; tokens = tokenize(cmd);
-<a class="jxr_linenumber" name="L275" href="#L275">275</a> 
-<a class="jxr_linenumber" name="L276" href="#L276">276</a>         Exporter.Builder exporterBuilder = <strong class="jxr_keyword">new</strong> Exporter.Builder();
-<a class="jxr_linenumber" name="L277" href="#L277">277</a>         String table = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L278" href="#L278">278</a>         String schemaFileName = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L279" href="#L279">279</a> 
-<a class="jxr_linenumber" name="L280" href="#L280">280</a>         <em class="jxr_comment">// Process the command line flags.</em>
-<a class="jxr_linenumber" name="L281" href="#L281">281</a>         <strong class="jxr_keyword">int</strong> i = 1; <em class="jxr_comment">// skip the first token which will always be "export"</em>
-<a class="jxr_linenumber" name="L282" href="#L282">282</a>         <strong class="jxr_keyword">for</strong> (; i &lt; tokens.size(); i++) {
-<a class="jxr_linenumber" name="L283" href="#L283">283</a>             String arg = tokens.get(i);
-<a class="jxr_linenumber" name="L284" href="#L284">284</a>             <strong class="jxr_keyword">if</strong> (!arg.startsWith(<span class="jxr_string">"-"</span>)) {
-<a class="jxr_linenumber" name="L285" href="#L285">285</a>                 <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L286" href="#L286">286</a>             }
-<a class="jxr_linenumber" name="L287" href="#L287">287</a>             <strong class="jxr_keyword">switch</strong> (arg) {
-<a class="jxr_linenumber" name="L288" href="#L288">288</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"-d"</span>:
-<a class="jxr_linenumber" name="L289" href="#L289">289</a>                     i++;
-<a class="jxr_linenumber" name="L290" href="#L290">290</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
-<a class="jxr_linenumber" name="L291" href="#L291">291</a>                         prompt(<span class="jxr_string">"Missing parameter for -d flag"</span>);
-<a class="jxr_linenumber" name="L292" href="#L292">292</a>                         prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L293" href="#L293">293</a>                         <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L294" href="#L294">294</a>                     }
-<a class="jxr_linenumber" name="L295" href="#L295">295</a>                     exporterBuilder.withDelimiter(tokens.get(i));
-<a class="jxr_linenumber" name="L296" href="#L296">296</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L297" href="#L297">297</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"-t"</span>:
-<a class="jxr_linenumber" name="L298" href="#L298">298</a>                     i++;
-<a class="jxr_linenumber" name="L299" href="#L299">299</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
-<a class="jxr_linenumber" name="L300" href="#L300">300</a>                         prompt(<span class="jxr_string">"Missing parameter for -t flag"</span>);
-<a class="jxr_linenumber" name="L301" href="#L301">301</a>                         prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L302" href="#L302">302</a>                         <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L303" href="#L303">303</a>                     }
-<a class="jxr_linenumber" name="L304" href="#L304">304</a>                     table = tokens.get(i);
-<a class="jxr_linenumber" name="L305" href="#L305">305</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L306" href="#L306">306</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--bom"</span>:
-<a class="jxr_linenumber" name="L307" href="#L307">307</a>                     exporterBuilder.includeBom(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">     * Prints the ResultSet {@code resultSet} in a format suitable for the terminal console given by {@code printStream}.</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">     * @param resultSet         result set to print</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">     * @param printStream       stream to print to</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">     * @param hideEmptyColumns  whether to leave out the columns without a value in any row, they are named below the table</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">     * @since 5.3.1</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> consoleDump(ResultSet resultSet, PrintStream printStream, <strong class="jxr_keyword">boolean</strong> hideEmptyColumns) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         <strong class="jxr_keyword">new</strong> TableFormat(resultSet).hideEmptyColumns(hideEmptyColumns).output(printStream);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     }
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> executeStatement(String sql) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <strong class="jxr_keyword">try</strong> (Statement st = conn.createStatement()) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>             <strong class="jxr_keyword">if</strong> (st.execute(sql)) {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>                 ResultSet rs = st.getResultSet();
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>                 <strong class="jxr_keyword">if</strong> (rs != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>                     consoleDump(rs, System.out);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>                     lastSqlQuery = sql;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>                     System.out.println(<span class="jxr_string">"Ok!"</span>);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>                 }
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>                 <strong class="jxr_keyword">int</strong> num = st.getUpdateCount();
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>                 prompt(num == 0 ? <span class="jxr_string">"No rows affected"</span> : num + <span class="jxr_string">" row(s) affected"</span>);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>             }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         }
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     }
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> prompt() {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         System.out.println();
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">if</strong> (!batchMode) {
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>             System.out.print(<span class="jxr_string">"UCanAccess&gt;"</span>);
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         }
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     }
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> prompt(String content) {
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         <strong class="jxr_keyword">if</strong> (!batchMode) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>             System.out.println(<span class="jxr_string">"UCanAccess&gt;"</span> + content);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         }
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     }
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     <strong class="jxr_keyword">private</strong> String readInput() {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>             String ret = input.readLine();
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>             <strong class="jxr_keyword">if</strong> (ret == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                 prompt(<span class="jxr_string">"Ciao!"</span>);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                 System.exit(0);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>             }
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>             <strong class="jxr_keyword">return</strong> ret.trim();
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>         } <strong class="jxr_keyword">catch</strong> (IOException ex) {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage(), ex);
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         }
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     }
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> sayHello(String version) {
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         prompt(<span class="jxr_string">""</span>);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         System.out.println(<span class="jxr_string">"UCanAccess version "</span> + version);
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>         System.out.println(<span class="jxr_string">"You are connected!! "</span>);
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>         System.out.println(<span class="jxr_string">"Type quit to exit "</span>);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>         System.out.println();
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>         System.out.println(<span class="jxr_string">"Commands end with ; "</span>);
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         System.out.println();
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         System.out.println(<span class="jxr_string">"Use:   "</span>);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>         System.out.printf(<span class="jxr_string">"   %s;%n"</span>, EXPORT_USAGE);
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>         System.out.println(
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>                 <span class="jxr_string">"for exporting the result set from the last executed query or a specific table into a .csv file"</span>);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         prompt();
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     }
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> printExportHelp() {
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         System.out.printf(<span class="jxr_string">"Usage: %s;%n"</span>, EXPORT_USAGE);
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>         System.out.println(<span class="jxr_string">"Export the most recent SQL query to the given &lt;pathToCsv&gt; file."</span>);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         System.out.println(<span class="jxr_string">"  -d &lt;delimiter&gt; Set the CSV column delimiter (default: ';')."</span>);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         System.out.println(<span class="jxr_string">"  -t &lt;table&gt;     Output the &lt;table&gt; instead of the previous query."</span>);
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         System.out.println(<span class="jxr_string">"  --big_query_schema &lt;schemaFile&gt;  Output the BigQuery schema"</span> + <span class="jxr_string">" to &lt;schemaFile&gt;."</span>);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         System.out.println(<span class="jxr_string">"  --bom          Output the UTF-8 byte order mark."</span>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         System.out.println(<span class="jxr_string">"  --newlines     Preserve embedded newlines (&#92;&#92;r, &#92;&#92;n)."</span>);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         System.out.println(<span class="jxr_string">"  --help         Print this help message."</span>);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         System.out.println(<span class="jxr_string">"Single (') or double (\&quot;) quoted strings are supported."</span>);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         System.out.println(<span class="jxr_string">"Backslash (&#92;&#92;) escaping (e.g. &#92;&#92;n, &#92;&#92;t) is enabled within quotes."</span>);
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         System.out.println(<span class="jxr_string">"Use two backslashes (&#92;&#92;&#92;&#92;) to insert one backslash within quotes "</span>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>                 + <span class="jxr_string">"(e.g. \&quot;c:&#92;&#92;&#92;&#92;temp&#92;&#92;&#92;&#92;newfile.csv\&quot;)."</span>);
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     }
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> start(String[] commands) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>         <strong class="jxr_keyword">boolean</strong> exit = false;
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         <strong class="jxr_keyword">while</strong> (connected) {
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>             String userInput;
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>             <strong class="jxr_keyword">if</strong> (commands != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>                 userInput = String.join(<span class="jxr_string">" "</span>, commands);
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>                 <strong class="jxr_keyword">if</strong> (!userInput.endsWith(<span class="jxr_string">";"</span>)) {
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>                    userInput += <span class="jxr_string">";"</span>;
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>                 }
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>                 commands = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>                 exit = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>                 userInput = readInput();
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>             }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>             <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"quit"</span>.equalsIgnoreCase(userInput)) {
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>                 connected = false;
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>             }
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>             sb.append(<span class="jxr_string">" "</span>).append(userInput);
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>             <em class="jxr_comment">// If the current userInput ends with ';', then execute the buffered command.</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>             <strong class="jxr_keyword">if</strong> (userInput.endsWith(<span class="jxr_string">";"</span>)) {
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>                 String cmd = sb.substring(0, sb.length() - 1).trim();
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>                     <strong class="jxr_keyword">if</strong> (cmd.toLowerCase(Locale.ROOT).startsWith(<span class="jxr_string">"export "</span>)) {
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>                         executeExport(cmd);
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>                     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>                         executeStatement(cmd);
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>                     }
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>                 } <strong class="jxr_keyword">catch</strong> (Exception ex) {
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>                     prompt(ex.getMessage());
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>                 }
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>                 <strong class="jxr_keyword">if</strong> (exit) {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>                    connected = false;
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>                    <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>                 }
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>                 sb.setLength(0);
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>                 prompt();
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>             }
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         }
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         System.out.println(<span class="jxr_string">"Cheers! Thank you for using the UCanAccess JDBC Driver."</span>);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>     }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">     * Parse the {@code cmd} to handle command line flags of the form: "export [-d delimiter] [-t table] pathToCsv". For</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">     * example:</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">     * export -d , -t License License.csv</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">     * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">     * {@code -t License} option dumps the {@code License} table using the SQL statement "SELECT * FROM [License]".</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> executeExport(String cmd) <strong class="jxr_keyword">throws</strong> SQLException, IOException {
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>         List&lt;String&gt; tokens = tokenize(cmd);
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>         Exporter.Builder exporterBuilder = <strong class="jxr_keyword">new</strong> Exporter.Builder();
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>         String table = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>         String schemaFileName = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>         <em class="jxr_comment">// Process the command line flags.</em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         <strong class="jxr_keyword">int</strong> i = 1; <em class="jxr_comment">// skip the first token which will always be "export"</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         <strong class="jxr_keyword">for</strong> (; i &lt; tokens.size(); i++) {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>             String arg = tokens.get(i);
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             <strong class="jxr_keyword">if</strong> (!arg.startsWith(<span class="jxr_string">"-"</span>)) {
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>             }
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>             <strong class="jxr_keyword">switch</strong> (arg) {
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"-d"</span>:
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>                     i++;
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>                         prompt(<span class="jxr_string">"Missing parameter for -d flag"</span>);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>                         prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>                         <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>                     }
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>                     exporterBuilder.withDelimiter(tokens.get(i));
 <a class="jxr_linenumber" name="L308" href="#L308">308</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L309" href="#L309">309</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--newlines"</span>:
-<a class="jxr_linenumber" name="L310" href="#L310">310</a>                     exporterBuilder.preserveNewlines(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L311" href="#L311">311</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L312" href="#L312">312</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--big_query_schema"</span>:
-<a class="jxr_linenumber" name="L313" href="#L313">313</a>                     i++;
-<a class="jxr_linenumber" name="L314" href="#L314">314</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
-<a class="jxr_linenumber" name="L315" href="#L315">315</a>                         prompt(<span class="jxr_string">"Missing parameter for --big_query_schema flag"</span>);
-<a class="jxr_linenumber" name="L316" href="#L316">316</a>                         prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L317" href="#L317">317</a>                         <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L318" href="#L318">318</a>                     }
-<a class="jxr_linenumber" name="L319" href="#L319">319</a>                     schemaFileName = tokens.get(i);
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"-t"</span>:
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>                     i++;
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>                         prompt(<span class="jxr_string">"Missing parameter for -t flag"</span>);
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>                         prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>                         <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>                     }
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>                     table = tokens.get(i);
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--bom"</span>:
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>                     exporterBuilder.includeBom(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L320" href="#L320">320</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L321" href="#L321">321</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--help"</span>:
-<a class="jxr_linenumber" name="L322" href="#L322">322</a>                     printExportHelp();
-<a class="jxr_linenumber" name="L323" href="#L323">323</a>                     <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L324" href="#L324">324</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--"</span>:
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--newlines"</span>:
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>                     exporterBuilder.preserveNewlines(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--big_query_schema"</span>:
 <a class="jxr_linenumber" name="L325" href="#L325">325</a>                     i++;
-<a class="jxr_linenumber" name="L326" href="#L326">326</a>                     <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L327" href="#L327">327</a>                 <strong class="jxr_keyword">default</strong>:
-<a class="jxr_linenumber" name="L328" href="#L328">328</a>                     prompt(<span class="jxr_string">"Unknown flag "</span> + arg);
-<a class="jxr_linenumber" name="L329" href="#L329">329</a>                     prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L330" href="#L330">330</a>                     <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L331" href="#L331">331</a>             }
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 
-<a class="jxr_linenumber" name="L333" href="#L333">333</a>         }
-<a class="jxr_linenumber" name="L334" href="#L334">334</a>         <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
-<a class="jxr_linenumber" name="L335" href="#L335">335</a>             prompt(<span class="jxr_string">"File name not found"</span>);
-<a class="jxr_linenumber" name="L336" href="#L336">336</a>             prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L337" href="#L337">337</a>             <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L338" href="#L338">338</a>         }
-<a class="jxr_linenumber" name="L339" href="#L339">339</a>         <strong class="jxr_keyword">if</strong> (i &lt; tokens.size() - 1) {
-<a class="jxr_linenumber" name="L340" href="#L340">340</a>             prompt(<span class="jxr_string">"Too many arguments"</span>);
-<a class="jxr_linenumber" name="L341" href="#L341">341</a>             prompt(EXPORT_PROMPT);
-<a class="jxr_linenumber" name="L342" href="#L342">342</a>             <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L343" href="#L343">343</a>         }
-<a class="jxr_linenumber" name="L344" href="#L344">344</a>         String csvFileName = tokens.get(i);
-<a class="jxr_linenumber" name="L345" href="#L345">345</a>         <a name="Exporter" href="../../../net/ucanaccess/console/Exporter.html#Exporter">Exporter</a> exporter = exporterBuilder.build();
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 
-<a class="jxr_linenumber" name="L347" href="#L347">347</a>         <em class="jxr_comment">// Determine the SQL statement to execute. If the '-t table' option is given</em>
-<a class="jxr_linenumber" name="L348" href="#L348">348</a>         <em class="jxr_comment">// run a 'select * from [table]' query to export the table, instead of</em>
-<a class="jxr_linenumber" name="L349" href="#L349">349</a>         <em class="jxr_comment">// executing the 'lastSqlQuery'.</em>
-<a class="jxr_linenumber" name="L350" href="#L350">350</a>         String sqlQuery;
-<a class="jxr_linenumber" name="L351" href="#L351">351</a>         <strong class="jxr_keyword">if</strong> (table != <strong class="jxr_keyword">null</strong> &amp;&amp; !table.isEmpty()) {
-<a class="jxr_linenumber" name="L352" href="#L352">352</a>             sqlQuery = Sql.of(SELECT, <span class="jxr_string">"*"</span>, FROM, <span class="jxr_string">"["</span> + table + <span class="jxr_string">"]"</span>).toString();
-<a class="jxr_linenumber" name="L353" href="#L353">353</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (lastSqlQuery != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L354" href="#L354">354</a>             sqlQuery = lastSqlQuery;
-<a class="jxr_linenumber" name="L355" href="#L355">355</a>         } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L356" href="#L356">356</a>             prompt(<span class="jxr_string">"You must first execute an SQL query, then export the ResultSet!"</span>);
-<a class="jxr_linenumber" name="L357" href="#L357">357</a>             <strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L358" href="#L358">358</a>         }
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 
-<a class="jxr_linenumber" name="L360" href="#L360">360</a>         exportCsvAndSchema(sqlQuery, csvFileName, schemaFileName, exporter);
-<a class="jxr_linenumber" name="L361" href="#L361">361</a>     }
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 
-<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">     * Runs the given{@code sqlQuery} and exports the CSV to {@code csvFileName}. and the BigQuery schema to</em>
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">     * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export</em>
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">     * operations.</em>
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L368" href="#L368">368</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> exportCsvAndSchema(CharSequence sqlQuery, String csvFileName, String schemaFileName, <a name="Exporter" href="../../../net/ucanaccess/console/Exporter.html#Exporter">Exporter</a> exporter) <strong class="jxr_keyword">throws</strong> SQLException, IOException {
-<a class="jxr_linenumber" name="L369" href="#L369">369</a>         Objects.requireNonNull(sqlQuery, <span class="jxr_string">"Sql required"</span>);
-<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">try</strong> (Statement statement = conn.createStatement()) {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a>             ResultSet rs = statement.executeQuery(sqlQuery.toString());
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 
-<a class="jxr_linenumber" name="L373" href="#L373">373</a>             <em class="jxr_comment">// output the csvFile</em>
-<a class="jxr_linenumber" name="L374" href="#L374">374</a>             File csvFile = <strong class="jxr_keyword">new</strong> File(csvFileName);
-<a class="jxr_linenumber" name="L375" href="#L375">375</a>             <strong class="jxr_keyword">try</strong> (PrintStream out = <strong class="jxr_keyword">new</strong> PrintStream(csvFile)) {
-<a class="jxr_linenumber" name="L376" href="#L376">376</a>                 exporter.dumpCsv(rs, out);
-<a class="jxr_linenumber" name="L377" href="#L377">377</a>                 out.flush();
-<a class="jxr_linenumber" name="L378" href="#L378">378</a>             }
-<a class="jxr_linenumber" name="L379" href="#L379">379</a>             prompt(<span class="jxr_string">"Created CSV file: "</span> + csvFile.getAbsolutePath());
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 
-<a class="jxr_linenumber" name="L381" href="#L381">381</a>             <em class="jxr_comment">// output the schema file if requested</em>
-<a class="jxr_linenumber" name="L382" href="#L382">382</a>             <strong class="jxr_keyword">if</strong> (schemaFileName != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L383" href="#L383">383</a>                 File schemaFile = <strong class="jxr_keyword">new</strong> File(schemaFileName);
-<a class="jxr_linenumber" name="L384" href="#L384">384</a>                 <strong class="jxr_keyword">try</strong> (PrintStream out = <strong class="jxr_keyword">new</strong> PrintStream(csvFile)) {
-<a class="jxr_linenumber" name="L385" href="#L385">385</a>                     exporter.dumpSchema(rs, out);
-<a class="jxr_linenumber" name="L386" href="#L386">386</a>                     out.flush();
-<a class="jxr_linenumber" name="L387" href="#L387">387</a>                 }
-<a class="jxr_linenumber" name="L388" href="#L388">388</a>                 prompt(<span class="jxr_string">"Created schema file: "</span> + schemaFile.getAbsolutePath());
-<a class="jxr_linenumber" name="L389" href="#L389">389</a>             }
-<a class="jxr_linenumber" name="L390" href="#L390">390</a>         }
-<a class="jxr_linenumber" name="L391" href="#L391">391</a>     }
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>                     <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>                         prompt(<span class="jxr_string">"Missing parameter for --big_query_schema flag"</span>);
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>                         prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>                         <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                     }
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>                     schemaFileName = tokens.get(i);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--help"</span>:
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>                     printExportHelp();
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>                     <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>                 <strong class="jxr_keyword">case</strong> <span class="jxr_string">"--"</span>:
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>                     i++;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>                 <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>                     prompt(<span class="jxr_string">"Unknown flag "</span> + arg);
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>                     prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>                     <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>             }
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>         }
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>         <strong class="jxr_keyword">if</strong> (i &gt;= tokens.size()) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>             prompt(<span class="jxr_string">"File name not found"</span>);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>             prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>         }
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>         <strong class="jxr_keyword">if</strong> (i &lt; tokens.size() - 1) {
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>             prompt(<span class="jxr_string">"Too many arguments"</span>);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>             prompt(EXPORT_PROMPT);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>         }
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>         String csvFileName = tokens.get(i);
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>         <a name="Exporter" href="../../../net/ucanaccess/console/Exporter.html#Exporter">Exporter</a> exporter = exporterBuilder.build();
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         <em class="jxr_comment">// Determine the SQL statement to execute. If the '-t table' option is given</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>         <em class="jxr_comment">// run a 'select * from [table]' query to export the table, instead of</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>         <em class="jxr_comment">// executing the 'lastSqlQuery'.</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>         String sqlQuery;
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>         <strong class="jxr_keyword">if</strong> (table != <strong class="jxr_keyword">null</strong> &amp;&amp; !table.isEmpty()) {
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>             sqlQuery = Sql.of(SELECT, <span class="jxr_string">"*"</span>, FROM, <span class="jxr_string">"["</span> + table + <span class="jxr_string">"]"</span>).toString();
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (lastSqlQuery != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>             sqlQuery = lastSqlQuery;
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>             prompt(<span class="jxr_string">"You must first execute an SQL query, then export the ResultSet!"</span>);
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         }
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>         exportCsvAndSchema(sqlQuery, csvFileName, schemaFileName, exporter);
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">     * Runs the given{@code sqlQuery} and exports the CSV to {@code csvFileName}. and the BigQuery schema to</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">     * {@code schemaFileName} (if given). Uses the given {@code exporter} to perform the actual CSV and schema export</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">     * operations.</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> exportCsvAndSchema(CharSequence sqlQuery, String csvFileName, String schemaFileName, <a name="Exporter" href="../../../net/ucanaccess/console/Exporter.html#Exporter">Exporter</a> exporter) <strong class="jxr_keyword">throws</strong> SQLException, IOException {
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>         Objects.requireNonNull(sqlQuery, <span class="jxr_string">"Sql required"</span>);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>         <strong class="jxr_keyword">try</strong> (Statement statement = conn.createStatement()) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>             ResultSet rs = statement.executeQuery(sqlQuery.toString());
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>             <em class="jxr_comment">// output the csvFile</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>             File csvFile = <strong class="jxr_keyword">new</strong> File(csvFileName);
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>             <strong class="jxr_keyword">try</strong> (PrintStream out = <strong class="jxr_keyword">new</strong> PrintStream(csvFile)) {
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>                 exporter.dumpCsv(rs, out);
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>                 out.flush();
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>             }
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>             prompt(<span class="jxr_string">"Created CSV file: "</span> + csvFile.getAbsolutePath());
 <a class="jxr_linenumber" name="L392" href="#L392">392</a> 
-<a class="jxr_linenumber" name="L393" href="#L393">393</a>     <strong class="jxr_keyword">static</strong> List&lt;String&gt; tokenize(String s) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L394" href="#L394">394</a>         <em class="jxr_comment">// Create a tokenizer that creates tokens delimited by whitespace. Also handles single and</em>
-<a class="jxr_linenumber" name="L395" href="#L395">395</a>         <em class="jxr_comment">// double quotes. Does not support comments or numbers. All characters between U+0000</em>
-<a class="jxr_linenumber" name="L396" href="#L396">396</a>         <em class="jxr_comment">// U+0020 are considered to be whitespace characters (this includes \r, \n, and \t).</em>
-<a class="jxr_linenumber" name="L397" href="#L397">397</a>         <em class="jxr_comment">// All characters from U+0021 to U+00FF are normal word characters.</em>
-<a class="jxr_linenumber" name="L398" href="#L398">398</a>         <em class="jxr_comment">// Internally, StreamTokenzier treats all characters &gt;= U+0100 to be a normal</em>
-<a class="jxr_linenumber" name="L399" href="#L399">399</a>         <em class="jxr_comment">// word character, and unfortunately, this cannot be changed.</em>
-<a class="jxr_linenumber" name="L400" href="#L400">400</a>         <em class="jxr_comment">//</em>
-<a class="jxr_linenumber" name="L401" href="#L401">401</a>         <em class="jxr_comment">// Non-breaking-space character U+00A0 is currently treated as a normal character,</em>
-<a class="jxr_linenumber" name="L402" href="#L402">402</a>         <em class="jxr_comment">// but I could be convinced that it should be considered a whitespace.</em>
-<a class="jxr_linenumber" name="L403" href="#L403">403</a>         StreamTokenizer st = <strong class="jxr_keyword">new</strong> StreamTokenizer(<strong class="jxr_keyword">new</strong> StringReader(s));
-<a class="jxr_linenumber" name="L404" href="#L404">404</a>         st.resetSyntax();
-<a class="jxr_linenumber" name="L405" href="#L405">405</a>         st.wordChars(33, 255);
-<a class="jxr_linenumber" name="L406" href="#L406">406</a>         st.whitespaceChars(0, ' ');
-<a class="jxr_linenumber" name="L407" href="#L407">407</a>         st.quoteChar('&quot;');
-<a class="jxr_linenumber" name="L408" href="#L408">408</a>         st.quoteChar('\'');
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
-<a class="jxr_linenumber" name="L410" href="#L410">410</a>         List&lt;String&gt; tokens = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L411" href="#L411">411</a>         <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
-<a class="jxr_linenumber" name="L412" href="#L412">412</a>             <strong class="jxr_keyword">int</strong> ttype = st.nextToken();
-<a class="jxr_linenumber" name="L413" href="#L413">413</a>             <strong class="jxr_keyword">if</strong> (ttype == StreamTokenizer.TT_EOF) {
-<a class="jxr_linenumber" name="L414" href="#L414">414</a>                 <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L415" href="#L415">415</a>             } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ttype == StreamTokenizer.TT_WORD) {
-<a class="jxr_linenumber" name="L416" href="#L416">416</a>                 tokens.add(st.sval);
-<a class="jxr_linenumber" name="L417" href="#L417">417</a>             } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ttype == '\'' || ttype == '&quot;') {
-<a class="jxr_linenumber" name="L418" href="#L418">418</a>                 tokens.add(st.sval);
-<a class="jxr_linenumber" name="L419" href="#L419">419</a>             }
-<a class="jxr_linenumber" name="L420" href="#L420">420</a>         }
-<a class="jxr_linenumber" name="L421" href="#L421">421</a>         <strong class="jxr_keyword">return</strong> tokens;
-<a class="jxr_linenumber" name="L422" href="#L422">422</a>     }
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
-<a class="jxr_linenumber" name="L424" href="#L424">424</a>     <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">     * Helper to produce table-formatted output of a JDBC resultset.</em>
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">     * @author Markus Spann</em>
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L428" href="#L428">428</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> TableFormat {
-<a class="jxr_linenumber" name="L429" href="#L429">429</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;       NUMERIC_JDBC_TYPES =
-<a class="jxr_linenumber" name="L430" href="#L430">430</a>             List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
-<a class="jxr_linenumber" name="L431" href="#L431">431</a>                 Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
-<a class="jxr_linenumber" name="L432" href="#L432">432</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>         MAX_COL_WIDTH      = 50;
-<a class="jxr_linenumber" name="L433" href="#L433">433</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;String&gt;       colNames;
-<a class="jxr_linenumber" name="L434" href="#L434">434</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;      colWidths;
-<a class="jxr_linenumber" name="L435" href="#L435">435</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;      colTypes;
-<a class="jxr_linenumber" name="L436" href="#L436">436</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;List&lt;String&gt;&gt; records            = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 
-<a class="jxr_linenumber" name="L438" href="#L438">438</a>         TableFormat(ResultSet resultSet) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L439" href="#L439">439</a>             <strong class="jxr_keyword">this</strong>(resultSet, -1);
-<a class="jxr_linenumber" name="L440" href="#L440">440</a>         }
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 
-<a class="jxr_linenumber" name="L442" href="#L442">442</a>         TableFormat(ResultSet resultSet, <strong class="jxr_keyword">int</strong> maxRows) <strong class="jxr_keyword">throws</strong> SQLException {
-<a class="jxr_linenumber" name="L443" href="#L443">443</a>             ResultSetMetaData meta = resultSet.getMetaData();
-<a class="jxr_linenumber" name="L444" href="#L444">444</a>             <strong class="jxr_keyword">int</strong> columnCount = meta.getColumnCount();
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 
-<a class="jxr_linenumber" name="L446" href="#L446">446</a>             colNames = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
-<a class="jxr_linenumber" name="L447" href="#L447">447</a>             colWidths = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
-<a class="jxr_linenumber" name="L448" href="#L448">448</a>             colTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
-<a class="jxr_linenumber" name="L449" href="#L449">449</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> col = 1; col &lt;= columnCount; ++col) {
-<a class="jxr_linenumber" name="L450" href="#L450">450</a>                 String colLabel = meta.getColumnLabel(col);
-<a class="jxr_linenumber" name="L451" href="#L451">451</a>                 colNames.add(colLabel);
-<a class="jxr_linenumber" name="L452" href="#L452">452</a>                 colWidths.add(Math.min(colLabel.length(), MAX_COL_WIDTH));
-<a class="jxr_linenumber" name="L453" href="#L453">453</a>                 colTypes.add(meta.getColumnType(col));
-<a class="jxr_linenumber" name="L454" href="#L454">454</a>             }
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
-<a class="jxr_linenumber" name="L456" href="#L456">456</a>             records.add(colNames); <em class="jxr_comment">// header record</em>
-<a class="jxr_linenumber" name="L457" href="#L457">457</a>             <strong class="jxr_keyword">while</strong> (resultSet.next() &amp;&amp; (maxRows &lt; 0 || maxRows &lt; records.size())) {
-<a class="jxr_linenumber" name="L458" href="#L458">458</a>                 List&lt;String&gt; rec = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L459" href="#L459">459</a>                 records.add(rec);
-<a class="jxr_linenumber" name="L460" href="#L460">460</a>                 <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> col = 1; col &lt;= columnCount; ++col) {
-<a class="jxr_linenumber" name="L461" href="#L461">461</a>                     Object obj = resultSet.getObject(col);
-<a class="jxr_linenumber" name="L462" href="#L462">462</a>                     <strong class="jxr_keyword">if</strong> (obj != <strong class="jxr_keyword">null</strong> &amp;&amp; obj.getClass().isArray() &amp;&amp; !obj.getClass().getComponentType().isPrimitive()) {
-<a class="jxr_linenumber" name="L463" href="#L463">463</a>                         obj = Arrays.toString((Object[]) obj);
-<a class="jxr_linenumber" name="L464" href="#L464">464</a>                     }
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 
-<a class="jxr_linenumber" name="L466" href="#L466">466</a>                     String s = obj == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">""</span> : obj.toString();
-<a class="jxr_linenumber" name="L467" href="#L467">467</a>                     rec.add(s);
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 
-<a class="jxr_linenumber" name="L469" href="#L469">469</a>                     <strong class="jxr_keyword">int</strong> colWidth = colWidths.get(col - 1);
-<a class="jxr_linenumber" name="L470" href="#L470">470</a>                     <strong class="jxr_keyword">if</strong> (colWidth &lt; s.length() &amp;&amp; colWidth &lt; MAX_COL_WIDTH) {
-<a class="jxr_linenumber" name="L471" href="#L471">471</a>                         colWidths.set(col - 1, s.length());
-<a class="jxr_linenumber" name="L472" href="#L472">472</a>                     }
-<a class="jxr_linenumber" name="L473" href="#L473">473</a>                 }
-<a class="jxr_linenumber" name="L474" href="#L474">474</a>             }
-<a class="jxr_linenumber" name="L475" href="#L475">475</a>         }
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 
-<a class="jxr_linenumber" name="L477" href="#L477">477</a>         <strong class="jxr_keyword">void</strong> output(PrintStream printStream) {
-<a class="jxr_linenumber" name="L478" href="#L478">478</a>             String interline = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L479" href="#L479">479</a>             String divider = <span class="jxr_string">"|"</span>;
-<a class="jxr_linenumber" name="L480" href="#L480">480</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> idx = 0; idx &lt; records.size(); idx++) {
-<a class="jxr_linenumber" name="L481" href="#L481">481</a>                 List&lt;String&gt; rec = records.get(idx);
-<a class="jxr_linenumber" name="L482" href="#L482">482</a>                 String line = <span class="jxr_string">" "</span> + joinWithLen(<span class="jxr_string">" "</span> + divider + <span class="jxr_string">" "</span>, rec) + <span class="jxr_string">" "</span>;
-<a class="jxr_linenumber" name="L483" href="#L483">483</a>                 <strong class="jxr_keyword">if</strong> (idx == 0) { <em class="jxr_comment">// index 0 holds header</em>
-<a class="jxr_linenumber" name="L484" href="#L484">484</a>                     interline = line.replaceAll(<span class="jxr_string">"[^&#92;&#92;"</span> + divider + <span class="jxr_string">"]"</span>, <span class="jxr_string">"-"</span>).replace(divider, <span class="jxr_string">"+"</span>);
-<a class="jxr_linenumber" name="L485" href="#L485">485</a>                     interline = <span class="jxr_string">"·"</span> + interline + <span class="jxr_string">"·"</span>;
-<a class="jxr_linenumber" name="L486" href="#L486">486</a>                     printStream.println();
-<a class="jxr_linenumber" name="L487" href="#L487">487</a>                     printStream.println(interline);
-<a class="jxr_linenumber" name="L488" href="#L488">488</a>                     printStream.println(divider + line + divider);
-<a class="jxr_linenumber" name="L489" href="#L489">489</a>                     printStream.println(interline);
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 
-<a class="jxr_linenumber" name="L491" href="#L491">491</a>                 } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L492" href="#L492">492</a>                     printStream.println(divider + line + divider);
-<a class="jxr_linenumber" name="L493" href="#L493">493</a>                 }
-<a class="jxr_linenumber" name="L494" href="#L494">494</a>             }
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 
-<a class="jxr_linenumber" name="L496" href="#L496">496</a>             <strong class="jxr_keyword">if</strong> (records.size() &gt; 1) {
-<a class="jxr_linenumber" name="L497" href="#L497">497</a>                 printStream.println(interline);
-<a class="jxr_linenumber" name="L498" href="#L498">498</a>             }
-<a class="jxr_linenumber" name="L499" href="#L499">499</a>         }
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 
-<a class="jxr_linenumber" name="L501" href="#L501">501</a>         String joinWithLen(CharSequence delim, List&lt;String&gt; elems) {
-<a class="jxr_linenumber" name="L502" href="#L502">502</a>             StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L503" href="#L503">503</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; elems.size(); i++) {
-<a class="jxr_linenumber" name="L504" href="#L504">504</a>                 <strong class="jxr_keyword">int</strong> width = colWidths.get(i);
-<a class="jxr_linenumber" name="L505" href="#L505">505</a>                 <strong class="jxr_keyword">int</strong> type = colTypes.get(i);
-<a class="jxr_linenumber" name="L506" href="#L506">506</a>                 String str = elems.get(i);
-<a class="jxr_linenumber" name="L507" href="#L507">507</a>                 sb.append(isNumericJdbcType(type) ? leftPad(str, width) : rightPad(str, width));
-<a class="jxr_linenumber" name="L508" href="#L508">508</a>                 <strong class="jxr_keyword">if</strong> (i &lt; elems.size() - 1) {
-<a class="jxr_linenumber" name="L509" href="#L509">509</a>                     sb.append(delim);
-<a class="jxr_linenumber" name="L510" href="#L510">510</a>                 }
-<a class="jxr_linenumber" name="L511" href="#L511">511</a>             }
-<a class="jxr_linenumber" name="L512" href="#L512">512</a>             <strong class="jxr_keyword">return</strong> sb.toString();
-<a class="jxr_linenumber" name="L513" href="#L513">513</a>         }
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 
-<a class="jxr_linenumber" name="L515" href="#L515">515</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isNumericJdbcType(<strong class="jxr_keyword">int</strong> type) {
-<a class="jxr_linenumber" name="L516" href="#L516">516</a>             <strong class="jxr_keyword">return</strong> NUMERIC_JDBC_TYPES.contains(type);
-<a class="jxr_linenumber" name="L517" href="#L517">517</a>         }
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
-<a class="jxr_linenumber" name="L519" href="#L519">519</a>         <strong class="jxr_keyword">static</strong> String rightPad(String str, <strong class="jxr_keyword">int</strong> width) {
-<a class="jxr_linenumber" name="L520" href="#L520">520</a>             <strong class="jxr_keyword">return</strong> (str + repeat(<span class="jxr_string">" "</span>, width - str.length())).substring(0, width);
-<a class="jxr_linenumber" name="L521" href="#L521">521</a>         }
-<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
-<a class="jxr_linenumber" name="L523" href="#L523">523</a>         <strong class="jxr_keyword">static</strong> String leftPad(String str, <strong class="jxr_keyword">int</strong> width) {
-<a class="jxr_linenumber" name="L524" href="#L524">524</a>             <strong class="jxr_keyword">return</strong> (repeat(<span class="jxr_string">" "</span>, width - str.length()) + str).substring(0, width);
-<a class="jxr_linenumber" name="L525" href="#L525">525</a>         }
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 
-<a class="jxr_linenumber" name="L527" href="#L527">527</a>         <strong class="jxr_keyword">static</strong> String repeat(String str, <strong class="jxr_keyword">int</strong> count) {
-<a class="jxr_linenumber" name="L528" href="#L528">528</a>             <strong class="jxr_keyword">return</strong> count &gt; 0 ? String.format(<span class="jxr_string">"%0"</span> + count + <span class="jxr_string">"d"</span>, 0).replace(<span class="jxr_string">"0"</span>, str) : <span class="jxr_string">""</span>;
-<a class="jxr_linenumber" name="L529" href="#L529">529</a>         }
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
-<a class="jxr_linenumber" name="L531" href="#L531">531</a>     }
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> }
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>             <em class="jxr_comment">// output the schema file if requested</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>             <strong class="jxr_keyword">if</strong> (schemaFileName != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>                 File schemaFile = <strong class="jxr_keyword">new</strong> File(schemaFileName);
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>                 <strong class="jxr_keyword">try</strong> (PrintStream out = <strong class="jxr_keyword">new</strong> PrintStream(csvFile)) {
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>                     exporter.dumpSchema(rs, out);
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>                     out.flush();
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>                 }
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>                 prompt(<span class="jxr_string">"Created schema file: "</span> + schemaFile.getAbsolutePath());
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>             }
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>         }
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>     }
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>     <strong class="jxr_keyword">static</strong> List&lt;String&gt; tokenize(String s) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         <em class="jxr_comment">// Create a tokenizer that creates tokens delimited by whitespace. Also handles single and</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         <em class="jxr_comment">// double quotes. Does not support comments or numbers. All characters between U+0000</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         <em class="jxr_comment">// U+0020 are considered to be whitespace characters (this includes \r, \n, and \t).</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         <em class="jxr_comment">// All characters from U+0021 to U+00FF are normal word characters.</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>         <em class="jxr_comment">// Internally, StreamTokenzier treats all characters &gt;= U+0100 to be a normal</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>         <em class="jxr_comment">// word character, and unfortunately, this cannot be changed.</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>         <em class="jxr_comment">// Non-breaking-space character U+00A0 is currently treated as a normal character,</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>         <em class="jxr_comment">// but I could be convinced that it should be considered a whitespace.</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>         StreamTokenizer st = <strong class="jxr_keyword">new</strong> StreamTokenizer(<strong class="jxr_keyword">new</strong> StringReader(s));
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>         st.resetSyntax();
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         st.wordChars(33, 255);
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>         st.whitespaceChars(0, ' ');
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         st.quoteChar('&quot;');
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>         st.quoteChar('\'');
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>         List&lt;String&gt; tokens = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>         <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>             <strong class="jxr_keyword">int</strong> ttype = st.nextToken();
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>             <strong class="jxr_keyword">if</strong> (ttype == StreamTokenizer.TT_EOF) {
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>             } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ttype == StreamTokenizer.TT_WORD) {
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                 tokens.add(st.sval);
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>             } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ttype == '\'' || ttype == '&quot;') {
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>                 tokens.add(st.sval);
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>             }
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>         }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>         <strong class="jxr_keyword">return</strong> tokens;
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     }
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_javadoccomment">     * Helper to produce table-formatted output of a JDBC resultset.</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">     * @author Markus Spann</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> TableFormat {
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;       NUMERIC_JDBC_TYPES =
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>             List.of(Types.BIT, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT, Types.FLOAT,
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>                 Types.REAL, Types.DOUBLE, Types.NUMERIC, Types.DECIMAL, Types.ROWID);
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>         MAX_COL_WIDTH      = 50;
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>         <em class="jxr_comment">// the table is indented to set it off from the text before</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String      INDENT             = <span class="jxr_string">"  "</span>;
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         <em class="jxr_comment">// wider tables are printed with one block of column names and values per row</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>         MAX_TABLE_WIDTH    = 200;
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>         <em class="jxr_comment">// code points displayed in two console columns, after the ranges of Markus Kuhn's wcwidth</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>[][]     WIDE_RANGES        = {
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             {0x1100, 0x115F}, <em class="jxr_comment">// Hangul Jamo</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>             {0x2E80, 0xA4CF}, <em class="jxr_comment">// CJK radicals ... Yi</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>             {0xAC00, 0xD7A3}, <em class="jxr_comment">// Hangul syllables</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>             {0xF900, 0xFAFF}, <em class="jxr_comment">// CJK compatibility ideographs</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>             {0xFE30, 0xFE4F}, <em class="jxr_comment">// CJK compatibility forms</em>
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>             {0xFF00, 0xFF60}, <em class="jxr_comment">// fullwidth forms</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>             {0xFFE0, 0xFFE6}, <em class="jxr_comment">// fullwidth signs</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>             {0x1F300, 0x1F64F}, <em class="jxr_comment">// emoji</em>
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>             {0x1F900, 0x1F9FF}, <em class="jxr_comment">// supplemental symbols and pictographs</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>             {0x20000, 0x3FFFD} <em class="jxr_comment">// CJK extensions</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>         };
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Border             border;
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;String&gt;       colNames;
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;      colWidths;
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;Integer&gt;      colTypes;
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> List&lt;List&lt;String&gt;&gt; records            = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong>                  hideEmptyColumns;
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong>                      maxTableWidth      = MAX_TABLE_WIDTH;
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">         * Characters to draw the table border with.</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>         enum Border {
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>             ASCII('|', <span class="jxr_string">"+-++"</span>, <span class="jxr_string">"+=++"</span>, <span class="jxr_string">"+-++"</span>, <span class="jxr_string">"+-++"</span>),
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>             UNICODE('│', <span class="jxr_string">"┌─┬┐"</span>, <span class="jxr_string">"╞═╪╡"</span>, <span class="jxr_string">"├─┼┤"</span>, <span class="jxr_string">"└─┴┘"</span>);
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">char</strong>   vertical;
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>             <em class="jxr_comment">// each line given by its left junction, horizontal character, inner and right junction</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String top;
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String header;
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String middle;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String bottom;
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> <em class="jxr_javadoccomment">             * Creates a border of the given characters.</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">             *</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> <em class="jxr_javadoccomment">             * @param vertical  character of the vertical lines</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> <em class="jxr_javadoccomment">             * @param top       characters of the top line</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">             * @param header    characters of the line below the header</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">             * @param middle    characters of the line between two rows</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> <em class="jxr_javadoccomment">             * @param bottom    characters of the bottom line</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>             Border(<strong class="jxr_keyword">char</strong> vertical, String top, String header, String middle, String bottom) {
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>                 <strong class="jxr_keyword">this</strong>.vertical = vertical;
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>                 <strong class="jxr_keyword">this</strong>.top = top;
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>                 <strong class="jxr_keyword">this</strong>.header = header;
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>                 <strong class="jxr_keyword">this</strong>.middle = middle;
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>                 <strong class="jxr_keyword">this</strong>.bottom = bottom;
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>             }
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">             * Returns the unicode border if the given charset can encode its characters, the ascii border otherwise.</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>             <strong class="jxr_keyword">static</strong> Border forCharset(Charset charset) {
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>                 String characters = UNICODE.vertical + UNICODE.top + UNICODE.header + UNICODE.middle + UNICODE.bottom;
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>                 <strong class="jxr_keyword">return</strong> charset.canEncode() &amp;&amp; charset.newEncoder().canEncode(characters) ? UNICODE : ASCII;
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>             }
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">             * Returns the border that the standard output can display.</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>             <strong class="jxr_keyword">static</strong> Border forConsole() {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>                 <strong class="jxr_keyword">return</strong> forCharset(consoleCharset());
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>             }
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> <em class="jxr_javadoccomment">             * Returns the charset of the standard output, as far as the running Java version tells it.</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>             <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Charset consoleCharset() {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>                 <em class="jxr_comment">// stdout.encoding exists since Java 19, sun.stdout.encoding on Windows consoles before, native.encoding</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>                 <em class="jxr_comment">// since Java 17 is what System.out uses on Java 18 when not writing to a console, sun.jnu.encoding is the</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>                 <em class="jxr_comment">// platform encoding on older versions, unlike the default charset not changed by -Dfile.encoding</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>                 <strong class="jxr_keyword">for</strong> (String property : <strong class="jxr_keyword">new</strong> String[] {<span class="jxr_string">"stdout.encoding"</span>, <span class="jxr_string">"sun.stdout.encoding"</span>, <span class="jxr_string">"native.encoding"</span>, <span class="jxr_string">"sun.jnu.encoding"</span>}) {
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>                     String name = System.getProperty(property);
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>                     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>                         <strong class="jxr_keyword">if</strong> (name != <strong class="jxr_keyword">null</strong> &amp;&amp; Charset.isSupported(name)) {
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>                             <strong class="jxr_keyword">return</strong> Charset.forName(name);
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>                         }
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>                     } <strong class="jxr_keyword">catch</strong> (IllegalArgumentException ignored) {
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>                         <em class="jxr_comment">// an illegal charset name, try the next property</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>                     }
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>                 }
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>                 <strong class="jxr_keyword">return</strong> Charset.defaultCharset();
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>             }
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> <em class="jxr_javadoccomment">             * Returns a horizontal line of the table.</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> <em class="jxr_javadoccomment">             *</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <em class="jxr_javadoccomment">             * @param chars   left junction, horizontal character, inner and right junction of the line</em>
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">             * @param widths  widths of the column contents</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>             <strong class="jxr_keyword">static</strong> String line(String chars, List&lt;Integer&gt; widths) {
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>                 StringJoiner line = <strong class="jxr_keyword">new</strong> StringJoiner(chars.substring(2, 3), chars.substring(0, 1), chars.substring(3, 4));
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>                 <em class="jxr_comment">// one blank on either side of the content</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>                 widths.forEach(w -&gt; line.add(chars.substring(1, 2).repeat(w + 2)));
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>                 <strong class="jxr_keyword">return</strong> line.toString();
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>             }
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>             <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">             * Returns a horizontal line of the table with the given label at its start.</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">             *</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">             * @param chars   left junction, horizontal character, inner and right junction of the line</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> <em class="jxr_javadoccomment">             * @param widths  widths of the column contents, the first one wide enough for the label</em>
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> <em class="jxr_javadoccomment">             * @param label   text to show in the line</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> <em class="jxr_javadoccomment">             */</em>
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>             <strong class="jxr_keyword">static</strong> String line(String chars, List&lt;Integer&gt; widths, String label) {
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>                 String line = line(chars, widths);
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>                 String text = chars.charAt(1) + <span class="jxr_string">" "</span> + label + <span class="jxr_string">" "</span>;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>                 <strong class="jxr_keyword">return</strong> line.charAt(0) + text + line.substring(1 + text.length());
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>             }
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>         }
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">         * Reads all rows of the given result set, drawing the border the console can display.</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_javadoccomment">         * @param resultSet  result set to format</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>         TableFormat(ResultSet resultSet) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>             <strong class="jxr_keyword">this</strong>(resultSet, -1, Border.forConsole());
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>         }
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> 
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">         * Reads the rows of the given result set.</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">         * @param resultSet  result set to format</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">         * @param maxRows    maximum number of rows to read, negative for all rows</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">         * @param border     characters to draw the table border with</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>         TableFormat(ResultSet resultSet, <strong class="jxr_keyword">int</strong> maxRows, Border border) <strong class="jxr_keyword">throws</strong> SQLException {
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>             <strong class="jxr_keyword">this</strong>.border = border;
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>             ResultSetMetaData meta = resultSet.getMetaData();
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>             <strong class="jxr_keyword">int</strong> columnCount = meta.getColumnCount();
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>             colNames = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>             colWidths = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>             colTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(columnCount);
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> col = 1; col &lt;= columnCount; ++col) {
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>                 String colLabel = printable(meta.getColumnLabel(col));
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>                 colNames.add(colLabel);
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>                 colWidths.add(Math.min(displayWidth(colLabel), MAX_COL_WIDTH));
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>                 colTypes.add(meta.getColumnType(col));
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>             }
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> 
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>             records.add(colNames); <em class="jxr_comment">// header record</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>             <strong class="jxr_keyword">while</strong> ((maxRows &lt; 0 || maxRows &gt;= records.size()) &amp;&amp; resultSet.next()) {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>                 List&lt;String&gt; rec = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 records.add(rec);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>                 <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> col = 1; col &lt;= columnCount; ++col) {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>                     Object obj = resultSet.getObject(col);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>                     <strong class="jxr_keyword">if</strong> (obj != <strong class="jxr_keyword">null</strong> &amp;&amp; obj.getClass().isArray() &amp;&amp; !obj.getClass().getComponentType().isPrimitive()) {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>                         obj = Arrays.toString((Object[]) obj);
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>                     }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> 
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>                     String s = obj == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">""</span> : printable(obj.toString());
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>                     rec.add(s);
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> 
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>                     <strong class="jxr_keyword">int</strong> width = Math.min(displayWidth(s), MAX_COL_WIDTH);
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>                     <strong class="jxr_keyword">if</strong> (colWidths.get(col - 1) &lt; width) {
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>                         colWidths.set(col - 1, width);
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>                     }
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>                 }
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>             }
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>         }
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> 
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a> <em class="jxr_javadoccomment">         * Sets whether to leave out the columns without a value in any row.</em>
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> <em class="jxr_javadoccomment">         * @param hide  whether to leave out empty columns</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>         TableFormat hideEmptyColumns(<strong class="jxr_keyword">boolean</strong> hide) {
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>             hideEmptyColumns = hide;
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>         }
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_javadoccomment">         * Sets the width above which the table is printed with one block of column names and values per row.</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_javadoccomment">         * @param width  maximum width of a table with one line per row</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>         TableFormat maxTableWidth(<strong class="jxr_keyword">int</strong> width) {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>             maxTableWidth = width;
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>         }
+<a class="jxr_linenumber" name="L635" href="#L635">635</a> 
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L637" href="#L637">637</a> <em class="jxr_javadoccomment">         * Prints the table to the given stream, followed by the number of rows and the hidden columns.</em>
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> <em class="jxr_javadoccomment">         * @param printStream  stream to print to</em>
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>         <strong class="jxr_keyword">void</strong> output(PrintStream printStream) {
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>             List&lt;Integer&gt; columns = visibleColumns();
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>             List&lt;Integer&gt; widths = columns.stream().map(colWidths::get).collect(Collectors.toList());
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>             List&lt;List&lt;String&gt;&gt; rows = records.subList(1, records.size()); <em class="jxr_comment">// index 0 holds header</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> 
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>             printStream.println();
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>             <em class="jxr_comment">// each column takes its width plus one blank on either side and a vertical line</em>
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>             <strong class="jxr_keyword">if</strong> (widths.stream().mapToInt(w -&gt; w + 3).sum() + 1 &gt; maxTableWidth) {
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>                 <strong class="jxr_keyword">if</strong> (rows.isEmpty()) {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>                     printStream.println(INDENT + String.format(<span class="jxr_string">"(0 rows, columns: %s)"</span>, String.join(<span class="jxr_string">", "</span>, colNames)));
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>                     outputVertical(printStream, rows, columns);
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>                 }
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>                 <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>             }
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>             printStream.println(INDENT + Border.line(border.top, widths));
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>             printStream.println(INDENT + row(colNames, columns));
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>             <strong class="jxr_keyword">if</strong> (!rows.isEmpty()) {
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>                 printStream.println(INDENT + Border.line(border.header, widths));
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>             }
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>             rows.forEach(r -&gt; printStream.println(INDENT + row(r, columns)));
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>             printStream.println(INDENT + Border.line(border.bottom, widths));
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>             printStream.println(INDENT + footer(rows.size(), columns));
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>         }
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> 
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">         * Prints one block per row, listing the column names and values of the row line by line.</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> <em class="jxr_javadoccomment">         * @param printStream  stream to print to</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> <em class="jxr_javadoccomment">         * @param rows         rows to print</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> <em class="jxr_javadoccomment">         * @param columns      indexes of the columns to print</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>         <strong class="jxr_keyword">void</strong> outputVertical(PrintStream printStream, List&lt;List&lt;String&gt;&gt; rows, List&lt;Integer&gt; columns) {
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>             <em class="jxr_comment">// the name column is wide enough for the row label in the line above each block</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>             String lastLabel = String.format(<span class="jxr_string">"Row %d"</span>, rows.size());
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>             <strong class="jxr_keyword">int</strong> nameWidth = Math.min(MAX_COL_WIDTH, columns.stream()
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>                 .mapToInt(col -&gt; displayWidth(colNames.get(col)))
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>                 .reduce(lastLabel.length() + 1, Math::max));
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>             <strong class="jxr_keyword">int</strong> valueWidth = Math.min(MAX_COL_WIDTH, rows.stream()
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>                 .flatMap(row -&gt; columns.stream().map(row::get))
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>                 .mapToInt(TableFormat::displayWidth)
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>                 .max().orElse(0));
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>             List&lt;Integer&gt; widths = List.of(nameWidth, valueWidth);
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> 
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> idx = 0; idx &lt; rows.size(); idx++) {
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>                 String label = String.format(<span class="jxr_string">"Row %d"</span>, idx + 1);
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>                 printStream.println(INDENT + Border.line(idx == 0 ? border.top : border.middle, widths, label));
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>                 <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> col : columns) {
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>                     printStream.println(INDENT + cells(List.of(fit(colNames.get(col), nameWidth, false),
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>                         fit(rows.get(idx).get(col), valueWidth, false))));
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>                 }
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>             }
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>             printStream.println(INDENT + Border.line(border.bottom, widths));
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>             printStream.println(INDENT + footer(rows.size(), columns));
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>         }
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> 
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> <em class="jxr_javadoccomment">         * Returns the indexes of the columns to print, which are all columns unless empty columns are hidden. All</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> <em class="jxr_javadoccomment">         * columns are printed if every one is empty.</em>
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>         List&lt;Integer&gt; visibleColumns() {
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>             List&lt;Integer&gt; all = IntStream.range(0, colNames.size()).boxed().collect(Collectors.toList());
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>             <strong class="jxr_keyword">if</strong> (!hideEmptyColumns) {
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>                 <strong class="jxr_keyword">return</strong> all;
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>             }
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>             List&lt;Integer&gt; filled = all.stream()
+<a class="jxr_linenumber" name="L707" href="#L707">707</a>                 .filter(col -&gt; records.stream().skip(1).anyMatch(rec -&gt; !rec.get(col).isEmpty()))
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>                 .collect(Collectors.toList());
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>             <strong class="jxr_keyword">return</strong> filled.isEmpty() ? all : filled;
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>         }
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> 
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_javadoccomment">         * Returns the line below the table with the number of rows and the names of the hidden columns.</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> <em class="jxr_javadoccomment">         * @param rowCount  number of rows printed</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> <em class="jxr_javadoccomment">         * @param columns   indexes of the columns printed</em>
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>         String footer(<strong class="jxr_keyword">int</strong> rowCount, List&lt;Integer&gt; columns) {
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>             StringJoiner footer = <strong class="jxr_keyword">new</strong> StringJoiner(<span class="jxr_string">", "</span>, <span class="jxr_string">"("</span>, <span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>             footer.add(rowCount == 1 ? <span class="jxr_string">"1 row"</span> : String.format(<span class="jxr_string">"%d rows"</span>, rowCount));
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>             List&lt;String&gt; hidden = IntStream.range(0, colNames.size())
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>                 .filter(col -&gt; !columns.contains(col))
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>                 .mapToObj(colNames::get)
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>                 .collect(Collectors.toList());
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>             <strong class="jxr_keyword">if</strong> (!hidden.isEmpty()) {
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>                 footer.add(String.format(<span class="jxr_string">"%d empty %s hidden: %s"</span>, hidden.size(), hidden.size() == 1 ? <span class="jxr_string">"column"</span> : <span class="jxr_string">"columns"</span>,
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>                     String.join(<span class="jxr_string">", "</span>, hidden)));
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>             }
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>             <strong class="jxr_keyword">return</strong> footer.toString();
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>         }
+<a class="jxr_linenumber" name="L731" href="#L731">731</a> 
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L733" href="#L733">733</a> <em class="jxr_javadoccomment">         * Returns one row of the table with the values padded or cut to their column width.</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> <em class="jxr_javadoccomment">         * @param values   values of the row</em>
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> <em class="jxr_javadoccomment">         * @param columns  indexes of the columns to print</em>
+<a class="jxr_linenumber" name="L737" href="#L737">737</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>         String row(List&lt;String&gt; values, List&lt;Integer&gt; columns) {
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>             <strong class="jxr_keyword">return</strong> cells(columns.stream()
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>                 .map(col -&gt; fit(values.get(col), colWidths.get(col), isNumericJdbcType(colTypes.get(col))))
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>                 .collect(Collectors.toList()));
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>         }
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> 
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> <em class="jxr_javadoccomment">         * Returns a line of the table with the given cells between vertical lines.</em>
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> <em class="jxr_javadoccomment">         * @param cells  cell contents, already fit to their column width</em>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>         String cells(List&lt;String&gt; cells) {
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>             String vertical = String.valueOf(border.vertical);
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>             <strong class="jxr_keyword">return</strong> cells.stream().collect(Collectors.joining(<span class="jxr_string">" "</span> + vertical + <span class="jxr_string">" "</span>, vertical + <span class="jxr_string">" "</span>, <span class="jxr_string">" "</span> + vertical));
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>         }
+<a class="jxr_linenumber" name="L753" href="#L753">753</a> 
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> <em class="jxr_javadoccomment">         * Returns whether values of the given JDBC type are aligned right.</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isNumericJdbcType(<strong class="jxr_keyword">int</strong> type) {
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>             <strong class="jxr_keyword">return</strong> NUMERIC_JDBC_TYPES.contains(type);
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>         }
+<a class="jxr_linenumber" name="L760" href="#L760">760</a> 
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L762" href="#L762">762</a> <em class="jxr_javadoccomment">         * Replaces control characters such as line breaks and tabs and the unicode line and paragraph separators with a</em>
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> <em class="jxr_javadoccomment">         * blank, as they would break the table.</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>         <strong class="jxr_keyword">static</strong> String printable(String str) {
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>             <strong class="jxr_keyword">return</strong> str.codePoints()
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>                 .map(cp -&gt; Character.isISOControl(cp) || Character.getType(cp) == Character.LINE_SEPARATOR
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>                     || Character.getType(cp) == Character.PARAGRAPH_SEPARATOR ? ' ' : cp)
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>                 .collect(StringBuilder::<strong class="jxr_keyword">new</strong>, StringBuilder::appendCodePoint, StringBuilder::append)
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>                 .toString();
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>         }
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> 
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> <em class="jxr_javadoccomment">         * Returns the number of console columns the given string takes up.</em>
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> displayWidth(String str) {
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>             <strong class="jxr_keyword">return</strong> str.codePoints().map(TableFormat::displayWidth).sum();
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>         }
+<a class="jxr_linenumber" name="L779" href="#L779">779</a> 
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> <em class="jxr_javadoccomment">         * Returns the number of console columns the given code point takes up: 0 for combining marks, 2 for wide East</em>
+<a class="jxr_linenumber" name="L782" href="#L782">782</a> <em class="jxr_javadoccomment">         * Asian characters and emoji, 1 otherwise.</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> displayWidth(<strong class="jxr_keyword">int</strong> codePoint) {
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>             <strong class="jxr_keyword">int</strong> type = Character.getType(codePoint);
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>             <strong class="jxr_keyword">if</strong> (type == Character.NON_SPACING_MARK || type == Character.ENCLOSING_MARK || type == Character.FORMAT) {
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>                 <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>             }
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>             <strong class="jxr_keyword">return</strong> isWide(codePoint) ? 2 : 1;
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>         }
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> 
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L793" href="#L793">793</a> <em class="jxr_javadoccomment">         * Returns whether the given code point is displayed in two console columns.</em>
+<a class="jxr_linenumber" name="L794" href="#L794">794</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>         <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isWide(<strong class="jxr_keyword">int</strong> cp) {
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>             <strong class="jxr_keyword">if</strong> (cp == 0x303F) { <em class="jxr_comment">// ideographic half fill space</em>
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>             }
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong>[] range : WIDE_RANGES) {
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>                 <strong class="jxr_keyword">if</strong> (cp &gt;= range[0] &amp;&amp; cp &lt;= range[1]) {
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>                     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>                 }
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>             }
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>         }
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> 
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>         <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> <em class="jxr_javadoccomment">         * Pads or cuts the given string to exactly the given display width.</em>
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> <em class="jxr_javadoccomment">         *</em>
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> <em class="jxr_javadoccomment">         * @param str         string to fit</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a> <em class="jxr_javadoccomment">         * @param width       display width of the result</em>
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> <em class="jxr_javadoccomment">         * @param alignRight  whether to pad on the left</em>
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> <em class="jxr_javadoccomment">         */</em>
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>         <strong class="jxr_keyword">static</strong> String fit(String str, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">boolean</strong> alignRight) {
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>             StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>             <strong class="jxr_keyword">int</strong> used = 0;
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> cp : str.codePoints().toArray()) {
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>                 <strong class="jxr_keyword">int</strong> w = displayWidth(cp);
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>                 <strong class="jxr_keyword">if</strong> (used + w &gt; width) {
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>                 }
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>                 sb.appendCodePoint(cp);
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>                 used += w;
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>             }
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>             String padding = <span class="jxr_string">" "</span>.repeat(width - used);
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>             <strong class="jxr_keyword">return</strong> alignRight ? padding + sb : sb + padding;
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>         }
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> 
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>     }
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> }
 </pre>
 <hr/>
 <div id="footer">© 2012–2026 <a href="https://github.com/spannm/ucanaccess">UCanAccess</a></div>

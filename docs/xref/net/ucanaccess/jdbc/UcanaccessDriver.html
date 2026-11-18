@@ -49,9 +49,9 @@
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>          } <strong class="jxr_keyword">catch</strong> (ClassNotFoundException ex) {
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>              LOGGER.log(Level.WARNING, <span class="jxr_string">"Unable to find hsqldb driver (version 2.x.x. or later) on your classpath"</span>);
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage());
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage(), ex);
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>          } <strong class="jxr_keyword">catch</strong> (SQLException ex) {
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage());
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="UcanaccessRuntimeException" href="../../../net/ucanaccess/exception/UcanaccessRuntimeException.html#UcanaccessRuntimeException">UcanaccessRuntimeException</a>(ex.getMessage(), ex);
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>          }
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>      }
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  

@@ -274,14 +274,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Converts an expression to a byte from 0 to 255, rounding halves to the nearest even number like Access.</div>
 </dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cbyte(java.lang.String)" class="member-name-link">cbyte(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a text in the number format of the default locale to a byte.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#ccur(java.lang.Double)" class="member-name-link">ccur(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts a floating point number into a currency value, rounding halves to the even digit like Access.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#ccur(java.lang.String)" class="member-name-link">ccur(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a text in the number format of the default locale into a currency value.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#ccur(java.math.BigDecimal)" class="member-name-link">ccur(BigDecimal)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts an expression into a currency value with four decimal places, rounding halves to the even digit like
  Access.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdate(java.lang.Boolean)" class="member-name-link">cdate(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a boolean to a date like the number -1 for <code>true</code> or 0 for <code>false</code>, so True is 1899-12-29.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdate(java.lang.Double)" class="member-name-link">cdate(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
@@ -296,6 +308,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a date unchanged.</div>
 </dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdbl(java.lang.Boolean)" class="member-name-link">cdbl(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a boolean to -1 for <code>true</code> or 0 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdbl(java.lang.Double)" class="member-name-link">cdbl(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts an expression to a double.</div>
@@ -303,6 +319,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdbl(java.lang.String)" class="member-name-link">cdbl(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts a text to a double, using the decimal and grouping separators of the default locale like Access.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdbl(java.sql.Timestamp)" class="member-name-link">cdbl(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a date to the Access date value, the days since 1899-12-30 with the time as fraction.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cdec(java.lang.Double)" class="member-name-link">cdec(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
@@ -356,6 +376,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessStatement.html#clearWarnings()" class="member-name-link">clearWarnings()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessStatement.html" title="class in net.ucanaccess.jdbc">UcanaccessStatement</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#clng(java.lang.Boolean)" class="member-name-link">clng(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a boolean to -1 for <code>true</code> or 0 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#clng(java.lang.Double)" class="member-name-link">clng(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts an expression to a long integer, rounding halves to the nearest even number like Access.</div>
@@ -423,6 +447,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessDriver.html#connect(java.lang.String,java.util.Properties)" class="member-name-link">connect(String, Properties)</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessDriver.html" title="class in net.ucanaccess.jdbc">UcanaccessDriver</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/console/Main.html#consoleDump(java.sql.ResultSet,java.io.PrintStream)" class="member-name-link">consoleDump(ResultSet, PrintStream)</a> - Method in class net.ucanaccess.console.<a href="io.github.spannm.ucanaccess/net/ucanaccess/console/Main.html" title="class in net.ucanaccess.console">Main</a></dt>
+<dd>
+<div class="block">Prints the ResultSet <code>resultSet</code> in a format suitable for the terminal console given by <code>printStream</code>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/console/Main.html#consoleDump(java.sql.ResultSet,java.io.PrintStream,boolean)" class="member-name-link">consoleDump(ResultSet, PrintStream, boolean)</a> - Method in class net.ucanaccess.console.<a href="io.github.spannm.ucanaccess/net/ucanaccess/console/Main.html" title="class in net.ucanaccess.console">Main</a></dt>
 <dd>
 <div class="block">Prints the ResultSet <code>resultSet</code> in a format suitable for the terminal console given by <code>printStream</code>.</div>
 </dd>
@@ -577,6 +605,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cvar(java.lang.Double)" class="member-name-link">cvar(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cvar(java.lang.String)" class="member-name-link">cvar(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns a text unchanged, as a variant of a text is the text itself.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#cvdate(java.lang.Double)" class="member-name-link">cvdate(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts an Access date value to a date, like CDate.</div>
@@ -615,6 +647,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#dateAdd(java.lang.String,int,java.util.Date)" class="member-name-link">dateAdd(String, int, Date)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns a date containing a date to which a specified time interval has been added.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#dateAdd(java.lang.String,java.lang.Double,java.sql.Timestamp)" class="member-name-link">dateAdd(String, Double, Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Adds a number with a fraction of intervals; like in Access, the fraction is cut off, so 1.6 days are one day.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#dateDiff(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">dateDiff(String, String, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
@@ -917,6 +953,18 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Boolean,java.lang.Boolean,java.lang.Boolean%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(Boolean, Boolean, Boolean[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Double,java.lang.Boolean,java.lang.Double%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(Double, Boolean, Double[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the first value of a group of double values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.first(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Integer,java.lang.Boolean,java.lang.Integer%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(Integer, Boolean, Integer[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the first value of a group of integer values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.first(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Long,java.lang.Boolean,java.lang.Long%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(Long, Boolean, Long[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the first value of a group of long values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.first(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(Object, Boolean, Object[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#first(java.lang.String,java.lang.Boolean,java.lang.String%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">first(String, Boolean, String[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
@@ -935,26 +983,46 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/type/SqlConstants.html#FLOAT" class="member-name-link">FLOAT</a> - Static variable in class net.ucanaccess.type.<a href="io.github.spannm.ucanaccess/net/ucanaccess/type/SqlConstants.html" title="class in net.ucanaccess.type">SqlConstants</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.Boolean)" class="member-name-link">format(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a boolean to text without a format, as -1 or 0.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.Boolean,java.lang.String)" class="member-name-link">format(Boolean, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats a boolean like the number -1 for <code>true</code> or 0 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.Double)" class="member-name-link">format(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts a number to text without a format, like CStr.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.Double,java.lang.String)" class="member-name-link">format(Double, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Formats a number like the Access function Format, see <code>AccessFormat</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.String)" class="member-name-link">format(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns a text unchanged, as Format does without a format.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.String,java.lang.String)" class="member-name-link">format(String, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.lang.String,java.lang.String,boolean)" class="member-name-link">format(String, String, boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Formats a text like the Access function Format; a text that is a number or a date is formatted as such.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.sql.Timestamp)" class="member-name-link">format(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Converts a date to text without a format, like CStr.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.sql.Timestamp,java.lang.String)" class="member-name-link">format(Timestamp, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Formats a date like the Access function Format, see <code>AccessFormat</code>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.sql.Timestamp,java.lang.String,java.lang.Integer)" class="member-name-link">format(Timestamp, String, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats a date with the first day of the week for the tokens w and ww.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#format(java.sql.Timestamp,java.lang.String,java.lang.Integer,java.lang.Integer)" class="member-name-link">format(Timestamp, String, Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats a date with the first day of the week and the first week of the year for the tokens w and ww.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" class="type-name-link" title="class in net.ucanaccess.converters">FormatCache</a> - Class in <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/package-summary.html">net.ucanaccess.converters</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatCurrency(java.lang.Double)" class="member-name-link">formatCurrency(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
@@ -976,6 +1044,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatCurrency(java.lang.Double,java.lang.Integer,java.lang.Integer,java.lang.Integer,java.lang.Integer)" class="member-name-link">formatCurrency(Double, Integer, Integer, Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Formats a number as currency choosing whether to group digits.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatDateTime(java.lang.Double,java.lang.Integer)" class="member-name-link">formatDateTime(Double, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats an Access date value with a named format, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatDateTime(java.sql.Timestamp,java.lang.Integer)"><code>Functions.formatDateTime(Timestamp, Integer)</code></a>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatDateTime(java.lang.String,java.lang.Integer)" class="member-name-link">formatDateTime(String, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats a text that is a date with a named format, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatDateTime(java.sql.Timestamp,java.lang.Integer)"><code>Functions.formatDateTime(Timestamp, Integer)</code></a>.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatDateTime(java.sql.Timestamp)" class="member-name-link">formatDateTime(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
@@ -1004,6 +1080,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatNumber(java.lang.Double,java.lang.Integer,java.lang.Integer,java.lang.Integer,java.lang.Integer)" class="member-name-link">formatNumber(Double, Integer, Integer, Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Formats a number choosing whether to group digits.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatNumber(java.lang.String,java.lang.Integer)" class="member-name-link">formatNumber(String, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Formats a text in the number format of the default locale with the given number of decimal places.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#formatPercent(java.lang.Double)" class="member-name-link">formatPercent(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
@@ -1300,8 +1380,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessConnection.html#getCtxExcId()" class="member-name-link">getCtxExcId()</a> - Static method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessConnection.html" title="class in net.ucanaccess.jdbc">UcanaccessConnection</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getCurrencyDefault()" class="member-name-link">getCurrencyDefault()</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/Context.html#getCurrentConnection()" class="member-name-link">getCurrentConnection()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/Context.html" title="class in net.ucanaccess.jdbc">Context</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/Context.html#getCurrentExecId()" class="member-name-link">getCurrentExecId()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/Context.html" title="class in net.ucanaccess.jdbc">Context</a></dt>
@@ -1353,8 +1431,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.DDLType.html#getDDLType(java.lang.String)" class="member-name-link">getDDLType(String)</a> - Static method in enum net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.DDLType.html" title="enum in net.ucanaccess.converters">SQLConverter.DDLType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.html#getDDLType(java.lang.String)" class="member-name-link">getDDLType(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.html" title="class in net.ucanaccess.converters">SQLConverter</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getDecimalFormat(java.lang.String)" class="member-name-link">getDecimalFormat(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/type/AccessVersion.html#getDefaultAccessVersion()" class="member-name-link">getDefaultAccessVersion()</a> - Static method in enum net.ucanaccess.type.<a href="io.github.spannm.ucanaccess/net/ucanaccess/type/AccessVersion.html" title="enum in net.ucanaccess.type">AccessVersion</a></dt>
 <dd>&nbsp;</dd>
@@ -1678,8 +1754,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getNoArgs()" class="member-name-link">getNoArgs()</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getNoGrouping()" class="member-name-link">getNoGrouping()</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessCallableStatement.html#getNString(int)" class="member-name-link">getNString(int)</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessCallableStatement.html" title="class in net.ucanaccess.jdbc">UcanaccessCallableStatement</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSet.html#getNString(int)" class="member-name-link">getNString(int)</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSet.html" title="class in net.ucanaccess.jdbc">UcanaccessResultSet</a></dt>
@@ -1849,8 +1923,6 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the name of the second database object in the given DDL statement, e.g. a column or constraint.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.DDLType.html#getSelect(java.lang.String)" class="member-name-link">getSelect(String)</a> - Method in enum net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.DDLType.html" title="enum in net.ucanaccess.converters">SQLConverter.DDLType</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getSharp()" class="member-name-link">getSharp()</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessCallableStatement.html#getShort(int)" class="member-name-link">getShort(int)</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessCallableStatement.html" title="class in net.ucanaccess.jdbc">UcanaccessCallableStatement</a></dt>
 <dd>&nbsp;</dd>
@@ -2106,8 +2178,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSet.html#getWrappedStatement()" class="member-name-link">getWrappedStatement()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSet.html" title="class in net.ucanaccess.jdbc">UcanaccessResultSet</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html#getZpzz()" class="member-name-link">getZpzz()</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FormatCache.html" title="class in net.ucanaccess.converters">FormatCache</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/type/SqlConstants.html#GROUP_BY" class="member-name-link">GROUP_BY</a> - Static variable in class net.ucanaccess.type.<a href="io.github.spannm.ucanaccess/net/ucanaccess/type/SqlConstants.html" title="class in net.ucanaccess.type">SqlConstants</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/TypesMap.AccessType.html#GUID" class="member-name-link">GUID</a> - Enum constant in enum net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/TypesMap.AccessType.html" title="enum in net.ucanaccess.converters">TypesMap.AccessType</a></dt>
@@ -2144,6 +2214,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#hex(java.lang.Double)" class="member-name-link">hex(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns the hexadecimal representation of a number, rounded to a whole number first.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#hex(java.lang.String)" class="member-name-link">hex(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns the hexadecimal representation of a text in the number format of the default locale.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.html#HHMMSS_ACCESS_FORMAT" class="member-name-link">HHMMSS_ACCESS_FORMAT</a> - Static variable in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/SQLConverter.html" title="class in net.ucanaccess.converters">SQLConverter</a></dt>
 <dd>&nbsp;</dd>
@@ -2210,6 +2284,34 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Boolean,java.sql.Timestamp,java.sql.Timestamp)" class="member-name-link">iif(Boolean, Timestamp, Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.Boolean,java.lang.Boolean)" class="member-name-link">iif(Double, Boolean, Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns one of two booleans, with a number as condition.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.Double,java.lang.Double)" class="member-name-link">iif(Double, Double, Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns one of two numbers, with a number as condition.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.Double,java.lang.String)" class="member-name-link">iif(Double, Double, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns a number or a text as text, with a number as condition.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.Integer,java.lang.Integer)" class="member-name-link">iif(Double, Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns one of two long integers, with a number as condition.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.String,java.lang.Double)" class="member-name-link">iif(Double, String, Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns a text or a number as text, with a number as condition.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.lang.String,java.lang.String)" class="member-name-link">iif(Double, String, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns one of two texts; like in Access, a number as condition is true unless it is zero.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#iif(java.lang.Double,java.sql.Timestamp,java.sql.Timestamp)" class="member-name-link">iif(Double, Timestamp, Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns one of two dates, with a number as condition.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/IJackcessOpenerInterface.html" class="type-name-link" title="interface in net.ucanaccess.jdbc">IJackcessOpenerInterface</a> - Interface in <a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/package-summary.html">net.ucanaccess.jdbc</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Metadata.Property.html#immediatelyReleaseResources" class="member-name-link">immediatelyReleaseResources</a> - Enum constant in enum net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Metadata.Property.html" title="enum in net.ucanaccess.converters">Metadata.Property</a></dt>
@@ -2344,6 +2446,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Metadata.html#isCurrency(java.lang.String,java.lang.String)" class="member-name-link">isCurrency(String, String)</a> - Method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Metadata.html" title="class in net.ucanaccess.converters">Metadata</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isDate(java.lang.Double)" class="member-name-link">isDate(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns <code>false</code>, as Access does not take a number for a date in IsDate.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isDate(java.lang.String)" class="member-name-link">isDate(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns <code>true</code> if the expression is a valid date, otherwise <code>false</code>.</div>
@@ -2380,11 +2486,19 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSetMetaData.html#isNullable(int)" class="member-name-link">isNullable(int)</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessResultSetMetaData.html" title="class in net.ucanaccess.jdbc">UcanaccessResultSetMetaData</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isNumeric(java.lang.Boolean)" class="member-name-link">isNumeric(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns <code>true</code>, as a boolean is the number -1 or 0 in Access.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isNumeric(java.lang.String)" class="member-name-link">isNumeric(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isNumeric(java.math.BigDecimal)" class="member-name-link">isNumeric(BigDecimal)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns <code>true</code> if the expression is a valid number, otherwise <code>false</code>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#isNumeric(java.sql.Timestamp)" class="member-name-link">isNumeric(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns <code>false</code>, as Access does not take a date for a number in IsNumeric.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/RegionalSettings.html#isPointDateSeparator()" class="member-name-link">isPointDateSeparator()</a> - Method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/RegionalSettings.html" title="class in net.ucanaccess.converters">RegionalSettings</a></dt>
 <dd>&nbsp;</dd>
@@ -2474,6 +2588,18 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Boolean,java.lang.Boolean,java.lang.Boolean%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(Boolean, Boolean, Boolean[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Double,java.lang.Boolean,java.lang.Double%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(Double, Boolean, Double[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the last value of a group of double values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.last(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Integer,java.lang.Boolean,java.lang.Integer%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(Integer, Boolean, Integer[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the last value of a group of integer values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.last(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Long,java.lang.Boolean,java.lang.Long%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(Long, Boolean, Long[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
+<dd>
+<div class="block">Returns the last value of a group of long values, see <a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)"><code>FunctionsAggregate.last(Object, Boolean, Object[], Integer[])</code></a>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.Object,java.lang.Boolean,java.lang.Object%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(Object, Boolean, Object[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html#last(java.lang.String,java.lang.Boolean,java.lang.String%5B%5D,java.lang.Integer%5B%5D)" class="member-name-link">last(String, Boolean, String[], Integer[])</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/FunctionsAggregate.html" title="class in net.ucanaccess.converters">FunctionsAggregate</a></dt>
@@ -2488,6 +2614,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#leftS(java.lang.String,int)" class="member-name-link">leftS(String, int)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#len(java.lang.Boolean)" class="member-name-link">len(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns the length of a boolean converted to text, so 2 for <code>true</code> ("-1") and 1 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#len(java.lang.Double)" class="member-name-link">len(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns the length of a number converted to text, like Access does for numeric expressions.</div>
@@ -2495,6 +2625,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#len(java.lang.String)" class="member-name-link">len(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns the length of the specified string.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#len(java.sql.Timestamp)" class="member-name-link">len(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns the length of a date converted to text in the general date format.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessBlob.html#length()" class="member-name-link">length()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessBlob.html" title="class in net.ucanaccess.jdbc">UcanaccessBlob</a></dt>
 <dd>&nbsp;</dd>
@@ -2576,6 +2710,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#mint(java.lang.Double)" class="member-name-link">mint(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns the integer portion of a number, rounding negative numbers down like Access.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#mint(java.sql.Timestamp)" class="member-name-link">mint(Timestamp)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns the date without the time, as Int of a date value in Access.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#minute(java.lang.Double)" class="member-name-link">minute(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
@@ -3629,6 +3767,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessDatabaseMetadata.html#storesUpperCaseQuotedIdentifiers()" class="member-name-link">storesUpperCaseQuotedIdentifiers()</a> - Method in class net.ucanaccess.jdbc.<a href="io.github.spannm.ucanaccess/net/ucanaccess/jdbc/UcanaccessDatabaseMetadata.html" title="class in net.ucanaccess.jdbc">UcanaccessDatabaseMetadata</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#str(java.lang.Boolean)" class="member-name-link">str(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Converts a boolean to text like the number -1 for <code>true</code> or 0 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#str(java.lang.Double)" class="member-name-link">str(Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns a string representation of a number.</div>
@@ -3644,6 +3786,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#strConv(java.lang.String,int)" class="member-name-link">strConv(String, int)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns a string converted as specified.</div>
+</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#string(java.lang.Integer,java.lang.Integer)" class="member-name-link">string(Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns a character repeated, given by its character code; like in Access, codes above 255 count modulo 256.</div>
 </dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#string(java.lang.Integer,java.lang.String)" class="member-name-link">string(Integer, String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
@@ -3856,6 +4002,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the current system time as text in the format hh:mm:ss, like Time$ in Access.</div>
 </dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#timeSerial(java.lang.Double,java.lang.Double,java.lang.Double)" class="member-name-link">timeSerial(Double, Double, Double)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns a time given hours, minutes and seconds with fractions, which are rounded to whole numbers first,
+ halves to even like Access, so TimeSerial(1.5, 0, 0) is 02:00:00.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#timeSerial(java.lang.Integer,java.lang.Integer,java.lang.Integer)" class="member-name-link">timeSerial(Integer, Integer, Integer)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Returns a time given an hour, minute, and second value.</div>
@@ -3944,6 +4095,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">TriggerException(String)</a> - Constructor for exception class net.ucanaccess.triggers.<a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerException.html" title="class in net.ucanaccess.triggers">TriggerException</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable)" class="member-name-link">TriggerException(String, Throwable)</a> - Constructor for exception class net.ucanaccess.triggers.<a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerException.html" title="class in net.ucanaccess.triggers">TriggerException</a></dt>
+<dd>
+<div class="block">Creates a trigger exception that keeps the exception it was caused by.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerInsert.html" class="type-name-link" title="class in net.ucanaccess.triggers">TriggerInsert</a> - Class in <a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/package-summary.html">net.ucanaccess.triggers</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerInsert.html#%3Cinit%3E()" class="member-name-link">TriggerInsert()</a> - Constructor for class net.ucanaccess.triggers.<a href="io.github.spannm.ucanaccess/net/ucanaccess/triggers/TriggerInsert.html" title="class in net.ucanaccess.triggers">TriggerInsert</a></dt>
@@ -4306,6 +4461,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/type/AccessVersion.html#V2016" class="member-name-link">V2016</a> - Enum constant in enum net.ucanaccess.type.<a href="io.github.spannm.ucanaccess/net/ucanaccess/type/AccessVersion.html" title="enum in net.ucanaccess.type">AccessVersion</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#val(java.lang.Boolean)" class="member-name-link">val(Boolean)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
+<dd>
+<div class="block">Returns -1 for <code>true</code> or 0 for <code>false</code>.</div>
+</dd>
 <dt><a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html#val(java.lang.String)" class="member-name-link">val(String)</a> - Static method in class net.ucanaccess.converters.<a href="io.github.spannm.ucanaccess/net/ucanaccess/converters/Functions.html" title="class in net.ucanaccess.converters">Functions</a></dt>
 <dd>
 <div class="block">Accepts a string as input and returns the numbers found in that string.</div>

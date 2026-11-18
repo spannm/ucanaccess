@@ -94,9 +94,9 @@
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof BigDecimal &amp;&amp; dbVal instanceof Number) {
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>                  <strong class="jxr_keyword">return</strong> ((BigDecimal) currVal).compareTo(<strong class="jxr_keyword">new</strong> BigDecimal(dbVal.toString())) == 0;
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof Integer &amp;&amp; dbVal instanceof Short) {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>                  <strong class="jxr_keyword">return</strong> (Integer) currVal == ((Short) dbVal).intValue();
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>                  <strong class="jxr_keyword">return</strong> (Integer) currVal == (<strong class="jxr_keyword">short</strong>) dbVal;
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dbVal instanceof Integer &amp;&amp; currVal instanceof Short) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  <strong class="jxr_keyword">return</strong> (Integer) dbVal == ((Short) currVal).intValue();
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  <strong class="jxr_keyword">return</strong> (Integer) dbVal == (<strong class="jxr_keyword">short</strong>) currVal;
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (currVal instanceof Integer &amp;&amp; dbVal instanceof Byte) {
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>                  <strong class="jxr_keyword">return</strong> (Integer) currVal == SQLConverter.asUnsigned((Byte) dbVal);
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>              } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dbVal instanceof Integer &amp;&amp; currVal instanceof Byte) {
@@ -109,7 +109,7 @@
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>                     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L102" href="#L102">102</a>                 }
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>                 <strong class="jxr_keyword">if</strong> (dbVal instanceof Float &amp;&amp; currVal instanceof Double) {
-<a class="jxr_linenumber" name="L104" href="#L104">104</a>                     <strong class="jxr_keyword">return</strong> ((Float) dbVal).doubleValue() == (Double) currVal;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>                     <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">float</strong>) dbVal == (<strong class="jxr_keyword">double</strong>) currVal;
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>                 }
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>             }
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>             <strong class="jxr_keyword">if</strong> (currVal instanceof byte[] &amp;&amp; dbVal instanceof byte[]) {
