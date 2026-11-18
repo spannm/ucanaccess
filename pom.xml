@@ -246,6 +246,8 @@
                     <configuration>
                         <systemPropertyVariables>
                             <user.timezone/>
+                            <!-- the console encoding of Maven, which prints the output of the test JVM -->
+                            <stdout.encoding>${stdout.encoding}</stdout.encoding>
                         </systemPropertyVariables>
 
                         <failIfNoTests>true</failIfNoTests>
