@@ -21,6 +21,12 @@ java -jar ucanaccess-&lt;version&gt;-uber.jar /path/to/your/database.accdb</pre>
             scripts put on the classpath.
         </p>
         <p>
+            On Linux and macOS, <i>console.sh</i> runs the console through
+            <a href="https://github.com/hanslub42/rlwrap">rlwrap</a> if it is installed. You then get line editing and
+            a history of your statements with the arrow keys, kept in <i>~/.ucanaccess_history</i>. The Windows console
+            offers both on its own.
+        </p>
+        <p>
             Once connected, the console prints the version, the database and its format, followed by a prompt. You can
             enter SQL queries or commands at this prompt. All queries and commands end with a semicolon (";"),
             <code>quit</code> or <code>exit</code> leaves the console. Errors are printed to standard error.
