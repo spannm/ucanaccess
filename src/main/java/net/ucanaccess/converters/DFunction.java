@@ -34,7 +34,7 @@ public class DFunction {
     /**
      * Replaces each domain function by a subquery. The expression and the domain must be text literals; the criterion
      * is a text literal or text joined with &amp;, whose other parts refer to the row of the outer query. A SELECT
-     * without a FROM clause gets FROM DUAL, as HSQLDB needs one.
+     * without a FROM clause gets FROM DUAL later, see {@link SQLConverter#addFromDual(String)}.
      *
      * @return converted SQL
      */
@@ -55,11 +55,6 @@ public class DFunction {
             out = out.substring(0, m.start()) + replacement + out.substring(close + 1);
             pos = m.start() + replacement.length();
             m = PAT_DFUNCTION.matcher(out);
-        }
-        // HSQLDB needs a FROM clause around the subqueries
-        String upper = sql.toUpperCase(Locale.ROOT);
-        if (!out.equals(sql) && upper.trim().startsWith("SELECT") && !upper.contains(" FROM ")) {
-            out = out.trim() + " FROM DUAL";
         }
         return out;
     }

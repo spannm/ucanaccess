@@ -136,6 +136,9 @@ public final class SQLConverter {
         "OR", "NOT", "AS", "ON", "CASE", "WHEN", "THEN", "ELSE", "END", "HAVING", "GROUP", "ORDER", "BY", "LIKE", "BETWEEN",
         "IS", "IN", "VALUES", "SET", "UNION", "JOIN", "INNER", "LEFT", "RIGHT", "OUTER", "INTO", "ASC", "DESC", "LIMIT",
         "TOP", "DISTINCT", "ALL", "EXISTS", "ESCAPE");
+    /** Keywords that follow the FROM clause, so a SELECT without FROM ends before them. */
+    private static final List<String>        SELECT_END_KEYWORDS            = List.of("WHERE", "GROUP", "HAVING", "ORDER",
+        "UNION", "INTERSECT", "EXCEPT");
     private static final List<String>        WHITE_SPACED_TABLE_NAMES       = new ArrayList<>();
     private static final Set<String>         ESCAPED_IDENTIFIERS            = new HashSet<>();
     private static final Set<String>         ALREADY_ESCAPED_IDENTIFIERS    = new HashSet<>();
@@ -438,6 +441,7 @@ public final class SQLConverter {
         }
         // after the domain functions, which split dynamic criteria at &
         sql = translateAccessConcatenation(sql);
+        sql = addFromDual(sql);
         sql = sql.trim();
 
         nsql.setSql(sql);
@@ -690,6 +694,117 @@ public final class SQLConverter {
             }
         }
         return -1;
+    }
+
+    /**
+     * Adds {@code FROM DUAL} to each SELECT without a FROM clause of its own, like {@code SELECT Now()}, which Access
+     * allows and HSQLDB does not. This also covers subqueries, the parts of a UNION and INSERT ... SELECT.
+     *
+     * @param sql SQL string
+     * @return SQL string with a FROM clause for each SELECT
+     */
+    static String addFromDual(String sql) {
+        boolean[] quoted = quotedPositions(sql);
+        markBrackets(sql, quoted);
+        List<Integer> inserts = new ArrayList<>();
+        for (int i = 0; i < sql.length(); i++) {
+            if (!quoted[i] && isKeywordAt(sql, i, "SELECT")) {
+                int end = endOfSelectWithoutFrom(sql, quoted, i + "SELECT".length());
+                if (end >= 0) {
+                    inserts.add(end);
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder(sql);
+        for (int k = inserts.size() - 1; k >= 0; k--) {
+            sb.insert(inserts.get(k), " FROM DUAL");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Finds the end of a SELECT up to the closing parenthesis of a subquery, a semicolon or a keyword that follows the
+     * FROM clause, all on the level of the SELECT.
+     *
+     * @param sql    SQL string
+     * @param quoted quoted positions
+     * @param from   position after the keyword SELECT
+     * @return position after the last expression of the SELECT, -1 if the SELECT has a FROM clause
+     */
+    private static int endOfSelectWithoutFrom(String sql, boolean[] quoted, int from) {
+        int depth = 0;
+        int i = from;
+        for (; i < sql.length(); i++) {
+            if (quoted[i]) {
+                continue;
+            }
+            char c = sql.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                if (depth == 0) {
+                    break;
+                }
+                depth--;
+            } else if (depth == 0) {
+                if (isKeywordAt(sql, i, "FROM")) {
+                    return -1;
+                } else if (c == ';' || isSelectEnd(sql, i)) {
+                    break;
+                }
+            }
+        }
+        while (i > from && Character.isWhitespace(sql.charAt(i - 1))) {
+            i--;
+        }
+        return i;
+    }
+
+    /**
+     * Returns whether a keyword that follows the FROM clause starts at the given position.
+     */
+    private static boolean isSelectEnd(String sql, int pos) {
+        return SELECT_END_KEYWORDS.stream().anyMatch(kw -> isKeywordAt(sql, pos, kw));
+    }
+
+    /**
+     * Returns whether the given keyword starts at the given position as a word of its own, ignoring case.
+     */
+    private static boolean isKeywordAt(String sql, int pos, String keyword) {
+        int end = pos + keyword.length();
+        return sql.regionMatches(true, pos, keyword, 0, keyword.length())
+            && (pos == 0 || !isIdentifierChar(sql.charAt(pos - 1)))
+            && (end >= sql.length() || !isIdentifierChar(sql.charAt(end)));
+    }
+
+    /**
+     * Returns whether the given character can be part of an unquoted identifier.
+     */
+    private static boolean isIdentifierChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_' || c == '@' || c == '$';
+    }
+
+    /**
+     * Marks names in square brackets outside of quotes as quoted.
+     *
+     * @param sql    SQL string
+     * @param quoted quoted positions, which are completed
+     */
+    private static void markBrackets(String sql, boolean[] quoted) {
+        boolean inBrackets = false;
+        for (int i = 0; i < sql.length(); i++) {
+            if (quoted[i]) {
+                continue;
+            }
+            char c = sql.charAt(i);
+            if (c == '[') {
+                inBrackets = true;
+            }
+            quoted[i] = inBrackets;
+            if (c == ']') {
+                inBrackets = false;
+            }
+        }
     }
 
     /**
