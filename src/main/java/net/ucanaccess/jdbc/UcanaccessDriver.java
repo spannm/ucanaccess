@@ -2,7 +2,10 @@ package net.ucanaccess.jdbc;
 
 import static net.ucanaccess.converters.Metadata.Property.*;
 
+import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Database.FileFormat;
+import io.github.spannm.jackcess.impl.DatabaseImpl;
+import io.github.spannm.jackcess.impl.JetFormat.CodecType;
 import net.ucanaccess.converters.LoadJet;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.AuthenticationException;
@@ -92,7 +95,9 @@ public final class UcanaccessDriver implements Driver {
                 DBReference dbRef = alreadyLoaded ? as.getReference(fileDb) : as.loadReference(fileDb, ff, jko, knownProps.get(password), charsetArg);
 
                 if (!alreadyLoaded) {
-                    if ((useCustomOpener
+                    // the mirror of an encrypted database must not be stored in plain text
+                    boolean encryptedDb = knownProps.get(password) != null && isOfficeFormat(dbRef.getDbIO());
+                    if ((useCustomOpener || encryptedDb
                         || (knownProps.containsKey(encrypt) && Boolean.parseBoolean(knownProps.get(encrypt))))
                         && ((knownProps.containsKey(memory) && !Boolean.parseBoolean(knownProps.get(memory)))
                             || knownProps.containsKey(keepMirror))) {
@@ -182,7 +187,7 @@ public final class UcanaccessDriver implements Driver {
                         throw new IOException(ex);
                     });
                 }
-                String pwd = dbRef.getDbIO().getDatabasePassword();
+                String pwd = getJetPassword(dbRef.getDbIO());
                 if (pwd != null && !knownProps.containsKey(jackcessOpener)) {
                     if (!pwd.equals(knownProps.get(password))) {
                         throw new AuthenticationException();
@@ -280,6 +285,22 @@ public final class UcanaccessDriver implements Driver {
     @Override
     public boolean jdbcCompliant() {
         return true;
+    }
+
+    /**
+     * Returns the password in the header of the database. Databases of Access 2007 and later keep no password there,
+     * their password is checked when decrypting them.
+     */
+    private static String getJetPassword(Database db) throws IOException {
+        return isOfficeFormat(db) ? null : db.getDatabasePassword();
+    }
+
+    /**
+     * Returns whether the given database uses the format of Access 2007 and later, which is encrypted if it has a
+     * password.
+     */
+    private static boolean isOfficeFormat(Database db) {
+        return db instanceof DatabaseImpl && ((DatabaseImpl) db).getFormat().CODEC_TYPE == CodecType.OFFICE;
     }
 
     /**

@@ -137,5 +137,12 @@
     &lt;artifactId&gt;jackcess-encrypt&lt;/artifactId&gt;
     &lt;version&gt;5.2.0&lt;/version&gt;
 &lt;/dependency&gt;</pre>
+        <p>
+            Since 5.3.1 UCanAccess opens encrypted databases on its own as soon as Jackcess Encrypt is on the classpath,
+            just pass the password in the connection, e.g. <code>jdbc:ucanaccess://C:/data/secret.accdb;password=secret</code>.
+            The uber jar already contains Jackcess Encrypt, only <a href="https://www.bouncycastle.org/">Bouncy Castle</a>
+            (<code>org.bouncycastle:bcprov-jdk18on</code>) has to be added. The distribution zip ships it in the
+            <code>lib</code> folder.
+        </p>
     </body>
 </html>

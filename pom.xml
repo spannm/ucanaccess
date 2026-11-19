@@ -109,6 +109,7 @@
         <uber.jar.classifier.name>uber</uber.jar.classifier.name>
 
         <dep.jackcess.version>5.2.0</dep.jackcess.version>
+        <dep.jackcess-encrypt.version>5.2.0</dep.jackcess-encrypt.version>
 
         <dep.hsqldb.version>2.7.4</dep.hsqldb.version>
         <dep.hsqldb.classifier/>
@@ -171,6 +172,15 @@
             <groupId>io.github.spannm</groupId>
             <artifactId>jackcess</artifactId>
             <version>${dep.jackcess.version}</version>
+        </dependency>
+
+        <!-- optional for encrypted databases, part of the uber jar, while Bouncy Castle goes to the lib folder -->
+        <dependency>
+            <groupId>io.github.spannm</groupId>
+            <artifactId>jackcess-encrypt</artifactId>
+            <version>${dep.jackcess-encrypt.version}</version>
+            <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -519,6 +529,7 @@
                                     <exclude>commons-io:commons-io</exclude>
                                     <exclude>com.zaxxer:SparseBitSet</exclude>
                                     <exclude>org.apache.logging.log4j</exclude>
+                                    <exclude>org.bouncycastle:bcprov-jdk18on</exclude>
                                 </excludes>
                             </artifactSet>
 

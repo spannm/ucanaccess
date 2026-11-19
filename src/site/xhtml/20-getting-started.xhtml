@@ -192,6 +192,11 @@ Connection connExample = DriverManager.getConnection(&quot;jdbc:ucanaccess://c:/
             UCanAccess</strong><br/>
         </p>
         <p>
+            Since 5.3.1 a custom opener is no longer needed for encrypted databases: if Jackcess Encrypt is on the
+            classpath, the default opener uses it with the password of the connection. With <code>memory=false</code>,
+            the HSQLDB files of an encrypted Access 2007 and later database are encrypted as well.
+        </p>
+        <p>
             <strong>Security note:</strong> the class name passed to <code>jackcessOpener</code> is loaded and
             instantiated via reflection using its public no-arg constructor. This parameter must therefore only ever
             be set from trusted, static application configuration &#8211; never from untrusted or user-supplied input
