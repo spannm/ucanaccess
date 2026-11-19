@@ -1,24 +1,15 @@
 @ECHO OFF
-SET PATH=%PATH%;.
-SET BASE_DIR=%~f0
+SETLOCAL
 
-:CONT
-SET RMVD=%BASE_DIR:~-1%
-SET BASE_DIR=%BASE_DIR:~0,-1%
-if NOT "%RMVD%"=="\" goto CONT
+SET "UCANACCESS_HOME=%~dp0"
 
-SET UCANACCESS_HOME=%BASE_DIR%
-SET LOCAL_HOME_JAVA="%JAVA_HOME%"
-IF EXIST %LOCAL_HOME_JAVA%\bin\java.exe (
-    SET LOCAL_JAVA=%LOCAL_HOME_JAVA%\bin\java.exe
+IF EXIST "%JAVA_HOME%\bin\java.exe" (
+    SET "JAVACMD=%JAVA_HOME%\bin\java.exe"
 ) ELSE (
-    SET LOCAL_JAVA=java.exe
+    SET "JAVACMD=java.exe"
 )
 
-%LOCAL_JAVA% -version
-@ECHO.
+"%JAVACMD%" -jar "%UCANACCESS_HOME%${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar" %*
 
-SET CLASSPATH="%UCANACCESS_HOME%\${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar"
-
-%LOCAL_JAVA% -jar %CLASSPATH%
-PAUSE
+REM keep the window open when started by double-click
+IF "%~1"=="" PAUSE

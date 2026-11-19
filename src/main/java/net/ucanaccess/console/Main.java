@@ -12,6 +12,7 @@ import net.ucanaccess.util.Try;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +55,7 @@ public class Main {
         String[] commands = null;
         if (args.length > 0) {
             String file = args[0];
-            if (file.endsWith(".properties")) {
+            if (file.toLowerCase(Locale.ROOT).endsWith(".properties")) {
                 File pfl = new File(args[0]);
                 if (pfl.exists()) {
                     try (FileInputStream fis = new FileInputStream(pfl)) {
@@ -66,12 +67,12 @@ public class Main {
                             k -> Optional.ofNullable(Property.parse(k)).map(Property::name).orElse(k.toLowerCase(Locale.ROOT)),
                             props::getProperty, (v1, v2) -> v1, Properties::new));
                 }
-            } else if (file.endsWith(".accdb") || file.endsWith(".mdb")) {
+            } else {
                 fl = new File(file);
                 size = fl.length();
                 if (args.length > 1) {
-                    if (hasPassword(fl)) {
-                       passwordEntry = args[1];
+                    if (fl.isFile() && hasPassword(fl)) {
+                       passwordEntry = ";password=" + args[1];
                     } else {
                        commands = Arrays.copyOfRange(args, 1, args.length);
                     }
@@ -91,7 +92,11 @@ public class Main {
                 System.out.println("Given file does not exist");
             }
             System.out.print("Please, enter the full path to the access file (.mdb or .accdb): ");
-            String path = input.readLine().trim();
+            String path = input.readLine();
+            if (path == null) {
+                System.exit(1);
+            }
+            path = path.trim();
             if (path.endsWith(";")) {
                 path = path.substring(0, path.length() - 1);
             }
@@ -282,7 +287,7 @@ public class Main {
      * The {@code -d ,} option changes the delimiter character to a comma instead of the default semicolon. The
      * {@code -t License} option dumps the {@code License} table using the SQL statement "SELECT * FROM [License]".
      */
-    private void executeExport(String cmd) throws SQLException, IOException {
+    void executeExport(String cmd) throws SQLException, IOException {
         List<String> tokens = tokenize(cmd);
 
         Exporter.Builder exporterBuilder = new Exporter.Builder();
@@ -293,7 +298,10 @@ public class Main {
         int i = 1; // skip the first token which will always be "export"
         for (; i < tokens.size(); i++) {
             String arg = tokens.get(i);
-            if (!arg.startsWith("-")) {
+            if ("--".equals(arg)) {
+                i++;
+                break;
+            } else if (!arg.startsWith("-")) {
                 break;
             }
             switch (arg) {
@@ -333,9 +341,6 @@ public class Main {
                 case "--help":
                     printExportHelp();
                     return;
-                case "--":
-                    i++;
-                    break;
                 default:
                     prompt("Unknown flag " + arg);
                     prompt(EXPORT_PROMPT);
@@ -384,7 +389,7 @@ public class Main {
 
             // output the csvFile
             File csvFile = new File(csvFileName);
-            try (PrintStream out = new PrintStream(csvFile)) {
+            try (PrintStream out = new PrintStream(csvFile, StandardCharsets.UTF_8)) {
                 exporter.dumpCsv(rs, out);
                 out.flush();
             }
@@ -393,7 +398,7 @@ public class Main {
             // output the schema file if requested
             if (schemaFileName != null) {
                 File schemaFile = new File(schemaFileName);
-                try (PrintStream out = new PrintStream(csvFile)) {
+                try (PrintStream out = new PrintStream(schemaFile, StandardCharsets.UTF_8)) {
                     exporter.dumpSchema(rs, out);
                     out.flush();
                 }
