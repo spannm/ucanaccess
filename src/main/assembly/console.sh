@@ -8,4 +8,7 @@ else
     JAVACMD=java
 fi
 
-exec "$JAVACMD" -jar "$UCANACCESS_HOME/${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar" "$@"
+# the lib folder holds the optional jars for encrypted databases
+CLASSPATH="$UCANACCESS_HOME/${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar:$UCANACCESS_HOME/lib/*"
+
+exec "$JAVACMD" -cp "$CLASSPATH" ${ucanaccess.console.main} "$@"

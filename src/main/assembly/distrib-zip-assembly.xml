@@ -36,4 +36,17 @@
         </file>
     </files>
 
+    <!-- Bouncy Castle, only needed for encrypted databases -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.bouncycastle:bcprov-jdk18on</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
 </assembly>

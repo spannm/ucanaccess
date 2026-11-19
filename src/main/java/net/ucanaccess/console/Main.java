@@ -5,9 +5,9 @@ import static net.ucanaccess.type.SqlConstants.SELECT;
 
 import io.github.spannm.jackcess.Database;
 import io.github.spannm.jackcess.Database.FileFormat;
-import io.github.spannm.jackcess.DatabaseBuilder;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.jdbc.DefaultJackcessOpener;
 import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Sql;
 import net.ucanaccess.util.Try;
@@ -50,12 +50,17 @@ public class Main {
         this.input = input;
     }
 
+    /**
+     * Returns whether the given database needs a password. An encrypted database that cannot be opened without it needs
+     * one, a database that cannot be decrypted at all is left to the driver to report.
+     */
     private static boolean hasPassword(File f) throws IOException {
-        try (Database db = Try.catching(() -> DatabaseBuilder.open(f))
-            .orElseGet(() -> Try.catching(() -> new DatabaseBuilder()
-                .withReadOnly(true)
-                .withFile(f).open()).orThrow())) {
+        try (Database db = new DefaultJackcessOpener().open(f, null)) {
             return db.getDatabasePassword() != null;
+        } catch (UnsupportedOperationException ex) {
+            return false;
+        } catch (IllegalStateException ex) {
+            return true;
         }
     }
 

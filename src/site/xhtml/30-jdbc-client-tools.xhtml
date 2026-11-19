@@ -17,6 +17,10 @@
         <pre>
 java -jar ucanaccess-&lt;version&gt;-uber.jar /path/to/your/database.accdb</pre>
         <p>
+            Encrypted databases additionally need Bouncy Castle from the <i>lib</i> folder of the distribution, which the
+            scripts put on the classpath.
+        </p>
+        <p>
             Once connected, the console prints the version, the database and its format, followed by a prompt. You can
             enter SQL queries or commands at this prompt. All queries and commands end with a semicolon (";"),
             <code>quit</code> or <code>exit</code> leaves the console. Errors are printed to standard error.

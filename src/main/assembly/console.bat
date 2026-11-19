@@ -9,7 +9,10 @@ IF EXIST "%JAVA_HOME%\bin\java.exe" (
     SET "JAVACMD=java.exe"
 )
 
-"%JAVACMD%" -jar "%UCANACCESS_HOME%${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar" %*
+REM the lib folder holds the optional jars for encrypted databases
+SET "CLASSPATH=%UCANACCESS_HOME%${artifact.artifactId}-${artifact.version}-${uber.jar.classifier.name}.jar;%UCANACCESS_HOME%lib\*"
+
+"%JAVACMD%" -cp "%CLASSPATH%" ${ucanaccess.console.main} %*
 
 REM keep the window open when started by double-click
 IF "%~1"=="" PAUSE
