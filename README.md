@@ -132,6 +132,29 @@ try (Connection conn = DriverManager.getConnection(url)) {
 
 <p style="height: 20px;">&nbsp;</p>
 
+## Console
+
+UCanAccess comes with a small interactive SQL console. It is the quickest way to look into an Access database
+without writing any code. Download the
+[uber jar](https://repo1.maven.org/maven2/io/github/spannm/ucanaccess/5.3.0/ucanaccess-5.3.0-uber.jar), which
+contains all dependencies, and pass it the database file:
+
+```shell
+java -jar ucanaccess-5.3.0-uber.jar /path/to/your/database.accdb
+```
+
+Enter SQL statements at the `UCanAccess>` prompt and end each one with a semicolon. Results are printed as a table,
+`quit` leaves the console. A statement given after the file name is executed once, without an interactive session:
+
+```shell
+java -jar ucanaccess-5.3.0-uber.jar /path/to/your/database.accdb "SELECT * FROM Customers"
+```
+
+The `export` command writes the last result or a whole table to a CSV file, e.g. `export -t Customers customers.csv;`.
+See [JDBC client tools](https://spannm.github.io/ucanaccess/30-jdbc-client-tools.html) for all options.
+
+<p style="height: 20px;">&nbsp;</p>
+
 ## 🔗 Linked Tables & Untrusted Databases
 
 If the `.accdb`/`.mdb` file you open contains linked tables, UCanAccess automatically opens the linked database files
