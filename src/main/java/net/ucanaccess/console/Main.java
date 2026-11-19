@@ -4,9 +4,11 @@ import static net.ucanaccess.type.SqlConstants.FROM;
 import static net.ucanaccess.type.SqlConstants.SELECT;
 
 import io.github.spannm.jackcess.Database;
+import io.github.spannm.jackcess.Database.FileFormat;
 import io.github.spannm.jackcess.DatabaseBuilder;
 import net.ucanaccess.converters.Metadata.Property;
 import net.ucanaccess.exception.UcanaccessRuntimeException;
+import net.ucanaccess.jdbc.UcanaccessConnection;
 import net.ucanaccess.util.Sql;
 import net.ucanaccess.util.Try;
 
@@ -23,7 +25,19 @@ public class Main {
     private static final String  EXPORT_USAGE  = "export [--help] [--bom] [-d <delimiter>] [-t <table>] "
         + "[--big_query_schema <pathToSchemaFile>] " + "[--newlines] <pathToCsv>";
 
-    private static final String  EXPORT_PROMPT = "Export command syntax is: " + EXPORT_USAGE;
+    private static final String  EXPORT_PROMPT = "Usage: " + EXPORT_USAGE;
+
+    private static final String  USAGE         = String.join(System.lineSeparator(),
+        "Usage: console [<database> [<password> | <statement>]]",
+        "       console <connection>.properties",
+        "Opens an interactive SQL console on an Access database (.mdb, .accdb).",
+        "  <database>    database file, asked for if missing",
+        "  <password>    password of the database, asked for if needed",
+        "  <statement>   SQL statement to execute instead of starting the console",
+        "  --help        print this help",
+        "  --version     print the version");
+
+    private static final long    MEMORY_LIMIT  = 30_000_000;
 
     private static boolean       batchMode     = false;
     private final Connection     conn;
@@ -55,7 +69,16 @@ public class Main {
         String[] commands = null;
         if (args.length > 0) {
             String file = args[0];
-            if (file.toLowerCase(Locale.ROOT).endsWith(".properties")) {
+            if ("--help".equals(file) || "-h".equals(file)) {
+                System.out.println(USAGE);
+                return;
+            } else if ("--version".equals(file)) {
+                System.out.printf("UCanAccess %s%n", version());
+                return;
+            } else if (file.startsWith("-")) {
+                System.err.printf("Unknown option: %s%n%s%n", file, USAGE);
+                System.exit(2);
+            } else if (file.toLowerCase(Locale.ROOT).endsWith(".properties")) {
                 File pfl = new File(args[0]);
                 if (pfl.exists()) {
                     try (FileInputStream fis = new FileInputStream(pfl)) {
@@ -75,6 +98,7 @@ public class Main {
                        passwordEntry = ";password=" + args[1];
                     } else {
                        commands = Arrays.copyOfRange(args, 1, args.length);
+                       setBatchMode(true);
                     }
                 }
             }
@@ -83,15 +107,14 @@ public class Main {
         try {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         } catch (ClassNotFoundException ex) {
-            System.err.println(ex.getMessage());
-            System.err.println("Check your classpath!");
+            System.err.printf("UCanAccess driver not found on the classpath: %s%n", ex.getMessage());
             System.exit(1);
         }
         while (fl == null || !fl.exists()) {
             if (fl != null) {
-                System.out.println("Given file does not exist");
+                System.err.printf("File not found: %s%n", fl.getAbsolutePath());
             }
-            System.out.print("Please, enter the full path to the access file (.mdb or .accdb): ");
+            System.out.print("Path to the Access database (.mdb, .accdb): ");
             String path = input.readLine();
             if (path == null) {
                 System.exit(1);
@@ -100,9 +123,8 @@ public class Main {
             if (path.endsWith(";")) {
                 path = path.substring(0, path.length() - 1);
             }
-            if ("quit".equalsIgnoreCase(path)) {
-                System.out.println("I'm so unhappy. Goodbye.");
-                System.exit(1);
+            if (isQuit(path)) {
+                return;
             }
             fl = new File(path);
             size = fl.length();
@@ -111,12 +133,16 @@ public class Main {
         try {
             String noMem = "";
             if (passwordEntry.isEmpty() && (props.containsKey(Property.jackcessOpener.name()) || hasPassword(fl))) {
-                System.out.print("Please, enter password: ");
-                passwordEntry = ";password=" + input.readLine().trim();
+                String password = readPassword(input);
+                if (password == null) {
+                    System.exit(1);
+                }
+                passwordEntry = ";password=" + password;
             }
 
-            if (!props.containsKey(Property.jackcessOpener.name())) {
-                noMem = size > 30000000 ? ";" + Property.memory + "=false" : "";
+            if (!props.containsKey(Property.jackcessOpener.name()) && size > MEMORY_LIMIT) {
+                noMem = ";" + Property.memory + "=false";
+                System.out.printf("Large database, opening it with %s=false%n", Property.memory);
             }
 
             conn = DriverManager.getConnection("jdbc:ucanaccess://" + fl.getAbsolutePath() + passwordEntry + noMem, props);
@@ -127,12 +153,51 @@ public class Main {
                 sqlw = sqlw.getNextWarning();
             }
         } catch (Exception ex) {
-            System.err.println(ex);
+            System.err.printf("Error: %s%n", ex.getMessage());
             System.exit(1);
         }
         Main main = new Main(conn, input);
-        main.sayHello(conn.getMetaData().getDriverVersion());
+        if (commands == null) {
+            main.sayHello(fl);
+        }
         main.start(commands);
+    }
+
+    /**
+     * Returns the version of UCanAccess from the manifest, which is missing when running from the class files.
+     */
+    private static String version() {
+        return Optional.ofNullable(Main.class.getPackage().getImplementationVersion()).orElse("(development build)");
+    }
+
+    /**
+     * Reads the database password, without echo if a terminal is attached.
+     */
+    private static String readPassword(BufferedReader input) throws IOException {
+        Console console = System.console();
+        if (isTerminal(console)) {
+            char[] password = console.readPassword("Password: ");
+            return password == null ? null : new String(password);
+        }
+        System.out.print("Password: ");
+        return Optional.ofNullable(input.readLine()).map(String::trim).orElse(null);
+    }
+
+    /**
+     * Returns whether the given console is attached to a terminal. Since Java 22 {@link System#console()} returns a
+     * console even without a terminal, only {@code Console.isTerminal()} tells.
+     */
+    private static boolean isTerminal(Console console) {
+        if (console == null) {
+            return false;
+        }
+        try {
+            return (Boolean) Console.class.getMethod("isTerminal").invoke(console);
+        } catch (NoSuchMethodException ex) {
+            return true;
+        } catch (ReflectiveOperationException ex) {
+            return false;
+        }
     }
 
     public static void setBatchMode(boolean batchMode) {
@@ -166,11 +231,11 @@ public class Main {
                     consoleDump(rs, System.out);
                     lastSqlQuery = sql;
                 } else {
-                    System.out.println("Ok!");
+                    System.out.println("OK");
                 }
             } else {
                 int num = st.getUpdateCount();
-                prompt(num == 0 ? "No rows affected" : num + " row(s) affected");
+                System.out.printf("%d %s affected%n", num, num == 1 ? "row" : "rows");
             }
         }
     }
@@ -178,21 +243,22 @@ public class Main {
     private void prompt() {
         System.out.println();
         if (!batchMode) {
-            System.out.print("UCanAccess>");
+            System.out.print("UCanAccess> ");
         }
     }
 
-    private void prompt(String content) {
-        if (!batchMode) {
-            System.out.println("UCanAccess>" + content);
-        }
+    /**
+     * Prints the given error message to standard error.
+     */
+    private static void error(String message) {
+        System.err.printf("Error: %s%n", message);
     }
 
     private String readInput() {
         try {
             String ret = input.readLine();
             if (ret == null) {
-                prompt("Ciao!");
+                System.out.println();
                 System.exit(0);
             }
             return ret.trim();
@@ -201,20 +267,41 @@ public class Main {
         }
     }
 
-    private void sayHello(String version) {
-        prompt("");
-        System.out.println("UCanAccess version " + version);
-        System.out.println("You are connected!! ");
-
-        System.out.println("Type quit to exit ");
-        System.out.println();
-        System.out.println("Commands end with ; ");
-        System.out.println();
-        System.out.println("Use:   ");
-        System.out.printf("   %s;%n", EXPORT_USAGE);
-        System.out.println(
-                "for exporting the result set from the last executed query or a specific table into a .csv file");
+    /**
+     * Prints the version, the database the console is connected to and how to use it.
+     */
+    private void sayHello(File dbFile) {
+        System.out.printf("UCanAccess %s, connected to %s (%s)%n", version(), dbFile.getAbsolutePath(), fileFormat());
+        System.out.println("End statements with ';'. Type 'quit' to exit, 'export --help;' for CSV export.");
         prompt();
+    }
+
+    /**
+     * Returns the file format of the database, e.g. {@code Access 2007} for {@link FileFormat#V2007}.
+     */
+    private String fileFormat() {
+        if (!(conn instanceof UcanaccessConnection)) {
+            return "unknown format";
+        }
+        String format = Try.catching(() -> ((UcanaccessConnection) conn).getDbIO().getFileFormat().name())
+            .orElse("unknown format");
+        return format.matches("V\\d{4}") ? "Access " + format.substring(1) : format;
+    }
+
+    /**
+     * Prints the given error message of the export command, followed by its usage.
+     */
+    private static void exportError(String message) {
+        error(message);
+        System.err.println(EXPORT_PROMPT);
+    }
+
+    /**
+     * Returns whether the given input ends the console.
+     */
+    static boolean isQuit(String userInput) {
+        String cmd = userInput.endsWith(";") ? userInput.substring(0, userInput.length() - 1).trim() : userInput;
+        return "quit".equalsIgnoreCase(cmd) || "exit".equalsIgnoreCase(cmd);
     }
 
     private void printExportHelp() {
@@ -247,7 +334,7 @@ public class Main {
             } else {
                 userInput = readInput();
             }
-            if ("quit".equalsIgnoreCase(userInput)) {
+            if (sb.length() == 0 && isQuit(userInput)) {
                 connected = false;
                 break;
             }
@@ -257,13 +344,13 @@ public class Main {
             if (userInput.endsWith(";")) {
                 String cmd = sb.substring(0, sb.length() - 1).trim();
                 try {
-                    if (cmd.toLowerCase(Locale.ROOT).startsWith("export ")) {
+                    if (cmd.toLowerCase(Locale.ROOT).matches("export(\\s.*)?")) {
                         executeExport(cmd);
                     } else {
                         executeStatement(cmd);
                     }
                 } catch (Exception ex) {
-                    prompt(ex.getMessage());
+                    error(ex.getMessage());
                 }
                 if (exit) {
                    connected = false;
@@ -273,7 +360,6 @@ public class Main {
                 prompt();
             }
         }
-        System.out.println("Cheers! Thank you for using the UCanAccess JDBC Driver.");
     }
 
     /**
@@ -308,8 +394,7 @@ public class Main {
                 case "-d":
                     i++;
                     if (i >= tokens.size()) {
-                        prompt("Missing parameter for -d flag");
-                        prompt(EXPORT_PROMPT);
+                        exportError("Option -d requires a value.");
                         return;
                     }
                     exporterBuilder.withDelimiter(tokens.get(i));
@@ -317,8 +402,7 @@ public class Main {
                 case "-t":
                     i++;
                     if (i >= tokens.size()) {
-                        prompt("Missing parameter for -t flag");
-                        prompt(EXPORT_PROMPT);
+                        exportError("Option -t requires a value.");
                         return;
                     }
                     table = tokens.get(i);
@@ -332,8 +416,7 @@ public class Main {
                 case "--big_query_schema":
                     i++;
                     if (i >= tokens.size()) {
-                        prompt("Missing parameter for --big_query_schema flag");
-                        prompt(EXPORT_PROMPT);
+                        exportError("Option --big_query_schema requires a value.");
                         return;
                     }
                     schemaFileName = tokens.get(i);
@@ -342,20 +425,17 @@ public class Main {
                     printExportHelp();
                     return;
                 default:
-                    prompt("Unknown flag " + arg);
-                    prompt(EXPORT_PROMPT);
+                    exportError(String.format("Unknown option: %s", arg));
                     return;
             }
 
         }
         if (i >= tokens.size()) {
-            prompt("File name not found");
-            prompt(EXPORT_PROMPT);
+            exportError("Missing CSV file name.");
             return;
         }
         if (i < tokens.size() - 1) {
-            prompt("Too many arguments");
-            prompt(EXPORT_PROMPT);
+            exportError("Too many arguments.");
             return;
         }
         String csvFileName = tokens.get(i);
@@ -370,7 +450,7 @@ public class Main {
         } else if (lastSqlQuery != null) {
             sqlQuery = lastSqlQuery;
         } else {
-            prompt("You must first execute an SQL query, then export the ResultSet!");
+            error("Nothing to export: run a query first or use -t <table>.");
             return;
         }
 
@@ -393,7 +473,7 @@ public class Main {
                 exporter.dumpCsv(rs, out);
                 out.flush();
             }
-            prompt("Created CSV file: " + csvFile.getAbsolutePath());
+            System.out.printf("Created CSV file: %s%n", csvFile.getAbsolutePath());
 
             // output the schema file if requested
             if (schemaFileName != null) {
@@ -402,7 +482,7 @@ public class Main {
                     exporter.dumpSchema(rs, out);
                     out.flush();
                 }
-                prompt("Created schema file: " + schemaFile.getAbsolutePath());
+                System.out.printf("Created schema file: %s%n", schemaFile.getAbsolutePath());
             }
         }
     }

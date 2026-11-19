@@ -4,11 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import net.ucanaccess.test.AbstractBaseTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 class MainTest extends AbstractBaseTest {
+
+    @ParameterizedTest(name = "[{index}] {0} --> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "quit           | true",
+        "QUIT;          | true",
+        "exit           | true",
+        "quit ;         | true",
+        "quit the table | false",
+        "SELECT 1;      | false"
+    })
+    void isQuit_userInput_detectsQuitAndExit(String userInput, boolean expected) {
+        assertThat(Main.isQuit(userInput)).isEqualTo(expected);
+    }
 
     @Test
     void testTokenize() throws IOException {
