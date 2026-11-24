@@ -12,7 +12,7 @@
 <h1 align="center">UCanAccess</h1>
 <h3 align="center">The modern bridge between Java and Microsoft Access</h3>
 
-**UCanAccess** is a open-source pure-Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb`, `.accdb`) without needing any native Windows libraries - R.I.P. `OdbcJdbcBridge` 🪦.
+**UCanAccess** is a open-source pure-Java JDBC driver that gives you seamless access to Microsoft Access databases (`.mdb`, `.accdb`) without needing any native Windows libraries - R.I.P. `OdbcJdbcBridge`.
 
 <p>
   <strong>New to UCanAccess?</strong> Check out the introduction guide on 
@@ -23,7 +23,7 @@
   <img src="docs/images/ucanaccess-logo.svg" alt="UCanAccess Logo" width="360">
 </div>
 
-## ✨ Key Features
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/list-check-dark.svg"><img src=".github/icons/list-check.svg" height="20" alt=""></picture> Key Features
 
 * **Pure Java Power**: Zero native dependencies. Runs anywhere Java 11+ is supported.
 
@@ -39,7 +39,7 @@
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 🛠 Tech Stack & Requirements
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/stack-2-dark.svg"><img src=".github/icons/stack-2.svg" height="20" alt=""></picture> Tech Stack & Requirements
 
 * **Java Version**: 11 or higher (LTS versions like Java 17 and 21 are fully supported, the tests run on Java 11, 17 and 21).
 
@@ -55,7 +55,7 @@
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 📦 Installation
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/package-dark.svg"><img src=".github/icons/package.svg" height="20" alt=""></picture> Installation
 
 To use UCanAccess in your project, add the following dependency.
 
@@ -83,7 +83,7 @@ implementation("io.github.spannm:ucanaccess:5.3.0")
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 🔁 Migrating from `net.sf.ucanaccess`
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/arrows-exchange-dark.svg"><img src=".github/icons/arrows-exchange.svg" height="20" alt=""></picture> Migrating from `net.sf.ucanaccess`
 
 Still on the original `net.sf.ucanaccess:ucanaccess` artifact? That project has had no release since 2020 and no longer receives security or compatibility updates. Development of UCanAccess continues here. For most projects, switching is a **drop-in change**: the JDBC driver class and connection URL stay the same, just update your dependency coordinates:
 
@@ -116,7 +116,7 @@ You get current Jackcess/HSQLDB versions (with their CVE fixes), tested Java 11/
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 🚦 Quick Start
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/rocket-dark.svg"><img src=".github/icons/rocket.svg" height="20" alt=""></picture> Quick Start
 
 Connecting to your database is as simple as:
 
@@ -132,7 +132,7 @@ try (Connection conn = DriverManager.getConnection(url)) {
 
 <p style="height: 20px;">&nbsp;</p>
 
-## Console
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/terminal-2-dark.svg"><img src=".github/icons/terminal-2.svg" height="20" alt=""></picture> Console
 
 UCanAccess comes with a small interactive SQL console. It is the quickest way to look into an Access database
 without writing any code. Download the
@@ -155,7 +155,7 @@ See [JDBC client tools](https://spannm.github.io/ucanaccess/30-jdbc-client-tools
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 🔗 Linked Tables & Untrusted Databases
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/link-dark.svg"><img src=".github/icons/link.svg" height="20" alt=""></picture> Linked Tables & Untrusted Databases
 
 If the `.accdb`/`.mdb` file you open contains linked tables, UCanAccess automatically opens the linked database files
 so those tables can be read. Local linked paths are resolved as before, but a linked table pointing to a
@@ -172,16 +172,16 @@ String url = "jdbc:ucanaccess://C:/path/to/your/database.accdb;allowRemoteLinks=
 
 <p style="height: 20px;">&nbsp;</p>
 
-## Why a New Home?
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/home-dark.svg"><img src=".github/icons/home.svg" height="20" alt=""></picture> Why a New Home?
 
 The original project (developed by Marco Amadei and Gord Thompson) was the gold standard for Access connectivity but went quiet in 2020, leaving `net.sf.ucanaccess:ucanaccess` unmaintained at version 5.0.1.
 As a long-time contributor and Java enthusiast, I decided to give UCanAccess a **new home**.
 
-My goal is to keep this essential tool alive, maintain a **high test coverage** (JUnit 5), and ensure it meets modern **Clean Code** and **SOLID** standards. If you maintain a project that still depends on `net.sf.ucanaccess`, see [Migrating from `net.sf.ucanaccess`](#-migrating-from-netsfucanaccess) above — a PR bumping the dependency is very welcome.
+My goal is to keep this essential tool alive, maintain a **high test coverage** (JUnit 5), and ensure it meets modern **Clean Code** and **SOLID** standards. If you maintain a project that still depends on `net.sf.ucanaccess`, see [Migrating from `net.sf.ucanaccess`](#--migrating-from-netsfucanaccess) above - a PR bumping the dependency is very welcome.
 
 <p style="height: 20px;">&nbsp;</p>
 
-## 🤝 Contributions welcome!
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/git-pull-request-dark.svg"><img src=".github/icons/git-pull-request.svg" height="20" alt=""></picture> Contributions welcome!
 
 Got a bug to fix or a feature to add?
 
@@ -193,7 +193,7 @@ Got a bug to fix or a feature to add?
 
 <div align="center"> ─────────────── </div>
 
-### ⚖️ License
+### <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/scale-dark.svg"><img src=".github/icons/scale.svg" height="20" alt=""></picture> License
 
 UCanAccess is licensed under the **Apache License, Version 2.0**.
 
@@ -203,7 +203,7 @@ UCanAccess is licensed under the **Apache License, Version 2.0**.
 <table style="border-collapse: collapse;">
   <tr>
     <td style="padding: 40px; border: 2px solid #3a82c2;">
-      <strong>Enjoying UCanAccess? Please leave a 🌟 to support the project!</strong><br>
+      <strong>Enjoying UCanAccess? Please leave a star to support the project!</strong><br>
       <small>Your stars help to keep the bridge between Java and Access alive and visible.</small>
     </td>
   </tr>
