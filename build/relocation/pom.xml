@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Relocation POM for the old Maven coordinates net.sf.ucanaccess:ucanaccess.
+
+    Maven follows the relocation and resolves io.github.spannm:ucanaccess instead,
+    printing a warning with the message below. The version of this POM matches
+    the target version, so tools that bump dependency versions (Dependabot,
+    Renovate, versions-maven-plugin) lead users straight to the current release.
+    The relocation version is a literal because old Gradle versions do not
+    interpolate it.
+
+    Publish with: mvn -f build/relocation/pom.xml deploy
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.sf.ucanaccess</groupId>
+    <artifactId>ucanaccess</artifactId>
+    <version>5.3.0</version>
+    <packaging>pom</packaging>
+
+    <name>UCanAccess (relocated)</name>
+    <description>Relocated to io.github.spannm:ucanaccess, where development of UCanAccess continues.</description>
+    <url>https://github.com/spannm/ucanaccess</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>spannm</id>
+            <name>Markus Spann</name>
+            <email>spannm@outlook.de</email>
+        </developer>
+        <developer>
+            <id>marco-amadei</id>
+            <name>Marco Amadei</name>
+            <email>amadei.mar@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/spannm/ucanaccess.git</connection>
+        <url>https://github.com/spannm/ucanaccess</url>
+    </scm>
+
+    <distributionManagement>
+        <relocation>
+            <groupId>io.github.spannm</groupId>
+            <artifactId>ucanaccess</artifactId>
+            <version>5.3.0</version>
+            <message>UCanAccess has moved to io.github.spannm:ucanaccess, please update your dependency. See https://github.com/spannm/ucanaccess</message>
+        </relocation>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.8</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.12.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>sonatype-central</publishingServerId>
+                    <autoPublish>false</autoPublish>
+                    <waitUntil>validated</waitUntil>
+                    <checksums>all</checksums>
+                    <deploymentName>net.sf.ucanaccess:ucanaccess:${project.version} (relocation)</deploymentName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
