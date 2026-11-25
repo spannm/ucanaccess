@@ -7,8 +7,8 @@ Older versions do not receive backported patches.
 
 | Version | Supported |
 |---------|-----------|
-| latest  | ✅         |
-| older   | ❌         |
+| latest  | Yes       |
+| older   | No        |
 
 ## Reporting a Vulnerability
 
